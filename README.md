@@ -3,6 +3,7 @@
 
 ## And02 Link
 [And02 Wiki](https://github.com/boostcampwm2025/and02-boostcamp/wiki)
+
 [And02 Figjam](https://www.figma.com/board/kon44yrMJOaZHCJc7YZby2/And02-%ED%94%BC%EA%B7%B8%EC%9E%BC?node-id=0-1&p=f&t=lmJ6qwNw7hjW9Hc7-0)
 
 - 프로젝트에 대한 설계가 완료되면 링크 삭제 후 README 본문 수정 예정
