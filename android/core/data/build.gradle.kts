@@ -33,7 +33,10 @@ android {
 }
 
 dependencies {
+    implementation(project(":domain"))
+    implementation(project(":core:network"))
 
+    implementation(libs.retrofit)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
