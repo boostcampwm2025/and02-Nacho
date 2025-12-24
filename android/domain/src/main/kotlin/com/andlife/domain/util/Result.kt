@@ -7,6 +7,13 @@ sealed interface Result<out D, out E: InvitationError> {
     data class Error<out E: InvitationError>(val error: E): Result<Nothing, E>
 }
 
+inline fun <T, E: InvitationError, R> Result<T, E>.map(transform: (T) -> R): Result<R, E> {
+    return when(this) {
+        is Result.Error -> Result.Error(error)
+        is Result.Success -> Result.Success(transform(data))
+    }
+}
+
 inline fun <D, E : InvitationError> Result<D, E>.onSuccess(
     action: (data: D) -> Unit
 ): Result<D, E> {
