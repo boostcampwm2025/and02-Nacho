@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Invitation</string>
+    <string name="home">홈</string>
+    <string name="invitation">초대장</string>
+    <string name="my_invitation">나의 초대</string>
+
 </resources>
