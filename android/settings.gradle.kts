@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "Invitation"
 include(":app")
 include(":feature:home")
+include(":feature:invitation")
