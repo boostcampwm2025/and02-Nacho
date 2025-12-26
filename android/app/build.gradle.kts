@@ -44,8 +44,10 @@ dependencies {
     implementation(project(":feature:home"))
     implementation(project(":feature:invitation"))
     implementation(project(":feature:myinvitation"))
+    implementation(project(":core:designsystem"))
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.immutable)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
