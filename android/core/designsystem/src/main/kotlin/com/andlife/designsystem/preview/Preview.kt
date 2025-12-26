@@ -1,6 +1,7 @@
-package com.andlife.designsystem.util
+package com.andlife.designsystem.preview
 
 import android.content.res.Configuration
+import android.content.res.Configuration.UI_MODE_TYPE_NORMAL
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 
@@ -20,12 +21,12 @@ annotation class ThemePreview
 
 @Preview(
     name = "Normal",
-    device = Devices.PIXEL_8,
-    showBackground = true
+    showBackground = true,
+    uiMode = UI_MODE_TYPE_NORMAL
 )
 @Preview(
     name = "Foldable",
+    showBackground = true,
     device = Devices.FOLDABLE,
-    showBackground = true
 )
 annotation class DevicePreview

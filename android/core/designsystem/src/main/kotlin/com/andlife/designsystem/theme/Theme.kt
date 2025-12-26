@@ -5,7 +5,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 
-// Theme.kt
 @Composable
 fun InvitationTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

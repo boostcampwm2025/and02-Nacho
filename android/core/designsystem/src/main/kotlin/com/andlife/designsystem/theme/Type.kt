@@ -16,8 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.andlife.designsystem.R
-import com.andlife.designsystem.util.DevicePreview
-import com.andlife.designsystem.util.ThemePreview
+import com.andlife.designsystem.preview.ThemePreview
 
 val pretendardFamily = FontFamily(
     Font(R.font.pretendard_bold, FontWeight.Bold),
@@ -156,7 +155,6 @@ internal val invitationTypography = InvitationTypography(
 internal val LocalInvitationTypography = staticCompositionLocalOf { invitationTypography }
 
 @ThemePreview
-@DevicePreview
 @Composable
 private fun InvitationTypographyPreview() {
     Column(
