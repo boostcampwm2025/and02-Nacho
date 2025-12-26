@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: InvitationServer
+
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/andlife?serverTimezone=UTC
+    username: root
+    password: ${MYSQL_PASSWORD}
+
+    jpa:
+      hibernate:
+        ddl-auto: create
+      defer-datasource-initialization: true
+
+      show-sql: true
+
+      properties:
+        hibernate:
+          format_sql: true
+
+    sql:
+      init:
+        mode: always
