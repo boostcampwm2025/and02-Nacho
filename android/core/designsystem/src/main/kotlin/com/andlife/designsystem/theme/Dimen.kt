@@ -13,15 +13,6 @@ object InvitationSpacing {
     val threeXLarge = 32.dp
 }
 
-object InvitationRadius {
-    val twoXSmall = 4.dp
-    val threeXSmall = 8.dp
-    val xSmall = 12.dp
-    val small = 16.dp
-    val medium = 20.dp
-    val large = 24.dp
-}
-
 object InvitationIconSize {
     val xSmall = 16.dp
     val small = 20.dp
