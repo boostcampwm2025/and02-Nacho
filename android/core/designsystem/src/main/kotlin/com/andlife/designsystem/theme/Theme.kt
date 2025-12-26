@@ -21,7 +21,9 @@ fun InvitationTheme(
         LocalIconColorScheme provides iconColorScheme,
         LocalBrandColorScheme provides brandColorScheme,
         LocalInvitationTypography provides invitationTypography,
+        LocalInvitationShapes provides invitationShapes,
     ) {
+        MaterialTheme.shapes
         MaterialTheme(
             content = content,
         )
@@ -49,4 +51,8 @@ object InvitationTheme {
     val typography: InvitationTypography
         @Composable
         get() = LocalInvitationTypography.current
+
+    val shapes: InvitationShapes
+        @Composable
+        get() = LocalInvitationShapes.current
 }
