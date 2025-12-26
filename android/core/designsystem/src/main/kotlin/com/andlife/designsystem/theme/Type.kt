@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +34,7 @@ object InvitationLineHeightRatio {
 fun TextStyle.withLineHeightRatio(ratio: Float): TextStyle =
     copy(lineHeight = fontSize * ratio)
 
+@Immutable
 data class InvitationTypography(
     val heading1: TextStyle,
     val heading2: TextStyle,
