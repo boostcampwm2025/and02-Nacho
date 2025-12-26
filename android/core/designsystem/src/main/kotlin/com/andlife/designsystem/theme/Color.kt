@@ -42,31 +42,27 @@ val IconPrimary = Color(0xFFF43F5E)
 val IconSecondary = Color(0xFF111827)
 val IconTertiary = Color(0xFFFFFFFF)
 
-// ColorScheme.kt
 @Immutable
 data class InvitationColorScheme(
-    // Background
+
     val backgroundPrimary: Color,
     val backgroundSecondary: Color,
     val backgroundSurface: Color,
     val backgroundBorder: Color,
     val backgroundOverlay: Color,
 
-    // Text
     val textPrimary: Color,
     val textSecondary: Color,
     val textTertiary: Color,
     val textDisabled: Color,
     val textOnPrimary: Color,
 
-    // Brand
     val brandPrimary: Color,
     val brandSecondary: Color,
     val brandLight: Color,
     val brandDark: Color,
     val brandOnPrimary: Color,
 
-    // Icon
     val iconPrimary: Color,
     val iconSecondary: Color,
     val iconTertiary: Color,
