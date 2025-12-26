@@ -12,17 +12,17 @@ enum class MainBottomTab(
     val route: KClass<*>
 ) {
     HOME(
-        R.drawable.ic_launcher_background,
+        R.drawable.ic_home_24,
         R.string.home,
         Home::class
     ),
     INVITATION(
-        R.drawable.ic_launcher_background,
+        R.drawable.ic_invitation_24,
         R.string.invitation,
         Invitation::class
     ),
     MY_INVITATION(
-        R.drawable.ic_launcher_background,
+        R.drawable.ic_myinvitation_24,
         R.string.my_invitation,
         MyInvitation::class
     );
