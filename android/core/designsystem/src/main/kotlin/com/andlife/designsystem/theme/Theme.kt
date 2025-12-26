@@ -5,25 +5,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 
+// Theme.kt
 @Composable
 fun InvitationTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    val backgroundColorScheme = if (darkTheme) DarkBackgroundColorScheme else LightBackgroundColorScheme
-    val textColorScheme = if (darkTheme) DarkTextColorScheme else LightTextColorScheme
-    val iconColorScheme = if (darkTheme) DarkIconColorScheme else LightIconColorScheme
-    val brandColorScheme = if (darkTheme) DarkBrandColorScheme else LightBrandColorScheme
+    val colorScheme = if (darkTheme) DarkInvitationColorScheme else LightInvitationColorScheme
 
     CompositionLocalProvider(
-        LocalBackgroundColorScheme provides backgroundColorScheme,
-        LocalTextColorScheme provides textColorScheme,
-        LocalIconColorScheme provides iconColorScheme,
-        LocalBrandColorScheme provides brandColorScheme,
+        LocalInvitationColorScheme provides colorScheme,
         LocalInvitationTypography provides invitationTypography,
         LocalInvitationShapes provides invitationShapes,
     ) {
-        MaterialTheme.shapes
         MaterialTheme(
             content = content,
         )
@@ -32,21 +26,9 @@ fun InvitationTheme(
 
 object InvitationTheme {
 
-    val backgroundColorScheme: InvitationColorScheme
+    val colorScheme: InvitationColorScheme
         @Composable
-        get() = LocalBackgroundColorScheme.current
-
-    val textColorScheme: InvitationColorScheme
-        @Composable
-        get() = LocalTextColorScheme.current
-
-    val iconColorScheme: InvitationColorScheme
-        @Composable
-        get() = LocalIconColorScheme.current
-
-    val brandColorScheme: InvitationBrandColorScheme
-        @Composable
-        get() = LocalBrandColorScheme.current
+        get() = LocalInvitationColorScheme.current
 
     val typography: InvitationTypography
         @Composable
