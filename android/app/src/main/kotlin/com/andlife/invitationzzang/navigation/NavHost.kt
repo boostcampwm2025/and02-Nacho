@@ -4,14 +4,18 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.navigation.compose.NavHost
+import com.andlife.designsystem.preview.ThemePreview
+import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.home.homeNavGraph
 import com.andlife.invitation.invitationNavGraph
 import com.andlife.myinvitation.myInvitationNavGraph
@@ -24,6 +28,7 @@ fun InvitationNavHost(
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
+        containerColor = InvitationTheme.colorScheme.backgroundPrimary,
         bottomBar = {
             AnimatedVisibility(navigator.shouldShowBottomBar()) {
                 InvitationBottomBar(
@@ -57,6 +62,7 @@ private fun InvitationBottomBar(
 ) {
     NavigationBar(
         modifier = modifier,
+        containerColor = InvitationTheme.colorScheme.backgroundPrimary
     ) {
         tabs.forEach { tab ->
             NavigationBarItem(
@@ -71,7 +77,28 @@ private fun InvitationBottomBar(
                 label = {
                     Text(text = stringResource(tab.labelResId))
                 },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = InvitationTheme.colorScheme.brandPrimary,
+                    selectedTextColor = InvitationTheme.colorScheme.brandPrimary,
+                    indicatorColor = Color.Transparent
+                )
             )
         }
+    }
+}
+
+@ThemePreview
+@Composable
+private fun InvitationBottomBarPreview() {
+    InvitationTheme {
+        InvitationBottomBar(
+            currentTab = MainBottomTab.INVITATION,
+            tabs = listOf(
+                MainBottomTab.HOME,
+                MainBottomTab.INVITATION,
+                MainBottomTab.MY_INVITATION
+            ).toImmutableList(),
+            onTabSelected = {}
+        )
     }
 }

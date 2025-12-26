@@ -98,7 +98,7 @@ val LightInvitationColorScheme = InvitationColorScheme(
 
 // TODO: 나중에 다크모드 색상 정의 필요. 지금은 라이트모드와 동일하게 설정
 val DarkInvitationColorScheme = LightInvitationColorScheme.copy(
-    backgroundPrimary = TextPrimary,
+    //backgroundPrimary = TextPrimary,
 )
 
 internal val LocalInvitationColorScheme = staticCompositionLocalOf { LightInvitationColorScheme }
