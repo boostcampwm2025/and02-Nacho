@@ -75,11 +75,16 @@ private fun InvitationBottomBar(
                     )
                 },
                 label = {
-                    Text(text = stringResource(tab.labelResId))
+                    Text(
+                        text = stringResource(tab.labelResId),
+                        style = InvitationTheme.typography.bodySmallMedium
+                    )
                 },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = InvitationTheme.colorScheme.brandPrimary,
+                    unselectedIconColor = InvitationTheme.colorScheme.textTertiary,
                     selectedTextColor = InvitationTheme.colorScheme.brandPrimary,
+                    unselectedTextColor = InvitationTheme.colorScheme.textTertiary,
                     indicatorColor = Color.Transparent
                 )
             )
