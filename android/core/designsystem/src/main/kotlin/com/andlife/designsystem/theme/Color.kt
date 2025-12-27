@@ -113,7 +113,7 @@ private fun InvitationColorSchemePreview() {
             Text(
                 text = "Hello",
                 color = InvitationTheme.colorScheme.textTertiary,
-                style = InvitationTheme.typography.heading1
+                style = InvitationTheme.typography.headingLarge
             )
 
             Box(
