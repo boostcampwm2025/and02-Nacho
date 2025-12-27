@@ -34,6 +34,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:designsystem"))
     implementation(libs.kotlinx.immutable)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -46,6 +47,8 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.coil.kt.compose)
+    implementation(libs.coil.kt.network.okhttp)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
