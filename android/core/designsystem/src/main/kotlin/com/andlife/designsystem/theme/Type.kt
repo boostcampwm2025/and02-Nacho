@@ -53,7 +53,7 @@ data class InvitationTypography(
     val bodyExtraSmallRegular: TextStyle,
 )
 
-internal val invitationTypography = InvitationTypography(
+val invitationTypography = InvitationTypography(
 
     headingLarge = TextStyle(
         fontFamily = pretendardFamily,
