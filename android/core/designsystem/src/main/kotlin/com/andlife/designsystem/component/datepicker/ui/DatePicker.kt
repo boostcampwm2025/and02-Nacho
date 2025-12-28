@@ -85,7 +85,7 @@ private fun DatePickerHeader(
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary
         )
-        
+
         // 제목 (클릭 가능)
         Text(
             text = title,
@@ -93,7 +93,7 @@ private fun DatePickerHeader(
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
-        
+
         // 다음 화살표
         Text(
             text = "▶",
@@ -226,10 +226,11 @@ private fun DatePickerYearMonthSelector(
     }
 }
 
-// 해당 월의 첫째 날의 요일인덱스 반환
+// 해당 월의 첫째 날의 요일인덱스 반환: 일요일 = 0, 월요일 = 1, ...
 private fun getFirstDayOfWeek(yearMonth: DatePickerYearMonth): Int {
     val date = LocalDate(yearMonth.year, yearMonth.month, 1)
-    return date.dayOfWeek.ordinal
+    // DayOfWeek.ordinal: 월요일 = 0, 화요일 = 1, ...
+    return (date.dayOfWeek.ordinal + 1) % 7
 }
 
 // 해당 월의 일수 반환
