@@ -18,13 +18,13 @@ fun InvitationTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
-    trailingIcon: @Composable (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
     isError: Boolean = false,
     enabled: Boolean = true,
     readOnly: Boolean = false,
     singleLine: Boolean = true,
-    modifier: Modifier = Modifier
-){
+    trailingIcon: @Composable (() -> Unit)? = null
+) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,

@@ -26,9 +26,9 @@ import com.andlife.designsystem.theme.InvitationTheme
 @Composable
 fun InvitationButton(
     text: String,
-    enabled: Boolean = true,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ){
     Button(
         onClick = onClick,
