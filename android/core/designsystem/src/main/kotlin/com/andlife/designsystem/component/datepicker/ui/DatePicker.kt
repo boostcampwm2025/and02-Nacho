@@ -1,5 +1,6 @@
 package com.andlife.designsystem.component.datepicker.ui
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -36,30 +37,38 @@ fun DatePicker(
     state: DatePickerState,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier) {
-        if (state.mode == DatePickerMode.DATE) {
-            DatePickerHeader(
-                title = "${state.displayedMonth.year}년 ${state.displayedMonth.month}월",
-                onHeaderClick = state::showYearMonthSelector,
-                onPreviousClick = state::moveToPreviousMonth,
-                onNextClick = state::moveToNextMonth
-            )
-            DatePickerCalendar(
-                yearMonth = state.displayedMonth,
-                selectedDate = state.selectedDate?.let { DatePickerDate(it) },
-                onDateClick = { date -> state.selectDate(date.date) }
-            )
-        } else {
-            DatePickerHeader(
-                title = "${state.displayedMonth.year}년",
-                onHeaderClick = {},
-                onPreviousClick = state::moveToPreviousYear,
-                onNextClick = state::moveToNextYear
-            )
-            DatePickerYearMonthSelector(
-                yearMonth = state.displayedMonth,
-                onMonthSelected = state::showCalendar
-            )
+    Crossfade(targetState = state.mode) { mode ->
+        when (mode) {
+            DatePickerMode.DATE -> {
+                Column(modifier) {
+                    DatePickerHeader(
+                        title = "${state.displayedMonth.year}년 ${state.displayedMonth.month}월",
+                        onHeaderClick = state::showYearMonthSelector,
+                        onPreviousClick = state::moveToPreviousMonth,
+                        onNextClick = state::moveToNextMonth
+                    )
+                    DatePickerCalendar(
+                        yearMonth = state.displayedMonth,
+                        selectedDate = state.selectedDate?.let { DatePickerDate(it) },
+                        onDateClick = { date -> state.selectDate(date.date) }
+                    )
+                }
+            }
+
+            DatePickerMode.YEAR_MONTH -> {
+                Column(modifier) {
+                    DatePickerHeader(
+                        title = "${state.displayedMonth.year}년",
+                        onHeaderClick = {},
+                        onPreviousClick = state::moveToPreviousYear,
+                        onNextClick = state::moveToNextYear
+                    )
+                    DatePickerYearMonthSelector(
+                        yearMonth = state.displayedMonth,
+                        onMonthSelected = state::showCalendar
+                    )
+                }
+            }
         }
     }
 }
