@@ -12,6 +12,7 @@ java {
 dependencies {
     implementation(libs.android.gradleApiPlugin)
     implementation(libs.kotlin.gradlePlugin)
+    implementation(libs.ktlint.gradlePlugin)
     compileOnly(libs.compose.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
     compileOnly(libs.room.gradlePlugin)

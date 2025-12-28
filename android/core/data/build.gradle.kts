@@ -1,6 +1,7 @@
 plugins {
     id("invitation.android.library")
     id("invitation.android.hilt")
+    id("invitation.kotlin.serialization")
 }
 
 android {
@@ -16,6 +17,8 @@ dependencies {
     implementation(projects.core.database)
     implementation(projects.core.datastore)
 
+    // retrofit
+    implementation(libs.retrofit)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
