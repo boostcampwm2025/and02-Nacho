@@ -19,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.R
 import com.andlife.designsystem.preview.ThemePreview
+import com.andlife.designsystem.theme.InvitationElevation
 import com.andlife.designsystem.theme.InvitationTheme
 
 @Composable
@@ -28,8 +29,8 @@ fun InvitationButton(
     enabled: Boolean = true,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     elevation: ButtonElevation = ButtonDefaults.buttonElevation(
-        defaultElevation = 2.dp,
-        pressedElevation = 4.dp,
+        defaultElevation = InvitationElevation.small,
+        pressedElevation = InvitationElevation.medium,
     ),
     containerColor: Color = InvitationTheme.colorScheme.brandPrimary,
     contentColor: Color = InvitationTheme.colorScheme.brandOnPrimary,
