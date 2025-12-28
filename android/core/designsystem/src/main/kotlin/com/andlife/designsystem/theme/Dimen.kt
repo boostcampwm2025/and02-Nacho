@@ -25,3 +25,10 @@ object InvitationStroke {
     val small = 1.dp
     val medium = 2.dp
 }
+
+object InvitationElevation {
+    val none = 0.dp
+    val small = 2.dp
+    val medium = 4.dp
+    val large = 8.dp
+}
