@@ -1,11 +1,13 @@
 package com.andlife.designsystem.component.datepicker.state
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
 import com.andlife.designsystem.component.datepicker.model.DatePickerDate
 import com.andlife.designsystem.component.datepicker.model.DatePickerYearMonth
 import com.andlife.designsystem.component.datepicker.ui.DatePickerMode
 import kotlinx.datetime.LocalDate
 
+@Stable
 internal class DatePickerStateImpl(
     initialSelectedDate: DatePickerDate?,
     initialDisplayedMonth: DatePickerYearMonth,

@@ -1,9 +1,9 @@
 package com.andlife.designsystem.component.datepicker.model
 
-import androidx.compose.runtime.Stable
+import androidx.compose.runtime.Immutable
 import kotlinx.datetime.LocalDate
 
-@Stable
+@Immutable
 data class DatePickerDate(
     val date: LocalDate,
 )
