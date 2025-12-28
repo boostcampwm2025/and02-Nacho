@@ -11,8 +11,10 @@ interface DatePickerState {
 
     fun selectDate(date: LocalDate)
 
-//    fun moveToPreviousMonth()
-//    fun moveToNextMonth()
+    fun moveToPreviousMonth()
+    fun moveToNextMonth()
+    fun moveToPreviousYear()
+    fun moveToNextYear()
 
     fun showYearMonthSelector()
     fun showCalendar(yearMonth: DatePickerYearMonth)

@@ -37,7 +37,9 @@ fun DatePicker(
         if (state.mode == DatePickerMode.DATE) {
             DatePickerHeader(
                 title = "${state.displayedMonth.year}년 ${state.displayedMonth.month}월",
-                onHeaderClick = state::showYearMonthSelector
+                onHeaderClick = state::showYearMonthSelector,
+                onPreviousClick = state::moveToPreviousMonth,
+                onNextClick = state::moveToNextMonth
             )
             DatePickerCalendar(
                 yearMonth = state.displayedMonth,
@@ -47,7 +49,9 @@ fun DatePicker(
         } else {
             DatePickerHeader(
                 title = "${state.displayedMonth.year}년",
-                onHeaderClick = {}
+                onHeaderClick = {},
+                onPreviousClick = state::moveToPreviousYear,
+                onNextClick = state::moveToNextYear
             )
             DatePickerYearMonthSelector(
                 yearMonth = state.displayedMonth,
@@ -61,19 +65,43 @@ fun DatePicker(
 private fun DatePickerHeader(
     title: String,
     onHeaderClick: () -> Unit = {},
+    onPreviousClick: () -> Unit = {},
+    onNextClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(16.dp),
-        horizontalArrangement = Arrangement.Center,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        // 이전 화살표
+        Text(
+            text = "◀",
+            modifier = Modifier
+                .clickable { onPreviousClick() }
+                .padding(8.dp),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+        
+        // 제목 (클릭 가능)
         Text(
             text = title,
             modifier = Modifier.clickable { onHeaderClick() },
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
+        )
+        
+        // 다음 화살표
+        Text(
+            text = "▶",
+            modifier = Modifier
+                .clickable { onNextClick() }
+                .padding(8.dp),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary
         )
     }
 }

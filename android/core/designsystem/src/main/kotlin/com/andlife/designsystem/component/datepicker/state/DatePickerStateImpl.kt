@@ -4,6 +4,8 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
 import com.andlife.designsystem.component.datepicker.model.DatePickerDate
 import com.andlife.designsystem.component.datepicker.model.DatePickerYearMonth
+import com.andlife.designsystem.component.datepicker.model.minusMonth
+import com.andlife.designsystem.component.datepicker.model.plusMonth
 import com.andlife.designsystem.component.datepicker.ui.DatePickerMode
 import kotlinx.datetime.LocalDate
 
@@ -30,14 +32,21 @@ internal class DatePickerStateImpl(
         _selectedDate.value = DatePickerDate(date)  // LocalDate에서 DatePickerDate로 변환
     }
 
-    // DatePickerYearMonth에 plusMonths, minusMonths 확장함수 만들고 진행하기
-//    override fun moveToPreviousMonth() {
-//        _displayedMonth.value = _displayedMonth.value.minusMonths(1)
-//    }
-//
-//    override fun moveToNextMonth() {
-//        _displayedMonth.value = _displayedMonth.value.plusMonths(1)
-//    }
+    override fun moveToPreviousMonth() {
+        _displayedMonth.value = _displayedMonth.value.minusMonth()
+    }
+
+    override fun moveToNextMonth() {
+        _displayedMonth.value = _displayedMonth.value.plusMonth()
+    }
+
+    override fun moveToPreviousYear() {
+        _displayedMonth.value = _displayedMonth.value.copy(year = _displayedMonth.value.year - 1)
+    }
+
+    override fun moveToNextYear() {
+        _displayedMonth.value = _displayedMonth.value.copy(year = _displayedMonth.value.year + 1)
+    }
 
     override fun showYearMonthSelector() {
         _mode.value = DatePickerMode.YEAR_MONTH
