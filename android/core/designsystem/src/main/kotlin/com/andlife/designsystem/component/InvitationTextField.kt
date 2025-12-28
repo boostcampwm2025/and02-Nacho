@@ -31,7 +31,7 @@ fun InvitationTextField(
         placeholder = {
             Text(
                 text = placeholder,
-                style = InvitationTheme.typography.bodyMedium1
+                style = InvitationTheme.typography.bodyMediumSemiBold
             )
         },
         trailingIcon = trailingIcon,
@@ -39,7 +39,7 @@ fun InvitationTextField(
         enabled = enabled,
         readOnly = readOnly,
         singleLine = singleLine,
-        textStyle = InvitationTheme.typography.bodyMedium1,
+        textStyle = InvitationTheme.typography.bodyMediumSemiBold,
         shape = InvitationTheme.shapes.extraSmall,
         colors = OutlinedTextFieldDefaults.colors(
             focusedTextColor = InvitationTheme.colorScheme.textPrimary,

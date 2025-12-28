@@ -51,7 +51,7 @@ fun InvitationButton(
     ) {
         Text(
             text = text,
-            style = InvitationTheme.typography.bodyLarge1
+            style = InvitationTheme.typography.bodyLargeSemiBold
         )
     }
 }

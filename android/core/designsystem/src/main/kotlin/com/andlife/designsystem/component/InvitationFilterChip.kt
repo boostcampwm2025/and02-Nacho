@@ -26,7 +26,7 @@ fun InvitationFilterChip(
         label = {
             Text(
                 text = label,
-                style = InvitationTheme.typography.bodySmall2
+                style = InvitationTheme.typography.bodySmallRegular
             )
         },
         modifier = modifier,

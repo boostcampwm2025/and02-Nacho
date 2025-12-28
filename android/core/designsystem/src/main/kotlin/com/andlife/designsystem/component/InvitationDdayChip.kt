@@ -23,7 +23,7 @@ fun InvitationDdayChip(
     ) {
         Text(
             text = label,
-            style = InvitationTheme.typography.bodySmall1,
+            style = InvitationTheme.typography.bodySmallSemiBold,
             modifier = Modifier
                 .padding(
                     horizontal = InvitationSpacing.medium,

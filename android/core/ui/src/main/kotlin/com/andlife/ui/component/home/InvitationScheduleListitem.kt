@@ -67,7 +67,7 @@ fun InvitationScheduleListitem(
                 ) {
                     Text(
                         text = title,
-                        style = InvitationTheme.typography.bodyLarge1,
+                        style = InvitationTheme.typography.bodyLargeSemiBold,
                         color = InvitationTheme.colorScheme.textPrimary,
                         modifier = Modifier.weight(1f),
                         maxLines = 1,
@@ -81,7 +81,7 @@ fun InvitationScheduleListitem(
 
                 Text(
                     text = startTime,
-                    style = InvitationTheme.typography.bodyMedium2,
+                    style = InvitationTheme.typography.bodyMediumRegular,
                     color = InvitationTheme.colorScheme.textSecondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -89,7 +89,7 @@ fun InvitationScheduleListitem(
 
                 Text(
                     text = hostName,
-                    style = InvitationTheme.typography.bodyMedium2,
+                    style = InvitationTheme.typography.bodyMediumRegular,
                     color = InvitationTheme.colorScheme.textTertiary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
