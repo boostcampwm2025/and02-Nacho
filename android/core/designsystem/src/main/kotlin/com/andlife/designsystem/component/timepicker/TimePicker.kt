@@ -80,6 +80,7 @@ fun AmPmColumn(
         items = listOf("오전", "오후"),
         initialIndex = if (isPm) 1 else 0,
         onItemSelected = { onAmPmChange(it == 1) },
+        isInfinite = false,
         modifier = modifier
     )
 }
@@ -118,17 +119,18 @@ private fun BasicScrollableColumn(
     items: List<String>,
     initialIndex: Int,
     onItemSelected: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isInfinite: Boolean = true,
 ) {
     val itemHeight = 60.dp // TODO: 나중에 외부에서 받도록 변경
     val itemCount = items.size
 
-    val repeatCount = 1000
+    val repeatCount = if (isInfinite) 1000 else 1
     val totalItemCount = itemCount * repeatCount
-    val middleIndex = (repeatCount / 2) * itemCount
+    val startOffset = if (isInfinite) (repeatCount / 2) * itemCount else 0
 
     val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = middleIndex + initialIndex
+        initialFirstVisibleItemIndex = startOffset + initialIndex
     )
     val snapBehavior = rememberSnapFlingBehavior(lazyListState = listState)
 
