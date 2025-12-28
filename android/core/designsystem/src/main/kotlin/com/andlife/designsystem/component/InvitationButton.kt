@@ -3,32 +3,38 @@ package com.andlife.designsystem.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.R
-import com.andlife.designsystem.theme.InvitationIconSize
-import com.andlife.designsystem.theme.InvitationSpacing
+import com.andlife.designsystem.preview.ThemePreview
 import com.andlife.designsystem.theme.InvitationTheme
 
 @Composable
 fun InvitationButton(
-    text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    elevation: ButtonElevation = ButtonDefaults.buttonElevation(
+        defaultElevation = 2.dp,
+        pressedElevation = 4.dp,
+    ),
+    containerColor: Color = InvitationTheme.colorScheme.brandPrimary,
+    contentColor: Color = InvitationTheme.colorScheme.brandOnPrimary,
+    content: @Composable RowScope.() -> Unit,
+
 ){
     Button(
         onClick = onClick,
@@ -36,106 +42,71 @@ fun InvitationButton(
         enabled = enabled,
         shape = InvitationTheme.shapes.small,
         colors = ButtonDefaults.buttonColors(
-            containerColor = InvitationTheme.colorScheme.brandPrimary,
-            contentColor = InvitationTheme.colorScheme.brandOnPrimary,
+            containerColor = containerColor,
+            contentColor = contentColor,
         ),
-        elevation = ButtonDefaults.buttonElevation(
-            defaultElevation = 2.dp,
-            pressedElevation = 4.dp
-        ),
-        contentPadding = PaddingValues(
-            horizontal = InvitationSpacing.medium,
-            vertical = InvitationSpacing.medium
-        )
+        elevation = elevation,
+        contentPadding = contentPadding
     ) {
-        Text(
-            text = text,
-            style = InvitationTheme.typography.bodyLargeSemiBold
-        )
+        content()
     }
 }
 
+@ThemePreview
 @Composable
-fun InvitationIconButton(
-    iconRes: Int,
-    enabled: Boolean= true,
-    contentDescription: String?,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-){
-    Surface(
-        modifier = modifier,
-        shape = InvitationTheme.shapes.small,
-        color = if (enabled) InvitationTheme.colorScheme.brandPrimary
-        else InvitationTheme.colorScheme.backgroundBorder,
-        contentColor = InvitationTheme.colorScheme.brandOnPrimary,
-    ) {
-        IconButton(
-            onClick = onClick,
-            enabled = enabled,
-            modifier = Modifier.size(InvitationIconSize.large)
-        ) {
-            Icon(
-                painter = painterResource(id = iconRes),
-                contentDescription = contentDescription,
-                modifier = Modifier.size(InvitationIconSize.medium)
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun InvitationButtonPreview(){
+private fun InvitationButtonPreview() {
     InvitationTheme {
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+            InvitationButton(
+                onClick = {},
             ) {
-                InvitationButton(
-                    text = "초대 생성하기",
-                    enabled = true,
-                    onClick = {},
-                    modifier = Modifier.weight(1f),
-                )
+                Text("저장")
             }
 
             InvitationButton(
-                text = "저장",
-                enabled = true,
                 onClick = {},
-            )
-        }
-    }
-}
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("초대 생성하기")
+            }
 
-@Preview(showBackground = true)
-@Composable
-fun InvitationIconButtonPreview() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.xSmall)
-    ) {
-        InvitationTheme {
-            InvitationIconButton(
-                iconRes = R.drawable.ic_search_24,
+            InvitationButton(
                 onClick = {},
-                contentDescription = "검색"
-            )
-        }
-        InvitationTheme {
-            InvitationIconButton(
-                iconRes = R.drawable.ic_search_24,
+                elevation = ButtonDefaults.buttonElevation(
+                    defaultElevation = 0.dp,
+                    pressedElevation = 0.dp
+                ),
+                containerColor = InvitationTheme.colorScheme.brandOnPrimary,
+                contentColor = InvitationTheme.colorScheme.brandPrimary
+            ) {
+                Text("미리보기")
+            }
+
+            InvitationButton(
+                onClick = {},
+                elevation = ButtonDefaults.buttonElevation(
+                    defaultElevation = 0.dp,
+                    pressedElevation = 0.dp
+                ),
+                containerColor = InvitationTheme.colorScheme.brandOnPrimary,
+                contentColor = InvitationTheme.colorScheme.brandPrimary
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_search_24),
+                    contentDescription = "검색"
+                )
+                Spacer(Modifier.width(8.dp))
+                Text("초대카드 편집")
+            }
+
+            InvitationButton(
+                onClick = {},
                 enabled = false,
-                onClick = {},
-                contentDescription = "검색"
-            )
+            ) {
+                Text("비활성화")
+            }
         }
     }
 }
