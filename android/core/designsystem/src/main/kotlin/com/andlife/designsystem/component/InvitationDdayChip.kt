@@ -5,6 +5,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
@@ -23,10 +24,13 @@ fun InvitationDdayChip(
         Text(
             text = label,
             style = InvitationTheme.typography.bodySmall1,
-            modifier = Modifier.padding(
-                horizontal = InvitationSpacing.medium,
-                vertical = InvitationSpacing.xSmall
-            )
+            modifier = Modifier
+                .padding(
+                    horizontal = InvitationSpacing.medium,
+                    vertical = InvitationSpacing.xSmall
+                ),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }

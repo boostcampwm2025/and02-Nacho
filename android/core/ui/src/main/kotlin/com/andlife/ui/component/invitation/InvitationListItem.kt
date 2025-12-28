@@ -36,7 +36,7 @@ import com.andlife.ui.R
 fun InvitationListitem(
     imageUrl: String,
     title: String,
-    dateTime: String,
+    startTime: String,
     hostName: String,
     address: String,
     ddayText: String,
@@ -107,12 +107,14 @@ fun InvitationListitem(
                 Text(
                     text = hostName,
                     style = InvitationTheme.typography.bodyMedium2,
-                    color = InvitationTheme.colorScheme.textTertiary
+                    color = InvitationTheme.colorScheme.textTertiary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 IconTextRow(
                     iconRes = R.drawable.ic_calendar_24,
-                    text = dateTime
+                    text = startTime
                 )
 
                 IconTextRow(
@@ -138,7 +140,7 @@ private fun IconTextRow(
         Icon(
             painter = painterResource(id = iconRes),
             contentDescription = null,
-            tint = Color.Unspecified ///InvitationTheme.colorScheme.textSecondary
+            tint = Color.Unspecified
         )
 
         Text(
@@ -158,7 +160,7 @@ fun InvitationListitemPreview(){
         InvitationListitem(
             imageUrl = "https://example.com/image.jpg",
             title = "네부캠 송년회",
-            dateTime = "2025년 1월 15일 오후 1시",
+            startTime = "2025년 1월 15일 오후 1시",
             hostName = "안드라이프",
             address = "강남대로62길 23 4층 코드스쿼드",
             ddayText = "D-3",

@@ -26,7 +26,7 @@ import com.andlife.designsystem.theme.InvitationTheme
 fun InvitationScheduleListitem(
     imageUrl: String,
     title: String,
-    dateTime: String,
+    startTime: String,
     hostName: String,
     ddayText: String,
     onClick: () -> Unit,
@@ -64,6 +64,7 @@ fun InvitationScheduleListitem(
                     Text(
                         text = title,
                         style = InvitationTheme.typography.bodyLarge1,
+                        color = InvitationTheme.colorScheme.textPrimary,
                         modifier = Modifier.weight(1f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -75,15 +76,19 @@ fun InvitationScheduleListitem(
                 }
 
                 Text(
-                    text = dateTime,
+                    text = startTime,
                     style = InvitationTheme.typography.bodyMedium2,
-                    color = InvitationTheme.colorScheme.textSecondary
+                    color = InvitationTheme.colorScheme.textSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 Text(
                     text = hostName,
                     style = InvitationTheme.typography.bodyMedium2,
-                    color = InvitationTheme.colorScheme.textTertiary
+                    color = InvitationTheme.colorScheme.textTertiary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
@@ -97,7 +102,7 @@ fun InvitationScheduleListitemPreview(){
         InvitationScheduleListitem(
             imageUrl = "https://example.com/image.jpg",
             title = "네부캠 송년회",
-            dateTime = "2025년 1월 15일 오후 1시",
+            startTime = "2025년 1월 15일 오후 1시",
             hostName = "안드라이프",
             ddayText = "D-3",
             onClick = {},
