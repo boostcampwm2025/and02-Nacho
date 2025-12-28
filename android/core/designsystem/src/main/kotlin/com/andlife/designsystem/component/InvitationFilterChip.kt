@@ -8,8 +8,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import com.andlife.designsystem.R
+import com.andlife.designsystem.preview.ThemePreview
 import com.andlife.designsystem.theme.InvitationStroke
 import com.andlife.designsystem.theme.InvitationTheme
 
@@ -52,9 +52,9 @@ fun InvitationFilterChip(
     )
 }
 
-@Preview(showBackground = true)
+@ThemePreview
 @Composable
-fun InvitationFilterChipPreview(){
+private fun InvitationFilterChipPreview(){
     InvitationTheme {
         InvitationFilterChip(
             label = "가까운 순",
