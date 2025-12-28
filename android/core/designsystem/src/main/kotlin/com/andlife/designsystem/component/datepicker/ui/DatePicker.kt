@@ -164,8 +164,10 @@ private fun DatePickerCalendar(
                 val date = DatePickerDate(
                     LocalDate(yearMonth.year, yearMonth.month, day + 1)
                 )
+                val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
                 val isSelected = selectedDate?.date == date.date
-                val isToday = date.date == Clock.System.todayIn(TimeZone.currentSystemDefault())
+                val isToday = date.date == today
+                val isBeforeToday = date.date < today
 
                 Box(
                     modifier = Modifier
@@ -178,13 +180,22 @@ private fun DatePickerCalendar(
                                 else -> Color.Transparent
                             }
                         )
-                        .clickable { onDateClick(date) },
+                        .let { modifier ->
+                            if (isBeforeToday) {
+                                modifier
+                            } else {
+                                modifier.clickable { onDateClick(date) }
+                            }
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = (day + 1).toString(),
-                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                        else MaterialTheme.colorScheme.onSurface,
+                        color = when {
+                            isBeforeToday -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                            isSelected -> MaterialTheme.colorScheme.onPrimary
+                            else -> MaterialTheme.colorScheme.onSurface
+                        },
                         fontSize = 14.sp
                     )
                 }
