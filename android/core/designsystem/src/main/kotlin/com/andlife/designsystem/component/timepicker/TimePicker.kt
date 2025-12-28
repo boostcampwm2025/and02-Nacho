@@ -19,6 +19,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.preview.ThemePreview
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun InvitationTimePicker(
@@ -125,6 +127,8 @@ private fun BasicScrollableColumn(
     val itemHeight = 60.dp // TODO: 나중에 외부에서 받도록 변경
     val itemCount = items.size
 
+    val scope = rememberCoroutineScope()
+
     val repeatCount = if (isInfinite) 1000 else 1
     val totalItemCount = itemCount * repeatCount
     val startOffset = if (isInfinite) (repeatCount / 2) * itemCount else 0
@@ -173,7 +177,17 @@ private fun BasicScrollableColumn(
                         .fillMaxWidth()
                         .height(itemHeight)
                         .clickable {
-                            // TODO: 클릭 시 해당 아이템으로 스크롤 이동
+                            scope.launch {
+                                if (isInfinite) {
+                                    val currentFirstIndex = listState.firstVisibleItemIndex
+                                    val currentOffset = currentFirstIndex % itemCount
+                                    val diff = realIndex - currentOffset
+
+                                    listState.animateScrollToItem(currentFirstIndex + diff)
+                                } else {
+                                    listState.animateScrollToItem(index)
+                                }
+                            }
                         },
                     contentAlignment = Alignment.Center
                 ) {
