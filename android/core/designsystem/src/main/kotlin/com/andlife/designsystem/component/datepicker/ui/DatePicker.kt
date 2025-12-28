@@ -21,7 +21,10 @@ import androidx.compose.ui.unit.sp
 import com.andlife.designsystem.component.datepicker.model.DatePickerDate
 import com.andlife.designsystem.component.datepicker.model.DatePickerYearMonth
 import com.andlife.designsystem.component.datepicker.state.DatePickerState
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 
 enum class DatePickerMode {
     DATE,  // 달력에서 날짜 선택
@@ -153,14 +156,18 @@ private fun DatePickerCalendar(
                     LocalDate(yearMonth.year, yearMonth.month, day + 1)
                 )
                 val isSelected = selectedDate?.date == date.date
+                val isToday = date.date == Clock.System.todayIn(TimeZone.currentSystemDefault())
 
                 Box(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
                         .background(
-                            if (isSelected) MaterialTheme.colorScheme.primary
-                            else Color.Transparent
+                            when {
+                                isSelected -> MaterialTheme.colorScheme.primary
+                                isToday -> Color.Gray.copy(alpha = 0.15f)
+                                else -> Color.Transparent
+                            }
                         )
                         .clickable { onDateClick(date) },
                     contentAlignment = Alignment.Center
