@@ -35,7 +35,8 @@ enum class DatePickerMode {
 @Composable
 fun DatePicker(
     state: DatePickerState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    colors: DatePickerColors = DatePickerDefaults.colors()
 ) {
     Crossfade(targetState = state.mode) { mode ->
         when (mode) {
@@ -45,12 +46,14 @@ fun DatePicker(
                         title = "${state.displayedMonth.year}년 ${state.displayedMonth.month}월",
                         onHeaderClick = state::showYearMonthSelector,
                         onPreviousClick = state::moveToPreviousMonth,
-                        onNextClick = state::moveToNextMonth
+                        onNextClick = state::moveToNextMonth,
+                        colors = colors
                     )
                     DatePickerCalendar(
                         yearMonth = state.displayedMonth,
                         selectedDate = state.selectedDate?.let { DatePickerDate(it) },
-                        onDateClick = { date -> state.selectDate(date.date) }
+                        onDateClick = { date -> state.selectDate(date.date) },
+                        colors = colors
                     )
                 }
             }
@@ -61,11 +64,13 @@ fun DatePicker(
                         title = "${state.displayedMonth.year}년",
                         onHeaderClick = {},
                         onPreviousClick = state::moveToPreviousYear,
-                        onNextClick = state::moveToNextYear
+                        onNextClick = state::moveToNextYear,
+                        colors = colors
                     )
                     DatePickerYearMonthSelector(
                         yearMonth = state.displayedMonth,
-                        onMonthSelected = state::showCalendar
+                        onMonthSelected = state::showCalendar,
+                        colors = colors
                     )
                 }
             }
@@ -79,6 +84,7 @@ private fun DatePickerHeader(
     onHeaderClick: () -> Unit = {},
     onPreviousClick: () -> Unit = {},
     onNextClick: () -> Unit = {},
+    colors: DatePickerColors,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -95,7 +101,7 @@ private fun DatePickerHeader(
                 .clickable { onPreviousClick() }
                 .padding(8.dp),
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = colors.navigationColor
         )
 
         // 제목 (클릭 가능)
@@ -103,7 +109,8 @@ private fun DatePickerHeader(
             text = title,
             modifier = Modifier.clickable { onHeaderClick() },
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = colors.headerTextColor
         )
 
         // 다음 화살표
@@ -113,7 +120,7 @@ private fun DatePickerHeader(
                 .clickable { onNextClick() }
                 .padding(8.dp),
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = colors.navigationColor
         )
     }
 }
@@ -123,6 +130,7 @@ private fun DatePickerCalendar(
     yearMonth: DatePickerYearMonth,
     selectedDate: DatePickerDate?,
     onDateClick: (DatePickerDate) -> Unit,
+    colors: DatePickerColors,
     modifier: Modifier = Modifier
 ) {
     val daysCountInMonth = getDaysCountInMonth(yearMonth)
@@ -140,7 +148,7 @@ private fun DatePickerCalendar(
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = colors.weekdayTextColor
                 )
             }
         }
@@ -175,8 +183,8 @@ private fun DatePickerCalendar(
                         .clip(CircleShape)
                         .background(
                             when {
-                                isSelected -> MaterialTheme.colorScheme.primary
-                                isToday -> Color.Gray.copy(alpha = 0.15f)
+                                isSelected -> colors.selectedDateColor
+                                isToday -> colors.todayBackgroundColor
                                 else -> Color.Transparent
                             }
                         )
@@ -192,9 +200,10 @@ private fun DatePickerCalendar(
                     Text(
                         text = (day + 1).toString(),
                         color = when {
-                            isBeforeToday -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
-                            isSelected -> MaterialTheme.colorScheme.onPrimary
-                            else -> MaterialTheme.colorScheme.onSurface
+                            isBeforeToday -> colors.disabledTextColor
+                            isSelected -> colors.selectedTextColor
+                            isToday -> colors.todayTextColor
+                            else -> colors.normalTextColor
                         },
                         fontSize = 14.sp
                     )
@@ -208,6 +217,7 @@ private fun DatePickerCalendar(
 private fun DatePickerYearMonthSelector(
     yearMonth: DatePickerYearMonth,
     onMonthSelected: (DatePickerYearMonth) -> Unit,
+    colors: DatePickerColors,
     modifier: Modifier = Modifier
 ) {
     val months = listOf(
@@ -219,7 +229,6 @@ private fun DatePickerYearMonthSelector(
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
         verticalArrangement = Arrangement.SpaceAround,
-        // horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = modifier.padding(16.dp),
         contentPadding = PaddingValues(8.dp)
     ) {
@@ -233,8 +242,8 @@ private fun DatePickerYearMonthSelector(
                     .height(64.dp)
                     .clip(MaterialTheme.shapes.medium)
                     .background(
-                        if (isCurrentMonth) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.surface
+                        if (isCurrentMonth) colors.selectedMonthColor
+                        else Color.Transparent
                     )
                     .clickable {
                         onMonthSelected(DatePickerYearMonth(yearMonth.year, month))
@@ -245,8 +254,8 @@ private fun DatePickerYearMonthSelector(
                     text = months[index],
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = if (isCurrentMonth) FontWeight.Bold else FontWeight.Normal,
-                    color = if (isCurrentMonth) MaterialTheme.colorScheme.onPrimary
-                    else MaterialTheme.colorScheme.onSurface
+                    color = if (isCurrentMonth) colors.selectedTextColor
+                    else colors.normalTextColor
                 )
             }
         }
