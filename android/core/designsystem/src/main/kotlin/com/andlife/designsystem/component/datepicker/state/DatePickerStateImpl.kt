@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.andlife.designsystem.component.datepicker.model.DatePickerDate
 import com.andlife.designsystem.component.datepicker.model.DatePickerYearMonth
 import com.andlife.designsystem.component.datepicker.ui.DatePickerMode
+import kotlinx.datetime.LocalDate
 
 internal class DatePickerStateImpl(
     initialSelectedDate: DatePickerDate?,
@@ -14,8 +15,8 @@ internal class DatePickerStateImpl(
     private val _displayedMonth = mutableStateOf(initialDisplayedMonth)
     private val _mode = mutableStateOf(DatePickerMode.DATE)
 
-    override val selectedDate: DatePickerDate?
-        get() = _selectedDate.value
+    override val selectedDate: LocalDate?
+        get() = _selectedDate.value?.date  // DatePickerDate에서 LocalDate로 변환
 
     override val displayedMonth: DatePickerYearMonth
         get() = _displayedMonth.value
@@ -23,8 +24,8 @@ internal class DatePickerStateImpl(
     override val mode: DatePickerMode
         get() = _mode.value
 
-    override fun selectDate(date: DatePickerDate) {
-        _selectedDate.value = date
+    override fun selectDate(date: LocalDate) {
+        _selectedDate.value = DatePickerDate(date)  // LocalDate에서 DatePickerDate로 변환
     }
 
     // DatePickerYearMonth에 plusMonths, minusMonths 확장함수 만들고 진행하기

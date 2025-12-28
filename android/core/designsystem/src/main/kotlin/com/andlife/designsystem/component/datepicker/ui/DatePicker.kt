@@ -41,8 +41,8 @@ fun DatePicker(
             )
             DatePickerCalendar(
                 yearMonth = state.displayedMonth,
-                selectedDate = state.selectedDate,
-                onDateClick = state::selectDate
+                selectedDate = state.selectedDate?.let { DatePickerDate(it) },
+                onDateClick = { date -> state.selectDate(date.date) }
             )
         } else {
             DatePickerHeader(

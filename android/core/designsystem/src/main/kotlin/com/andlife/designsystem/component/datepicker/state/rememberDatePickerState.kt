@@ -6,18 +6,19 @@ import com.andlife.designsystem.component.datepicker.model.DatePickerDate
 import com.andlife.designsystem.component.datepicker.model.DatePickerYearMonth
 import com.andlife.designsystem.component.datepicker.model.toYearMonth
 import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 
 @Composable
 fun rememberDatePickerState(
-    initialSelectedDate: DatePickerDate? = null,
+    initialSelectedDate: LocalDate? = null,
     initialDisplayedMonth: DatePickerYearMonth = Clock.System.todayIn(TimeZone.currentSystemDefault())
         .toYearMonth()
 ): DatePickerState {
     return remember {
         DatePickerStateImpl(
-            initialSelectedDate = initialSelectedDate,
+            initialSelectedDate = initialSelectedDate?.let { DatePickerDate(it) },
             initialDisplayedMonth = initialDisplayedMonth
         )
     }

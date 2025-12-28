@@ -1,15 +1,15 @@
 package com.andlife.designsystem.component.datepicker.state
 
-import com.andlife.designsystem.component.datepicker.model.DatePickerDate
 import com.andlife.designsystem.component.datepicker.model.DatePickerYearMonth
 import com.andlife.designsystem.component.datepicker.ui.DatePickerMode
+import kotlinx.datetime.LocalDate
 
 interface DatePickerState {
-    val selectedDate: DatePickerDate?
+    val selectedDate: LocalDate?
     val displayedMonth: DatePickerYearMonth
     val mode: DatePickerMode
 
-    fun selectDate(date: DatePickerDate)
+    fun selectDate(date: LocalDate)
 
 //    fun moveToPreviousMonth()
 //    fun moveToNextMonth()
