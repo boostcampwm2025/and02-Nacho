@@ -138,7 +138,8 @@ private fun BasicScrollableColumn(
     )
     val snapBehavior = rememberSnapFlingBehavior(lazyListState = listState)
 
-    val currentIndex = listState.firstVisibleItemIndex % itemCount
+    //val currentIndex = listState.firstVisibleItemIndex % itemCount
+    val currentIndex = listState.getCenterItemIndex()?.let { it % itemCount } ?: 0
 
     LaunchedEffect(currentIndex) {
         onItemSelected(currentIndex)
