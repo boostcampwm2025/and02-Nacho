@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.R
@@ -27,6 +28,7 @@ fun InvitationButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    shape: Shape = InvitationTheme.shapes.small,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     elevation: ButtonElevation = ButtonDefaults.buttonElevation(
         defaultElevation = InvitationElevation.small,
@@ -35,13 +37,12 @@ fun InvitationButton(
     containerColor: Color = InvitationTheme.colorScheme.brandPrimary,
     contentColor: Color = InvitationTheme.colorScheme.brandOnPrimary,
     content: @Composable RowScope.() -> Unit,
-
 ){
     Button(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
-        shape = InvitationTheme.shapes.small,
+        shape = shape,
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = contentColor,
