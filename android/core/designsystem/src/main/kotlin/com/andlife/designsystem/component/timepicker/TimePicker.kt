@@ -86,7 +86,7 @@ fun AmPmColumn(
 
 @Composable
 fun HourColumn(
-    hour: Int, // 24시간제 입력
+    hour: Int,
     onHourChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -94,7 +94,7 @@ fun HourColumn(
     BasicScrollableColumn(
         items = (1..12).map { it.toString() },
         initialIndex = hour12 - 1,
-        onItemSelected = { index -> onHourChange(index + 1) }, // 여기서 12시간제 -> 24시간제 로직은 부모가 처리
+        onItemSelected = { index -> onHourChange(index + 1) },
         modifier = modifier
     )
 }
@@ -121,10 +121,18 @@ private fun BasicScrollableColumn(
     modifier: Modifier = Modifier
 ) {
     val itemHeight = 60.dp // TODO: 나중에 외부에서 받도록 변경
-    val listState = rememberLazyListState(initialFirstVisibleItemIndex = initialIndex)
+    val itemCount = items.size
+
+    val repeatCount = 1000
+    val totalItemCount = itemCount * repeatCount
+    val middleIndex = (repeatCount / 2) * itemCount
+
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = middleIndex + initialIndex
+    )
     val snapBehavior = rememberSnapFlingBehavior(lazyListState = listState)
 
-    val currentIndex = listState.firstVisibleItemIndex
+    val currentIndex = listState.firstVisibleItemIndex % itemCount
 
     LaunchedEffect(currentIndex) {
         onItemSelected(currentIndex)
@@ -152,8 +160,12 @@ private fun BasicScrollableColumn(
             contentPadding = PaddingValues(vertical = itemHeight),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            itemsIndexed(items) { index, item ->
-                val isSelected = index == currentIndex
+            items(
+                count = totalItemCount,
+                key = { index -> index }
+            ) { index ->
+                val realIndex = index % itemCount
+                val isSelected = realIndex == currentIndex
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -164,7 +176,7 @@ private fun BasicScrollableColumn(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = item,
+                        text = items[realIndex],
                         color = if (isSelected) InvitationTheme.colorScheme.textPrimary else InvitationTheme.colorScheme.textTertiary,
                     )
                 }
