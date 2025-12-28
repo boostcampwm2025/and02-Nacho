@@ -13,8 +13,8 @@ import kotlinx.datetime.todayIn
 @Composable
 fun rememberDatePickerState(
     initialSelectedDate: LocalDate? = null,
-    initialDisplayedMonth: DatePickerYearMonth = Clock.System.todayIn(TimeZone.currentSystemDefault())
-        .toYearMonth()
+    initialDisplayedMonth: DatePickerYearMonth = initialSelectedDate?.toYearMonth()
+        ?: Clock.System.todayIn(TimeZone.currentSystemDefault()).toYearMonth()
 ): DatePickerState {
     return remember {
         DatePickerStateImpl(
