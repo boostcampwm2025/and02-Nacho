@@ -22,9 +22,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.component.InvitationDdayChip
+import com.andlife.designsystem.preview.ThemePreview
 import com.andlife.designsystem.theme.InvitationIconSize
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationStroke
@@ -32,13 +32,13 @@ import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.ui.R
 
 @Composable
-fun InvitationListitem(
+fun InvitationListItem(
     imageUrl: String,
     title: String,
     startTime: String,
     hostName: String?,
     address: String,
-    ddayText: String,
+    dDayText: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -102,7 +102,7 @@ fun InvitationListitem(
                     )
 
                     InvitationDdayChip(
-                        label = ddayText
+                        label = dDayText
                     )
                 }
 
@@ -154,31 +154,31 @@ private fun IconTextRow(
     }
 }
 
-@Preview(showBackground = true)
+@ThemePreview
 @Composable
-fun InvitationListitemPreview(){
+private fun InvitationListItemPreview(){
     InvitationTheme {
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small)
         ) {
-            InvitationListitem(
+            InvitationListItem(
                 imageUrl = "https://example.com/image.jpg",
                 title = "네부캠 송년회",
                 startTime = "2025년 1월 15일 오후 1시",
                 hostName = "안드라이프",
                 address = "강남대로62길 23 4층 코드스쿼드",
-                ddayText = "D-3",
+                dDayText = "D-3",
                 onClick = {},
             )
 
-            InvitationListitem(
+            InvitationListItem(
                 imageUrl = "https://example.com/image.jpg",
                 title = "네부캠 송년회",
                 startTime = "2025년 1월 15일 오후 1시",
                 hostName = null,
                 address = "강남대로62길 23 4층 코드스쿼드",
-                ddayText = "D-3",
+                dDayText = "D-3",
                 onClick = {},
             )
         }
