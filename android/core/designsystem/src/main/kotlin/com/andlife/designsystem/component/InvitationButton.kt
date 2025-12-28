@@ -41,8 +41,7 @@ fun InvitationButton(
         ),
         elevation = ButtonDefaults.buttonElevation(
             defaultElevation = 2.dp,
-            pressedElevation = 4.dp,
-            disabledElevation = 0.dp
+            pressedElevation = 4.dp
         ),
         contentPadding = PaddingValues(
             horizontal = InvitationSpacing.medium,
