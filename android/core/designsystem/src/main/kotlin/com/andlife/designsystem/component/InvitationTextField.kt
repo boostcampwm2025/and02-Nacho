@@ -3,13 +3,16 @@ package com.andlife.designsystem.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.painterResource
 import com.andlife.designsystem.R
+import com.andlife.designsystem.preview.ThemePreview
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
 
@@ -18,12 +21,13 @@ fun InvitationTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
+    trailingIcon: @Composable (() -> Unit)? = null,
     modifier: Modifier = Modifier,
-    isError: Boolean = false,
     enabled: Boolean = true,
     readOnly: Boolean = false,
+    isError: Boolean = false,
     singleLine: Boolean = true,
-    trailingIcon: @Composable (() -> Unit)? = null
+    minLines: Int = 1,
 ) {
     OutlinedTextField(
         value = value,
@@ -39,6 +43,7 @@ fun InvitationTextField(
         enabled = enabled,
         readOnly = readOnly,
         singleLine = singleLine,
+        minLines = if (singleLine) 1 else minLines,
         textStyle = InvitationTheme.typography.bodyMediumSemiBold,
         shape = InvitationTheme.shapes.extraSmall,
         colors = OutlinedTextFieldDefaults.colors(
@@ -54,9 +59,9 @@ fun InvitationTextField(
 
 }
 
-@Preview(showBackground = true)
+@ThemePreview
 @Composable
-fun InvitationTextFieldPreview() {
+private fun InvitationTextFieldPreview() {
     InvitationTheme {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -69,18 +74,22 @@ fun InvitationTextFieldPreview() {
                 onValueChange = { address = it },
                 placeholder = "주소를 검색해주세요",
                 trailingIcon = {
-                    InvitationIconButton(
-                        iconRes = R.drawable.ic_search_24,
-                        contentDescription = "검색",
-                        onClick = { }
-                    )
+                    IconButton(onClick = { }) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_search_24),
+                            contentDescription = "검색",
+                            tint = InvitationTheme.colorScheme.iconPrimary
+                        )
+                    }
                 }
             )
 
             InvitationTextField(
                 value = "",
                 onValueChange = { address = it },
-                placeholder = "상세 주소",
+                placeholder = "공지사항 추가",
+                singleLine = false,
+                minLines = 10
             )
         }
     }
