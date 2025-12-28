@@ -17,9 +17,7 @@ fun NavController.navigateToInvitation(navOptions: NavOptions) {
     navigate(Invitation, navOptions)
 }
 
-fun NavGraphBuilder.invitationNavGraph(
-    paddingValues: PaddingValues
-) {
+fun NavGraphBuilder.invitationNavGraph(paddingValues: PaddingValues) {
     composable<Invitation> {
         InvitationScreen(modifier = Modifier.padding(paddingValues))
     }

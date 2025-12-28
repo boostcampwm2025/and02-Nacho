@@ -10,7 +10,7 @@ android {
 dependencies {
     // designSystem
     implementation(projects.core.designsystem)
-    
+
     // immutable
     implementation(libs.kotlinx.immutable)
 

@@ -1,4 +1,3 @@
 package com.andlife.network.api.invitation
 
-class InvitationResponse {
-}
+class InvitationResponse

@@ -1,4 +1,3 @@
 package com.andlife.network.api.home
 
-interface HomeApiService {
-}
+interface HomeApiService
