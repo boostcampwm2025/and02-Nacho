@@ -31,13 +31,12 @@ import com.andlife.designsystem.theme.InvitationStroke
 import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.ui.R
 
-
 @Composable
 fun InvitationListitem(
     imageUrl: String,
     title: String,
     startTime: String,
-    hostName: String,
+    hostName: String?,
     address: String,
     ddayText: String,
     onClick: () -> Unit,
@@ -88,14 +87,15 @@ fun InvitationListitem(
 
             Column(
                 modifier = Modifier.padding(InvitationSpacing.medium),
-                verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small)
+                verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = title,
-                        style = InvitationTheme.typography.bodyLarge1,
+                        style = InvitationTheme.typography.headingSmallSemiBold,
+                        color = InvitationTheme.colorScheme.textPrimary,
                         modifier = Modifier.weight(1f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -106,23 +106,22 @@ fun InvitationListitem(
                     )
                 }
 
-                Text(
-                    text = hostName,
-                    style = InvitationTheme.typography.bodyMedium2,
-                    color = InvitationTheme.colorScheme.textTertiary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                hostName?.let {
+                    Text(
+                        text = it,
+                        style = InvitationTheme.typography.bodyMediumMedium,
+                        color = InvitationTheme.colorScheme.textSecondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
 
-                IconTextRow(
-                    iconRes = R.drawable.ic_calendar_24,
-                    text = startTime
-                )
-
-                IconTextRow(
-                    iconRes = R.drawable.ic_location_24,
-                    text = address
-                )
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(InvitationSpacing.xSmall)
+                ) {
+                    IconTextRow(iconRes = R.drawable.ic_calendar_24, text = startTime)
+                    IconTextRow(iconRes = R.drawable.ic_location_24, text = address)
+                }
             }
         }
     }
@@ -147,7 +146,7 @@ private fun IconTextRow(
 
         Text(
             text = text,
-            style = InvitationTheme.typography.bodyMedium2,
+            style = InvitationTheme.typography.bodyMediumRegular,
             color = InvitationTheme.colorScheme.textSecondary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -159,14 +158,29 @@ private fun IconTextRow(
 @Composable
 fun InvitationListitemPreview(){
     InvitationTheme {
-        InvitationListitem(
-            imageUrl = "https://example.com/image.jpg",
-            title = "네부캠 송년회",
-            startTime = "2025년 1월 15일 오후 1시",
-            hostName = "안드라이프",
-            address = "강남대로62길 23 4층 코드스쿼드",
-            ddayText = "D-3",
-            onClick = {},
-        )
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small)
+        ) {
+            InvitationListitem(
+                imageUrl = "https://example.com/image.jpg",
+                title = "네부캠 송년회",
+                startTime = "2025년 1월 15일 오후 1시",
+                hostName = "안드라이프",
+                address = "강남대로62길 23 4층 코드스쿼드",
+                ddayText = "D-3",
+                onClick = {},
+            )
+
+            InvitationListitem(
+                imageUrl = "https://example.com/image.jpg",
+                title = "네부캠 송년회",
+                startTime = "2025년 1월 15일 오후 1시",
+                hostName = null,
+                address = "강남대로62길 23 4층 코드스쿼드",
+                ddayText = "D-3",
+                onClick = {},
+            )
+        }
     }
 }
