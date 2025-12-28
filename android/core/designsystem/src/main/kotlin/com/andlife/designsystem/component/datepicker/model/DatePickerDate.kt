@@ -7,9 +7,3 @@ import kotlinx.datetime.LocalDate
 data class DatePickerDate(
     val date: LocalDate,
 )
-
-fun LocalDate.toDatePickerDate(): DatePickerDate {
-    return DatePickerDate(
-        date = this
-    )
-}
