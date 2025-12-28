@@ -48,6 +48,9 @@ dependencies {
     // Immutable
     implementation(libs.kotlinx.immutable)
 
+    // Kotlin Datetime
+    implementation(libs.kotlinx.datetime)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
