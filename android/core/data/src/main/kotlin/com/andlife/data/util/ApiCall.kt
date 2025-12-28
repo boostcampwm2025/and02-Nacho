@@ -13,7 +13,7 @@ suspend fun <T> apiCall(call: suspend () -> BaseResponse<T>): Result<T, DataErro
         when (response.code) {
             in 200..299 -> {
                 response.data?.let {
-                    Result.Success(it) // it은 여기서 T (non-nullable)
+                    Result.Success(it)
                 } ?: Result.Error(DataError.Network.NOT_FOUND, response.message)
             }
 
