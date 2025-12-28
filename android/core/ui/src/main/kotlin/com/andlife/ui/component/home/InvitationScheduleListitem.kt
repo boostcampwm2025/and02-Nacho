@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.AsyncImage
@@ -21,6 +22,7 @@ import com.andlife.designsystem.component.InvitationDdayChip
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationStroke
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.ui.R
 
 @Composable
 fun InvitationScheduleListitem(
@@ -49,6 +51,8 @@ fun InvitationScheduleListitem(
                 model = imageUrl,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
+                placeholder = painterResource(R.drawable.ic_placeholder_default_24),
+                error = painterResource(R.drawable.ic_error_outline_24),
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(16f / 9f)

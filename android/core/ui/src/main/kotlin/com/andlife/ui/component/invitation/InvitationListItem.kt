@@ -61,6 +61,8 @@ fun InvitationListitem(
                     model = imageUrl,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
+                    placeholder = painterResource(R.drawable.ic_placeholder_default_24),
+                    error = painterResource(R.drawable.ic_error_outline_24),
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(16f / 9f)
