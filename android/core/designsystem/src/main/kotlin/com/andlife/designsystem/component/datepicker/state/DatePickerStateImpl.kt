@@ -6,17 +6,21 @@ import com.andlife.designsystem.component.datepicker.model.DatePickerDate
 import com.andlife.designsystem.component.datepicker.model.DatePickerYearMonth
 import com.andlife.designsystem.component.datepicker.model.minusMonth
 import com.andlife.designsystem.component.datepicker.model.plusMonth
+import com.andlife.designsystem.component.datepicker.model.toYearMonth
+import com.andlife.designsystem.component.datepicker.ui.DatePickerDefaults
 import com.andlife.designsystem.component.datepicker.ui.DatePickerMode
 import kotlinx.datetime.LocalDate
 
 @Stable
 internal class DatePickerStateImpl(
-    initialSelectedDate: DatePickerDate?,
-    initialDisplayedMonth: DatePickerYearMonth,
+    initialSelectedDate: DatePickerDate?
 ) : DatePickerState {
 
     private val _selectedDate = mutableStateOf(initialSelectedDate)
-    private val _displayedMonth = mutableStateOf(initialDisplayedMonth)
+    private val _displayedMonth = mutableStateOf(
+        initialSelectedDate?.toYearMonth()
+            ?: DatePickerDate(DatePickerDefaults.today()).toYearMonth()
+    )
     private val _mode = mutableStateOf(DatePickerMode.DATE)
 
     override val selectedDate: LocalDate?

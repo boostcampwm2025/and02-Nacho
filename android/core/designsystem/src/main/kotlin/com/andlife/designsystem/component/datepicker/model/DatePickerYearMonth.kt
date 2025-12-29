@@ -1,7 +1,5 @@
 package com.andlife.designsystem.component.datepicker.model
 
-import kotlinx.datetime.LocalDate
-
 data class DatePickerYearMonth(
     val year: Int,
     val month: Int
@@ -35,9 +33,9 @@ fun DatePickerYearMonth.minusMonth(): DatePickerYearMonth {
     }
 }
 
-fun LocalDate.toYearMonth(): DatePickerYearMonth {
+fun DatePickerDate.toYearMonth(): DatePickerYearMonth {
     return DatePickerYearMonth(
-        year = this.year,
-        month = this.monthNumber
+        year = this.date.year,
+        month = this.date.monthNumber
     )
 }

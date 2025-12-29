@@ -3,7 +3,6 @@ package com.andlife.designsystem.component.datepicker.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import com.andlife.designsystem.theme.InvitationTheme
 import kotlinx.datetime.Clock
@@ -13,12 +12,12 @@ import kotlinx.datetime.todayIn
 
 @Stable
 object DatePickerDefaults {
-
-    @Composable
-    fun today(): LocalDate {
-        return remember {
-            Clock.System.todayIn(TimeZone.currentSystemDefault())
-        }
+    
+    fun today(
+        clock: Clock = Clock.System,
+        timeZone: TimeZone = TimeZone.currentSystemDefault()
+    ): LocalDate {
+        return clock.todayIn(timeZone)
     }
 
     @Composable
