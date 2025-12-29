@@ -112,8 +112,6 @@ fun AmPmColumn(
     onAmPmChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val targetIndex = if (isPm) 1 else 0
-
     BasicScrollableColumn(
         items = listOf("오전", "오후").toImmutableList(),
         initialIndex = if (isPm) 1 else 0,
@@ -239,7 +237,6 @@ private fun BasicScrollableColumn(
                 if (lastVibratedIndex != index) {
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     lastVibratedIndex = index
-                    // 실시간으로 상태 업데이트 전달
                     onItemSelected(index)
                 }
             }
