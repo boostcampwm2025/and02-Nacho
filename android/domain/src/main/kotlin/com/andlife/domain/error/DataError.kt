@@ -1,16 +1,16 @@
 package com.andlife.domain.error
 
-sealed interface DataError: InvitationError {
-    enum class Network: DataError {
+sealed interface DataError : InvitationError {
+    enum class Network : DataError {
         REQUEST_TIMEOUT,
         SERVER_ERROR,
         UNAUTHORIZED,
         NOT_FOUND,
         SERIALIZATION,
-        UNKNOWN
+        UNKNOWN,
     }
 
-    enum class Local: DataError {
-        DISK_FULL
+    enum class Local : DataError {
+        DISK_FULL,
     }
 }

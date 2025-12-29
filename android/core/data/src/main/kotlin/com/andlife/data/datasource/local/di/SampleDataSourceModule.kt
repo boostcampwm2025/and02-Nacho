@@ -1,4 +1,3 @@
 package com.andlife.data.datasource.local.di
 
-class SampleDataSourceModule {
-}
+class SampleDataSourceModule

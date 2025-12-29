@@ -1,4 +1,3 @@
 package com.andlife.data.datasource.remote.invitation
 
-class SampleInvitationRemoteDataSource {
-}
+class SampleInvitationRemoteDataSource

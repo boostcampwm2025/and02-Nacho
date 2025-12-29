@@ -17,16 +17,17 @@ data class InvitationShapes(
     val small: CornerBasedShape,
     val medium: CornerBasedShape,
     val large: CornerBasedShape,
-    val extraLarge: CornerBasedShape
+    val extraLarge: CornerBasedShape,
 )
 
-val invitationShapes = InvitationShapes(
-    extraSmall = RoundedCornerShape(4.dp),
-    small = RoundedCornerShape(8.dp),
-    medium = RoundedCornerShape(16.dp),
-    large = RoundedCornerShape(24.dp),
-    extraLarge = RoundedCornerShape(32.dp)
-)
+val invitationShapes =
+    InvitationShapes(
+        extraSmall = RoundedCornerShape(4.dp),
+        small = RoundedCornerShape(8.dp),
+        medium = RoundedCornerShape(16.dp),
+        large = RoundedCornerShape(24.dp),
+        extraLarge = RoundedCornerShape(32.dp),
+    )
 
 internal val LocalInvitationShapes = staticCompositionLocalOf { invitationShapes }
 
@@ -35,31 +36,31 @@ internal val LocalInvitationShapes = staticCompositionLocalOf { invitationShapes
 private fun InvitationShapesPreview() {
     InvitationTheme {
         Column(
-            modifier = Modifier
+            modifier = Modifier,
         ) {
             Button(
                 onClick = {},
-                shape = InvitationTheme.shapes.extraSmall
+                shape = InvitationTheme.shapes.extraSmall,
             ) {}
 
             Button(
                 onClick = {},
-                shape = InvitationTheme.shapes.small
+                shape = InvitationTheme.shapes.small,
             ) {}
 
             Button(
                 onClick = {},
-                shape = InvitationTheme.shapes.medium
+                shape = InvitationTheme.shapes.medium,
             ) {}
 
             Button(
                 onClick = {},
-                shape = InvitationTheme.shapes.large
+                shape = InvitationTheme.shapes.large,
             ) {}
 
             Button(
                 onClick = {},
-                shape = InvitationTheme.shapes.extraLarge
+                shape = InvitationTheme.shapes.extraLarge,
             ) {}
         }
     }

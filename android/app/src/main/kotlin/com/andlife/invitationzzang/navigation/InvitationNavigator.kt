@@ -17,9 +17,8 @@ import com.andlife.myinvitation.navigateToMyInvitation
 
 @Stable
 class InvitationNavigator(
-    val navController: NavHostController
+    val navController: NavHostController,
 ) {
-
     val currentDestination: NavDestination?
         @Composable get() = navController.currentBackStackEntryAsState().value?.destination
 
@@ -28,28 +27,37 @@ class InvitationNavigator(
     val mainBottomTabs = MainBottomTab.entries
 
     val currentTab: MainBottomTab?
-        @Composable get() = MainBottomTab.entries.find { tab ->
+        @Composable get() =
+            MainBottomTab.entries.find { tab ->
+                currentDestination?.hasRoute(tab.route) == true
+            }
+
+    @Composable
+    fun shouldShowBottomBar(): Boolean =
+        MainBottomTab.entries.any { tab ->
             currentDestination?.hasRoute(tab.route) == true
         }
 
-    @Composable
-    fun shouldShowBottomBar(): Boolean = MainBottomTab.entries.any {tab ->
-        currentDestination?.hasRoute(tab.route) == true
-    }
-
     fun navigate(tab: MainBottomTab) {
-        val navOptions = navOptions {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
+        val navOptions =
+            navOptions {
+                popUpTo(navController.graph.findStartDestination().id) {
+                    saveState = true
+                }
+                launchSingleTop = true
+                restoreState = true
             }
-            launchSingleTop = true
-            restoreState = true
-        }
 
         when (tab) {
-            MainBottomTab.HOME -> { navController.navigateToHome(navOptions) }
-            MainBottomTab.INVITATION -> { navController.navigateToInvitation(navOptions) }
-            MainBottomTab.MY_INVITATION -> { navController.navigateToMyInvitation(navOptions) }
+            MainBottomTab.HOME -> {
+                navController.navigateToHome(navOptions)
+            }
+            MainBottomTab.INVITATION -> {
+                navController.navigateToInvitation(navOptions)
+            }
+            MainBottomTab.MY_INVITATION -> {
+                navController.navigateToMyInvitation(navOptions)
+            }
         }
     }
 
@@ -68,9 +76,7 @@ class InvitationNavigator(
 @Composable
 internal fun rememberInvitationNavigator(
     navController: NavHostController = rememberNavController(),
-): InvitationNavigator = remember(navController) {
-    InvitationNavigator(navController)
-}
-
-
-
+): InvitationNavigator =
+    remember(navController) {
+        InvitationNavigator(navController)
+    }
