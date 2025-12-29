@@ -13,7 +13,7 @@ object DatePickerDefaults {
     fun colors(
         selectedDateColor: Color = InvitationTheme.colorScheme.textSecondary,
         selectedTextColor: Color = InvitationTheme.colorScheme.textOnPrimary,
-        todayBackgroundColor: Color = InvitationTheme.colorScheme.textDisabled,
+        todayBackgroundColor: Color = InvitationTheme.colorScheme.backgroundSecondary,
         todayTextColor: Color = InvitationTheme.colorScheme.textPrimary,
         selectedMonthColor: Color = InvitationTheme.colorScheme.brandPrimary,
         normalTextColor: Color = InvitationTheme.colorScheme.textSecondary,
