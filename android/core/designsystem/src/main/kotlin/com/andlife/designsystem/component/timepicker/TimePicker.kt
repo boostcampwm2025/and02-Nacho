@@ -65,6 +65,7 @@ fun InvitationTimePicker(
         )
         MinuteColumn(
             minute = state.minute,
+            minuteInterval = state.minuteInterval,
             onMinuteChange = { state.minute = it },
             modifier = Modifier.weight(1f)
         )
@@ -104,13 +105,27 @@ fun HourColumn(
 @Composable
 fun MinuteColumn(
     minute: Int,
+    minuteInterval: Int,
     onMinuteChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val items = remember(minuteInterval) {
+        (0 until 60 step minuteInterval).map { it.toString().padStart(2, '0') }
+    }
+
+//    val initialIndex = remember(minute, minuteInterval) {
+//        items.indexOfFirst { it.toInt() == minute }.takeIf { it >= 0 } ?: 0
+//    }
+    val initialIndex = remember(minute, minuteInterval) {
+        (minute / minuteInterval).coerceIn(0, items.size - 1)
+    }
+
     BasicScrollableColumn(
-        items = (0..59).map { it.toString().padStart(2, '0') },
-        initialIndex = minute,
-        onItemSelected = { onMinuteChange(it) },
+        items = items,
+        initialIndex = initialIndex,
+        onItemSelected = { index ->
+            onMinuteChange(index * minuteInterval)
+        },
         modifier = modifier
     )
 }
