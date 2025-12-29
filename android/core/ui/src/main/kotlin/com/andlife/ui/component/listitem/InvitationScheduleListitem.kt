@@ -1,4 +1,4 @@
-package com.andlife.ui.component.home
+package com.andlife.ui.component.listitem
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.component.InvitationDdayChip
@@ -51,7 +52,7 @@ fun InvitationScheduleListitem(
         Column {
             AsyncImage(
                 model = imageUrl,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.des_schedule_list_image),
                 contentScale = ContentScale.Crop,
                 placeholder = painterResource(R.drawable.ic_placeholder_default_24),
                 error = painterResource(R.drawable.ic_error_outline_24),
