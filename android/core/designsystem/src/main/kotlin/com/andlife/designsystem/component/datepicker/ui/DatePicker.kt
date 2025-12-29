@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import com.andlife.designsystem.theme.InvitationTheme
 import androidx.compose.runtime.Composable
@@ -17,11 +18,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.andlife.designsystem.R
 import com.andlife.designsystem.component.datepicker.model.DatePickerDate
 import com.andlife.designsystem.component.datepicker.model.DatePickerYearMonth
 import com.andlife.designsystem.component.datepicker.state.DatePickerState
+import com.andlife.designsystem.theme.InvitationIconSize
 import com.andlife.designsystem.theme.InvitationSpacing
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
@@ -48,7 +52,8 @@ fun DatePicker(
                         onHeaderClick = state::showYearMonthSelector,
                         onPreviousClick = state::moveToPreviousMonth,
                         onNextClick = state::moveToNextMonth,
-                        colors = colors
+                        colors = colors,
+                        isClickable = true,
                     )
                     DatePickerCalendar(
                         yearMonth = state.displayedMonth,
@@ -86,7 +91,8 @@ private fun DatePickerHeader(
     onPreviousClick: () -> Unit = {},
     onNextClick: () -> Unit = {},
     colors: DatePickerColors,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isClickable: Boolean = false
 ) {
     Row(
         modifier = modifier
@@ -95,32 +101,57 @@ private fun DatePickerHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 이전 화살표  // TODO: 아이콘으로 변경 필요
-        Text(
-            text = "◀",
+        Icon(
+            painter = painterResource(id = R.drawable.ic_chevron_left_24),
+            contentDescription = null,
             modifier = Modifier
-                .clickable { onPreviousClick() }
-                .padding(8.dp),
-            style = InvitationTheme.typography.headingSmallBold,
-            color = colors.navigationColor
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { onPreviousClick() }
+                .padding(InvitationSpacing.small),
+            tint = colors.navigationColor
         )
 
         // 제목 (클릭 가능)
-        Text(
-            text = title,
-            modifier = Modifier.clickable { onHeaderClick() },
-            style = InvitationTheme.typography.headingMedium,
-            color = colors.headerTextColor
-        )
-
-        // 다음 화살표
-        Text(
-            text = "▶",
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .clickable { onNextClick() }
-                .padding(8.dp),
-            style = InvitationTheme.typography.headingMedium,
-            color = colors.navigationColor
+                .let { modifier ->
+                    if (isClickable) {
+                        modifier.clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { onHeaderClick() }
+                    } else {
+                        modifier
+                    }
+                }
+                .padding(InvitationSpacing.small)
+        ) {
+            Text(
+                text = title,
+                style = InvitationTheme.typography.headingMedium,
+                color = colors.headerTextColor
+            )
+            if (isClickable)
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_arrow_drop_down_24),
+                    contentDescription = null,
+                    tint = colors.navigationColor
+                )
+        }
+
+        Icon(
+            painter = painterResource(id = R.drawable.ic_chevron_right_24),
+            contentDescription = null,
+            modifier = Modifier
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { onNextClick() }
+                .padding(InvitationSpacing.small),
+            tint = colors.navigationColor
         )
     }
 }
