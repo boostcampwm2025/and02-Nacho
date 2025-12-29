@@ -36,8 +36,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.andlife.designsystem.preview.ThemePreview
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
@@ -50,8 +48,8 @@ import kotlin.math.abs
 fun InvitationTimePicker(
     state: InvitationTimePickerState,
     modifier: Modifier = Modifier,
-    textStyle: TextStyle = TextStyle(fontSize = 20.sp),
-    itemVerticalPadding: Dp = 12.dp,
+    textStyle: TextStyle = InvitationTheme.typography.headingLarge,
+    itemVerticalPadding: Dp = InvitationSpacing.threeXLarge,
     isFadeEdgeEnabled: Boolean = false,
 ) {
     val density = LocalDensity.current
@@ -65,7 +63,7 @@ fun InvitationTimePicker(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(horizontal = InvitationSpacing.large),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -113,7 +111,7 @@ fun AmPmColumn(
     modifier: Modifier = Modifier
 ) {
     BasicScrollableColumn(
-        items = listOf("오전", "오후").toImmutableList(),
+        items = listOf("오전", "오후").toImmutableList(), // TODO: 리소스화
         initialIndex = if (isPm) 1 else 0,
         externalSelectedIndex = if (isPm) 1 else 0,
         onItemSelected = { onAmPmChange(it == 1) },
@@ -301,7 +299,11 @@ private fun BasicScrollableColumn(
                     Text(
                         text = items[realIndex],
                         style = textStyle,
-                        color = if (realIndex == currentIndex) Color.Black else Color.Gray,
+                        color = if (realIndex == currentIndex) {
+                            InvitationTheme.colorScheme.textPrimary
+                        } else {
+                            InvitationTheme.colorScheme.textTertiary
+                        },
                         textAlign = TextAlign.Center
                     )
                 }
@@ -353,7 +355,7 @@ private fun InvitationTimePickerPreview() {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(InvitationSpacing.large),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
