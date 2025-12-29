@@ -17,6 +17,9 @@ dependencies {
     // coil
     implementation(libs.coil.kt.compose)
 
+    // Immutable
+    implementation(libs.kotlinx.immutable)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
