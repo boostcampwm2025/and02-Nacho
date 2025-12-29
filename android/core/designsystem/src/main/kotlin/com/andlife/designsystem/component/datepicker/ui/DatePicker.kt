@@ -267,7 +267,7 @@ private fun DatePickerYearMonthSelector(
         columns = GridCells.Fixed(3),
         verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium),
         modifier = modifier.padding(),
-        contentPadding = PaddingValues(InvitationSpacing.large)
+        contentPadding = PaddingValues(horizontal = InvitationSpacing.large)
     ) {
         items(12) { index ->
             val month = index + 1
