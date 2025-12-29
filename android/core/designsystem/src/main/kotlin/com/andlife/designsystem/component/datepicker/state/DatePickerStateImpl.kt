@@ -15,7 +15,8 @@ import kotlinx.datetime.LocalDate
 
 @Stable
 internal class DatePickerStateImpl(
-    initialSelectedDate: DatePickerDate?
+    initialSelectedDate: DatePickerDate?,
+    initialMode: DatePickerMode
 ) : DatePickerState {
 
     private val _selectedDate = mutableStateOf(initialSelectedDate)
@@ -23,7 +24,7 @@ internal class DatePickerStateImpl(
         initialSelectedDate?.toYearMonth()
             ?: DatePickerDate(DatePickerDefaults.today()).toYearMonth()
     )
-    private val _mode = mutableStateOf(DatePickerMode.DATE)
+    private val _mode = mutableStateOf(initialMode)
 
     override val selectedDate: LocalDate?
         get() = _selectedDate.value?.date  // DatePickerDate에서 LocalDate로 변환
@@ -78,11 +79,13 @@ internal class DatePickerStateImpl(
                     value[0]?.let { DatePickerDate(LocalDate.parse(it as String)) }
                 val year = value[1] as Int
                 val month = value[2] as Int
+                val mode = value[3] as DatePickerMode
                 DatePickerStateImpl(
-                    initialSelectedDate = selectedDate
+                    initialSelectedDate = selectedDate,
+                    initialMode = mode
                 ).apply {
                     _displayedMonth.value = DatePickerYearMonth(year, month)
-                    _mode.value = value[3] as DatePickerMode
+                    _mode.value = mode
                 }
             }
         )
