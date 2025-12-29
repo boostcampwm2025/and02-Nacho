@@ -18,7 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.component.InvitationDdayChip
-import com.andlife.designsystem.preview.ThemePreview
+import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationStroke
 import com.andlife.designsystem.theme.InvitationTheme
@@ -32,18 +32,20 @@ fun InvitationScheduleListitem(
     hostName: String,
     dDayText: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         onClick = onClick,
         shape = InvitationTheme.shapes.medium,
-        colors = CardDefaults.cardColors(
-            containerColor = InvitationTheme.colorScheme.backgroundPrimary
-        ),
-        border = BorderStroke(
-            InvitationStroke.small,
-            InvitationTheme.colorScheme.backgroundBorder
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = InvitationTheme.colorScheme.backgroundPrimary,
+            ),
+        border =
+            BorderStroke(
+                InvitationStroke.small,
+                InvitationTheme.colorScheme.backgroundBorder,
+            ),
         modifier = modifier,
     ) {
         Column {
@@ -53,17 +55,18 @@ fun InvitationScheduleListitem(
                 contentScale = ContentScale.Crop,
                 placeholder = painterResource(R.drawable.ic_placeholder_default_24),
                 error = painterResource(R.drawable.ic_error_outline_24),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f),
             )
 
             Column(
                 modifier = Modifier.padding(InvitationSpacing.medium),
-                verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small)
+                verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = title,
@@ -71,11 +74,11 @@ fun InvitationScheduleListitem(
                         color = InvitationTheme.colorScheme.textPrimary,
                         modifier = Modifier.weight(1f),
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
 
                     InvitationDdayChip(
-                        label = dDayText
+                        label = dDayText,
                     )
                 }
 
@@ -84,7 +87,7 @@ fun InvitationScheduleListitem(
                     style = InvitationTheme.typography.bodyMediumRegular,
                     color = InvitationTheme.colorScheme.textSecondary,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
 
                 Text(
@@ -92,16 +95,16 @@ fun InvitationScheduleListitem(
                     style = InvitationTheme.typography.bodyMediumRegular,
                     color = InvitationTheme.colorScheme.textTertiary,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
     }
 }
 
-@ThemePreview
+@PreviewTheme
 @Composable
-private fun InvitationScheduleListitemPreview(){
+private fun InvitationScheduleListitemPreview() {
     InvitationTheme {
         InvitationScheduleListitem(
             imageUrl = "https://example.com/image.jpg",

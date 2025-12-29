@@ -1,4 +1,3 @@
 package com.andlife.home.viewmodel
 
-class HomeViewModel {
-}
+class HomeViewModel

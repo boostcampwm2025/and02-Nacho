@@ -24,7 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.component.InvitationDdayChip
-import com.andlife.designsystem.preview.ThemePreview
+import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationIconSize
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationStroke
@@ -40,18 +40,20 @@ fun InvitationListItem(
     address: String,
     dDayText: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         onClick = onClick,
         shape = InvitationTheme.shapes.medium,
-        colors = CardDefaults.cardColors(
-            containerColor = InvitationTheme.colorScheme.backgroundPrimary
-        ),
-        border = BorderStroke(
-            InvitationStroke.small,
-            InvitationTheme.colorScheme.backgroundBorder
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = InvitationTheme.colorScheme.backgroundPrimary,
+            ),
+        border =
+            BorderStroke(
+                InvitationStroke.small,
+                InvitationTheme.colorScheme.backgroundBorder,
+            ),
         modifier = modifier,
     ) {
         Column {
@@ -62,21 +64,22 @@ fun InvitationListItem(
                     contentScale = ContentScale.Crop,
                     placeholder = painterResource(R.drawable.ic_placeholder_default_24),
                     error = painterResource(R.drawable.ic_error_outline_24),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(16f / 9f)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(16f / 9f),
                 )
 
                 IconButton(
                     onClick = { },
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(InvitationSpacing.large)
-                        .background(
-                            color = InvitationTheme.colorScheme.backgroundPrimary,
-                            shape = InvitationTheme.shapes.extraLarge
-                        )
-                        .size(InvitationIconSize.large)
+                    modifier =
+                        Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(InvitationSpacing.large)
+                            .background(
+                                color = InvitationTheme.colorScheme.backgroundPrimary,
+                                shape = InvitationTheme.shapes.extraLarge,
+                            ).size(InvitationIconSize.large),
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_more_vert_24),
@@ -87,10 +90,10 @@ fun InvitationListItem(
 
             Column(
                 modifier = Modifier.padding(InvitationSpacing.medium),
-                verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium)
+                verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium),
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = title,
@@ -98,11 +101,11 @@ fun InvitationListItem(
                         color = InvitationTheme.colorScheme.textPrimary,
                         modifier = Modifier.weight(1f),
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
 
                     InvitationDdayChip(
-                        label = dDayText
+                        label = dDayText,
                     )
                 }
 
@@ -112,12 +115,12 @@ fun InvitationListItem(
                         style = InvitationTheme.typography.bodyMediumMedium,
                         color = InvitationTheme.colorScheme.textSecondary,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
 
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(InvitationSpacing.xSmall)
+                    verticalArrangement = Arrangement.spacedBy(InvitationSpacing.xSmall),
                 ) {
                     IconTextRow(iconRes = R.drawable.ic_calendar_24, text = startTime)
                     IconTextRow(iconRes = R.drawable.ic_location_24, text = address)
@@ -131,17 +134,17 @@ fun InvitationListItem(
 private fun IconTextRow(
     iconRes: Int,
     text: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.xSmall)
+        horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.xSmall),
     ) {
         Icon(
             painter = painterResource(id = iconRes),
             contentDescription = null,
-            tint = Color.Unspecified
+            tint = Color.Unspecified,
         )
 
         Text(
@@ -149,18 +152,18 @@ private fun IconTextRow(
             style = InvitationTheme.typography.bodyMediumRegular,
             color = InvitationTheme.colorScheme.textSecondary,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }
 
-@ThemePreview
+@PreviewTheme
 @Composable
-private fun InvitationListItemPreview(){
+private fun InvitationListItemPreview() {
     InvitationTheme {
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small)
+            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
         ) {
             InvitationListItem(
                 imageUrl = "https://example.com/image.jpg",

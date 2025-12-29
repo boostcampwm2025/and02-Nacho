@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import com.andlife.designsystem.R
-import com.andlife.designsystem.preview.ThemePreview
+import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationStroke
 import com.andlife.designsystem.theme.InvitationTheme
 
@@ -26,7 +26,7 @@ fun InvitationFilterChip(
         label = {
             Text(
                 text = label,
-                style = InvitationTheme.typography.bodySmallMedium
+                style = InvitationTheme.typography.bodySmallMedium,
             )
         },
         modifier = modifier,
@@ -35,31 +35,33 @@ fun InvitationFilterChip(
                 painter = painterResource(id = R.drawable.ic_chevron_down_16),
                 contentDescription = null,
             )
-        } ,
+        },
         shape = InvitationTheme.shapes.extraLarge,
-        colors = FilterChipDefaults.filterChipColors(
-            containerColor = InvitationTheme.colorScheme.backgroundSecondary,
-            labelColor = InvitationTheme.colorScheme.textPrimary,
-            iconColor = InvitationTheme.colorScheme.iconSecondary,
-            selectedContainerColor = InvitationTheme.colorScheme.backgroundSecondary,
-            selectedLabelColor = InvitationTheme.colorScheme.textPrimary,
-            selectedTrailingIconColor = InvitationTheme.colorScheme.iconSecondary
-        ),
-        border = BorderStroke(
-            InvitationStroke.small,
-            InvitationTheme.colorScheme.backgroundBorder
-        ),
+        colors =
+            FilterChipDefaults.filterChipColors(
+                containerColor = InvitationTheme.colorScheme.backgroundSecondary,
+                labelColor = InvitationTheme.colorScheme.textPrimary,
+                iconColor = InvitationTheme.colorScheme.iconSecondary,
+                selectedContainerColor = InvitationTheme.colorScheme.backgroundSecondary,
+                selectedLabelColor = InvitationTheme.colorScheme.textPrimary,
+                selectedTrailingIconColor = InvitationTheme.colorScheme.iconSecondary,
+            ),
+        border =
+            BorderStroke(
+                InvitationStroke.small,
+                InvitationTheme.colorScheme.backgroundBorder,
+            ),
     )
 }
 
-@ThemePreview
+@PreviewTheme
 @Composable
-private fun InvitationFilterChipPreview(){
+private fun InvitationFilterChipPreview() {
     InvitationTheme {
         InvitationFilterChip(
             label = "가까운 순",
             selected = true,
-            onClick = {}
+            onClick = {},
         )
     }
 }

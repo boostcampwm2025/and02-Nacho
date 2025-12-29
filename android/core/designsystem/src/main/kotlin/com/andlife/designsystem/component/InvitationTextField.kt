@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import com.andlife.designsystem.R
-import com.andlife.designsystem.preview.ThemePreview
+import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
 
@@ -21,13 +21,13 @@ fun InvitationTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
-    trailingIcon: @Composable (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     readOnly: Boolean = false,
     isError: Boolean = false,
     singleLine: Boolean = true,
     minLines: Int = 1,
+    trailingIcon: @Composable (() -> Unit)? = null,
 ) {
     OutlinedTextField(
         value = value,
@@ -35,7 +35,7 @@ fun InvitationTextField(
         placeholder = {
             Text(
                 text = placeholder,
-                style = InvitationTheme.typography.bodyMediumSemiBold
+                style = InvitationTheme.typography.bodyMediumSemiBold,
             )
         },
         trailingIcon = trailingIcon,
@@ -46,26 +46,26 @@ fun InvitationTextField(
         minLines = if (singleLine) 1 else minLines,
         textStyle = InvitationTheme.typography.bodyMediumSemiBold,
         shape = InvitationTheme.shapes.extraSmall,
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = InvitationTheme.colorScheme.textPrimary,
-            unfocusedTextColor = InvitationTheme.colorScheme.textPrimary,
-            focusedPlaceholderColor = InvitationTheme.colorScheme.textTertiary,
-            unfocusedPlaceholderColor = InvitationTheme.colorScheme.textTertiary,
-            unfocusedBorderColor = InvitationTheme.colorScheme.backgroundBorder,
-            focusedBorderColor = InvitationTheme.colorScheme.brandPrimary,
-        ),
-        modifier = modifier.fillMaxWidth()
+        colors =
+            OutlinedTextFieldDefaults.colors(
+                focusedTextColor = InvitationTheme.colorScheme.textPrimary,
+                unfocusedTextColor = InvitationTheme.colorScheme.textPrimary,
+                focusedPlaceholderColor = InvitationTheme.colorScheme.textTertiary,
+                unfocusedPlaceholderColor = InvitationTheme.colorScheme.textTertiary,
+                unfocusedBorderColor = InvitationTheme.colorScheme.backgroundBorder,
+                focusedBorderColor = InvitationTheme.colorScheme.brandPrimary,
+            ),
+        modifier = modifier.fillMaxWidth(),
     )
-
 }
 
-@ThemePreview
+@PreviewTheme
 @Composable
 private fun InvitationTextFieldPreview() {
     InvitationTheme {
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small)
+            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
         ) {
             var address = ""
 
@@ -78,10 +78,10 @@ private fun InvitationTextFieldPreview() {
                         Icon(
                             painter = painterResource(R.drawable.ic_search_24),
                             contentDescription = "검색",
-                            tint = InvitationTheme.colorScheme.iconPrimary
+                            tint = InvitationTheme.colorScheme.iconPrimary,
                         )
                     }
-                }
+                },
             )
 
             InvitationTextField(
@@ -89,7 +89,7 @@ private fun InvitationTextFieldPreview() {
                 onValueChange = { address = it },
                 placeholder = "공지사항 추가",
                 singleLine = false,
-                minLines = 10
+                minLines = 10,
             )
         }
     }

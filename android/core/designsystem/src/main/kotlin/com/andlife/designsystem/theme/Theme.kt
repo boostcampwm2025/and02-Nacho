@@ -24,7 +24,6 @@ fun InvitationTheme(
 }
 
 object InvitationTheme {
-
     val colorScheme: InvitationColorScheme
         @Composable
         get() = LocalInvitationColorScheme.current

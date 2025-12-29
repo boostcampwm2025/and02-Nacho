@@ -1,4 +1,3 @@
 package com.andlife.home.model
 
-class HomeUiModel {
-}
+class HomeUiModel

@@ -17,9 +17,7 @@ fun NavController.navigateToHome(navOptions: NavOptions) {
     navigate(Home, navOptions)
 }
 
-fun NavGraphBuilder.homeNavGraph(
-    paddingValues: PaddingValues,
-) {
+fun NavGraphBuilder.homeNavGraph(paddingValues: PaddingValues) {
     composable<Home> {
         HomeScreen(modifier = Modifier.padding(paddingValues))
     }

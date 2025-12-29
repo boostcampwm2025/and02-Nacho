@@ -6,12 +6,10 @@ import com.andlife.invitationzzang.navigation.InvitationNavHost
 import com.andlife.invitationzzang.navigation.rememberInvitationNavigator
 
 @Composable
-fun InvitationApp(
-    modifier: Modifier = Modifier
-) {
+fun InvitationApp(modifier: Modifier = Modifier) {
     val navigator = rememberInvitationNavigator()
     InvitationNavHost(
         navigator = navigator,
-        modifier = modifier
+        modifier = modifier,
     )
 }

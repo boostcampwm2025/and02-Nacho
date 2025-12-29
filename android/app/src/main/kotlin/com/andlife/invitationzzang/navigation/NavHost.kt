@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.navigation.compose.NavHost
-import com.andlife.designsystem.preview.ThemePreview
+import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.home.homeNavGraph
 import com.andlife.invitation.invitationNavGraph
@@ -34,17 +34,17 @@ fun InvitationNavHost(
                 InvitationBottomBar(
                     currentTab = navigator.currentTab,
                     tabs = navigator.mainBottomTabs.toImmutableList(),
-                    onTabSelected = navigator::navigate,
-                    modifier = Modifier
+                    onTabSelect = navigator::navigate,
+                    modifier = Modifier,
                 )
             }
         },
-        modifier = modifier
+        modifier = modifier,
     ) { innerPadding ->
         NavHost(
             modifier = Modifier,
             navController = navigator.navController,
-            startDestination = navigator.startDestination
+            startDestination = navigator.startDestination,
         ) {
             homeNavGraph(innerPadding)
             invitationNavGraph(innerPadding)
@@ -57,53 +57,55 @@ fun InvitationNavHost(
 private fun InvitationBottomBar(
     currentTab: MainBottomTab?,
     tabs: ImmutableList<MainBottomTab>,
-    onTabSelected: (MainBottomTab) -> Unit,
+    onTabSelect: (MainBottomTab) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     NavigationBar(
         modifier = modifier,
-        containerColor = InvitationTheme.colorScheme.backgroundPrimary
+        containerColor = InvitationTheme.colorScheme.backgroundPrimary,
     ) {
         tabs.forEach { tab ->
             NavigationBarItem(
                 selected = currentTab == tab,
-                onClick = { onTabSelected(tab) },
+                onClick = { onTabSelect(tab) },
                 icon = {
                     Icon(
                         ImageVector.vectorResource(tab.iconResId),
-                        stringResource(tab.labelResId)
+                        stringResource(tab.labelResId),
                     )
                 },
                 label = {
                     Text(
                         text = stringResource(tab.labelResId),
-                        style = InvitationTheme.typography.bodySmallMedium
+                        style = InvitationTheme.typography.bodySmallMedium,
                     )
                 },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = InvitationTheme.colorScheme.brandPrimary,
-                    unselectedIconColor = InvitationTheme.colorScheme.textTertiary,
-                    selectedTextColor = InvitationTheme.colorScheme.brandPrimary,
-                    unselectedTextColor = InvitationTheme.colorScheme.textTertiary,
-                    indicatorColor = Color.Transparent
-                )
+                colors =
+                    NavigationBarItemDefaults.colors(
+                        selectedIconColor = InvitationTheme.colorScheme.brandPrimary,
+                        unselectedIconColor = InvitationTheme.colorScheme.textTertiary,
+                        selectedTextColor = InvitationTheme.colorScheme.brandPrimary,
+                        unselectedTextColor = InvitationTheme.colorScheme.textTertiary,
+                        indicatorColor = Color.Transparent,
+                    ),
             )
         }
     }
 }
 
-@ThemePreview
+@PreviewTheme
 @Composable
 private fun InvitationBottomBarPreview() {
     InvitationTheme {
         InvitationBottomBar(
             currentTab = MainBottomTab.INVITATION,
-            tabs = listOf(
-                MainBottomTab.HOME,
-                MainBottomTab.INVITATION,
-                MainBottomTab.MY_INVITATION
-            ).toImmutableList(),
-            onTabSelected = {}
+            tabs =
+                listOf(
+                    MainBottomTab.HOME,
+                    MainBottomTab.INVITATION,
+                    MainBottomTab.MY_INVITATION,
+                ).toImmutableList(),
+            onTabSelect = {},
         )
     }
 }
