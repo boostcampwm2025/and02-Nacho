@@ -25,6 +25,8 @@ import com.andlife.designsystem.R
 import com.andlife.designsystem.component.datepicker.model.DatePickerDate
 import com.andlife.designsystem.component.datepicker.model.DatePickerYearMonth
 import com.andlife.designsystem.component.datepicker.state.DatePickerState
+import com.andlife.designsystem.component.datepicker.state.rememberDatePickerState
+import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationSpacing
 import kotlinx.datetime.LocalDate
 
@@ -313,4 +315,38 @@ private fun getDaysCountInMonth(yearMonth: DatePickerYearMonth): Int {
 // 윤년 여부 판단
 private fun isLeapYear(year: Int): Boolean {
     return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
+}
+
+@PreviewTheme
+@Composable
+private fun DatePickerPreview() {
+    InvitationTheme {
+        DatePicker(
+            state = rememberDatePickerState()
+        )
+    }
+}
+
+@PreviewTheme
+@Composable
+private fun DatePickerWithSelectedDatePreview() {
+    InvitationTheme {
+        DatePicker(
+            state = rememberDatePickerState(
+                initialSelectedDate = LocalDate(2025, 12, 31)
+            )
+        )
+    }
+}
+
+@PreviewTheme
+@Composable
+private fun DatePickerWithYearMonthModePreview() {
+    InvitationTheme {
+        DatePicker(
+            state = rememberDatePickerState(
+                initialMode = DatePickerMode.YEAR_MONTH
+            )
+        )
+    }
 }
