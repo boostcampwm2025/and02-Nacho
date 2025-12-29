@@ -13,17 +13,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
@@ -32,7 +35,9 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.andlife.designsystem.preview.ThemePreview
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
@@ -43,6 +48,7 @@ import kotlin.math.abs
 fun InvitationTimePicker(
     state: InvitationTimePickerState,
     modifier: Modifier = Modifier,
+    itemHeight: Dp = 50.dp
 ) {
     Row(
         modifier = modifier
@@ -53,29 +59,26 @@ fun InvitationTimePicker(
     ) {
         AmPmColumn(
             isPm = state.isPm,
+            itemHeight = itemHeight,
             onAmPmChange = { state.isPm = it },
             modifier = Modifier.weight(1f)
         )
         HourColumn(
             hour = state.hour,
+            itemHeight = itemHeight,
             onHourChange = { newHour12 ->
                 val oldHour12 = state.hour12
-
                 if ((oldHour12 == 11 && newHour12 == 12) || (oldHour12 == 12 && newHour12 == 11)) {
                     state.isPm = !state.isPm
                 }
-
-                state.hour = when {
-                    state.isPm && newHour12 != 12 -> newHour12 + 12
-                    !state.isPm && newHour12 == 12 -> 0
-                    else -> newHour12
-                }
+                state.updateHour12(newHour12)
             },
             modifier = Modifier.weight(1f)
         )
         MinuteColumn(
             minute = state.minute,
             minuteInterval = state.minuteInterval,
+            itemHeight = itemHeight,
             onMinuteChange = { state.minute = it },
             modifier = Modifier.weight(1f)
         )
@@ -85,12 +88,14 @@ fun InvitationTimePicker(
 @Composable
 fun AmPmColumn(
     isPm: Boolean,
+    itemHeight: Dp,
     onAmPmChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     BasicScrollableColumn(
         items = listOf("오전", "오후"),
         initialIndex = if (isPm) 1 else 0,
+        itemHeight = itemHeight,
         onItemSelected = { onAmPmChange(it == 1) },
         isInfinite = false,
         modifier = modifier
@@ -100,6 +105,7 @@ fun AmPmColumn(
 @Composable
 fun HourColumn(
     hour: Int,
+    itemHeight: Dp,
     onHourChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -107,6 +113,7 @@ fun HourColumn(
     BasicScrollableColumn(
         items = (1..12).map { it.toString() },
         initialIndex = hour12 - 1,
+        itemHeight = itemHeight,
         onItemSelected = { index -> onHourChange(index + 1) },
         modifier = modifier
     )
@@ -116,6 +123,7 @@ fun HourColumn(
 fun MinuteColumn(
     minute: Int,
     minuteInterval: Int,
+    itemHeight: Dp,
     onMinuteChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -123,9 +131,6 @@ fun MinuteColumn(
         (0 until 60 step minuteInterval).map { it.toString().padStart(2, '0') }
     }
 
-//    val initialIndex = remember(minute, minuteInterval) {
-//        items.indexOfFirst { it.toInt() == minute }.takeIf { it >= 0 } ?: 0
-//    }
     val initialIndex = remember(minute, minuteInterval) {
         (minute / minuteInterval).coerceIn(0, items.size - 1)
     }
@@ -133,6 +138,7 @@ fun MinuteColumn(
     BasicScrollableColumn(
         items = items,
         initialIndex = initialIndex,
+        itemHeight = itemHeight,
         onItemSelected = { index ->
             onMinuteChange(index * minuteInterval)
         },
@@ -144,14 +150,13 @@ fun MinuteColumn(
 private fun BasicScrollableColumn(
     items: List<String>,
     initialIndex: Int,
+    itemHeight: Dp,
     onItemSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
     isInfinite: Boolean = true,
     isFadeEdgeEnabled: Boolean = false,
 ) {
-    val itemHeight = 60.dp // TODO: 나중에 외부에서 받도록 변경
     val itemCount = items.size
-
     val scope = rememberCoroutineScope()
 
     val repeatCount = if (isInfinite) 1000 else 1
@@ -163,6 +168,16 @@ private fun BasicScrollableColumn(
     )
     val snapBehavior = rememberSnapFlingBehavior(lazyListState = listState)
     val haptic = LocalHapticFeedback.current
+
+    var itemHeightPx by remember { mutableFloatStateOf(0f) }
+
+//    val itemHeightDp = with(LocalDensity.current) {
+//        if (itemHeightPx > 0f) {
+//            itemHeightPx.toDp()
+//        } else {
+//            60.dp
+//        }
+//    }
 
     LaunchedEffect(initialIndex) {
         if (!listState.isScrollInProgress) {
@@ -176,37 +191,39 @@ private fun BasicScrollableColumn(
         }
     }
 
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.layoutInfo }
-            .collect { layoutInfo ->
-                val viewPortCenter = (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
+//    val currentIndex by remember {
+//        derivedStateOf {
+//            val centerItemIndex = listState.getCenterItemIndex() ?: return@derivedStateOf initialIndex
+//            val realIndex = centerItemIndex % itemCount
+//            realIndex
+//        }
+//    }
 
-                val closestItem = layoutInfo.visibleItemsInfo.minByOrNull { item ->
-                    val itemCenter = item.offset + (item.size / 2)
-                    abs(itemCenter - viewPortCenter)
-                }
-
-                closestItem?.let { item ->
-                    val itemCenter = item.offset + (item.size / 2)
-                    val distanceFromCenter = abs(itemCenter - viewPortCenter)
-
-                    if (distanceFromCenter < 5 && listState.isScrollInProgress) {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    }
-                }
-            }
-    }
-
-    //val currentIndex = listState.firstVisibleItemIndex % itemCount
-    //val currentIndex = listState.getCenterItemIndex()?.let { it % itemCount } ?: 0
     val currentIndex by remember {
         derivedStateOf {
-            listState.getCenterItemIndex()?.let { it % itemCount } ?: 0
+            val layoutInfo = listState.layoutInfo
+            if (layoutInfo.visibleItemsInfo.isEmpty()) return@derivedStateOf initialIndex
+
+            val viewportCenter = (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
+            val centerItem = layoutInfo.visibleItemsInfo.minByOrNull {
+                abs((it.offset + it.size / 2) - viewportCenter)
+            }
+            (centerItem?.index ?: 0) % itemCount
         }
     }
 
     LaunchedEffect(currentIndex) {
         onItemSelected(currentIndex)
+    }
+
+    var lastVibratedIndex by remember { mutableIntStateOf(-1) }
+    LaunchedEffect(listState) {
+        snapshotFlow { currentIndex }.collect { index ->
+            if (listState.isScrollInProgress && lastVibratedIndex != index) {
+                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                lastVibratedIndex = index
+            }
+        }
     }
 
     Box(
@@ -222,16 +239,6 @@ private fun BasicScrollableColumn(
             ),
         contentAlignment = Alignment.Center
     ) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(itemHeight)
-                .padding(horizontal = InvitationSpacing.large),
-            color = InvitationTheme.colorScheme.backgroundBorder,
-            shape = InvitationTheme.shapes.small
-        ) {
-
-        }
         LazyColumn(
             state = listState,
             flingBehavior = snapBehavior,
@@ -246,29 +253,34 @@ private fun BasicScrollableColumn(
                 }
             ) { index ->
                 val realIndex = index % itemCount
-                val isSelected = realIndex == currentIndex
+                val itemAlpha by remember {
+                    derivedStateOf {
+                        val layoutInfo = listState.layoutInfo
+                        val itemInfo = layoutInfo.visibleItemsInfo.find { it.index == index } ?: return@derivedStateOf 0.3f
+                        val viewportCenter = (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
+                        val distance = abs((itemInfo.offset + itemInfo.size / 2) - viewportCenter)
+                        (1f - (distance.toFloat() / 100f)).coerceIn(0.3f, 1f)
+                    }
+                }
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(itemHeight)
                         .clickable {
                             scope.launch {
-                                if (isInfinite) {
-                                    val currentFirstIndex = listState.firstVisibleItemIndex
-                                    val currentOffset = currentFirstIndex % itemCount
-                                    val diff = realIndex - currentOffset
-
-                                    listState.animateScrollToItem(currentFirstIndex + diff)
-                                } else {
-                                    listState.animateScrollToItem(index)
-                                }
+                                val currentFirstIndex = listState.firstVisibleItemIndex
+                                val currentOffset = currentFirstIndex % itemCount
+                                val diff = realIndex - currentOffset
+                                listState.animateScrollToItem(currentFirstIndex + diff)
                             }
                         },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = items[realIndex],
-                        color = if (isSelected) InvitationTheme.colorScheme.textPrimary else InvitationTheme.colorScheme.textTertiary,
+                        fontSize = 20.sp,
+                        modifier = Modifier.alpha(itemAlpha),
+                        color = if (realIndex == currentIndex) Color.Black else Color.Gray
                     )
                 }
             }
