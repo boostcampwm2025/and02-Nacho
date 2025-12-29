@@ -101,7 +101,7 @@ private class InvitationTimePickerStateImpl(
 fun rememberInvitationTimePickerState(
     initialHour: Int = 0,
     initialMinute: Int = 0,
-    minuteInterval: Int = 1
+    minuteInterval: Int = InvitationTimePickerDefaults.MINUTE_INTERVAL_5
 ): InvitationTimePickerState {
     return rememberSaveable(saver = InvitationTimePickerStateImpl.Saver()) {
         InvitationTimePickerStateImpl(
