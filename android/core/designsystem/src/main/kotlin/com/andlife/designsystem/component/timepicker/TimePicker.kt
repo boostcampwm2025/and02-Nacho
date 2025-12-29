@@ -21,6 +21,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -29,11 +30,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.preview.ThemePreview
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 @Composable
 fun InvitationTimePicker(
@@ -158,6 +162,7 @@ private fun BasicScrollableColumn(
         initialFirstVisibleItemIndex = startOffset + initialIndex
     )
     val snapBehavior = rememberSnapFlingBehavior(lazyListState = listState)
+    val haptic = LocalHapticFeedback.current
 
     LaunchedEffect(initialIndex) {
         if (!listState.isScrollInProgress) {
@@ -169,6 +174,27 @@ private fun BasicScrollableColumn(
                 listState.animateScrollToItem(currentFirstIndex + diff)
             }
         }
+    }
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.layoutInfo }
+            .collect { layoutInfo ->
+                val viewPortCenter = (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
+
+                val closestItem = layoutInfo.visibleItemsInfo.minByOrNull { item ->
+                    val itemCenter = item.offset + (item.size / 2)
+                    abs(itemCenter - viewPortCenter)
+                }
+
+                closestItem?.let { item ->
+                    val itemCenter = item.offset + (item.size / 2)
+                    val distanceFromCenter = abs(itemCenter - viewPortCenter)
+
+                    if (distanceFromCenter < 5 && listState.isScrollInProgress) {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    }
+                }
+            }
     }
 
     //val currentIndex = listState.firstVisibleItemIndex % itemCount
@@ -261,7 +287,6 @@ private fun LazyListState.getCenterItemIndex(): Int? {
 
 @Composable
 private fun Modifier.fadeEdge(color: Color): Modifier {
-    // 그라데이션 지점 설정 (위/아래 25% 지점부터 투명해지기 시작)
     val fadeEdgeBrushColor = remember(color) {
         arrayOf(
             0f to color.copy(alpha = 0.8f),
@@ -282,7 +307,6 @@ private fun Modifier.fadeEdge(color: Color): Modifier {
             )
             onDrawWithContent {
                 drawContent()
-                // BlendMode.DstOut을 사용하여 콘텐츠 위에 그라데이션 마스크를 씌움
                 drawRect(
                     brush = brush,
                     blendMode = BlendMode.DstOut,
