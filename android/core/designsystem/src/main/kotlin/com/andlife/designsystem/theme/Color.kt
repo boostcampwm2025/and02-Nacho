@@ -14,7 +14,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.andlife.designsystem.preview.ThemePreview
+import com.andlife.designsystem.preview.PreviewTheme
 
 // Background
 val BackgroundPrimary = Color(0xFFFFFFFF)
@@ -44,82 +44,79 @@ val IconTertiary = Color(0xFFFFFFFF)
 
 @Immutable
 data class InvitationColorScheme(
-
     val backgroundPrimary: Color,
     val backgroundSecondary: Color,
     val backgroundSurface: Color,
     val backgroundBorder: Color,
     val backgroundOverlay: Color,
-
     val textPrimary: Color,
     val textSecondary: Color,
     val textTertiary: Color,
     val textDisabled: Color,
     val textOnPrimary: Color,
-
     val brandPrimary: Color,
     val brandSecondary: Color,
     val brandLight: Color,
     val brandDark: Color,
     val brandOnPrimary: Color,
-
     val iconPrimary: Color,
     val iconSecondary: Color,
     val iconTertiary: Color,
 )
 
-val LightInvitationColorScheme = InvitationColorScheme(
-    backgroundPrimary = BackgroundPrimary,
-    backgroundSecondary = BackgroundSecondary,
-    backgroundSurface = BackgroundSurface,
-    backgroundBorder = BackgroundBorder,
-    backgroundOverlay = BackgroundOverlay,
-
-    textPrimary = TextPrimary,
-    textSecondary = TextSecondary,
-    textTertiary = TextTertiary,
-    textDisabled = TextDisabled,
-    textOnPrimary = TextOnPrimary,
-
-    brandPrimary = BrandPrimary,
-    brandSecondary = BrandSecondary,
-    brandLight = BrandLight,
-    brandDark = BrandDark,
-    brandOnPrimary = BrandOnPrimary,
-
-    iconPrimary = IconPrimary,
-    iconSecondary = IconSecondary,
-    iconTertiary = IconTertiary,
-)
+val LightInvitationColorScheme =
+    InvitationColorScheme(
+        backgroundPrimary = BackgroundPrimary,
+        backgroundSecondary = BackgroundSecondary,
+        backgroundSurface = BackgroundSurface,
+        backgroundBorder = BackgroundBorder,
+        backgroundOverlay = BackgroundOverlay,
+        textPrimary = TextPrimary,
+        textSecondary = TextSecondary,
+        textTertiary = TextTertiary,
+        textDisabled = TextDisabled,
+        textOnPrimary = TextOnPrimary,
+        brandPrimary = BrandPrimary,
+        brandSecondary = BrandSecondary,
+        brandLight = BrandLight,
+        brandDark = BrandDark,
+        brandOnPrimary = BrandOnPrimary,
+        iconPrimary = IconPrimary,
+        iconSecondary = IconSecondary,
+        iconTertiary = IconTertiary,
+    )
 
 // TODO: 나중에 다크모드 색상 정의 필요. 지금은 라이트모드와 동일하게 설정
-val DarkInvitationColorScheme = LightInvitationColorScheme.copy(
-    //backgroundPrimary = TextPrimary,
-)
+val DarkInvitationColorScheme =
+    LightInvitationColorScheme.copy(
+        // backgroundPrimary = TextPrimary,
+    )
 
 internal val LocalInvitationColorScheme = staticCompositionLocalOf { LightInvitationColorScheme }
 
-@ThemePreview
+@PreviewTheme
 @Composable
 private fun InvitationColorSchemePreview() {
     InvitationTheme {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(InvitationTheme.colorScheme.backgroundPrimary)
-                .padding(InvitationSpacing.medium),
-            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.large)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(InvitationTheme.colorScheme.backgroundPrimary)
+                    .padding(InvitationSpacing.medium),
+            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.large),
         ) {
             Text(
                 text = "Hello",
                 color = InvitationTheme.colorScheme.textTertiary,
-                style = InvitationTheme.typography.headingLarge
+                style = InvitationTheme.typography.headingLarge,
             )
 
             Box(
-                modifier = Modifier
-                    .size(50.dp)
-                    .background(InvitationTheme.colorScheme.brandPrimary)
+                modifier =
+                    Modifier
+                        .size(50.dp)
+                        .background(InvitationTheme.colorScheme.brandPrimary),
             )
         }
     }

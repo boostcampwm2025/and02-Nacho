@@ -1,0 +1,3 @@
+import extension.configureHiltAndroid
+
+configureHiltAndroid()

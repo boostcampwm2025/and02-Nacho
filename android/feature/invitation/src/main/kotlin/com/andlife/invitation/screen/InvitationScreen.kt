@@ -5,8 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-fun InvitationScreen(
-    modifier: Modifier = Modifier
-) {
+fun InvitationScreen(modifier: Modifier = Modifier) {
     Text(text = "InvitationScreen")
 }
