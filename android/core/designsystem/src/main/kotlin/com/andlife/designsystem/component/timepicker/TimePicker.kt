@@ -214,7 +214,10 @@ private fun BasicScrollableColumn(
         ) {
             items(
                 count = totalItemCount,
-                key = { index -> index }
+                key = { index ->
+                    val realIndex = index % itemCount
+                    "${items[realIndex]}_$index"
+                }
             ) { index ->
                 val realIndex = index % itemCount
                 val isSelected = realIndex == currentIndex
