@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -36,7 +37,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import com.andlife.designsystem.preview.ThemePreview
+import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
 import kotlinx.collections.immutable.ImmutableList
@@ -54,17 +55,21 @@ fun InvitationTimePicker(
     isFadeEdgeEnabled: Boolean = false,
 ) {
     val density = LocalDensity.current
-    val itemHeight = remember(styles.textStyle, itemVerticalPadding) {
-        with(density) {
-            val fontSizeDp = styles.textStyle.fontSize.toDp()
-            fontSizeDp + (itemVerticalPadding * 2)
+    val itemHeight =
+        remember(
+            styles.textStyle,
+            itemVerticalPadding,
+        ) {
+            with(density) {
+                val fontSizeDp = styles.textStyle.fontSize.toDp()
+                fontSizeDp + (itemVerticalPadding * 2)
+            }
         }
-    }
 
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         AmPmColumn(
             isPm = state.isPm,
@@ -73,7 +78,7 @@ fun InvitationTimePicker(
             textStyle = styles.textStyle,
             colors = colors,
             isFadeEdgeEnabled = isFadeEdgeEnabled,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
         HourColumn(
             hour12 = state.hour12,
@@ -88,7 +93,7 @@ fun InvitationTimePicker(
             textStyle = styles.textStyle,
             colors = colors,
             isFadeEdgeEnabled = isFadeEdgeEnabled,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
         MinuteColumn(
             minute = state.minute,
@@ -98,7 +103,7 @@ fun InvitationTimePicker(
             textStyle = styles.textStyle,
             colors = colors,
             isFadeEdgeEnabled = isFadeEdgeEnabled,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
     }
 }
@@ -109,21 +114,21 @@ fun AmPmColumn(
     itemHeight: Dp,
     textStyle: TextStyle,
     colors: InvitationTimePickerColors,
-    isFadeEdgeEnabled: Boolean = false,
     onAmPmChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isFadeEdgeEnabled: Boolean = false,
 ) {
     BasicScrollableColumn(
         items = listOf("오전", "오후").toImmutableList(), // TODO: 리소스화
         initialIndex = if (isPm) 1 else 0,
         externalSelectedIndex = if (isPm) 1 else 0,
-        onItemSelected = { onAmPmChange(it == 1) },
+        onItemSelect = { onAmPmChange(it == 1) },
         itemHeight = itemHeight,
         textStyle = textStyle,
         colors = colors,
         isInfinite = false,
         isFadeEdgeEnabled = isFadeEdgeEnabled,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -135,19 +140,19 @@ fun HourColumn(
     textStyle: TextStyle,
     colors: InvitationTimePickerColors,
     isFadeEdgeEnabled: Boolean,
-    modifier: Modifier
+    modifier: Modifier = Modifier,
 ) {
     BasicScrollableColumn(
         items = (1..12).map { it.toString() }.toImmutableList(),
         initialIndex = hour12 - 1,
         externalSelectedIndex = hour12 - 1,
-        onItemSelected = { onHourChange(it + 1) },
+        onItemSelect = { onHourChange(it + 1) },
         itemHeight = itemHeight,
         textStyle = textStyle,
         colors = colors,
         isInfinite = true,
         isFadeEdgeEnabled = isFadeEdgeEnabled,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -160,24 +165,25 @@ fun MinuteColumn(
     textStyle: TextStyle,
     colors: InvitationTimePickerColors,
     isFadeEdgeEnabled: Boolean,
-    modifier: Modifier
+    modifier: Modifier = Modifier,
 ) {
-    val items = remember(minuteInterval) {
-        (0 until 60 step minuteInterval).map { it.toString().padStart(2, '0') }
-    }
+    val items =
+        remember(minuteInterval) {
+            (0 until 60 step minuteInterval).map { it.toString().padStart(2, '0') }
+        }
     val currentIndex = (minute / minuteInterval).coerceIn(0, items.size - 1)
 
     BasicScrollableColumn(
         items = items.toImmutableList(),
         initialIndex = currentIndex,
         externalSelectedIndex = currentIndex,
-        onItemSelected = { onMinuteChange(it * minuteInterval) },
+        onItemSelect = { onMinuteChange(it * minuteInterval) },
         itemHeight = itemHeight,
         textStyle = textStyle,
         colors = colors,
         isInfinite = true,
         isFadeEdgeEnabled = isFadeEdgeEnabled,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -186,7 +192,7 @@ private fun BasicScrollableColumn(
     items: ImmutableList<String>,
     initialIndex: Int,
     externalSelectedIndex: Int,
-    onItemSelected: (Int) -> Unit,
+    onItemSelect: (Int) -> Unit,
     itemHeight: Dp,
     textStyle: TextStyle,
     colors: InvitationTimePickerColors,
@@ -200,9 +206,10 @@ private fun BasicScrollableColumn(
     val repeatCount = if (isInfinite) 1000 else 1
     val startOffset = if (isInfinite) (repeatCount / 2) * itemCount else 0
 
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = startOffset + initialIndex
-    )
+    val listState =
+        rememberLazyListState(
+            initialFirstVisibleItemIndex = startOffset + initialIndex,
+        )
     val snapBehavior = rememberSnapFlingBehavior(lazyListState = listState)
 
     val currentIndex by remember {
@@ -211,9 +218,10 @@ private fun BasicScrollableColumn(
             if (layoutInfo.visibleItemsInfo.isEmpty()) return@derivedStateOf initialIndex
 
             val viewportCenter = (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
-            val centerItem = layoutInfo.visibleItemsInfo.minByOrNull {
-                abs((it.offset + it.size / 2) - viewportCenter)
-            }
+            val centerItem =
+                layoutInfo.visibleItemsInfo.minByOrNull {
+                    abs((it.offset + it.size / 2) - viewportCenter)
+                }
             (centerItem?.index ?: 0) % itemCount
         }
     }
@@ -223,45 +231,49 @@ private fun BasicScrollableColumn(
             val currentPosition = listState.firstVisibleItemIndex
             val currentRealIndex = currentPosition % itemCount
             val diff = externalSelectedIndex - currentRealIndex
-            val scrollTarget = if (isInfinite) {
-                val adjustedDiff = when {
-                    abs(diff) <= itemCount / 2 -> diff
-                    diff > 0 -> diff - itemCount
-                    else -> diff + itemCount
+            val scrollTarget =
+                if (isInfinite) {
+                    val adjustedDiff =
+                        when {
+                            abs(diff) <= itemCount / 2 -> diff
+                            diff > 0 -> diff - itemCount
+                            else -> diff + itemCount
+                        }
+                    currentPosition + adjustedDiff
+                } else {
+                    externalSelectedIndex
                 }
-                currentPosition + adjustedDiff
-            } else {
-                externalSelectedIndex
-            }
             listState.animateScrollToItem(scrollTarget)
         }
     }
 
     var lastVibratedIndex by remember { mutableIntStateOf(-1) }
+    val latestOnItemSelect by rememberUpdatedState(onItemSelect)
+
     LaunchedEffect(listState) {
         snapshotFlow { currentIndex }
             .collect { index ->
                 if (lastVibratedIndex != index) {
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     lastVibratedIndex = index
-                    onItemSelected(index)
+                    latestOnItemSelect(index)
                 }
             }
     }
 
-
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(itemHeight * 3)
-            .then(
-                if (isFadeEdgeEnabled) {
-                    Modifier.fadeEdge(colors.fadeColor)
-                } else {
-                    Modifier
-                }
-            ),
-        contentAlignment = Alignment.Center
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(itemHeight * 3)
+                .then(
+                    if (isFadeEdgeEnabled) {
+                        Modifier.fadeEdge(colors.fadeColor)
+                    } else {
+                        Modifier
+                    },
+                ),
+        contentAlignment = Alignment.Center,
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
@@ -272,48 +284,49 @@ private fun BasicScrollableColumn(
         ) {
             items(
                 count = itemCount * repeatCount,
-                key = { index -> "${index}_${items[index % itemCount]}" }
+                key = { index -> "${index}_${items[index % itemCount]}" },
             ) { index ->
                 val realIndex = index % itemCount
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(itemHeight)
-                        .graphicsLayer {
-                            val layoutInfo = listState.layoutInfo
-                            val itemInfo = layoutInfo.visibleItemsInfo.find { it.index == index }
-                            if (itemInfo != null) {
-                                val viewportCenter =
-                                    (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2f
-                                val itemCenter = itemInfo.offset + itemInfo.size / 2f
-                                val distance = abs(itemCenter - viewportCenter)
-                                alpha = (1f - (distance / size.height)).coerceIn(0.3f, 1f)
-                            } else {
-                                alpha = 0.3f
-                            }
-                        }
-                        .clickable {
-                            scope.launch {
-                                val currentFirstIndex = listState.firstVisibleItemIndex
-                                val currentRealIndex = currentFirstIndex % itemCount
-                                var diff = realIndex - currentRealIndex
-                                if (isInfinite && abs(diff) > itemCount / 2) {
-                                    diff = if (diff > 0) diff - itemCount else diff + itemCount
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(itemHeight)
+                            .graphicsLayer {
+                                val layoutInfo = listState.layoutInfo
+                                val itemInfo = layoutInfo.visibleItemsInfo.find { it.index == index }
+                                if (itemInfo != null) {
+                                    val viewportCenter =
+                                        (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2f
+                                    val itemCenter = itemInfo.offset + itemInfo.size / 2f
+                                    val distance = abs(itemCenter - viewportCenter)
+                                    alpha = (1f - (distance / size.height)).coerceIn(0.3f, 1f)
+                                } else {
+                                    alpha = 0.3f
                                 }
-                                listState.animateScrollToItem(currentFirstIndex + diff)
-                            }
-                        },
-                    contentAlignment = Alignment.Center
+                            }.clickable {
+                                scope.launch {
+                                    val currentFirstIndex = listState.firstVisibleItemIndex
+                                    val currentRealIndex = currentFirstIndex % itemCount
+                                    var diff = realIndex - currentRealIndex
+                                    if (isInfinite && abs(diff) > itemCount / 2) {
+                                        diff = if (diff > 0) diff - itemCount else diff + itemCount
+                                    }
+                                    listState.animateScrollToItem(currentFirstIndex + diff)
+                                }
+                            },
+                    contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         text = items[realIndex],
                         style = textStyle,
-                        color = if (realIndex == currentIndex) {
-                            colors.selectedTextColor
-                        } else {
-                            colors.unSelectedTextColor
-                        },
-                        textAlign = TextAlign.Center
+                        color =
+                            if (realIndex == currentIndex) {
+                                colors.selectedTextColor
+                            } else {
+                                colors.unSelectedTextColor
+                            },
+                        textAlign = TextAlign.Center,
                     )
                 }
             }
@@ -323,24 +336,26 @@ private fun BasicScrollableColumn(
 
 @Composable
 private fun Modifier.fadeEdge(color: Color): Modifier {
-    val fadeEdgeBrushColor = remember(color) {
-        arrayOf(
-            0f to color.copy(alpha = 0.9f),
-            0.25f to color.copy(alpha = 0.2f),
-            0.5f to Color.Transparent,
-            0.75f to color.copy(alpha = 0.2f),
-            1f to color.copy(alpha = 0.9f),
-        )
-    }
+    val fadeEdgeBrushColor =
+        remember(color) {
+            arrayOf(
+                0f to color.copy(alpha = 0.9f),
+                0.25f to color.copy(alpha = 0.2f),
+                0.5f to Color.Transparent,
+                0.75f to color.copy(alpha = 0.2f),
+                1f to color.copy(alpha = 0.9f),
+            )
+        }
 
     return this
         .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
         .drawWithCache {
-            val brush = Brush.verticalGradient(
-                colorStops = fadeEdgeBrushColor,
-                startY = 0f,
-                endY = size.height,
-            )
+            val brush =
+                Brush.verticalGradient(
+                    colorStops = fadeEdgeBrushColor,
+                    startY = 0f,
+                    endY = size.height,
+                )
             onDrawWithContent {
                 drawContent()
                 drawRect(
@@ -351,34 +366,38 @@ private fun Modifier.fadeEdge(color: Color): Modifier {
         }
 }
 
-@ThemePreview
+@PreviewTheme
 @Composable
 private fun InvitationTimePickerPreview() {
     InvitationTheme {
-        val state = rememberInvitationTimePickerState(
-            initialHour = 10,
-            initialMinute = 30,
-            minuteInterval = 5,
-        )
+        val state =
+            rememberInvitationTimePickerState(
+                initialHour = 10,
+                initialMinute = 30,
+                minuteInterval = 5,
+            )
 
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(InvitationSpacing.large),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(InvitationSpacing.large),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
             InvitationTimePicker(
                 state = state,
-                modifier = Modifier
-                    .fillMaxWidth()
+                modifier =
+                    Modifier
+                        .fillMaxWidth(),
             )
 
             Text(
                 text = "선택된 시간: ${state.hour12}시 ${state.minute}분 ${if (state.isPm) "오후" else "오전"}",
                 style = InvitationTheme.typography.bodyLargeMedium,
-                modifier = Modifier
-                    .padding(top = InvitationSpacing.large)
+                modifier =
+                    Modifier
+                        .padding(top = InvitationSpacing.large),
             )
         }
     }

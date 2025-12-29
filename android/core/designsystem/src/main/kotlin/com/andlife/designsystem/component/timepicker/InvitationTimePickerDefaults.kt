@@ -10,7 +10,6 @@ import com.andlife.designsystem.theme.InvitationTheme
 
 @Stable
 object InvitationTimePickerDefaults {
-
     const val MINUTE_INTERVAL_1 = 1
     const val MINUTE_INTERVAL_5 = 5
     const val MINUTE_INTERVAL_10 = 10
@@ -22,18 +21,18 @@ object InvitationTimePickerDefaults {
         selectedTextColor: Color = InvitationTheme.colorScheme.textPrimary,
         unSelectedTextColor: Color = InvitationTheme.colorScheme.textTertiary,
         fadeColor: Color = InvitationTheme.colorScheme.backgroundPrimary,
-    ): InvitationTimePickerColors = InvitationTimePickerColors(
-        selectedTextColor = selectedTextColor,
-        unSelectedTextColor = unSelectedTextColor,
-        fadeColor = fadeColor
-    )
+    ): InvitationTimePickerColors =
+        InvitationTimePickerColors(
+            selectedTextColor = selectedTextColor,
+            unSelectedTextColor = unSelectedTextColor,
+            fadeColor = fadeColor,
+        )
 
     @Composable
-    fun styles(
-        textStyle: TextStyle = InvitationTheme.typography.headingLarge
-    ): InvitationTimePickerStyles = InvitationTimePickerStyles(
-        textStyle = textStyle
-    )
+    fun styles(textStyle: TextStyle = InvitationTheme.typography.headingLarge): InvitationTimePickerStyles =
+        InvitationTimePickerStyles(
+            textStyle = textStyle,
+        )
 }
 
 @Stable
@@ -45,5 +44,5 @@ data class InvitationTimePickerColors(
 
 @Stable
 data class InvitationTimePickerStyles(
-    val textStyle: TextStyle
+    val textStyle: TextStyle,
 )
