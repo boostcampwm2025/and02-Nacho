@@ -4,14 +4,23 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import com.andlife.designsystem.theme.InvitationTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -28,18 +37,19 @@ import com.andlife.designsystem.component.datepicker.state.DatePickerState
 import com.andlife.designsystem.component.datepicker.state.rememberDatePickerState
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationSpacing
+import com.andlife.designsystem.theme.InvitationTheme
 import kotlinx.datetime.LocalDate
 
 enum class DatePickerMode {
-    DATE,  // 달력에서 날짜 선택
-    YEAR_MONTH  // 연/월 선택
+    DATE, // 달력에서 날짜 선택
+    YEAR_MONTH, // 연/월 선택
 }
 
 @Composable
 fun DatePicker(
     state: DatePickerState,
     modifier: Modifier = Modifier,
-    colors: DatePickerColors = DatePickerDefaults.colors()
+    colors: DatePickerColors = DatePickerDefaults.colors(),
 ) {
     Crossfade(targetState = state.mode) { mode ->
         when (mode) {
@@ -57,7 +67,7 @@ fun DatePicker(
                         yearMonth = state.displayedMonth,
                         selectedDate = state.selectedDate?.let { DatePickerDate(it) },
                         onDateClick = { date -> state.selectDate(date.date) },
-                        colors = colors
+                        colors = colors,
                     )
                 }
             }
@@ -69,12 +79,12 @@ fun DatePicker(
                         onHeaderClick = {},
                         onPreviousClick = state::moveToPreviousYear,
                         onNextClick = state::moveToNextYear,
-                        colors = colors
+                        colors = colors,
                     )
                     DatePickerYearMonthSelector(
                         yearMonth = state.displayedMonth,
                         onMonthSelected = state::showCalendar,
-                        colors = colors
+                        colors = colors,
                     )
                 }
             }
@@ -90,66 +100,70 @@ private fun DatePickerHeader(
     onNextClick: () -> Unit = {},
     colors: DatePickerColors,
     modifier: Modifier = Modifier,
-    isClickable: Boolean = false
+    isClickable: Boolean = false,
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(InvitationSpacing.large),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(InvitationSpacing.large),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             painter = painterResource(id = R.drawable.ic_chevron_left_24),
             contentDescription = null,
-            modifier = Modifier
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) { onPreviousClick() }
-                .padding(InvitationSpacing.small),
-            tint = colors.navigationColor
+            modifier =
+                Modifier
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) { onPreviousClick() }
+                    .padding(InvitationSpacing.small),
+            tint = colors.navigationColor,
         )
 
         // 제목 (클릭 가능)
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .let { modifier ->
-                    if (isClickable) {
-                        modifier.clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
-                        ) { onHeaderClick() }
-                    } else {
-                        modifier
-                    }
-                }
-                .padding(InvitationSpacing.small)
+            modifier =
+                Modifier
+                    .let { modifier ->
+                        if (isClickable) {
+                            modifier.clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                            ) { onHeaderClick() }
+                        } else {
+                            modifier
+                        }
+                    }.padding(InvitationSpacing.small),
         ) {
             Text(
                 text = title,
                 style = InvitationTheme.typography.headingMedium,
-                color = colors.headerTextColor
+                color = colors.headerTextColor,
             )
-            if (isClickable)
+            if (isClickable) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_arrow_drop_down_24),
                     contentDescription = null,
-                    tint = colors.navigationColor
+                    tint = colors.navigationColor,
                 )
+            }
         }
 
         Icon(
             painter = painterResource(id = R.drawable.ic_chevron_right_24),
             contentDescription = null,
-            modifier = Modifier
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) { onNextClick() }
-                .padding(InvitationSpacing.small),
-            tint = colors.navigationColor
+            modifier =
+                Modifier
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) { onNextClick() }
+                    .padding(InvitationSpacing.small),
+            tint = colors.navigationColor,
         )
     }
 }
@@ -160,7 +174,7 @@ private fun DatePickerCalendar(
     selectedDate: DatePickerDate?,
     onDateClick: (DatePickerDate) -> Unit,
     colors: DatePickerColors,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val daysCountInMonth = getDaysCountInMonth(yearMonth)
     val firstDayOfWeek = getFirstDayOfWeek(yearMonth)
@@ -169,7 +183,7 @@ private fun DatePickerCalendar(
         // 요일 헤더
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             listOf("일", "월", "화", "수", "목", "금", "토").forEach { dayOfWeek ->
                 Text(
@@ -177,7 +191,7 @@ private fun DatePickerCalendar(
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                     style = InvitationTheme.typography.bodyMediumSemiBold,
-                    color = colors.weekdayTextColor
+                    color = colors.weekdayTextColor,
                 )
             }
         }
@@ -197,49 +211,63 @@ private fun DatePickerCalendar(
 
             // 실제 날짜들
             items(daysCountInMonth) { day ->
-                val date = DatePickerDate(
-                    LocalDate(yearMonth.year, yearMonth.month, day + 1)
-                )
+                val date =
+                    DatePickerDate(
+                        LocalDate(yearMonth.year, yearMonth.month, day + 1),
+                    )
                 val isSelected = selectedDate?.date == date.date
                 val isToday = date.date == DatePickerDefaults.today()
                 val isBeforeToday = date.date < DatePickerDefaults.today()
 
                 Box(
-                    modifier = Modifier
-                        .aspectRatio(1f)
-                        .let { modifier ->
-                            if (isBeforeToday) modifier
-                            else modifier.clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                onDateClick(date)
-                            }
-                        },
-                    contentAlignment = Alignment.Center
+                    modifier =
+                        Modifier
+                            .aspectRatio(1f)
+                            .let { modifier ->
+                                if (isBeforeToday) {
+                                    modifier
+                                } else {
+                                    modifier.clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = null,
+                                    ) {
+                                        onDateClick(date)
+                                    }
+                                }
+                            },
+                    contentAlignment = Alignment.Center,
                 ) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize(0.7f) // 원 크기 조절
-                            .clip(CircleShape)
-                            .background(
-                                when {
-                                    isSelected -> colors.selectedDateColor
-                                    isToday -> colors.todayBackgroundColor
-                                    else -> Color.Transparent
-                                }
-                            )
+                        modifier =
+                            Modifier
+                                .fillMaxSize(0.7f) // 원 크기 조절
+                                .clip(CircleShape)
+                                .background(
+                                    when {
+                                        isSelected -> colors.selectedDateColor
+                                        isToday -> colors.todayBackgroundColor
+                                        else -> Color.Transparent
+                                    },
+                                ),
                     )
 
                     Text(
                         text = (day + 1).toString(),
-                        style = if (isSelected || isToday) InvitationTheme.typography.bodyMediumMedium else InvitationTheme.typography.bodyMediumRegular,
-                        color = when {
-                            isBeforeToday -> colors.disabledTextColor
-                            isSelected -> colors.selectedTextColor
-                            isToday -> colors.todayTextColor
-                            else -> colors.normalTextColor
-                        },
+                        style =
+                            if (isSelected ||
+                                isToday
+                            ) {
+                                InvitationTheme.typography.bodyMediumMedium
+                            } else {
+                                InvitationTheme.typography.bodyMediumRegular
+                            },
+                        color =
+                            when {
+                                isBeforeToday -> colors.disabledTextColor
+                                isSelected -> colors.selectedTextColor
+                                isToday -> colors.todayTextColor
+                                else -> colors.normalTextColor
+                            },
                     )
                 }
             }
@@ -252,43 +280,65 @@ private fun DatePickerYearMonthSelector(
     yearMonth: DatePickerYearMonth,
     onMonthSelected: (DatePickerYearMonth) -> Unit,
     colors: DatePickerColors,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    val months = listOf(
-        "1월", "2월", "3월", "4월",
-        "5월", "6월", "7월", "8월",
-        "9월", "10월", "11월", "12월"
-    )
+    val months =
+        listOf(
+            "1월",
+            "2월",
+            "3월",
+            "4월",
+            "5월",
+            "6월",
+            "7월",
+            "8월",
+            "9월",
+            "10월",
+            "11월",
+            "12월",
+        )
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
         verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium),
         modifier = modifier.padding(),
-        contentPadding = PaddingValues(horizontal = InvitationSpacing.large)
+        contentPadding = PaddingValues(horizontal = InvitationSpacing.large),
     ) {
         items(12) { index ->
             val month = index + 1
             val isCurrentMonth = month == yearMonth.month
 
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .clip(InvitationTheme.shapes.small)
-                    .background(
-                        if (isCurrentMonth) colors.selectedMonthColor
-                        else Color.Transparent
-                    )
-                    .clickable {
-                        onMonthSelected(DatePickerYearMonth(yearMonth.year, month))
-                    },
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(64.dp)
+                        .clip(InvitationTheme.shapes.small)
+                        .background(
+                            if (isCurrentMonth) {
+                                colors.selectedMonthColor
+                            } else {
+                                Color.Transparent
+                            },
+                        ).clickable {
+                            onMonthSelected(DatePickerYearMonth(yearMonth.year, month))
+                        },
+                contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = months[index],
-                    style = if (isCurrentMonth) InvitationTheme.typography.bodyMediumSemiBold else InvitationTheme.typography.bodyMediumRegular,
-                    color = if (isCurrentMonth) colors.selectedTextColor
-                    else colors.normalTextColor
+                    style =
+                        if (isCurrentMonth) {
+                            InvitationTheme.typography.bodyMediumSemiBold
+                        } else {
+                            InvitationTheme.typography.bodyMediumRegular
+                        },
+                    color =
+                        if (isCurrentMonth) {
+                            colors.selectedTextColor
+                        } else {
+                            colors.normalTextColor
+                        },
                 )
             }
         }
@@ -303,26 +353,23 @@ private fun getFirstDayOfWeek(yearMonth: DatePickerYearMonth): Int {
 }
 
 // 해당 월의 일수 반환
-private fun getDaysCountInMonth(yearMonth: DatePickerYearMonth): Int {
-    return when (yearMonth.month) {
+private fun getDaysCountInMonth(yearMonth: DatePickerYearMonth): Int =
+    when (yearMonth.month) {
         1, 3, 5, 7, 8, 10, 12 -> 31
         4, 6, 9, 11 -> 30
         2 -> if (isLeapYear(yearMonth.year)) 29 else 28
         else -> 30
     }
-}
 
 // 윤년 여부 판단
-private fun isLeapYear(year: Int): Boolean {
-    return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
-}
+private fun isLeapYear(year: Int): Boolean = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
 
 @PreviewTheme
 @Composable
 private fun DatePickerPreview() {
     InvitationTheme {
         DatePicker(
-            state = rememberDatePickerState()
+            state = rememberDatePickerState(),
         )
     }
 }
@@ -332,9 +379,10 @@ private fun DatePickerPreview() {
 private fun DatePickerWithSelectedDatePreview() {
     InvitationTheme {
         DatePicker(
-            state = rememberDatePickerState(
-                initialSelectedDate = LocalDate(2025, 12, 31)
-            )
+            state =
+                rememberDatePickerState(
+                    initialSelectedDate = LocalDate(2025, 12, 31),
+                ),
         )
     }
 }
@@ -344,9 +392,10 @@ private fun DatePickerWithSelectedDatePreview() {
 private fun DatePickerWithYearMonthModePreview() {
     InvitationTheme {
         DatePicker(
-            state = rememberDatePickerState(
-                initialMode = DatePickerMode.YEAR_MONTH
-            )
+            state =
+                rememberDatePickerState(
+                    initialMode = DatePickerMode.YEAR_MONTH,
+                ),
         )
     }
 }

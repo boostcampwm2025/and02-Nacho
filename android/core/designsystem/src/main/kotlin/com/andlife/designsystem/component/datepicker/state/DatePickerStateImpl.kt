@@ -16,18 +16,18 @@ import kotlinx.datetime.LocalDate
 @Stable
 internal class DatePickerStateImpl(
     initialSelectedDate: DatePickerDate?,
-    initialMode: DatePickerMode
+    initialMode: DatePickerMode,
 ) : DatePickerState {
-
     private val _selectedDate = mutableStateOf(initialSelectedDate)
-    private val _displayedMonth = mutableStateOf(
-        initialSelectedDate?.toYearMonth()
-            ?: DatePickerDate(DatePickerDefaults.today()).toYearMonth()
-    )
+    private val _displayedMonth =
+        mutableStateOf(
+            initialSelectedDate?.toYearMonth()
+                ?: DatePickerDate(DatePickerDefaults.today()).toYearMonth(),
+        )
     private val _mode = mutableStateOf(initialMode)
 
     override val selectedDate: LocalDate?
-        get() = _selectedDate.value?.date  // DatePickerDate에서 LocalDate로 변환
+        get() = _selectedDate.value?.date // DatePickerDate에서 LocalDate로 변환
 
     override val displayedMonth: DatePickerYearMonth
         get() = _displayedMonth.value
@@ -36,7 +36,7 @@ internal class DatePickerStateImpl(
         get() = _mode.value
 
     override fun selectDate(date: LocalDate) {
-        _selectedDate.value = DatePickerDate(date)  // LocalDate에서 DatePickerDate로 변환
+        _selectedDate.value = DatePickerDate(date) // LocalDate에서 DatePickerDate로 변환
     }
 
     override fun moveToPreviousMonth() {
@@ -65,29 +65,30 @@ internal class DatePickerStateImpl(
     }
 
     companion object {
-        fun Saver(): Saver<DatePickerStateImpl, Any> = listSaver(
-            save = {
-                listOf(
-                    it.selectedDate?.toString(),
-                    it.displayedMonth.year,
-                    it.displayedMonth.month,
-                    it.mode
-                )
-            },
-            restore = { value ->
-                val selectedDate =
-                    value[0]?.let { DatePickerDate(LocalDate.parse(it as String)) }
-                val year = value[1] as Int
-                val month = value[2] as Int
-                val mode = value[3] as DatePickerMode
-                DatePickerStateImpl(
-                    initialSelectedDate = selectedDate,
-                    initialMode = mode
-                ).apply {
-                    _displayedMonth.value = DatePickerYearMonth(year, month)
-                    _mode.value = mode
-                }
-            }
-        )
+        fun Saver(): Saver<DatePickerStateImpl, Any> =
+            listSaver(
+                save = {
+                    listOf(
+                        it.selectedDate?.toString(),
+                        it.displayedMonth.year,
+                        it.displayedMonth.month,
+                        it.mode,
+                    )
+                },
+                restore = { value ->
+                    val selectedDate =
+                        value[0]?.let { DatePickerDate(LocalDate.parse(it as String)) }
+                    val year = value[1] as Int
+                    val month = value[2] as Int
+                    val mode = value[3] as DatePickerMode
+                    DatePickerStateImpl(
+                        initialSelectedDate = selectedDate,
+                        initialMode = mode,
+                    ).apply {
+                        _displayedMonth.value = DatePickerYearMonth(year, month)
+                        _mode.value = mode
+                    }
+                },
+            )
     }
 }

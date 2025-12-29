@@ -12,13 +12,10 @@ import kotlinx.datetime.todayIn
 
 @Stable
 object DatePickerDefaults {
-    
     fun today(
         clock: Clock = Clock.System,
-        timeZone: TimeZone = TimeZone.currentSystemDefault()
-    ): LocalDate {
-        return clock.todayIn(timeZone)
-    }
+        timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    ): LocalDate = clock.todayIn(timeZone)
 
     @Composable
     fun colors(
@@ -31,9 +28,9 @@ object DatePickerDefaults {
         disabledTextColor: Color = InvitationTheme.colorScheme.textDisabled,
         headerTextColor: Color = InvitationTheme.colorScheme.textPrimary,
         weekdayTextColor: Color = InvitationTheme.colorScheme.textPrimary,
-        navigationColor: Color = InvitationTheme.colorScheme.textPrimary
-    ): DatePickerColors {
-        return DatePickerColors(
+        navigationColor: Color = InvitationTheme.colorScheme.textPrimary,
+    ): DatePickerColors =
+        DatePickerColors(
             selectedDateColor = selectedDateColor,
             selectedTextColor = selectedTextColor,
             todayBackgroundColor = todayBackgroundColor,
@@ -43,9 +40,8 @@ object DatePickerDefaults {
             disabledTextColor = disabledTextColor,
             headerTextColor = headerTextColor,
             weekdayTextColor = weekdayTextColor,
-            navigationColor = navigationColor
+            navigationColor = navigationColor,
         )
-    }
 }
 
 @Immutable
@@ -59,5 +55,5 @@ data class DatePickerColors(
     val disabledTextColor: Color,
     val headerTextColor: Color,
     val weekdayTextColor: Color,
-    val navigationColor: Color
+    val navigationColor: Color,
 )
