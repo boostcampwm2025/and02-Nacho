@@ -27,10 +27,7 @@ import com.andlife.designsystem.component.datepicker.model.DatePickerYearMonth
 import com.andlife.designsystem.component.datepicker.state.DatePickerState
 import com.andlife.designsystem.theme.InvitationIconSize
 import com.andlife.designsystem.theme.InvitationSpacing
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
 
 enum class DatePickerMode {
     DATE,  // 달력에서 날짜 선택
@@ -202,10 +199,9 @@ private fun DatePickerCalendar(
                 val date = DatePickerDate(
                     LocalDate(yearMonth.year, yearMonth.month, day + 1)
                 )
-                val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
                 val isSelected = selectedDate?.date == date.date
-                val isToday = date.date == today
-                val isBeforeToday = date.date < today
+                val isToday = date.date == DatePickerDefaults.today()
+                val isBeforeToday = date.date < DatePickerDefaults.today()
 
                 Box(
                     modifier = Modifier
