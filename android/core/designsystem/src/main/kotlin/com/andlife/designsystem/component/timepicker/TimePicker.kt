@@ -49,8 +49,7 @@ fun InvitationTimePicker(
         HourColumn(
             hour = state.hour,
             onHourChange = { newHour12 ->
-                val newHour12 = newHour12
-                val oldHour12 = if (state.hour % 12 == 0) 12 else state.hour % 12
+                val oldHour12 = state.hour12
 
                 if ((oldHour12 == 11 && newHour12 == 12) || (oldHour12 == 12 && newHour12 == 11)) {
                     state.isPm = !state.isPm
@@ -137,6 +136,18 @@ private fun BasicScrollableColumn(
         initialFirstVisibleItemIndex = startOffset + initialIndex
     )
     val snapBehavior = rememberSnapFlingBehavior(lazyListState = listState)
+
+    LaunchedEffect(initialIndex) {
+        if (!listState.isScrollInProgress) {
+            val currentFirstIndex = listState.firstVisibleItemIndex
+            val currentRealIndex = currentFirstIndex % itemCount
+
+            if (currentRealIndex != initialIndex) {
+                val diff = initialIndex - currentRealIndex
+                listState.animateScrollToItem(currentFirstIndex + diff)
+            }
+        }
+    }
 
     //val currentIndex = listState.firstVisibleItemIndex % itemCount
     //val currentIndex = listState.getCenterItemIndex()?.let { it % itemCount } ?: 0
