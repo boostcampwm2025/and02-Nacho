@@ -17,16 +17,16 @@ import androidx.compose.ui.tooling.preview.Preview
     showBackground = true,
     uiMode = Configuration.UI_MODE_NIGHT_YES,
 )
-annotation class ThemePreview
+annotation class PreviewTheme
 
 @Preview(
     name = "Normal",
     showBackground = true,
-    uiMode = UI_MODE_TYPE_NORMAL
+    uiMode = UI_MODE_TYPE_NORMAL,
 )
 @Preview(
     name = "Foldable",
     showBackground = true,
     device = Devices.FOLDABLE,
 )
-annotation class DevicePreview
+annotation class PreviewDevice

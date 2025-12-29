@@ -16,22 +16,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.andlife.designsystem.R
-import com.andlife.designsystem.preview.ThemePreview
+import com.andlife.designsystem.preview.PreviewTheme
 
-val pretendardFamily = FontFamily(
-    Font(R.font.pretendard_bold, FontWeight.Bold),
-    Font(R.font.pretendard_semi_bold, FontWeight.SemiBold),
-    Font(R.font.pretendard_medium, FontWeight.Medium),
-    Font(R.font.pretendard_regular, FontWeight.Normal),
-)
+val pretendardFamily =
+    FontFamily(
+        Font(R.font.pretendard_bold, FontWeight.Bold),
+        Font(R.font.pretendard_semi_bold, FontWeight.SemiBold),
+        Font(R.font.pretendard_medium, FontWeight.Medium),
+        Font(R.font.pretendard_regular, FontWeight.Normal),
+    )
 
 object InvitationLineHeightRatio {
-    const val Heading = 1.5f
-    const val Body = 1.3f
+    const val HEADING = 1.5f
+    const val BODY = 1.3f
 }
 
-fun TextStyle.withLineHeightRatio(ratio: Float): TextStyle =
-    copy(lineHeight = fontSize * ratio)
+fun TextStyle.withLineHeightRatio(ratio: Float): TextStyle = copy(lineHeight = fontSize * ratio)
 
 @Immutable
 data class InvitationTypography(
@@ -53,108 +53,109 @@ data class InvitationTypography(
     val bodyExtraSmallRegular: TextStyle,
 )
 
-val invitationTypography = InvitationTypography(
-
-    headingLarge = TextStyle(
-        fontFamily = pretendardFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 24.sp
-    ).withLineHeightRatio(InvitationLineHeightRatio.Heading),
-
-    headingMedium = TextStyle(
-        fontFamily = pretendardFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 20.sp
-    ).withLineHeightRatio(InvitationLineHeightRatio.Heading),
-
-    headingSmallBold = TextStyle(
-        fontFamily = pretendardFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 18.sp
-    ).withLineHeightRatio(InvitationLineHeightRatio.Heading),
-
-    headingSmallSemiBold = TextStyle(
-        fontFamily = pretendardFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 18.sp
-    ).withLineHeightRatio(InvitationLineHeightRatio.Heading),
-
-    bodyLargeSemiBold = TextStyle(
-        fontFamily = pretendardFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 16.sp
-    ).withLineHeightRatio(InvitationLineHeightRatio.Body),
-
-    bodyLargeMedium = TextStyle(
-        fontFamily = pretendardFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 16.sp
-    ).withLineHeightRatio(InvitationLineHeightRatio.Body),
-
-    bodyLargeRegular = TextStyle(
-        fontFamily = pretendardFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp
-    ).withLineHeightRatio(InvitationLineHeightRatio.Body),
-
-    bodyMediumSemiBold = TextStyle(
-        fontFamily = pretendardFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 14.sp
-    ).withLineHeightRatio(InvitationLineHeightRatio.Body),
-
-    bodyMediumMedium = TextStyle(
-        fontFamily = pretendardFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 14.sp
-    ).withLineHeightRatio(InvitationLineHeightRatio.Body),
-
-    bodyMediumRegular = TextStyle(
-        fontFamily = pretendardFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 14.sp
-    ).withLineHeightRatio(InvitationLineHeightRatio.Body),
-
-    bodySmallSemiBold = TextStyle(
-        fontFamily = pretendardFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 12.sp
-    ).withLineHeightRatio(InvitationLineHeightRatio.Body),
-
-    bodySmallMedium = TextStyle(
-        fontFamily = pretendardFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 12.sp
-    ).withLineHeightRatio(InvitationLineHeightRatio.Body),
-
-    bodySmallRegular = TextStyle(
-        fontFamily = pretendardFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 12.sp
-    ).withLineHeightRatio(InvitationLineHeightRatio.Body),
-
-    bodyExtraSmallSemiBold = TextStyle(
-        fontFamily = pretendardFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 11.sp
-    ).withLineHeightRatio(InvitationLineHeightRatio.Body),
-
-    bodyExtraSmallMedium = TextStyle(
-        fontFamily = pretendardFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 11.sp
-    ).withLineHeightRatio(InvitationLineHeightRatio.Body),
-
-    bodyExtraSmallRegular = TextStyle(
-        fontFamily = pretendardFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 11.sp
-    ).withLineHeightRatio(InvitationLineHeightRatio.Body)
-)
+val invitationTypography =
+    InvitationTypography(
+        headingLarge =
+            TextStyle(
+                fontFamily = pretendardFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp,
+            ).withLineHeightRatio(InvitationLineHeightRatio.HEADING),
+        headingMedium =
+            TextStyle(
+                fontFamily = pretendardFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+            ).withLineHeightRatio(InvitationLineHeightRatio.HEADING),
+        headingSmallBold =
+            TextStyle(
+                fontFamily = pretendardFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+            ).withLineHeightRatio(InvitationLineHeightRatio.HEADING),
+        headingSmallSemiBold =
+            TextStyle(
+                fontFamily = pretendardFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp,
+            ).withLineHeightRatio(InvitationLineHeightRatio.HEADING),
+        bodyLargeSemiBold =
+            TextStyle(
+                fontFamily = pretendardFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 16.sp,
+            ).withLineHeightRatio(InvitationLineHeightRatio.BODY),
+        bodyLargeMedium =
+            TextStyle(
+                fontFamily = pretendardFamily,
+                fontWeight = FontWeight.Medium,
+                fontSize = 16.sp,
+            ).withLineHeightRatio(InvitationLineHeightRatio.BODY),
+        bodyLargeRegular =
+            TextStyle(
+                fontFamily = pretendardFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 16.sp,
+            ).withLineHeightRatio(InvitationLineHeightRatio.BODY),
+        bodyMediumSemiBold =
+            TextStyle(
+                fontFamily = pretendardFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 14.sp,
+            ).withLineHeightRatio(InvitationLineHeightRatio.BODY),
+        bodyMediumMedium =
+            TextStyle(
+                fontFamily = pretendardFamily,
+                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp,
+            ).withLineHeightRatio(InvitationLineHeightRatio.BODY),
+        bodyMediumRegular =
+            TextStyle(
+                fontFamily = pretendardFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 14.sp,
+            ).withLineHeightRatio(InvitationLineHeightRatio.BODY),
+        bodySmallSemiBold =
+            TextStyle(
+                fontFamily = pretendardFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 12.sp,
+            ).withLineHeightRatio(InvitationLineHeightRatio.BODY),
+        bodySmallMedium =
+            TextStyle(
+                fontFamily = pretendardFamily,
+                fontWeight = FontWeight.Medium,
+                fontSize = 12.sp,
+            ).withLineHeightRatio(InvitationLineHeightRatio.BODY),
+        bodySmallRegular =
+            TextStyle(
+                fontFamily = pretendardFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 12.sp,
+            ).withLineHeightRatio(InvitationLineHeightRatio.BODY),
+        bodyExtraSmallSemiBold =
+            TextStyle(
+                fontFamily = pretendardFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 11.sp,
+            ).withLineHeightRatio(InvitationLineHeightRatio.BODY),
+        bodyExtraSmallMedium =
+            TextStyle(
+                fontFamily = pretendardFamily,
+                fontWeight = FontWeight.Medium,
+                fontSize = 11.sp,
+            ).withLineHeightRatio(InvitationLineHeightRatio.BODY),
+        bodyExtraSmallRegular =
+            TextStyle(
+                fontFamily = pretendardFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 11.sp,
+            ).withLineHeightRatio(InvitationLineHeightRatio.BODY),
+    )
 
 internal val LocalInvitationTypography = staticCompositionLocalOf { invitationTypography }
 
-@ThemePreview
+@PreviewTheme
 @Composable
 private fun InvitationTypographyPreview() {
     Column(

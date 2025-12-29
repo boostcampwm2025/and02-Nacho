@@ -9,22 +9,21 @@ import kotlin.reflect.KClass
 enum class MainBottomTab(
     val iconResId: Int,
     val labelResId: Int,
-    val route: KClass<*>
+    val route: KClass<*>,
 ) {
     HOME(
         R.drawable.ic_home_24,
         R.string.home,
-        Home::class
+        Home::class,
     ),
     INVITATION(
         R.drawable.ic_invitation_24,
         R.string.invitation,
-        Invitation::class
+        Invitation::class,
     ),
     MY_INVITATION(
         R.drawable.ic_myinvitation_24,
         R.string.my_invitation,
-        MyInvitation::class
-    );
-
+        MyInvitation::class,
+    ),
 }

@@ -19,7 +19,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.R
-import com.andlife.designsystem.preview.ThemePreview
+import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationElevation
 import com.andlife.designsystem.theme.InvitationTheme
 
@@ -30,36 +30,38 @@ fun InvitationButton(
     enabled: Boolean = true,
     shape: Shape = InvitationTheme.shapes.small,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
-    elevation: ButtonElevation = ButtonDefaults.buttonElevation(
-        defaultElevation = InvitationElevation.small,
-        pressedElevation = InvitationElevation.medium,
-    ),
+    elevation: ButtonElevation =
+        ButtonDefaults.buttonElevation(
+            defaultElevation = InvitationElevation.small,
+            pressedElevation = InvitationElevation.medium,
+        ),
     containerColor: Color = InvitationTheme.colorScheme.brandPrimary,
     contentColor: Color = InvitationTheme.colorScheme.brandOnPrimary,
     content: @Composable RowScope.() -> Unit,
-){
+) {
     Button(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
         shape = shape,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = containerColor,
-            contentColor = contentColor,
-        ),
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor = containerColor,
+                contentColor = contentColor,
+            ),
         elevation = elevation,
-        contentPadding = contentPadding
+        contentPadding = contentPadding,
     ) {
         content()
     }
 }
 
-@ThemePreview
+@PreviewTheme
 @Composable
 private fun InvitationButtonPreview() {
     InvitationTheme {
         Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             InvitationButton(
                 onClick = {},
@@ -69,35 +71,37 @@ private fun InvitationButtonPreview() {
 
             InvitationButton(
                 onClick = {},
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("초대 생성하기")
             }
 
             InvitationButton(
                 onClick = {},
-                elevation = ButtonDefaults.buttonElevation(
-                    defaultElevation = 0.dp,
-                    pressedElevation = 0.dp
-                ),
+                elevation =
+                    ButtonDefaults.buttonElevation(
+                        defaultElevation = 0.dp,
+                        pressedElevation = 0.dp,
+                    ),
                 containerColor = InvitationTheme.colorScheme.brandOnPrimary,
-                contentColor = InvitationTheme.colorScheme.brandPrimary
+                contentColor = InvitationTheme.colorScheme.brandPrimary,
             ) {
                 Text("미리보기")
             }
 
             InvitationButton(
                 onClick = {},
-                elevation = ButtonDefaults.buttonElevation(
-                    defaultElevation = 0.dp,
-                    pressedElevation = 0.dp
-                ),
+                elevation =
+                    ButtonDefaults.buttonElevation(
+                        defaultElevation = 0.dp,
+                        pressedElevation = 0.dp,
+                    ),
                 containerColor = InvitationTheme.colorScheme.brandOnPrimary,
-                contentColor = InvitationTheme.colorScheme.brandPrimary
+                contentColor = InvitationTheme.colorScheme.brandPrimary,
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_search_24),
-                    contentDescription = "검색"
+                    contentDescription = "검색",
                 )
                 Spacer(Modifier.width(8.dp))
                 Text("초대카드 편집")
