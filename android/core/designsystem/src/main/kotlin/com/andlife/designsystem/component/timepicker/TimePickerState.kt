@@ -1,8 +1,10 @@
 package com.andlife.designsystem.component.timepicker
 
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.Saver
@@ -16,8 +18,13 @@ private fun test() {
         initialHour = 10,
         initialMinute = 30,
     )
+
+    TimePicker(
+        state = state
+    )
 }
 
+@Stable
 interface InvitationTimePickerState {
     var hour: Int // 0..23
     var minute: Int
