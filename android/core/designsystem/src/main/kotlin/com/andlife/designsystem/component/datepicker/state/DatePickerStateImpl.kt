@@ -2,6 +2,8 @@ package com.andlife.designsystem.component.datepicker.state
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
 import com.andlife.designsystem.component.datepicker.model.DatePickerDate
 import com.andlife.designsystem.component.datepicker.model.DatePickerYearMonth
 import com.andlife.designsystem.component.datepicker.model.minusMonth
@@ -59,5 +61,28 @@ internal class DatePickerStateImpl(
     override fun showCalendar(yearMonth: DatePickerYearMonth) {
         _displayedMonth.value = yearMonth
         _mode.value = DatePickerMode.DATE
+    }
+
+    companion object {
+        fun Saver(): Saver<DatePickerStateImpl, Any> = listSaver(
+            save = {
+                listOf(
+                    it.selectedDate?.toString(),
+                    it.displayedMonth.year,
+                    it.displayedMonth.month,
+                )
+            },
+            restore = { value ->
+                val selectedDate =
+                    value[0]?.let { DatePickerDate(LocalDate.parse(it as String)) }
+                val year = value[1] as Int
+                val month = value[2] as Int
+                DatePickerStateImpl(
+                    initialSelectedDate = selectedDate
+                ).apply {
+                    _displayedMonth.value = DatePickerYearMonth(year, month)
+                }
+            }
+        )
     }
 }
