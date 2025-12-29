@@ -270,8 +270,17 @@ private fun BasicScrollableColumn(
                             scope.launch {
                                 val currentFirstIndex = listState.firstVisibleItemIndex
                                 val currentOffset = currentFirstIndex % itemCount
-                                val diff = realIndex - currentOffset
-                                listState.animateScrollToItem(currentFirstIndex + diff)
+                                if (isInfinite) {
+                                    var diff = realIndex - currentOffset
+                                    if (abs(diff) > itemCount / 2) {
+                                        if (diff > 0) diff -= itemCount
+                                        else diff += itemCount
+                                    }
+                                    listState.animateScrollToItem(currentFirstIndex + diff)
+                                } else {
+                                    val diff = realIndex - currentOffset
+                                    listState.animateScrollToItem(currentFirstIndex + diff)
+                                }
                             }
                         },
                     contentAlignment = Alignment.Center
