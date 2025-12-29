@@ -8,20 +8,19 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import com.andlife.designsystem.theme.InvitationTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.andlife.designsystem.component.datepicker.model.DatePickerDate
 import com.andlife.designsystem.component.datepicker.model.DatePickerYearMonth
 import com.andlife.designsystem.component.datepicker.state.DatePickerState
+import com.andlife.designsystem.theme.InvitationSpacing
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -90,17 +89,17 @@ private fun DatePickerHeader(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(InvitationSpacing.large),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 이전 화살표
+        // 이전 화살표  // TODO: 아이콘으로 변경 필요
         Text(
             text = "◀",
             modifier = Modifier
                 .clickable { onPreviousClick() }
                 .padding(8.dp),
-            style = MaterialTheme.typography.titleMedium,
+            style = InvitationTheme.typography.headingSmallBold,
             color = colors.navigationColor
         )
 
@@ -108,8 +107,7 @@ private fun DatePickerHeader(
         Text(
             text = title,
             modifier = Modifier.clickable { onHeaderClick() },
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
+            style = InvitationTheme.typography.headingMedium,
             color = colors.headerTextColor
         )
 
@@ -119,7 +117,7 @@ private fun DatePickerHeader(
             modifier = Modifier
                 .clickable { onNextClick() }
                 .padding(8.dp),
-            style = MaterialTheme.typography.titleMedium,
+            style = InvitationTheme.typography.headingMedium,
             color = colors.navigationColor
         )
     }
@@ -136,18 +134,18 @@ private fun DatePickerCalendar(
     val daysCountInMonth = getDaysCountInMonth(yearMonth)
     val firstDayOfWeek = getFirstDayOfWeek(yearMonth)
 
-    Column(modifier = modifier.padding(horizontal = 16.dp)) {
+    Column(modifier = modifier.padding(horizontal = InvitationSpacing.large)) {
         // 요일 헤더
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             listOf("일", "월", "화", "수", "목", "금", "토").forEach { dayOfWeek ->
                 Text(
                     text = dayOfWeek,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = InvitationTheme.typography.bodyMediumSemiBold,
                     color = colors.weekdayTextColor
                 )
             }
@@ -158,13 +156,12 @@ private fun DatePickerCalendar(
         // 날짜 그리드
         LazyVerticalGrid(
             columns = GridCells.Fixed(7),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier.fillMaxWidth()
+            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium),
+            modifier = Modifier.fillMaxWidth(),
         ) {
             // 빈 공간 (월의 첫 번째 날 이전)
             items(firstDayOfWeek % 7) {
-                Box(modifier = Modifier.size(40.dp))
+                Box(modifier = Modifier.size(28.dp))
             }
 
             // 실제 날짜들
@@ -179,33 +176,35 @@ private fun DatePickerCalendar(
 
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(
-                            when {
-                                isSelected -> colors.selectedDateColor
-                                isToday -> colors.todayBackgroundColor
-                                else -> Color.Transparent
-                            }
-                        )
+                        .aspectRatio(1f)
                         .let { modifier ->
-                            if (isBeforeToday) {
-                                modifier
-                            } else {
-                                modifier.clickable { onDateClick(date) }
-                            }
+                            if (isBeforeToday) modifier
+                            else modifier.clickable { onDateClick(date) }
                         },
                     contentAlignment = Alignment.Center
                 ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize(0.7f) // 원 크기 조절
+                            .clip(CircleShape)
+                            .background(
+                                when {
+                                    isSelected -> colors.selectedDateColor
+                                    isToday -> colors.todayBackgroundColor
+                                    else -> Color.Transparent
+                                }
+                            )
+                    )
+
                     Text(
                         text = (day + 1).toString(),
+                        style = if (isSelected || isToday) InvitationTheme.typography.bodyMediumMedium else InvitationTheme.typography.bodyMediumRegular,
                         color = when {
                             isBeforeToday -> colors.disabledTextColor
                             isSelected -> colors.selectedTextColor
                             isToday -> colors.todayTextColor
                             else -> colors.normalTextColor
                         },
-                        fontSize = 14.sp
                     )
                 }
             }
@@ -228,9 +227,9 @@ private fun DatePickerYearMonthSelector(
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
-        verticalArrangement = Arrangement.SpaceAround,
-        modifier = modifier.padding(16.dp),
-        contentPadding = PaddingValues(8.dp)
+        verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium),
+        modifier = modifier.padding(),
+        contentPadding = PaddingValues(InvitationSpacing.large)
     ) {
         items(12) { index ->
             val month = index + 1
@@ -240,7 +239,7 @@ private fun DatePickerYearMonthSelector(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp)
-                    .clip(MaterialTheme.shapes.medium)
+                    .clip(InvitationTheme.shapes.small)
                     .background(
                         if (isCurrentMonth) colors.selectedMonthColor
                         else Color.Transparent
@@ -252,8 +251,7 @@ private fun DatePickerYearMonthSelector(
             ) {
                 Text(
                     text = months[index],
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = if (isCurrentMonth) FontWeight.Bold else FontWeight.Normal,
+                    style = if (isCurrentMonth) InvitationTheme.typography.bodyMediumSemiBold else InvitationTheme.typography.bodyMediumRegular,
                     color = if (isCurrentMonth) colors.selectedTextColor
                     else colors.normalTextColor
                 )
