@@ -48,22 +48,21 @@ import kotlin.math.abs
 fun InvitationTimePicker(
     state: InvitationTimePickerState,
     modifier: Modifier = Modifier,
-    textStyle: TextStyle = InvitationTheme.typography.headingLarge,
-    itemVerticalPadding: Dp = InvitationSpacing.threeXLarge,
+    colors: InvitationTimePickerColors = InvitationTimePickerDefaults.colors(),
+    styles: InvitationTimePickerStyles = InvitationTimePickerDefaults.styles(),
+    itemVerticalPadding: Dp = InvitationTimePickerDefaults.itemVerticalPadding,
     isFadeEdgeEnabled: Boolean = false,
 ) {
     val density = LocalDensity.current
-    val itemHeight = remember(textStyle, itemVerticalPadding) {
+    val itemHeight = remember(styles.textStyle, itemVerticalPadding) {
         with(density) {
-            val fontSizeDp = textStyle.fontSize.toDp()
+            val fontSizeDp = styles.textStyle.fontSize.toDp()
             fontSizeDp + (itemVerticalPadding * 2)
         }
     }
 
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = InvitationSpacing.large),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -71,7 +70,8 @@ fun InvitationTimePicker(
             isPm = state.isPm,
             onAmPmChange = { state.isPm = it },
             itemHeight = itemHeight,
-            textStyle = textStyle,
+            textStyle = styles.textStyle,
+            colors = colors,
             isFadeEdgeEnabled = isFadeEdgeEnabled,
             modifier = Modifier.weight(1f)
         )
@@ -85,7 +85,8 @@ fun InvitationTimePicker(
                 state.updateHour12(newHour12)
             },
             itemHeight = itemHeight,
-            textStyle = textStyle,
+            textStyle = styles.textStyle,
+            colors = colors,
             isFadeEdgeEnabled = isFadeEdgeEnabled,
             modifier = Modifier.weight(1f)
         )
@@ -94,7 +95,8 @@ fun InvitationTimePicker(
             minuteInterval = state.minuteInterval,
             onMinuteChange = { state.minute = it },
             itemHeight = itemHeight,
-            textStyle = textStyle,
+            textStyle = styles.textStyle,
+            colors = colors,
             isFadeEdgeEnabled = isFadeEdgeEnabled,
             modifier = Modifier.weight(1f)
         )
@@ -106,6 +108,7 @@ fun AmPmColumn(
     isPm: Boolean,
     itemHeight: Dp,
     textStyle: TextStyle,
+    colors: InvitationTimePickerColors,
     isFadeEdgeEnabled: Boolean = false,
     onAmPmChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
@@ -117,6 +120,7 @@ fun AmPmColumn(
         onItemSelected = { onAmPmChange(it == 1) },
         itemHeight = itemHeight,
         textStyle = textStyle,
+        colors = colors,
         isInfinite = false,
         isFadeEdgeEnabled = isFadeEdgeEnabled,
         modifier = modifier
@@ -129,6 +133,7 @@ fun HourColumn(
     onHourChange: (Int) -> Unit,
     itemHeight: Dp,
     textStyle: TextStyle,
+    colors: InvitationTimePickerColors,
     isFadeEdgeEnabled: Boolean,
     modifier: Modifier
 ) {
@@ -139,6 +144,7 @@ fun HourColumn(
         onItemSelected = { onHourChange(it + 1) },
         itemHeight = itemHeight,
         textStyle = textStyle,
+        colors = colors,
         isInfinite = true,
         isFadeEdgeEnabled = isFadeEdgeEnabled,
         modifier = modifier
@@ -152,6 +158,7 @@ fun MinuteColumn(
     onMinuteChange: (Int) -> Unit,
     itemHeight: Dp,
     textStyle: TextStyle,
+    colors: InvitationTimePickerColors,
     isFadeEdgeEnabled: Boolean,
     modifier: Modifier
 ) {
@@ -167,6 +174,7 @@ fun MinuteColumn(
         onItemSelected = { onMinuteChange(it * minuteInterval) },
         itemHeight = itemHeight,
         textStyle = textStyle,
+        colors = colors,
         isInfinite = true,
         isFadeEdgeEnabled = isFadeEdgeEnabled,
         modifier = modifier
@@ -181,6 +189,7 @@ private fun BasicScrollableColumn(
     onItemSelected: (Int) -> Unit,
     itemHeight: Dp,
     textStyle: TextStyle,
+    colors: InvitationTimePickerColors,
     isFadeEdgeEnabled: Boolean,
     modifier: Modifier = Modifier,
     isInfinite: Boolean = true,
@@ -247,7 +256,7 @@ private fun BasicScrollableColumn(
             .height(itemHeight * 3)
             .then(
                 if (isFadeEdgeEnabled) {
-                    Modifier.fadeEdge(InvitationTheme.colorScheme.backgroundPrimary)
+                    Modifier.fadeEdge(colors.fadeColor)
                 } else {
                     Modifier
                 }
@@ -300,9 +309,9 @@ private fun BasicScrollableColumn(
                         text = items[realIndex],
                         style = textStyle,
                         color = if (realIndex == currentIndex) {
-                            InvitationTheme.colorScheme.textPrimary
+                            colors.selectedTextColor
                         } else {
-                            InvitationTheme.colorScheme.textTertiary
+                            colors.unSelectedTextColor
                         },
                         textAlign = TextAlign.Center
                     )
