@@ -38,20 +38,33 @@ private class InvitationTimePickerStateImpl(
 
     override var hour: Int
         get() = _hour
-        set(value) { _hour = value.coerceIn(0, 23) }
+        set(value) {
+            val newValue = value.coerceIn(0, 23)
+            if (_hour != newValue) {
+                _hour = newValue
+            }
+        }
 
     override var minute: Int
         get() = _minute
-        set(value) { _minute = value }
+        set(value) {
+            val newValue = value.coerceIn(0, 59)
+            if (_minute != newValue) {
+                _minute = newValue
+            }
+        }
 
     override var isPm: Boolean
         get() = hour >= 12
         set(value) {
-            val currentHour12 = hour12
-            hour = when {
-                value && hour < 12 -> hour + 12
-                !value && hour >= 12 -> hour - 12
-                else -> hour
+            val newHour = when {
+                value && _hour < 12 -> _hour + 12
+                !value && _hour >= 12 -> _hour - 12
+                else -> _hour
+            }
+
+            if (_hour != newHour) {
+                _hour = newHour
             }
         }
 
