@@ -11,14 +11,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
@@ -44,6 +41,8 @@ import androidx.compose.ui.unit.sp
 import com.andlife.designsystem.preview.ThemePreview
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
@@ -116,7 +115,7 @@ fun AmPmColumn(
     val targetIndex = if (isPm) 1 else 0
 
     BasicScrollableColumn(
-        items = listOf("오전", "오후"),
+        items = listOf("오전", "오후").toImmutableList(),
         initialIndex = if (isPm) 1 else 0,
         externalSelectedIndex = if (isPm) 1 else 0,
         onItemSelected = { onAmPmChange(it == 1) },
@@ -138,7 +137,7 @@ fun HourColumn(
     modifier: Modifier
 ) {
     BasicScrollableColumn(
-        items = (1..12).map { it.toString() },
+        items = (1..12).map { it.toString() }.toImmutableList(),
         initialIndex = hour12 - 1,
         externalSelectedIndex = hour12 - 1,
         onItemSelected = { onHourChange(it + 1) },
@@ -166,7 +165,7 @@ fun MinuteColumn(
     val currentIndex = (minute / minuteInterval).coerceIn(0, items.size - 1)
 
     BasicScrollableColumn(
-        items = items,
+        items = items.toImmutableList(),
         initialIndex = currentIndex,
         externalSelectedIndex = currentIndex,
         onItemSelected = { onMinuteChange(it * minuteInterval) },
@@ -180,7 +179,7 @@ fun MinuteColumn(
 
 @Composable
 private fun BasicScrollableColumn(
-    items: List<String>,
+    items: ImmutableList<String>,
     initialIndex: Int,
     externalSelectedIndex: Int,
     onItemSelected: (Int) -> Unit,
