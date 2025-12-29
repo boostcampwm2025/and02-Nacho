@@ -25,7 +25,6 @@ import com.andlife.designsystem.R
 import com.andlife.designsystem.component.datepicker.model.DatePickerDate
 import com.andlife.designsystem.component.datepicker.model.DatePickerYearMonth
 import com.andlife.designsystem.component.datepicker.state.DatePickerState
-import com.andlife.designsystem.theme.InvitationIconSize
 import com.andlife.designsystem.theme.InvitationSpacing
 import kotlinx.datetime.LocalDate
 
