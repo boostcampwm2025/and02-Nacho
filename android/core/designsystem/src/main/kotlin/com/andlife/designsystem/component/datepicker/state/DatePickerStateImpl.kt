@@ -70,6 +70,7 @@ internal class DatePickerStateImpl(
                     it.selectedDate?.toString(),
                     it.displayedMonth.year,
                     it.displayedMonth.month,
+                    it.mode
                 )
             },
             restore = { value ->
@@ -81,6 +82,7 @@ internal class DatePickerStateImpl(
                     initialSelectedDate = selectedDate
                 ).apply {
                     _displayedMonth.value = DatePickerYearMonth(year, month)
+                    _mode.value = value[3] as DatePickerMode
                 }
             }
         )
