@@ -201,7 +201,6 @@ private fun DatePickerCalendar(
         // 날짜 그리드
         LazyVerticalGrid(
             columns = GridCells.Fixed(7),
-            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium),
             modifier = Modifier.fillMaxWidth(),
         ) {
             // 빈 공간 (월의 첫 번째 날 이전)
