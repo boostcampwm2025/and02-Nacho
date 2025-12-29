@@ -57,10 +57,10 @@ fun DatePicker(
                 Column(modifier) {
                     DatePickerHeader(
                         title = "${state.displayedMonth.year}년 ${state.displayedMonth.month}월",
+                        colors = colors,
                         onHeaderClick = state::showYearMonthSelector,
                         onPreviousClick = state::moveToPreviousMonth,
                         onNextClick = state::moveToNextMonth,
-                        colors = colors,
                         isClickable = true,
                     )
                     DatePickerCalendar(
@@ -76,14 +76,14 @@ fun DatePicker(
                 Column(modifier) {
                     DatePickerHeader(
                         title = "${state.displayedMonth.year}년",
+                        colors = colors,
                         onHeaderClick = {},
                         onPreviousClick = state::moveToPreviousYear,
                         onNextClick = state::moveToNextYear,
-                        colors = colors,
                     )
                     DatePickerYearMonthSelector(
                         yearMonth = state.displayedMonth,
-                        onMonthSelected = state::showCalendar,
+                        onMonthSelect = state::showCalendar,
                         colors = colors,
                     )
                 }
@@ -95,11 +95,11 @@ fun DatePicker(
 @Composable
 private fun DatePickerHeader(
     title: String,
+    colors: DatePickerColors,
+    modifier: Modifier = Modifier,
     onHeaderClick: () -> Unit = {},
     onPreviousClick: () -> Unit = {},
     onNextClick: () -> Unit = {},
-    colors: DatePickerColors,
-    modifier: Modifier = Modifier,
     isClickable: Boolean = false,
 ) {
     Row(
@@ -278,7 +278,7 @@ private fun DatePickerCalendar(
 @Composable
 private fun DatePickerYearMonthSelector(
     yearMonth: DatePickerYearMonth,
-    onMonthSelected: (DatePickerYearMonth) -> Unit,
+    onMonthSelect: (DatePickerYearMonth) -> Unit,
     colors: DatePickerColors,
     modifier: Modifier = Modifier,
 ) {
@@ -321,7 +321,7 @@ private fun DatePickerYearMonthSelector(
                                 Color.Transparent
                             },
                         ).clickable {
-                            onMonthSelected(DatePickerYearMonth(yearMonth.year, month))
+                            onMonthSelect(DatePickerYearMonth(yearMonth.year, month))
                         },
                 contentAlignment = Alignment.Center,
             ) {
