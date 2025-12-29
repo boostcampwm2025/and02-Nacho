@@ -23,6 +23,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.preview.ThemePreview
 import com.andlife.designsystem.theme.InvitationSpacing
@@ -137,6 +143,7 @@ private fun BasicScrollableColumn(
     onItemSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
     isInfinite: Boolean = true,
+    isFadeEdgeEnabled: Boolean = false,
 ) {
     val itemHeight = 60.dp // TODO: 나중에 외부에서 받도록 변경
     val itemCount = items.size
@@ -179,7 +186,14 @@ private fun BasicScrollableColumn(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(itemHeight * 3),
+            .height(itemHeight * 3)
+            .then(
+                if (isFadeEdgeEnabled) {
+                    Modifier.fadeEdge(InvitationTheme.colorScheme.backgroundPrimary)
+                } else {
+                    Modifier
+                }
+            ),
         contentAlignment = Alignment.Center
     ) {
         Surface(
@@ -240,6 +254,38 @@ private fun LazyListState.getCenterItemIndex(): Int? {
         itemCenter in (viewportCenter - itemInfo.size / 2)..(viewportCenter + itemInfo.size / 2)
     }
     return centralItemInfo?.index
+}
+
+@Composable
+private fun Modifier.fadeEdge(color: Color): Modifier {
+    // 그라데이션 지점 설정 (위/아래 25% 지점부터 투명해지기 시작)
+    val fadeEdgeBrushColor = remember(color) {
+        arrayOf(
+            0f to color.copy(alpha = 0.8f),
+            0.20f to color.copy(alpha = 0.2f),
+            0.5f to Color.Transparent,
+            0.8f to color.copy(alpha = 0.2f),
+            1f to color.copy(alpha = 0.8f),
+        )
+    }
+
+    return this
+        .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+        .drawWithCache {
+            val brush = Brush.verticalGradient(
+                colorStops = fadeEdgeBrushColor,
+                startY = 0f,
+                endY = size.height,
+            )
+            onDrawWithContent {
+                drawContent()
+                // BlendMode.DstOut을 사용하여 콘텐츠 위에 그라데이션 마스크를 씌움
+                drawRect(
+                    brush = brush,
+                    blendMode = BlendMode.DstOut,
+                )
+            }
+        }
 }
 
 @ThemePreview
