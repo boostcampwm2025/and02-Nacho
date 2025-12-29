@@ -12,17 +12,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.preview.ThemePreview
 import com.andlife.designsystem.theme.InvitationSpacing
@@ -139,7 +139,12 @@ private fun BasicScrollableColumn(
     val snapBehavior = rememberSnapFlingBehavior(lazyListState = listState)
 
     //val currentIndex = listState.firstVisibleItemIndex % itemCount
-    val currentIndex = listState.getCenterItemIndex()?.let { it % itemCount } ?: 0
+    //val currentIndex = listState.getCenterItemIndex()?.let { it % itemCount } ?: 0
+    val currentIndex by remember {
+        derivedStateOf {
+            listState.getCenterItemIndex()?.let { it % itemCount } ?: 0
+        }
+    }
 
     LaunchedEffect(currentIndex) {
         onItemSelected(currentIndex)
