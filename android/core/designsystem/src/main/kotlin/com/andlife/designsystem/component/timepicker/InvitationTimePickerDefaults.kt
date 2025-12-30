@@ -1,6 +1,7 @@
 package com.andlife.designsystem.component.timepicker
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -10,6 +11,7 @@ import com.andlife.designsystem.theme.InvitationTheme
 
 @Stable
 object InvitationTimePickerDefaults {
+
     const val MINUTE_INTERVAL_1 = 1
     const val MINUTE_INTERVAL_5 = 5
     const val MINUTE_INTERVAL_10 = 10
@@ -29,20 +31,20 @@ object InvitationTimePickerDefaults {
         )
 
     @Composable
-    fun textStyles(textStyle: TextStyle = InvitationTheme.typography.headingLarge): InvitationTimePickerStyles =
-        InvitationTimePickerStyles(
+    fun textStyles(textStyle: TextStyle = InvitationTheme.typography.headingLarge): InvitationTimePickerTextStyles =
+        InvitationTimePickerTextStyles(
             textStyle = textStyle,
         )
 }
 
-@Stable
+@Immutable
 data class InvitationTimePickerColors(
     val selectedTextColor: Color,
     val unSelectedTextColor: Color,
     val fadeColor: Color,
 )
 
-@Stable
-data class InvitationTimePickerStyles(
+@Immutable
+data class InvitationTimePickerTextStyles(
     val textStyle: TextStyle,
 )
