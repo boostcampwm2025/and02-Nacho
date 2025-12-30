@@ -52,7 +52,7 @@ fun InvitationTimePicker(
     state: InvitationTimePickerState,
     modifier: Modifier = Modifier,
     colors: InvitationTimePickerColors = InvitationTimePickerDefaults.colors(),
-    styles: InvitationTimePickerStyles = InvitationTimePickerDefaults.styles(),
+    styles: InvitationTimePickerStyles = InvitationTimePickerDefaults.textStyles(),
     itemVerticalPadding: Dp = InvitationTimePickerDefaults.itemVerticalPadding,
     isFadeEdgeEnabled: Boolean = false,
 ) {

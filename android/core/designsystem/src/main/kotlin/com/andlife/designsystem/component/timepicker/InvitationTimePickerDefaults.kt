@@ -29,7 +29,7 @@ object InvitationTimePickerDefaults {
         )
 
     @Composable
-    fun styles(textStyle: TextStyle = InvitationTheme.typography.headingLarge): InvitationTimePickerStyles =
+    fun textStyles(textStyle: TextStyle = InvitationTheme.typography.headingLarge): InvitationTimePickerStyles =
         InvitationTimePickerStyles(
             textStyle = textStyle,
         )
