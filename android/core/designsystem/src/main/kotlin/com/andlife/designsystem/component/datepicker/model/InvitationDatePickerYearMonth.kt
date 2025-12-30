@@ -1,38 +1,38 @@
 package com.andlife.designsystem.component.datepicker.model
 
-data class DatePickerYearMonth(
+data class InvitationDatePickerYearMonth(
     val year: Int,
     val month: Int,
 )
 
-fun DatePickerYearMonth.plusMonth(): DatePickerYearMonth =
+fun InvitationDatePickerYearMonth.plusMonth(): InvitationDatePickerYearMonth =
     if (month == 12) {
-        DatePickerYearMonth(
+        InvitationDatePickerYearMonth(
             year = year + 1,
             month = 1,
         )
     } else {
-        DatePickerYearMonth(
+        InvitationDatePickerYearMonth(
             year = year,
             month = month + 1,
         )
     }
 
-fun DatePickerYearMonth.minusMonth(): DatePickerYearMonth =
+fun InvitationDatePickerYearMonth.minusMonth(): InvitationDatePickerYearMonth =
     if (month == 1) {
-        DatePickerYearMonth(
+        InvitationDatePickerYearMonth(
             year = year - 1,
             month = 12,
         )
     } else {
-        DatePickerYearMonth(
+        InvitationDatePickerYearMonth(
             year = year,
             month = month - 1,
         )
     }
 
-fun DatePickerDate.toYearMonth(): DatePickerYearMonth =
-    DatePickerYearMonth(
+fun InvitationDatePickerDate.toYearMonth(): InvitationDatePickerYearMonth =
+    InvitationDatePickerYearMonth(
         year = this.date.year,
         month = this.date.monthNumber,
     )

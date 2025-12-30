@@ -11,7 +11,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 
 @Stable
-object DatePickerDefaults {
+object InvitationDatePickerDefaults {
     fun today(
         clock: Clock = Clock.System,
         timeZone: TimeZone = TimeZone.currentSystemDefault(),
@@ -29,8 +29,8 @@ object DatePickerDefaults {
         headerTextColor: Color = InvitationTheme.colorScheme.textPrimary,
         weekdayTextColor: Color = InvitationTheme.colorScheme.textPrimary,
         navigationColor: Color = InvitationTheme.colorScheme.textPrimary,
-    ): DatePickerColors =
-        DatePickerColors(
+    ): InvitationDatePickerColors =
+        InvitationDatePickerColors(
             selectedDateColor = selectedDateColor,
             selectedTextColor = selectedTextColor,
             todayBackgroundColor = todayBackgroundColor,
@@ -45,7 +45,7 @@ object DatePickerDefaults {
 }
 
 @Immutable
-data class DatePickerColors(
+data class InvitationDatePickerColors(
     val selectedDateColor: Color,
     val selectedTextColor: Color,
     val todayBackgroundColor: Color,

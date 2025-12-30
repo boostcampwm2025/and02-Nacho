@@ -4,6 +4,6 @@ import androidx.compose.runtime.Immutable
 import kotlinx.datetime.LocalDate
 
 @Immutable
-data class DatePickerDate(
+data class InvitationDatePickerDate(
     val date: LocalDate,
 )

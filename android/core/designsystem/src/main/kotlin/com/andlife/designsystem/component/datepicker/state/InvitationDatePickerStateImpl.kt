@@ -4,39 +4,39 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
-import com.andlife.designsystem.component.datepicker.model.DatePickerDate
-import com.andlife.designsystem.component.datepicker.model.DatePickerYearMonth
+import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerDate
+import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerYearMonth
 import com.andlife.designsystem.component.datepicker.model.minusMonth
 import com.andlife.designsystem.component.datepicker.model.plusMonth
 import com.andlife.designsystem.component.datepicker.model.toYearMonth
-import com.andlife.designsystem.component.datepicker.ui.DatePickerDefaults
-import com.andlife.designsystem.component.datepicker.ui.DatePickerMode
+import com.andlife.designsystem.component.datepicker.ui.InvitationDatePickerDefaults
+import com.andlife.designsystem.component.datepicker.ui.InvitationDatePickerMode
 import kotlinx.datetime.LocalDate
 
 @Stable
-internal class DatePickerStateImpl(
-    initialSelectedDate: DatePickerDate?,
-    initialMode: DatePickerMode,
-) : DatePickerState {
+internal class InvitationDatePickerStateImpl(
+    initialSelectedDate: InvitationDatePickerDate?,
+    initialMode: InvitationDatePickerMode,
+) : InvitationDatePickerState {
     private val _selectedDate = mutableStateOf(initialSelectedDate)
     private val _displayedMonth =
         mutableStateOf(
             initialSelectedDate?.toYearMonth()
-                ?: DatePickerDate(DatePickerDefaults.today()).toYearMonth(),
+                ?: InvitationDatePickerDate(InvitationDatePickerDefaults.today()).toYearMonth(),
         )
     private val _mode = mutableStateOf(initialMode)
 
     override val selectedDate: LocalDate?
-        get() = _selectedDate.value?.date // DatePickerDate에서 LocalDate로 변환
+        get() = _selectedDate.value?.date // InvitationDatePickerDate에서 LocalDate로 변환
 
-    override val displayedMonth: DatePickerYearMonth
+    override val displayedMonth: InvitationDatePickerYearMonth
         get() = _displayedMonth.value
 
-    override val mode: DatePickerMode
+    override val mode: InvitationDatePickerMode
         get() = _mode.value
 
     override fun selectDate(date: LocalDate) {
-        _selectedDate.value = DatePickerDate(date) // LocalDate에서 DatePickerDate로 변환
+        _selectedDate.value = InvitationDatePickerDate(date) // LocalDate에서 InvitationDatePickerDate로 변환
     }
 
     override fun moveToPreviousMonth() {
@@ -56,16 +56,16 @@ internal class DatePickerStateImpl(
     }
 
     override fun showYearMonthSelector() {
-        _mode.value = DatePickerMode.YEAR_MONTH
+        _mode.value = InvitationDatePickerMode.YEAR_MONTH
     }
 
-    override fun showCalendar(yearMonth: DatePickerYearMonth) {
+    override fun showCalendar(yearMonth: InvitationDatePickerYearMonth) {
         _displayedMonth.value = yearMonth
-        _mode.value = DatePickerMode.DATE
+        _mode.value = InvitationDatePickerMode.DATE
     }
 
     companion object {
-        fun Saver(): Saver<DatePickerStateImpl, Any> =
+        fun Saver(): Saver<InvitationDatePickerStateImpl, Any> =
             listSaver(
                 save = {
                     listOf(
@@ -77,15 +77,15 @@ internal class DatePickerStateImpl(
                 },
                 restore = { value ->
                     val selectedDate =
-                        value[0]?.let { DatePickerDate(LocalDate.parse(it as String)) }
+                        value[0]?.let { InvitationDatePickerDate(LocalDate.parse(it as String)) }
                     val year = value[1] as Int
                     val month = value[2] as Int
-                    val mode = value[3] as DatePickerMode
-                    DatePickerStateImpl(
+                    val mode = value[3] as InvitationDatePickerMode
+                    InvitationDatePickerStateImpl(
                         initialSelectedDate = selectedDate,
                         initialMode = mode,
                     ).apply {
-                        _displayedMonth.value = DatePickerYearMonth(year, month)
+                        _displayedMonth.value = InvitationDatePickerYearMonth(year, month)
                         _mode.value = mode
                     }
                 },

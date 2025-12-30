@@ -31,31 +31,31 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.R
-import com.andlife.designsystem.component.datepicker.model.DatePickerDate
-import com.andlife.designsystem.component.datepicker.model.DatePickerYearMonth
-import com.andlife.designsystem.component.datepicker.state.DatePickerState
-import com.andlife.designsystem.component.datepicker.state.rememberDatePickerState
+import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerDate
+import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerYearMonth
+import com.andlife.designsystem.component.datepicker.state.InvitationDatePickerState
+import com.andlife.designsystem.component.datepicker.state.rememberInvitationDatePickerState
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
 import kotlinx.datetime.LocalDate
 
-enum class DatePickerMode {
-    DATE, // 달력에서 날짜 선택
-    YEAR_MONTH, // 연/월 선택
+enum class InvitationDatePickerMode {
+    DATE, // 달력에서 날짜 선택 모드
+    YEAR_MONTH, // 연/월 선택 모드
 }
 
 @Composable
-fun DatePicker(
-    state: DatePickerState,
+fun InvitationDatePicker(
+    state: InvitationDatePickerState,
     modifier: Modifier = Modifier,
-    colors: DatePickerColors = DatePickerDefaults.colors(),
+    colors: InvitationDatePickerColors = InvitationDatePickerDefaults.colors(),
 ) {
     Crossfade(targetState = state.mode) { mode ->
         when (mode) {
-            DatePickerMode.DATE -> {
+            InvitationDatePickerMode.DATE -> {
                 Column(modifier) {
-                    DatePickerHeader(
+                    InvitationDatePickerHeader(
                         title = "${state.displayedMonth.year}년 ${state.displayedMonth.month}월",
                         colors = colors,
                         onHeaderClick = state::showYearMonthSelector,
@@ -63,25 +63,25 @@ fun DatePicker(
                         onNextClick = state::moveToNextMonth,
                         isClickable = true,
                     )
-                    DatePickerCalendar(
+                    InvitationDatePickerCalendar(
                         yearMonth = state.displayedMonth,
-                        selectedDate = state.selectedDate?.let { DatePickerDate(it) },
+                        selectedDate = state.selectedDate?.let { InvitationDatePickerDate(it) },
                         onDateClick = { date -> state.selectDate(date.date) },
                         colors = colors,
                     )
                 }
             }
 
-            DatePickerMode.YEAR_MONTH -> {
+            InvitationDatePickerMode.YEAR_MONTH -> {
                 Column(modifier) {
-                    DatePickerHeader(
+                    InvitationDatePickerHeader(
                         title = "${state.displayedMonth.year}년",
                         colors = colors,
                         onHeaderClick = {},
                         onPreviousClick = state::moveToPreviousYear,
                         onNextClick = state::moveToNextYear,
                     )
-                    DatePickerYearMonthSelector(
+                    InvitationDatePickerYearMonthSelector(
                         yearMonth = state.displayedMonth,
                         onMonthSelect = state::showCalendar,
                         colors = colors,
@@ -93,9 +93,9 @@ fun DatePicker(
 }
 
 @Composable
-private fun DatePickerHeader(
+private fun InvitationDatePickerHeader(
     title: String,
-    colors: DatePickerColors,
+    colors: InvitationDatePickerColors,
     modifier: Modifier = Modifier,
     onHeaderClick: () -> Unit = {},
     onPreviousClick: () -> Unit = {},
@@ -169,11 +169,11 @@ private fun DatePickerHeader(
 }
 
 @Composable
-private fun DatePickerCalendar(
-    yearMonth: DatePickerYearMonth,
-    selectedDate: DatePickerDate?,
-    onDateClick: (DatePickerDate) -> Unit,
-    colors: DatePickerColors,
+private fun InvitationDatePickerCalendar(
+    yearMonth: InvitationDatePickerYearMonth,
+    selectedDate: InvitationDatePickerDate?,
+    onDateClick: (InvitationDatePickerDate) -> Unit,
+    colors: InvitationDatePickerColors,
     modifier: Modifier = Modifier,
 ) {
     val daysCountInMonth = getDaysCountInMonth(yearMonth)
@@ -211,12 +211,12 @@ private fun DatePickerCalendar(
             // 실제 날짜들
             items(daysCountInMonth) { day ->
                 val date =
-                    DatePickerDate(
+                    InvitationDatePickerDate(
                         LocalDate(yearMonth.year, yearMonth.month, day + 1),
                     )
                 val isSelected = selectedDate?.date == date.date
-                val isToday = date.date == DatePickerDefaults.today()
-                val isBeforeToday = date.date < DatePickerDefaults.today()
+                val isToday = date.date == InvitationDatePickerDefaults.today()
+                val isBeforeToday = date.date < InvitationDatePickerDefaults.today()
 
                 Box(
                     modifier =
@@ -275,10 +275,10 @@ private fun DatePickerCalendar(
 }
 
 @Composable
-private fun DatePickerYearMonthSelector(
-    yearMonth: DatePickerYearMonth,
-    onMonthSelect: (DatePickerYearMonth) -> Unit,
-    colors: DatePickerColors,
+private fun InvitationDatePickerYearMonthSelector(
+    yearMonth: InvitationDatePickerYearMonth,
+    onMonthSelect: (InvitationDatePickerYearMonth) -> Unit,
+    colors: InvitationDatePickerColors,
     modifier: Modifier = Modifier,
 ) {
     val months =
@@ -320,7 +320,7 @@ private fun DatePickerYearMonthSelector(
                                 Color.Transparent
                             },
                         ).clickable {
-                            onMonthSelect(DatePickerYearMonth(yearMonth.year, month))
+                            onMonthSelect(InvitationDatePickerYearMonth(yearMonth.year, month))
                         },
                 contentAlignment = Alignment.Center,
             ) {
@@ -345,14 +345,14 @@ private fun DatePickerYearMonthSelector(
 }
 
 // 해당 월의 첫째 날의 요일인덱스 반환: 일요일 = 0, 월요일 = 1, ...
-private fun getFirstDayOfWeek(yearMonth: DatePickerYearMonth): Int {
+private fun getFirstDayOfWeek(yearMonth: InvitationDatePickerYearMonth): Int {
     val date = LocalDate(yearMonth.year, yearMonth.month, 1)
     // DayOfWeek.ordinal: 월요일 = 0, 화요일 = 1, ...
     return (date.dayOfWeek.ordinal + 1) % 7
 }
 
 // 해당 월의 일수 반환
-private fun getDaysCountInMonth(yearMonth: DatePickerYearMonth): Int =
+private fun getDaysCountInMonth(yearMonth: InvitationDatePickerYearMonth): Int =
     when (yearMonth.month) {
         1, 3, 5, 7, 8, 10, 12 -> 31
         4, 6, 9, 11 -> 30
@@ -365,21 +365,21 @@ private fun isLeapYear(year: Int): Boolean = year % 4 == 0 && (year % 100 != 0 |
 
 @PreviewTheme
 @Composable
-private fun DatePickerPreview() {
+private fun InvitationDatePickerPreview() {
     InvitationTheme {
-        DatePicker(
-            state = rememberDatePickerState(),
+        InvitationDatePicker(
+            state = rememberInvitationDatePickerState(),
         )
     }
 }
 
 @PreviewTheme
 @Composable
-private fun DatePickerWithSelectedDatePreview() {
+private fun DatePickerWithSelectedInvitationDatePreview() {
     InvitationTheme {
-        DatePicker(
+        InvitationDatePicker(
             state =
-                rememberDatePickerState(
+                rememberInvitationDatePickerState(
                     initialSelectedDate = LocalDate(2025, 12, 31),
                 ),
         )
@@ -388,12 +388,12 @@ private fun DatePickerWithSelectedDatePreview() {
 
 @PreviewTheme
 @Composable
-private fun DatePickerWithYearMonthModePreview() {
+private fun InvitationDatePickerWithYearMonthModePreview() {
     InvitationTheme {
-        DatePicker(
+        InvitationDatePicker(
             state =
-                rememberDatePickerState(
-                    initialMode = DatePickerMode.YEAR_MONTH,
+                rememberInvitationDatePickerState(
+                    initialMode = InvitationDatePickerMode.YEAR_MONTH,
                 ),
         )
     }
