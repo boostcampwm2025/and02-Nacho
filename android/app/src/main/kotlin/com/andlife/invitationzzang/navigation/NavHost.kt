@@ -19,7 +19,7 @@ import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.home.homeNavGraph
 import com.andlife.invitation.invitationNavGraph
 import com.andlife.myinvitation.addressSearchNavGraph
-import com.andlife.myinvitation.myInvitationDetailNavGraph
+import com.andlife.myinvitation.myInvitationCreateNavGraph
 import com.andlife.myinvitation.myInvitationNavGraph
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -54,10 +54,10 @@ fun InvitationNavHost(
 
             myInvitationNavGraph(
                 paddingValues = innerPadding,
-                onNavigateToDetail = navigator::navigateToMyInvitationDetail
+                onNavigateToCreate = navigator::navigateToMyInvitationCreate
             )
 
-            myInvitationDetailNavGraph(
+            myInvitationCreateNavGraph(
                 paddingValues = innerPadding,
                 onNavigateToAddressSearch = navigator::navigateToAddressSearch,
                 onNavigateBack = navigator::navigatePopBackStack
@@ -66,7 +66,7 @@ fun InvitationNavHost(
             addressSearchNavGraph(
                 navController = navigator.navController,
                 paddingValues = innerPadding,
-                onClose = navigator::navigatePopBackStack
+                onBack = navigator::navigatePopBackStack
             )
         }
     }

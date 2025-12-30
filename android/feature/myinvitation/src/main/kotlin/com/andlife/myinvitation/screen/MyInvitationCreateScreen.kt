@@ -9,33 +9,33 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.andlife.designsystem.component.InvitationButton
 import com.andlife.designsystem.component.InvitationTextField
-import com.andlife.domain.model.Address
+import com.andlife.ui.model.AddressUiModel
 
 @Composable
-fun MyInvitationDetailRoute(
-    selectedAddress: Address?,
+fun MyInvitationCreateRoute(
+    selectedAddress: AddressUiModel?,
     onNavigateToAddressSearch: () -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    MyInvitationDetailScreen(
+    MyInvitationCreateScreen(
         selectedAddress = selectedAddress,
         onNavigateToAddressSearch = onNavigateToAddressSearch,
         onNavigateBack = onNavigateBack,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
 @Composable
-private fun MyInvitationDetailScreen(
-    selectedAddress: Address?,
+private fun MyInvitationCreateScreen(
+    selectedAddress: AddressUiModel?,
     onNavigateToAddressSearch: () -> Unit,
     onNavigateBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Scaffold(modifier = modifier.fillMaxSize()) { padding ->
         Column(modifier = Modifier.padding(padding)) {
-            Text(text = "MyInvitationDetailScreen")
+            Text(text = "MyInvitationCreateScreen")
 
             InvitationButton(onClick = onNavigateBack) {
                 Text("뒤로가기")

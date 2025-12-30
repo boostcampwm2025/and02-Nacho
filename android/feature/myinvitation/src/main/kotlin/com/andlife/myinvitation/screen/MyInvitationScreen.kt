@@ -11,29 +11,29 @@ import com.andlife.designsystem.component.InvitationButton
 
 @Composable
 fun MyInvitationRoute(
-    onNavigateToDetail: () -> Unit,
+    onNavigateToCreate: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     MyInvitationScreen(
-        onNavigateToDetail = onNavigateToDetail,
-        modifier = modifier
+        onNavigateToCreate = onNavigateToCreate,
+        modifier = modifier,
     )
 }
 
 @Composable
 private fun MyInvitationScreen(
-    onNavigateToDetail: () -> Unit,
+    onNavigateToCreate: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize(),
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
             Text(text = "MyInvitationScreen")
             InvitationButton(
-                onClick = onNavigateToDetail,
+                onClick = onNavigateToCreate,
             ) {
-                Text("리스트 카드 선택")
+                Text("초대 생성")
             }
         }
     }
