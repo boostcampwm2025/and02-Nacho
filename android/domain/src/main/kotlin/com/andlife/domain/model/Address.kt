@@ -1,7 +1,7 @@
 package com.andlife.domain.model
 
 data class Address(
-    val id: Int,
+    val id: Long,
     val roadAddress: String,
     val placeName: String,
     val streetAddress: String,
