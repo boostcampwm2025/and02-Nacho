@@ -134,20 +134,6 @@ private fun AddressSearchScreen(
     }
 }
 
-@Composable
-private fun EmptySearchGuide(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = stringResource(R.string.label_address_search_guide),
-            style = InvitationTheme.typography.bodyMediumRegular,
-            color = InvitationTheme.colorScheme.textTertiary
-        )
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddressSearchTopBar(
@@ -198,6 +184,20 @@ private fun SearchInputField(
         },
         modifier = modifier.padding(vertical = InvitationSpacing.medium),
     )
+}
+
+@Composable
+private fun EmptySearchGuide(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = stringResource(R.string.label_address_search_guide),
+            style = InvitationTheme.typography.bodyMediumRegular,
+            color = InvitationTheme.colorScheme.textTertiary
+        )
+    }
 }
 
 @Composable
