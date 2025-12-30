@@ -5,11 +5,6 @@ on:
     branches: [ "dev" ]
     paths:
       - 'backend/**'
-  pull_request:
-    branches: [ "dev" ]
-    types: [ closed ]
-    paths:
-      - 'backend/**'
 
 jobs:
   build-and-deploy:
