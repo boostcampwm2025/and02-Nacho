@@ -1,6 +1,5 @@
 plugins {
     id("invitation.android.feature")
-    id("kotlin-parcelize")
 }
 
 android {
@@ -8,18 +7,6 @@ android {
 }
 
 dependencies {
-    // designSystem
-    implementation(projects.core.designsystem)
-
-    // ui
-    implementation(projects.core.ui)
-
-    // domain
-    implementation(projects.domain)
-
-    // coil
-    implementation(libs.coil.kt.compose)
-
     // paging
     implementation(libs.androidx.paging.compose)
 
