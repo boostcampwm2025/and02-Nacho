@@ -19,9 +19,12 @@ import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.ui.R
 
 @Composable
-fun InvitationLoadingError(onRetry: () -> Unit) {
+fun InvitationLoadingError(
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
