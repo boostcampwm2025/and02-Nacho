@@ -3,12 +3,10 @@ package com.andlife.ui.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
@@ -36,11 +34,11 @@ fun InvitationTimePickerBottomSheet(
     initialMinute: Int = 0,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
 ) {
-
-    val timePickerState = rememberInvitationTimePickerState(
-        initialHour = initialHour,
-        initialMinute = initialMinute
-    )
+    val timePickerState =
+        rememberInvitationTimePickerState(
+            initialHour = initialHour,
+            initialMinute = initialMinute,
+        )
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -48,20 +46,21 @@ fun InvitationTimePickerBottomSheet(
         containerColor = InvitationTheme.colorScheme.backgroundPrimary,
         dragHandle = {
             BottomSheetDefaults.DragHandle(
-                color = InvitationTheme.colorScheme.backgroundBorder
+                color = InvitationTheme.colorScheme.backgroundBorder,
             )
         },
     ) {
         Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(horizontal = InvitationSpacing.large)
-                .padding(bottom = InvitationSpacing.large),
+            modifier =
+                modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = InvitationSpacing.large)
+                    .padding(bottom = InvitationSpacing.large),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(InvitationSpacing.xLarge),
         ) {
             InvitationTimePicker(
-                state = timePickerState
+                state = timePickerState,
             )
             InvitationButton(
                 onClick = {
@@ -69,14 +68,15 @@ fun InvitationTimePickerBottomSheet(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(vertical = InvitationSpacing.large),
-                elevation = ButtonDefaults.buttonElevation(
-                    defaultElevation = InvitationElevation.none,
-                    pressedElevation = InvitationElevation.none,
-                )
+                elevation =
+                    ButtonDefaults.buttonElevation(
+                        defaultElevation = InvitationElevation.none,
+                        pressedElevation = InvitationElevation.none,
+                    ),
             ) {
                 Text(
                     text = stringResource(id = R.string.btn_label_confirm),
-                    style = InvitationTheme.typography.bodyLargeSemiBold
+                    style = InvitationTheme.typography.bodyLargeSemiBold,
                 )
             }
         }

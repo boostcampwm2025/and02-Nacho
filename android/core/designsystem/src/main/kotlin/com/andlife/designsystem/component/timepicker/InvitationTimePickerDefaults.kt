@@ -11,7 +11,6 @@ import com.andlife.designsystem.theme.InvitationTheme
 
 @Stable
 object InvitationTimePickerDefaults {
-
     const val MINUTE_INTERVAL_1 = 1
     const val MINUTE_INTERVAL_5 = 5
     const val MINUTE_INTERVAL_10 = 10

@@ -314,8 +314,7 @@ private fun BasicScrollableColumn(
                                 } else {
                                     alpha = 0.3f
                                 }
-                            }
-                            .clickable {
+                            }.clickable {
                                 scope.launch {
                                     val currentFirstIndex = listState.firstVisibleItemIndex
                                     val currentRealIndex = currentFirstIndex % itemCount

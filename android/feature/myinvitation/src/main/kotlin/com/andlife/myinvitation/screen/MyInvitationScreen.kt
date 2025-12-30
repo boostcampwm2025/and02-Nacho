@@ -28,7 +28,7 @@ fun MyInvitationScreen(modifier: Modifier = Modifier) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(text = selectedTimeText, style = InvitationTheme.typography.headingLarge)
 
@@ -52,7 +52,7 @@ fun MyInvitationScreen(modifier: Modifier = Modifier) {
             },
             onDismissRequest = {
                 showSheet = false
-            }
+            },
         )
     }
 }
