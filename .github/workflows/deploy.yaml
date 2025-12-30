@@ -39,3 +39,16 @@ jobs:
           source: "backend/build/libs/*.jar,backend/Dockerfile,backend/docker-compose.yaml"
           target: "/home/ubuntu/andlife"
           strip_components: 1
+
+      - name: EC2에서 Docker Compose 실행
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.AWS_SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.AWS_EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/andlife
+            export MYSQL_PASSWORD="${{ secrets.MYSQL_PASSWORD }}"
+
+            docker compose down
+            docker compose up --build -d
