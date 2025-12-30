@@ -1,6 +1,10 @@
-package com.andlife.domain.model
+package com.andlife.ui.model
 
-data class Address(
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+data class AddressUiModel(
     val id: Long,
     val roadAddress: String,
     val placeName: String,
@@ -8,4 +12,4 @@ data class Address(
     val zipCode: String,
     val latitude: Double,
     val longitude: Double
-)
+) : Parcelable
