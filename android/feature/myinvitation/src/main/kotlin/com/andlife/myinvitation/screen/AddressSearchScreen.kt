@@ -21,6 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,7 +39,9 @@ import com.andlife.designsystem.theme.InvitationStroke
 import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.domain.model.Address
 import com.andlife.myinvitation.R
+import com.andlife.myinvitation.model.AddressSearchSideEffect
 import com.andlife.myinvitation.model.AddressSearchUiEvent
+import com.andlife.myinvitation.model.AddressSearchUiState
 import com.andlife.myinvitation.viewmodel.AddressSearchViewModel
 import com.andlife.ui.component.paging.PagingStateContent
 import kotlinx.coroutines.flow.flowOf
@@ -53,8 +56,21 @@ fun AddressSearchRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val addressItems = viewModel.addresses.collectAsLazyPagingItems()
 
+    LaunchedEffect(Unit) {
+        viewModel.effectFlow.collect { effect ->
+            when (effect) {
+                is AddressSearchSideEffect.NavigateBackWithAddress -> {
+                    onAddressSelected(effect.address)
+                }
+                AddressSearchSideEffect.NavigateBack -> {
+                    onClose()
+                }
+            }
+        }
+    }
+
     AddressSearchScreen(
-        query = uiState.query,
+        uiState = uiState,
         onEvent = viewModel::onEvent,
         addressItems = addressItems,
         modifier = modifier
@@ -63,7 +79,7 @@ fun AddressSearchRoute(
 
 @Composable
 private fun AddressSearchScreen(
-    query: String,
+    uiState: AddressSearchUiState,
     onEvent: (AddressSearchUiEvent) -> Unit,
     addressItems: LazyPagingItems<Address>,
     modifier: Modifier = Modifier,
@@ -84,7 +100,7 @@ private fun AddressSearchScreen(
                 .padding(horizontal = InvitationSpacing.medium),
         ) {
             SearchInputField(
-                query = query,
+                query = uiState.query,
                 onQueryChange = { onEvent(AddressSearchUiEvent.UpdateQuery(it)) },
             )
 
@@ -275,7 +291,7 @@ private fun AddressSearchScreenPreview() {
 
     InvitationTheme {
         AddressSearchScreen(
-            query = "강남",
+            uiState = AddressSearchUiState("강남"),
             onEvent = {},
             addressItems = emptyPagingItems
         )
