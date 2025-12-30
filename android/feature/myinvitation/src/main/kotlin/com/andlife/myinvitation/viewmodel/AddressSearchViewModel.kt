@@ -9,8 +9,11 @@ import com.andlife.myinvitation.model.AddressSearchUiEvent
 import com.andlife.myinvitation.model.AddressSearchUiState
 import com.andlife.ui.base.BaseViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -31,23 +34,20 @@ class AddressSearchViewModel : BaseViewModel<AddressSearchUiState, AddressSearch
             initialValue = AddressSearchUiState()
         )
 
-    val query: StateFlow<String> = uiState
+    @OptIn(FlowPreview::class)
+    private val searchParamsFlow = uiState
         .map { it.query }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ""
-        )
+        .distinctUntilChanged()
+        .debounce(300L)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val addresses = uiState
-        .map { it.query }
+    val addresses = searchParamsFlow
         .flatMapLatest { query ->
-            // TODO: API 연동 시 SearchAddressUseCase 사용
-            // searchAddressUseCase(query)
-
-            // 임시: 빈 데이터 반환
-            flowOf(PagingData.empty<Address>())
+            if (query.isBlank()) {
+                flowOf(PagingData.empty<Address>())
+            } else {
+                flowOf(PagingData.empty<Address>()) // TODO: 실제 API 호출
+            }
         }
         .cachedIn(viewModelScope)
 

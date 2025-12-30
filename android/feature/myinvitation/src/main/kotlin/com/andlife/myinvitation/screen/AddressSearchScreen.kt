@@ -3,6 +3,7 @@ package com.andlife.myinvitation.screen
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -21,8 +22,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -43,6 +44,7 @@ import com.andlife.myinvitation.model.AddressSearchSideEffect
 import com.andlife.myinvitation.model.AddressSearchUiEvent
 import com.andlife.myinvitation.model.AddressSearchUiState
 import com.andlife.myinvitation.viewmodel.AddressSearchViewModel
+import com.andlife.ui.util.collectWithLifecycle
 import com.andlife.ui.component.paging.PagingStateContent
 import kotlinx.coroutines.flow.flowOf
 
@@ -56,15 +58,13 @@ fun AddressSearchRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val addressItems = viewModel.addresses.collectAsLazyPagingItems()
 
-    LaunchedEffect(Unit) {
-        viewModel.effectFlow.collect { effect ->
-            when (effect) {
-                is AddressSearchSideEffect.NavigateBackWithAddress -> {
-                    onAddressSelected(effect.address)
-                }
-                AddressSearchSideEffect.NavigateBack -> {
-                    onClose()
-                }
+    viewModel.effectFlow.collectWithLifecycle { effect ->
+        when (effect) {
+            is AddressSearchSideEffect.NavigateBackWithAddress -> {
+                onAddressSelected(effect.address)
+            }
+            AddressSearchSideEffect.NavigateBack -> {
+                onClose()
             }
         }
     }
@@ -104,23 +104,47 @@ private fun AddressSearchScreen(
                 onQueryChange = { onEvent(AddressSearchUiEvent.UpdateQuery(it)) },
             )
 
-            SearchResultCount(
-                itemCount = addressItems.itemCount,
-                loadState = addressItems.loadState.refresh,
-            )
-
-            PagingStateContent(
-                loadState = addressItems.loadState.refresh,
-                itemCount = addressItems.itemCount,
-                onRetry = { addressItems.retry() },
-            ) {
-                AddressResultList(
-                    itemCount = addressItems.itemCount,
-                    getItem = { index -> addressItems[index] },
-                    onAddressClick = { onEvent(AddressSearchUiEvent.SelectAddress(it)) },
+            if (uiState.query.isBlank()) {
+                EmptySearchGuide(
+                    modifier = Modifier.weight(1f)
                 )
+            } else {
+                key(uiState.query) {
+                    Column {
+                        SearchResultCount(
+                            itemCount = addressItems.itemCount,
+                            loadState = addressItems.loadState.refresh,
+                        )
+
+                        PagingStateContent(
+                            loadState = addressItems.loadState.refresh,
+                            itemCount = addressItems.itemCount,
+                            onRetry = { addressItems.retry() },
+                        ) {
+                            AddressResultList(
+                                itemCount = addressItems.itemCount,
+                                getItem = { index -> addressItems[index] },
+                                onAddressClick = { onEvent(AddressSearchUiEvent.SelectAddress(it)) },
+                            )
+                        }
+                    }
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun EmptySearchGuide(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = stringResource(R.string.label_address_search_guide),
+            style = InvitationTheme.typography.bodyMediumRegular,
+            color = InvitationTheme.colorScheme.textTertiary
+        )
     }
 }
 
@@ -288,7 +312,6 @@ private fun AddressItem(
 @Composable
 private fun AddressSearchScreenPreview() {
     val emptyPagingItems = flowOf(PagingData.empty<Address>()).collectAsLazyPagingItems()
-
     InvitationTheme {
         AddressSearchScreen(
             uiState = AddressSearchUiState("강남"),
