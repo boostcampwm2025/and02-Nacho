@@ -1,5 +1,6 @@
 plugins {
     id("invitation.android.feature")
+    id("kotlin-parcelize")
 }
 
 android {
