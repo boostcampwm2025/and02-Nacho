@@ -23,3 +23,19 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+
+      - name: 권한 부여 및 빌드
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean build -x test
+        working-directory: ./backend
+
+      - name: 빌드 결과물과 설정 파일들을 EC2로 전송
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.AWS_SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.AWS_EC2_SSH_KEY }}
+          source: "backend/build/libs/*.jar,backend/Dockerfile,backend/docker-compose.yaml"
+          target: "/home/ubuntu/andlife"
+          strip_components: 1
