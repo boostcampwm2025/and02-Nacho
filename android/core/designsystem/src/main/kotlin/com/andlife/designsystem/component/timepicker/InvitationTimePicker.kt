@@ -2,6 +2,7 @@ package com.andlife.designsystem.component.timepicker
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -314,7 +315,10 @@ private fun BasicScrollableColumn(
                                 } else {
                                     alpha = 0.3f
                                 }
-                            }.clickable {
+                            }.clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() },
+                            ) {
                                 scope.launch {
                                     val currentFirstIndex = listState.firstVisibleItemIndex
                                     val currentRealIndex = currentFirstIndex % itemCount
