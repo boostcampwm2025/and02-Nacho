@@ -34,9 +34,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import com.andlife.designsystem.R
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
@@ -124,8 +126,10 @@ private fun AmPmColumn(
     modifier: Modifier = Modifier,
     isFadeEdgeEnabled: Boolean = false,
 ) {
+    val amPmItems = stringArrayResource(R.array.am_pm_array).toImmutableList()
+
     BasicScrollableColumn(
-        items = listOf("오전", "오후").toImmutableList(), // TODO: 리소스화
+        items = amPmItems,
         initialIndex = if (isPm) 1 else 0,
         externalSelectedIndex = if (isPm) 1 else 0,
         onItemSelect = { onAmPmChange(it == 1) },

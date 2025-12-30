@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="am_pm_array">
+        <item>오전</item>
+        <item>오후</item>
+    </string-array>
+
+</resources>
