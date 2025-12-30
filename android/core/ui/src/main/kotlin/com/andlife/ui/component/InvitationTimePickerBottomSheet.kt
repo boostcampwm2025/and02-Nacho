@@ -50,10 +50,11 @@ fun InvitationTimePickerBottomSheet(
                 color = InvitationTheme.colorScheme.backgroundBorder,
             )
         },
+        modifier = modifier,
     ) {
         Column(
             modifier =
-                modifier
+                Modifier
                     .fillMaxWidth()
                     .padding(horizontal = InvitationSpacing.large)
                     .padding(bottom = InvitationSpacing.large),
