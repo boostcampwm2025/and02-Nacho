@@ -1,0 +1,19 @@
+name: 서버 배포 자동화
+
+on:
+  push:
+    branches: [ "dev" ]
+    paths:
+      - 'backend/**'
+  pull_request:
+    branches: [ "dev" ]
+    types: [ closed ]
+    paths:
+      - 'backend/**'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v3
