@@ -127,7 +127,7 @@ private fun AmPmColumn(
     modifier: Modifier = Modifier,
     isFadeEdgeEnabled: Boolean = false,
 ) {
-    val amPmItems = stringArrayResource(R.array.am_pm_array).toImmutableList()
+    val amPmItems = stringArrayResource(R.array.array_am_pm).toImmutableList()
 
     BasicScrollableColumn(
         items = amPmItems,
