@@ -14,12 +14,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,8 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -44,16 +44,16 @@ import com.andlife.myinvitation.model.AddressSearchSideEffect
 import com.andlife.myinvitation.model.AddressSearchUiEvent
 import com.andlife.myinvitation.model.AddressSearchUiState
 import com.andlife.myinvitation.viewmodel.AddressSearchViewModel
-import com.andlife.ui.util.collectWithLifecycle
 import com.andlife.ui.component.paging.PagingStateContent
+import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun AddressSearchRoute(
-    onClose: () -> Unit,
+    onBack: () -> Unit,
     onAddressSelected: (Address) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: AddressSearchViewModel = viewModel()
+    viewModel: AddressSearchViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val addressItems = viewModel.addresses.collectAsLazyPagingItems()
@@ -63,8 +63,9 @@ fun AddressSearchRoute(
             is AddressSearchSideEffect.NavigateBackWithAddress -> {
                 onAddressSelected(effect.address)
             }
+
             AddressSearchSideEffect.NavigateBack -> {
-                onClose()
+                onBack()
             }
         }
     }
@@ -73,7 +74,7 @@ fun AddressSearchRoute(
         uiState = uiState,
         onEvent = viewModel::onEvent,
         addressItems = addressItems,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -88,16 +89,17 @@ private fun AddressSearchScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             AddressSearchTopBar(
-                onClose = { onEvent(AddressSearchUiEvent.ClickClose) }
+                onBack = { onEvent(AddressSearchUiEvent.ClickBack) },
             )
         },
         containerColor = InvitationTheme.colorScheme.backgroundPrimary,
     ) { innerPadding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = InvitationSpacing.medium),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = InvitationSpacing.medium),
         ) {
             SearchInputField(
                 query = uiState.query,
@@ -106,7 +108,7 @@ private fun AddressSearchScreen(
 
             if (uiState.query.isBlank()) {
                 EmptySearchGuide(
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
             } else {
                 key(uiState.query) {
@@ -137,10 +139,10 @@ private fun AddressSearchScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddressSearchTopBar(
-    onClose: () -> Unit,
-    modifier: Modifier = Modifier
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    CenterAlignedTopAppBar(
+    TopAppBar(
         modifier = modifier,
         title = {
             Text(
@@ -149,19 +151,20 @@ private fun AddressSearchTopBar(
                 color = InvitationTheme.colorScheme.textPrimary,
             )
         },
-        actions = {
-            IconButton(onClick = onClose) {
+        navigationIcon = {
+            IconButton(onClick = onBack) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_close_24),
-                    contentDescription = stringResource(R.string.des_address_search_close),
+                    painter = painterResource(R.drawable.ic_arrow_back_24),
+                    contentDescription = stringResource(R.string.des_address_search_back),
                     tint = InvitationTheme.colorScheme.iconSecondary,
                 )
             }
         },
         windowInsets = WindowInsets(),
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = InvitationTheme.colorScheme.backgroundPrimary,
-        ),
+        colors =
+            TopAppBarDefaults.topAppBarColors(
+                containerColor = InvitationTheme.colorScheme.backgroundPrimary,
+            ),
     )
 }
 
@@ -169,7 +172,7 @@ private fun AddressSearchTopBar(
 private fun SearchInputField(
     query: String,
     onQueryChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     InvitationTextField(
         value = query,
@@ -190,12 +193,12 @@ private fun SearchInputField(
 private fun EmptySearchGuide(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             text = stringResource(R.string.label_address_search_guide),
             style = InvitationTheme.typography.bodyMediumRegular,
-            color = InvitationTheme.colorScheme.textTertiary
+            color = InvitationTheme.colorScheme.textTertiary,
         )
     }
 }
@@ -204,7 +207,7 @@ private fun EmptySearchGuide(modifier: Modifier = Modifier) {
 private fun SearchResultCount(
     itemCount: Int,
     loadState: androidx.paging.LoadState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     if (loadState is androidx.paging.LoadState.NotLoading) {
         Row(
@@ -231,19 +234,19 @@ private fun AddressResultList(
     itemCount: Int,
     getItem: (Int) -> Address?,
     onAddressClick: (Address) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium),
-        contentPadding = PaddingValues(vertical = InvitationSpacing.medium)
+        contentPadding = PaddingValues(vertical = InvitationSpacing.medium),
     ) {
         items(count = itemCount) { index ->
             val address = getItem(index)
             address?.let {
                 AddressItem(
                     address = it,
-                    onClick = { onAddressClick(it) }
+                    onClick = { onAddressClick(it) },
                 )
             }
         }
@@ -254,37 +257,41 @@ private fun AddressResultList(
 private fun AddressItem(
     address: Address,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick),
         shape = InvitationTheme.shapes.small,
-        colors = CardDefaults.cardColors(
-            containerColor = InvitationTheme.colorScheme.backgroundPrimary
-        ),
-        border = BorderStroke(
-            InvitationStroke.small,
-            InvitationTheme.colorScheme.backgroundBorder,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = InvitationTheme.colorScheme.backgroundPrimary,
+            ),
+        border =
+            BorderStroke(
+                InvitationStroke.small,
+                InvitationTheme.colorScheme.backgroundBorder,
+            ),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(InvitationSpacing.medium),
-            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(InvitationSpacing.medium),
+            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = address.roadAddress,
                     style = InvitationTheme.typography.bodyMediumRegular,
                     color = InvitationTheme.colorScheme.textPrimary,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
                 Text(
                     text = address.zipCode,
@@ -316,7 +323,7 @@ private fun AddressSearchScreenPreview() {
         AddressSearchScreen(
             uiState = AddressSearchUiState("강남"),
             onEvent = {},
-            addressItems = emptyPagingItems
+            addressItems = emptyPagingItems,
         )
     }
 }
@@ -324,43 +331,49 @@ private fun AddressSearchScreenPreview() {
 @PreviewTheme
 @Composable
 private fun AddressSearchResultPreview() {
-    val fakeAddresses = listOf(
-        Address(
-            id = 1,
-            roadAddress = "서울특별시 강남구 강남대로62길 23",
-            placeName = "코드스쿼드",
-            streetAddress = "서울특별시 강남구 강남대로62길 23 4층",
-            zipCode = "06175",
-        ),
-        Address(
-            id = 2,
-            roadAddress = "서울특별시 서초구 강남대로 202",
-            placeName = "양재역",
-            streetAddress = "서울특별시 서초구 강남대로 202",
-            zipCode = "06752",
-        ),
-    )
+    val fakeAddresses =
+        listOf(
+            Address(
+                id = 1,
+                roadAddress = "서울특별시 강남구 강남대로62길 23",
+                placeName = "코드스쿼드",
+                streetAddress = "서울특별시 강남구 강남대로62길 23 4층",
+                zipCode = "06175",
+                latitude = 37.5012743,
+                longitude = 127.0396597,
+            ),
+            Address(
+                id = 2,
+                roadAddress = "서울특별시 서초구 강남대로 202",
+                placeName = "양재역",
+                streetAddress = "서울특별시 서초구 강남대로 202",
+                zipCode = "06752",
+                latitude = 37.4845239,
+                longitude = 127.0343395,
+            ),
+        )
 
     InvitationTheme {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(InvitationSpacing.medium)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(InvitationSpacing.medium),
         ) {
             SearchResultCount(
                 itemCount = fakeAddresses.size,
-                loadState = androidx.paging.LoadState.NotLoading(endOfPaginationReached = true)
+                loadState = androidx.paging.LoadState.NotLoading(endOfPaginationReached = true),
             )
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium),
-                contentPadding = PaddingValues(vertical = InvitationSpacing.medium)
+                contentPadding = PaddingValues(vertical = InvitationSpacing.medium),
             ) {
                 items(count = fakeAddresses.size) { index ->
                     AddressItem(
                         address = fakeAddresses[index],
-                        onClick = { }
+                        onClick = { },
                     )
                 }
             }
