@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.component.InvitationButton
 import com.andlife.designsystem.component.timepicker.InvitationTimePicker
 import com.andlife.designsystem.component.timepicker.rememberInvitationTimePickerState
+import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationElevation
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
@@ -80,5 +81,17 @@ fun InvitationTimePickerBottomSheet(
                 )
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@PreviewTheme
+@Composable
+private fun InvitationTimePickerBottomSheetPreview() {
+    InvitationTheme {
+        InvitationTimePickerBottomSheet(
+            onConfirm = { _, _ -> },
+            onDismissRequest = {},
+        )
     }
 }
