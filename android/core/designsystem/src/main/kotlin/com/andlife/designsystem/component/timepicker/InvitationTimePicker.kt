@@ -95,6 +95,12 @@ fun InvitationTimePicker(
             isFadeEdgeEnabled = isFadeEdgeEnabled,
             modifier = Modifier.weight(1f),
         )
+        Text(
+            text = ":",
+            style = styles.textStyle,
+            color = colors.selectedTextColor,
+            modifier = Modifier.padding(horizontal = InvitationSpacing.small),
+        )
         MinuteColumn(
             minute = state.minute,
             minuteInterval = state.minuteInterval,
@@ -304,7 +310,8 @@ private fun BasicScrollableColumn(
                                 } else {
                                     alpha = 0.3f
                                 }
-                            }.clickable {
+                            }
+                            .clickable {
                                 scope.launch {
                                     val currentFirstIndex = listState.firstVisibleItemIndex
                                     val currentRealIndex = currentFirstIndex % itemCount
