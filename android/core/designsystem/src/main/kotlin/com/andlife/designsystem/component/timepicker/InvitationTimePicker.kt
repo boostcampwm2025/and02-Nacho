@@ -109,7 +109,7 @@ fun InvitationTimePicker(
 }
 
 @Composable
-fun AmPmColumn(
+private fun AmPmColumn(
     isPm: Boolean,
     itemHeight: Dp,
     textStyle: TextStyle,
@@ -133,7 +133,7 @@ fun AmPmColumn(
 }
 
 @Composable
-fun HourColumn(
+private fun HourColumn(
     hour12: Int,
     onHourChange: (Int) -> Unit,
     itemHeight: Dp,
@@ -157,7 +157,7 @@ fun HourColumn(
 }
 
 @Composable
-fun MinuteColumn(
+private fun MinuteColumn(
     minute: Int,
     minuteInterval: Int,
     onMinuteChange: (Int) -> Unit,
