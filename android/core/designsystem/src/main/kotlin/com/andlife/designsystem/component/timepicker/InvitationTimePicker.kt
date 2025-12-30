@@ -132,7 +132,7 @@ private fun AmPmColumn(
         items = amPmItems,
         initialIndex = if (isPm) 1 else 0,
         externalSelectedIndex = if (isPm) 1 else 0,
-        onItemSelect = { onAmPmChange(it == 1) },
+        onValueChange = { onAmPmChange(it == 1) },
         itemHeight = itemHeight,
         textStyle = textStyle,
         colors = colors,
@@ -156,7 +156,7 @@ private fun HourColumn(
         items = (1..12).map { it.toString() }.toImmutableList(),
         initialIndex = hour12 - 1,
         externalSelectedIndex = hour12 - 1,
-        onItemSelect = { onHourChange(it + 1) },
+        onValueChange = { onHourChange(it + 1) },
         itemHeight = itemHeight,
         textStyle = textStyle,
         colors = colors,
@@ -187,7 +187,7 @@ private fun MinuteColumn(
         items = items.toImmutableList(),
         initialIndex = currentIndex,
         externalSelectedIndex = currentIndex,
-        onItemSelect = { onMinuteChange(it * minuteInterval) },
+        onValueChange = { onMinuteChange(it * minuteInterval) },
         itemHeight = itemHeight,
         textStyle = textStyle,
         colors = colors,
@@ -202,7 +202,7 @@ private fun BasicScrollableColumn(
     items: ImmutableList<String>,
     initialIndex: Int,
     externalSelectedIndex: Int,
-    onItemSelect: (Int) -> Unit,
+    onValueChange: (Int) -> Unit,
     itemHeight: Dp,
     textStyle: TextStyle,
     colors: InvitationTimePickerColors,
@@ -258,7 +258,7 @@ private fun BasicScrollableColumn(
     }
 
     var lastVibratedIndex by remember { mutableIntStateOf(-1) }
-    val latestOnItemSelect by rememberUpdatedState(onItemSelect)
+    val latestOnValueChange by rememberUpdatedState(onValueChange)
 
     LaunchedEffect(listState) {
         snapshotFlow { currentIndex }
@@ -266,7 +266,7 @@ private fun BasicScrollableColumn(
                 if (lastVibratedIndex != index) {
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     lastVibratedIndex = index
-                    latestOnItemSelect(index)
+                    latestOnValueChange(index)
                 }
             }
     }
