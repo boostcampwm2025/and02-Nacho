@@ -1,7 +1,18 @@
 package com.andlife.InvitationServer.controller
 
-import org.springframework.stereotype.Controller
+import com.andlife.InvitationServer.entity.Sample
+import com.andlife.InvitationServer.service.SampleService
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RestController
 
-@Controller
-class SampleController {
+@RestController
+class SampleController(
+    private val sampleService: SampleService
+) {
+
+    @GetMapping("/")
+    fun getSamples(): List<Sample> {
+        return sampleService.getAllSamples()
+    }
+
 }

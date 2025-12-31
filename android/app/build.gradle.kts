@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
     id("invitation.ktlint")
 }
 
@@ -51,10 +53,15 @@ dependencies {
     implementation(projects.feature.home)
     implementation(projects.feature.invitation)
     implementation(projects.feature.myinvitation)
+    implementation(projects.feature.invitationEdit)
     implementation(projects.core.designsystem)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.immutable)
+
+    // Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

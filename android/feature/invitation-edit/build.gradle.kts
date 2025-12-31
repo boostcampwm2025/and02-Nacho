@@ -1,5 +1,6 @@
 plugins {
     id("invitation.android.feature")
+    id("kotlin-parcelize")
 }
 
 android {
@@ -7,6 +8,9 @@ android {
 }
 
 dependencies {
+    // paging
+    implementation(libs.androidx.paging.compose)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

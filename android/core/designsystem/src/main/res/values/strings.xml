@@ -6,4 +6,6 @@
         <item>오후</item>
     </string-array>
 
+    <string name="des_component_filterchip">검색결과를 정렬하는 칩 아이콘</string>
+
 </resources>

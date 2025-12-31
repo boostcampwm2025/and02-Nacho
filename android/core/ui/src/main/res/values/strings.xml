@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="label_loading_fetch_failed">데이터를 불러오는 데 실패했습니다.</string>
+    <string name="label_loading_retry">재시도</string>
+    <string name="label_paging_empty_result">결과가 없습니다.</string>
+
+    <string name="des_schedule_list_image">다가오는 초대의 이미지</string>
+    <string name="des_invitation_list_image">초대장 리스트 카드의 이미지</string>
+    <string name="des_invitation_more_btn">초대장 리스트 카드의 더보기 아이콘 버튼</string>
+    <string name="des_invitation_icon">초대장 시간 장소 아이콘</string>
+
     <string name="btn_label_confirm">확인</string>
 
 </resources>
