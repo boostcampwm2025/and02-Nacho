@@ -1,4 +1,4 @@
-package com.andlife.myinvitation.model
+package com.andlife.invitation_edit.model
 
 import androidx.compose.runtime.Stable
 import com.andlife.ui.base.BaseUiState

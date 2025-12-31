@@ -1,7 +1,6 @@
-package com.andlife.myinvitation.model
+package com.andlife.invitation_edit.model
 
 import com.andlife.ui.base.BaseUiEvent
-import com.andlife.ui.model.AddressUiModel
 
 sealed interface AddressSearchUiEvent : BaseUiEvent {
     data class UpdateQuery(val query: String) : AddressSearchUiEvent

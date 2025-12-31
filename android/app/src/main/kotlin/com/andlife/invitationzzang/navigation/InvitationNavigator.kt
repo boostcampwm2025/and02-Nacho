@@ -13,9 +13,9 @@ import androidx.navigation.navOptions
 import com.andlife.home.Home
 import com.andlife.home.navigateToHome
 import com.andlife.invitation.navigateToInvitation
-import com.andlife.myinvitation.navigateToAddressSearch
+import com.andlife.invitation_edit.navigateToAddressSearch
+import com.andlife.invitation_edit.navigateToMyInvitationCreate
 import com.andlife.myinvitation.navigateToMyInvitation
-import com.andlife.myinvitation.navigateToMyInvitationCreate
 
 @Stable
 class InvitationNavigator(

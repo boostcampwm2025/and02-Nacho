@@ -18,8 +18,8 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.home.homeNavGraph
 import com.andlife.invitation.invitationNavGraph
-import com.andlife.myinvitation.addressSearchNavGraph
-import com.andlife.myinvitation.myInvitationCreateNavGraph
+import com.andlife.invitation_edit.addressSearchNavGraph
+import com.andlife.invitation_edit.myInvitationCreateNavGraph
 import com.andlife.myinvitation.myInvitationNavGraph
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList

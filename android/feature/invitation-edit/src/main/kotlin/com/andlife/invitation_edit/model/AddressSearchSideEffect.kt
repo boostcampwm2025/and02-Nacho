@@ -1,7 +1,6 @@
-package com.andlife.myinvitation.model
+package com.andlife.invitation_edit.model
 
 import com.andlife.ui.base.BaseSideEffect
-import com.andlife.ui.model.AddressUiModel
 
 sealed interface AddressSearchSideEffect : BaseSideEffect {
     data class NavigateBackWithAddress(val addressUiModel: AddressUiModel) : AddressSearchSideEffect

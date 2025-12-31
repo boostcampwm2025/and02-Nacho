@@ -1,4 +1,4 @@
-package com.andlife.myinvitation.screen
+package com.andlife.invitation_edit.screen
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.andlife.designsystem.component.InvitationButton
 import com.andlife.designsystem.component.InvitationTextField
-import com.andlife.ui.model.AddressUiModel
+import com.andlife.invitation_edit.model.AddressUiModel
 
 @Composable
 fun MyInvitationCreateRoute(

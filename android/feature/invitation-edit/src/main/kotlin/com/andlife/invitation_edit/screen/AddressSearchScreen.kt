@@ -1,4 +1,4 @@
-package com.andlife.myinvitation.screen
+package com.andlife.invitation_edit.screen
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -39,13 +39,13 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationStroke
 import com.andlife.designsystem.theme.InvitationTheme
-import com.andlife.myinvitation.R
-import com.andlife.myinvitation.model.AddressSearchSideEffect
-import com.andlife.myinvitation.model.AddressSearchUiEvent
-import com.andlife.myinvitation.model.AddressSearchUiState
-import com.andlife.myinvitation.viewmodel.AddressSearchViewModel
+import com.andlife.invitation_edit.R
+import com.andlife.invitation_edit.model.AddressSearchSideEffect
+import com.andlife.invitation_edit.model.AddressSearchUiEvent
+import com.andlife.invitation_edit.model.AddressSearchUiState
+import com.andlife.invitation_edit.model.AddressUiModel
+import com.andlife.invitation_edit.viewmodel.AddressSearchViewModel
 import com.andlife.ui.component.paging.PagingStateContent
-import com.andlife.ui.model.AddressUiModel
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.coroutines.flow.flowOf
 
@@ -127,7 +127,7 @@ private fun AddressSearchScreen(
                             AddressResultList(
                                 itemCount = addressItems.itemCount,
                                 getItem = { index -> addressItems[index] },
-                                onAddressClick ={ addressUiModel ->
+                                onAddressClick = { addressUiModel ->
                                     onEvent(AddressSearchUiEvent.SelectAddress(addressUiModel))
                                 },
                             )
