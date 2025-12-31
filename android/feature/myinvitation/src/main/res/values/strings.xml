@@ -1,10 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="label_address_search_title">주소검색</string>
-    <string name="label_address_search_input_hint">도로명, 건물명 또는 지번으로 검색</string>
-    <string name="label_address_search_result">검색결과 </string>
-    <string name="label_address_search_guide">찾으시는 장소나 주소를 입력해 주세요. </string>
-
-    <string name="des_address_search_back">주소검색 창을 닫는 뒤로가기 아이콘 버튼</string>
-    <string name="des_address_search_input">주소 검색 입력창의 아이콘</string>
-</resources>
+<resources> </resources>
