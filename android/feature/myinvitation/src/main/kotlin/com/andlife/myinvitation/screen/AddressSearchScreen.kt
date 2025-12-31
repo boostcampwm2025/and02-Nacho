@@ -30,6 +30,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -50,7 +51,7 @@ import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun AddressSearchRoute(
-    onBack: () -> Unit,
+    onNavigateBack: () -> Unit,
     onAddressSelected: (Address) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AddressSearchViewModel = hiltViewModel(),
@@ -65,7 +66,7 @@ fun AddressSearchRoute(
             }
 
             AddressSearchSideEffect.NavigateBack -> {
-                onBack()
+                onNavigateBack()
             }
         }
     }
@@ -206,10 +207,10 @@ private fun EmptySearchGuide(modifier: Modifier = Modifier) {
 @Composable
 private fun SearchResultCount(
     itemCount: Int,
-    loadState: androidx.paging.LoadState,
+    loadState: LoadState,
     modifier: Modifier = Modifier,
 ) {
-    if (loadState is androidx.paging.LoadState.NotLoading) {
+    if (loadState is LoadState.NotLoading) {
         Row(
             modifier = modifier.padding(InvitationSpacing.small),
             verticalAlignment = Alignment.CenterVertically,
@@ -362,7 +363,7 @@ private fun AddressSearchResultPreview() {
         ) {
             SearchResultCount(
                 itemCount = fakeAddresses.size,
-                loadState = androidx.paging.LoadState.NotLoading(endOfPaginationReached = true),
+                loadState = LoadState.NotLoading(endOfPaginationReached = true),
             )
 
             LazyColumn(

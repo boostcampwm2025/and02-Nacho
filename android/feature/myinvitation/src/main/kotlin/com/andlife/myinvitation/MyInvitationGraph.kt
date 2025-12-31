@@ -70,16 +70,16 @@ fun NavGraphBuilder.myInvitationCreateNavGraph(
 fun NavGraphBuilder.addressSearchNavGraph(
     navController: NavController,
     paddingValues: PaddingValues,
-    onBack: () -> Unit,
+    onNavigateBack: () -> Unit,
 ) {
     composable<AddressSearch> {
         AddressSearchRoute(
-            onBack = onBack,
+            onNavigateBack = onNavigateBack,
             onAddressSelected = { address ->
                 navController.previousBackStackEntry
                     ?.savedStateHandle
                     ?.set("selected_address", address.toUiModel())
-                onBack()
+                onNavigateBack()
             },
             modifier = Modifier.padding(paddingValues),
         )
