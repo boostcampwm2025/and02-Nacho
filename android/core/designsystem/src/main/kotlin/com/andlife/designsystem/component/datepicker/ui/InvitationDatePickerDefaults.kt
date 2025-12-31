@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
+import com.andlife.designsystem.R
 import com.andlife.designsystem.theme.InvitationTheme
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
@@ -12,6 +13,9 @@ import kotlinx.datetime.todayIn
 
 @Stable
 object InvitationDatePickerDefaults {
+    val monthSuffixRes = R.string.txt_month
+    val yearSuffixRes = R.string.txt_year
+
     fun today(
         clock: Clock = Clock.System,
         timeZone: TimeZone = TimeZone.currentSystemDefault(),

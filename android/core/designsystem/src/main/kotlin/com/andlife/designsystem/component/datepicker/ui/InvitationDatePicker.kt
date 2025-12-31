@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.R
@@ -51,12 +52,15 @@ fun InvitationDatePicker(
     modifier: Modifier = Modifier,
     colors: InvitationDatePickerColors = InvitationDatePickerDefaults.colors(),
 ) {
+    val yearSuffix = stringResource(InvitationDatePickerDefaults.yearSuffixRes)
+    val monthSuffix = stringResource(InvitationDatePickerDefaults.monthSuffixRes)
+
     Crossfade(targetState = state.mode) { mode ->
         when (mode) {
             InvitationDatePickerMode.DATE -> {
                 Column(modifier) {
                     InvitationDatePickerHeader(
-                        title = "${state.displayedMonth.year}년 ${state.displayedMonth.month}월",
+                        title = "${state.displayedMonth.year}$yearSuffix ${state.displayedMonth.month}$monthSuffix",
                         colors = colors,
                         onHeaderClick = state::showYearMonthSelector,
                         onPreviousClick = state::moveToPreviousMonth,
@@ -75,7 +79,7 @@ fun InvitationDatePicker(
             InvitationDatePickerMode.YEAR_MONTH -> {
                 Column(modifier) {
                     InvitationDatePickerHeader(
-                        title = "${state.displayedMonth.year}년",
+                        title = "${state.displayedMonth.year}$yearSuffix",
                         colors = colors,
                         onHeaderClick = {},
                         onPreviousClick = state::moveToPreviousYear,
@@ -85,6 +89,7 @@ fun InvitationDatePicker(
                         yearMonth = state.displayedMonth,
                         onMonthSelect = state::showCalendar,
                         colors = colors,
+                        monthSuffix = monthSuffix,
                     )
                 }
             }
@@ -279,24 +284,9 @@ private fun InvitationDatePickerYearMonthSelector(
     yearMonth: InvitationDatePickerYearMonth,
     onMonthSelect: (InvitationDatePickerYearMonth) -> Unit,
     colors: InvitationDatePickerColors,
+    monthSuffix: String,
     modifier: Modifier = Modifier,
 ) {
-    val months =
-        listOf(
-            "1월",
-            "2월",
-            "3월",
-            "4월",
-            "5월",
-            "6월",
-            "7월",
-            "8월",
-            "9월",
-            "10월",
-            "11월",
-            "12월",
-        )
-
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
         verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium),
@@ -325,7 +315,7 @@ private fun InvitationDatePickerYearMonthSelector(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = months[index],
+                    text = (index + 1).toString() + monthSuffix,
                     style =
                         if (isCurrentMonth) {
                             InvitationTheme.typography.bodyMediumSemiBold
