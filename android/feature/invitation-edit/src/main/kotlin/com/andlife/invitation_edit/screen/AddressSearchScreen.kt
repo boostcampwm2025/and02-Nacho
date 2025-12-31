@@ -149,7 +149,7 @@ private fun AddressSearchTopBar(
         modifier = modifier,
         title = {
             Text(
-                text = stringResource(R.string.label_address_search_title),
+                text = stringResource(R.string.txt_address_search_title),
                 style = InvitationTheme.typography.headingSmallSemiBold,
                 color = InvitationTheme.colorScheme.textPrimary,
             )
@@ -158,7 +158,7 @@ private fun AddressSearchTopBar(
             IconButton(onClick = onBack) {
                 Icon(
                     painter = painterResource(R.drawable.ic_arrow_back_24),
-                    contentDescription = stringResource(R.string.des_address_search_back),
+                    contentDescription = stringResource(R.string.desc_top_bar_back),
                     tint = InvitationTheme.colorScheme.iconSecondary,
                 )
             }
@@ -180,11 +180,11 @@ private fun SearchInputField(
     InvitationTextField(
         value = query,
         onValueChange = onQueryChange,
-        placeholder = stringResource(R.string.label_address_search_input_hint),
+        placeholder = stringResource(R.string.txt_address_input_hint),
         leadingIcon = {
             Icon(
                 painter = painterResource(R.drawable.ic_search_24),
-                contentDescription = stringResource(R.string.des_address_search_input),
+                contentDescription = stringResource(R.string.desc_search_input_icon),
                 tint = InvitationTheme.colorScheme.iconDisabled,
             )
         },
@@ -199,7 +199,7 @@ private fun EmptySearchGuide(modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = stringResource(R.string.label_address_search_guide),
+            text = stringResource(R.string.msg_search_guide),
             style = InvitationTheme.typography.bodyMediumRegular,
             color = InvitationTheme.colorScheme.textTertiary,
         )
@@ -219,7 +219,7 @@ private fun SearchResultCount(
             horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.xSmall),
         ) {
             Text(
-                text = stringResource(R.string.label_address_search_result),
+                text = stringResource(R.string.txt_search_result),
                 style = InvitationTheme.typography.bodyMediumRegular,
                 color = InvitationTheme.colorScheme.textPrimary,
             )
