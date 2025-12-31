@@ -41,6 +41,7 @@ val BrandDark = Color(0xFFBE123C)
 val IconPrimary = Color(0xFFF43F5E)
 val IconSecondary = Color(0xFF111827)
 val IconTertiary = Color(0xFFFFFFFF)
+val IconDisabled = Color(0xFFE5E7EB)
 
 @Immutable
 data class InvitationColorScheme(
@@ -62,6 +63,7 @@ data class InvitationColorScheme(
     val iconPrimary: Color,
     val iconSecondary: Color,
     val iconTertiary: Color,
+    val iconDisabled: Color,
 )
 
 val LightInvitationColorScheme =
@@ -84,6 +86,7 @@ val LightInvitationColorScheme =
         iconPrimary = IconPrimary,
         iconSecondary = IconSecondary,
         iconTertiary = IconTertiary,
+        iconDisabled = IconDisabled,
     )
 
 // TODO: 나중에 다크모드 색상 정의 필요. 지금은 라이트모드와 동일하게 설정

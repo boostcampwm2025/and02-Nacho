@@ -27,6 +27,7 @@ fun InvitationTextField(
     isError: Boolean = false,
     singleLine: Boolean = true,
     minLines: Int = 1,
+    leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
 ) {
     OutlinedTextField(
@@ -38,6 +39,7 @@ fun InvitationTextField(
                 style = InvitationTheme.typography.bodyMediumSemiBold,
             )
         },
+        leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
         isError = isError,
         enabled = enabled,
@@ -76,7 +78,7 @@ private fun InvitationTextFieldPreview() {
                 trailingIcon = {
                     IconButton(onClick = { }) {
                         Icon(
-                            painter = painterResource(R.drawable.ic_search_24),
+                            painter = painterResource(R.drawable.ic_chevron_down_16),
                             contentDescription = "검색",
                             tint = InvitationTheme.colorScheme.iconPrimary,
                         )

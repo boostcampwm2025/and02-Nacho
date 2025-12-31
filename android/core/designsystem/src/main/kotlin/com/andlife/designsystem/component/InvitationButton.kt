@@ -80,8 +80,8 @@ private fun InvitationButtonPreview() {
                 onClick = {},
                 elevation =
                     ButtonDefaults.buttonElevation(
-                        defaultElevation = 0.dp,
-                        pressedElevation = 0.dp,
+                        defaultElevation = InvitationElevation.none,
+                        pressedElevation = InvitationElevation.none,
                     ),
                 containerColor = InvitationTheme.colorScheme.brandOnPrimary,
                 contentColor = InvitationTheme.colorScheme.brandPrimary,
@@ -93,14 +93,14 @@ private fun InvitationButtonPreview() {
                 onClick = {},
                 elevation =
                     ButtonDefaults.buttonElevation(
-                        defaultElevation = 0.dp,
-                        pressedElevation = 0.dp,
+                        defaultElevation = InvitationElevation.none,
+                        pressedElevation = InvitationElevation.none,
                     ),
                 containerColor = InvitationTheme.colorScheme.brandOnPrimary,
                 contentColor = InvitationTheme.colorScheme.brandPrimary,
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_search_24),
+                    painter = painterResource(id = R.drawable.ic_chevron_down_16),
                     contentDescription = "검색",
                 )
                 Spacer(Modifier.width(8.dp))

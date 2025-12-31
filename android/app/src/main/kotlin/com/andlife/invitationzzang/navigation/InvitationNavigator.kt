@@ -13,6 +13,8 @@ import androidx.navigation.navOptions
 import com.andlife.home.Home
 import com.andlife.home.navigateToHome
 import com.andlife.invitation.navigateToInvitation
+import com.andlife.invitation_edit.navigateToAddressSearch
+import com.andlife.invitation_edit.navigateToMyInvitationCreate
 import com.andlife.myinvitation.navigateToMyInvitation
 
 @Stable
@@ -65,10 +67,18 @@ class InvitationNavigator(
     fun navigateToInvitationDetail(id: Long) {
     }
 
-    fun navigateToMyInvitationDetail(id: Long) {
+    fun navigateToMyInvitationCreate(id: Long = -1) {
+        navController.navigateToMyInvitationCreate(
+            id = id,
+            navOptions = navOptions { launchSingleTop = true }
+        )
     }
 
-    fun popBackStack() {
+    fun navigateToAddressSearch() {
+        navController.navigateToAddressSearch(navOptions = navOptions { launchSingleTop = true })
+    }
+
+    fun navigatePopBackStack() {
         navController.popBackStack()
     }
 }
