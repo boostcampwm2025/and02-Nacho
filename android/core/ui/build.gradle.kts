@@ -1,7 +1,6 @@
 plugins {
     id("invitation.android.library")
     id("invitation.android.compose")
-    id("kotlin-parcelize")
 }
 
 android {
