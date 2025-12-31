@@ -122,7 +122,7 @@ private fun InvitationDatePickerHeader(
     ) {
         Icon(
             painter = painterResource(id = R.drawable.ic_chevron_left_24),
-            contentDescription = null,
+            contentDescription = stringResource(R.string.desc_previous_month_or_year),
             modifier =
                 Modifier
                     .clickable(
@@ -157,7 +157,7 @@ private fun InvitationDatePickerHeader(
             if (isClickable) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_arrow_drop_down_24),
-                    contentDescription = null,
+                    contentDescription = stringResource(R.string.desc_to_year_month_mode),
                     tint = colors.navigationColor,
                 )
             }
@@ -165,7 +165,7 @@ private fun InvitationDatePickerHeader(
 
         Icon(
             painter = painterResource(id = R.drawable.ic_chevron_right_24),
-            contentDescription = null,
+            contentDescription = stringResource(R.string.desc_next_month_or_year),
             modifier =
                 Modifier
                     .clickable(

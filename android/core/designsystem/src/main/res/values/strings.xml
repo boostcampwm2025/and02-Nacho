@@ -3,5 +3,8 @@
 
     <string name="txt_year">년</string>
     <string name="txt_month">월</string>
+    <string name="desc_previous_month_or_year">이전 달/년</string>
+    <string name="desc_next_month_or_year">다음 달/년</string>
+    <string name="desc_to_year_month_mode">년/월 모드로 전환</string>
 
 </resources>
