@@ -1,4 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -22,6 +24,25 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        var properties = Properties()
+        properties.load(FileInputStream("local.properties"))
+        val kakaoNativeAppKey = properties.getProperty("KAKAO_NATIVE_APP_KEY") ?: ""
+        val kakaoRestApiKey = properties.getProperty("KAKAO_REST_API_KEY") ?: ""
+
+        buildConfigField(
+            "String",
+            "KAKAO_NATIVE_APP_KEY",
+            "\"$kakaoNativeAppKey\""
+        )
+
+        buildConfigField(
+            "String",
+            "KAKAO_REST_API_KEY",
+            "\"$kakaoRestApiKey\""
+        )
+
+        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoNativeAppKey
     }
 
     buildTypes {
