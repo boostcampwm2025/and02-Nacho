@@ -26,7 +26,7 @@ import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.ui.R
 
 @Composable
-fun InvitationScheduleListitem(
+fun InvitationScheduleListItem(
     imageUrl: String,
     title: String,
     startTime: String,
@@ -105,9 +105,9 @@ fun InvitationScheduleListitem(
 
 @PreviewTheme
 @Composable
-private fun InvitationScheduleListitemPreview() {
+private fun InvitationScheduleListItemPreview() {
     InvitationTheme {
-        InvitationScheduleListitem(
+        InvitationScheduleListItem(
             imageUrl = "https://example.com/image.jpg",
             title = "네부캠 송년회",
             startTime = "2025년 1월 15일 오후 1시",
