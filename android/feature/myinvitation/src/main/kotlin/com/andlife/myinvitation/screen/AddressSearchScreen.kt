@@ -39,20 +39,20 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationStroke
 import com.andlife.designsystem.theme.InvitationTheme
-import com.andlife.domain.model.Address
 import com.andlife.myinvitation.R
 import com.andlife.myinvitation.model.AddressSearchSideEffect
 import com.andlife.myinvitation.model.AddressSearchUiEvent
 import com.andlife.myinvitation.model.AddressSearchUiState
 import com.andlife.myinvitation.viewmodel.AddressSearchViewModel
 import com.andlife.ui.component.paging.PagingStateContent
+import com.andlife.ui.model.AddressUiModel
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun AddressSearchRoute(
     onNavigateBack: () -> Unit,
-    onAddressSelected: (Address) -> Unit,
+    onAddressSelected: (AddressUiModel) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AddressSearchViewModel = hiltViewModel(),
 ) {
@@ -62,7 +62,7 @@ fun AddressSearchRoute(
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is AddressSearchSideEffect.NavigateBackWithAddress -> {
-                onAddressSelected(effect.address)
+                onAddressSelected(effect.addressUiModel)
             }
 
             AddressSearchSideEffect.NavigateBack -> {
@@ -83,7 +83,7 @@ fun AddressSearchRoute(
 private fun AddressSearchScreen(
     uiState: AddressSearchUiState,
     onEvent: (AddressSearchUiEvent) -> Unit,
-    addressItems: LazyPagingItems<Address>,
+    addressItems: LazyPagingItems<AddressUiModel>,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -127,7 +127,9 @@ private fun AddressSearchScreen(
                             AddressResultList(
                                 itemCount = addressItems.itemCount,
                                 getItem = { index -> addressItems[index] },
-                                onAddressClick = { onEvent(AddressSearchUiEvent.SelectAddress(it)) },
+                                onAddressClick ={ addressUiModel ->
+                                    onEvent(AddressSearchUiEvent.SelectAddress(addressUiModel))
+                                },
                             )
                         }
                     }
@@ -233,8 +235,8 @@ private fun SearchResultCount(
 @Composable
 private fun AddressResultList(
     itemCount: Int,
-    getItem: (Int) -> Address?,
-    onAddressClick: (Address) -> Unit,
+    getItem: (Int) -> AddressUiModel?,
+    onAddressClick: (AddressUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -256,7 +258,7 @@ private fun AddressResultList(
 
 @Composable
 private fun AddressItem(
-    address: Address,
+    address: AddressUiModel,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -319,7 +321,7 @@ private fun AddressItem(
 @PreviewTheme
 @Composable
 private fun AddressSearchScreenPreview() {
-    val emptyPagingItems = flowOf(PagingData.empty<Address>()).collectAsLazyPagingItems()
+    val emptyPagingItems = flowOf(PagingData.empty<AddressUiModel>()).collectAsLazyPagingItems()
     InvitationTheme {
         AddressSearchScreen(
             uiState = AddressSearchUiState("강남"),
@@ -334,7 +336,7 @@ private fun AddressSearchScreenPreview() {
 private fun AddressSearchResultPreview() {
     val fakeAddresses =
         listOf(
-            Address(
+            AddressUiModel(
                 id = 1,
                 roadAddress = "서울특별시 강남구 강남대로62길 23",
                 placeName = "코드스쿼드",
@@ -343,7 +345,7 @@ private fun AddressSearchResultPreview() {
                 latitude = 37.5012743,
                 longitude = 127.0396597,
             ),
-            Address(
+            AddressUiModel(
                 id = 2,
                 roadAddress = "서울특별시 서초구 강남대로 202",
                 placeName = "양재역",

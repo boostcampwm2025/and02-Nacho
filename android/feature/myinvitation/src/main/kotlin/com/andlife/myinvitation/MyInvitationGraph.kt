@@ -8,7 +8,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import com.andlife.myinvitation.mapper.toUiModel
 import com.andlife.myinvitation.screen.AddressSearchRoute
 import com.andlife.myinvitation.screen.MyInvitationCreateRoute
 import com.andlife.myinvitation.screen.MyInvitationRoute
@@ -75,10 +74,10 @@ fun NavGraphBuilder.addressSearchNavGraph(
     composable<AddressSearch> {
         AddressSearchRoute(
             onNavigateBack = onNavigateBack,
-            onAddressSelected = { address ->
+            onAddressSelected = { addressUiModel ->
                 navController.previousBackStackEntry
                     ?.savedStateHandle
-                    ?.set("selected_address", address.toUiModel())
+                    ?.set("selected_address", addressUiModel)
                 onNavigateBack()
             },
             modifier = Modifier.padding(paddingValues),

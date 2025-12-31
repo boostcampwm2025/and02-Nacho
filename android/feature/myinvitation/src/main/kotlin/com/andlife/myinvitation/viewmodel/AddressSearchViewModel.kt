@@ -3,7 +3,9 @@ package com.andlife.myinvitation.viewmodel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.map
 import com.andlife.domain.model.Address
+import com.andlife.myinvitation.mapper.toUiModel
 import com.andlife.myinvitation.model.AddressSearchSideEffect
 import com.andlife.myinvitation.model.AddressSearchUiEvent
 import com.andlife.myinvitation.model.AddressSearchUiState
@@ -45,7 +47,11 @@ class AddressSearchViewModel
                     } else {
                         flowOf(PagingData.empty<Address>()) // TODO: 실제 API 호출
                     }
-                }.cachedIn(viewModelScope)
+                }
+                .map { pagingData ->
+                    pagingData.map { address -> address.toUiModel() }
+                }
+                .cachedIn(viewModelScope)
 
         override fun onEvent(event: AddressSearchUiEvent) {
             when (event) {
@@ -60,7 +66,7 @@ class AddressSearchViewModel
         }
 
         private fun selectAddress(event: AddressSearchUiEvent.SelectAddress) {
-            sendEffect(AddressSearchSideEffect.NavigateBackWithAddress(event.address))
+            sendEffect(AddressSearchSideEffect.NavigateBackWithAddress(event.addressUiModel))
         }
 
         private fun clickClose() {
