@@ -39,7 +39,10 @@ import com.andlife.designsystem.component.datepicker.state.rememberInvitationDat
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import java.time.format.TextStyle
+import java.util.Locale
 
 enum class InvitationDatePickerMode {
     DATE, // 달력에서 날짜 선택 모드
@@ -51,6 +54,7 @@ fun InvitationDatePicker(
     state: InvitationDatePickerState,
     modifier: Modifier = Modifier,
     colors: InvitationDatePickerColors = InvitationDatePickerDefaults.colors(),
+    locale: Locale = Locale.getDefault(),
 ) {
     val yearSuffix = stringResource(InvitationDatePickerDefaults.yearSuffixRes)
     val monthSuffix = stringResource(InvitationDatePickerDefaults.monthSuffixRes)
@@ -72,6 +76,7 @@ fun InvitationDatePicker(
                         selectedDate = state.selectedDate?.let { InvitationDatePickerDate(it) },
                         onDateClick = { date -> state.selectDate(date.date) },
                         colors = colors,
+                        locale = locale,
                     )
                 }
             }
@@ -179,6 +184,7 @@ private fun InvitationDatePickerCalendar(
     selectedDate: InvitationDatePickerDate?,
     onDateClick: (InvitationDatePickerDate) -> Unit,
     colors: InvitationDatePickerColors,
+    locale: Locale,
     modifier: Modifier = Modifier,
 ) {
     val daysCountInMonth = getDaysCountInMonth(yearMonth)
@@ -190,7 +196,11 @@ private fun InvitationDatePickerCalendar(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            listOf("일", "월", "화", "수", "목", "금", "토").forEach { dayOfWeek ->
+            val dayOfWeeks =
+                DayOfWeek.entries.map {
+                    it.getDisplayName(TextStyle.NARROW, locale)
+                }
+            dayOfWeeks.forEach { dayOfWeek ->
                 Text(
                     text = dayOfWeek,
                     modifier = Modifier.weight(1f),
