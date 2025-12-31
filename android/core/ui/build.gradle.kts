@@ -11,6 +11,9 @@ dependencies {
     // designSystem
     implementation(projects.core.designsystem)
 
+    // datetime
+    implementation(libs.kotlinx.datetime)
+
     // immutable
     implementation(libs.kotlinx.immutable)
 
