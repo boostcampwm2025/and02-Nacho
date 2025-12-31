@@ -33,8 +33,9 @@ fun InvitationTimePickerBottomSheet(
     modifier: Modifier = Modifier,
     initialHour: Int = 9,
     initialMinute: Int = 0,
-    sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
 ) {
+    val sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
     val timePickerState =
         rememberInvitationTimePickerState(
             initialHour = initialHour,
