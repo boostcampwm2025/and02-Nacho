@@ -46,7 +46,7 @@ private fun MyInvitationCreateScreen(
             }
 
             InvitationTextField(
-                value = "도로명 주소: ${selectedAddress?.roadAddress}\n장소명: ${selectedAddress?.placeName}",
+                value = "도로명 주소: ${selectedAddress?.roadAddressName}\n장소명: ${selectedAddress?.placeName}",
                 onValueChange = {},
                 placeholder = "주소를 선택해주세요",
                 singleLine = false,
