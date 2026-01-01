@@ -225,29 +225,41 @@ private fun InvitationDatePickerCalendar(
                 Box(modifier = Modifier.size(28.dp))
             }
 
-            // 실제 날짜들
-            items(daysCountInMonth) { day ->
-                val date =
-                    InvitationDatePickerDate(
-                        LocalDate(yearMonth.year, yearMonth.month, day + 1),
+            // 실제 날짜들: UiModel의 리스트 생성
+            val today = InvitationDatePickerDefaults.today()
+
+            val dateCellUiModels =
+                (1..daysCountInMonth).map { day ->
+                    val date =
+                        InvitationDatePickerDate(
+                            LocalDate(yearMonth.year, yearMonth.month, day),
+                        )
+
+                    InvitationDatePickerCellUiModel(
+                        date = date,
+                        day = day,
+                        isSelected = selectedDate?.date == date.date,
+                        isToday = date.date == today,
+                        isDisabled = date.date < today,
                     )
-                val isSelected = selectedDate?.date == date.date
-                val isToday = date.date == InvitationDatePickerDefaults.today()
-                val isBeforeToday = date.date < InvitationDatePickerDefaults.today()
+                }
+
+            items(dateCellUiModels.size) { index ->
+                val cell = dateCellUiModels[index]
 
                 Box(
                     modifier =
                         Modifier
                             .aspectRatio(1f)
                             .let { modifier ->
-                                if (isBeforeToday) {
+                                if (cell.isDisabled) {
                                     modifier
                                 } else {
                                     modifier.clickable(
                                         interactionSource = remember { MutableInteractionSource() },
                                         indication = null,
                                     ) {
-                                        onDateClick(date)
+                                        onDateClick(cell.date)
                                     }
                                 }
                             },
@@ -256,32 +268,30 @@ private fun InvitationDatePickerCalendar(
                     Box(
                         modifier =
                             Modifier
-                                .fillMaxSize(0.7f) // 원 크기 조절
+                                .fillMaxSize(0.7f)
                                 .clip(CircleShape)
                                 .background(
                                     when {
-                                        isSelected -> colors.selectedDateColor
-                                        isToday -> colors.todayBackgroundColor
+                                        cell.isSelected -> colors.selectedDateColor
+                                        cell.isToday -> colors.todayBackgroundColor
                                         else -> Color.Transparent
                                     },
                                 ),
                     )
 
                     Text(
-                        text = (day + 1).toString(),
+                        text = cell.day.toString(),
                         style =
-                            if (isSelected ||
-                                isToday
-                            ) {
+                            if (cell.isSelected || cell.isToday) {
                                 InvitationTheme.typography.bodyMediumMedium
                             } else {
                                 InvitationTheme.typography.bodyMediumRegular
                             },
                         color =
                             when {
-                                isBeforeToday -> colors.disabledTextColor
-                                isSelected -> colors.selectedTextColor
-                                isToday -> colors.todayTextColor
+                                cell.isDisabled -> colors.disabledTextColor
+                                cell.isSelected -> colors.selectedTextColor
+                                cell.isToday -> colors.todayTextColor
                                 else -> colors.normalTextColor
                             },
                     )
