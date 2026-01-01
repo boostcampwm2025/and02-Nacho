@@ -4,7 +4,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
-import com.andlife.domain.model.Address
+import com.andlife.domain.usecase.SearchAddressUseCase
 import com.andlife.invitation_edit.model.AddressSearchSideEffect
 import com.andlife.invitation_edit.model.AddressSearchUiEvent
 import com.andlife.invitation_edit.model.AddressSearchUiState
@@ -23,7 +23,9 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 @HiltViewModel
-class AddressSearchViewModel @Inject constructor() :
+class AddressSearchViewModel @Inject constructor(
+    private val searchAddressUseCase: SearchAddressUseCase,
+) :
     BaseViewModel<AddressSearchUiState, AddressSearchUiEvent, AddressSearchSideEffect>(
         initialState = AddressSearchUiState(),
     ) {
@@ -41,9 +43,9 @@ class AddressSearchViewModel @Inject constructor() :
         searchParamsFlow
             .flatMapLatest { query ->
                 if (query.isBlank()) {
-                    flowOf(PagingData.empty<Address>())
+                    flowOf(PagingData.empty())
                 } else {
-                    flowOf(PagingData.empty<Address>()) // TODO: 실제 API 호출
+                    searchAddressUseCase(query)
                 }
             }
             .map { pagingData ->
