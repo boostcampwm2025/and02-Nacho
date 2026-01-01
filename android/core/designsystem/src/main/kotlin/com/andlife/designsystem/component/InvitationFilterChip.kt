@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.R
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationStroke
@@ -32,8 +33,8 @@ fun InvitationFilterChip(
         modifier = modifier,
         trailingIcon = {
             Icon(
-                painter = painterResource(id = R.drawable.ic_chevron_down_16),
-                contentDescription = null,
+                painter = painterResource(R.drawable.ic_chevron_down_16),
+                contentDescription = stringResource(R.string.des_component_filterchip),
             )
         },
         shape = InvitationTheme.shapes.extraLarge,

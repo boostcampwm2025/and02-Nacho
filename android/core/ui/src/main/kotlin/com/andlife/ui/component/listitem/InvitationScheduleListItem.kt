@@ -1,4 +1,4 @@
-package com.andlife.ui.component.home
+package com.andlife.ui.component.listitem
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.component.InvitationDdayChip
@@ -25,7 +26,7 @@ import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.ui.R
 
 @Composable
-fun InvitationScheduleListitem(
+fun InvitationScheduleListItem(
     imageUrl: String,
     title: String,
     startTime: String,
@@ -51,7 +52,7 @@ fun InvitationScheduleListitem(
         Column {
             AsyncImage(
                 model = imageUrl,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.des_schedule_list_image),
                 contentScale = ContentScale.Crop,
                 placeholder = painterResource(R.drawable.ic_placeholder_default_24),
                 error = painterResource(R.drawable.ic_error_outline_24),
@@ -104,9 +105,9 @@ fun InvitationScheduleListitem(
 
 @PreviewTheme
 @Composable
-private fun InvitationScheduleListitemPreview() {
+private fun InvitationScheduleListItemPreview() {
     InvitationTheme {
-        InvitationScheduleListitem(
+        InvitationScheduleListItem(
             imageUrl = "https://example.com/image.jpg",
             title = "네부캠 송년회",
             startTime = "2025년 1월 15일 오후 1시",

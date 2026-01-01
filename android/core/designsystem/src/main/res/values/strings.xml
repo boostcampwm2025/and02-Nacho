@@ -7,4 +7,5 @@
     <string name="desc_next_month_or_year">다음 달/년</string>
     <string name="desc_to_year_month_mode">년/월 모드로 전환</string>
 
+    <string name="des_component_filterchip">검색결과를 정렬하는 칩 아이콘</string>
 </resources>
