@@ -7,9 +7,9 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class AddressUiModel(
     val id: Long,
-    val roadAddress: String,
+    val roadAddressName: String,
     val placeName: String,
-    val streetAddress: String,
+    val addressName: String,
     val zipCode: String,
     val latitude: Double,
     val longitude: Double
@@ -18,9 +18,9 @@ data class AddressUiModel(
 fun Address.toUiModel() =
     AddressUiModel(
         id = id,
-        roadAddress = roadAddress,
+        roadAddressName = roadAddressName,
         placeName = placeName,
-        streetAddress = streetAddress,
+        addressName = addressName,
         zipCode = zipCode,
         latitude = latitude,
         longitude = longitude,

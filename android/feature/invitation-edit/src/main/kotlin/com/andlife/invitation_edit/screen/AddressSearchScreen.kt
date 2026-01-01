@@ -291,7 +291,7 @@ private fun AddressItem(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = address.roadAddress,
+                    text = address.roadAddressName,
                     style = InvitationTheme.typography.bodyMediumRegular,
                     color = InvitationTheme.colorScheme.textPrimary,
                     modifier = Modifier.weight(1f),
@@ -310,7 +310,7 @@ private fun AddressItem(
             )
 
             Text(
-                text = address.streetAddress,
+                text = address.addressName,
                 style = InvitationTheme.typography.bodySmallRegular,
                 color = InvitationTheme.colorScheme.textTertiary,
             )
@@ -338,18 +338,18 @@ private fun AddressSearchResultPreview() {
         listOf(
             AddressUiModel(
                 id = 1,
-                roadAddress = "서울특별시 강남구 강남대로62길 23",
+                roadAddressName = "서울특별시 강남구 강남대로62길 23",
                 placeName = "코드스쿼드",
-                streetAddress = "서울특별시 강남구 강남대로62길 23 4층",
+                addressName = "서울특별시 강남구 강남대로62길 23 4층",
                 zipCode = "06175",
                 latitude = 37.5012743,
                 longitude = 127.0396597,
             ),
             AddressUiModel(
                 id = 2,
-                roadAddress = "서울특별시 서초구 강남대로 202",
+                roadAddressName = "서울특별시 서초구 강남대로 202",
                 placeName = "양재역",
-                streetAddress = "서울특별시 서초구 강남대로 202",
+                addressName = "서울특별시 서초구 강남대로 202",
                 zipCode = "06752",
                 latitude = 37.4845239,
                 longitude = 127.0343395,
