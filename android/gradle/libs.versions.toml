@@ -27,6 +27,7 @@ kotlinxDatetime = "0.6.2"
 androidxComposeMaterial3Adaptive = "1.2.0"
 ktlint = "14.0.1"
 compose-ruleset = "0.4.28"
+javaxInject = "1"
 
 [libraries]
 androidx-compose-material3-adaptive-navigation-suite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
@@ -72,6 +73,7 @@ retrofit-kotlin-serialization = { group = "com.squareup.retrofit2", name = "conv
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 
+androidx-paging-common = { group = "androidx.paging", name = "paging-common", version.ref = "paging" }
 androidx-paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
 androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
 
@@ -86,6 +88,8 @@ androidx-lifecycle-viewModelCompose = { group = "androidx.lifecycle", name = "li
 androidx-lifecycle-runtimeTesting = { group = "androidx.lifecycle", name = "lifecycle-runtime-testing", version.ref = "lifecycleRuntimeKtx" }
 
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+
+javax-inject = { group = "javax.inject", name = "javax.inject", version.ref = "javaxInject" }
 
 ktlint-compose-rules = { group = "io.nlopez.compose.rules", name = "ktlint", version.ref = "compose-ruleset" }
 

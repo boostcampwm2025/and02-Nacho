@@ -8,6 +8,9 @@ android {
 }
 
 dependencies {
+    // data layer
+    implementation(projects.core.data)
+
     // paging
     implementation(libs.androidx.paging.compose)
 
