@@ -1,6 +1,7 @@
 package com.andlife.InvitationServer.controller
 
 import com.andlife.InvitationServer.entity.Sample
+import com.andlife.InvitationServer.response.BaseResponse
 import com.andlife.InvitationServer.service.SampleService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
@@ -11,8 +12,9 @@ class SampleController(
 ) {
 
     @GetMapping("/")
-    fun getSamples(): List<Sample> {
-        return sampleService.getAllSamples()
+    fun getSamples(): BaseResponse<List<Sample>> {
+        val samples = sampleService.getAllSamples()
+        return BaseResponse.success(samples)
     }
 
 }
