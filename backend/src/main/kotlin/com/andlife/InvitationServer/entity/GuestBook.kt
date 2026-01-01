@@ -20,11 +20,11 @@ class GuestBook(
     val id: Long = 0,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "invitation_id")
+    @JoinColumn(name = "invitation_id", nullable = false)
     val invitation: Invitation,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     val user: User,
 
     @Column(name = "text_content", columnDefinition = "TEXT", nullable = false)
@@ -47,7 +47,7 @@ class GuestBookImage(
     val id: Long = 0,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "guestbook_post_id")
+    @JoinColumn(name = "guestbook_post_id", nullable = false)
     val guestBook: GuestBook,
 
     @Column(name = "image_url", nullable = false)
@@ -64,7 +64,7 @@ class GuestBookAudio(
     val id: Long = 0,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "guestbook_post_id")
+    @JoinColumn(name = "guestbook_post_id", nullable = false)
     val guestBook: GuestBook,
 
     @Column(name = "audio_url", nullable = false)
@@ -84,7 +84,7 @@ class GuestBookVideo(
     val id: Long = 0,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "guestbook_post_id")
+    @JoinColumn(name = "guestbook_post_id", nullable = false)
     val guestBook: GuestBook,
 
     @Column(name = "video_url", nullable = false)
@@ -98,5 +98,26 @@ class GuestBookVideo(
     val durationSeconds: Int,
 
     @Column(name = "display_order", nullable = false)
-    val displayOrder: Int = 0
+    val displayOrder: Int = 0,
+
+    @OneToMany(mappedBy = "video", cascade = [CascadeType.ALL])
+    val previewThumbnails: MutableList<VideoPreviewThumbnail> = mutableListOf()
+)
+
+
+@Entity
+@Table(name = "video_preview_thumbnails")
+class VideoPreviewThumbnail(
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long = 0,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "guestbook_video_id", nullable = false)
+    val video: GuestBookVideo,
+
+    @Column(name = "thumbnail_url", nullable = false)
+    val thumbnailUrl: String,
+
+    @Column(name = "time_seconds", nullable = false)
+    val timeSeconds: Double
 )
