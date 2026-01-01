@@ -34,6 +34,8 @@ import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.R
 import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerDate
 import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerYearMonth
+import com.andlife.designsystem.component.datepicker.model.getDaysCountInMonth
+import com.andlife.designsystem.component.datepicker.model.getFirstDayOfWeek
 import com.andlife.designsystem.component.datepicker.state.InvitationDatePickerState
 import com.andlife.designsystem.component.datepicker.state.rememberInvitationDatePickerState
 import com.andlife.designsystem.preview.PreviewTheme
@@ -187,8 +189,8 @@ private fun InvitationDatePickerCalendar(
     locale: Locale,
     modifier: Modifier = Modifier,
 ) {
-    val daysCountInMonth = getDaysCountInMonth(yearMonth)
-    val firstDayOfWeek = getFirstDayOfWeek(yearMonth)
+    val daysCountInMonth = yearMonth.getDaysCountInMonth()
+    val firstDayOfWeek = yearMonth.getFirstDayOfWeek()
 
     Column(modifier = modifier.padding(horizontal = InvitationSpacing.large)) {
         // 요일 헤더
@@ -343,25 +345,6 @@ private fun InvitationDatePickerYearMonthSelector(
         }
     }
 }
-
-// 해당 월의 첫째 날의 요일인덱스 반환: 일요일 = 0, 월요일 = 1, ...
-private fun getFirstDayOfWeek(yearMonth: InvitationDatePickerYearMonth): Int {
-    val date = LocalDate(yearMonth.year, yearMonth.month, 1)
-    // DayOfWeek.ordinal: 월요일 = 0, 화요일 = 1, ...
-    return (date.dayOfWeek.ordinal + 1) % 7
-}
-
-// 해당 월의 일수 반환
-private fun getDaysCountInMonth(yearMonth: InvitationDatePickerYearMonth): Int =
-    when (yearMonth.month) {
-        1, 3, 5, 7, 8, 10, 12 -> 31
-        4, 6, 9, 11 -> 30
-        2 -> if (isLeapYear(yearMonth.year)) 29 else 28
-        else -> 30
-    }
-
-// 윤년 여부 판단
-private fun isLeapYear(year: Int): Boolean = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
 
 @PreviewTheme
 @Composable
