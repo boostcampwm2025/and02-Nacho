@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -35,7 +36,6 @@ import com.andlife.designsystem.R
 import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerCell
 import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerDate
 import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerYearMonth
-import com.andlife.designsystem.component.datepicker.model.getDaysCountInMonth
 import com.andlife.designsystem.component.datepicker.model.getFirstDayOfWeek
 import com.andlife.designsystem.component.datepicker.state.InvitationDatePickerState
 import com.andlife.designsystem.component.datepicker.state.rememberInvitationDatePickerState
@@ -243,7 +243,6 @@ private fun InvitationDatePickerCalendar(
     locale: Locale,
     modifier: Modifier = Modifier,
 ) {
-    val daysCountInMonth = state.displayedMonth.getDaysCountInMonth()
     val firstDayOfWeek = state.displayedMonth.getFirstDayOfWeek()
 
     Column(modifier = modifier.padding(horizontal = InvitationSpacing.large)) {
@@ -281,13 +280,11 @@ private fun InvitationDatePickerCalendar(
 
             // State에서 미리 계산된 dateCells 사용
             items(
-                daysCountInMonth,
-                { index ->
-                    state.dateCells[index].date.toString()
+                state.dateCells,
+                { cell ->
+                    cell.date.toString()
                 },
-            ) { index ->
-                val cell = state.dateCells[index]
-
+            ) { cell ->
                 DateCell(
                     cell = cell,
                     onClick = onDateClick,
