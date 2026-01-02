@@ -67,6 +67,7 @@ dependencies {
     implementation(projects.feature.invitation)
     implementation(projects.feature.myinvitation)
     implementation(projects.feature.invitationEdit)
+    implementation(projects.core.data)
     implementation(projects.core.designsystem)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
