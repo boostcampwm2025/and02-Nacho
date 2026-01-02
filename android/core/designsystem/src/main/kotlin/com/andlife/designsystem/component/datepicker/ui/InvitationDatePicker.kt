@@ -63,11 +63,14 @@ private fun DateCell(
             Modifier
                 .aspectRatio(1f)
                 .let {
-                    if (cell.isDisabled) it
-                    else it.clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                    ) { onClick(cell.date) }
+                    if (cell.isDisabled) {
+                        it
+                    } else {
+                        it.clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                        ) { onClick(cell.date) }
+                    }
                 },
         contentAlignment = Alignment.Center,
     ) {
@@ -103,7 +106,6 @@ private fun DateCell(
         )
     }
 }
-
 
 @Composable
 fun InvitationDatePicker(
@@ -278,10 +280,12 @@ private fun InvitationDatePickerCalendar(
             }
 
             // State에서 미리 계산된 dateCells 사용
-            items(daysCountInMonth,
+            items(
+                daysCountInMonth,
                 { index ->
                     state.dateCells[index].date.toString()
-                }) { index ->
+                },
+            ) { index ->
                 val cell = state.dateCells[index]
 
                 DateCell(
