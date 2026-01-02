@@ -10,7 +10,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class AddressRepositoryModule {
+internal abstract class AddressRepositoryModule {
     @Binds
     @Singleton
     abstract fun bindAddressRepository(impl: AddressRepositoryImpl): AddressRepository

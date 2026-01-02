@@ -4,7 +4,7 @@ import com.andlife.network.api.kakao.address.KakaoAddressResponse
 import com.andlife.network.api.kakao.address.KakaoAddressService
 import javax.inject.Inject
 
-class AddressRemoteDataSourceImpl
+internal class AddressRemoteDataSourceImpl
     @Inject
     constructor(
         private val kakaoAddressService: KakaoAddressService,

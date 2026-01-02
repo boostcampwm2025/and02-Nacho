@@ -10,7 +10,7 @@ import com.andlife.domain.repository.AddressRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class AddressRepositoryImpl
+internal class AddressRepositoryImpl
     @Inject
     constructor(
         private val remoteDataSource: AddressRemoteDataSource,
