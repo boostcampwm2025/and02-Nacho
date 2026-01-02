@@ -3,13 +3,11 @@ package com.andlife.data.datasource.remote.address
 import com.andlife.network.api.kakao.address.KakaoAddressResponse
 import com.andlife.network.api.kakao.address.KakaoAddressService
 import javax.inject.Inject
-import javax.inject.Named
 
 class AddressRemoteDataSourceImpl
     @Inject
     constructor(
         private val kakaoAddressService: KakaoAddressService,
-        @param:Named("kakaoApiKey") private val apiKey: String,
     ) : AddressRemoteDataSource {
         override suspend fun searchAddress(
             query: String,
@@ -17,13 +15,8 @@ class AddressRemoteDataSourceImpl
             size: Int,
         ): KakaoAddressResponse =
             kakaoAddressService.searchAddress(
-                authorization = "$KAKAO_AUTH_PREFIX$apiKey",
                 query = query,
                 page = page,
                 size = size,
             )
-
-        companion object {
-            private const val KAKAO_AUTH_PREFIX = "KakaoAK "
-        }
     }

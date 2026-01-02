@@ -1,6 +1,7 @@
 package com.andlife.network.di
 
 import com.andlife.network.api.kakao.address.KakaoAddressService
+import com.andlife.network.interceptor.KakaoAuthInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -28,9 +29,12 @@ object KakaoNetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient =
+    fun provideOkHttpClient(
+        kakaoAuthInterceptor: KakaoAuthInterceptor,
+    ): OkHttpClient =
         OkHttpClient
             .Builder()
+            .addInterceptor(kakaoAuthInterceptor)
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
                     level = HttpLoggingInterceptor.Level.BODY
