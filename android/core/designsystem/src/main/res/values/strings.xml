@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <string-array name="array_am_pm">
+        <item>오전</item>
+        <item>오후</item>
+    </string-array>
+
     <string name="des_component_filterchip">검색결과를 정렬하는 칩 아이콘</string>
+
 </resources>
