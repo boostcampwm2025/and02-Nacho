@@ -24,10 +24,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <meta-data
-            android:name="com.kakao.sdk.AppKey"
-            android:value="${KAKAO_NATIVE_APP_KEY}" />
     </application>
 
 </manifest>
