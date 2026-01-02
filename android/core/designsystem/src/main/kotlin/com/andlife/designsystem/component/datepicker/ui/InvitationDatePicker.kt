@@ -280,7 +280,7 @@ private fun InvitationDatePickerCalendar(
             // State에서 미리 계산된 dateCells 사용
             items(daysCountInMonth,
                 { index ->
-                    state.dateCells[index].date
+                    state.dateCells[index].date.toString()
                 }) { index ->
                 val cell = state.dateCells[index]
 
