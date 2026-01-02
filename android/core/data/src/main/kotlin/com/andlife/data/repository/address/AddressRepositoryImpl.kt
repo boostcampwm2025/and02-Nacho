@@ -4,7 +4,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.andlife.data.datasource.remote.address.AddressRemoteDataSource
-import com.andlife.data.repository.address.AddressSearchPagingSource
+import com.andlife.data.datasource.remote.address.AddressSearchPagingSource
 import com.andlife.domain.model.Address
 import com.andlife.domain.repository.AddressRepository
 import kotlinx.coroutines.flow.Flow

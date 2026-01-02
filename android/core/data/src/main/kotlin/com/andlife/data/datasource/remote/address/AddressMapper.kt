@@ -1,4 +1,4 @@
-package com.andlife.data.repository.address
+package com.andlife.data.datasource.remote.address
 
 import com.andlife.domain.model.Address
 import com.andlife.network.api.kakao.address.Document
