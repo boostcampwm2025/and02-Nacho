@@ -291,7 +291,7 @@ private fun AddressItem(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = address.roadAddressName,
+                    text = address.addressName,
                     style = InvitationTheme.typography.bodyMediumRegular,
                     color = InvitationTheme.colorScheme.textPrimary,
                     modifier = Modifier.weight(1f),
@@ -310,7 +310,7 @@ private fun AddressItem(
             )
 
             Text(
-                text = address.addressName,
+                text = address.roadAddressName,
                 style = InvitationTheme.typography.bodySmallRegular,
                 color = InvitationTheme.colorScheme.textTertiary,
             )
