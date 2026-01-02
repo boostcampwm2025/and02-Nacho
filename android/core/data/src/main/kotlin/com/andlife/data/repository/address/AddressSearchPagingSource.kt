@@ -1,9 +1,8 @@
-package com.andlife.data.paging
+package com.andlife.data.repository.address
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.andlife.data.datasource.remote.address.AddressRemoteDataSource
-import com.andlife.data.mapper.toDomain
 import com.andlife.domain.model.Address
 import retrofit2.HttpException
 import java.io.IOException
