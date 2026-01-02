@@ -52,7 +52,7 @@ import kotlinx.coroutines.flow.flowOf
 @Composable
 fun AddressSearchRoute(
     onNavigateBack: () -> Unit,
-    onAddressSelected: (AddressUiModel) -> Unit,
+    onAddressSelect: (AddressUiModel) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AddressSearchViewModel = hiltViewModel(),
 ) {
@@ -62,7 +62,7 @@ fun AddressSearchRoute(
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is AddressSearchSideEffect.NavigateBackWithAddress -> {
-                onAddressSelected(effect.addressUiModel)
+                onAddressSelect(effect.addressUiModel)
             }
 
             AddressSearchSideEffect.NavigateBack -> {

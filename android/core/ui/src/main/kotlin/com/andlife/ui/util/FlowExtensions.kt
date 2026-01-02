@@ -15,7 +15,7 @@ fun <T> Flow<T>.collectWithLifecycle(
     action: suspend (T) -> Unit,
 ) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
-    LaunchedEffect(this, lifecycle) {
+    LaunchedEffect(this, lifecycle, action) {
         lifecycle.repeatOnLifecycle(minActiveState) {
             collect { action(it) }
         }

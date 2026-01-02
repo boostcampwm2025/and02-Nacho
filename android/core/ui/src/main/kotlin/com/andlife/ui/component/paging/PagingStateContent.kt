@@ -16,10 +16,10 @@ import com.andlife.ui.component.loading.InvitationLoadingIndicator
 
 @Composable
 fun PagingStateContent(
-    modifier: Modifier = Modifier,
     loadState: LoadState,
     itemCount: Int,
     onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     Box(modifier = modifier.fillMaxSize()) {

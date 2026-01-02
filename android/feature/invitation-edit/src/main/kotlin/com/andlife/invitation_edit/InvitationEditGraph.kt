@@ -60,7 +60,7 @@ fun NavGraphBuilder.addressSearchNavGraph(
     composable<AddressSearch> {
         AddressSearchRoute(
             onNavigateBack = onNavigateBack,
-            onAddressSelected = { addressUiModel ->
+            onAddressSelect = { addressUiModel ->
                 navController.previousBackStackEntry
                     ?.savedStateHandle
                     ?.set("selected_address", addressUiModel)
