@@ -17,7 +17,4 @@ dependencies {
 
     // paging
     implementation(libs.androidx.paging.common)
-
-    // javax.inject
-    implementation(libs.javax.inject)
 }
