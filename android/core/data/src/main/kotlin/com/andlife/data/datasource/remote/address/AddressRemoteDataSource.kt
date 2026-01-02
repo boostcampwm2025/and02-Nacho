@@ -6,6 +6,6 @@ interface AddressRemoteDataSource {
     suspend fun searchAddress(
         query: String,
         page: Int,
-        size: Int = 15,
+        size: Int,
     ): KakaoAddressResponse
 }
