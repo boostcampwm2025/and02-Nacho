@@ -1,10 +1,9 @@
-package com.andlife.designsystem.component.datepicker.ui
+package com.andlife.designsystem.component.datepicker.model
 
 import androidx.compose.runtime.Immutable
-import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerDate
 
 @Immutable
-data class InvitationDatePickerCellUiModel(
+data class InvitationDatePickerCell(
     val date: InvitationDatePickerDate,
     val day: Int,
     val isSelected: Boolean,

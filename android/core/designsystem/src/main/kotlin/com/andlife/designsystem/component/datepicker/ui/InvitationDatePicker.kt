@@ -32,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.R
+import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerCell
 import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerDate
 import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerYearMonth
 import com.andlife.designsystem.component.datepicker.model.getDaysCountInMonth
@@ -53,7 +54,7 @@ enum class InvitationDatePickerMode {
 
 @Composable
 private fun DateCell(
-    cell: InvitationDatePickerCellUiModel,
+    cell: InvitationDatePickerCell,
     onClick: (InvitationDatePickerDate) -> Unit,
     colors: InvitationDatePickerColors,
 ) {

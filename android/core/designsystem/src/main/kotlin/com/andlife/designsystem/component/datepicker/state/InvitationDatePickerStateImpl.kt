@@ -6,11 +6,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
+import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerCell
 import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerDate
 import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerYearMonth
 import com.andlife.designsystem.component.datepicker.model.getDaysCountInMonth
 import com.andlife.designsystem.component.datepicker.model.toYearMonth
-import com.andlife.designsystem.component.datepicker.ui.InvitationDatePickerCellUiModel
 import com.andlife.designsystem.component.datepicker.ui.InvitationDatePickerDefaults
 import com.andlife.designsystem.component.datepicker.ui.InvitationDatePickerMode
 import kotlinx.datetime.LocalDate
@@ -37,7 +37,7 @@ internal class InvitationDatePickerStateImpl(
     override val mode: InvitationDatePickerMode
         get() = _mode.value
 
-    override val dateCells: List<InvitationDatePickerCellUiModel> by derivedStateOf {
+    override val dateCells: List<InvitationDatePickerCell> by derivedStateOf {
         val daysCountInMonth = _displayedMonth.value.getDaysCountInMonth()
         val today = InvitationDatePickerDefaults.today()
 
@@ -47,7 +47,7 @@ internal class InvitationDatePickerStateImpl(
                     LocalDate(_displayedMonth.value.year, _displayedMonth.value.month, day),
                 )
 
-            InvitationDatePickerCellUiModel(
+            InvitationDatePickerCell(
                 date = date,
                 day = day,
                 isSelected = _selectedDate.value?.date == date.date,
