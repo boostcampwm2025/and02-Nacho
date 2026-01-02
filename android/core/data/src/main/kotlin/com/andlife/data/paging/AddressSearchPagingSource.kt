@@ -13,7 +13,7 @@ class AddressSearchPagingSource(
     private val query: String,
 ) : PagingSource<Int, Address>() {
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Address> {
-        if(query.isBlank()) {
+        if (query.isBlank()) {
             return LoadResult.Page(
                 data = emptyList(),
                 prevKey = null,
@@ -31,11 +31,11 @@ class AddressSearchPagingSource(
                     size = params.loadSize,
                 )
             val addresses = response.documents.map { it.toDomain() }
-            val nextKey = if(response.meta.isEnd) null else page + 1
+            val nextKey = if (response.meta.isEnd) null else page + 1
 
             LoadResult.Page(
                 data = addresses,
-                prevKey = if(page == INITIAL_PAGE) null else page - 1,
+                prevKey = if (page == INITIAL_PAGE) null else page - 1,
                 nextKey = nextKey,
             )
         } catch (e: IOException) {

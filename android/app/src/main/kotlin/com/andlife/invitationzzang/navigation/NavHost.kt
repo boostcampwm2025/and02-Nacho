@@ -54,19 +54,19 @@ fun InvitationNavHost(
 
             myInvitationNavGraph(
                 paddingValues = innerPadding,
-                onNavigateToCreate = navigator::navigateToMyInvitationCreate
+                onNavigateToCreate = navigator::navigateToMyInvitationCreate,
             )
 
             myInvitationCreateNavGraph(
                 paddingValues = innerPadding,
                 onNavigateToAddressSearch = navigator::navigateToAddressSearch,
-                onNavigateBack = navigator::navigatePopBackStack
+                onNavigateBack = navigator::navigatePopBackStack,
             )
 
             addressSearchNavGraph(
                 navController = navigator.navController,
                 paddingValues = innerPadding,
-                onNavigateBack = navigator::navigatePopBackStack
+                onNavigateBack = navigator::navigatePopBackStack,
             )
         }
     }

@@ -14,9 +14,7 @@ import javax.inject.Singleton
 object AddressRepositoryModule {
     @Provides
     @Singleton
-    fun provideAddressRepository(
-        remoteDataSource: AddressRemoteDataSource,
-    ): AddressRepository =
+    fun provideAddressRepository(remoteDataSource: AddressRemoteDataSource): AddressRepository =
         AddressRepositoryImpl(
             remoteDataSource = remoteDataSource,
         )

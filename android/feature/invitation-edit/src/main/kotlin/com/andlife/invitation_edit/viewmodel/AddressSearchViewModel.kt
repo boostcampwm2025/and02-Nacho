@@ -23,53 +23,52 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 @HiltViewModel
-class AddressSearchViewModel @Inject constructor(
-    private val searchAddressUseCase: SearchAddressUseCase,
-) :
-    BaseViewModel<AddressSearchUiState, AddressSearchUiEvent, AddressSearchSideEffect>(
-        initialState = AddressSearchUiState(),
-    ) {
-    override val uiState: StateFlow<AddressSearchUiState> = mutableUiState.asStateFlow()
+class AddressSearchViewModel
+    @Inject
+    constructor(
+        private val searchAddressUseCase: SearchAddressUseCase,
+    ) : BaseViewModel<AddressSearchUiState, AddressSearchUiEvent, AddressSearchSideEffect>(
+            initialState = AddressSearchUiState(),
+        ) {
+        override val uiState: StateFlow<AddressSearchUiState> = mutableUiState.asStateFlow()
 
-    @OptIn(FlowPreview::class)
-    private val searchParamsFlow =
-        uiState
-            .map { it.query }
-            .distinctUntilChanged()
-            .debounce(300L)
+        @OptIn(FlowPreview::class)
+        private val searchParamsFlow =
+            uiState
+                .map { it.query }
+                .distinctUntilChanged()
+                .debounce(300L)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val addresses =
-        searchParamsFlow
-            .flatMapLatest { query ->
-                if (query.isBlank()) {
-                    flowOf(PagingData.empty())
-                } else {
-                    searchAddressUseCase(query)
-                }
+        @OptIn(ExperimentalCoroutinesApi::class)
+        val addresses =
+            searchParamsFlow
+                .flatMapLatest { query ->
+                    if (query.isBlank()) {
+                        flowOf(PagingData.empty())
+                    } else {
+                        searchAddressUseCase(query)
+                    }
+                }.map { pagingData ->
+                    pagingData.map { address -> address.toUiModel() }
+                }.cachedIn(viewModelScope)
+
+        override fun onEvent(event: AddressSearchUiEvent) {
+            when (event) {
+                is AddressSearchUiEvent.UpdateQuery -> updateQuery(event)
+                is AddressSearchUiEvent.SelectAddress -> selectAddress(event)
+                is AddressSearchUiEvent.ClickBack -> clickClose()
             }
-            .map { pagingData ->
-                pagingData.map { address -> address.toUiModel() }
-            }
-            .cachedIn(viewModelScope)
+        }
 
-    override fun onEvent(event: AddressSearchUiEvent) {
-        when (event) {
-            is AddressSearchUiEvent.UpdateQuery -> updateQuery(event)
-            is AddressSearchUiEvent.SelectAddress -> selectAddress(event)
-            is AddressSearchUiEvent.ClickBack -> clickClose()
+        private fun updateQuery(event: AddressSearchUiEvent.UpdateQuery) {
+            updateState { copy(query = event.query) }
+        }
+
+        private fun selectAddress(event: AddressSearchUiEvent.SelectAddress) {
+            sendEffect(AddressSearchSideEffect.NavigateBackWithAddress(event.addressUiModel))
+        }
+
+        private fun clickClose() {
+            sendEffect(AddressSearchSideEffect.NavigateBack)
         }
     }
-
-    private fun updateQuery(event: AddressSearchUiEvent.UpdateQuery) {
-        updateState { copy(query = event.query) }
-    }
-
-    private fun selectAddress(event: AddressSearchUiEvent.SelectAddress) {
-        sendEffect(AddressSearchSideEffect.NavigateBackWithAddress(event.addressUiModel))
-    }
-
-    private fun clickClose() {
-        sendEffect(AddressSearchSideEffect.NavigateBack)
-    }
-}

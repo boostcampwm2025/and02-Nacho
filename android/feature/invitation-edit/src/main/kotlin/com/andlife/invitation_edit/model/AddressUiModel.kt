@@ -12,7 +12,7 @@ data class AddressUiModel(
     val addressName: String,
     val zipCode: String,
     val latitude: Double,
-    val longitude: Double
+    val longitude: Double,
 ) : Parcelable
 
 fun Address.toUiModel() =

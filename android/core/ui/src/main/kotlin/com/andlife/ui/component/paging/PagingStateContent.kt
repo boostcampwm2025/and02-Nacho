@@ -20,7 +20,7 @@ fun PagingStateContent(
     loadState: LoadState,
     itemCount: Int,
     onRetry: () -> Unit,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         when (loadState) {
@@ -56,7 +56,7 @@ private fun PagingStateContentPreview_Loading() {
             loadState = LoadState.Loading,
             itemCount = 0,
             onRetry = {},
-            content = { Text("데이터 로드 완료") }
+            content = { Text("데이터 로드 완료") },
         )
     }
 }
@@ -69,7 +69,7 @@ private fun PagingStateContentPreview_Error() {
             loadState = LoadState.Error(Throwable("네트워크 오류 발생")),
             itemCount = 0,
             onRetry = {},
-            content = { Text("데이터 로드 완료") }
+            content = { Text("데이터 로드 완료") },
         )
     }
 }
@@ -82,7 +82,7 @@ private fun PagingStateContentPreview_Empty() {
             loadState = LoadState.NotLoading(endOfPaginationReached = true),
             itemCount = 0,
             onRetry = {},
-            content = { Text("데이터 로드 완료") }
+            content = { Text("데이터 로드 완료") },
         )
     }
 }
