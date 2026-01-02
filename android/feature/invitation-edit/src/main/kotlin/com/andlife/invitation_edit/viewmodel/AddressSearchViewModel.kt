@@ -4,7 +4,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
-import com.andlife.domain.usecase.SearchAddressUseCase
+import com.andlife.domain.repository.AddressRepository
 import com.andlife.invitation_edit.model.AddressSearchSideEffect
 import com.andlife.invitation_edit.model.AddressSearchUiEvent
 import com.andlife.invitation_edit.model.AddressSearchUiState
@@ -26,7 +26,7 @@ import javax.inject.Inject
 class AddressSearchViewModel
     @Inject
     constructor(
-        private val searchAddressUseCase: SearchAddressUseCase,
+        private val addressRepository: AddressRepository,
     ) : BaseViewModel<AddressSearchUiState, AddressSearchUiEvent, AddressSearchSideEffect>(
             initialState = AddressSearchUiState(),
         ) {
@@ -46,7 +46,7 @@ class AddressSearchViewModel
                     if (query.isBlank()) {
                         flowOf(PagingData.empty())
                     } else {
-                        searchAddressUseCase(query)
+                        addressRepository.searchAddress(query)
                     }
                 }.map { pagingData ->
                     pagingData.map { address -> address.toUiModel() }
