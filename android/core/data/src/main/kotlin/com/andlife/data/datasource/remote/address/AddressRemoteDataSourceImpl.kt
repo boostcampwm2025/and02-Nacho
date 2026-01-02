@@ -15,9 +15,13 @@ class AddressRemoteDataSourceImpl @Inject constructor(
         size: Int,
     ): KakaoAddressResponse =
         kakaoAddressService.searchAddress(
-            authorization = "KakaoAK $apiKey",
+            authorization = "$KAKAO_AUTH_PREFIX $apiKey",
             query = query,
             page = page,
             size = size,
         )
+
+    companion object {
+        private const val KAKAO_AUTH_PREFIX = "KakaoAK "
+    }
 }

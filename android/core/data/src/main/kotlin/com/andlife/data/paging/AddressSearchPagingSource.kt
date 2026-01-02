@@ -21,7 +21,7 @@ class AddressSearchPagingSource(
             )
         }
 
-        val page = params.key ?: 1
+        val page = params.key ?: INITIAL_PAGE
 
         return try {
             val response =
@@ -35,7 +35,7 @@ class AddressSearchPagingSource(
 
             LoadResult.Page(
                 data = addresses,
-                prevKey = if(page == 1) null else page - 1,
+                prevKey = if(page == INITIAL_PAGE) null else page - 1,
                 nextKey = nextKey,
             )
         } catch (e: IOException) {
@@ -49,7 +49,11 @@ class AddressSearchPagingSource(
 
     override fun getRefreshKey(state: PagingState<Int, Address>): Int? =
         state.anchorPosition?.let { anchorPosition ->
-            state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
-                ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)
+            state.closestPageToPosition(anchorPosition)?.prevKey?.plus(INITIAL_PAGE)
+                ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(INITIAL_PAGE)
         }
+
+    companion object {
+        private const val INITIAL_PAGE = 1
+    }
 }

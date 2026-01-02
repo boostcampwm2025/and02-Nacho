@@ -17,9 +17,9 @@ class AddressRepositoryImpl @Inject constructor(
         Pager(
             config =
                 PagingConfig(
-                    pageSize = 15,
+                    pageSize = DEFAULT_PAGE_SIZE,
                     enablePlaceholders = false,
-                    initialLoadSize = 15,
+                    initialLoadSize = DEFAULT_PAGE_SIZE,
                 ),
             pagingSourceFactory = {
                 AddressSearchPagingSource(
@@ -28,4 +28,8 @@ class AddressRepositoryImpl @Inject constructor(
                 )
             },
         ).flow
+
+    companion object {
+        private const val DEFAULT_PAGE_SIZE = 15
+    }
 }
