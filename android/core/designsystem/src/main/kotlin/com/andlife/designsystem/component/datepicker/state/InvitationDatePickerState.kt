@@ -5,6 +5,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerDate
 import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerYearMonth
+import com.andlife.designsystem.component.datepicker.ui.InvitationDatePickerCellUiModel
 import com.andlife.designsystem.component.datepicker.ui.InvitationDatePickerMode
 import kotlinx.datetime.LocalDate
 
@@ -13,6 +14,7 @@ interface InvitationDatePickerState {
     val selectedDate: LocalDate?
     val displayedMonth: InvitationDatePickerYearMonth
     val mode: InvitationDatePickerMode
+    val dateCells: List<InvitationDatePickerCellUiModel>
 
     fun selectDate(date: LocalDate)
 

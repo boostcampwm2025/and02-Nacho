@@ -52,6 +52,59 @@ enum class InvitationDatePickerMode {
 }
 
 @Composable
+private fun DateCell(
+    cell: InvitationDatePickerCellUiModel,
+    onClick: (InvitationDatePickerDate) -> Unit,
+    colors: InvitationDatePickerColors,
+) {
+    Box(
+        modifier =
+            Modifier
+                .aspectRatio(1f)
+                .let {
+                    if (cell.isDisabled) it
+                    else it.clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) { onClick(cell.date) }
+                },
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize(0.7f)
+                    .clip(CircleShape)
+                    .background(
+                        when {
+                            cell.isSelected -> colors.selectedDateColor
+                            cell.isToday -> colors.todayBackgroundColor
+                            else -> Color.Transparent
+                        },
+                    ),
+        )
+
+        Text(
+            text = cell.day.toString(),
+            style =
+                if (cell.isSelected || cell.isToday) {
+                    InvitationTheme.typography.bodyMediumMedium
+                } else {
+                    InvitationTheme.typography.bodyMediumRegular
+                },
+            color =
+                when {
+                    cell.isDisabled -> colors.disabledTextColor
+                    cell.isSelected -> colors.selectedTextColor
+                    cell.isToday -> colors.todayTextColor
+                    else -> colors.normalTextColor
+                },
+        )
+    }
+}
+
+
+@Composable
 fun InvitationDatePicker(
     state: InvitationDatePickerState,
     modifier: Modifier = Modifier,
@@ -74,8 +127,7 @@ fun InvitationDatePicker(
                         isClickable = true,
                     )
                     InvitationDatePickerCalendar(
-                        yearMonth = state.displayedMonth,
-                        selectedDate = state.selectedDate?.let { InvitationDatePickerDate(it) },
+                        state = state,
                         onDateClick = { date -> state.selectDate(date.date) },
                         colors = colors,
                         locale = locale,
@@ -182,15 +234,14 @@ private fun InvitationDatePickerHeader(
 
 @Composable
 private fun InvitationDatePickerCalendar(
-    yearMonth: InvitationDatePickerYearMonth,
-    selectedDate: InvitationDatePickerDate?,
+    state: InvitationDatePickerState,
     onDateClick: (InvitationDatePickerDate) -> Unit,
     colors: InvitationDatePickerColors,
     locale: Locale,
     modifier: Modifier = Modifier,
 ) {
-    val daysCountInMonth = yearMonth.getDaysCountInMonth()
-    val firstDayOfWeek = yearMonth.getFirstDayOfWeek()
+    val daysCountInMonth = state.displayedMonth.getDaysCountInMonth()
+    val firstDayOfWeek = state.displayedMonth.getFirstDayOfWeek()
 
     Column(modifier = modifier.padding(horizontal = InvitationSpacing.large)) {
         // 요일 헤더
@@ -225,77 +276,18 @@ private fun InvitationDatePickerCalendar(
                 Box(modifier = Modifier.size(28.dp))
             }
 
-            // 실제 날짜들: UiModel의 리스트 생성
-            val today = InvitationDatePickerDefaults.today()
+            // State에서 미리 계산된 dateCells 사용
+            items(daysCountInMonth,
+                { index ->
+                    state.dateCells[index].date
+                }) { index ->
+                val cell = state.dateCells[index]
 
-            val dateCellUiModels =
-                (1..daysCountInMonth).map { day ->
-                    val date =
-                        InvitationDatePickerDate(
-                            LocalDate(yearMonth.year, yearMonth.month, day),
-                        )
-
-                    InvitationDatePickerCellUiModel(
-                        date = date,
-                        day = day,
-                        isSelected = selectedDate?.date == date.date,
-                        isToday = date.date == today,
-                        isDisabled = date.date < today,
-                    )
-                }
-
-            items(dateCellUiModels.size) { index ->
-                val cell = dateCellUiModels[index]
-
-                Box(
-                    modifier =
-                        Modifier
-                            .aspectRatio(1f)
-                            .let { modifier ->
-                                if (cell.isDisabled) {
-                                    modifier
-                                } else {
-                                    modifier.clickable(
-                                        interactionSource = remember { MutableInteractionSource() },
-                                        indication = null,
-                                    ) {
-                                        onDateClick(cell.date)
-                                    }
-                                }
-                            },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxSize(0.7f)
-                                .clip(CircleShape)
-                                .background(
-                                    when {
-                                        cell.isSelected -> colors.selectedDateColor
-                                        cell.isToday -> colors.todayBackgroundColor
-                                        else -> Color.Transparent
-                                    },
-                                ),
-                    )
-
-                    Text(
-                        text = cell.day.toString(),
-                        style =
-                            if (cell.isSelected || cell.isToday) {
-                                InvitationTheme.typography.bodyMediumMedium
-                            } else {
-                                InvitationTheme.typography.bodyMediumRegular
-                            },
-                        color =
-                            when {
-                                cell.isDisabled -> colors.disabledTextColor
-                                cell.isSelected -> colors.selectedTextColor
-                                cell.isToday -> colors.todayTextColor
-                                else -> colors.normalTextColor
-                            },
-                    )
-                }
+                DateCell(
+                    cell = cell,
+                    onClick = onDateClick,
+                    colors = colors,
+                )
             }
         }
     }
