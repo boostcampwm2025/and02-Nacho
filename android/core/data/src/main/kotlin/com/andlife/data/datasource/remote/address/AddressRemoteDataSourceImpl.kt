@@ -17,7 +17,7 @@ class AddressRemoteDataSourceImpl
             size: Int,
         ): KakaoAddressResponse =
             kakaoAddressService.searchAddress(
-                authorization = "$KAKAO_AUTH_PREFIX $apiKey",
+                authorization = "$KAKAO_AUTH_PREFIX$apiKey",
                 query = query,
                 page = page,
                 size = size,
