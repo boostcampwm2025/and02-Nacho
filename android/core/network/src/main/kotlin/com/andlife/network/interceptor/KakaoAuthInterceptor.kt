@@ -10,13 +10,17 @@ class KakaoAuthInterceptor
     constructor(
         @param:Named("kakaoApiKey") private val apiKey: String,
     ) : Interceptor {
-    override fun intercept(chain: Interceptor.Chain): Response {
-        val originalRequest = chain.request()
-        val requestWithAuth =
-            originalRequest
-                .newBuilder()
-                .header("Authorization", "KakaoAK $apiKey")
-                .build()
-        return chain.proceed(requestWithAuth)
+        override fun intercept(chain: Interceptor.Chain): Response {
+            val originalRequest = chain.request()
+            val requestWithAuth =
+                originalRequest
+                    .newBuilder()
+                    .header(AUTHORIZATION_HEADER, "$KAKAO_AUTH_PREFIX$apiKey")
+                    .build()
+            return chain.proceed(requestWithAuth)
+        }
+        companion object {
+            private const val AUTHORIZATION_HEADER = "Authorization"
+            private const val KAKAO_AUTH_PREFIX = "KakaoAK "
+        }
     }
-}

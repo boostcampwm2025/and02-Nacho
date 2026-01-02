@@ -29,9 +29,7 @@ object KakaoNetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(
-        kakaoAuthInterceptor: KakaoAuthInterceptor,
-    ): OkHttpClient =
+    fun provideOkHttpClient(kakaoAuthInterceptor: KakaoAuthInterceptor): OkHttpClient =
         OkHttpClient
             .Builder()
             .addInterceptor(kakaoAuthInterceptor)
