@@ -12,6 +12,14 @@ annotation class InvitationRetrofit
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
+annotation class MediaOkHttp
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class MediaRetrofit
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
 annotation class KakaoOkHttp
 
 @Qualifier
