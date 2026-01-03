@@ -5,5 +5,8 @@ import com.andlife.domain.model.Address
 import kotlinx.coroutines.flow.Flow
 
 interface AddressRepository {
-    fun searchAddress(query: String): Flow<PagingData<Address>>
+    fun searchAddress(
+        query: String,
+        onTotalCountLoaded: (Int) -> Unit,
+    ): Flow<PagingData<Address>>
 }

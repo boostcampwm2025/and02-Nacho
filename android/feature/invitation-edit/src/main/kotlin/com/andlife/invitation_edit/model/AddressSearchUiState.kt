@@ -6,4 +6,5 @@ import com.andlife.ui.base.BaseUiState
 @Stable
 data class AddressSearchUiState(
     val query: String = "",
+    val totalCount: Int = 0,
 ) : BaseUiState

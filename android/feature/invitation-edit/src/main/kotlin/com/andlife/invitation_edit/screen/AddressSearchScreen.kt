@@ -115,7 +115,7 @@ private fun AddressSearchScreen(
                 key(uiState.query) {
                     Column {
                         SearchResultCount(
-                            itemCount = addressItems.itemCount,
+                            itemCount = uiState.totalCount,
                             loadState = addressItems.loadState.refresh,
                         )
 

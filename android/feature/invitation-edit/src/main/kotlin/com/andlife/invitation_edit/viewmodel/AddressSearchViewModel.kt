@@ -13,6 +13,7 @@ import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import com.andlife.invitation_edit.model.AddressUiModel
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,21 +33,27 @@ class AddressSearchViewModel @Inject constructor(
     override val uiState: StateFlow<AddressSearchUiState> = mutableUiState.asStateFlow()
 
     @OptIn(FlowPreview::class)
-    private val searchParamsFlow = uiState.map { it.query }.distinctUntilChanged().debounce(300L)
+    private val searchParamsFlow =
+        uiState
+            .map { it.query }
+            .distinctUntilChanged()
+            .debounce(300L)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val addresses =
+    val addresses: Flow<PagingData<AddressUiModel>> =
         searchParamsFlow
             .flatMapLatest { query ->
                 if (query.isBlank()) {
+                    updateState { copy(totalCount = 0) }
                     flowOf(PagingData.empty())
                 } else {
-                    addressRepository.searchAddress(query)
+                    addressRepository.searchAddress(query) { totalCount ->
+                        updateState { copy(totalCount = totalCount) }
+                    }
                 }
             }.map { pagingData ->
                 pagingData.map { address -> address.toUiModel() }
             }.cachedIn(viewModelScope)
-
     override fun onEvent(event: AddressSearchUiEvent) {
         when (event) {
             is AddressSearchUiEvent.UpdateQuery -> updateQuery(event)

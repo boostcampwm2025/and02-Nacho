@@ -13,7 +13,10 @@ import javax.inject.Inject
 internal class AddressRepositoryImpl @Inject constructor(
     private val remoteDataSource: AddressRemoteDataSource,
 ) : AddressRepository {
-    override fun searchAddress(query: String): Flow<PagingData<Address>> =
+    override fun searchAddress(
+        query: String,
+        onTotalCountLoaded: (Int) -> Unit,
+    ): Flow<PagingData<Address>> =
         Pager(
             config =
                 PagingConfig(
@@ -25,6 +28,7 @@ internal class AddressRepositoryImpl @Inject constructor(
                 AddressSearchPagingSource(
                     remoteDataSource = remoteDataSource,
                     query = query,
+                    onTotalCountLoaded = onTotalCountLoaded,
                 )
             },
         ).flow
