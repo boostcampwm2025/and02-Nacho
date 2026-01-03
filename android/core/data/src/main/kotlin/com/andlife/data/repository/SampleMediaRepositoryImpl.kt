@@ -2,9 +2,9 @@ package com.andlife.data.repository
 
 import com.andlife.data.util.media.MediaUploader
 import com.andlife.domain.error.DataError
-import com.andlife.domain.repository.MediaType
-import com.andlife.domain.util.Result
+import com.andlife.domain.model.MediaType
 import com.andlife.domain.repository.SampleMediaRepository
+import com.andlife.domain.util.Result
 import jakarta.inject.Inject
 import java.io.File
 
