@@ -28,4 +28,5 @@ r2:
   secret-key: ${R2_SECRET_KEY}
   endpoint: ${R2_ENDPOINT}
   bucket-name: video-test-boostcamp
+  public-url: ${R2_PUBLIC_URL}
   region: auto
