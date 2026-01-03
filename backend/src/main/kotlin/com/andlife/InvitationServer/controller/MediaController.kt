@@ -195,7 +195,7 @@ class MediaController(
     fun completeUpload(@RequestBody request: CompleteUploadRequest): BaseResponse<CompleteUploadResponse> {
         return try {
             val mediaUrl = if (publicUrl.isNotBlank()) {
-                "$publicUrl/${request.mediaKey}"
+                "$publicUrl${request.mediaKey}"
             } else {
                 null
             }
@@ -269,7 +269,7 @@ class MediaController(
         return try {
             val results = request.files.map { fileKey ->
                 val mediaUrl = if (publicUrl.isNotBlank()) {
-                    "$publicUrl/${fileKey.mediaKey}"
+                    "$publicUrl${fileKey.mediaKey}"
                 } else {
                     null
                 }
