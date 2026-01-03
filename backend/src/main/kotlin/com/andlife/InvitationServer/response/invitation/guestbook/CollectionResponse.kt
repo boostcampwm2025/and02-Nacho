@@ -1,4 +1,4 @@
-package com.andlife.InvitationServer.response.invitation
+package com.andlife.InvitationServer.response.invitation.guestbook
 
 import com.andlife.InvitationServer.constant.MediaType
 import com.andlife.InvitationServer.response.AuthorResponse
