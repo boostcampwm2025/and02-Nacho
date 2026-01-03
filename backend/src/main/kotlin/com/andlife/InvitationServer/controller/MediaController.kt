@@ -105,7 +105,7 @@ class MediaController(
 ) {
 
     // 1. Pre-signed URL 생성 (업로드용)
-    @PostMapping("/upload-url")
+    @PostMapping("/start")
     fun getUploadUrl(@RequestBody request: UploadUrlRequest): UploadUrlResponse {
         val mediaType = request.mediaType
         val extension = mediaType.getExtension()
