@@ -14,6 +14,6 @@ interface MediaUploader {
 
     suspend fun uploadMediaBatch(
         files: List<Pair<File, MediaType>> // TODO: Pair -> Data Class
-    ): Result<List<String>, DataError>
+    ): Result<List<String?>, DataError>
 }
 

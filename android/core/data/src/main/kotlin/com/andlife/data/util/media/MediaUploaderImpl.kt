@@ -28,134 +28,86 @@ class MediaUploaderImpl @Inject constructor(
     @param:MediaOkHttp private val okHttpClient: OkHttpClient
 ) : MediaUploader {
 
-    companion object {
-        private const val TAG = "MediaUploader"
-    }
-
     override suspend fun uploadMedia(
         file: File,
         mediaType: MediaType
-    ): Result<String, DataError> {
+    ): Result<String, DataError> = withContext(Dispatchers.IO) {
         val uploadUrlResult = apiCall {
             mediaService.uploadMedia(
-                UploadMediaRequest(
-                    mediaType = mediaType.name,
-                    fileName = file.name
-                )
+                UploadMediaRequest(mediaType = mediaType.name, fileName = file.name)
             )
         }
 
-        when (uploadUrlResult) {
-            is Result.Error -> {
-                return uploadUrlResult
-            }
+        if (uploadUrlResult is Result.Error) return@withContext uploadUrlResult
+        val uploadData = (uploadUrlResult as Result.Success).data
+
+        val uploadResult = uploadToR2(uploadData.uploadUrl, file, mediaType)
+        if (uploadResult is Result.Error) return@withContext uploadResult
+
+        val completeResult = apiCall {
+            mediaService.completeUpload(
+                CompleteUploadRequest(mediaKey = uploadData.mediaKey, mediaType = mediaType.name)
+            )
+        }
+
+        return@withContext when (completeResult) {
+            is Result.Error -> completeResult
             is Result.Success -> {
-                val uploadData = uploadUrlResult.data
-                val uploadResult = uploadToR2(
-                    uploadData.uploadUrl,
-                    file,
-                    mediaType
-                )
-
-                if (uploadResult is Result.Error) {
-                    return uploadResult
-                }
-                val completeResult = apiCall {
-                    mediaService.completeUpload(
-                        CompleteUploadRequest(
-                            mediaKey = uploadData.mediaKey,
-                            mediaType = mediaType.name
-                        )
-                    )
-                }
-
-                return when (completeResult) {
-                    is Result.Error -> {
-                        completeResult
-                    }
-                    is Result.Success -> {
-                        val mediaUrl = completeResult.data.mediaUrl
-                        if (mediaUrl != null) {
-                            Result.Success(mediaUrl)
-                        } else {
-                            Result.Error(
-                                DataError.Network.UNKNOWN,
-                                "Media URL is null"
-                            )
-                        }
-                    }
-                }
+                val mediaUrl = completeResult.data.mediaUrl
+                if (mediaUrl != null) Result.Success(mediaUrl)
+                else Result.Error(DataError.Network.UNKNOWN, "Media URL is null")
             }
         }
     }
 
     override suspend fun uploadMediaBatch(
         files: List<Pair<File, MediaType>>
-    ): Result<List<String>, DataError> {
-        return withContext(Dispatchers.IO) {
-            val batchRequest = BatchUploadMediaRequest(
-                files = files.map { (file, type) ->
-                    FileInfo(
-                        mediaType = type.name,
-                        fileName = file.name
-                    )
-                }
-            )
-
-            val uploadUrlsResult = apiCall {
-                mediaService.batchUploadMedia(batchRequest)
+    ): Result<List<String?>, DataError> = withContext(Dispatchers.IO) {
+        val batchRequest = BatchUploadMediaRequest(
+            files = files.map { (file, type) ->
+                FileInfo(mediaType = type.name, fileName = file.name)
             }
+        )
 
-            when (uploadUrlsResult) {
-                is Result.Error -> {
-                    return@withContext uploadUrlsResult
+        // 서버로부터 업로드 URL들 받아오기
+        val uploadUrlsResult = apiCall { mediaService.batchUploadMedia(batchRequest) }
+        if (uploadUrlsResult is Result.Error) return@withContext uploadUrlsResult
+
+        val uploadInfos = (uploadUrlsResult as Result.Success).data.files
+
+        // R2 병렬 업로드 (실패 시 null 반환)
+        val uploadResults = uploadInfos.zip(files).map { (info, filePair) ->
+            async {
+                val result = uploadToR2(info.uploadUrl, filePair.first, filePair.second)
+                if (result is Result.Success) info else null
+            }
+        }.awaitAll()
+
+        // 업로드에 성공한 항목들만 모아서 완료 요청 (성공한 게 하나도 없더라도 API 구조에 따라 호출 가능)
+        val successfulInfos = uploadResults.filterNotNull()
+
+        // 만약 성공한 게 하나도 없다면 바로 빈 리스트 반환할 수도 있음
+        if (successfulInfos.isEmpty()) {
+            return@withContext Result.Success(List(files.size) { null })
+        }
+
+        val completeRequest = BatchCompleteUploadRequest(
+            files = successfulInfos.map { info ->
+                FileKeyInfo(mediaKey = info.mediaKey, fileName = info.fileName)
+            }
+        )
+
+        val completeResult = apiCall { mediaService.batchCompleteUpload(completeRequest) }
+
+        return@withContext when (completeResult) {
+            is Result.Error -> completeResult
+            is Result.Success -> {
+                val completedData = completeResult.data.files
+
+                val finalUrls = uploadInfos.map { info ->
+                    completedData.find { it.mediaKey == info.mediaKey }?.mediaUrl
                 }
-                is Result.Success -> {
-                    val uploadInfos = uploadUrlsResult.data.files
-                    val uploadResults = uploadInfos.zip(files).mapIndexed { index, (info, filePair) ->
-                        async {
-                            uploadToR2(info.uploadUrl, filePair.first, filePair.second)
-                        }
-                    }.awaitAll()
-
-                    // 업로드 실패한 항목 체크
-                    val firstError = uploadResults.firstOrNull { it is Result.Error }
-                    if (firstError is Result.Error) {
-                        return@withContext firstError
-                    }
-                    val completeRequest = BatchCompleteUploadRequest(
-                        files = uploadInfos.map { info ->
-                            FileKeyInfo(
-                                mediaKey = info.mediaKey,
-                                fileName = info.fileName
-                            )
-                        }
-                    )
-
-                    val completeResult = apiCall {
-                        mediaService.batchCompleteUpload(completeRequest)
-                    }
-
-                    when (completeResult) {
-                        is Result.Error -> {
-                            completeResult
-                        }
-                        is Result.Success -> {
-                            val mediaUrls = completeResult.data.files
-                                .sortedBy { uploadInfos.indexOfFirst { info -> info.mediaKey == it.mediaKey } }
-                                .mapNotNull { it.mediaUrl }
-
-                            if (mediaUrls.size == files.size) {
-                                Result.Success(mediaUrls)
-                            } else {
-                                Result.Error(
-                                    DataError.Network.UNKNOWN,
-                                    "Some media URLs are missing"
-                                )
-                            }
-                        }
-                    }
-                }
+                Result.Success(finalUrls)
             }
         }
     }
@@ -166,34 +118,18 @@ class MediaUploaderImpl @Inject constructor(
         mediaType: MediaType
     ): Result<Unit, DataError> = withContext(Dispatchers.IO) {
         try {
-            val contentType = when (mediaType) {
-                MediaType.IMAGE -> "image/jpeg"
-                MediaType.VIDEO -> "video/mp4"
-                MediaType.AUDIO -> "audio/mpeg"
-            }
+            val requestBody = file.asRequestBody(mediaType.contentType.toMediaType())
+            val request = Request.Builder().url(uploadUrl).put(requestBody).build()
 
-            val requestBody = file.asRequestBody(contentType.toMediaType())
-            val request = Request.Builder()
-                .url(uploadUrl)
-                .put(requestBody)
-                .build()
-            val response = okHttpClient.newCall(request).execute()
-
-            if (response.isSuccessful) {
-                Result.Success(Unit)
-            } else {
-                val errorBody = response.body?.string()
-                Result.Error(
-                    DataError.Network.UNKNOWN,
-                    "R2 upload failed: ${response.code} - $errorBody"
-                )
+            okHttpClient.newCall(request).execute().use { response ->
+                if (response.isSuccessful) {
+                    Result.Success(Unit)
+                } else {
+                    Result.Error(DataError.Network.UNKNOWN, "R2 upload failed")
+                }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
-            Result.Error(
-                DataError.Network.UNKNOWN,
-                "R2 upload exception: ${e.message}"
-            )
+            Result.Error(DataError.Network.UNKNOWN, e.message ?: "Unknown error")
         }
     }
 }

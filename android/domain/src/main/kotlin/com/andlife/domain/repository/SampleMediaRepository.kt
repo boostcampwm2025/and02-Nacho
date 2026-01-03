@@ -12,9 +12,11 @@ interface SampleMediaRepository {
 
     suspend fun uploadMultipleMedia(
         files: List<Pair<File, MediaType>>
-    ): Result<List<String>, DataError>
+    ): Result<List<String?>, DataError>
 }
 
-enum class MediaType {
-    IMAGE, VIDEO, AUDIO
+enum class MediaType(val contentType: String) {
+    IMAGE("image/jpeg"),
+    VIDEO("video/mp4"),
+    AUDIO("audio/mpeg")
 }
