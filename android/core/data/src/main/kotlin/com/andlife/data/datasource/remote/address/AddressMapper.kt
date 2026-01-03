@@ -1,9 +1,9 @@
 package com.andlife.data.datasource.remote.address
 
 import com.andlife.domain.model.Address
-import com.andlife.network.api.kakao.address.Document
+import com.andlife.network.api.kakao.address.KakaoAddressResponse
 
-fun Document.toDomain(): Address =
+fun KakaoAddressResponse.Document.toDomain(): Address =
     Address(
         id = id.toLongOrNull() ?: 0L,
         roadAddressName = roadAddressName,
