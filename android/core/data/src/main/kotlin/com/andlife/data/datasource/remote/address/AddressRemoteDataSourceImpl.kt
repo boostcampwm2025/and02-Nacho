@@ -1,7 +1,10 @@
 package com.andlife.data.datasource.remote.address
 
+import com.andlife.data.util.externalApiCall
+import com.andlife.domain.error.DataError
 import com.andlife.network.api.kakao.address.KakaoAddressResponse
 import com.andlife.network.api.kakao.address.KakaoAddressService
+import com.andlife.domain.util.Result
 import javax.inject.Inject
 
 internal class AddressRemoteDataSourceImpl @Inject constructor(
@@ -11,10 +14,12 @@ internal class AddressRemoteDataSourceImpl @Inject constructor(
         query: String,
         page: Int,
         size: Int,
-    ): KakaoAddressResponse =
-        kakaoAddressService.searchAddress(
-            query = query,
-            page = page,
-            size = size,
-        )
+    ): Result<KakaoAddressResponse, DataError> =
+        externalApiCall {
+            kakaoAddressService.searchAddress(
+                query = query,
+                page = page,
+                size = size,
+            )
+        }
 }
