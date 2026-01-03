@@ -21,7 +21,7 @@ class SampleMediaRepositoryImpl @Inject constructor(
 
     override suspend fun uploadMultipleMedia(
         files: List<Pair<File, MediaType>>
-    ): Result<List<String>, DataError> {
+    ): Result<List<String?>, DataError> {
         return mediaUploader.uploadMediaBatch(files)
     }
 }
