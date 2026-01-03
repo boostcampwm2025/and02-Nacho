@@ -1,5 +1,7 @@
 package com.andlife.InvitationServer.controller
 
+import com.andlife.InvitationServer.response.BaseResponse
+import com.andlife.InvitationServer.response.CommonResponseCode
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -13,7 +15,6 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.services.s3.model.HeadObjectRequest
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest
@@ -59,12 +60,12 @@ class R2Config {
     }
 }
 
-data class UploadUrlRequest(
+data class UploadMediaRequest(
     val mediaType: MediaType,
     val fileName: String
 )
 
-data class UploadUrlResponse(
+data class UploadMediaResponse(
     val uploadUrl: String,
     val mediaKey: String,
     val mediaType: MediaType
@@ -106,7 +107,7 @@ class MediaController(
 
     // 1. Pre-signed URL 생성 (업로드용)
     @PostMapping("/start")
-    fun getUploadUrl(@RequestBody request: UploadUrlRequest): UploadUrlResponse {
+    fun getUploadUrl(@RequestBody request: UploadMediaRequest): BaseResponse<UploadMediaResponse> {
         val mediaType = request.mediaType
         val extension = mediaType.getExtension()
 
@@ -127,59 +128,60 @@ class MediaController(
 
         val presignedRequest = r2Presigner.presignPutObject(presignRequest)
 
-        return UploadUrlResponse(
+        val response = UploadMediaResponse(
             uploadUrl = presignedRequest.url().toString(),
             mediaKey = key,
             mediaType = mediaType
         )
+
+        return BaseResponse.success(response)
     }
 
     @PostMapping("/complete")
-    fun completeUpload(@RequestBody request: CompleteUploadRequest): CompleteUploadResponse {
+    fun completeUpload(@RequestBody request: CompleteUploadRequest): BaseResponse<CompleteUploadResponse> {
         return try {
-            // 파일이 실제로 R2에 존재하는지 확인
-             val headObjectRequest = HeadObjectRequest.builder()
-                 .bucket(bucketName)
-                 .key(request.mediaKey)
-                 .build()
-             r2Client.headObject(headObjectRequest)
-
+            // 공개 URL 생성 (publicUrl이 설정되어 있는 경우)
             val mediaUrl = if (publicUrl.isNotBlank()) {
                 "$publicUrl/${request.mediaKey}"
             } else {
                 null
             }
 
-            CompleteUploadResponse(
+            val response = CompleteUploadResponse(
                 success = true,
-                mediaUrl = mediaUrl,
-                message = "성공적으로 업로드가 완료되었습니다."
+                mediaUrl = mediaUrl
             )
+
+            BaseResponse.success(data = response)
         } catch (e: Exception) {
-            CompleteUploadResponse(
+            val response = CompleteUploadResponse( // TODO: 에러로 반환되게 수정, 일단 지금은 response있고 code 500으로 반환
                 success = false,
-                message = "업로드 검증 실패: ${e.message}"
+                message = "Upload completion failed: ${e.message}"
             )
+            BaseResponse.success(data = response, responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
         }
     }
 
     @DeleteMapping("/{mediaKey}")
-    fun deleteMedia(@PathVariable mediaKey: String): CompleteUploadResponse {
+    fun deleteMedia(@PathVariable mediaKey: String): BaseResponse<CompleteUploadResponse> {
         return try {
             r2Client.deleteObject { builder ->
                 builder.bucket(bucketName)
                     .key(mediaKey)
             }
 
-            CompleteUploadResponse(
+            val response = CompleteUploadResponse(
                 success = true,
-                message = "Media deleted successfully"
+                mediaUrl = null
             )
+
+            BaseResponse.success(data = response)
         } catch (e: Exception) {
-            CompleteUploadResponse(
+            val response = CompleteUploadResponse(
                 success = false,
-                message = "Delete failed: ${e.message}"
+                message = "Media deletion failed: ${e.message}"
             )
+            BaseResponse.success(data = response, responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
         }
     }
 }
