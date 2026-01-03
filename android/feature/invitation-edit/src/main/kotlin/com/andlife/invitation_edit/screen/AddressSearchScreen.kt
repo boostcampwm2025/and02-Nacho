@@ -163,7 +163,6 @@ private fun AddressSearchTopBar(
                 )
             }
         },
-        windowInsets = WindowInsets(),
         colors =
             TopAppBarDefaults.topAppBarColors(
                 containerColor = InvitationTheme.colorScheme.backgroundPrimary,

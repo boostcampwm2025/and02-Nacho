@@ -65,7 +65,6 @@ fun InvitationNavHost(
 
             addressSearchNavGraph(
                 navController = navigator.navController,
-                paddingValues = innerPadding,
                 onNavigateBack = navigator::navigatePopBackStack,
             )
         }
