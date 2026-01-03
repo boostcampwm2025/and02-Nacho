@@ -3,10 +3,10 @@ package com.andlife.invitation.screen
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.andlife.domain.model.MediaType
 import com.andlife.domain.repository.SampleMediaRepository
-import com.andlife.domain.repository.MediaType
-import com.andlife.domain.util.onSuccess
 import com.andlife.domain.util.onFailure
+import com.andlife.domain.util.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.io.File
