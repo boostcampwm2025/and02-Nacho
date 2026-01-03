@@ -60,28 +60,6 @@ class R2Config {
     }
 }
 
-data class UploadMediaRequest(
-    val mediaType: MediaType,
-    val fileName: String
-)
-
-data class UploadMediaResponse(
-    val uploadUrl: String,
-    val mediaKey: String,
-    val mediaType: MediaType
-)
-
-data class CompleteUploadRequest(
-    val mediaKey: String,
-    val mediaType: MediaType
-)
-
-data class CompleteUploadResponse(
-    val success: Boolean,
-    val mediaUrl: String? = null,
-    val message: String? = null
-)
-
 enum class MediaType(val folder: String, val contentType: String) {
     VIDEO("videos", "video/mp4"),
     IMAGE("images", "image/jpeg"),
@@ -96,6 +74,67 @@ enum class MediaType(val folder: String, val contentType: String) {
     }
 }
 
+data class UploadMediaRequest(
+    val mediaType: String,
+    val fileName: String
+)
+
+data class UploadMediaResponse(
+    val uploadUrl: String,
+    val mediaKey: String,
+    val mediaType: String
+)
+
+data class CompleteUploadRequest(
+    val mediaKey: String,
+    val mediaType: String
+)
+
+data class CompleteUploadResponse(
+    val success: Boolean,
+    val mediaUrl: String? = null,
+    val message: String? = null
+)
+
+data class BatchUploadMediaRequest(
+    val files: List<FileInfo>
+)
+
+data class FileInfo(
+    val mediaType: String,
+    val fileName: String
+)
+
+data class BatchUploadMediaResponse(
+    val files: List<UploadInfo>
+)
+
+data class UploadInfo(
+    val uploadUrl: String,
+    val mediaKey: String,
+    val mediaType: String,
+    val fileName: String
+)
+
+data class BatchCompleteUploadRequest(
+    val files: List<FileKeyInfo>
+)
+
+data class FileKeyInfo(
+    val mediaKey: String,
+    val fileName: String
+)
+
+data class BatchCompleteUploadResponse(
+    val files: List<CompleteUploadInfo>
+)
+
+data class CompleteUploadInfo(
+    val mediaKey: String,
+    val mediaUrl: String?,
+    val fileName: String
+)
+
 @RestController
 @RequestMapping("/api/v1/media")
 class MediaController(
@@ -104,43 +143,57 @@ class MediaController(
     @param:Value("\${r2.bucket-name}") private val bucketName: String,
     @param:Value("\${r2.public-url}") private val publicUrl: String
 ) {
-
-    // 1. Pre-signed URL 생성 (업로드용)
     @PostMapping("/start")
     fun getUploadUrl(@RequestBody request: UploadMediaRequest): BaseResponse<UploadMediaResponse> {
-        val mediaType = request.mediaType
-        val extension = mediaType.getExtension()
+        return try {
+            val mediaType = MediaType.valueOf(request.mediaType.uppercase())
+            val extension = mediaType.getExtension()
+            val key = "${mediaType.folder}/${UUID.randomUUID()}$extension"
 
-        // 미디어 타입별로 폴더 분리
-        val key = "${mediaType.folder}/${UUID.randomUUID()}$extension"
+            val putObjectRequest = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .contentType(mediaType.contentType)
+                .build()
 
-        // Pre-signed URL 생성 (15분 유효)
-        val putObjectRequest = PutObjectRequest.builder()
-            .bucket(bucketName)
-            .key(key)
-            .contentType(mediaType.contentType)
-            .build()
+            val presignRequest = PutObjectPresignRequest.builder()
+                .signatureDuration(Duration.ofMinutes(15))
+                .putObjectRequest(putObjectRequest)
+                .build()
 
-        val presignRequest = PutObjectPresignRequest.builder()
-            .signatureDuration(Duration.ofMinutes(15))
-            .putObjectRequest(putObjectRequest)
-            .build()
+            val presignedRequest = r2Presigner.presignPutObject(presignRequest)
 
-        val presignedRequest = r2Presigner.presignPutObject(presignRequest)
+            val response = UploadMediaResponse(
+                uploadUrl = presignedRequest.url().toString(),
+                mediaKey = key,
+                mediaType = mediaType.name
+            )
 
-        val response = UploadMediaResponse(
-            uploadUrl = presignedRequest.url().toString(),
-            mediaKey = key,
-            mediaType = mediaType
-        )
-
-        return BaseResponse.success(response)
+            BaseResponse.success(response)
+        } catch (e: IllegalArgumentException) {
+            BaseResponse.success(
+                UploadMediaResponse(
+                    uploadUrl = "",
+                    mediaKey = "",
+                    mediaType = ""
+                ),
+                responseCode = CommonResponseCode.BAD_REQUEST
+            )
+        } catch (e: Exception) {
+            BaseResponse.success(
+                UploadMediaResponse(
+                    uploadUrl = "",
+                    mediaKey = "",
+                    mediaType = ""
+                ),
+                responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR
+            )
+        }
     }
 
     @PostMapping("/complete")
     fun completeUpload(@RequestBody request: CompleteUploadRequest): BaseResponse<CompleteUploadResponse> {
         return try {
-            // 공개 URL 생성 (publicUrl이 설정되어 있는 경우)
             val mediaUrl = if (publicUrl.isNotBlank()) {
                 "$publicUrl/${request.mediaKey}"
             } else {
@@ -152,13 +205,90 @@ class MediaController(
                 mediaUrl = mediaUrl
             )
 
-            BaseResponse.success(data = response)
+            BaseResponse.success(response)
         } catch (e: Exception) {
-            val response = CompleteUploadResponse( // TODO: 에러로 반환되게 수정, 일단 지금은 response있고 code 500으로 반환
+            val response = CompleteUploadResponse(
                 success = false,
                 message = "Upload completion failed: ${e.message}"
             )
-            BaseResponse.success(data = response, responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
+            BaseResponse.success(response, responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    @PostMapping("/batch/start")
+    fun getBatchUploadUrls(
+        @RequestBody request: BatchUploadMediaRequest
+    ): BaseResponse<BatchUploadMediaResponse> {
+        return try {
+            val uploadInfos = request.files.map { fileInfo ->
+                val mediaType = MediaType.valueOf(fileInfo.mediaType.uppercase())
+                val extension = mediaType.getExtension()
+                val key = "${mediaType.folder}/${UUID.randomUUID()}$extension"
+
+                val putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .contentType(mediaType.contentType)
+                    .build()
+
+                val presignRequest = PutObjectPresignRequest.builder()
+                    .signatureDuration(Duration.ofMinutes(15))
+                    .putObjectRequest(putObjectRequest)
+                    .build()
+
+                val presignedRequest = r2Presigner.presignPutObject(presignRequest)
+
+                UploadInfo(
+                    uploadUrl = presignedRequest.url().toString(),
+                    mediaKey = key,
+                    mediaType = mediaType.name,
+                    fileName = fileInfo.fileName
+                )
+            }
+
+            val response = BatchUploadMediaResponse(files = uploadInfos)
+            BaseResponse.success(response)
+
+        } catch (e: IllegalArgumentException) {
+            BaseResponse.success(
+                BatchUploadMediaResponse(files = emptyList()),
+                responseCode = CommonResponseCode.BAD_REQUEST
+            )
+        } catch (e: Exception) {
+            BaseResponse.success(
+                BatchUploadMediaResponse(files = emptyList()),
+                responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR
+            )
+        }
+    }
+
+    @PostMapping("/batch/complete")
+    fun completeBatchUpload(
+        @RequestBody request: BatchCompleteUploadRequest
+    ): BaseResponse<BatchCompleteUploadResponse> {
+        return try {
+            val results = request.files.map { fileKey ->
+                val mediaUrl = if (publicUrl.isNotBlank()) {
+                    "$publicUrl/${fileKey.mediaKey}"
+                } else {
+                    null
+                }
+
+                CompleteUploadInfo(
+                    mediaKey = fileKey.mediaKey,
+                    mediaUrl = mediaUrl,
+                    fileName = fileKey.fileName
+                )
+            }
+
+            val response = BatchCompleteUploadResponse(files = results)
+            BaseResponse.success(response)
+
+        } catch (e: Exception) {
+            BaseResponse.success(
+                BatchCompleteUploadResponse(files = emptyList()),
+                responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR
+            )
         }
     }
 
@@ -175,13 +305,13 @@ class MediaController(
                 mediaUrl = null
             )
 
-            BaseResponse.success(data = response)
+            BaseResponse.success(response)
         } catch (e: Exception) {
             val response = CompleteUploadResponse(
                 success = false,
                 message = "Media deletion failed: ${e.message}"
             )
-            BaseResponse.success(data = response, responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
+            BaseResponse.success(response, responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
         }
     }
 }
