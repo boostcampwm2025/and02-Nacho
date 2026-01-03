@@ -5,12 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 
-interface GuestBookRepository: JpaRepository<GuestBook, Long> {
+interface GuestBookRepository : JpaRepository<GuestBook, Long> {
     @Query("SELECT DISTINCT g FROM GuestBook g " +
             "JOIN FETCH g.user " +
-            "LEFT JOIN FETCH g.images " +
-            "LEFT JOIN FETCH g.audios " +
-            "LEFT JOIN FETCH g.videos " +
             "WHERE g.invitation.id = :invitationId")
     fun findAllByInvitationIdWithDetails(@Param("invitationId") invitationId: Long): List<GuestBook>
 }
