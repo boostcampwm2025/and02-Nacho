@@ -19,14 +19,6 @@ import javax.inject.Singleton
 object KakaoNetworkModule {
     private const val KAKAO_BASE_URL = "https://dapi.kakao.com/"
 
-//    @Provides
-//    @Singleton
-//    fun provideJson(): Json =
-//        Json {
-//            ignoreUnknownKeys = true
-//            coerceInputValues = true
-//        }
-
     @Provides
     @Singleton
     @KakaoOkHttp
@@ -58,6 +50,5 @@ object KakaoNetworkModule {
     @Singleton
     fun provideKakaoAddressService(
         @KakaoRetrofit retrofit: Retrofit,
-    ): KakaoAddressService =
-        retrofit.create(KakaoAddressService::class.java)
+    ): KakaoAddressService = retrofit.create(KakaoAddressService::class.java)
 }

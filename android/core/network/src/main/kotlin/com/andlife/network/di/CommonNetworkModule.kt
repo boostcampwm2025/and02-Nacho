@@ -12,13 +12,13 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object CommonNetworkModule {
-
     @Provides
     @Singleton
-    fun provideJson() = Json {
-        ignoreUnknownKeys = true
-        coerceInputValues = true
-    }
+    fun provideJson() =
+        Json {
+            ignoreUnknownKeys = true
+            coerceInputValues = true
+        }
 
     @Provides
     @Singleton
