@@ -31,6 +31,7 @@ class GuestBookService(
                     mediaType = MediaType.IMAGE,
                     mediaUrl = image.imageUrl,
                     author = author,
+                    content = gb.textContent,
                     createdAt = createdAt,
                     durationSeconds = 0
                 ))
@@ -42,6 +43,7 @@ class GuestBookService(
                     mediaType = MediaType.AUDIO,
                     mediaUrl = audio.audioUrl,
                     author = author,
+                    content = gb.textContent,
                     createdAt = createdAt,
                     durationSeconds = audio.durationSeconds
                 ))
@@ -53,6 +55,7 @@ class GuestBookService(
                     mediaType = MediaType.VIDEO,
                     mediaUrl = video.thumbnailUrl,
                     author = author,
+                    content = gb.textContent,
                     createdAt = createdAt,
                     durationSeconds = video.durationSeconds
                 ))
