@@ -12,6 +12,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
@@ -44,7 +45,31 @@ object InvitationNetworkModule {
 
     @Provides
     @Singleton
+    @MediaOkHttp
+    fun provideMediaOkHttpClient(
+        loggingInterceptor: HttpLoggingInterceptor
+    ): OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(loggingInterceptor)
+        .connectTimeout(60, TimeUnit.SECONDS) // 파일 업로드는 더 길게
+        .writeTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .build()
+
+    @Provides
+    @Singleton
+    @MediaRetrofit
+    fun provideMediaRetrofit(
+        json: Json,
+        @MediaOkHttp okHttpClient: OkHttpClient
+    ): Retrofit = Retrofit.Builder()
+        .baseUrl(BuildConfig.SERVER_URL)
+        .client(okHttpClient)
+        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+        .build()
+
+    @Provides
+    @Singleton
     fun provideInvitationApiService(
-        @InvitationRetrofit retrofit: Retrofit,
+        @MediaRetrofit retrofit: Retrofit,
     ): MediaService = retrofit.create(MediaService::class.java)
 }
