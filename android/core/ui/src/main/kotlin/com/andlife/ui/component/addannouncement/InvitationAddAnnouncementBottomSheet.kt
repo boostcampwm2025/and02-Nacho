@@ -94,7 +94,10 @@ fun InvitationAddAnnouncementBottomSheet(
         modifier = modifier,
     ) {
         Box(
-            modifier = Modifier.fillMaxWidth(),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = InvitationSpacing.twoXLarge),
         ) {
             Text(
                 text = "공지사항 추가",
