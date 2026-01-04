@@ -8,4 +8,14 @@
     <string name="des_invitation_list_image">초대장 리스트 카드의 이미지</string>
     <string name="des_invitation_more_btn">초대장 리스트 카드의 더보기 아이콘 버튼</string>
     <string name="des_invitation_icon">초대장 시간 장소 아이콘</string>
+
+    <string name="label_add_announcement">공지사항 추가</string>
+    <string name="label_announcement_title">공지사항 제목</string>
+    <string name="tf_announcement_title_hint">제목을 입력해주세요</string>
+    <string name="label_announcement_content">공지사항 내용</string>
+    <string name="tf_announcement_content_hint">내용을 입력해주세요</string>
+    <string name="desc_close">닫기</string>
+    <string name="txt_delete_all">모두 지우기</string>
+    <string name="txt_submit">등록</string>
+
 </resources>

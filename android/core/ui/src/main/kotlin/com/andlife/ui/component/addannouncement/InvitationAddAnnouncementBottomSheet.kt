@@ -25,6 +25,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.andlife.designsystem.component.InvitationButton
 import com.andlife.designsystem.component.InvitationTextField
@@ -102,7 +103,7 @@ fun InvitationAddAnnouncementBottomSheet(
                     .padding(top = InvitationSpacing.twoXLarge),
         ) {
             Text(
-                text = "공지사항 추가",
+                text = stringResource(R.string.label_add_announcement),
                 style = InvitationTheme.typography.headingSmallSemiBold,
                 color = InvitationTheme.colorScheme.textPrimary,
                 modifier = Modifier.align(Alignment.Center),
@@ -123,7 +124,7 @@ fun InvitationAddAnnouncementBottomSheet(
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_close_24),
-                    contentDescription = "닫기",
+                    contentDescription = stringResource(R.string.desc_close),
                     tint = InvitationTheme.colorScheme.textPrimary,
                 )
             }
@@ -138,20 +139,20 @@ fun InvitationAddAnnouncementBottomSheet(
             Spacer(modifier = Modifier.height(InvitationSpacing.large))
 
             TitleAndTextField(
-                title = "공지사항 제목",
+                title = stringResource(R.string.label_announcement_title),
                 textFieldValue = draft.title,
                 onTextFieldValueChange = viewModel::updateTitle,
-                textFieldPlaceholder = "제목을 입력해주세요",
+                textFieldPlaceholder = stringResource(R.string.tf_announcement_title_hint),
                 modifier = Modifier.fillMaxWidth(),
             )
 
             Spacer(modifier = Modifier.height(InvitationSpacing.medium))
 
             TitleAndTextField(
-                title = "공지사항 내용",
+                title = stringResource(R.string.label_announcement_content),
                 textFieldValue = draft.content,
                 onTextFieldValueChange = viewModel::updateContent,
-                textFieldPlaceholder = "내용을 입력해주세요",
+                textFieldPlaceholder = stringResource(R.string.tf_announcement_content_hint),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = false,
                 minLines = 5,
@@ -168,7 +169,7 @@ fun InvitationAddAnnouncementBottomSheet(
                     contentPadding = PaddingValues(vertical = InvitationSpacing.medium),
                 ) {
                     Text(
-                        text = "모두 지우기",
+                        text = stringResource(R.string.txt_delete_all),
                         color = InvitationTheme.colorScheme.iconPrimary,
                         style = InvitationTheme.typography.bodyMediumSemiBold,
                     )
@@ -192,7 +193,7 @@ fun InvitationAddAnnouncementBottomSheet(
                     ),
             ) {
                 Text(
-                    text = "등록",
+                    text = stringResource(R.string.txt_submit),
                     style = InvitationTheme.typography.bodyLargeSemiBold,
                 )
             }
