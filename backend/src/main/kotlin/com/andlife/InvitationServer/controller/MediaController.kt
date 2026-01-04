@@ -221,7 +221,7 @@ class MediaController(
                     // Simple 업로드는 클라이언트가 이미 완료했으므로 별도 처리 불필요
 
                     val mediaUrl = if (publicUrl.isNotBlank()) {
-                        "$publicUrl${fileInfo.mediaKey}"
+                        "${publicUrl.removeSuffix("/")}/${fileInfo.mediaKey.removePrefix("/")}"
                     } else {
                         null
                     }
