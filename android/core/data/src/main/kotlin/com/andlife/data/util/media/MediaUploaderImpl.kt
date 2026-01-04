@@ -36,6 +36,8 @@ class MediaUploaderImpl @Inject constructor(
     @param:MediaOkHttp private val okHttpClient: OkHttpClient
 ) : MediaUploader {
 
+    // TODO: 하나 실패 시 전체 실패로 할지, 부분 성공으로 할지 정책 정하기.
+    // TODO: 일단 하나 실패하면 해당 파일만 실패 처리함. [url1, url2, null, url4] 이런 식으로 반환.
     override suspend fun uploadMedias(
         files: List<MediaFile>
     ): Result<List<String?>, DataError> = withContext(Dispatchers.IO) {
@@ -241,7 +243,7 @@ class MediaUploaderImpl @Inject constructor(
             } catch (e: Exception) {
                 lastException = e
                 if (attempt < maxRetries - 1) {
-                    delay(1000L * (attempt + 1)) // Exponential backoff
+                    delay(2000L * (attempt + 1)) // Exponential backoff
                 }
             }
         }
