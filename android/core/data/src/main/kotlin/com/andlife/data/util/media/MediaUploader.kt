@@ -6,7 +6,5 @@ import com.andlife.domain.util.Result
 
 interface MediaUploader {
 
-    suspend fun uploadMedias(
-        files: List<MediaFile>
-    ): Result<List<String?>, DataError>
+    suspend fun uploadMedias(files: List<MediaFile>): Result<List<String?>, DataError>
 }

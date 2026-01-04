@@ -1,7 +1,5 @@
-package com.andlife.data.repository.di
+package com.andlife.data.util.media
 
-import com.andlife.data.util.media.MediaUploader
-import com.andlife.data.util.media.MediaUploaderImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
