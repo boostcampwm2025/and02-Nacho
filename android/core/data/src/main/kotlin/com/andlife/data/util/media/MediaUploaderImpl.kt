@@ -1,7 +1,8 @@
 package com.andlife.data.util.media
 
-import android.content.Context
+import android.content.ContentResolver
 import android.net.Uri
+import androidx.core.net.toUri
 import com.andlife.data.util.apiCall
 import com.andlife.domain.error.DataError
 import com.andlife.domain.model.MediaFile
@@ -15,7 +16,6 @@ import com.andlife.network.api.media.FileUploadInfo
 import com.andlife.network.api.media.MediaService
 import com.andlife.network.api.media.PartInfo
 import com.andlife.network.di.InvitationMedia
-import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -33,10 +33,9 @@ import okio.BufferedSink
 import okio.source
 import java.io.FileInputStream
 import java.io.IOException
-import androidx.core.net.toUri
 
 class MediaUploaderImpl @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+    private val contentResolver: ContentResolver,
     private val mediaService: MediaService,
     @param:InvitationMedia private val okHttpClient: OkHttpClient
 ) : MediaUploader {
@@ -138,7 +137,7 @@ class MediaUploaderImpl @Inject constructor(
                 override fun contentLength(): Long = fileSize
 
                 override fun writeTo(sink: BufferedSink) {
-                    context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    contentResolver.openInputStream(uri)?.use { inputStream ->
                         inputStream.source().use { source ->
                             sink.writeAll(source)
                         }
@@ -210,7 +209,7 @@ class MediaUploaderImpl @Inject constructor(
         chunkSize: Long,
         totalSize: Long
     ): ByteArray {
-        return context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
+        return contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
             FileInputStream(pfd.fileDescriptor).use { inputStream ->
                 val offset = (partNumber - 1) * chunkSize
                 val remainingBytes = totalSize - offset
