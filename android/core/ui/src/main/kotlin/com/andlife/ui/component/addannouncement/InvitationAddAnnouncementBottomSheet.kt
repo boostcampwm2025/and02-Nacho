@@ -1,4 +1,4 @@
-package com.andlife.ui.component
+package com.andlife.ui.component.addannouncement
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,14 +19,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.andlife.designsystem.component.InvitationButton
 import com.andlife.designsystem.component.InvitationTextField
 import com.andlife.designsystem.preview.PreviewTheme
@@ -71,6 +70,7 @@ fun InvitationAddAnnouncementBottomSheet(
     onConfirm: (String, String) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: AddAnnouncementViewModel = viewModel(),
 ) {
     val sheetState =
         rememberModalBottomSheetState(
@@ -78,9 +78,7 @@ fun InvitationAddAnnouncementBottomSheet(
         )
 
     val scope = rememberCoroutineScope()
-
-    var title by remember { mutableStateOf("") }
-    var content by remember { mutableStateOf("") }
+    val draft by viewModel.announcementDraft.collectAsState()
 
     ModalBottomSheet(
         onDismissRequest = { }, // 사용하지 않음
@@ -136,8 +134,8 @@ fun InvitationAddAnnouncementBottomSheet(
 
             TitleAndTextField(
                 title = "공지사항 제목",
-                textFieldValue = title,
-                onTextFieldValueChange = { title = it },
+                textFieldValue = draft.title,
+                onTextFieldValueChange = viewModel::updateTitle,
                 textFieldPlaceholder = "제목을 입력해주세요",
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -146,8 +144,8 @@ fun InvitationAddAnnouncementBottomSheet(
 
             TitleAndTextField(
                 title = "공지사항 내용",
-                textFieldValue = content,
-                onTextFieldValueChange = { content = it },
+                textFieldValue = draft.content,
+                onTextFieldValueChange = viewModel::updateContent,
                 textFieldPlaceholder = "내용을 입력해주세요",
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 5,
@@ -159,8 +157,7 @@ fun InvitationAddAnnouncementBottomSheet(
             ) {
                 TextButton(
                     onClick = {
-                        title = ""
-                        content = ""
+                        viewModel.clearDraft()
                     },
                     contentPadding = PaddingValues(vertical = InvitationSpacing.medium),
                 ) {
@@ -176,7 +173,8 @@ fun InvitationAddAnnouncementBottomSheet(
 
             InvitationButton(
                 onClick = {
-                    onConfirm(title, content)
+                    onConfirm(draft.title, draft.content)
+                    viewModel.clearDraft()
                 },
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(vertical = InvitationSpacing.medium),
