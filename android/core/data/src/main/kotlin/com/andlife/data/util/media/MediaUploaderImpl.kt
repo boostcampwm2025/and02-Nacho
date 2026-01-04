@@ -1,8 +1,10 @@
 package com.andlife.data.util.media
 
-import android.util.Log
+import android.content.Context
+import android.net.Uri
 import com.andlife.data.util.apiCall
 import com.andlife.domain.error.DataError
+import com.andlife.domain.model.MediaFile
 import com.andlife.domain.model.MediaType
 import com.andlife.domain.util.Result
 import com.andlife.network.api.media.BatchCompleteUploadRequest
@@ -13,6 +15,7 @@ import com.andlife.network.api.media.FileUploadInfo
 import com.andlife.network.api.media.MediaService
 import com.andlife.network.api.media.PartInfo
 import com.andlife.network.di.MediaOkHttp
+import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -24,29 +27,33 @@ import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.File
+import okio.BufferedSink
+import okio.source
+import java.io.FileInputStream
 import java.io.IOException
-import java.io.RandomAccessFile
-import java.util.concurrent.atomic.AtomicInteger
+import androidx.core.net.toUri
 
 class MediaUploaderImpl @Inject constructor(
+    @param:ApplicationContext private val context: Context,
     private val mediaService: MediaService,
     @param:MediaOkHttp private val okHttpClient: OkHttpClient
 ) : MediaUploader {
 
-    // TODO: 하나 실패 시 전체 실패로 할지, 부분 성공으로 할지 정책 정하기.
-    // TODO: 일단 하나 실패하면 해당 파일만 실패 처리함. [url1, url2, null, url4] 이런 식으로 반환.
+    companion object {
+        private const val MAX_CONCURRENT_CHUNKS = 3
+    }
+
     override suspend fun uploadMedias(
-        files: List<MediaFile>
+        files: List<MediaFile> // TODO: 데이터 레이어용을 굳이 따로 만들어야 하나? 일단 도메인 모델로 진행
     ): Result<List<String?>, DataError> = withContext(Dispatchers.IO) {
 
         val startRequest = BatchUploadMediaRequest(
             files = files.map { mediaFile ->
                 FileUploadInfo(
-                    fileName = mediaFile.file.name,
-                    fileSize = mediaFile.file.length(),
+                    fileName = mediaFile.fileName,
+                    fileSize = mediaFile.fileSize,
                     mediaType = mediaFile.mediaType.name
                 )
             }
@@ -58,17 +65,19 @@ class MediaUploaderImpl @Inject constructor(
         val uploadInfos = (startResult as Result.Success).data.files
 
         val uploadResults = uploadInfos.zip(files).map { (info, mediaFile) ->
+            val uri = mediaFile.uriString.toUri()
             async {
                 try {
                     if (info.isMultipart) {
                         val parts = uploadMultipart(
-                            file = mediaFile.file,
+                            uri = uri,
                             uploadId = info.uploadId!!,
                             chunkUrls = info.chunkUrls!!,
-                            chunkSize = info.chunkSize!!
-                        ) {
-                            Log.d("MediaUploader", "업로드 진행률 ${mediaFile.file.name}: ${it * 100}%")
-                        }
+                            chunkSize = info.chunkSize!!,
+                            totalSize = mediaFile.fileSize
+                        )
+
+                        if (parts == null) return@async null
 
                         CompleteFileInfo(
                             mediaKey = info.mediaKey,
@@ -79,18 +88,16 @@ class MediaUploaderImpl @Inject constructor(
                     } else {
                         val uploadResult = uploadSimple(
                             uploadUrl = info.uploadUrl!!,
-                            file = mediaFile.file,
-                            mediaType = mediaFile.mediaType,
+                            uri = uri,
+                            mediaType = mediaFile.mediaType
                         )
 
                         if (uploadResult is Result.Success) {
                             CompleteFileInfo(
                                 mediaKey = info.mediaKey,
-                                fileName = info.fileName,
+                                fileName = info.fileName
                             )
-                        } else {
-                            null
-                        }
+                        } else null
                     }
                 } catch (e: Exception) {
                     null
@@ -112,7 +119,6 @@ class MediaUploaderImpl @Inject constructor(
             is Result.Success -> {
                 val completedData = completeResult.data.files
 
-                // 원래 순서대로 URL 매핑 (실패한 건 null)
                 val finalUrls = uploadInfos.map { info ->
                     completedData.find {
                         it.mediaKey == info.mediaKey && it.success
@@ -125,24 +131,42 @@ class MediaUploaderImpl @Inject constructor(
 
     private suspend fun uploadSimple(
         uploadUrl: String,
-        file: File,
+        uri: Uri,
         mediaType: MediaType
     ): Result<Unit, DataError> = withContext(Dispatchers.IO) {
         try {
-            val requestBody = file.asRequestBody(mediaType.contentType.toMediaType())
-            val request = Request.Builder()
-                .url(uploadUrl)
-                .put(requestBody)
-                .build()
+            val inputStream = context.contentResolver.openInputStream(uri)
+                ?: return@withContext Result.Error(
+                    DataError.Network.UNKNOWN,
+                    "Cannot open Uri"
+                )
 
-            okHttpClient.newCall(request).execute().use { response ->
-                if (response.isSuccessful) {
-                    Result.Success(Unit)
-                } else {
-                    Result.Error(
-                        DataError.Network.UNKNOWN,
-                        "Simple upload failed: ${response.code}"
-                    )
+            inputStream.use { stream ->
+                // 스트리밍 RequestBody
+                val requestBody = object : RequestBody() {
+                    override fun contentType() = mediaType.contentType.toMediaType()
+
+                    override fun writeTo(sink: BufferedSink) {
+                        stream.source().use { source ->
+                            sink.writeAll(source)
+                        }
+                    }
+                }
+
+                val request = Request.Builder()
+                    .url(uploadUrl)
+                    .put(requestBody)
+                    .build()
+
+                okHttpClient.newCall(request).execute().use { response ->
+                    if (response.isSuccessful) {
+                        Result.Success(Unit)
+                    } else {
+                        Result.Error(
+                            DataError.Network.UNKNOWN,
+                            "Simple upload failed: ${response.code}"
+                        )
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -151,68 +175,74 @@ class MediaUploaderImpl @Inject constructor(
     }
 
     private suspend fun uploadMultipart(
-        file: File,
+        uri: Uri,
         uploadId: String,
         chunkUrls: List<ChunkUrl>,
         chunkSize: Long,
-        onProgress: ((Float) -> Unit)? = null
-    ): List<PartInfo> = withContext(Dispatchers.IO) {
+        totalSize: Long
+    ): List<PartInfo>? = withContext(Dispatchers.IO) {
 
-        // 최대 3개 청크 동시 업로드
         val semaphore = Semaphore(MAX_CONCURRENT_CHUNKS)
-        val completedChunks = AtomicInteger(0)
-        val totalChunks = chunkUrls.size
 
-        val parts = chunkUrls.map { chunkUrl ->
-            async {
-                semaphore.withPermit {
-                    // 청크 데이터 읽기
-                    val chunkData = readChunk(
-                        file = file,
-                        partNumber = chunkUrl.partNumber,
-                        chunkSize = chunkSize
-                    )
+        try {
+            val parts = chunkUrls.map { chunkUrl ->
+                async {
+                    semaphore.withPermit {
+                        val chunkData = readChunkFromUri(
+                            uri = uri,
+                            partNumber = chunkUrl.partNumber,
+                            chunkSize = chunkSize,
+                            totalSize = totalSize
+                        )
 
-                    // 청크 업로드 (재시도 포함)
-                    val eTag = uploadChunkWithRetry(
-                        url = chunkUrl.uploadUrl,
-                        data = chunkData,
-                        partNumber = chunkUrl.partNumber
-                    )
+                        val eTag = uploadChunkWithRetry(
+                            url = chunkUrl.uploadUrl,
+                            data = chunkData,
+                            partNumber = chunkUrl.partNumber
+                        )
 
-                    val completed = completedChunks.incrementAndGet()
-                    onProgress?.invoke(completed.toFloat() / totalChunks)
-
-                    PartInfo(
-                        partNumber = chunkUrl.partNumber,
-                        eTag = eTag
-                    )
+                        PartInfo(partNumber = chunkUrl.partNumber, eTag = eTag)
+                    }
                 }
-            }
-        }.awaitAll()
+            }.awaitAll()
 
-        parts.sortedBy { it.partNumber }
+            parts.sortedBy { it.partNumber }
+        } catch (e: Exception) {
+            null
+        }
     }
 
-    private fun readChunk(
-        file: File,
+    private fun readChunkFromUri(
+        uri: Uri,
         partNumber: Int,
-        chunkSize: Long
+        chunkSize: Long,
+        totalSize: Long
     ): ByteArray {
-        RandomAccessFile(file, "r").use { randomAccessFile ->
-            // 청크 시작 위치 (partNumber는 1부터 시작)
-            val offset = (partNumber - 1) * chunkSize
-            randomAccessFile.seek(offset)
+        return context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
+            FileInputStream(pfd.fileDescriptor).use { inputStream ->
+                val offset = (partNumber - 1) * chunkSize
+                val remainingBytes = totalSize - offset
+                val bytesToRead = minOf(chunkSize, remainingBytes).toInt()
 
-            // 읽을 크기 계산 (마지막 청크는 작을 수 있음)
-            val remainingBytes = file.length() - offset
-            val bytesToRead = minOf(chunkSize, remainingBytes).toInt()
+                // FileChannel을 사용한 random access
+                inputStream.channel.position(offset)
 
-            val buffer = ByteArray(bytesToRead)
-            randomAccessFile.readFully(buffer)
+                val buffer = ByteArray(bytesToRead)
+                var totalRead = 0
 
-            return buffer
-        }
+                while (totalRead < bytesToRead) {
+                    val read = inputStream.read(
+                        buffer,
+                        totalRead,
+                        bytesToRead - totalRead
+                    )
+                    if (read == -1) break
+                    totalRead += read
+                }
+
+                buffer
+            }
+        } ?: throw IOException("Could not open FileDescriptor for $uri")
     }
 
     private suspend fun uploadChunkWithRetry(
@@ -230,28 +260,22 @@ class MediaUploaderImpl @Inject constructor(
                     .put(data.toRequestBody("application/octet-stream".toMediaType()))
                     .build()
 
-                val response = okHttpClient.newCall(request).execute()
-
-                if (response.isSuccessful) {
-                    val eTag = response.header("ETag")?.trim('"')
-                        ?: throw IllegalStateException("No ETag in response")
-                    return@withContext eTag
-                } else {
-                    throw IOException("Part $partNumber upload failed: ${response.code}")
+                okHttpClient.newCall(request).execute().use { response ->
+                    if (response.isSuccessful) {
+                        return@withContext response.header("ETag")?.trim('"')
+                            ?: throw IllegalStateException("No ETag in response")
+                    } else {
+                        throw IOException("Part $partNumber failed: ${response.code}")
+                    }
                 }
-
             } catch (e: Exception) {
                 lastException = e
                 if (attempt < maxRetries - 1) {
-                    delay(2000L * (attempt + 1)) // Exponential backoff
+                    delay(1000L * (attempt + 1))
                 }
             }
         }
 
         throw lastException ?: IOException("Upload failed for part $partNumber")
-    }
-
-    companion object {
-        private const val MAX_CONCURRENT_CHUNKS = 3
     }
 }
