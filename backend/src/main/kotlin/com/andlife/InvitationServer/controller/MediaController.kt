@@ -15,12 +15,19 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.CompleteMultipartUploadRequest
+import software.amazon.awssdk.services.s3.model.CompletedMultipartUpload
+import software.amazon.awssdk.services.s3.model.CompletedPart
+import software.amazon.awssdk.services.s3.model.CreateMultipartUploadRequest
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import software.amazon.awssdk.services.s3.model.UploadPartRequest
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest
+import software.amazon.awssdk.services.s3.presigner.model.UploadPartPresignRequest
 import java.net.URI
 import java.time.Duration
 import java.util.UUID
+import kotlin.math.ceil
 
 @Configuration
 class R2Config {
@@ -74,35 +81,14 @@ enum class MediaType(val folder: String, val contentType: String) {
     }
 }
 
-data class UploadMediaRequest(
-    val mediaType: String,
-    val fileName: String
-)
-
-data class UploadMediaResponse(
-    val uploadUrl: String,
-    val mediaKey: String,
-    val mediaType: String
-)
-
-data class CompleteUploadRequest(
-    val mediaKey: String,
-    val mediaType: String
-)
-
-data class CompleteUploadResponse(
-    val success: Boolean,
-    val mediaUrl: String? = null,
-    val message: String? = null
-)
-
 data class BatchUploadMediaRequest(
-    val files: List<FileInfo>
+    val files: List<FileUploadInfo>
 )
 
-data class FileInfo(
-    val mediaType: String,
-    val fileName: String
+data class FileUploadInfo(
+    val fileName: String,
+    val fileSize: Long,
+    val mediaType: String
 )
 
 data class BatchUploadMediaResponse(
@@ -110,29 +96,56 @@ data class BatchUploadMediaResponse(
 )
 
 data class UploadInfo(
-    val uploadUrl: String,
+    val fileName: String,
     val mediaKey: String,
     val mediaType: String,
-    val fileName: String
+    val isMultipart: Boolean,
+
+    // Simple upload (100MB 이하)
+    val uploadUrl: String? = null,
+
+    // Multipart upload (100MB 초과)
+    val uploadId: String? = null,
+    val chunkSize: Long? = null,
+    val totalChunks: Int? = null,
+    val chunkUrls: List<ChunkUrl>? = null
+)
+
+data class ChunkUrl(
+    val partNumber: Int,
+    val uploadUrl: String
 )
 
 data class BatchCompleteUploadRequest(
-    val files: List<FileKeyInfo>
+    val files: List<CompleteFileInfo>
 )
 
-data class FileKeyInfo(
+data class CompleteFileInfo(
     val mediaKey: String,
-    val fileName: String
+    val fileName: String,
+    val uploadId: String? = null, // multipart인 경우만
+    val parts: List<PartInfo>? = null // multipart인 경우만
+)
+
+data class PartInfo(
+    val partNumber: Int,
+    val eTag: String
 )
 
 data class BatchCompleteUploadResponse(
-    val files: List<CompleteUploadInfo>
+    val files: List<CompletedFileInfo>
 )
 
-data class CompleteUploadInfo(
+data class CompletedFileInfo(
+    val fileName: String,
     val mediaKey: String,
     val mediaUrl: String?,
-    val fileName: String
+    val success: Boolean
+)
+
+data class DeleteMediaResponse(
+    val success: Boolean,
+    val message: String? = null
 )
 
 @RestController
@@ -143,80 +156,8 @@ class MediaController(
     @param:Value("\${r2.bucket-name}") private val bucketName: String,
     @param:Value("\${r2.public-url}") private val publicUrl: String
 ) {
-    @PostMapping("/start")
-    fun getUploadUrl(@RequestBody request: UploadMediaRequest): BaseResponse<UploadMediaResponse> {
-        return try {
-            val mediaType = MediaType.valueOf(request.mediaType.uppercase())
-            val extension = mediaType.getExtension()
-            val key = "${mediaType.folder}/${UUID.randomUUID()}$extension"
-
-            val putObjectRequest = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(key)
-                .contentType(mediaType.contentType)
-                .build()
-
-            val presignRequest = PutObjectPresignRequest.builder()
-                .signatureDuration(Duration.ofMinutes(15))
-                .putObjectRequest(putObjectRequest)
-                .build()
-
-            val presignedRequest = r2Presigner.presignPutObject(presignRequest)
-
-            val response = UploadMediaResponse(
-                uploadUrl = presignedRequest.url().toString(),
-                mediaKey = key,
-                mediaType = mediaType.name
-            )
-
-            BaseResponse.success(response)
-        } catch (e: IllegalArgumentException) {
-            BaseResponse.success(
-                UploadMediaResponse(
-                    uploadUrl = "",
-                    mediaKey = "",
-                    mediaType = ""
-                ),
-                responseCode = CommonResponseCode.BAD_REQUEST
-            )
-        } catch (e: Exception) {
-            BaseResponse.success(
-                UploadMediaResponse(
-                    uploadUrl = "",
-                    mediaKey = "",
-                    mediaType = ""
-                ),
-                responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR
-            )
-        }
-    }
-
-    @PostMapping("/complete")
-    fun completeUpload(@RequestBody request: CompleteUploadRequest): BaseResponse<CompleteUploadResponse> {
-        return try {
-            val mediaUrl = if (publicUrl.isNotBlank()) {
-                "$publicUrl${request.mediaKey}"
-            } else {
-                null
-            }
-
-            val response = CompleteUploadResponse(
-                success = true,
-                mediaUrl = mediaUrl
-            )
-
-            BaseResponse.success(response)
-        } catch (e: Exception) {
-            val response = CompleteUploadResponse(
-                success = false,
-                message = "Upload completion failed: ${e.message}"
-            )
-            BaseResponse.success(response, responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
-        }
-    }
-
     @PostMapping("/batch/start")
-    fun getBatchUploadUrls(
+    fun batchStartUpload(
         @RequestBody request: BatchUploadMediaRequest
     ): BaseResponse<BatchUploadMediaResponse> {
         return try {
@@ -225,25 +166,13 @@ class MediaController(
                 val extension = mediaType.getExtension()
                 val key = "${mediaType.folder}/${UUID.randomUUID()}$extension"
 
-                val putObjectRequest = PutObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(key)
-                    .contentType(mediaType.contentType)
-                    .build()
-
-                val presignRequest = PutObjectPresignRequest.builder()
-                    .signatureDuration(Duration.ofMinutes(15))
-                    .putObjectRequest(putObjectRequest)
-                    .build()
-
-                val presignedRequest = r2Presigner.presignPutObject(presignRequest)
-
-                UploadInfo(
-                    uploadUrl = presignedRequest.url().toString(),
-                    mediaKey = key,
-                    mediaType = mediaType.name,
-                    fileName = fileInfo.fileName
-                )
+                if (fileInfo.fileSize <= SIZE_THRESHOLD_BYTES) {
+                    // 100MB 이하 → 단순 업로드
+                    createSimpleUploadInfo(key, mediaType, fileInfo.fileName)
+                } else {
+                    // 100MB 초과 → 멀티파트 업로드
+                    createMultipartUploadInfo(key, mediaType, fileInfo.fileName, fileInfo.fileSize)
+                }
             }
 
             val response = BatchUploadMediaResponse(files = uploadInfos)
@@ -263,22 +192,54 @@ class MediaController(
     }
 
     @PostMapping("/batch/complete")
-    fun completeBatchUpload(
+    fun batchCompleteUpload(
         @RequestBody request: BatchCompleteUploadRequest
     ): BaseResponse<BatchCompleteUploadResponse> {
         return try {
-            val results = request.files.map { fileKey ->
-                val mediaUrl = if (publicUrl.isNotBlank()) {
-                    "$publicUrl${fileKey.mediaKey}"
-                } else {
-                    null
-                }
+            val results = request.files.map { fileInfo ->
+                try {
+                    // Multipart 업로드인 경우
+                    if (fileInfo.uploadId != null && fileInfo.parts != null) {
+                        r2Client.completeMultipartUpload(
+                            CompleteMultipartUploadRequest.builder()
+                                .bucket(bucketName)
+                                .key(fileInfo.mediaKey)
+                                .uploadId(fileInfo.uploadId)
+                                .multipartUpload(
+                                    CompletedMultipartUpload.builder()
+                                        .parts(fileInfo.parts.map { part ->
+                                            CompletedPart.builder()
+                                                .partNumber(part.partNumber)
+                                                .eTag(part.eTag)
+                                                .build()
+                                        })
+                                        .build()
+                                )
+                                .build()
+                        )
+                    }
+                    // Simple 업로드는 클라이언트가 이미 완료했으므로 별도 처리 불필요
 
-                CompleteUploadInfo(
-                    mediaKey = fileKey.mediaKey,
-                    mediaUrl = mediaUrl,
-                    fileName = fileKey.fileName
-                )
+                    val mediaUrl = if (publicUrl.isNotBlank()) {
+                        "$publicUrl${fileInfo.mediaKey}"
+                    } else {
+                        null
+                    }
+
+                    CompletedFileInfo(
+                        fileName = fileInfo.fileName,
+                        mediaKey = fileInfo.mediaKey,
+                        mediaUrl = mediaUrl,
+                        success = true
+                    )
+                } catch (e: Exception) {
+                    CompletedFileInfo(
+                        fileName = fileInfo.fileName,
+                        mediaKey = fileInfo.mediaKey,
+                        mediaUrl = null,
+                        success = false
+                    )
+                }
             }
 
             val response = BatchCompleteUploadResponse(files = results)
@@ -293,25 +254,108 @@ class MediaController(
     }
 
     @DeleteMapping("/{mediaKey}")
-    fun deleteMedia(@PathVariable mediaKey: String): BaseResponse<CompleteUploadResponse> {
+    fun deleteMedia(
+        @PathVariable mediaKey: String
+    ): BaseResponse<DeleteMediaResponse> {
         return try {
             r2Client.deleteObject { builder ->
                 builder.bucket(bucketName)
                     .key(mediaKey)
             }
 
-            val response = CompleteUploadResponse(
-                success = true,
-                mediaUrl = null
+            BaseResponse.success(DeleteMediaResponse(success = true))
+
+        } catch (e: Exception) {
+            BaseResponse.success(
+                DeleteMediaResponse(
+                    success = false,
+                    message = "Media deletion failed: ${e.message}"
+                ),
+                responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR
+            )
+        }
+    }
+
+    private fun createSimpleUploadInfo(
+        key: String,
+        mediaType: MediaType,
+        fileName: String
+    ): UploadInfo {
+        val putObjectRequest = PutObjectRequest.builder()
+            .bucket(bucketName)
+            .key(key)
+            .contentType(mediaType.contentType)
+            .build()
+
+        val presignRequest = PutObjectPresignRequest.builder()
+            .signatureDuration(Duration.ofMinutes(15))
+            .putObjectRequest(putObjectRequest)
+            .build()
+
+        val presignedRequest = r2Presigner.presignPutObject(presignRequest)
+
+        return UploadInfo(
+            fileName = fileName,
+            mediaKey = key,
+            mediaType = mediaType.name,
+            isMultipart = false,
+            uploadUrl = presignedRequest.url().toString()
+        )
+    }
+
+    private fun createMultipartUploadInfo(
+        key: String,
+        mediaType: MediaType,
+        fileName: String,
+        fileSize: Long
+    ): UploadInfo {
+        val initiateRequest = CreateMultipartUploadRequest.builder()
+            .bucket(bucketName)
+            .key(key)
+            .contentType(mediaType.contentType)
+            .build()
+
+        val initiateResponse = r2Client.createMultipartUpload(initiateRequest)
+        val uploadId = initiateResponse.uploadId()
+
+        val totalChunks = ceil(fileSize / CHUNK_SIZE.toDouble()).toInt()
+
+        val chunkUrls = (1..totalChunks).map { partNumber ->
+            val uploadPartRequest = UploadPartRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .uploadId(uploadId)
+                .partNumber(partNumber)
+                .build()
+
+            val presignedRequest = r2Presigner.presignUploadPart(
+                UploadPartPresignRequest.builder()
+                    .signatureDuration(Duration.ofHours(2))
+                    .uploadPartRequest(uploadPartRequest)
+                    .build()
             )
 
-            BaseResponse.success(response)
-        } catch (e: Exception) {
-            val response = CompleteUploadResponse(
-                success = false,
-                message = "Media deletion failed: ${e.message}"
+            ChunkUrl(
+                partNumber = partNumber,
+                uploadUrl = presignedRequest.url().toString()
             )
-            BaseResponse.success(response, responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
         }
+
+        return UploadInfo(
+            fileName = fileName,
+            mediaKey = key,
+            mediaType = mediaType.name,
+            isMultipart = true,
+            uploadId = uploadId,
+            chunkSize = CHUNK_SIZE,
+            totalChunks = totalChunks,
+            chunkUrls = chunkUrls
+        )
+    }
+
+    companion object {
+        private const val SIZE_THRESHOLD_MB = 100L
+        private const val SIZE_THRESHOLD_BYTES = SIZE_THRESHOLD_MB * 1024 * 1024
+        private const val CHUNK_SIZE = 10 * 1024 * 1024L // 10MB
     }
 }
