@@ -20,6 +20,9 @@ dependencies {
     // paging
     implementation(libs.androidx.paging.compose)
 
+    // lifecycle
+    implementation(libs.androidx.lifecycle.viewModelCompose)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
