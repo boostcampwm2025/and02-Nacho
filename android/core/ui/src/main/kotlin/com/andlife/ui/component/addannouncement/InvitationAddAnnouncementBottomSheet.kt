@@ -42,6 +42,7 @@ fun TitleAndTextField(
     onTextFieldValueChange: (String) -> Unit,
     textFieldPlaceholder: String,
     modifier: Modifier = Modifier,
+    singleLine: Boolean = true,
     minLines: Int = 1,
 ) {
     Column(
@@ -60,6 +61,7 @@ fun TitleAndTextField(
             placeholder = textFieldPlaceholder,
             modifier = Modifier.fillMaxWidth(),
             minLines = minLines,
+            singleLine = singleLine,
         )
     }
 }
@@ -151,6 +153,7 @@ fun InvitationAddAnnouncementBottomSheet(
                 onTextFieldValueChange = viewModel::updateContent,
                 textFieldPlaceholder = "내용을 입력해주세요",
                 modifier = Modifier.fillMaxWidth(),
+                singleLine = false,
                 minLines = 5,
             )
 
