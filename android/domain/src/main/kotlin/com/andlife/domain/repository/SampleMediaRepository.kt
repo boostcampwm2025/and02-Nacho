@@ -1,13 +1,11 @@
 package com.andlife.domain.repository
 
 import com.andlife.domain.error.DataError
-import com.andlife.domain.model.MediaType
+import com.andlife.domain.model.MediaFile
 import com.andlife.domain.util.Result
-import java.io.File
 
 interface SampleMediaRepository {
-
-    suspend fun uploadMedias(
-        files: List<Pair<File, MediaType>>
+    suspend fun uploadMedia(
+        files: List<MediaFile>
     ): Result<List<String?>, DataError>
 }

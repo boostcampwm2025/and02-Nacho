@@ -41,10 +41,6 @@ class MediaUploaderImpl @Inject constructor(
     @param:MediaOkHttp private val okHttpClient: OkHttpClient
 ) : MediaUploader {
 
-    companion object {
-        private const val MAX_CONCURRENT_CHUNKS = 3
-    }
-
     override suspend fun uploadMedias(
         files: List<MediaFile> // TODO: 데이터 레이어용을 굳이 따로 만들어야 하나? 일단 도메인 모델로 진행
     ): Result<List<String?>, DataError> = withContext(Dispatchers.IO) {
@@ -277,5 +273,9 @@ class MediaUploaderImpl @Inject constructor(
         }
 
         throw lastException ?: IOException("Upload failed for part $partNumber")
+    }
+
+    companion object {
+        private const val MAX_CONCURRENT_CHUNKS = 3
     }
 }
