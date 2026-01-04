@@ -176,6 +176,7 @@ fun InvitationAddAnnouncementBottomSheet(
                     onConfirm(draft.title, draft.content)
                     viewModel.clearDraft()
                 },
+                enabled = draft.title.isNotBlank() && draft.content.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(vertical = InvitationSpacing.medium),
                 elevation =
