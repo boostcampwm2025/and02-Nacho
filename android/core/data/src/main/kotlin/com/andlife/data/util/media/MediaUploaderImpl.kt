@@ -1,5 +1,6 @@
 package com.andlife.data.util.media
 
+import android.util.Log
 import com.andlife.data.util.apiCall
 import com.andlife.domain.error.DataError
 import com.andlife.domain.model.MediaType
@@ -17,6 +18,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -25,6 +28,8 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.IOException
+import java.io.RandomAccessFile
+import java.util.concurrent.atomic.AtomicInteger
 
 class MediaUploaderImpl @Inject constructor(
     private val mediaService: MediaService,
@@ -59,7 +64,9 @@ class MediaUploaderImpl @Inject constructor(
                             uploadId = info.uploadId!!,
                             chunkUrls = info.chunkUrls!!,
                             chunkSize = info.chunkSize!!
-                        )
+                        ) {
+                            Log.d("MediaUploader", "업로드 진행률 ${mediaFile.file.name}: ${it * 100}%")
+                        }
 
                         CompleteFileInfo(
                             mediaKey = info.mediaKey,
@@ -145,34 +152,65 @@ class MediaUploaderImpl @Inject constructor(
         file: File,
         uploadId: String,
         chunkUrls: List<ChunkUrl>,
-        chunkSize: Long
+        chunkSize: Long,
+        onProgress: ((Float) -> Unit)? = null
     ): List<PartInfo> = withContext(Dispatchers.IO) {
-        val parts = mutableListOf<PartInfo>()
 
-        file.inputStream().use { inputStream ->
-            for (chunkUrl in chunkUrls) {
-                val buffer = ByteArray(chunkSize.toInt())
-                val bytesRead = inputStream.read(buffer)
-                val chunkData = if (bytesRead < chunkSize) {
-                    buffer.copyOf(bytesRead)
-                } else {
-                    buffer
+        // 최대 3개 청크 동시 업로드
+        val semaphore = Semaphore(MAX_CONCURRENT_CHUNKS)
+        val completedChunks = AtomicInteger(0)
+        val totalChunks = chunkUrls.size
+
+        val parts = chunkUrls.map { chunkUrl ->
+            async {
+                semaphore.withPermit {
+                    // 청크 데이터 읽기
+                    val chunkData = readChunk(
+                        file = file,
+                        partNumber = chunkUrl.partNumber,
+                        chunkSize = chunkSize
+                    )
+
+                    // 청크 업로드 (재시도 포함)
+                    val eTag = uploadChunkWithRetry(
+                        url = chunkUrl.uploadUrl,
+                        data = chunkData,
+                        partNumber = chunkUrl.partNumber
+                    )
+
+                    val completed = completedChunks.incrementAndGet()
+                    onProgress?.invoke(completed.toFloat() / totalChunks)
+
+                    PartInfo(
+                        partNumber = chunkUrl.partNumber,
+                        eTag = eTag
+                    )
                 }
-
-                val eTag = uploadChunkWithRetry(
-                    url = chunkUrl.uploadUrl,
-                    data = chunkData,
-                    partNumber = chunkUrl.partNumber
-                )
-
-                parts.add(PartInfo(
-                    partNumber = chunkUrl.partNumber,
-                    eTag = eTag
-                ))
             }
-        }
+        }.awaitAll()
 
-        parts
+        parts.sortedBy { it.partNumber }
+    }
+
+    private fun readChunk(
+        file: File,
+        partNumber: Int,
+        chunkSize: Long
+    ): ByteArray {
+        RandomAccessFile(file, "r").use { randomAccessFile ->
+            // 청크 시작 위치 (partNumber는 1부터 시작)
+            val offset = (partNumber - 1) * chunkSize
+            randomAccessFile.seek(offset)
+
+            // 읽을 크기 계산 (마지막 청크는 작을 수 있음)
+            val remainingBytes = file.length() - offset
+            val bytesToRead = minOf(chunkSize, remainingBytes).toInt()
+
+            val buffer = ByteArray(bytesToRead)
+            randomAccessFile.readFully(buffer)
+
+            return buffer
+        }
     }
 
     private suspend fun uploadChunkWithRetry(
@@ -203,11 +241,15 @@ class MediaUploaderImpl @Inject constructor(
             } catch (e: Exception) {
                 lastException = e
                 if (attempt < maxRetries - 1) {
-                    delay(1000L * (attempt + 1))
+                    delay(1000L * (attempt + 1)) // Exponential backoff
                 }
             }
         }
 
         throw lastException ?: IOException("Upload failed for part $partNumber")
+    }
+
+    companion object {
+        private const val MAX_CONCURRENT_CHUNKS = 3
     }
 }
