@@ -14,7 +14,7 @@ import com.andlife.network.api.media.CompleteFileInfo
 import com.andlife.network.api.media.FileUploadInfo
 import com.andlife.network.api.media.MediaService
 import com.andlife.network.api.media.PartInfo
-import com.andlife.network.di.MediaOkHttp
+import com.andlife.network.di.InvitationMedia
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +38,7 @@ import androidx.core.net.toUri
 class MediaUploaderImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val mediaService: MediaService,
-    @param:MediaOkHttp private val okHttpClient: OkHttpClient
+    @param:InvitationMedia private val okHttpClient: OkHttpClient
 ) : MediaUploader {
 
     override suspend fun uploadMedias(
@@ -85,7 +85,8 @@ class MediaUploaderImpl @Inject constructor(
                         val uploadResult = uploadSimple(
                             uploadUrl = info.uploadUrl!!,
                             uri = uri,
-                            mediaType = mediaFile.mediaType
+                            mediaType = mediaFile.mediaType,
+                            fileSize = mediaFile.fileSize
                         )
 
                         if (uploadResult is Result.Success) {
@@ -128,41 +129,36 @@ class MediaUploaderImpl @Inject constructor(
     private suspend fun uploadSimple(
         uploadUrl: String,
         uri: Uri,
-        mediaType: MediaType
+        mediaType: MediaType,
+        fileSize: Long
     ): Result<Unit, DataError> = withContext(Dispatchers.IO) {
         try {
-            val inputStream = context.contentResolver.openInputStream(uri)
-                ?: return@withContext Result.Error(
-                    DataError.Network.UNKNOWN,
-                    "Cannot open Uri"
-                )
+            val requestBody = object : RequestBody() {
+                override fun contentType() = mediaType.contentType.toMediaType()
+                override fun contentLength(): Long = fileSize
 
-            inputStream.use { stream ->
-                // 스트리밍 RequestBody
-                val requestBody = object : RequestBody() {
-                    override fun contentType() = mediaType.contentType.toMediaType()
-
-                    override fun writeTo(sink: BufferedSink) {
-                        stream.source().use { source ->
+                override fun writeTo(sink: BufferedSink) {
+                    context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                        inputStream.source().use { source ->
                             sink.writeAll(source)
                         }
-                    }
+                    } ?: throw IOException("Cannot open Uri: $uri")
                 }
+            }
 
-                val request = Request.Builder()
-                    .url(uploadUrl)
-                    .put(requestBody)
-                    .build()
+            val request = Request.Builder()
+                .url(uploadUrl)
+                .put(requestBody)
+                .build()
 
-                okHttpClient.newCall(request).execute().use { response ->
-                    if (response.isSuccessful) {
-                        Result.Success(Unit)
-                    } else {
-                        Result.Error(
-                            DataError.Network.UNKNOWN,
-                            "Simple upload failed: ${response.code}"
-                        )
-                    }
+            okHttpClient.newCall(request).execute().use { response ->
+                if (response.isSuccessful) {
+                    Result.Success(Unit)
+                } else {
+                    Result.Error(
+                        DataError.Network.UNKNOWN,
+                        "Simple upload failed: ${response.code}"
+                    )
                 }
             }
         } catch (e: Exception) {
