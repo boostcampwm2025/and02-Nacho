@@ -7,13 +7,7 @@ import java.io.File
 
 interface MediaUploader {
 
-    suspend fun uploadMedia(
-        file: File,
-        mediaType: MediaType
-    ): Result<String, DataError>
-
-    suspend fun uploadMediaBatch(
-        files: List<Pair<File, MediaType>> // TODO: Pair -> Data Class
+    suspend fun uploadMedias(
+        files: List<MediaFile>
     ): Result<List<String?>, DataError>
 }
-

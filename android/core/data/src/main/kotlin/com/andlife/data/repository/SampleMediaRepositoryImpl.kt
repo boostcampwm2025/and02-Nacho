@@ -1,5 +1,6 @@
 package com.andlife.data.repository
 
+import com.andlife.data.util.media.MediaFile
 import com.andlife.data.util.media.MediaUploader
 import com.andlife.domain.error.DataError
 import com.andlife.domain.model.MediaType
@@ -12,16 +13,13 @@ class SampleMediaRepositoryImpl @Inject constructor(
     private val mediaUploader: MediaUploader
 ) : SampleMediaRepository {
 
-    override suspend fun uploadSingleMedia(
-        file: File,
-        mediaType: MediaType
-    ): Result<String, DataError> {
-        return mediaUploader.uploadMedia(file, mediaType)
-    }
-
-    override suspend fun uploadMultipleMedia(
+    override suspend fun uploadMedias(
         files: List<Pair<File, MediaType>>
     ): Result<List<String?>, DataError> {
-        return mediaUploader.uploadMediaBatch(files)
+        val mediaFiles = files.map { (file, type) ->
+            MediaFile(file = file, mediaType = type)
+        }
+
+        return mediaUploader.uploadMedias(mediaFiles)
     }
 }

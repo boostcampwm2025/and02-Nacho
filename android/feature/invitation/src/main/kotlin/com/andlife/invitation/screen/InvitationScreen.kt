@@ -39,7 +39,7 @@ fun InvitationScreen(
         uri?.let {
             val mediaType = getMediaTypeFromUri(context, it)
             val file = uriToFile(context, it, mediaType)
-            viewModel.uploadSampleMedia(file, mediaType)
+            viewModel.uploadSingleMedia(file, mediaType)
         }
     }
 
@@ -52,7 +52,7 @@ fun InvitationScreen(
                 val file = uriToFile(context, uri, mediaType)
                 file to mediaType
             }
-            viewModel.uploadSampleMedias(files)
+            viewModel.uploadMultipleMedia(files)
         }
     }
 
