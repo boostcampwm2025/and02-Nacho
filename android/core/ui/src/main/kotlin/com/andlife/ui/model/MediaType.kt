@@ -1,4 +1,4 @@
-package com.andlife.ui.constant
+package com.andlife.ui.model
 
 enum class MediaType {
     IMAGE,
