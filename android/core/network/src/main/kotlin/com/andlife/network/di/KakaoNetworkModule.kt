@@ -21,7 +21,7 @@ object KakaoNetworkModule {
 
     @Provides
     @Singleton
-    @KakaoOkHttp
+    @Kakao
     fun provideKakaoOkHttpClient(
         kakaoAuthInterceptor: KakaoAuthInterceptor,
         loggingInterceptor: HttpLoggingInterceptor,
@@ -34,9 +34,9 @@ object KakaoNetworkModule {
 
     @Provides
     @Singleton
-    @KakaoRetrofit
+    @Kakao
     fun provideKakaoRetrofit(
-        @KakaoOkHttp okHttpClient: OkHttpClient,
+        @Kakao okHttpClient: OkHttpClient,
         json: Json,
     ): Retrofit =
         Retrofit
@@ -49,6 +49,6 @@ object KakaoNetworkModule {
     @Provides
     @Singleton
     fun provideKakaoAddressService(
-        @KakaoRetrofit retrofit: Retrofit,
+        @Kakao retrofit: Retrofit,
     ): KakaoAddressService = retrofit.create(KakaoAddressService::class.java)
 }

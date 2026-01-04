@@ -4,24 +4,12 @@ import javax.inject.Qualifier
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class InvitationOkHttp
+annotation class Invitation
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class InvitationRetrofit
+annotation class InvitationMedia
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class MediaOkHttp
-
-@Qualifier
-@Retention(AnnotationRetention.BINARY)
-annotation class MediaRetrofit
-
-@Qualifier
-@Retention(AnnotationRetention.BINARY)
-annotation class KakaoOkHttp
-
-@Qualifier
-@Retention(AnnotationRetention.BINARY)
-annotation class KakaoRetrofit
+annotation class Kakao

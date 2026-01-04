@@ -22,7 +22,7 @@ object InvitationNetworkModule {
 
     @Provides
     @Singleton
-    @InvitationOkHttp
+    @Invitation
     fun provideInvitationOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient =
         OkHttpClient
             .Builder()
@@ -31,10 +31,10 @@ object InvitationNetworkModule {
 
     @Provides
     @Singleton
-    @InvitationRetrofit
+    @Invitation
     fun provideInvitationRetrofit(
         json: Json,
-        @InvitationOkHttp okHttpClient: OkHttpClient,
+        @Invitation okHttpClient: OkHttpClient,
     ): Retrofit =
         Retrofit
             .Builder()
@@ -45,7 +45,7 @@ object InvitationNetworkModule {
 
     @Provides
     @Singleton
-    @MediaOkHttp
+    @InvitationMedia
     fun provideMediaOkHttpClient(
         loggingInterceptor: HttpLoggingInterceptor
     ): OkHttpClient = OkHttpClient.Builder()
@@ -57,10 +57,10 @@ object InvitationNetworkModule {
 
     @Provides
     @Singleton
-    @MediaRetrofit
+    @InvitationMedia
     fun provideMediaRetrofit(
         json: Json,
-        @MediaOkHttp okHttpClient: OkHttpClient
+        @InvitationMedia okHttpClient: OkHttpClient
     ): Retrofit = Retrofit.Builder()
         .baseUrl(BuildConfig.SERVER_URL)
         .client(okHttpClient)
@@ -70,6 +70,6 @@ object InvitationNetworkModule {
     @Provides
     @Singleton
     fun provideInvitationApiService(
-        @MediaRetrofit retrofit: Retrofit,
+        @InvitationMedia retrofit: Retrofit,
     ): MediaService = retrofit.create(MediaService::class.java)
 }
