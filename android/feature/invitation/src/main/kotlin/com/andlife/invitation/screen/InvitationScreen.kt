@@ -3,6 +3,7 @@ package com.andlife.invitation.screen
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.andlife.domain.model.MediaFile
 import com.andlife.domain.model.MediaType
-import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,9 +38,12 @@ fun InvitationScreen(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         uri?.let {
-            val mediaType = getMediaTypeFromUri(context, it)
-            val file = uriToFile(context, it, mediaType)
-            viewModel.uploadSingleMedia(file, mediaType)
+            val mediaFile = createMediaFile(context, it)
+            if (mediaFile != null) {
+                viewModel.uploadSingleMedia(mediaFile)
+            } else {
+                Log.e("SampleUpload", "파일 정보를 가져올 수 없습니다")
+            }
         }
     }
 
@@ -47,12 +51,15 @@ fun InvitationScreen(
         contract = ActivityResultContracts.PickMultipleVisualMedia()
     ) { uris ->
         if (uris.isNotEmpty()) {
-            val files = uris.map { uri ->
-                val mediaType = getMediaTypeFromUri(context, uri)
-                val file = uriToFile(context, uri, mediaType)
-                file to mediaType
+            val mediaFiles = uris.mapNotNull { uri ->
+                createMediaFile(context, uri)
             }
-            viewModel.uploadMultipleMedia(files)
+
+            if (mediaFiles.isNotEmpty()) {
+                viewModel.uploadMultipleMedia(mediaFiles)
+            } else {
+                Log.e("SampleUpload", "유효한 파일이 없습니다")
+            }
         }
     }
 
@@ -100,106 +107,68 @@ fun InvitationScreen(
     }
 }
 
+// Uri로부터 MediaFile 객체 생성
+private fun createMediaFile(context: Context, uri: Uri): MediaFile? {
+    val (fileName, fileSize) = getFileInfoFromUri(context, uri) ?: return null
+    val mediaType = getMediaTypeFromUri(context, uri)
+
+    return MediaFile(
+        uriString = uri.toString(),
+        mediaType = mediaType,
+        fileName = fileName,
+        fileSize = fileSize
+    )
+}
+
+// Uri로부터 파일 이름과 크기 가져오기
+private fun getFileInfoFromUri(context: Context, uri: Uri): Pair<String, Long>? {
+    return context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+        val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+
+        if (cursor.moveToFirst() && nameIndex != -1 && sizeIndex != -1) {
+            val name = cursor.getString(nameIndex)
+            val size = cursor.getLong(sizeIndex)
+            name to size
+        } else null
+    }
+}
+
+// Uri로부터 MediaType 결정
 private fun getMediaTypeFromUri(context: Context, uri: Uri): MediaType {
     val mimeType = context.contentResolver.getType(uri)
+
     return when {
         mimeType?.startsWith("image/") == true -> MediaType.IMAGE
         mimeType?.startsWith("video/") == true -> MediaType.VIDEO
         mimeType?.startsWith("audio/") == true -> MediaType.AUDIO
         else -> {
-            // mimeType을 못 가져온 경우 확장자로 판별
-            val extension = context.contentResolver.openInputStream(uri)?.use {
-                getExtensionFromUri(context, uri)
-            } ?: ""
+            val extension = getExtensionFromUri(context, uri)
 
             when (extension.lowercase()) {
                 "jpg", "jpeg", "png", "gif", "webp" -> MediaType.IMAGE
                 "mp4", "mov", "avi", "mkv" -> MediaType.VIDEO
                 "mp3", "wav", "m4a", "aac" -> MediaType.AUDIO
-                else -> MediaType.IMAGE // 기본값
+                else -> MediaType.IMAGE
             }
         }
     }
 }
 
+// Uri로부터 파일 확장자 가져오기
 private fun getExtensionFromUri(context: Context, uri: Uri): String {
     return when (uri.scheme) {
         "content" -> {
-            val cursor = context.contentResolver.query(uri, null, null, null, null)
-            cursor?.use {
-                if (it.moveToFirst()) {
-                    val displayNameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val displayNameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
                     if (displayNameIndex != -1) {
-                        val displayName = it.getString(displayNameIndex)
+                        val displayName = cursor.getString(displayNameIndex)
                         displayName.substringAfterLast('.', "")
                     } else ""
                 } else ""
             } ?: ""
         }
         else -> uri.path?.substringAfterLast('.', "") ?: ""
-    }
-}
-
-private fun uriToFile(context: Context, uri: Uri, mediaType: MediaType): File {
-    val contentResolver = context.contentResolver
-
-    // 원본 파일명 가져오기 (가능하면)
-    val originalFileName = getOriginalFileName(context, uri)
-
-    // 확장자 결정
-    val extension = when (mediaType) {
-        MediaType.IMAGE -> {
-            // MIME 타입 확인해서 정확한 확장자 사용
-            when (contentResolver.getType(uri)) {
-                "image/png" -> "png"
-                "image/gif" -> "gif"
-                "image/webp" -> "webp"
-                else -> "jpg"
-            }
-        }
-        MediaType.VIDEO -> {
-            when (contentResolver.getType(uri)) {
-                "video/quicktime" -> "mov"
-                "video/x-msvideo" -> "avi"
-                "video/x-matroska" -> "mkv"
-                else -> "mp4"
-            }
-        }
-        MediaType.AUDIO -> {
-            when (contentResolver.getType(uri)) {
-                "audio/wav" -> "wav"
-                "audio/x-m4a" -> "m4a"
-                "audio/aac" -> "aac"
-                else -> "mp3"
-            }
-        }
-    }
-
-    val fileName = originalFileName ?: "temp_${System.currentTimeMillis()}.$extension"
-    val tempFile = File(context.cacheDir, fileName)
-
-    contentResolver.openInputStream(uri)?.use { input ->
-        tempFile.outputStream().use { output ->
-            input.copyTo(output)
-        }
-    }
-
-    return tempFile
-}
-
-private fun getOriginalFileName(context: Context, uri: Uri): String? {
-    return when (uri.scheme) {
-        "content" -> {
-            val cursor = context.contentResolver.query(uri, null, null, null, null)
-            cursor?.use {
-                if (it.moveToFirst()) {
-                    val displayNameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                    if (displayNameIndex != -1) {
-                        it.getString(displayNameIndex)
-                    } else null
-                } else null
-            }
-        }
-        else -> uri.path?.substringAfterLast('/')
     }
 }

@@ -3,13 +3,12 @@ package com.andlife.invitation.screen
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.andlife.domain.model.MediaType
+import com.andlife.domain.model.MediaFile
 import com.andlife.domain.repository.SampleMediaRepository
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -17,11 +16,11 @@ class SampleViewModel @Inject constructor(
     private val sampleMediaRepository: SampleMediaRepository,
 ) : ViewModel() {
 
-    fun uploadSingleMedia(file: File, mediaType: MediaType) {
+    fun uploadSingleMedia(mediaFile: MediaFile) {
         viewModelScope.launch {
-            Log.d("SampleUpload", "단건 업로드 시작: ${file.name}, 크기: ${file.length()}")
+            Log.d("SampleUpload", "단건 업로드 시작: ${mediaFile.fileName}, 크기: ${mediaFile.fileSize}")
 
-            sampleMediaRepository.uploadMedias(listOf(file to mediaType))
+            sampleMediaRepository.uploadMedia(listOf(mediaFile))
                 .onSuccess { urls ->
                     val url = urls.firstOrNull()
                     if (url != null) {
@@ -36,14 +35,15 @@ class SampleViewModel @Inject constructor(
         }
     }
 
-    fun uploadMultipleMedia(files: List<Pair<File, MediaType>>) {
+    fun uploadMultipleMedia(mediaFiles: List<MediaFile>) {
         viewModelScope.launch {
+            Log.d("SampleUpload", "배치 업로드 시작 - 파일 개수: ${mediaFiles.size}")
 
-            files.forEachIndexed { index, (file, type) ->
-                Log.d("SampleUpload", "[$index] ${file.name}, 크기: ${file.length()} bytes, 타입: $type")
+            mediaFiles.forEachIndexed { index, file ->
+                Log.d("SampleUpload", "[$index] ${file.fileName}, 크기: ${file.fileSize} bytes, 타입: ${file.mediaType}")
             }
 
-            sampleMediaRepository.uploadMedias(files)
+            sampleMediaRepository.uploadMedia(mediaFiles)
                 .onSuccess { urls ->
                     val successCount = urls.count { it != null }
                     val failCount = urls.count { it == null }
@@ -54,7 +54,7 @@ class SampleViewModel @Inject constructor(
                         if (url != null) {
                             Log.d("SampleUpload", "[$index] 성공: $url")
                         } else {
-                            Log.e("SampleUpload", "[$index] 실패: ${files[index].first.name}")
+                            Log.e("SampleUpload", "[$index] 실패: ${mediaFiles[index].fileName}")
                         }
                     }
                 }
