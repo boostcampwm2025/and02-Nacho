@@ -6,12 +6,8 @@ import com.andlife.domain.util.Result
 import java.io.File
 
 interface SampleMediaRepository {
-    suspend fun uploadSingleMedia(
-        file: File,
-        mediaType: MediaType
-    ): Result<String, DataError>
 
-    suspend fun uploadMultipleMedia(
+    suspend fun uploadMedias(
         files: List<Pair<File, MediaType>>
     ): Result<List<String?>, DataError>
 }

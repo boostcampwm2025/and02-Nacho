@@ -17,31 +17,45 @@ class SampleViewModel @Inject constructor(
     private val sampleMediaRepository: SampleMediaRepository,
 ) : ViewModel() {
 
-    // 단건 업로드
-    fun uploadSampleMedia(file: File, mediaType: MediaType) {
+    fun uploadSingleMedia(file: File, mediaType: MediaType) {
         viewModelScope.launch {
-            sampleMediaRepository.uploadSingleMedia(file, mediaType)
-                .onSuccess { url ->
-                    Log.d("SampleUpload", "단건 업로드 성공: $url")
+            Log.d("SampleUpload", "단건 업로드 시작: ${file.name}, 크기: ${file.length()}")
+
+            sampleMediaRepository.uploadMedias(listOf(file to mediaType))
+                .onSuccess { urls ->
+                    val url = urls.firstOrNull()
+                    if (url != null) {
+                        Log.d("SampleUpload", "단건 업로드 성공: $url")
+                    } else {
+                        Log.e("SampleUpload", "단건 업로드 실패: URL이 null")
+                    }
                 }
                 .onFailure { error ->
-                    Log.e("SampleUpload", "단건 업로드 실패, $error")
+                    Log.e("SampleUpload", "단건 업로드 실패: $error")
                 }
         }
     }
 
-    // 다건 업로드
-    fun uploadSampleMedias(files: List<Pair<File, MediaType>>) {
+    fun uploadMultipleMedia(files: List<Pair<File, MediaType>>) {
         viewModelScope.launch {
-            Log.d("SampleUpload", "파일 개수: ${files.size}")
+
             files.forEachIndexed { index, (file, type) ->
-                Log.d("SampleUpload", "[$index] ${file.name}, 크기: ${file.length()}, 타입: $type")
+                Log.d("SampleUpload", "[$index] ${file.name}, 크기: ${file.length()} bytes, 타입: $type")
             }
 
-            sampleMediaRepository.uploadMultipleMedia(files)
+            sampleMediaRepository.uploadMedias(files)
                 .onSuccess { urls ->
+                    val successCount = urls.count { it != null }
+                    val failCount = urls.count { it == null }
+
+                    Log.d("SampleUpload", "배치 업로드 완료 - 성공: $successCount, 실패: $failCount")
+
                     urls.forEachIndexed { index, url ->
-                        Log.d("SampleUpload", "[$index] $url")
+                        if (url != null) {
+                            Log.d("SampleUpload", "[$index] 성공: $url")
+                        } else {
+                            Log.e("SampleUpload", "[$index] 실패: ${files[index].first.name}")
+                        }
                     }
                 }
                 .onFailure { error ->
