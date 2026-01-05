@@ -4,8 +4,7 @@ import kotlinx.datetime.LocalDateTime
 
 data class GuestBook(
     val id: Long,
-    val authorName: String,
-    val authorProfileImage: String? = null,
+    val author: GuestBookAuthor,
     val invitationTitle: String,
     val textContent: String,
     val visualMedias: List<GuestBookEntryMedia>,

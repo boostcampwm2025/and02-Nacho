@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
 data class AuthorResponse(
     val userId: Long,
     val name: String,
-    val profileImageUrl: String? = null
+    val profileImageUrl: String? = null,
 )
