@@ -3,10 +3,9 @@ package com.andlife.data.util.media
 import android.content.ContentResolver
 import android.net.Uri
 import android.provider.OpenableColumns
-import com.andlife.domain.model.MediaFile
+import androidx.core.net.toUri
 import com.andlife.domain.model.MediaType
 import jakarta.inject.Inject
-import androidx.core.net.toUri
 
 class MediaFileProvider @Inject constructor(
     private val contentResolver: ContentResolver
@@ -29,6 +28,7 @@ class MediaFileProvider @Inject constructor(
         return uriStrings.mapNotNull { createFromUri(it) }
     }
 
+    // Uri로부터 파일 이름과 크기 가져오기
     private fun getFileInfoFromUri(uri: Uri): Pair<String, Long>? {
         return contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
@@ -42,6 +42,7 @@ class MediaFileProvider @Inject constructor(
         }
     }
 
+    // Uri로부터 미디어 타입 결정
     private fun getMediaTypeFromUri(uri: Uri): MediaType {
         val mimeType = contentResolver.getType(uri)
 
@@ -61,6 +62,7 @@ class MediaFileProvider @Inject constructor(
         }
     }
 
+    // Uri로부터 파일 확장자 가져오기
     private fun getExtensionFromUri(uri: Uri): String {
         return when (uri.scheme) {
             "content" -> {

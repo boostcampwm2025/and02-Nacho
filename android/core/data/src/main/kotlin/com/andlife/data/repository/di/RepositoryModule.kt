@@ -14,6 +14,4 @@ internal abstract class AddressRepositoryModule {
     @Binds
     @Singleton
     abstract fun bindAddressRepository(impl: AddressRepositoryImpl): AddressRepository
-
 }
-

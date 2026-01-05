@@ -1,4 +1,6 @@
-package com.andlife.domain.model
+package com.andlife.data.util.media
+
+import com.andlife.domain.model.MediaType
 
 data class MediaFile(
     val uriString: String,
