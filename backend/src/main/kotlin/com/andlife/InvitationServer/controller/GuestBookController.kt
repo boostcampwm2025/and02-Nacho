@@ -2,7 +2,6 @@ package com.andlife.InvitationServer.controller
 
 import com.andlife.InvitationServer.response.BaseResponse
 import com.andlife.InvitationServer.service.GuestBookService
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -21,13 +20,13 @@ data class GuestBookResponse(
     val writerProfileImage: String?,
     val invitationTitle: String,
     val textContent: String,
-    val visualMedias: List<MediaResponse>,
-    val audioMedias: List<MediaResponse>,
+    val visualMedias: List<GuestBookMediaResponse>,
+    val audioMedias: List<GuestBookMediaResponse>,
     val totalVisualCount: Int,
     val createdAt: LocalDateTime,
 )
 
-data class MediaResponse(
+data class GuestBookMediaResponse(
     val type: MediaType,
     val url: String,
     val thumbnailUrl: String? = null,
