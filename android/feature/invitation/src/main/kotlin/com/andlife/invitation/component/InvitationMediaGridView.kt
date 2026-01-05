@@ -19,7 +19,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 @Composable
-fun MediaGridView(
+fun InvitationMediaGridView(
     items: List<InvitationMediaUiModel>,
     onItemClick: (Long) -> Unit,
     modifier: Modifier = Modifier
@@ -44,7 +44,7 @@ fun MediaGridView(
 
 @PreviewTheme
 @Composable
-fun MediaGridViewPreview() {
+fun InvitationMediaGridViewPreview() {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
     val mockItems = listOf(
@@ -81,7 +81,7 @@ fun MediaGridViewPreview() {
     )
 
     InvitationTheme {
-        MediaGridView(
+        InvitationMediaGridView(
             items = mockItems,
             onItemClick = {}
         )
