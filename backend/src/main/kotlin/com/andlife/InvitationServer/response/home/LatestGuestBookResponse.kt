@@ -7,7 +7,7 @@ data class LatestGuestBookResponse(
     val userName: String,
     val userProfileUrl: String,
     val content: String,
-    val createAt: LocalDateTime,
+    val createdAt: LocalDateTime,
     val images: List<GuestbookImageResponse> = emptyList(),
     val audios: List<GuestbookAudioResponse> = emptyList(),
     val videos: List<GuestbookVideoResponse> = emptyList()
