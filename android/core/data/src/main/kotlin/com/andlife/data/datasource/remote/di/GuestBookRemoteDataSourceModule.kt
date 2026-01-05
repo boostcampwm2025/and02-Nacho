@@ -11,11 +11,9 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class GuestBookRemoteDataSourceModule {
-
     @Binds
     @Singleton
     abstract fun bindGuestBookRemoteDataSource(
-        guestBookRemoteDataSourceImpl: GuestBookRemoteDataSourceImpl
+        guestBookRemoteDataSourceImpl: GuestBookRemoteDataSourceImpl,
     ): GuestBookRemoteDataSource
-
 }
