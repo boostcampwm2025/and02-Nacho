@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class AddAnnouncementViewModel : ViewModel() {
+class InvitationAddAnnouncementViewModel : ViewModel() {
     private val _announcementDraft = MutableStateFlow(AnnouncementDraft())
     val announcementDraft: StateFlow<AnnouncementDraft> = _announcementDraft.asStateFlow()
 

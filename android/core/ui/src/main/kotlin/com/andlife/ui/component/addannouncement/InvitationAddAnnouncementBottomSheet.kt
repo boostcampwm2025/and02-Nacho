@@ -73,7 +73,7 @@ fun InvitationAddAnnouncementBottomSheet(
     onConfirm: (String, String) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: AddAnnouncementViewModel = viewModel(),
+    viewModel: InvitationAddAnnouncementViewModel = viewModel(),
 ) {
     val sheetState =
         rememberModalBottomSheetState(
