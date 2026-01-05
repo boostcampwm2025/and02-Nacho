@@ -12,4 +12,8 @@ interface GuestBookService {
         @Path("invitationId") invitationId: Long
     ): BaseResponse<List<CollectionResponse>>
 
+    @GET("/api/v1/invitations/{invitationId}/guestbooks")
+    suspend fun getGuestBooksByInvitationId(
+        @Path("invitationId") invitationId: Long,
+    ): BaseResponse<List<GuestBookResponse>>
 }
