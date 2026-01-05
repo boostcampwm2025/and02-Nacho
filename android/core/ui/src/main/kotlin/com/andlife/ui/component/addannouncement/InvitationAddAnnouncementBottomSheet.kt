@@ -6,9 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -16,7 +14,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -102,11 +99,9 @@ fun InvitationAddAnnouncementBottomSheet(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = InvitationSpacing.large)
-                    .padding(bottom = InvitationSpacing.large),
+                    .padding(all = InvitationSpacing.large),
+            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium),
         ) {
-            Spacer(modifier = Modifier.height(InvitationSpacing.large))
-
             TitleAndTextField(
                 title = stringResource(R.string.label_announcement_title),
                 textFieldValue = draft.title,
@@ -114,8 +109,6 @@ fun InvitationAddAnnouncementBottomSheet(
                 textFieldPlaceholder = stringResource(R.string.tf_announcement_title_hint),
                 modifier = Modifier.fillMaxWidth(),
             )
-
-            Spacer(modifier = Modifier.height(InvitationSpacing.medium))
 
             TitleAndTextField(
                 title = stringResource(R.string.label_announcement_content),
@@ -131,21 +124,17 @@ fun InvitationAddAnnouncementBottomSheet(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
             ) {
-                TextButton(
-                    onClick = {
-                        viewModel.clearDraft()
-                    },
-                    contentPadding = PaddingValues(vertical = InvitationSpacing.medium),
-                ) {
-                    Text(
-                        text = stringResource(R.string.txt_delete_all),
-                        color = InvitationTheme.colorScheme.iconPrimary,
-                        style = InvitationTheme.typography.bodyMediumSemiBold,
-                    )
-                }
+                Text(
+                    text = stringResource(R.string.txt_delete_all),
+                    modifier =
+                        Modifier
+                            .clickable {
+                                viewModel.clearDraft()
+                            },
+                    color = InvitationTheme.colorScheme.iconPrimary,
+                    style = InvitationTheme.typography.bodyMediumSemiBold,
+                )
             }
-
-            Spacer(modifier = Modifier.height(InvitationSpacing.medium))
 
             InvitationButton(
                 onClick = {
@@ -181,6 +170,7 @@ fun TitleAndTextField(
     minLines: Int = 1,
 ) {
     Column(
+        verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
         horizontalAlignment = Alignment.Start,
         modifier = modifier,
     ) {
@@ -189,7 +179,6 @@ fun TitleAndTextField(
             style = InvitationTheme.typography.bodyMediumSemiBold,
             color = InvitationTheme.colorScheme.textPrimary,
         )
-        Spacer(modifier = Modifier.height(InvitationSpacing.small))
         InvitationTextField(
             value = textFieldValue,
             onValueChange = onTextFieldValueChange,
