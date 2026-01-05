@@ -22,8 +22,8 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationIconSize
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
-import com.andlife.domain.model.MediaType
 import com.andlife.ui.R
+import com.andlife.ui.model.MediaType
 
 @Composable
 fun MediaItem(
