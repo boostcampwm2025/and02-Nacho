@@ -1,7 +1,7 @@
 package com.andlife.InvitationServer.service
 
 import com.andlife.InvitationServer.controller.GuestBookResponse
-import com.andlife.InvitationServer.controller.MediaResponse
+import com.andlife.InvitationServer.controller.GuestBookMediaResponse
 import com.andlife.InvitationServer.controller.MediaType
 import com.andlife.InvitationServer.repository.GuestBookRepository
 import org.springframework.stereotype.Service
@@ -16,16 +16,16 @@ class GuestBookService(
         val guestBooks = guestBookRepository.findAllByInvitationId(invitationId)
 
         return guestBooks.map { guestBook ->
-            val allMedia = mutableListOf<MediaResponse>()
+            val allMedia = mutableListOf<GuestBookMediaResponse>()
 
             guestBook.images.forEach {
-                allMedia.add(MediaResponse(MediaType.IMAGE, it.imageUrl, null, null, it.displayOrder))
+                allMedia.add(GuestBookMediaResponse(MediaType.IMAGE, it.imageUrl, null, null, it.displayOrder))
             }
             guestBook.videos.forEach {
-                allMedia.add(MediaResponse(MediaType.VIDEO, it.videoUrl, it.thumbnailUrl, it.durationSeconds, it.displayOrder))
+                allMedia.add(GuestBookMediaResponse(MediaType.VIDEO, it.videoUrl, it.thumbnailUrl, it.durationSeconds, it.displayOrder))
             }
             guestBook.audios.forEach {
-                allMedia.add(MediaResponse(MediaType.AUDIO, it.audioUrl, null, it.durationSeconds, it.displayOrder))
+                allMedia.add(GuestBookMediaResponse(MediaType.AUDIO, it.audioUrl, null, it.durationSeconds, it.displayOrder))
             }
 
             val sortedList = allMedia.sortedBy { it.displayOrder }
