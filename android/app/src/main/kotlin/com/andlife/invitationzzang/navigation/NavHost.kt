@@ -17,6 +17,7 @@ import androidx.navigation.compose.NavHost
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.home.homeNavGraph
+import com.andlife.invitation.invitationDetailNavGraph
 import com.andlife.invitation.invitationNavGraph
 import com.andlife.invitation_edit.addressSearchNavGraph
 import com.andlife.invitation_edit.myInvitationCreateNavGraph
@@ -50,7 +51,12 @@ fun InvitationNavHost(
         ) {
             homeNavGraph(innerPadding)
 
-            invitationNavGraph(innerPadding)
+            invitationNavGraph(
+                paddingValues = innerPadding,
+                onNavigateToDetail = navigator::navigateToInvitationDetail,
+            )
+
+            invitationDetailNavGraph()
 
             myInvitationNavGraph(
                 paddingValues = innerPadding,

@@ -7,18 +7,44 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import com.andlife.invitation.screen.InvitationScreen
+import androidx.navigation.navDeepLink
+import com.andlife.invitation.screen.InvitationDetailRoute
+import com.andlife.invitation.screen.InvitationRoute
 import kotlinx.serialization.Serializable
 
 @Serializable
 data object Invitation
 
+@Serializable
+data class InvitationDetail(
+    val id: Long,
+)
+
 fun NavController.navigateToInvitation(navOptions: NavOptions) {
     navigate(Invitation, navOptions)
 }
 
-fun NavGraphBuilder.invitationNavGraph(paddingValues: PaddingValues) {
+fun NavController.navigateToInvitationDetail(
+    id: Long,
+    navOptions: NavOptions,
+) {
+    navigate(InvitationDetail(id), navOptions)
+}
+
+fun NavGraphBuilder.invitationNavGraph(
+    paddingValues: PaddingValues,
+    onNavigateToDetail: (Long) -> Unit,
+) {
     composable<Invitation> {
-        InvitationScreen(modifier = Modifier.padding(paddingValues))
+        InvitationRoute(
+            onNavigateToDetail = onNavigateToDetail,
+            modifier = Modifier.padding(paddingValues),
+        )
+    }
+}
+
+fun NavGraphBuilder.invitationDetailNavGraph() {
+    composable<InvitationDetail>{
+        InvitationDetailRoute(modifier = Modifier.padding())
     }
 }
