@@ -14,4 +14,7 @@ class GuestBookRepositoryImpl @Inject constructor(
     override suspend fun getMediaCollection(invitationId: Long): Result<List<GuestBookMedia>, DataError> {
         return guestBookRemoteDataSource.getMediaCollection(invitationId)
     }
+
+    override suspend fun getGuestBooksByInvitationId(invitationId: Long): Result<List<com.andlife.domain.model.GuestBook>, DataError> =
+        guestBookRemoteDataSource.getGuestBooksByInvitationId(invitationId)
 }

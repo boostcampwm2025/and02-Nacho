@@ -19,13 +19,13 @@ import javax.inject.Singleton
 object KakaoNetworkModule {
     private const val BASE_URL = "https://dapi.kakao.com/"
 
-    @Provides
-    @Singleton
-    fun provideJson(): Json =
-        Json {
-            ignoreUnknownKeys = true
-            coerceInputValues = true
-        }
+//    @Provides
+//    @Singleton
+//    fun provideJson(): Json =
+//        Json {
+//            ignoreUnknownKeys = true
+//            coerceInputValues = true
+//        }
 
     @Provides
     @Singleton
