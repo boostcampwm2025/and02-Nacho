@@ -1,6 +1,9 @@
 package com.andlife.InvitationServer.service.invitation.guestbook
 
 import com.andlife.InvitationServer.constant.MediaType
+import com.andlife.InvitationServer.controller.GuestBookAuthorResponse
+import com.andlife.InvitationServer.controller.GuestBookEntryMediaResponse
+import com.andlife.InvitationServer.controller.GuestBookResponse
 import com.andlife.InvitationServer.repository.invitation.guestbook.GuestBookRepository
 import com.andlife.InvitationServer.response.AuthorResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.CollectionResponse
@@ -63,6 +66,44 @@ class GuestBookService(
         }
 
         return collection.sortedByDescending { it.createdAt }
+    }
+
+    fun getGuestBooks(invitationId: Long): List<GuestBookResponse> {
+        val guestBooks = guestBookRepository.findAllByInvitationId(invitationId)
+
+        return guestBooks.map { guestBook ->
+            val allMedia = mutableListOf<GuestBookEntryMediaResponse>()
+
+            guestBook.images.forEach {
+                allMedia.add(GuestBookEntryMediaResponse(com.andlife.InvitationServer.controller.MediaType.IMAGE, it.imageUrl, null, null, it.displayOrder))
+            }
+            guestBook.videos.forEach {
+                allMedia.add(GuestBookEntryMediaResponse(com.andlife.InvitationServer.controller.MediaType.VIDEO, it.videoUrl, it.thumbnailUrl, it.durationSeconds, it.displayOrder))
+            }
+            guestBook.audios.forEach {
+                allMedia.add(GuestBookEntryMediaResponse(com.andlife.InvitationServer.controller.MediaType.AUDIO, it.audioUrl, null, it.durationSeconds, it.displayOrder))
+            }
+
+            val sortedList = allMedia.sortedBy { it.displayOrder }
+
+            val visualMedias = sortedList.filter { it.type != com.andlife.InvitationServer.controller.MediaType.AUDIO }
+            val audioMedias = sortedList.filter { it.type == com.andlife.InvitationServer.controller.MediaType.AUDIO }
+
+            GuestBookResponse(
+                id = guestBook.id,
+                author = GuestBookAuthorResponse(
+                    id = guestBook.user.id,
+                    name = guestBook.user.name,
+                    profileImageUrl = guestBook.user.profileImageUrl
+                ),
+                invitationTitle = guestBook.invitation.title,
+                textContent = guestBook.textContent,
+                visualMedias = visualMedias,
+                audioMedias = audioMedias,
+                totalVisualCount = visualMedias.size,
+                createdAt = guestBook.createdAt
+            )
+        }
     }
 
 }

@@ -1,7 +1,7 @@
 package com.andlife.InvitationServer.controller
 
 import com.andlife.InvitationServer.response.BaseResponse
-import com.andlife.InvitationServer.service.GuestBookService
+import com.andlife.InvitationServer.service.invitation.guestbook.GuestBookService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -16,8 +16,7 @@ enum class MediaType {
 
 data class GuestBookResponse(
     val id: Long,
-    val authorName: String,
-    val authorProfileImage: String?,
+    val author: GuestBookAuthorResponse,
     val invitationTitle: String,
     val textContent: String,
     val visualMedias: List<GuestBookEntryMediaResponse>,
@@ -26,12 +25,18 @@ data class GuestBookResponse(
     val createdAt: LocalDateTime,
 )
 
+data class GuestBookAuthorResponse(
+    val id: Long,
+    val name: String,
+    val profileImageUrl: String?,
+)
+
 data class GuestBookEntryMediaResponse(
     val type: MediaType,
     val url: String,
     val thumbnailUrl: String? = null,
     val durationSeconds: Int? = null,
-    val displayOrder: Int
+    val displayOrder: Int,
 )
 
 @RestController
