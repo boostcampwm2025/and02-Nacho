@@ -8,17 +8,15 @@ android {
 }
 
 dependencies {
-    // datetime
-    implementation(libs.kotlinx.datetime)
-
-    // immutable
-    implementation(libs.kotlinx.immutable)
 
     // coil
     implementation(libs.coil.kt.compose)
 
     // Immutable
     implementation(libs.kotlinx.immutable)
+
+    // Kotlin Datetime
+    implementation(libs.kotlinx.datetime)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
