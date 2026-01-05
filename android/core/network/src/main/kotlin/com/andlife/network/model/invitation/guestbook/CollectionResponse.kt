@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CollectionResponse(
     val id: Long,
-    val mediaType: MediaType,
+    val mediaType: String,
     val mediaUrl: String,
     val author: AuthorResponse,
     val content: String,
