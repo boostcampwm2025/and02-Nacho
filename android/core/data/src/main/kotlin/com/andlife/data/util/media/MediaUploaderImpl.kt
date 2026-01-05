@@ -37,7 +37,7 @@ import java.io.IOException
 class MediaUploaderImpl @Inject constructor(
     private val contentResolver: ContentResolver,
     private val mediaService: MediaService,
-    @param:InvitationMedia private val okHttpClient: OkHttpClient
+    @param:InvitationMedia private val okHttpClient: OkHttpClient,
 ) : MediaUploader {
 
     override suspend fun uploadMedias(
