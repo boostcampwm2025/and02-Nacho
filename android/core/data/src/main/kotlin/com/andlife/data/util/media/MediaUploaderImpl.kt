@@ -9,11 +9,11 @@ import com.andlife.domain.model.MediaType
 import com.andlife.domain.util.Result
 import com.andlife.network.api.media.BatchCompleteUploadRequest
 import com.andlife.network.api.media.BatchUploadMediaRequest
-import com.andlife.network.api.media.ChunkUrl
-import com.andlife.network.api.media.CompleteFileInfo
-import com.andlife.network.api.media.FileUploadInfo
+import com.andlife.network.api.media.ChunkUrlResponse
+import com.andlife.network.api.media.CompleteFileInfoRequest
+import com.andlife.network.api.media.FileUploadInfoRequest
 import com.andlife.network.api.media.MediaService
-import com.andlife.network.api.media.PartInfo
+import com.andlife.network.api.media.PartInfoRequest
 import com.andlife.network.di.InvitationMedia
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
@@ -44,7 +44,7 @@ class MediaUploaderImpl @Inject constructor(
                 BatchUploadMediaRequest(
                     files =
                         files.map { mediaFile ->
-                            FileUploadInfo(
+                            FileUploadInfoRequest(
                                 fileName = mediaFile.fileName,
                                 fileSize = mediaFile.fileSize,
                                 mediaType = mediaFile.mediaType.name,
@@ -76,7 +76,7 @@ class MediaUploaderImpl @Inject constructor(
 
                                     if (parts == null) return@async null
 
-                                    CompleteFileInfo(
+                                    CompleteFileInfoRequest(
                                         mediaKey = info.mediaKey,
                                         fileName = info.fileName,
                                         uploadId = info.uploadId,
@@ -92,7 +92,7 @@ class MediaUploaderImpl @Inject constructor(
                                         )
 
                                     if (uploadResult is Result.Success) {
-                                        CompleteFileInfo(
+                                        CompleteFileInfoRequest(
                                             mediaKey = info.mediaKey,
                                             fileName = info.fileName,
                                         )
@@ -180,10 +180,10 @@ class MediaUploaderImpl @Inject constructor(
     private suspend fun uploadMultipart(
         uri: Uri,
         uploadId: String,
-        chunkUrls: List<ChunkUrl>,
+        chunkUrls: List<ChunkUrlResponse>,
         chunkSize: Long,
         totalSize: Long,
-    ): List<PartInfo>? =
+    ): List<PartInfoRequest>? =
         withContext(Dispatchers.IO) {
             val semaphore = Semaphore(MAX_CONCURRENT_CHUNKS)
 
@@ -208,7 +208,7 @@ class MediaUploaderImpl @Inject constructor(
                                             partNumber = chunkUrl.partNumber,
                                         )
 
-                                    PartInfo(partNumber = chunkUrl.partNumber, eTag = eTag)
+                                    PartInfoRequest(partNumber = chunkUrl.partNumber, eTag = eTag)
                                 }
                             }
                         }.awaitAll()
