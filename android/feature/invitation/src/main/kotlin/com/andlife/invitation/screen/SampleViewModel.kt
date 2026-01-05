@@ -1,9 +1,9 @@
 package com.andlife.invitation.screen
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.andlife.domain.model.MediaFile
 import com.andlife.domain.repository.SampleMediaRepository
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
@@ -16,50 +16,42 @@ class SampleViewModel @Inject constructor(
     private val sampleMediaRepository: SampleMediaRepository,
 ) : ViewModel() {
 
-    fun uploadSingleMedia(mediaFile: MediaFile) {
+    fun uploadSingleMedia(uri: Uri) {
         viewModelScope.launch {
-            Log.d("SampleUpload", "단건 업로드 시작: ${mediaFile.fileName}, 크기: ${mediaFile.fileSize}")
+            Log.d("SampleUpload", "단건 업로드 시작")
 
-            sampleMediaRepository.uploadMedia(listOf(mediaFile))
+            sampleMediaRepository.uploadMedias(listOf(uri.toString()))
                 .onSuccess { urls ->
                     val url = urls.firstOrNull()
                     if (url != null) {
-                        Log.d("SampleUpload", "단건 업로드 성공: $url")
+                        Log.d("SampleUpload", "업로드 성공: $url")
                     } else {
-                        Log.e("SampleUpload", "단건 업로드 실패: URL이 null")
+                        Log.e("SampleUpload", "업로드 실패")
                     }
                 }
                 .onFailure { error ->
-                    Log.e("SampleUpload", "단건 업로드 실패: $error")
+                    Log.e("SampleUpload", "업로드 실패: $error")
                 }
         }
     }
 
-    fun uploadMultipleMedia(mediaFiles: List<MediaFile>) {
+    fun uploadMultipleMedia(uris: List<Uri>) {
         viewModelScope.launch {
-            Log.d("SampleUpload", "배치 업로드 시작 - 파일 개수: ${mediaFiles.size}")
+            Log.d("SampleUpload", "배치 업로드 시작 - ${uris.size}개")
 
-            mediaFiles.forEachIndexed { index, file ->
-                Log.d("SampleUpload", "[$index] ${file.fileName}, 크기: ${file.fileSize} bytes, 타입: ${file.mediaType}")
-            }
-
-            sampleMediaRepository.uploadMedia(mediaFiles)
+            sampleMediaRepository.uploadMedias(uris.map { it.toString() })
                 .onSuccess { urls ->
-                    val successCount = urls.count { it != null }
-                    val failCount = urls.count { it == null }
-
-                    Log.d("SampleUpload", "배치 업로드 완료 - 성공: $successCount, 실패: $failCount")
-
+                    Log.d("SampleUpload", "업로드 성공: ${urls.size}개")
                     urls.forEachIndexed { index, url ->
                         if (url != null) {
                             Log.d("SampleUpload", "[$index] 성공: $url")
                         } else {
-                            Log.e("SampleUpload", "[$index] 실패: ${mediaFiles[index].fileName}")
+                            Log.e("SampleUpload", "[$index] 실패: 업로드 실패")
                         }
                     }
                 }
                 .onFailure { error ->
-                    Log.e("SampleUpload", "배치 업로드 에러: $error")
+                    Log.e("SampleUpload", "에러: $error")
                 }
         }
     }
