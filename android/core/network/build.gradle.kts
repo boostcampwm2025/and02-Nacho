@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("invitation.android.library")
     id("invitation.kotlin.serialization")
@@ -6,6 +8,20 @@ plugins {
 
 android {
     namespace = "com.andlife.network"
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    defaultConfig {
+
+        val properties = Properties()
+        val localProps = project.rootProject.file("local.properties")
+        properties.load(localProps.inputStream())
+        val serverUrl = properties.getProperty("SERVER_URL") ?: ""
+
+        buildConfigField("String", "SERVER_URL", "\"$serverUrl\"")
+    }
 }
 
 dependencies {

@@ -1,5 +1,6 @@
 package com.andlife.network.di
 
+import com.andlife.network.BuildConfig
 import com.andlife.network.api.guestbook.GuestBookService
 import dagger.Module
 import dagger.Provides
@@ -16,8 +17,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object InvitationNetworkModule {
-//    private const val BASE_URL = "http://16.176.249.140:8080/"
-    private const val BASE_URL = "http://10.0.2.2:8080"
+    private const val SERVER_BASE_URL = BuildConfig.SERVER_URL
 
     @Provides
     @Singleton
@@ -45,7 +45,7 @@ object InvitationNetworkModule {
         json: Json
     ): Retrofit =
         Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(SERVER_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
