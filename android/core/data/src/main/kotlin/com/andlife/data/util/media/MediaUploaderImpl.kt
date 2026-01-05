@@ -151,7 +151,7 @@ class MediaUploaderImpl @Inject constructor(
                                 inputStream.source().use { source ->
                                     sink.writeAll(source)
                                 }
-                            } ?: throw IOException("Cannot open Uri: $uri")
+                            } ?: throw IOException("Uri를 열 수 없음: $uri")
                         }
                     }
 
@@ -168,12 +168,12 @@ class MediaUploaderImpl @Inject constructor(
                     } else {
                         Result.Error(
                             DataError.Network.UNKNOWN,
-                            "Simple upload failed: ${response.code}",
+                            "uploadSimple 실패: ${response.code}",
                         )
                     }
                 }
             } catch (e: Exception) {
-                Result.Error(DataError.Network.UNKNOWN, e.message ?: "Unknown error")
+                Result.Error(DataError.Network.UNKNOWN, e.message ?: "알 수 없는 에러")
             }
         }
 
@@ -250,7 +250,7 @@ class MediaUploaderImpl @Inject constructor(
 
                 buffer
             }
-        } ?: throw IOException("Could not open FileDescriptor for $uri")
+        } ?: throw IOException("FileDescriptor로 열 수 없음: $uri")
 
     private suspend fun uploadChunkWithRetry(
         url: String,
@@ -273,9 +273,9 @@ class MediaUploaderImpl @Inject constructor(
                     okHttpClient.newCall(request).execute().use { response ->
                         if (response.isSuccessful) {
                             return@withContext response.header("ETag")?.trim('"')
-                                ?: throw IllegalStateException("No ETag in response")
+                                ?: throw IllegalStateException("ETag 헤더 누락")
                         } else {
-                            throw IOException("Part $partNumber failed: ${response.code}")
+                            throw IOException("Part $partNumber 업로드 실패: ${response.code}")
                         }
                     }
                 } catch (e: Exception) {
@@ -286,7 +286,7 @@ class MediaUploaderImpl @Inject constructor(
                 }
             }
 
-            throw lastException ?: IOException("Upload failed for part $partNumber")
+            throw lastException ?: IOException("Part $partNumber 업로드 실패...")
         }
 
     companion object {
