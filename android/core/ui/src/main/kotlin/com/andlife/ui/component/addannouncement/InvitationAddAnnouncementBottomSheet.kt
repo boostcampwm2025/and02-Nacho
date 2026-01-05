@@ -19,13 +19,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.andlife.designsystem.component.InvitationButton
 import com.andlife.designsystem.component.InvitationTextField
@@ -50,7 +50,7 @@ fun InvitationAddAnnouncementBottomSheet(
         )
 
     val scope = rememberCoroutineScope()
-    val draft by viewModel.announcementDraft.collectAsState()
+    val draft by viewModel.announcementDraft.collectAsStateWithLifecycle()
 
     ModalBottomSheet(
         onDismissRequest = { }, // 사용하지 않음
