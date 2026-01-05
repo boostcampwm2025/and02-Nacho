@@ -8,7 +8,7 @@ import com.andlife.domain.model.MediaType
 import jakarta.inject.Inject
 
 class MediaFileProvider @Inject constructor(
-    private val contentResolver: ContentResolver
+    private val contentResolver: ContentResolver,
 ) {
     // Uri로부터 MediaFileInfo 생성
     fun createFromUri(uriString: String): MediaFile? {
@@ -20,17 +20,15 @@ class MediaFileProvider @Inject constructor(
             uriString = uri.toString(),
             fileName = fileName,
             fileSize = fileSize,
-            mediaType = mediaType
+            mediaType = mediaType,
         )
     }
 
-    fun createFromUris(uriStrings: List<String>): List<MediaFile> {
-        return uriStrings.mapNotNull { createFromUri(it) }
-    }
+    fun createFromUris(uriStrings: List<String>): List<MediaFile> = uriStrings.mapNotNull { createFromUri(it) }
 
     // Uri로부터 파일 이름과 크기 가져오기
-    private fun getFileInfoFromUri(uri: Uri): Pair<String, Long>? {
-        return contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+    private fun getFileInfoFromUri(uri: Uri): Pair<String, Long>? =
+        contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
             val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
 
@@ -38,9 +36,10 @@ class MediaFileProvider @Inject constructor(
                 val name = cursor.getString(nameIndex)
                 val size = cursor.getLong(sizeIndex)
                 name to size
-            } else null
+            } else {
+                null
+            }
         }
-    }
 
     // Uri로부터 미디어 타입 결정
     private fun getMediaTypeFromUri(uri: Uri): MediaType {
@@ -63,8 +62,8 @@ class MediaFileProvider @Inject constructor(
     }
 
     // Uri로부터 파일 확장자 가져오기
-    private fun getExtensionFromUri(uri: Uri): String {
-        return when (uri.scheme) {
+    private fun getExtensionFromUri(uri: Uri): String =
+        when (uri.scheme) {
             "content" -> {
                 contentResolver.query(uri, null, null, null, null)?.use { cursor ->
                     if (cursor.moveToFirst()) {
@@ -72,11 +71,14 @@ class MediaFileProvider @Inject constructor(
                         if (displayNameIndex != -1) {
                             val displayName = cursor.getString(displayNameIndex)
                             displayName.substringAfterLast('.', "")
-                        } else ""
-                    } else ""
+                        } else {
+                            ""
+                        }
+                    } else {
+                        ""
+                    }
                 } ?: ""
             }
             else -> uri.path?.substringAfterLast('.', "") ?: ""
         }
-    }
 }
