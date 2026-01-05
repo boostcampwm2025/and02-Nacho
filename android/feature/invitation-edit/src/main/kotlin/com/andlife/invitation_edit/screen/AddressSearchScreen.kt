@@ -52,7 +52,7 @@ import kotlinx.coroutines.flow.flowOf
 @Composable
 fun AddressSearchRoute(
     onNavigateBack: () -> Unit,
-    onAddressSelected: (AddressUiModel) -> Unit,
+    onAddressSelect: (AddressUiModel) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AddressSearchViewModel = hiltViewModel(),
 ) {
@@ -62,7 +62,7 @@ fun AddressSearchRoute(
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is AddressSearchSideEffect.NavigateBackWithAddress -> {
-                onAddressSelected(effect.addressUiModel)
+                onAddressSelect(effect.addressUiModel)
             }
 
             AddressSearchSideEffect.NavigateBack -> {
@@ -115,7 +115,7 @@ private fun AddressSearchScreen(
                 key(uiState.query) {
                     Column {
                         SearchResultCount(
-                            itemCount = addressItems.itemCount,
+                            itemCount = uiState.totalCount,
                             loadState = addressItems.loadState.refresh,
                         )
 
@@ -149,7 +149,7 @@ private fun AddressSearchTopBar(
         modifier = modifier,
         title = {
             Text(
-                text = stringResource(R.string.label_address_search_title),
+                text = stringResource(R.string.txt_address_search_title),
                 style = InvitationTheme.typography.headingSmallSemiBold,
                 color = InvitationTheme.colorScheme.textPrimary,
             )
@@ -158,12 +158,11 @@ private fun AddressSearchTopBar(
             IconButton(onClick = onBack) {
                 Icon(
                     painter = painterResource(R.drawable.ic_arrow_back_24),
-                    contentDescription = stringResource(R.string.des_address_search_back),
+                    contentDescription = stringResource(R.string.desc_top_bar_back),
                     tint = InvitationTheme.colorScheme.iconSecondary,
                 )
             }
         },
-        windowInsets = WindowInsets(),
         colors =
             TopAppBarDefaults.topAppBarColors(
                 containerColor = InvitationTheme.colorScheme.backgroundPrimary,
@@ -180,11 +179,11 @@ private fun SearchInputField(
     InvitationTextField(
         value = query,
         onValueChange = onQueryChange,
-        placeholder = stringResource(R.string.label_address_search_input_hint),
+        placeholder = stringResource(R.string.txt_address_input_hint),
         leadingIcon = {
             Icon(
                 painter = painterResource(R.drawable.ic_search_24),
-                contentDescription = stringResource(R.string.des_address_search_input),
+                contentDescription = stringResource(R.string.desc_search_input_icon),
                 tint = InvitationTheme.colorScheme.iconDisabled,
             )
         },
@@ -199,7 +198,7 @@ private fun EmptySearchGuide(modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = stringResource(R.string.label_address_search_guide),
+            text = stringResource(R.string.msg_search_guide),
             style = InvitationTheme.typography.bodyMediumRegular,
             color = InvitationTheme.colorScheme.textTertiary,
         )
@@ -219,7 +218,7 @@ private fun SearchResultCount(
             horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.xSmall),
         ) {
             Text(
-                text = stringResource(R.string.label_address_search_result),
+                text = stringResource(R.string.txt_search_result),
                 style = InvitationTheme.typography.bodyMediumRegular,
                 color = InvitationTheme.colorScheme.textPrimary,
             )
@@ -291,7 +290,7 @@ private fun AddressItem(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = address.roadAddress,
+                    text = address.addressName,
                     style = InvitationTheme.typography.bodyMediumRegular,
                     color = InvitationTheme.colorScheme.textPrimary,
                     modifier = Modifier.weight(1f),
@@ -310,7 +309,7 @@ private fun AddressItem(
             )
 
             Text(
-                text = address.streetAddress,
+                text = address.roadAddressName,
                 style = InvitationTheme.typography.bodySmallRegular,
                 color = InvitationTheme.colorScheme.textTertiary,
             )
@@ -338,18 +337,18 @@ private fun AddressSearchResultPreview() {
         listOf(
             AddressUiModel(
                 id = 1,
-                roadAddress = "서울특별시 강남구 강남대로62길 23",
+                roadAddressName = "서울특별시 강남구 강남대로62길 23",
                 placeName = "코드스쿼드",
-                streetAddress = "서울특별시 강남구 강남대로62길 23 4층",
+                addressName = "서울특별시 강남구 강남대로62길 23 4층",
                 zipCode = "06175",
                 latitude = 37.5012743,
                 longitude = 127.0396597,
             ),
             AddressUiModel(
                 id = 2,
-                roadAddress = "서울특별시 서초구 강남대로 202",
+                roadAddressName = "서울특별시 서초구 강남대로 202",
                 placeName = "양재역",
-                streetAddress = "서울특별시 서초구 강남대로 202",
+                addressName = "서울특별시 서초구 강남대로 202",
                 zipCode = "06752",
                 latitude = 37.4845239,
                 longitude = 127.0343395,

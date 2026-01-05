@@ -14,4 +14,7 @@ kotlin {
 
 dependencies {
     implementation(libs.kotlinx.datetime)
+
+    // paging
+    implementation(libs.androidx.paging.common)
 }

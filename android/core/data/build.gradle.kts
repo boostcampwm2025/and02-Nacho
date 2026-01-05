@@ -17,6 +17,9 @@ dependencies {
     implementation(projects.core.database)
     implementation(projects.core.datastore)
 
+    // paging
+    implementation(libs.androidx.paging.runtime)
+
     // retrofit
     implementation(libs.retrofit)
     testImplementation(libs.junit)

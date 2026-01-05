@@ -14,13 +14,17 @@ import com.andlife.invitation_edit.screen.MyInvitationCreateRoute
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MyInvitationCreate(val id: Long)
+data class MyInvitationCreate(
+    val id: Long,
+)
 
 @Serializable
 data object AddressSearch
 
-
-fun NavController.navigateToMyInvitationCreate(id: Long, navOptions: NavOptions) {
+fun NavController.navigateToMyInvitationCreate(
+    id: Long,
+    navOptions: NavOptions,
+) {
     navigate(MyInvitationCreate(id), navOptions)
 }
 
@@ -34,9 +38,10 @@ fun NavGraphBuilder.myInvitationCreateNavGraph(
     onNavigateBack: () -> Unit,
 ) {
     composable<MyInvitationCreate> { backStackEntry ->
-        val selectedAddressUiModel = backStackEntry.savedStateHandle
-            .getStateFlow<AddressUiModel?>("selected_address", null)
-            .collectAsStateWithLifecycle()
+        val selectedAddressUiModel =
+            backStackEntry.savedStateHandle
+                .getStateFlow<AddressUiModel?>("selected_address", null)
+                .collectAsStateWithLifecycle()
 
         MyInvitationCreateRoute(
             selectedAddress = selectedAddressUiModel.value,
@@ -49,19 +54,17 @@ fun NavGraphBuilder.myInvitationCreateNavGraph(
 
 fun NavGraphBuilder.addressSearchNavGraph(
     navController: NavController,
-    paddingValues: PaddingValues,
     onNavigateBack: () -> Unit,
 ) {
     composable<AddressSearch> {
         AddressSearchRoute(
             onNavigateBack = onNavigateBack,
-            onAddressSelected = { addressUiModel ->
+            onAddressSelect = { addressUiModel ->
                 navController.previousBackStackEntry
                     ?.savedStateHandle
                     ?.set("selected_address", addressUiModel)
                 onNavigateBack()
             },
-            modifier = Modifier.padding(paddingValues),
         )
     }
 }

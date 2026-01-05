@@ -21,7 +21,7 @@ import com.andlife.ui.R
 @Composable
 fun InvitationLoadingError(
     onRetry: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier.fillMaxSize(),

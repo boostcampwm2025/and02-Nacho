@@ -12,10 +12,10 @@ import kotlinx.coroutines.flow.Flow
 @Composable
 fun <T> Flow<T>.collectWithLifecycle(
     minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
-    action: suspend (T) -> Unit
+    action: suspend (T) -> Unit,
 ) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
-    LaunchedEffect(this, lifecycle) {
+    LaunchedEffect(this, lifecycle, action) {
         lifecycle.repeatOnLifecycle(minActiveState) {
             collect { action(it) }
         }
