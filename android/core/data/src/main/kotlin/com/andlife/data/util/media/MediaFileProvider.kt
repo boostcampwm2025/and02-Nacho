@@ -3,6 +3,7 @@ package com.andlife.data.util.media
 import android.content.ContentResolver
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.webkit.MimeTypeMap
 import androidx.core.net.toUri
 import com.andlife.domain.model.MediaType
 import jakarta.inject.Inject
@@ -45,40 +46,31 @@ class MediaFileProvider @Inject constructor(
     private fun getMediaTypeFromUri(uri: Uri): MediaType {
         val mimeType = contentResolver.getType(uri)
 
-        return when {
-            mimeType?.startsWith("image/") == true -> MediaType.IMAGE
-            mimeType?.startsWith("video/") == true -> MediaType.VIDEO
-            mimeType?.startsWith("audio/") == true -> MediaType.AUDIO
-            else -> {
-                val extension = getExtensionFromUri(uri)
-                when (extension.lowercase()) {
-                    "jpg", "jpeg", "png", "gif", "webp" -> MediaType.IMAGE
-                    "mp4", "mov", "avi", "mkv" -> MediaType.VIDEO
-                    "mp3", "wav", "m4a", "aac" -> MediaType.AUDIO
-                    else -> MediaType.IMAGE
-                }
-            }
-        }
+        MediaType.fromMimeType(mimeType)?.let { return it }
+
+        val extension = getExtensionFromUri(uri)
+        return MediaType.fromExtension(extension)
     }
 
-    // Uri로부터 파일 확장자 가져오기
-    private fun getExtensionFromUri(uri: Uri): String =
-        when (uri.scheme) {
+    // Uri로부터 파일 확장자 추출
+    private fun getExtensionFromUri(uri: Uri): String {
+        // 스템 MimeTypeMap에서 먼저 찾기
+        val mimeType = contentResolver.getType(uri)
+        val extensionFromMap = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
+
+        if (!extensionFromMap.isNullOrEmpty()) return extensionFromMap
+
+        // MimeTypeMap에 없는 경우, 파일명에서 직접 추출
+        return when (uri.scheme) {
             "content" -> {
-                contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
                     if (cursor.moveToFirst()) {
-                        val displayNameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                        if (displayNameIndex != -1) {
-                            val displayName = cursor.getString(displayNameIndex)
-                            displayName.substringAfterLast('.', "")
-                        } else {
-                            ""
-                        }
-                    } else {
-                        ""
-                    }
+                        val displayName = cursor.getString(0)
+                        displayName.substringAfterLast('.', "")
+                    } else ""
                 } ?: ""
             }
             else -> uri.path?.substringAfterLast('.', "") ?: ""
         }
+    }
 }
