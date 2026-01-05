@@ -13,14 +13,14 @@ data class GuestBookResponse(
     val writerProfileImage: String? = null,
     val invitationTitle: String,
     val textContent: String,
-    val visualMedias: List<MediaResponse>,
-    val audioMedias: List<MediaResponse>,
+    val visualMedias: List<GuestBookMediaResponse>,
+    val audioMedias: List<GuestBookMediaResponse>,
     val totalVisualCount: Int,
     val createdAt: LocalDateTime,
 )
 
 @Serializable
-data class MediaResponse(
+data class GuestBookMediaResponse(
     val type: String,
     val url: String,
     val thumbnailUrl: String? = null,
