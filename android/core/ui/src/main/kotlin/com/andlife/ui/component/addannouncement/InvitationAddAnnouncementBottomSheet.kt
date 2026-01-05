@@ -36,37 +36,6 @@ import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.ui.R
 import kotlinx.coroutines.launch
 
-@Composable
-fun TitleAndTextField(
-    title: String,
-    textFieldValue: String,
-    onTextFieldValueChange: (String) -> Unit,
-    textFieldPlaceholder: String,
-    modifier: Modifier = Modifier,
-    singleLine: Boolean = true,
-    minLines: Int = 1,
-) {
-    Column(
-        horizontalAlignment = Alignment.Start,
-        modifier = modifier,
-    ) {
-        Text(
-            text = title,
-            style = InvitationTheme.typography.bodyMediumSemiBold,
-            color = InvitationTheme.colorScheme.textPrimary,
-        )
-        Spacer(modifier = Modifier.height(InvitationSpacing.small))
-        InvitationTextField(
-            value = textFieldValue,
-            onValueChange = onTextFieldValueChange,
-            placeholder = textFieldPlaceholder,
-            modifier = Modifier.fillMaxWidth(),
-            minLines = minLines,
-            singleLine = singleLine,
-        )
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InvitationAddAnnouncementBottomSheet(
@@ -198,6 +167,37 @@ fun InvitationAddAnnouncementBottomSheet(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun TitleAndTextField(
+    title: String,
+    textFieldValue: String,
+    onTextFieldValueChange: (String) -> Unit,
+    textFieldPlaceholder: String,
+    modifier: Modifier = Modifier,
+    singleLine: Boolean = true,
+    minLines: Int = 1,
+) {
+    Column(
+        horizontalAlignment = Alignment.Start,
+        modifier = modifier,
+    ) {
+        Text(
+            text = title,
+            style = InvitationTheme.typography.bodyMediumSemiBold,
+            color = InvitationTheme.colorScheme.textPrimary,
+        )
+        Spacer(modifier = Modifier.height(InvitationSpacing.small))
+        InvitationTextField(
+            value = textFieldValue,
+            onValueChange = onTextFieldValueChange,
+            placeholder = textFieldPlaceholder,
+            modifier = Modifier.fillMaxWidth(),
+            minLines = minLines,
+            singleLine = singleLine,
+        )
     }
 }
 
