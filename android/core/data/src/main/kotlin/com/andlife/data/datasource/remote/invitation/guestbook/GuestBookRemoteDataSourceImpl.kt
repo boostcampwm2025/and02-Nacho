@@ -24,7 +24,7 @@ class GuestBookRemoteDataSourceImpl @Inject constructor(
             networkList.map { response ->
                 GuestBookMedia(
                     id = response.id,
-                    type = MediaType.from(response.mediaType),
+                    type = MediaType.fromString(response.mediaType),
                     url = response.mediaUrl,
                     content = response.content,
                     authorName = response.author.name,
