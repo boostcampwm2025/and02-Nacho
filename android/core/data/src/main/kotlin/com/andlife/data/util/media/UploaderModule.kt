@@ -9,7 +9,6 @@ import jakarta.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class UploaderModule {
-
     @Binds
     @Singleton
     abstract fun bindMediaUploader(impl: MediaUploaderImpl): MediaUploader
