@@ -1,5 +1,8 @@
+@file:OptIn(InternalSerializationApi::class)
+
 package com.andlife.network.api.kakao.address
 
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
