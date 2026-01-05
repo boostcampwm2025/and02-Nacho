@@ -28,21 +28,20 @@ class GuestBookService(
                 allMedia.add(MediaResponse(MediaType.AUDIO, it.audioUrl, null, it.durationSeconds, it.displayOrder))
             }
 
-            // visualMedias: 이미지와 비디오 (가로 스크롤 캐러셀용)
-            val visualMedias = allMedia.filter { it.type == MediaType.IMAGE || it.type == MediaType.VIDEO }
-                .sortedBy { it.displayOrder }
+            val sortedList = allMedia.sortedBy { it.displayOrder }
 
-            // audioMedias: 음성 (하단 별도 리스트용)
-            val audioMedias = allMedia.filter { it.type == MediaType.AUDIO }
-                .sortedBy { it.displayOrder }
+            val visualMedias = sortedList.filter { it.type != MediaType.AUDIO }
+            val audioMedias = sortedList.filter { it.type == MediaType.AUDIO }
 
             GuestBookResponse(
                 id = guestBook.id,
                 writerName = guestBook.user.name,
                 writerProfileImage = guestBook.user.profileImageUrl,
+                invitationTitle = guestBook.invitation.title,
                 textContent = guestBook.textContent,
                 visualMedias = visualMedias,
                 audioMedias = audioMedias,
+                totalVisualCount = visualMedias.size,
                 createdAt = guestBook.createdAt
             )
         }

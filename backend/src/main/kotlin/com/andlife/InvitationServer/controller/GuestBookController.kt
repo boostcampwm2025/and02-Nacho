@@ -19,10 +19,12 @@ data class GuestBookResponse(
     val id: Long,
     val writerName: String,
     val writerProfileImage: String?,
+    val invitationTitle: String,
     val textContent: String,
     val visualMedias: List<MediaResponse>,
     val audioMedias: List<MediaResponse>,
-    val createdAt: LocalDateTime
+    val totalVisualCount: Int,
+    val createdAt: LocalDateTime,
 )
 
 data class MediaResponse(
