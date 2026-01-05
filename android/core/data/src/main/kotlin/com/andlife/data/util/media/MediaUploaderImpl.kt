@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.core.net.toUri
 import com.andlife.data.util.apiCall
 import com.andlife.domain.error.DataError
-import com.andlife.domain.model.MediaFile
 import com.andlife.domain.model.MediaType
 import com.andlife.domain.util.Result
 import com.andlife.network.api.media.BatchCompleteUploadRequest
@@ -41,7 +40,7 @@ class MediaUploaderImpl @Inject constructor(
 ) : MediaUploader {
 
     override suspend fun uploadMedias(
-        files: List<MediaFile> // TODO: 데이터 레이어용을 굳이 따로 만들어야 하나? 일단 도메인 모델로 진행
+        files: List<MediaFile>
     ): Result<List<String?>, DataError> = withContext(Dispatchers.IO) {
 
         val startRequest = BatchUploadMediaRequest(
