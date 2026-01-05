@@ -25,4 +25,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // kotlinx datetime
+    implementation(libs.kotlinx.datetime)
 }
