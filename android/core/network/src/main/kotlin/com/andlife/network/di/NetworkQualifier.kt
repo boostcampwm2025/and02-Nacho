@@ -1,0 +1,11 @@
+package com.andlife.network.di
+
+import javax.inject.Qualifier
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class Invitation
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class Kakao
