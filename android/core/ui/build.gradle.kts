@@ -11,9 +11,6 @@ dependencies {
     // designSystem
     implementation(projects.core.designsystem)
 
-    // datetime
-    implementation(libs.kotlinx.datetime)
-
     // immutable
     implementation(libs.kotlinx.immutable)
 
@@ -22,6 +19,9 @@ dependencies {
 
     // paging
     implementation(libs.androidx.paging.compose)
+
+    // kotlinx datetime
+    implementation(libs.kotlinx.datetime)
 
     // lifecycle
     implementation(libs.androidx.lifecycle.viewModelCompose)
