@@ -11,11 +11,10 @@ import androidx.compose.ui.text.TextStyle
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
-import com.andlife.ui.util.TimeUtils
 
 @Composable
-fun DurationOverlay(
-    duration: Int,
+fun MediaOverlay(
+    text: String,
     modifier: Modifier = Modifier,
     shape: CornerBasedShape = InvitationTheme.shapes.extraSmall,
     backgroundColor: Color = InvitationTheme.colorScheme.backgroundOverlay,
@@ -29,7 +28,7 @@ fun DurationOverlay(
         contentColor = contentColor
     ) {
         Text(
-            text = TimeUtils.formatDuration(duration),
+            text = text,
             style = textStyle,
             modifier = Modifier.padding(horizontal = InvitationSpacing.small, vertical = InvitationSpacing.xSmall)
         )
@@ -38,8 +37,21 @@ fun DurationOverlay(
 
 @PreviewTheme
 @Composable
-fun DurationOverlayPreview() {
+fun ImageOverlayPreview() {
     InvitationTheme {
-        DurationOverlay(duration = 828)
+        MediaOverlay(
+            text = "1/10",
+            shape = InvitationTheme.shapes.medium,
+        )
+    }
+}
+
+@PreviewTheme
+@Composable
+fun VideoOverlayPreview() {
+    InvitationTheme {
+        MediaOverlay(
+            text = "8:28"
+        )
     }
 }

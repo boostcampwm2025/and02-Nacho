@@ -24,6 +24,7 @@ import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.ui.R
 import com.andlife.ui.model.MediaType
+import com.andlife.ui.util.toFormatDuration
 
 @Composable
 fun MediaItem(
@@ -82,8 +83,8 @@ fun MediaItem(
         }
 
         if (duration != null && duration > 0) {
-            DurationOverlay(
-                duration = duration,
+            MediaOverlay(
+                text = duration.toFormatDuration(),
                 modifier = Modifier.align(Alignment.BottomEnd).padding(InvitationSpacing.small)
             )
         }
