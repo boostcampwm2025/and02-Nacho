@@ -67,7 +67,9 @@ class MediaFileProvider @Inject constructor(
                     if (cursor.moveToFirst()) {
                         val displayName = cursor.getString(0)
                         displayName.substringAfterLast('.', "")
-                    } else ""
+                    } else {
+                        ""
+                    }
                 } ?: ""
             }
             else -> uri.path?.substringAfterLast('.', "") ?: ""
