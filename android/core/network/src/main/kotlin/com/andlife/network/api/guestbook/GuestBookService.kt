@@ -6,10 +6,9 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 
 interface GuestBookService {
-
     @GET("/api/invitations/{invitationId}/collection")
     suspend fun getMediaCollection(
-        @Path("invitationId") invitationId: Long
+        @Path("invitationId") invitationId: Long,
     ): BaseResponse<List<CollectionResponse>>
 
     @GET("/api/v1/invitations/{invitationId}/guestbooks")
