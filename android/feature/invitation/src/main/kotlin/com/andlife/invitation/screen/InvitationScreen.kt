@@ -6,7 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.invitation.viewmodel.InvitationViewModel
-import com.andlife.ui.component.media.MediaGridView
+import com.andlife.invitation.component.MediaGridView
 
 @Composable
 fun InvitationScreen(

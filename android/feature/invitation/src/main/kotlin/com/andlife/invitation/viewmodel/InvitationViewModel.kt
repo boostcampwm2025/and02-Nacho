@@ -8,6 +8,7 @@ import com.andlife.domain.util.onSuccess
 import com.andlife.invitation.model.InvitationSideEffect
 import com.andlife.invitation.model.InvitationUiEvent
 import com.andlife.invitation.model.InvitationUiState
+import com.andlife.invitation.model.guestbook.toUiModel
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -47,7 +48,7 @@ class InvitationViewModel @Inject constructor(
                     updateState {
                         copy(
                             isLoading = false,
-                            mediaItems = mediaList
+                            mediaItems = mediaList.map { it.toUiModel() }
                         )
                     }
                     Log.d("ViewModel", "미디어 리스트: $mediaList")
