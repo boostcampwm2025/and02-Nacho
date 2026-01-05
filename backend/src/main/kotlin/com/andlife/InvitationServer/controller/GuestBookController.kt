@@ -16,17 +16,17 @@ enum class MediaType {
 
 data class GuestBookResponse(
     val id: Long,
-    val writerName: String,
-    val writerProfileImage: String?,
+    val authorName: String,
+    val authorProfileImage: String?,
     val invitationTitle: String,
     val textContent: String,
-    val visualMedias: List<GuestBookMediaResponse>,
-    val audioMedias: List<GuestBookMediaResponse>,
+    val visualMedias: List<GuestBookEntryMediaResponse>,
+    val audioMedias: List<GuestBookEntryMediaResponse>,
     val totalVisualCount: Int,
     val createdAt: LocalDateTime,
 )
 
-data class GuestBookMediaResponse(
+data class GuestBookEntryMediaResponse(
     val type: MediaType,
     val url: String,
     val thumbnailUrl: String? = null,

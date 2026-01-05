@@ -1,7 +1,7 @@
 package com.andlife.InvitationServer.service
 
 import com.andlife.InvitationServer.controller.GuestBookResponse
-import com.andlife.InvitationServer.controller.GuestBookMediaResponse
+import com.andlife.InvitationServer.controller.GuestBookEntryMediaResponse
 import com.andlife.InvitationServer.controller.MediaType
 import com.andlife.InvitationServer.repository.GuestBookRepository
 import org.springframework.stereotype.Service
@@ -16,16 +16,16 @@ class GuestBookService(
         val guestBooks = guestBookRepository.findAllByInvitationId(invitationId)
 
         return guestBooks.map { guestBook ->
-            val allMedia = mutableListOf<GuestBookMediaResponse>()
+            val allMedia = mutableListOf<GuestBookEntryMediaResponse>()
 
             guestBook.images.forEach {
-                allMedia.add(GuestBookMediaResponse(MediaType.IMAGE, it.imageUrl, null, null, it.displayOrder))
+                allMedia.add(GuestBookEntryMediaResponse(MediaType.IMAGE, it.imageUrl, null, null, it.displayOrder))
             }
             guestBook.videos.forEach {
-                allMedia.add(GuestBookMediaResponse(MediaType.VIDEO, it.videoUrl, it.thumbnailUrl, it.durationSeconds, it.displayOrder))
+                allMedia.add(GuestBookEntryMediaResponse(MediaType.VIDEO, it.videoUrl, it.thumbnailUrl, it.durationSeconds, it.displayOrder))
             }
             guestBook.audios.forEach {
-                allMedia.add(GuestBookMediaResponse(MediaType.AUDIO, it.audioUrl, null, it.durationSeconds, it.displayOrder))
+                allMedia.add(GuestBookEntryMediaResponse(MediaType.AUDIO, it.audioUrl, null, it.durationSeconds, it.displayOrder))
             }
 
             val sortedList = allMedia.sortedBy { it.displayOrder }
@@ -35,8 +35,8 @@ class GuestBookService(
 
             GuestBookResponse(
                 id = guestBook.id,
-                writerName = guestBook.user.name,
-                writerProfileImage = guestBook.user.profileImageUrl,
+                authorName = guestBook.user.name,
+                authorProfileImage = guestBook.user.profileImageUrl,
                 invitationTitle = guestBook.invitation.title,
                 textContent = guestBook.textContent,
                 visualMedias = visualMedias,
