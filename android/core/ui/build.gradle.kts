@@ -27,6 +27,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewModelCompose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
+    // ExoPlayer
+    implementation(libs.bundles.exoplayer)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

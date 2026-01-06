@@ -28,6 +28,7 @@ androidxComposeMaterial3Adaptive = "1.2.0"
 ktlint = "14.0.1"
 compose-ruleset = "0.4.28"
 javaxInject = "1"
+media3Exoplayer = "1.9.0"
 
 [libraries]
 androidx-compose-material3-adaptive-navigation-suite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
@@ -93,6 +94,10 @@ javax-inject = { group = "javax.inject", name = "javax.inject", version.ref = "j
 
 ktlint-compose-rules = { group = "io.nlopez.compose.rules", name = "ktlint", version.ref = "compose-ruleset" }
 
+androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3Exoplayer" }
+androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3Exoplayer" }
+
+
 # Dependencies of the included build-logic
 ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
 android-gradleApiPlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
@@ -120,4 +125,8 @@ compose = [
     "androidx-compose-ui-graphics",
     "androidx-compose-ui-tooling-preview",
     "androidx-compose-material3"
+]
+exoplayer = [
+    "androidx-media3-exoplayer",
+    "androidx-media3-ui"
 ]
