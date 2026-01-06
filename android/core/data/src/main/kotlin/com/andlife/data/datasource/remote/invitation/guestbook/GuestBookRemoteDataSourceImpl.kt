@@ -7,6 +7,7 @@ import com.andlife.domain.model.GuestBookMedia
 import com.andlife.domain.model.MediaType
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.map
+import com.andlife.network.api.guestbook.GuestBookResponse
 import com.andlife.network.api.guestbook.GuestBookService
 import com.andlife.network.di.Invitation
 import com.andlife.network.model.invitation.guestbook.CollectionResponse
@@ -37,7 +38,7 @@ class GuestBookRemoteDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun getGuestBooksByInvitationId(invitationId: Long): Result<List<GuestBook>, DataError> = apiCall {
+    override suspend fun getGuestBooksByInvitationId(invitationId: Long): Result<List<GuestBookResponse>, DataError> = apiCall {
         guestBookService.getGuestBooksByInvitationId(invitationId)
-    }.map { list -> list.map { it.toDomain() } }
+    }
 }
