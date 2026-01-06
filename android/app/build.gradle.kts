@@ -74,6 +74,9 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.immutable)
 
+    // Install Referrer (디퍼드 딥링크용)
+    implementation(libs.installreferrer)
+
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
