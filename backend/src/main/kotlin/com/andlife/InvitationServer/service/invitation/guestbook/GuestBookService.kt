@@ -76,19 +76,19 @@ class GuestBookService(
             val allMedia = mutableListOf<GuestBookEntryMediaResponse>()
 
             guestBook.images.forEach {
-                allMedia.add(GuestBookEntryMediaResponse(com.andlife.InvitationServer.controller.MediaType.IMAGE, it.imageUrl, null, null, it.displayOrder))
+                allMedia.add(GuestBookEntryMediaResponse(it.id, MediaType.IMAGE, it.imageUrl, null, null, it.displayOrder))
             }
             guestBook.videos.forEach {
-                allMedia.add(GuestBookEntryMediaResponse(com.andlife.InvitationServer.controller.MediaType.VIDEO, it.videoUrl, it.thumbnailUrl, it.durationSeconds, it.displayOrder))
+                allMedia.add(GuestBookEntryMediaResponse(it.id, MediaType.VIDEO, it.videoUrl, it.thumbnailUrl, it.durationSeconds, it.displayOrder))
             }
             guestBook.audios.forEach {
-                allMedia.add(GuestBookEntryMediaResponse(com.andlife.InvitationServer.controller.MediaType.AUDIO, it.audioUrl, null, it.durationSeconds, it.displayOrder))
+                allMedia.add(GuestBookEntryMediaResponse(it.id, MediaType.AUDIO, it.audioUrl, null, it.durationSeconds, it.displayOrder))
             }
 
             val sortedList = allMedia.sortedBy { it.displayOrder }
 
-            val visualMedias = sortedList.filter { it.type != com.andlife.InvitationServer.controller.MediaType.AUDIO }
-            val audioMedias = sortedList.filter { it.type == com.andlife.InvitationServer.controller.MediaType.AUDIO }
+            val visualMedias = sortedList.filter { it.type != MediaType.AUDIO }
+            val audioMedias = sortedList.filter { it.type == MediaType.AUDIO }
 
             GuestBookResponse(
                 id = guestBook.id,
