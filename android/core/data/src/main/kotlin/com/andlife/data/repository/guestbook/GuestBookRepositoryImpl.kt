@@ -10,9 +10,7 @@ import com.andlife.domain.util.Result
 import com.andlife.domain.util.map
 import javax.inject.Inject
 
-class GuestBookRepositoryImpl
-@Inject
-constructor(
+class GuestBookRepositoryImpl @Inject constructor(
     private val guestBookRemoteDataSource: GuestBookRemoteDataSource,
 ) : GuestBookRepository {
     override suspend fun getMediaCollection(invitationId: Long): Result<List<GuestBookMedia>, DataError> =

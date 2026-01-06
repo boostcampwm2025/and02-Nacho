@@ -2,7 +2,6 @@ package com.andlife.data.datasource.remote.invitation.guestbook
 
 import com.andlife.data.util.apiCall
 import com.andlife.domain.error.DataError
-import com.andlife.domain.model.GuestBook
 import com.andlife.domain.model.GuestBookMedia
 import com.andlife.domain.model.MediaType
 import com.andlife.domain.util.Result
@@ -38,7 +37,8 @@ class GuestBookRemoteDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun getGuestBooksByInvitationId(invitationId: Long): Result<List<GuestBookResponse>, DataError> = apiCall {
-        guestBookService.getGuestBooksByInvitationId(invitationId)
-    }
+    override suspend fun getGuestBooksByInvitationId(invitationId: Long): Result<List<GuestBookResponse>, DataError> =
+        apiCall {
+            guestBookService.getGuestBooksByInvitationId(invitationId)
+        }
 }
