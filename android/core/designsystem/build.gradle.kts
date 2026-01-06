@@ -11,7 +11,6 @@ dependencies {
 
     // coil
     implementation(libs.coil.kt.compose)
-    implementation(libs.coil.kt.network.okhttp)
 
     // Immutable
     implementation(libs.kotlinx.immutable)
