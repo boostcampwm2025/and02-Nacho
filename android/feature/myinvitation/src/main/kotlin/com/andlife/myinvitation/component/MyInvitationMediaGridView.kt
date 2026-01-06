@@ -11,7 +11,7 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.domain.model.MediaType
-import com.andlife.myinvitation.model.MyInvitationMediaUiModel
+import com.andlife.myinvitation.model.MyInvitationCollectionUiModel
 import com.andlife.myinvitation.util.toUiType
 import com.andlife.ui.component.media.MediaItem
 import kotlinx.datetime.Clock
@@ -20,7 +20,7 @@ import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun MyInvitationMediaGridView(
-    items: List<MyInvitationMediaUiModel>,
+    items: List<MyInvitationCollectionUiModel>,
     onItemClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -48,7 +48,7 @@ fun MyInvitationMediaGridViewPreview() {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
     val mockItems = listOf(
-        MyInvitationMediaUiModel(
+        MyInvitationCollectionUiModel(
             id = 1L,
             url = "https://picsum.photos/400/600?random=1",
             type = MediaType.IMAGE.toUiType(),
@@ -58,7 +58,7 @@ fun MyInvitationMediaGridViewPreview() {
             createdAt = now,
             durationSeconds = null
         ),
-        MyInvitationMediaUiModel(
+        MyInvitationCollectionUiModel(
             id = 2L,
             url = "https://picsum.photos/400/600?random=2",
             type = MediaType.VIDEO.toUiType(),
@@ -68,7 +68,7 @@ fun MyInvitationMediaGridViewPreview() {
             createdAt = now,
             durationSeconds = 120
         ),
-        MyInvitationMediaUiModel(
+        MyInvitationCollectionUiModel(
             id = 3L,
             url = "https://picsum.photos/400/600?random=3",
             type = MediaType.AUDIO.toUiType(),

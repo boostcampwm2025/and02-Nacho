@@ -5,9 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
-import com.andlife.invitation.model.InvitationSideEffect
-import com.andlife.invitation.model.InvitationUiEvent
-import com.andlife.invitation.model.InvitationUiState
+import com.andlife.invitation.model.guestbook.InvitationCollectionSideEffect
+import com.andlife.invitation.model.guestbook.InvitationCollectionUiEvent
+import com.andlife.invitation.model.guestbook.InvitationCollectionUiState
 import com.andlife.invitation.model.guestbook.toUiModel
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,23 +19,23 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class InvitationViewModel @Inject constructor(
+class InvitationCollectionViewModel @Inject constructor(
     private val guestBookRepository: GuestBookRepository
-) : BaseViewModel<InvitationUiState, InvitationUiEvent, InvitationSideEffect>(
-    initialState = InvitationUiState()
+) : BaseViewModel<InvitationCollectionUiState, InvitationCollectionUiEvent, InvitationCollectionSideEffect>(
+    initialState = InvitationCollectionUiState()
 ) {
 
-    override val uiState: StateFlow<InvitationUiState> = mutableUiState
+    override val uiState: StateFlow<InvitationCollectionUiState> = mutableUiState
         .onStart {
             loadMediaCollection(1L)
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = InvitationUiState()
+            initialValue = InvitationCollectionUiState()
         )
 
-    override fun onEvent(event: InvitationUiEvent) {
+    override fun onEvent(event: InvitationCollectionUiEvent) {
         TODO("Not yet implemented")
     }
 
