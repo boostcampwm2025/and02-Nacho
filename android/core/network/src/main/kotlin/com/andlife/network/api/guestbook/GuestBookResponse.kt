@@ -10,12 +10,18 @@ import kotlinx.serialization.Serializable
 data class GuestBookResponse(
     val id: Long,
     val author: GuestBookAuthorResponse,
-    val invitationTitle: String,
+    val invitation: GuestBookInvitationResponse,
     val textContent: String,
     val visualMedias: List<GuestBookEntryMediaResponse>,
     val audioMedias: List<GuestBookEntryMediaResponse>,
     val totalVisualCount: Int,
     val createdAt: LocalDateTime,
+)
+
+@Serializable
+data class GuestBookInvitationResponse(
+    val id: Long,
+    val title: String,
 )
 
 @Serializable
