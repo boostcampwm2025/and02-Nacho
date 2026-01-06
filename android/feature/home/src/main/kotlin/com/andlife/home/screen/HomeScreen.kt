@@ -40,20 +40,25 @@ fun HomeScreen(
     val playVideoIndex by remember {
         derivedStateOf {
             val visibleItems = lazyListSTate.layoutInfo.visibleItemsInfo
-            Log.d("HomeScreen", "visibleItems size: ${visibleItems.size}")
-            when (visibleItems.size) {
+
+            val visibleItemsWithVisualMedia = visibleItems.filter { itemInfo ->
+                val guestBook = uiState.value.guestBooks.getOrNull(itemInfo.index)
+                guestBook?.visualMedias?.isNotEmpty() == true
+            }
+
+            when (visibleItemsWithVisualMedia.size) {
                 0 -> -1 // 보이는 아이템이 없으면 -1 반환
-                1 -> visibleItems.first().index // 보이는 아이템이 1개면 그 아이템 인덱스 반환
+                1 -> visibleItemsWithVisualMedia.first().index // 보이는 아이템이 1개면 그 아이템 인덱스 반환
                 2 -> {
-                    visibleItems.firstOrNull { item ->
+                    visibleItemsWithVisualMedia.firstOrNull { item ->
                         item.offset + item.size >= item.size * 0.7f // 70% 이상 보이는 아이템 찾기
-                    }?.index ?: visibleItems.first().index // 없으면 첫 번째 아이템 인덱스 반환
+                    }?.index ?: visibleItemsWithVisualMedia.first().index // 없으면 첫 번째 아이템 인덱스 반환
                 }
                 else -> {
-                    if (visibleItems.size >= 3) {
-                        visibleItems[1].index // 3개 이상이면 1 인덱스 반환
+                    if (visibleItemsWithVisualMedia.size >= 3) {
+                        visibleItemsWithVisualMedia[1].index // 3개 이상이면 1 인덱스(두 번째 아이템) 반환
                     } else {
-                        visibleItems.first().index // 그 외에는 첫 번째 아이템 인덱스 반환
+                        visibleItemsWithVisualMedia.first().index
                     }
                 }
             }
