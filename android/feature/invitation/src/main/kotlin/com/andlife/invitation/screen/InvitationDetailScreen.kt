@@ -1,40 +1,114 @@
 package com.andlife.invitation.screen
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.andlife.designsystem.theme.InvitationSpacing
+import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.invitation.R
+import com.andlife.invitation.model.InvitationDetailSideEffect
+import com.andlife.invitation.model.InvitationDetailUiEvent
+import com.andlife.invitation.model.InvitationDetailUiState
+import com.andlife.invitation.viewmodel.InvitationDetailViewModel
+import com.andlife.ui.util.collectWithLifecycle
 
 @Composable
 fun InvitationDetailRoute(
-    id: Long,
+    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: InvitationDetailViewModel = hiltViewModel(),
 ) {
-    Log.d("InvitationDetail", "InvitationDetailRoute 진입! id=$id")
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    viewModel.effectFlow.collectWithLifecycle { effect ->
+        when (effect) {
+            InvitationDetailSideEffect.NavigateBack -> {
+                onNavigateBack()
+            }
+        }
+    }
 
     InvitationDetailScreen(
-        id = id,
+        uiState = uiState,
+        onEvent = viewModel::onEvent,
         modifier = modifier,
     )
 }
 
 @Composable
 private fun InvitationDetailScreen(
-    id: Long,
+    uiState: InvitationDetailUiState,
+    onEvent: (InvitationDetailUiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
-    ) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
-            Text(text = "InvitationDetailScreen")
+        topBar = {
+            InvitationDetailTopBar(
+                title = "${uiState.id}",
+                onBack = { onEvent(InvitationDetailUiEvent.ClickBack) },
+            )
+        },
+        containerColor = InvitationTheme.colorScheme.backgroundPrimary,
+    ) { paddingValues ->
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = InvitationSpacing.medium),
+        ) {
             Text(
-                text = "받은 ID: $id",
+                text = "InvitationDetailScreen",
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun InvitationDetailTopBar(
+    title: String,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    TopAppBar(
+        modifier = modifier,
+        title = {
+            Text(
+                text = title,
+                style = InvitationTheme.typography.headingSmallSemiBold,
+                color = InvitationTheme.colorScheme.textPrimary,
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(
+                    painter = painterResource( R.drawable.ic_arrow_back_24),
+                    contentDescription = stringResource(R.string.desc_top_bar_back),
+                    tint = InvitationTheme.colorScheme.iconSecondary,
+                )
+            }
+        },
+        colors =
+            TopAppBarDefaults.topAppBarColors(
+                containerColor = InvitationTheme.colorScheme.backgroundPrimary,
+            ),
+    )
 }
