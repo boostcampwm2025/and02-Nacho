@@ -8,6 +8,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
+import androidx.navigation.toRoute
 import com.andlife.invitation.screen.InvitationDetailRoute
 import com.andlife.invitation.screen.InvitationRoute
 import kotlinx.serialization.Serializable
@@ -44,7 +45,18 @@ fun NavGraphBuilder.invitationNavGraph(
 }
 
 fun NavGraphBuilder.invitationDetailNavGraph() {
-    composable<InvitationDetail>{
-        InvitationDetailRoute(modifier = Modifier.padding())
+    composable<InvitationDetail>(
+        deepLinks = listOf(
+            navDeepLink {
+                uriPattern = "https://invitationzzang.com/invite/{id}"
+            },
+        )
+    ) { backStackEntry ->
+        val invitationDetail = backStackEntry.toRoute<InvitationDetail>()
+
+        InvitationDetailRoute(
+            id = invitationDetail.id,
+            modifier = Modifier.padding(),
+        )
     }
 }
