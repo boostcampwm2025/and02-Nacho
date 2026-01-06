@@ -23,38 +23,39 @@ import com.andlife.designsystem.theme.InvitationIconSize
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.ui.R
-import com.andlife.ui.model.MediaType
+import com.andlife.ui.model.UiMediaType
 import com.andlife.ui.util.toFormatDuration
 
 @Composable
 fun MediaItem(
     mediaUrl: String,
-    mediaType: MediaType,
+    mediaType: UiMediaType,
     modifier: Modifier = Modifier,
     duration: Int? = null,
     isEditMode: Boolean = false,
     onRemove: (() -> Unit)? = null,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
 ) {
     Box(
-        modifier = modifier
-            .aspectRatio(1f)
-            .clip(RoundedCornerShape(InvitationSpacing.small))
-            .clickable { onClick() }
+        modifier =
+            modifier
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(InvitationSpacing.small))
+                .clickable { onClick() },
     ) {
         when (mediaType) {
-            MediaType.IMAGE -> {
+            UiMediaType.IMAGE -> {
                 AsyncImage(
                     model = mediaUrl,
                     contentDescription = stringResource(R.string.desc_media_image),
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
                 )
             }
-            MediaType.AUDIO -> {
+            UiMediaType.AUDIO -> {
                 Box(
                     modifier = Modifier.fillMaxSize().background(InvitationTheme.colorScheme.backgroundSecondary),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_mic_24),
@@ -64,19 +65,19 @@ fun MediaItem(
                     )
                 }
             }
-            MediaType.VIDEO -> {
+            UiMediaType.VIDEO -> {
                 Box(modifier = Modifier.fillMaxSize()) {
                     AsyncImage(
                         model = mediaUrl,
                         contentDescription = stringResource(R.string.desc_media_video),
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Crop,
                     )
                     Icon(
                         painter = painterResource(id = R.drawable.ic_play_circle_24),
                         contentDescription = stringResource(R.string.desc_ic_play),
                         modifier = Modifier.align(Alignment.Center).size(InvitationIconSize.xLarge),
-                        tint = InvitationTheme.colorScheme.iconTertiary.copy(alpha = 0.8f)
+                        tint = InvitationTheme.colorScheme.iconTertiary.copy(alpha = 0.8f),
                     )
                 }
             }
@@ -85,19 +86,24 @@ fun MediaItem(
         if (duration != null && duration > 0) {
             MediaOverlay(
                 text = duration.toFormatDuration(),
-                modifier = Modifier.align(Alignment.BottomEnd).padding(InvitationSpacing.small)
+                modifier = Modifier.align(Alignment.BottomEnd).padding(InvitationSpacing.small),
             )
         }
 
         if (isEditMode) {
             IconButton(
                 onClick = { onRemove?.invoke() },
-                modifier = Modifier.align(Alignment.TopEnd).size(InvitationIconSize.medium).padding(InvitationSpacing.xSmall)
+                modifier =
+                    Modifier
+                        .align(
+                            Alignment.TopEnd,
+                        ).size(InvitationIconSize.medium)
+                        .padding(InvitationSpacing.xSmall),
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_cancel_24),
                     contentDescription = stringResource(R.string.desc_btn_remove),
-                    tint = InvitationTheme.colorScheme.backgroundOverlay
+                    tint = InvitationTheme.colorScheme.backgroundOverlay,
                 )
             }
         }
@@ -106,29 +112,28 @@ fun MediaItem(
 
 @PreviewTheme
 @Composable
-fun EditModeVideoItemPreview() {
+private fun EditModeVideoItemPreview() {
     InvitationTheme {
         MediaItem(
             mediaUrl = "https://picsum.photos/400/600?random=3",
-            mediaType = MediaType.VIDEO,
+            mediaType = UiMediaType.VIDEO,
             duration = 828,
             isEditMode = true,
-            onRemove = {}
+            onRemove = {},
         )
     }
 }
 
 @PreviewTheme
 @Composable
-fun EditModeAudioItemPreview() {
+private fun EditModeAudioItemPreview() {
     InvitationTheme {
         MediaItem(
             mediaUrl = "https://picsum.photos/400/600?random=3",
-            mediaType = MediaType.AUDIO,
+            mediaType = UiMediaType.AUDIO,
             duration = 314,
             isEditMode = true,
-            onRemove = {}
+            onRemove = {},
         )
     }
 }
-

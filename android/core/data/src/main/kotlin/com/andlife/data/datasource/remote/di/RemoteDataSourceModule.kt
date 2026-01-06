@@ -2,6 +2,8 @@ package com.andlife.data.datasource.remote.di
 
 import com.andlife.data.datasource.remote.address.AddressRemoteDataSource
 import com.andlife.data.datasource.remote.address.AddressRemoteDataSourceImpl
+import com.andlife.data.datasource.remote.invitation.guestbook.GuestBookRemoteDataSource
+import com.andlife.data.datasource.remote.invitation.guestbook.GuestBookRemoteDataSourceImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -16,4 +18,10 @@ internal abstract class AddressRemoteDataSourceModule {
     abstract fun bindAddressRemoteDataSource(
         addressRemoteDataSourceImpl: AddressRemoteDataSourceImpl,
     ): AddressRemoteDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindGuestBookRemoteDataSource(
+        guestBookRemoteDataSourceImpl: GuestBookRemoteDataSourceImpl,
+    ): GuestBookRemoteDataSource
 }

@@ -79,7 +79,6 @@ object InvitationNetworkModule {
     @Provides
     @Singleton
     fun provideGuestBookService(
-        @Invitation retrofit: Retrofit
-    ): GuestBookService =
-        retrofit.create(GuestBookService::class.java)
+        @Invitation retrofit: Retrofit,
+    ): GuestBookService = retrofit.create(GuestBookService::class.java)
 }

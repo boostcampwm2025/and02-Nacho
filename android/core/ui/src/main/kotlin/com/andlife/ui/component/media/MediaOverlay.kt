@@ -19,25 +19,25 @@ fun MediaOverlay(
     shape: CornerBasedShape = InvitationTheme.shapes.extraSmall,
     backgroundColor: Color = InvitationTheme.colorScheme.backgroundOverlay,
     contentColor: Color = InvitationTheme.colorScheme.textOnPrimary,
-    textStyle: TextStyle = InvitationTheme.typography.bodyMediumRegular
+    textStyle: TextStyle = InvitationTheme.typography.bodyMediumRegular,
 ) {
     Surface(
         modifier = modifier,
         shape = shape,
         color = backgroundColor,
-        contentColor = contentColor
+        contentColor = contentColor,
     ) {
         Text(
             text = text,
             style = textStyle,
-            modifier = Modifier.padding(horizontal = InvitationSpacing.small, vertical = InvitationSpacing.xSmall)
+            modifier = Modifier.padding(horizontal = InvitationSpacing.small, vertical = InvitationSpacing.xSmall),
         )
     }
 }
 
 @PreviewTheme
 @Composable
-fun ImageOverlayPreview() {
+private fun ImageOverlayPreview() {
     InvitationTheme {
         MediaOverlay(
             text = "1/10",
@@ -48,10 +48,10 @@ fun ImageOverlayPreview() {
 
 @PreviewTheme
 @Composable
-fun VideoOverlayPreview() {
+private fun VideoOverlayPreview() {
     InvitationTheme {
         MediaOverlay(
-            text = "8:28"
+            text = "8:28",
         )
     }
 }

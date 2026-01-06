@@ -2,12 +2,12 @@ package com.andlife.myinvitation.model
 
 import com.andlife.domain.model.GuestBookMedia
 import com.andlife.myinvitation.util.toUiType
-import com.andlife.ui.model.MediaType
+import com.andlife.ui.model.UiMediaType
 import kotlinx.datetime.LocalDateTime
 
 data class MyInvitationMediaUiModel(
     val id: Long,
-    val type: MediaType,
+    val type: UiMediaType,
     val url: String,
     val content: String,
     val authorName: String,
