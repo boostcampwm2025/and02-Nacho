@@ -56,7 +56,9 @@ fun InvitationNavHost(
                 onNavigateToDetail = navigator::navigateToInvitationDetail,
             )
 
-            invitationDetailNavGraph()
+            invitationDetailNavGraph(
+                onNavigateBack = navigator::navigatePopBackStack,
+            )
 
             myInvitationNavGraph(
                 paddingValues = innerPadding,
