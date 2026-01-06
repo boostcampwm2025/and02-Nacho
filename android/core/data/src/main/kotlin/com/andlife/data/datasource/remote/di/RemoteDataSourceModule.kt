@@ -12,7 +12,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-internal abstract class AddressRemoteDataSourceModule {
+internal abstract class RemoteDataSourceModule {
     @Binds
     @Singleton
     abstract fun bindAddressRemoteDataSource(
