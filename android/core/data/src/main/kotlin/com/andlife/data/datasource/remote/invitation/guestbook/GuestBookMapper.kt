@@ -19,6 +19,7 @@ fun GuestBookResponse.toDomain(): GuestBook =
         visualMedias = visualMedias.map { it.toDomain() },
         audioMedias = audioMedias.map { it.toDomain() },
         totalVisualCount = totalVisualCount,
+        isAuthorSelf = isAuthorSelf,
         createdAt = createdAt,
     )
 
