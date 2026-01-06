@@ -21,20 +21,19 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MyInvitationCollectionViewModel @Inject constructor(
-    private val guestBookRepository: GuestBookRepository
+    private val guestBookRepository: GuestBookRepository,
 ) : BaseViewModel<MyInvitationCollectionUiState, MyInvitationCollectionUiEvent, MyInvitationCollectionSideEffect>(
-    initialState = MyInvitationCollectionUiState()
-) {
-
-    override val uiState: StateFlow<MyInvitationCollectionUiState> = mutableUiState
-        .onStart {
-            loadMediaCollection(1L)
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = MyInvitationCollectionUiState()
-        )
+        initialState = MyInvitationCollectionUiState(),
+    ) {
+    override val uiState: StateFlow<MyInvitationCollectionUiState> =
+        mutableUiState
+            .onStart {
+                loadMediaCollection(1L)
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = MyInvitationCollectionUiState(),
+            )
 
     override fun onEvent(event: MyInvitationCollectionUiEvent) {
         TODO("Not yet implemented")
@@ -44,17 +43,17 @@ class MyInvitationCollectionViewModel @Inject constructor(
         viewModelScope.launch {
             updateState { copy(isLoading = true) }
 
-            guestBookRepository.getMediaCollection(invitationId)
+            guestBookRepository
+                .getMediaCollection(invitationId)
                 .onSuccess { mediaList ->
                     updateState {
                         copy(
                             isLoading = false,
-                            mediaItems = mediaList.map { it.toUiModel() }.toImmutableList()
+                            mediaItems = mediaList.map { it.toUiModel() }.toImmutableList(),
                         )
                     }
                     Log.d("ViewModel", "미디어 리스트: $mediaList")
-                }
-                .onFailure {
+                }.onFailure {
                     updateState { copy(isLoading = false) }
                     Log.e("ViewModel", "에러 발생: $it")
                 }

@@ -22,21 +22,21 @@ import kotlinx.datetime.toLocalDateTime
 fun InvitationMediaGridView(
     items: List<InvitationCollectionUiModel>,
     onItemClick: (Long) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
         modifier = modifier,
         contentPadding = PaddingValues(InvitationSpacing.small),
         horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
-        verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small)
+        verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
     ) {
         items(items = items) { item ->
             MediaItem(
                 mediaUrl = item.url,
                 mediaType = item.type,
                 duration = item.durationSeconds,
-                onClick = { onItemClick(item.id) }
+                onClick = { onItemClick(item.id) },
             )
         }
     }
@@ -44,46 +44,47 @@ fun InvitationMediaGridView(
 
 @PreviewTheme
 @Composable
-fun InvitationMediaGridViewPreview() {
+private fun InvitationMediaGridViewPreview() {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
-    val mockItems = listOf(
-        InvitationCollectionUiModel(
-            id = 1L,
-            url = "https://picsum.photos/400/600?random=1",
-            type = MediaType.IMAGE.toUiType(),
-            content = "방명록 내용 1",
-            authorName = "사용자1",
-            authorProfileUrl = null,
-            createdAt = now,
-            durationSeconds = null
-        ),
-        InvitationCollectionUiModel(
-            id = 2L,
-            url = "https://picsum.photos/400/600?random=2",
-            type = MediaType.VIDEO.toUiType(),
-            content = "방명록 내용 2",
-            authorName = "사용자2",
-            authorProfileUrl = null,
-            createdAt = now,
-            durationSeconds = 120
-        ),
-        InvitationCollectionUiModel(
-            id = 3L,
-            url = "https://picsum.photos/400/600?random=3",
-            type = MediaType.AUDIO.toUiType(),
-            content = "방명록 내용 3",
-            authorName = "사용자3",
-            authorProfileUrl = null,
-            createdAt = now,
-            durationSeconds = 300
+    val mockItems =
+        listOf(
+            InvitationCollectionUiModel(
+                id = 1L,
+                url = "https://picsum.photos/400/600?random=1",
+                type = MediaType.IMAGE.toUiType(),
+                content = "방명록 내용 1",
+                authorName = "사용자1",
+                authorProfileUrl = null,
+                createdAt = now,
+                durationSeconds = null,
+            ),
+            InvitationCollectionUiModel(
+                id = 2L,
+                url = "https://picsum.photos/400/600?random=2",
+                type = MediaType.VIDEO.toUiType(),
+                content = "방명록 내용 2",
+                authorName = "사용자2",
+                authorProfileUrl = null,
+                createdAt = now,
+                durationSeconds = 120,
+            ),
+            InvitationCollectionUiModel(
+                id = 3L,
+                url = "https://picsum.photos/400/600?random=3",
+                type = MediaType.AUDIO.toUiType(),
+                content = "방명록 내용 3",
+                authorName = "사용자3",
+                authorProfileUrl = null,
+                createdAt = now,
+                durationSeconds = 300,
+            ),
         )
-    )
 
     InvitationTheme {
         InvitationMediaGridView(
             items = mockItems,
-            onItemClick = {}
+            onItemClick = {},
         )
     }
 }

@@ -7,5 +7,5 @@ import kotlinx.collections.immutable.persistentListOf
 data class MyInvitationCollectionUiState(
     val isLoading: Boolean = false,
     val mediaItems: ImmutableList<MyInvitationCollectionUiModel> = persistentListOf(),
-    val errorMessage: String? = null
-): BaseUiState
+    val errorMessage: String? = null,
+) : BaseUiState

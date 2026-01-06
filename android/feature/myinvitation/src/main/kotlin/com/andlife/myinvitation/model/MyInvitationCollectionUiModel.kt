@@ -13,11 +13,11 @@ data class MyInvitationCollectionUiModel(
     val authorName: String,
     val authorProfileUrl: String?,
     val createdAt: LocalDateTime,
-    val durationSeconds: Int?
+    val durationSeconds: Int?,
 )
 
-fun GuestBookMedia.toUiModel(): MyInvitationCollectionUiModel {
-    return MyInvitationCollectionUiModel(
+fun GuestBookMedia.toUiModel(): MyInvitationCollectionUiModel =
+    MyInvitationCollectionUiModel(
         id = id,
         type = type.toUiType(),
         url = url,
@@ -25,6 +25,5 @@ fun GuestBookMedia.toUiModel(): MyInvitationCollectionUiModel {
         authorName = authorName,
         authorProfileUrl = authorProfileUrl,
         createdAt = createdAt,
-        durationSeconds = durationSeconds
+        durationSeconds = durationSeconds,
     )
-}
