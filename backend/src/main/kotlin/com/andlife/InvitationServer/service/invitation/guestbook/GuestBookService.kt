@@ -1,13 +1,9 @@
 package com.andlife.InvitationServer.service.invitation.guestbook
 
 import com.andlife.InvitationServer.constant.MediaType
-import com.andlife.InvitationServer.controller.GuestBookAuthorResponse
-import com.andlife.InvitationServer.controller.GuestBookEntryMediaResponse
-import com.andlife.InvitationServer.controller.GuestBookInvitationResponse
-import com.andlife.InvitationServer.controller.GuestBookResponse
 import com.andlife.InvitationServer.repository.invitation.guestbook.GuestBookRepository
 import com.andlife.InvitationServer.response.AuthorResponse
-import com.andlife.InvitationServer.response.invitation.guestbook.CollectionResponse
+import com.andlife.InvitationServer.response.invitation.guestbook.*
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

@@ -1,9 +1,6 @@
-package com.andlife.InvitationServer.controller
+package com.andlife.InvitationServer.response.invitation.guestbook
 
 import com.andlife.InvitationServer.constant.MediaType
-import com.andlife.InvitationServer.service.invitation.guestbook.GuestBookService
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDateTime
 
 data class GuestBookResponse(
