@@ -3,6 +3,7 @@ package com.andlife.InvitationServer.service.invitation.guestbook
 import com.andlife.InvitationServer.constant.MediaType
 import com.andlife.InvitationServer.controller.GuestBookAuthorResponse
 import com.andlife.InvitationServer.controller.GuestBookEntryMediaResponse
+import com.andlife.InvitationServer.controller.GuestBookInvitationResponse
 import com.andlife.InvitationServer.controller.GuestBookResponse
 import com.andlife.InvitationServer.repository.invitation.guestbook.GuestBookRepository
 import com.andlife.InvitationServer.response.AuthorResponse
@@ -96,14 +97,17 @@ class GuestBookService(
                     name = guestBook.user.name,
                     profileImageUrl = guestBook.user.profileImageUrl
                 ),
-                invitationTitle = guestBook.invitation.title,
+                invitation = GuestBookInvitationResponse(
+                    id = guestBook.invitation.id,
+                    title = guestBook.invitation.title
+                ),
                 textContent = guestBook.textContent,
                 visualMedias = visualMedias,
                 audioMedias = audioMedias,
                 totalVisualCount = visualMedias.size,
+                isAuthorSelf = false, // TODO: 인증 기능 구현 후 수정 필요
                 createdAt = guestBook.createdAt
             )
         }
     }
-
 }
