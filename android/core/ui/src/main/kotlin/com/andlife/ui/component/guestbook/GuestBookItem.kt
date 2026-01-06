@@ -1,7 +1,9 @@
 package com.andlife.ui.component.guestbook
 
+import androidx.annotation.OptIn
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,9 +14,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -32,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
@@ -103,6 +108,9 @@ fun GuestBookItem(
                 }
             }
         }
+        HorizontalDivider(
+            color = InvitationTheme.colorScheme.backgroundBorder
+        )
     }
 }
 
@@ -251,6 +259,7 @@ private fun GuestBookItemVisualMediaSection(
     }
 }
 
+@OptIn(UnstableApi::class)
 @Composable
 private fun SimpleVideoPlayer(
     videoUrl: String,
@@ -276,7 +285,7 @@ private fun SimpleVideoPlayer(
             PlayerView(context).apply {
                 player = exoPlayer
                 useController = false
-                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
+                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
             }
         },
         modifier = modifier.fillMaxSize(),
@@ -308,20 +317,23 @@ private fun GuestBookAudioItem(
                 color = InvitationTheme.colorScheme.brandLight,
                 shape = InvitationTheme.shapes.small,
             )
-            .padding(InvitationSpacing.medium),
+            .padding(InvitationSpacing.large),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
     ) {
-        Surface(
-            modifier = Modifier,
-            shape = CircleShape,
-            color = InvitationTheme.colorScheme.brandPrimary,
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .background(
+                    color = InvitationTheme.colorScheme.brandPrimary,
+                    shape = CircleShape,
+                ),
+            contentAlignment = Alignment.Center,
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_mic_24),
+                painter = painterResource(R.drawable.ic_mic_filled_18),
                 contentDescription = stringResource(R.string.desc_audio_media_icon),
-                modifier = Modifier.padding(InvitationSpacing.small),
-                tint = InvitationTheme.colorScheme.backgroundPrimary,
+                tint = InvitationTheme.colorScheme.iconTertiary,
             )
         }
         Column(
@@ -340,21 +352,22 @@ private fun GuestBookAudioItem(
             )
         }
         Surface(
-            modifier = Modifier
-                .clickable { onAudioMediaClick(audio) },
+            modifier = Modifier.size(40.dp),
             shape = CircleShape,
             color = InvitationTheme.colorScheme.backgroundPrimary,
             border = BorderStroke(
                 width = InvitationStroke.small,
                 color = InvitationTheme.colorScheme.iconDisabled,
-            )
+            ),
+            onClick = { onAudioMediaClick(audio) }
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_play_circle_24),
-                contentDescription = stringResource(R.string.desc_play_audio),
-                modifier = Modifier.padding(InvitationSpacing.small),
-                tint = InvitationTheme.colorScheme.textSecondary,
-            )
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_play_arrow_24),
+                    contentDescription = stringResource(R.string.desc_play_audio),
+                    tint = InvitationTheme.colorScheme.textSecondary,
+                )
+            }
         }
     }
 }
@@ -363,41 +376,47 @@ private fun GuestBookAudioItem(
 @Composable
 private fun GuestBookItemPreview() {
     InvitationTheme {
-        GuestBookItem(
-            authorName = "홍길동",
-            createdAt = LocalDateTime(2024, 6, 1, 12, 0),
-            textContent = "축하합니다! 행복한 결혼 생활 되세요!",
-            visualMediaUrls =
-                listOf(
-                    GuestBookEntryMediaUiModel(
-                        id = 1L,
-                        type = MediaType.IMAGE,
-                        url = "https://example.com/image1.jpg",
-                        thumbnailUrl = "https://example.com/thumb1.jpg",
-                        durationSeconds = null,
-                        displayOrder = 1,
-                    ),
-                    GuestBookEntryMediaUiModel(
-                        id = 2L,
-                        type = MediaType.VIDEO,
-                        url = "https://example.com/video1.mp4",
-                        thumbnailUrl = "https://example.com/videothumb1.jpg",
-                        durationSeconds = 120,
-                        displayOrder = 2,
-                    ),
-                ).toImmutableList(),
-            audioMediaUrls =
-                listOf(
-                    GuestBookEntryMediaUiModel(
-                        id = 3L,
-                        type = MediaType.AUDIO,
-                        url = "https://example.com/audio1.mp3",
-                        thumbnailUrl = "",
-                        durationSeconds = 45,
-                        displayOrder = 1,
-                    )
-                ).toImmutableList(),
-            totalVisualCount = 2,
-        )
+        LazyColumn(
+            modifier = Modifier
+                .padding(InvitationSpacing.large),
+            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.large),
+        ) {
+            item {
+                GuestBookItem(
+                    authorName = "홍길동",
+                    createdAt = LocalDateTime(2024, 6, 1, 12, 0),
+                    textContent = "축하합니다! 행복하세요!",
+                    visualMediaUrls = listOf(
+                        GuestBookEntryMediaUiModel(
+                            id = 1L,
+                            type = MediaType.IMAGE,
+                            url = "https://via.placeholder.com/150",
+                            displayOrder = 0,
+                        ),
+                        GuestBookEntryMediaUiModel(
+                            id = 2L,
+                            type = MediaType.VIDEO,
+                            url = "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
+                            durationSeconds = 30,
+                            displayOrder = 1,
+                        )
+                    ).toImmutableList(),
+                    audioMediaUrls = listOf(
+                        GuestBookEntryMediaUiModel(
+                            id = 3L,
+                            type = MediaType.AUDIO,
+                            url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+                            durationSeconds = 45,
+                            displayOrder = 0,
+                        )
+                    ).toImmutableList(),
+                    totalVisualCount = 2,
+                    authorProfileImageUrl = null,
+                    invitationTitle = "우리 결혼해요!",
+                    invitationId = 1001L,
+                    isAuthorSelf = true,
+                )
+            }
+        }
     }
 }
