@@ -3,7 +3,6 @@ package com.andlife.ui.component.guestbook
 import androidx.annotation.OptIn
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
@@ -45,6 +45,7 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationStroke
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.R as designR
 import com.andlife.ui.R
 import com.andlife.ui.component.media.MediaOverlay
 import com.andlife.ui.model.GuestBookEntryMediaUiModel
@@ -84,7 +85,7 @@ fun GuestBookItem(
         )
         GuestBookItemTextContent(
             invitationId = invitationId,
-            invitationTitle,
+            invitationTitle = invitationTitle,
             textContent = textContent,
             onInvitationTitleClick = onInvitationTitleClick,
         )
@@ -109,7 +110,8 @@ fun GuestBookItem(
             }
         }
         HorizontalDivider(
-            color = InvitationTheme.colorScheme.backgroundBorder
+            modifier = Modifier.padding(top = InvitationSpacing.xSmall),
+            color = InvitationTheme.colorScheme.backgroundBorder,
         )
     }
 }
@@ -129,14 +131,18 @@ private fun GuestBookItemHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AsyncImage(
-            model = authorProfileImageUrl ?: R.drawable.ic_close_24,
+            model = authorProfileImageUrl,
+            error = painterResource(R.drawable.ic_error_outline_24),
             contentDescription = null,
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape),
             contentScale = ContentScale.Crop,
         )
-        Column(modifier = Modifier.weight(1f)) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.xSmall),
+        ) {
             Text(
                 text = authorName,
                 style = InvitationTheme.typography.bodyMediumMedium,
@@ -190,7 +196,7 @@ private fun GuestBookItemTextContent(
                     color = InvitationTheme.colorScheme.textPrimary,
                 )
                 Icon(
-                    painter = painterResource(R.drawable.ic_close_24),
+                    painter = painterResource(designR.drawable.ic_chevron_right_24),
                     contentDescription = stringResource(R.string.desc_move_to_invitation),
                     tint = InvitationTheme.colorScheme.textPrimary,
                 )
@@ -232,6 +238,9 @@ private fun GuestBookItemVisualMediaSection(
 
                         media.durationSeconds?.let {
                             MediaOverlay(
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(InvitationSpacing.small),
                                 text = "$it 초", // TODO: 포맷팅 필요
                             )
                         }
@@ -271,6 +280,7 @@ private fun SimpleVideoPlayer(
             setMediaItem(MediaItem.fromUri(videoUrl))
             prepare()
             playWhenReady = true
+            repeatMode = Player.REPEAT_MODE_ONE
         }
     }
 
@@ -290,18 +300,6 @@ private fun SimpleVideoPlayer(
         },
         modifier = modifier.fillMaxSize(),
     )
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(InvitationTheme.colorScheme.backgroundOverlay),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_play_circle_24),
-            contentDescription = stringResource(R.string.desc_play_video),
-            tint = InvitationTheme.colorScheme.iconSecondary,
-        )
-    }
 }
 
 @Composable
