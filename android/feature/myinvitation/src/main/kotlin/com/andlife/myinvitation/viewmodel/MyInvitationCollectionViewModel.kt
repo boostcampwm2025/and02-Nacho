@@ -11,6 +11,7 @@ import com.andlife.myinvitation.model.MyInvitationCollectionUiState
 import com.andlife.myinvitation.model.toUiModel
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onStart
@@ -48,7 +49,7 @@ class MyInvitationCollectionViewModel @Inject constructor(
                     updateState {
                         copy(
                             isLoading = false,
-                            mediaItems = mediaList.map { it.toUiModel() }
+                            mediaItems = mediaList.map { it.toUiModel() }.toImmutableList()
                         )
                     }
                     Log.d("ViewModel", "미디어 리스트: $mediaList")
