@@ -24,6 +24,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,6 +66,7 @@ fun GuestBookItem(
     invitationTitle: String? = null,
     invitationId: Long? = null,
     isAuthorSelf: Boolean = false,
+    shouldPlayVideo: Boolean = false,
     onInvitationTitleClick: (Long) -> Unit = {},
     onVisualMediaClick: (GuestBookEntryMediaUiModel) -> Unit = {},
     onAudioMediaClick: (GuestBookEntryMediaUiModel) -> Unit = {},
@@ -91,6 +93,7 @@ fun GuestBookItem(
             GuestBookItemVisualMediaSection(
                 visualMediaUrls = visualMediaUrls,
                 totalVisualCount = totalVisualCount,
+                shouldPlayVideo = shouldPlayVideo,
                 onVisualMediaClick = onVisualMediaClick,
             )
         }
@@ -212,6 +215,7 @@ private fun GuestBookItemTextContent(
 private fun GuestBookItemVisualMediaSection(
     visualMediaUrls: ImmutableList<GuestBookEntryMediaUiModel>,
     totalVisualCount: Int,
+    shouldPlayVideo: Boolean,
     onVisualMediaClick: (GuestBookEntryMediaUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -232,7 +236,11 @@ private fun GuestBookItemVisualMediaSection(
             ) {
                 when (media.type) {
                     MediaType.VIDEO -> {
-                        SimpleVideoPlayer(videoUrl = media.url)
+                        SimpleVideoPlayer(
+                            videoId = media.id,
+                            videoUrl = media.url,
+                            shouldPlay = shouldPlayVideo && pagerState.currentPage == page,
+                        )
 
                         media.durationSeconds?.let {
                             MediaOverlay(
@@ -269,26 +277,27 @@ private fun GuestBookItemVisualMediaSection(
 @OptIn(UnstableApi::class)
 @Composable
 private fun SimpleVideoPlayer(
+    videoId: Long,
     videoUrl: String,
+    shouldPlay: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-//    val exoPlayer = remember {
-//        ExoPlayer.Builder(context).build().apply {
-//            setMediaItem(MediaItem.fromUri(videoUrl))
-//            prepare()
-//            playWhenReady = true
-//            repeatMode = Player.REPEAT_MODE_ONE
-//        }
-//    }
     val videoPlayer = remember(videoUrl) {
         VideoPlayerPool.getPlayer(context, videoUrl)
     }
 
-    DisposableEffect(videoUrl) {
-        videoPlayer.play() // Composable이 화면에 나타날 때 재생 시작
+    LaunchedEffect(shouldPlay) {
+        if (shouldPlay) {
+            VideoPlayerPool.playPlayer(videoUrl)
+        } else {
+            VideoPlayerPool.pausePlayer(videoUrl)
+        }
+    }
+
+    DisposableEffect(videoId) {
         onDispose {
-            videoPlayer.pause() // Composable이 화면에서 사라질 때 재생 일시정지
+            VideoPlayerPool.pausePlayer(videoUrl)
         }
     }
 
@@ -297,7 +306,7 @@ private fun SimpleVideoPlayer(
             PlayerView(context).apply {
                 player = videoPlayer.exoPlayer
                 useController = false
-                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
             }
         },
         modifier = modifier.fillMaxSize(),
