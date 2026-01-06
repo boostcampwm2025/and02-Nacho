@@ -1,13 +1,11 @@
-package com.andlife.invitation_edit.screen
+package com.andlife.invitation_edit.screen.address
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -56,12 +55,14 @@ fun AddressSearchRoute(
     modifier: Modifier = Modifier,
     viewModel: AddressSearchViewModel = hiltViewModel(),
 ) {
+    val keyboardManager = LocalSoftwareKeyboardController.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val addressItems = viewModel.addresses.collectAsLazyPagingItems()
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is AddressSearchSideEffect.NavigateBackWithAddress -> {
+                keyboardManager?.hide()
                 onAddressSelect(effect.addressUiModel)
             }
 
@@ -263,9 +264,7 @@ private fun AddressItem(
 ) {
     Card(
         modifier =
-            modifier
-                .fillMaxWidth()
-                .clickable(onClick = onClick),
+            modifier.fillMaxWidth(),
         shape = InvitationTheme.shapes.small,
         colors =
             CardDefaults.cardColors(
@@ -276,6 +275,7 @@ private fun AddressItem(
                 InvitationStroke.small,
                 InvitationTheme.colorScheme.backgroundBorder,
             ),
+        onClick = onClick,
     ) {
         Column(
             modifier =
