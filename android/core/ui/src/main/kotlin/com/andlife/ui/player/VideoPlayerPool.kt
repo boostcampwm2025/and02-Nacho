@@ -10,6 +10,7 @@ import androidx.media3.exoplayer.source.ProgressiveMediaSource
 object VideoPlayerPool {
     private const val MAX_POOL_SIZE = 5 // 최대 플레이어 수, 일단 5개로 설정, 필요시 조정 가능
     private val videoPool = LinkedHashMap<String, VideoPlayer>(MAX_POOL_SIZE, 0.75f)
+    private var lastPlayedUri: String? = null
 
     fun getPlayer(context: Context, uri: String): VideoPlayer {
         // 이미 해당 uri에 대한 플레이어가 존재하면 반환
@@ -55,11 +56,22 @@ object VideoPlayerPool {
     }
 
     fun playPlayer(uri: String) {
+        lastPlayedUri = uri
         videoPool[uri]?.play()
     }
 
     fun pausePlayer(uri: String) {
         videoPool[uri]?.pause()
+    }
+
+    fun pauseAllPlayers() {
+        videoPool.values.forEach { it.pause() }
+    }
+
+    fun resumeLastPlayed() {
+        lastPlayedUri?.let { uri ->
+            videoPool[uri]?.play()
+        }
     }
 
     fun releaseAll() {
