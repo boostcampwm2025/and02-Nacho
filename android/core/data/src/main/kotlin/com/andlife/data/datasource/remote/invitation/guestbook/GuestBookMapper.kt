@@ -37,6 +37,7 @@ fun GuestBookInvitationResponse.toDomain(): GuestBookInvitation =
 
 fun GuestBookEntryMediaResponse.toDomain(): GuestBookEntryMedia =
     GuestBookEntryMedia(
+        id = id,
         type = MediaType.fromString(type),
         url = url,
         thumbnailUrl = thumbnailUrl,

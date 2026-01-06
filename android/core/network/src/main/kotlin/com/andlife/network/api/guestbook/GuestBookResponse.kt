@@ -33,6 +33,7 @@ data class GuestBookAuthorResponse(
 
 @Serializable
 data class GuestBookEntryMediaResponse(
+    val id: Long,
     val type: String,
     val url: String,
     val thumbnailUrl: String?,
