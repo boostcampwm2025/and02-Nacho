@@ -50,6 +50,8 @@ fun MediaItem(
                     contentDescription = stringResource(R.string.desc_media_image),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
+                    placeholder = painterResource(R.drawable.ic_image_24),
+                    error = painterResource(R.drawable.ic_error_image_24),
                 )
             }
             UiMediaType.AUDIO -> {
@@ -72,6 +74,8 @@ fun MediaItem(
                         contentDescription = stringResource(R.string.desc_media_video),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,
+                        placeholder = painterResource(R.drawable.ic_image_24),
+                        error = painterResource(R.drawable.ic_error_image_24),
                     )
                     Icon(
                         painter = painterResource(id = R.drawable.ic_play_circle_24),
