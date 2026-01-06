@@ -74,6 +74,11 @@ object VideoPlayerPool {
         }
     }
 
+    fun preparePlayer(context: Context, uri: String) {
+        if (videoPool.containsKey(uri)) return // 이미 풀에 존재하면 준비할 필요 없음
+        getPlayer(context, uri)
+    }
+
     fun releaseAll() {
         videoPool.values.forEach { it.release() }
         videoPool.clear()
