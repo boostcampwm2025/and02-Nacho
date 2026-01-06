@@ -34,10 +34,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
@@ -45,14 +42,15 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationStroke
 import com.andlife.designsystem.theme.InvitationTheme
-import com.andlife.designsystem.R as designR
 import com.andlife.ui.R
 import com.andlife.ui.component.media.MediaOverlay
 import com.andlife.ui.model.GuestBookEntryMediaUiModel
 import com.andlife.ui.model.MediaType
+import com.andlife.ui.player.VideoPlayerPool
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.LocalDateTime
+import com.andlife.designsystem.R as designR
 
 @Composable
 fun GuestBookItem(
@@ -275,25 +273,29 @@ private fun SimpleVideoPlayer(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val exoPlayer = remember {
-        ExoPlayer.Builder(context).build().apply {
-            setMediaItem(MediaItem.fromUri(videoUrl))
-            prepare()
-            playWhenReady = true
-            repeatMode = Player.REPEAT_MODE_ONE
-        }
+//    val exoPlayer = remember {
+//        ExoPlayer.Builder(context).build().apply {
+//            setMediaItem(MediaItem.fromUri(videoUrl))
+//            prepare()
+//            playWhenReady = true
+//            repeatMode = Player.REPEAT_MODE_ONE
+//        }
+//    }
+    val videoPlayer = remember(videoUrl) {
+        VideoPlayerPool.getPlayer(context, videoUrl)
     }
 
-    DisposableEffect(Unit) {
+    DisposableEffect(videoUrl) {
+        videoPlayer.play() // Composable이 화면에 나타날 때 재생 시작
         onDispose {
-            exoPlayer.release()
+            videoPlayer.pause() // Composable이 화면에서 사라질 때 재생 일시정지
         }
     }
 
     AndroidView(
         factory = { context ->
             PlayerView(context).apply {
-                player = exoPlayer
+                player = videoPlayer.exoPlayer
                 useController = false
                 resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
             }
