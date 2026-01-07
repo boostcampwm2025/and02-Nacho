@@ -13,6 +13,7 @@ import androidx.navigation.navOptions
 import com.andlife.home.Home
 import com.andlife.home.navigateToHome
 import com.andlife.invitation.navigateToInvitation
+import com.andlife.invitation.navigateToInvitationDetail
 import com.andlife.invitation_edit.navigateToAddressSearch
 import com.andlife.invitation_edit.navigateToMyInvitationCreate
 import com.andlife.myinvitation.navigateToMyInvitation
@@ -63,8 +64,11 @@ class InvitationNavigator(
         }
     }
 
-    // 초대장 탭에서 -> 초대 상세로 가는 함수
     fun navigateToInvitationDetail(id: Long) {
+        navController.navigateToInvitationDetail(
+            id = id,
+            navOptions = navOptions { launchSingleTop = true },
+        )
     }
 
     fun navigateToMyInvitationCreate(id: Long = -1) {
