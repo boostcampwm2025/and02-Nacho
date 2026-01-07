@@ -86,5 +86,6 @@ class InvitationCollectionViewModel @Inject constructor(
                 selectedIndex = index,
             )
         }
+        Log.d("ViewModel", "바뀐 인덱스: $index")
     }
 }
