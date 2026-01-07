@@ -16,6 +16,8 @@ import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.model.GuestBookEntryMediaUiModel
 import com.andlife.ui.model.MediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onStart
@@ -29,8 +31,8 @@ fun GuestBook.toUiModel(): GuestBookUiModel = GuestBookUiModel(
     invitation = invitation,
     author = author.toUiModel(),
     textContent = textContent,
-    visualMedias = visualMedias.map { it.toUiModel() },
-    audioMedias = audioMedias.map { it.toUiModel() },
+    visualMedias = visualMedias.map { it.toUiModel() }.toImmutableList(),
+    audioMedias = audioMedias.map { it.toUiModel() }.toImmutableList(),
     totalVisualCount = totalVisualCount,
     isAuthorSelf = isAuthorSelf,
     createdAt = createdAt,
@@ -61,8 +63,8 @@ data class GuestBookUiModel(
     val invitation: GuestBookInvitation,
     val author: GuestBookAuthorUiModel,
     val textContent: String,
-    val visualMedias: List<GuestBookEntryMediaUiModel>,
-    val audioMedias: List<GuestBookEntryMediaUiModel>,
+    val visualMedias: ImmutableList<GuestBookEntryMediaUiModel>,
+    val audioMedias: ImmutableList<GuestBookEntryMediaUiModel>,
     val totalVisualCount: Int,
     val isAuthorSelf: Boolean,
     val createdAt: LocalDateTime,
