@@ -8,4 +8,5 @@ import com.andlife.network.model.invitation.guestbook.CollectionResponse
 interface GuestBookRemoteDataSource {
     suspend fun getMediaCollection(invitationId: Long): Result<List<CollectionResponse>, DataError>
 
-    suspend fun getGuestBooksByInvitationId(invitationId: Long): Result<List<GuestBookResponse>, DataError> }
+    suspend fun getGuestBooksByInvitationId(invitationId: Long): Result<List<GuestBookResponse>, DataError>
+}
