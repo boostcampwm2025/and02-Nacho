@@ -21,6 +21,7 @@ import com.andlife.invitation.invitationDetailNavGraph
 import com.andlife.invitation.invitationNavGraph
 import com.andlife.invitation_edit.addressSearchNavGraph
 import com.andlife.invitation_edit.myInvitationCreateNavGraph
+import com.andlife.myinvitation.myInvitationDetailNavGraph
 import com.andlife.myinvitation.myInvitationNavGraph
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -63,10 +64,15 @@ fun InvitationNavHost(
             myInvitationNavGraph(
                 paddingValues = innerPadding,
                 onNavigateToCreate = navigator::navigateToMyInvitationCreate,
+                onNavigateToDetail = navigator::navigateToMyInvitationDetail,
             )
 
             myInvitationCreateNavGraph(
                 onNavigateToAddressSearch = navigator::navigateToAddressSearch,
+                onNavigateBack = navigator::navigatePopBackStack,
+            )
+
+            myInvitationDetailNavGraph(
                 onNavigateBack = navigator::navigatePopBackStack,
             )
 

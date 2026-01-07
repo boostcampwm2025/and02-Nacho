@@ -1,7 +1,8 @@
-package com.andlife.invitation.screen
+package com.andlife.myinvitation.screen
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -18,33 +19,34 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.andlife.designsystem.component.InvitationTextField
+import com.andlife.designsystem.R as designR
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
-import com.andlife.designsystem.R as designR
-import com.andlife.invitation.R
-import com.andlife.invitation.model.InvitationDetailSideEffect
-import com.andlife.invitation.model.InvitationDetailUiEvent
-import com.andlife.invitation.model.InvitationDetailUiState
-import com.andlife.invitation.viewmodel.InvitationDetailViewModel
+import com.andlife.myinvitation.R
+import com.andlife.myinvitation.model.MyInvitationDetailSideEffect
+import com.andlife.myinvitation.model.MyInvitationDetailUiEvent
+import com.andlife.myinvitation.model.MyInvitationDetailUiState
+import com.andlife.myinvitation.viewmodel.MyInvitationDetailViewModel
 import com.andlife.ui.util.collectWithLifecycle
 
 @Composable
-fun InvitationDetailRoute(
+fun MyInvitationDetailRoute(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: InvitationDetailViewModel = hiltViewModel(),
+    viewModel: MyInvitationDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
-            InvitationDetailSideEffect.NavigateBack -> {
+            MyInvitationDetailSideEffect.NavigateBack -> {
                 onNavigateBack()
             }
         }
     }
 
-    InvitationDetailScreen(
+    MyInvitationDetailScreen(
         uiState = uiState,
         onEvent = viewModel::onEvent,
         modifier = modifier,
@@ -52,17 +54,17 @@ fun InvitationDetailRoute(
 }
 
 @Composable
-private fun InvitationDetailScreen(
-    uiState: InvitationDetailUiState,
-    onEvent: (InvitationDetailUiEvent) -> Unit,
+private fun MyInvitationDetailScreen(
+    uiState: MyInvitationDetailUiState,
+    onEvent: (MyInvitationDetailUiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            InvitationDetailTopBar(
+            MyInvitationDetailTopBar(
                 title = "초대장 id: ${uiState.id}",
-                onBack = { onEvent(InvitationDetailUiEvent.ClickBack) },
+                onBack = { onEvent(MyInvitationDetailUiEvent.ClickBack) },
             )
         },
         containerColor = InvitationTheme.colorScheme.backgroundPrimary,
@@ -75,8 +77,17 @@ private fun InvitationDetailScreen(
                     .padding(horizontal = InvitationSpacing.medium),
         ) {
             Text(
-                text = "InvitationDetailScreen",
-                style = MaterialTheme.typography.bodyMedium
+                text = "초대장 딥링크",
+                style = InvitationTheme.typography.bodyMediumSemiBold,
+                color = InvitationTheme.colorScheme.textPrimary,
+                modifier = Modifier.padding(bottom = InvitationSpacing.small)
+            )
+            InvitationTextField(
+                value = uiState.deepLinkUrl,
+                onValueChange = { },
+                placeholder = "",
+                readOnly = true,
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
@@ -84,7 +95,7 @@ private fun InvitationDetailScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun InvitationDetailTopBar(
+private fun MyInvitationDetailTopBar(
     title: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,

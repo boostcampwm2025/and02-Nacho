@@ -12,10 +12,12 @@ import com.andlife.designsystem.component.InvitationButton
 @Composable
 fun MyInvitationRoute(
     onNavigateToCreate: () -> Unit,
+    onNavigateToDetail: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     MyInvitationScreen(
         onNavigateToCreate = onNavigateToCreate,
+        onNavigateToDetail = onNavigateToDetail,
         modifier = modifier,
     )
 }
@@ -23,17 +25,29 @@ fun MyInvitationRoute(
 @Composable
 private fun MyInvitationScreen(
     onNavigateToCreate: () -> Unit,
+    onNavigateToDetail: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
     ) { padding ->
+        // TODO: 임시 나의 초대 화면
         Column(modifier = Modifier.padding(padding)) {
             Text(text = "MyInvitationScreen")
             InvitationButton(
                 onClick = onNavigateToCreate,
             ) {
                 Text("초대 생성")
+            }
+            InvitationButton(
+                onClick = { onNavigateToDetail(123L) }, // TODO: 실제 초대장 id 전달 필요
+            ) {
+                Text("임시 초대장 123")
+            }
+            InvitationButton(
+                onClick = { onNavigateToDetail(456L) }, // TODO: 실제 초대장 id 전달 필요
+            ) {
+                Text("임시 초대장 456")
             }
         }
     }

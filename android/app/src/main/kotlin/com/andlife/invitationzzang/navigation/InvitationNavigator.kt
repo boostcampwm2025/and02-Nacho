@@ -17,6 +17,7 @@ import com.andlife.invitation.navigateToInvitationDetail
 import com.andlife.invitation_edit.navigateToAddressSearch
 import com.andlife.invitation_edit.navigateToMyInvitationCreate
 import com.andlife.myinvitation.navigateToMyInvitation
+import com.andlife.myinvitation.navigateToMyInvitationDetail
 
 @Stable
 class InvitationNavigator(
@@ -73,6 +74,13 @@ class InvitationNavigator(
 
     fun navigateToMyInvitationCreate(id: Long = -1) {
         navController.navigateToMyInvitationCreate(
+            id = id,
+            navOptions = navOptions { launchSingleTop = true },
+        )
+    }
+
+    fun navigateToMyInvitationDetail(id: Long = -1) {
+        navController.navigateToMyInvitationDetail(
             id = id,
             navOptions = navOptions { launchSingleTop = true },
         )
