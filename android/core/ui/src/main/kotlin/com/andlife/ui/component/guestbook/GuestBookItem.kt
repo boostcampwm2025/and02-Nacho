@@ -37,6 +37,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.Player
@@ -77,7 +78,7 @@ fun GuestBookItem(
     onInvitationTitleClick: (Long) -> Unit = {},
     onVisualMediaClick: (GuestBookEntryMediaUiModel) -> Unit = {},
     onAudioMediaClick: (GuestBookEntryMediaUiModel) -> Unit = {},
-    onMoreOptionsClick: () -> Unit = {}
+    onMenuClick: () -> Unit = {}
 ) {
     Column(
         modifier = modifier,
@@ -88,7 +89,7 @@ fun GuestBookItem(
             authorProfileImageUrl = authorProfileImageUrl,
             createdAt = createdAt,
             isAuthorSelf = isAuthorSelf,
-            onMoreOptionsClick = onMoreOptionsClick,
+            onMenuClick = onMenuClick,
         )
         GuestBookItemTextContent(
             invitationId = invitationId,
@@ -130,7 +131,7 @@ private fun GuestBookItemHeader(
     authorProfileImageUrl: String?,
     createdAt: LocalDateTime,
     isAuthorSelf: Boolean,
-    onMoreOptionsClick: (() -> Unit),
+    onMenuClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -163,7 +164,7 @@ private fun GuestBookItemHeader(
             )
         }
         if (isAuthorSelf) {
-            IconButton(onClick = onMoreOptionsClick) {
+            IconButton(onClick = onMenuClick) {
                 Icon(
                     painter = painterResource(R.drawable.ic_more_vert_24),
                     contentDescription = stringResource(R.string.desc_edit_guest_book),
@@ -182,6 +183,9 @@ private fun GuestBookItemTextContent(
     onInvitationTitleClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var isExpanded by remember { mutableStateOf(false) }
+    var isOverflowed by remember { mutableStateOf(false) }
+
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium),
@@ -189,12 +193,12 @@ private fun GuestBookItemTextContent(
         invitationTitle?.let {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .clickable {
                         invitationId?.let { id ->
                             onInvitationTitleClick(id)
                         }
-                    },
+                    }
+                    .padding(vertical = InvitationSpacing.xSmall),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.xSmall),
             ) {
@@ -210,11 +214,40 @@ private fun GuestBookItemTextContent(
                 )
             }
         }
-        Text(
-            text = textContent,
-            style = InvitationTheme.typography.bodyMediumRegular,
-            color = InvitationTheme.colorScheme.textPrimary,
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    isExpanded = !isExpanded
+                },
+            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small)
+        ) {
+            Text(
+                text = textContent,
+                style = InvitationTheme.typography.bodyMediumRegular,
+                color = InvitationTheme.colorScheme.textPrimary,
+                maxLines = if (isExpanded) Int.MAX_VALUE else 2,
+                overflow = TextOverflow.Ellipsis,
+                onTextLayout = { textLayoutResult ->
+                    if (!isExpanded) {
+                        isOverflowed = textLayoutResult.hasVisualOverflow
+                    }
+                }
+            )
+            if (isOverflowed) {
+                Text(
+                    text = if (isExpanded) stringResource(R.string.txt_show_less) else stringResource(R.string.txt_show_more),
+                    modifier =
+                        Modifier
+                            .clickable {
+                                isExpanded = !isExpanded
+                            }
+                            .padding(InvitationSpacing.xSmall),
+                    style = InvitationTheme.typography.bodyMediumSemiBold,
+                    color = InvitationTheme.colorScheme.brandPrimary,
+                )
+            }
+        }
     }
 }
 
@@ -472,7 +505,7 @@ private fun GuestBookItemPreview() {
                 GuestBookItem(
                     authorName = "홍길동",
                     createdAt = LocalDateTime(2024, 6, 1, 12, 0),
-                    textContent = "축하합니다! 행복하세요!",
+                    textContent = "축하합니다!\n 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!",
                     visualMediaUrls = listOf(
                         GuestBookEntryMediaUiModel(
                             id = 1L,

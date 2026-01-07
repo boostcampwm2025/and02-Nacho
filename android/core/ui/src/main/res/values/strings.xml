@@ -37,6 +37,8 @@
     <string name="desc_play_video">영상 실행 버튼</string>
     <string name="format_audio_duration">%1$d 초</string>
     <string name="format_media_pager_indicator">%1$d/%2$d</string>
+    <string name="txt_show_less">접기</string>
+    <string name="txt_show_more">더보기</string>
 
     <!-- DateUtils -->
     <string name="txt_just_now">방금 전</string>
