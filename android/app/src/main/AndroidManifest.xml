@@ -17,7 +17,8 @@
             android:name="com.andlife.invitationzzang.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Invitation">
+            android:theme="@style/Theme.Invitation"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
