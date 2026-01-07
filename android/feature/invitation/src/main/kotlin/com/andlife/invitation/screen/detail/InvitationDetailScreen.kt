@@ -9,8 +9,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.andlife.designsystem.component.InvitationButton
 import com.andlife.invitation.screen.guestbook.InvitationCollectionScreen
+import com.andlife.invitation.viewmodel.InvitationCollectionViewModel
 import com.andlife.ui.component.GenericTabRow
 import com.andlife.ui.R
 
@@ -33,6 +35,7 @@ fun InvitationDetailRoute(
 private fun InvitationDetailScreen(
     modifier: Modifier = Modifier,
     onNavigateBack: () -> Unit,
+    collectionViewModel: InvitationCollectionViewModel = hiltViewModel(),
 ) {
     val tabTitles = listOf(
         stringResource(R.string.txt_invitation),
@@ -63,7 +66,7 @@ private fun InvitationDetailScreen(
                     when (index) {
                         0 -> Text("초대장 콘텐츠")
                         1 -> Text("방명록 화면")
-                        2 -> InvitationCollectionScreen()
+                        2 -> InvitationCollectionScreen(viewModel = collectionViewModel)
                     }
                 }
             )

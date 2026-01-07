@@ -35,7 +35,11 @@ class InvitationCollectionViewModel @Inject constructor(
             )
 
     override fun onEvent(event: InvitationCollectionUiEvent) {
-        TODO("Not yet implemented")
+        when (event) {
+            is InvitationCollectionUiEvent.OpenStory -> openStory(event.index)
+            is InvitationCollectionUiEvent.CloseStory -> closeStory()
+            is InvitationCollectionUiEvent.PageChanged -> pageChanged(event.index)
+        }
     }
 
     private suspend fun loadMediaCollection(invitationId: Long) {
@@ -55,5 +59,32 @@ class InvitationCollectionViewModel @Inject constructor(
                 updateState { copy(isLoading = false) }
                 Log.e("ViewModel", "에러 발생: $it")
             }
+    }
+
+    private fun openStory(index: Int) {
+        updateState {
+            copy(
+                isDetailMode = true,
+                selectedIndex = index,
+            )
+        }
+        Log.d("ViewModel", "선택된 인덱스: $index")
+    }
+
+    private fun closeStory() {
+        updateState {
+            copy(
+                isDetailMode = false,
+                selectedIndex = -1,
+            )
+        }
+    }
+
+    private fun pageChanged(index: Int) {
+        updateState {
+            copy(
+                selectedIndex = index,
+            )
+        }
     }
 }
