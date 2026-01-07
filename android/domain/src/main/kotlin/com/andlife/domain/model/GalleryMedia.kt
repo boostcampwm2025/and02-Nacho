@@ -2,7 +2,7 @@ package com.andlife.domain.model
 
 import kotlinx.datetime.LocalDateTime
 
-data class GuestBookMedia(
+data class GalleryMedia(
     val id: Long,
     val type: MediaType,
     val url: String,

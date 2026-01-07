@@ -4,7 +4,7 @@ import com.andlife.domain.model.GuestBook
 import com.andlife.domain.model.GuestBookAuthor
 import com.andlife.domain.model.GuestBookEntryMedia
 import com.andlife.domain.model.GuestBookInvitation
-import com.andlife.domain.model.GuestBookMedia
+import com.andlife.domain.model.GalleryMedia
 import com.andlife.domain.model.MediaType
 import com.andlife.network.api.guestbook.GuestBookAuthorResponse
 import com.andlife.network.api.guestbook.GuestBookEntryMediaResponse
@@ -12,8 +12,8 @@ import com.andlife.network.api.guestbook.GuestBookInvitationResponse
 import com.andlife.network.api.guestbook.GuestBookResponse
 import com.andlife.network.model.invitation.guestbook.CollectionResponse
 
-fun CollectionResponse.toDomain(): GuestBookMedia =
-    GuestBookMedia(
+fun CollectionResponse.toDomain(): GalleryMedia =
+    GalleryMedia(
         id = id,
         type = MediaType.fromString(mediaType),
         url = mediaUrl,
