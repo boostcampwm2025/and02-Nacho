@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -242,7 +243,7 @@ private fun GuestBookItemVisualMediaSection(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(4f / 3f)
+            .aspectRatio(1f)
             .clip(InvitationTheme.shapes.small),
     ) {
         HorizontalPager(state = pagerState) { page ->
@@ -305,6 +306,15 @@ private fun SimpleVideoPlayer(
         VideoPlayerPool.getPlayer(context, videoUrl)
     }
 
+    // 화면에 보이는 동안 보호
+    DisposableEffect(videoUrl) {
+        VideoPlayerPool.protectPlayer(videoUrl)
+        onDispose {
+            VideoPlayerPool.unprotectPlayer(videoUrl)
+            VideoPlayerPool.pausePlayer(videoUrl)
+        }
+    }
+
     LaunchedEffect(shouldPlay) {
         if (shouldPlay) {
             VideoPlayerPool.playPlayer(videoUrl)
@@ -313,21 +323,19 @@ private fun SimpleVideoPlayer(
         }
     }
 
-    DisposableEffect(videoId) {
-        onDispose {
-            VideoPlayerPool.pausePlayer(videoUrl)
-        }
-    }
-
     AndroidView(
         factory = { context ->
             PlayerView(context).apply {
-                player = videoPlayer.exoPlayer
                 useController = false
                 resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
             }
         },
-        modifier = modifier.fillMaxSize(),
+        update = { playerView ->
+            playerView.player = videoPlayer.exoPlayer
+        },
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.Black)
     )
 }
 
