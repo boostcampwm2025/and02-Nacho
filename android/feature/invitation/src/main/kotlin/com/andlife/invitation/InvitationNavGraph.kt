@@ -13,8 +13,21 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object Invitation
 
+@Serializable
+data class InvitationDetail(
+    val id: Long,
+)
+
+
 fun NavController.navigateToInvitation(navOptions: NavOptions) {
     navigate(Invitation, navOptions)
+}
+
+fun NavController.navigateToInvitationDetail(
+    id: Long,
+    navOptions: NavOptions
+) {
+    navigate(InvitationDetail(id), navOptions)
 }
 
 fun NavGraphBuilder.invitationNavGraph(paddingValues: PaddingValues) {
