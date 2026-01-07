@@ -53,6 +53,7 @@ import com.andlife.ui.component.media.MediaOverlay
 import com.andlife.ui.model.GuestBookEntryMediaUiModel
 import com.andlife.ui.model.MediaType
 import com.andlife.ui.player.VideoPlayerPool
+import com.andlife.ui.util.toRelativeTimeString
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.LocalDateTime
@@ -155,7 +156,7 @@ private fun GuestBookItemHeader(
                 color = InvitationTheme.colorScheme.textPrimary,
             )
             Text(
-                text = createdAt.toString(), // TODO: 포맷팅 필요
+                text = createdAt.toRelativeTimeString(),
                 style = InvitationTheme.typography.bodySmallRegular,
                 color = InvitationTheme.colorScheme.textTertiary,
             )
