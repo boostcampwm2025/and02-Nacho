@@ -3,7 +3,10 @@ package com.andlife.InvitationServer.service.invitation.guestbook
 import com.andlife.InvitationServer.constant.MediaType
 import com.andlife.InvitationServer.repository.invitation.guestbook.GuestBookRepository
 import com.andlife.InvitationServer.response.AuthorResponse
-import com.andlife.InvitationServer.response.invitation.guestbook.*
+import com.andlife.InvitationServer.response.invitation.guestbook.CollectionResponse
+import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookInvitationResponse
+import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookMediaResponse
+import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookResponse
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -88,7 +91,7 @@ class GuestBookService(
 
             GuestBookResponse(
                 id = guestBook.id,
-                author = GuestBookAuthorResponse(
+                author = AuthorResponse(
                     id = guestBook.user.id,
                     name = guestBook.user.name,
                     profileImageUrl = guestBook.user.profileImageUrl
