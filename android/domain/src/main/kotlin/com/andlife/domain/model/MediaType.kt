@@ -29,5 +29,13 @@ enum class MediaType(
                 else -> null
             }
         }
+
+        fun fromString(type: String?): MediaType {
+            return when (type?.uppercase()) {
+                "VIDEO" -> VIDEO
+                "AUDIO" -> AUDIO
+                else -> IMAGE
+            }
+        }
     }
 }

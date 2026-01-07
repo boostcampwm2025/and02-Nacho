@@ -12,6 +12,13 @@
     <string name="des_invitation_more_btn">초대장 리스트 카드의 더보기 아이콘 버튼</string>
     <string name="des_invitation_icon">초대장 시간 장소 아이콘</string>
 
+    <!--  모아보기 Media  -->
+    <string name="desc_media_image">방명록의 이미지</string>
+    <string name="desc_media_audio">방명록의 오디오</string>
+    <string name="desc_media_video">방명록의 영상 썸네일</string>
+    <string name="desc_ic_play">방명록의 영상 재생 아이콘</string>
+    <string name="desc_btn_remove">편집 모드 아이템 삭제 버튼</string>
+
     <string name="label_add_announcement">공지사항 추가</string>
     <string name="label_announcement_title">공지사항 제목</string>
     <string name="tf_announcement_title_hint">제목을 입력해주세요</string>

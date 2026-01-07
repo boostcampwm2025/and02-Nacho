@@ -1,6 +1,7 @@
 package com.andlife.network.di
 
 import com.andlife.network.BuildConfig
+import com.andlife.network.api.guestbook.GuestBookService
 import com.andlife.network.api.media.MediaService
 import dagger.Module
 import dagger.Provides
@@ -74,4 +75,10 @@ object InvitationNetworkModule {
     fun provideInvitationApiService(
         @InvitationMedia retrofit: Retrofit,
     ): MediaService = retrofit.create(MediaService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideGuestBookService(
+        @Invitation retrofit: Retrofit,
+    ): GuestBookService = retrofit.create(GuestBookService::class.java)
 }
