@@ -81,6 +81,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        installReferrerHandler = null
         Log.d("MainActivity", "onDestroy")
     }
 }
