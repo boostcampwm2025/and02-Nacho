@@ -69,6 +69,7 @@ dependencies {
     implementation(projects.feature.invitationEdit)
     implementation(projects.core.data)
     implementation(projects.core.designsystem)
+    implementation(projects.core.data)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.immutable)

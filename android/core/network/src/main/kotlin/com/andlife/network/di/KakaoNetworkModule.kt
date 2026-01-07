@@ -17,43 +17,38 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object KakaoNetworkModule {
-    private const val BASE_URL = "https://dapi.kakao.com/"
+    private const val KAKAO_BASE_URL = "https://dapi.kakao.com/"
 
     @Provides
     @Singleton
-    fun provideJson(): Json =
-        Json {
-            ignoreUnknownKeys = true
-            coerceInputValues = true
-        }
-
-    @Provides
-    @Singleton
-    fun provideOkHttpClient(kakaoAuthInterceptor: KakaoAuthInterceptor): OkHttpClient =
+    @Kakao
+    fun provideKakaoOkHttpClient(
+        kakaoAuthInterceptor: KakaoAuthInterceptor,
+        loggingInterceptor: HttpLoggingInterceptor,
+    ): OkHttpClient =
         OkHttpClient
             .Builder()
             .addInterceptor(kakaoAuthInterceptor)
-            .addInterceptor(
-                HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.BODY
-                },
-            ).build()
+            .addInterceptor(loggingInterceptor)
+            .build()
 
     @Provides
     @Singleton
+    @Kakao
     fun provideKakaoRetrofit(
-        okHttpClient: OkHttpClient,
+        @Kakao okHttpClient: OkHttpClient,
         json: Json,
     ): Retrofit =
         Retrofit
             .Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(KAKAO_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
 
     @Provides
     @Singleton
-    fun provideKakaoAddressService(retrofit: Retrofit): KakaoAddressService =
-        retrofit.create(KakaoAddressService::class.java)
+    fun provideKakaoAddressService(
+        @Kakao retrofit: Retrofit,
+    ): KakaoAddressService = retrofit.create(KakaoAddressService::class.java)
 }
