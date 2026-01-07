@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -39,24 +38,22 @@ class InvitationCollectionViewModel @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    private fun loadMediaCollection(invitationId: Long) {
-        viewModelScope.launch {
-            updateState { copy(isLoading = true) }
+    private suspend fun loadMediaCollection(invitationId: Long) {
+        updateState { copy(isLoading = true) }
 
-            guestBookRepository
-                .getMediaCollection(invitationId)
-                .onSuccess { mediaList ->
-                    updateState {
-                        copy(
-                            isLoading = false,
-                            mediaItems = mediaList.map { it.toUiModel() }.toImmutableList(),
-                        )
-                    }
-                    Log.d("ViewModel", "미디어 리스트: $mediaList")
-                }.onFailure {
-                    updateState { copy(isLoading = false) }
-                    Log.e("ViewModel", "에러 발생: $it")
+        guestBookRepository
+            .getMediaCollection(invitationId)
+            .onSuccess { mediaList ->
+                updateState {
+                    copy(
+                        isLoading = false,
+                        mediaItems = mediaList.map { it.toUiModel() }.toImmutableList(),
+                    )
                 }
-        }
+                Log.d("ViewModel", "미디어 리스트: $mediaList")
+            }.onFailure {
+                updateState { copy(isLoading = false) }
+                Log.e("ViewModel", "에러 발생: $it")
+            }
     }
 }
