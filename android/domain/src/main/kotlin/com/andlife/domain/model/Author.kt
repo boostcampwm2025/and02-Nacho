@@ -1,6 +1,6 @@
 package com.andlife.domain.model
 
-data class GuestBookAuthor(
+data class Author(
     val id: Long,
     val name: String,
     val profileImageUrl: String? = null,

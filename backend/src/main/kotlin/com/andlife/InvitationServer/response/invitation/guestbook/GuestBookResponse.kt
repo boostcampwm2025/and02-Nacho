@@ -1,11 +1,12 @@
 package com.andlife.InvitationServer.response.invitation.guestbook
 
 import com.andlife.InvitationServer.constant.MediaType
+import com.andlife.InvitationServer.response.AuthorResponse
 import java.time.LocalDateTime
 
 data class GuestBookResponse(
     val id: Long,
-    val author: GuestBookAuthorResponse,
+    val author: AuthorResponse,
     val invitation: GuestBookInvitationResponse,
     val textContent: String,
     val visualMedias: List<GuestBookMediaResponse>,
@@ -13,12 +14,6 @@ data class GuestBookResponse(
     val totalVisualCount: Int,
     val isAuthorSelf: Boolean,
     val createdAt: LocalDateTime,
-)
-
-data class GuestBookAuthorResponse(
-    val id: Long,
-    val name: String,
-    val profileImageUrl: String?,
 )
 
 data class GuestBookInvitationResponse(
