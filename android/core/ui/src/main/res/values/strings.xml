@@ -35,6 +35,8 @@
     <string name="desc_audio_media_icon">오디오 아이콘</string>
     <string name="desc_play_audio">오디오 재생 버튼</string>
     <string name="desc_play_video">영상 실행 버튼</string>
+    <string name="format_audio_duration">%1$d 초</string>
+    <string name="format_media_pager_indicator">%1$d/%2$d</string>
 
     <!-- DateUtils -->
     <string name="txt_just_now">방금 전</string>

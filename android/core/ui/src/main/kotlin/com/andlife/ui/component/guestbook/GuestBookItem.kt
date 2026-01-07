@@ -53,6 +53,7 @@ import com.andlife.ui.component.media.MediaOverlay
 import com.andlife.ui.model.GuestBookEntryMediaUiModel
 import com.andlife.ui.model.MediaType
 import com.andlife.ui.player.VideoPlayerPool
+import com.andlife.ui.util.toFormatDuration
 import com.andlife.ui.util.toRelativeTimeString
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -271,7 +272,7 @@ private fun GuestBookItemVisualMediaSection(
                                 modifier = Modifier
                                     .align(Alignment.BottomEnd)
                                     .padding(InvitationSpacing.small),
-                                text = "$it 초", // TODO: 포맷팅 필요
+                                text = it.toFormatDuration() // TODO: 타이머 기능 추가해야 함.
                             )
                         }
                     }
@@ -288,13 +289,15 @@ private fun GuestBookItemVisualMediaSection(
             }
         }
 
-        MediaOverlay(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(InvitationSpacing.small),
-            text = "${pagerState.currentPage + 1}/$totalVisualCount", // TODO: 포맷팅 필요
-            shape = InvitationTheme.shapes.medium,
-        )
+        if (visualMediaUrls.size > 1) {
+            MediaOverlay(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(InvitationSpacing.small),
+                text = "${pagerState.currentPage + 1}/$totalVisualCount",
+                shape = InvitationTheme.shapes.medium,
+            )
+        }
     }
 }
 
@@ -352,7 +355,12 @@ private fun SimpleVideoPlayer(
         }
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(Color.Black)
+    ) {
         AndroidView(
             factory = { context ->
                 PlayerView(context).apply {
@@ -422,7 +430,10 @@ private fun GuestBookAudioItem(
                 color = InvitationTheme.colorScheme.textPrimary,
             )
             Text(
-                text = "${audio.durationSeconds} 초", // TODO: 포맷팅 필요
+                text = stringResource(
+                    R.string.format_audio_duration,
+                    audio.durationSeconds ?: 0
+                ),
                 style = InvitationTheme.typography.bodySmallRegular,
                 color = InvitationTheme.colorScheme.textSecondary,
             )
