@@ -11,7 +11,7 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.domain.model.MediaType
-import com.andlife.invitation.model.guestbook.InvitationCollectionUiModel
+import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiModel
 import com.andlife.invitation.util.toUiType
 import com.andlife.ui.component.media.MediaItem
 import kotlinx.datetime.Clock

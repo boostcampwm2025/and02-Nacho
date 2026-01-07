@@ -1,4 +1,4 @@
-package com.andlife.invitation.model.guestbook
+package com.andlife.invitation.model.guestbook.collection
 
 import com.andlife.ui.base.BaseUiState
 import kotlinx.collections.immutable.ImmutableList
