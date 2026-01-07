@@ -25,7 +25,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +39,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
@@ -243,7 +247,7 @@ private fun GuestBookItemVisualMediaSection(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(1f)
+            .aspectRatio(1f) // TODO: 추후 미디어 비율에 맞게 조정 필요, 일단 정사각형으로 고정
             .clip(InvitationTheme.shapes.small),
     ) {
         HorizontalPager(state = pagerState) { page ->
@@ -256,8 +260,8 @@ private fun GuestBookItemVisualMediaSection(
                 when (media.type) {
                     MediaType.VIDEO -> {
                         SimpleVideoPlayer(
-                            videoId = media.id,
                             videoUrl = media.url,
+                            thumbnailUrl = media.thumbnailUrl,
                             shouldPlay = shouldPlayVideo && pagerState.currentPage == page,
                         )
 
@@ -296,8 +300,8 @@ private fun GuestBookItemVisualMediaSection(
 @OptIn(UnstableApi::class)
 @Composable
 private fun SimpleVideoPlayer(
-    videoId: Long,
     videoUrl: String,
+    thumbnailUrl: String?,
     shouldPlay: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -306,7 +310,31 @@ private fun SimpleVideoPlayer(
         VideoPlayerPool.getPlayer(context, videoUrl)
     }
 
-    // 화면에 보이는 동안 보호
+    var isVideoReady by remember(videoUrl) {
+        mutableStateOf(videoPlayer.exoPlayer.playbackState == Player.STATE_READY)
+    }
+
+    DisposableEffect(videoPlayer) {
+        isVideoReady = videoPlayer.exoPlayer.playbackState == Player.STATE_READY
+
+        val listener = object : Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                isVideoReady = playbackState == Player.STATE_READY ||
+                    playbackState == Player.STATE_BUFFERING
+            }
+
+            override fun onRenderedFirstFrame() {
+                isVideoReady = true
+            }
+        }
+
+        videoPlayer.exoPlayer.addListener(listener)
+
+        onDispose {
+            videoPlayer.exoPlayer.removeListener(listener)
+        }
+    }
+
     DisposableEffect(videoUrl) {
         VideoPlayerPool.protectPlayer(videoUrl)
         onDispose {
@@ -323,20 +351,32 @@ private fun SimpleVideoPlayer(
         }
     }
 
-    AndroidView(
-        factory = { context ->
-            PlayerView(context).apply {
-                useController = false
-                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-            }
-        },
-        update = { playerView ->
-            playerView.player = videoPlayer.exoPlayer
-        },
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color.Black)
-    )
+    Box(modifier = modifier.fillMaxSize()) {
+        AndroidView(
+            factory = { context ->
+                PlayerView(context).apply {
+                    player = videoPlayer.exoPlayer
+                    useController = false
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                }
+            },
+            update = { playerView ->
+                playerView.player = videoPlayer.exoPlayer
+            },
+            modifier = Modifier.fillMaxSize()
+        )
+
+        if (!isVideoReady && thumbnailUrl != null) {
+            AsyncImage(
+                model = thumbnailUrl,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black),
+                contentScale = ContentScale.Fit,
+            )
+        }
+    }
 }
 
 @Composable
@@ -426,12 +466,15 @@ private fun GuestBookItemPreview() {
                             id = 1L,
                             type = MediaType.IMAGE,
                             url = "https://via.placeholder.com/150",
+                            thumbnailUrl = "https://via.placeholder.com/150",
+                            durationSeconds = 34,
                             displayOrder = 0,
                         ),
                         GuestBookEntryMediaUiModel(
                             id = 2L,
                             type = MediaType.VIDEO,
                             url = "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
+                            thumbnailUrl = "https://via.placeholder.com/150",
                             durationSeconds = 30,
                             displayOrder = 1,
                         )
@@ -441,6 +484,7 @@ private fun GuestBookItemPreview() {
                             id = 3L,
                             type = MediaType.AUDIO,
                             url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+                            thumbnailUrl = "https://via.placeholder.com/150",
                             durationSeconds = 45,
                             displayOrder = 0,
                         )
