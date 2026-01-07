@@ -1,7 +1,7 @@
 package com.andlife.ui.model
 
-enum class MediaType {
+enum class UiMediaType {
     IMAGE,
     AUDIO,
-    VIDEO
+    VIDEO,
 }

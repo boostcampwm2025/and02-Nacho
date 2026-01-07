@@ -19,7 +19,7 @@ class GuestBookService(
 
         guestBooks.forEach { gb ->
             val author = AuthorResponse(
-                userId = gb.user.id,
+                id = gb.user.id,
                 name = gb.user.name,
                 profileImageUrl = gb.user.profileImageUrl
             )
