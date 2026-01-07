@@ -8,8 +8,8 @@ data class GuestBookResponse(
     val author: GuestBookAuthorResponse,
     val invitation: GuestBookInvitationResponse,
     val textContent: String,
-    val visualMedias: List<GuestBookEntryMediaResponse>,
-    val audioMedias: List<GuestBookEntryMediaResponse>,
+    val visualMedias: List<GuestBookMediaResponse>,
+    val audioMedias: List<GuestBookMediaResponse>,
     val totalVisualCount: Int,
     val isAuthorSelf: Boolean,
     val createdAt: LocalDateTime,
@@ -26,7 +26,7 @@ data class GuestBookInvitationResponse(
     val title: String,
 )
 
-data class GuestBookEntryMediaResponse(
+data class GuestBookMediaResponse(
     val id: Long,
     val type: MediaType,
     val url: String,

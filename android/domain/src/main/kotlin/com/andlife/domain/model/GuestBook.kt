@@ -7,8 +7,8 @@ data class GuestBook(
     val author: GuestBookAuthor,
     val invitation: GuestBookInvitation,
     val textContent: String,
-    val visualMedias: List<GuestBookEntryMedia>,
-    val audioMedias: List<GuestBookEntryMedia>,
+    val visualMedias: List<GuestBookMedia>,
+    val audioMedias: List<GuestBookMedia>,
     val totalVisualCount: Int,
     val createdAt: LocalDateTime,
 )

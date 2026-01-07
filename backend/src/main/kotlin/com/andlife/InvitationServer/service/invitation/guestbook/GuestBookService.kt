@@ -69,16 +69,16 @@ class GuestBookService(
         val guestBooks = guestBookRepository.findAllByInvitationId(invitationId)
 
         return guestBooks.map { guestBook ->
-            val allMedia = mutableListOf<GuestBookEntryMediaResponse>()
+            val allMedia = mutableListOf<GuestBookMediaResponse>()
 
             guestBook.images.forEach {
-                allMedia.add(GuestBookEntryMediaResponse(it.id, MediaType.IMAGE, it.imageUrl, null, null, it.displayOrder))
+                allMedia.add(GuestBookMediaResponse(it.id, MediaType.IMAGE, it.imageUrl, null, null, it.displayOrder))
             }
             guestBook.videos.forEach {
-                allMedia.add(GuestBookEntryMediaResponse(it.id, MediaType.VIDEO, it.videoUrl, it.thumbnailUrl, it.durationSeconds, it.displayOrder))
+                allMedia.add(GuestBookMediaResponse(it.id, MediaType.VIDEO, it.videoUrl, it.thumbnailUrl, it.durationSeconds, it.displayOrder))
             }
             guestBook.audios.forEach {
-                allMedia.add(GuestBookEntryMediaResponse(it.id, MediaType.AUDIO, it.audioUrl, null, it.durationSeconds, it.displayOrder))
+                allMedia.add(GuestBookMediaResponse(it.id, MediaType.AUDIO, it.audioUrl, null, it.durationSeconds, it.displayOrder))
             }
 
             val sortedList = allMedia.sortedBy { it.displayOrder }

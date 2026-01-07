@@ -1,6 +1,6 @@
 package com.andlife.domain.model
 
-data class GuestBookEntryMedia(
+data class GuestBookMedia(
     val id: Long,
     val type: MediaType,
     val url: String,
