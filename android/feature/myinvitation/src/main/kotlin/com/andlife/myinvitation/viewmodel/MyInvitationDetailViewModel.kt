@@ -40,7 +40,6 @@ class MyInvitationDetailViewModel @Inject constructor(
 
         viewModelScope.launch {
             // TODO: Repository 호출
-            Log.d("DeepLink", "전달받은 ID: $myInvitationId")
             updateState { copy(id = myInvitationId) }
         }
     }

@@ -50,6 +50,10 @@ fun NavGraphBuilder.invitationDetailNavGraph(
         deepLinks = listOf(
             navDeepLink<InvitationDetail>(
                 basePath = "https://invitationzzang.com/invite"
+            ),
+            // TODO: 로컬 테스트용 ngrok 도메인 삭제 예정
+            navDeepLink<InvitationDetail>(
+                basePath = "https://fenny-dell-unintrigued.ngrok-free.dev/invite"
             )
         )
     ) {
