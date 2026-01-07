@@ -46,6 +46,7 @@ object VideoPlayerPool {
             ).createMediaSource(MediaItem.fromUri(uri))
             reusablePlayer.setMediaSource(mediaSource)
             reusablePlayer.prepare()
+            reusablePlayer.exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
             videoPool[uri] = reusablePlayer
             reusablePlayer
         } else {
