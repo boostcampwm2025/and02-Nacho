@@ -3,7 +3,6 @@ package com.andlife.invitation.screen
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.andlife.designsystem.component.InvitationButton
 
@@ -25,7 +24,6 @@ fun InvitationScreen(
 ) {
     Column(
         modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         InvitationButton(
             // 임시로 ID 1번 전달
