@@ -17,6 +17,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://devrepo.kakao.com/nexus/content/groups/public/") }
     }
 }
 
@@ -37,3 +38,4 @@ include(":domain")
 include(":feature:invitation-edit")
 include(":feature:invitation-card")
 include(":feature:thanks-card")
+include(":core:deeplink")

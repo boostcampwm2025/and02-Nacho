@@ -28,12 +28,21 @@ android {
         var properties = Properties()
         properties.load(FileInputStream("local.properties"))
         val kakaoRestApiKey = properties.getProperty("KAKAO_REST_API_KEY") ?: ""
+        val kakaoNativeAppKey = properties.getProperty("KAKAO_NATIVE_APP_KEY") ?: ""
 
         buildConfigField(
             "String",
             "KAKAO_REST_API_KEY",
             "\"$kakaoRestApiKey\"",
         )
+
+        buildConfigField(
+            "String",
+            "KAKAO_NATIVE_APP_KEY",
+            "\"$kakaoNativeAppKey\"",
+        )
+
+        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoNativeAppKey
     }
 
     buildTypes {
@@ -73,13 +82,15 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.immutable)
-
-    // Install Referrer (디퍼드 딥링크용)
-    implementation(libs.installreferrer)
+    implementation(projects.core.deeplink)
 
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+
+    // Kakao
+    implementation(libs.kakao.common)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

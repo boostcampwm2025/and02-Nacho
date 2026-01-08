@@ -31,6 +31,7 @@ compose-ruleset = "0.4.28"
 javaxInject = "1"
 appsflyer = "6.14.2"
 installreferrer = "2.2"
+kakao-sdk = "2.23.2"
 
 [libraries]
 androidx-compose-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "materialIconsCore" }
@@ -108,6 +109,11 @@ kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-pl
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 room-gradlePlugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
 ktlint-gradlePlugin = { group = "org.jlleitschuh.gradle.ktlint", name = "org.jlleitschuh.gradle.ktlint.gradle.plugin", version.ref = "ktlint" }
+
+kakao-sdk-share = { group = "com.kakao.sdk", name = "v2-share", version.ref = "kakao-sdk" }
+kakao-bom = { module = "com.kakao.sdk:v2-bom", version.ref = "kakao-sdk" }
+kakao-common = { module = "com.kakao.sdk:v2-common" }
+kakao-user = { module = "com.kakao.sdk:v2-user" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
