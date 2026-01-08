@@ -9,11 +9,12 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.invitation.component.StoryPageContent
 import com.andlife.invitation.component.StoryTopHeader
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiEvent
 import com.andlife.invitation.viewmodel.InvitationCollectionViewModel
@@ -53,14 +54,19 @@ fun InvitationStoryScreen(
 
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.fillMaxSize(),
             pageSpacing = InvitationSpacing.none,
             userScrollEnabled = true
         ) { pageIndex ->
             val item = uiState.mediaItems[pageIndex]
 
             Box(modifier = Modifier.fillMaxSize()) {
-
+                StoryPageContent(
+                    item = item,
+                    isExpanded = uiState.isTextExpanded,
+                    onToggleExpand = { viewModel.onEvent(InvitationCollectionUiEvent.ToggleExpand) },
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
             }
         }
     }

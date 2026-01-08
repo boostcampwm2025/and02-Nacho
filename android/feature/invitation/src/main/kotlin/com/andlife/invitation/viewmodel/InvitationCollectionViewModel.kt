@@ -39,6 +39,7 @@ class InvitationCollectionViewModel @Inject constructor(
             is InvitationCollectionUiEvent.OpenStory -> openStory(event.index)
             is InvitationCollectionUiEvent.CloseStory -> closeStory()
             is InvitationCollectionUiEvent.PageChanged -> pageChanged(event.index)
+            is InvitationCollectionUiEvent.ToggleExpand -> toggleExpand()
         }
     }
 
@@ -87,5 +88,13 @@ class InvitationCollectionViewModel @Inject constructor(
             )
         }
         Log.d("ViewModel", "바뀐 인덱스: $index")
+    }
+
+    private fun toggleExpand() {
+        updateState {
+            copy(
+                isTextExpanded = !isTextExpanded,
+            )
+        }
     }
 }

@@ -24,7 +24,6 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationIconSize
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
-import com.andlife.invitation.util.toDateTime
 import com.andlife.invitation.util.toDateTimeFormat
 import com.andlife.ui.R
 import kotlinx.datetime.Clock

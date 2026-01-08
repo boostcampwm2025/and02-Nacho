@@ -6,4 +6,5 @@ sealed interface InvitationCollectionUiEvent : BaseUiEvent {
     data class OpenStory(val index: Int) : InvitationCollectionUiEvent
     data object CloseStory : InvitationCollectionUiEvent
     data class PageChanged(val index: Int) : InvitationCollectionUiEvent
+    data object ToggleExpand : InvitationCollectionUiEvent
 }

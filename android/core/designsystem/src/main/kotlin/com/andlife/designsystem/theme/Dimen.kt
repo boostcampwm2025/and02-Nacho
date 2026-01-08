@@ -20,6 +20,7 @@ object InvitationIconSize {
     val medium = 24.dp
     val large = 32.dp
     val xLarge = 48.dp
+    val textBox = 120.dp
 }
 
 object InvitationStroke {

@@ -10,4 +10,5 @@ data class InvitationCollectionUiState(
     val errorMessage: String? = null,
     val isDetailMode: Boolean = false,
     val selectedIndex: Int = 0,
+    val isTextExpanded: Boolean = false,
 ) : BaseUiState
