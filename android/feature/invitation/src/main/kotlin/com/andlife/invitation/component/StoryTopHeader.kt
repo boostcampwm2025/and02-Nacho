@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationIconSize
@@ -61,14 +62,14 @@ fun StoryTopHeader(
             if (!profileUrl.isNullOrEmpty()) {
                 AsyncImage(
                     model = profileUrl,
-                    contentDescription = "Profile Image",
+                    contentDescription = stringResource(R.string.desc_user_profile),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
                 )
             } else {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_person_24),
-                    contentDescription = "Default Profile",
+                    contentDescription = stringResource(R.string.desc_btn_back),
                     tint = InvitationTheme.colorScheme.iconSecondary,
                     modifier = Modifier.size(InvitationIconSize.medium)
                 )
@@ -93,7 +94,7 @@ fun StoryTopHeader(
         IconButton(onClick = { /* Todo: 다운로드 로직 */ }) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_download_24),
-                contentDescription = "Download",
+                contentDescription = stringResource(R.string.desc_btn_download),
                 tint = InvitationTheme.colorScheme.iconTertiary,
             )
         }

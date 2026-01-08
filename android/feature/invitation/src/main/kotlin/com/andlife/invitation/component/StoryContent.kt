@@ -34,7 +34,7 @@ fun StoryPageContent(
                 )
             }
             UiMediaType.VIDEO -> {
-                // TODO: VideoPlayer 컴포넌트 배치 (ExoPlayer)
+                // TODO: VideoPlayer 컴포넌트 구현 (ExoPlayer)
                 Box(modifier = Modifier.fillMaxSize().background(InvitationTheme.colorScheme.backgroundOverlay))
             }
             UiMediaType.AUDIO -> {

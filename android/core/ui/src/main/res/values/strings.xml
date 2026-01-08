@@ -23,6 +23,12 @@
     <string name="desc_media_video">방명록의 영상 썸네일</string>
     <string name="desc_ic_play">방명록의 영상 재생 아이콘</string>
     <string name="desc_btn_remove">편집 모드 아이템 삭제 버튼</string>
+    <string name="desc_user_profile">사용자의 프로필 사진</string>
+    <string name="desc_btn_back">뒤로가기 버튼</string>
+    <string name="desc_btn_download">미디어 다운로드 버튼</string>
+
+    <string name="txt_see_more">더보기..</string>
+    <string name="txt_collapse">접기</string>
 
     <string name="label_add_announcement">공지사항 추가</string>
     <string name="label_announcement_title">공지사항 제목</string>

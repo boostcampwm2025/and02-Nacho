@@ -19,11 +19,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationIconSize
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.ui.R
 
 @Composable
 fun StoryTextSection(
@@ -75,7 +77,7 @@ fun StoryTextSection(
             if (isTextOverflowing) {
                 Spacer(modifier = Modifier.height(InvitationSpacing.large))
                 Text(
-                    text = if (isExpanded) "접기" else "더보기...",
+                    text = if (isExpanded) stringResource(R.string.txt_collapse) else stringResource(R.string.txt_see_more),
                     style = InvitationTheme.typography.bodyMediumSemiBold,
                     color = InvitationTheme.colorScheme.textOnPrimary,
                     modifier = Modifier.clickable { onToggleExpand() }
