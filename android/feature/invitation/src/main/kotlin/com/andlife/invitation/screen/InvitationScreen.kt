@@ -13,7 +13,7 @@ fun InvitationRoute(
 ) {
     InvitationScreen(
         modifier = modifier,
-        onInvitationClick = onInvitationClick
+        onInvitationClick = onInvitationClick,
     )
 }
 

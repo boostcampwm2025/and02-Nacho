@@ -17,20 +17,21 @@ fun StoryPageContent(
     item: InvitationCollectionUiModel,
     isExpanded: Boolean,
     onToggleExpand: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(InvitationTheme.colorScheme.backgroundOverlay)
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(InvitationTheme.colorScheme.backgroundOverlay),
     ) {
-        when(item.type) {
+        when (item.type) {
             UiMediaType.IMAGE -> {
                 AsyncImage(
                     model = item.url,
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
                 )
             }
             UiMediaType.VIDEO -> {
@@ -38,14 +39,13 @@ fun StoryPageContent(
                 Box(modifier = Modifier.fillMaxSize().background(InvitationTheme.colorScheme.backgroundOverlay))
             }
             UiMediaType.AUDIO -> {
-
             }
         }
         StoryTextSection(
             content = item.content,
             isExpanded = isExpanded,
             onToggleExpand = onToggleExpand,
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier.align(Alignment.BottomCenter),
         )
     }
 }

@@ -38,26 +38,27 @@ fun StoryTopHeader(
     date: LocalDateTime,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
-    profileUrl: String? = null
+    profileUrl: String? = null,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(onClick = onClose) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_back_24),
                 contentDescription = "Back",
-                tint = InvitationTheme.colorScheme.iconTertiary
+                tint = InvitationTheme.colorScheme.iconTertiary,
             )
         }
 
         Box(
-            modifier = Modifier
-                .size(InvitationIconSize.large)
-                .clip(CircleShape)
-                .background(InvitationTheme.colorScheme.backgroundSecondary),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .size(InvitationIconSize.large)
+                    .clip(CircleShape)
+                    .background(InvitationTheme.colorScheme.backgroundSecondary),
+            contentAlignment = Alignment.Center,
         ) {
             if (!profileUrl.isNullOrEmpty()) {
                 AsyncImage(
@@ -71,7 +72,7 @@ fun StoryTopHeader(
                     painter = painterResource(id = R.drawable.ic_person_24),
                     contentDescription = stringResource(R.string.desc_btn_back),
                     tint = InvitationTheme.colorScheme.iconSecondary,
-                    modifier = Modifier.size(InvitationIconSize.medium)
+                    modifier = Modifier.size(InvitationIconSize.medium),
                 )
             }
         }
@@ -82,12 +83,12 @@ fun StoryTopHeader(
             Text(
                 text = name,
                 color = InvitationTheme.colorScheme.textOnPrimary,
-                style = InvitationTheme.typography.bodyMediumMedium
+                style = InvitationTheme.typography.bodyMediumMedium,
             )
             Text(
                 text = date.toDateTimeFormat(),
                 color = InvitationTheme.colorScheme.textTertiary,
-                style = InvitationTheme.typography.bodySmallRegular
+                style = InvitationTheme.typography.bodySmallRegular,
             )
         }
 
@@ -109,7 +110,7 @@ private fun StoryTopHeaderPreview() {
         StoryTopHeader(
             name = "사용자 이름",
             date = now,
-            onClose = {}
+            onClose = {},
         )
     }
 }

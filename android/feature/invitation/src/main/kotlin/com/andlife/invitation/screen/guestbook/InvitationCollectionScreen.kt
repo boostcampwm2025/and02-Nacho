@@ -14,7 +14,7 @@ import com.andlife.invitation.viewmodel.InvitationCollectionViewModel
 @Composable
 fun InvitationCollectionScreen(
     modifier: Modifier = Modifier,
-    viewModel: InvitationCollectionViewModel = hiltViewModel()
+    viewModel: InvitationCollectionViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -22,18 +22,18 @@ fun InvitationCollectionScreen(
         items = uiState.mediaItems,
         onItemClick = { index ->
             viewModel.onEvent(InvitationCollectionUiEvent.OpenStory(index))
-        }
+        },
     )
 
     if (uiState.isDetailMode) {
         Dialog(
             onDismissRequest = { viewModel.onEvent(InvitationCollectionUiEvent.CloseStory) },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
+            properties = DialogProperties(usePlatformDefaultWidth = false),
         ) {
             InvitationStoryScreen(
                 viewModel = viewModel,
                 initialIndex = uiState.selectedIndex,
-                onClose = { viewModel.onEvent(InvitationCollectionUiEvent.CloseStory) }
+                onClose = { viewModel.onEvent(InvitationCollectionUiEvent.CloseStory) },
             )
         }
     }

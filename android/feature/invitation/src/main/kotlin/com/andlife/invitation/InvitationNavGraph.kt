@@ -9,7 +9,6 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.andlife.invitation.screen.InvitationRoute
-import com.andlife.invitation.screen.InvitationScreen
 import com.andlife.invitation.screen.detail.InvitationDetailRoute
 import kotlinx.serialization.Serializable
 
@@ -27,7 +26,7 @@ fun NavController.navigateToInvitation(navOptions: NavOptions) {
 
 fun NavController.navigateToInvitationDetail(
     id: Long,
-    navOptions: NavOptions
+    navOptions: NavOptions,
 ) {
     navigate(InvitationDetail(id), navOptions)
 }

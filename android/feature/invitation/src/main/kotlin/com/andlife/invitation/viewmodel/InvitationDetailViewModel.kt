@@ -9,14 +9,16 @@ import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 @HiltViewModel
-class InvitationDetailViewModel @Inject constructor(
+class InvitationDetailViewModel
+    @Inject
+    constructor() :
+    BaseViewModel<InvitationDetailUiState, InvitationDetailUiEvent, InvitationDetailSideEffect>(
+            InvitationDetailUiState(),
+        ) {
+        override val uiState: StateFlow<InvitationDetailUiState>
+            get() = TODO("Not yet implemented")
 
-) : BaseViewModel<InvitationDetailUiState, InvitationDetailUiEvent, InvitationDetailSideEffect>(InvitationDetailUiState()){
-    override val uiState: StateFlow<InvitationDetailUiState>
-        get() = TODO("Not yet implemented")
-
-    override fun onEvent(event: InvitationDetailUiEvent) {
-        TODO("Not yet implemented")
+        override fun onEvent(event: InvitationDetailUiEvent) {
+            TODO("Not yet implemented")
+        }
     }
-
-}

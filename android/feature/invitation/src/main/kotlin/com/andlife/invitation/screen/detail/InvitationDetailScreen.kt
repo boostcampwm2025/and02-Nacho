@@ -13,8 +13,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.andlife.designsystem.component.InvitationButton
 import com.andlife.invitation.screen.guestbook.InvitationCollectionScreen
 import com.andlife.invitation.viewmodel.InvitationCollectionViewModel
-import com.andlife.ui.component.GenericTabRow
 import com.andlife.ui.R
+import com.andlife.ui.component.GenericTabRow
 
 private const val TAG = "InvitationDetailScreen"
 
@@ -27,7 +27,7 @@ fun InvitationDetailRoute(
     Log.d(TAG, "전달 받은 ID: $id")
     InvitationDetailScreen(
         modifier = modifier,
-        onNavigateBack = onNavigateBack
+        onNavigateBack = onNavigateBack,
     )
 }
 
@@ -37,11 +37,12 @@ private fun InvitationDetailScreen(
     onNavigateBack: () -> Unit,
     collectionViewModel: InvitationCollectionViewModel = hiltViewModel(),
 ) {
-    val tabTitles = listOf(
-        stringResource(R.string.txt_invitation),
-        stringResource(R.string.txt_guestbook),
-        stringResource(R.string.txt_collection),
-    )
+    val tabTitles =
+        listOf(
+            stringResource(R.string.txt_invitation),
+            stringResource(R.string.txt_guestbook),
+            stringResource(R.string.txt_collection),
+        )
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -51,8 +52,10 @@ private fun InvitationDetailScreen(
         },
     ) { innerPadding ->
         Column(
-            modifier = Modifier.fillMaxSize()
-                .padding(innerPadding)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
         ) {
             InvitationButton(
                 onClick = onNavigateBack,
@@ -68,7 +71,7 @@ private fun InvitationDetailScreen(
                         1 -> Text("방명록 화면")
                         2 -> InvitationCollectionScreen(viewModel = collectionViewModel)
                     }
-                }
+                },
             )
         }
     }

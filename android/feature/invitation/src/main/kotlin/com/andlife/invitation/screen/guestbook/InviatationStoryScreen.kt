@@ -24,13 +24,14 @@ fun InvitationStoryScreen(
     viewModel: InvitationCollectionViewModel,
     initialIndex: Int,
     onClose: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val pagerState = rememberPagerState(
-        initialPage = initialIndex,
-        pageCount = { uiState.mediaItems.size }
-    )
+    val pagerState =
+        rememberPagerState(
+            initialPage = initialIndex,
+            pageCount = { uiState.mediaItems.size },
+        )
 
     LaunchedEffect(pagerState.currentPage) {
         viewModel.onEvent(InvitationCollectionUiEvent.PageChanged(pagerState.currentPage))
@@ -39,16 +40,17 @@ fun InvitationStoryScreen(
     val currentItem = uiState.mediaItems.getOrNull(pagerState.currentPage)
 
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(InvitationTheme.colorScheme.backgroundInverse)
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(InvitationTheme.colorScheme.backgroundInverse),
     ) {
         currentItem?.let { item ->
             StoryTopHeader(
                 name = item.authorName,
                 date = item.createdAt,
                 profileUrl = item.authorProfileUrl,
-                onClose = onClose
+                onClose = onClose,
             )
         }
 
@@ -56,7 +58,7 @@ fun InvitationStoryScreen(
             state = pagerState,
             modifier = Modifier.fillMaxSize(),
             pageSpacing = InvitationSpacing.none,
-            userScrollEnabled = true
+            userScrollEnabled = true,
         ) { pageIndex ->
             val item = uiState.mediaItems[pageIndex]
 
@@ -65,7 +67,7 @@ fun InvitationStoryScreen(
                     item = item,
                     isExpanded = uiState.isTextExpanded,
                     onToggleExpand = { viewModel.onEvent(InvitationCollectionUiEvent.ToggleExpand) },
-                    modifier = Modifier.align(Alignment.BottomCenter)
+                    modifier = Modifier.align(Alignment.BottomCenter),
                 )
             }
         }

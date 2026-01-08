@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 fun GenericTabRow(
     tabs: List<String>,
     content: @Composable (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val coroutineScope = rememberCoroutineScope()
@@ -36,7 +36,7 @@ fun GenericTabRow(
                     thickness = InvitationStroke.small,
                     color = InvitationTheme.colorScheme.textTertiary,
                 )
-            }
+            },
         ) {
             tabs.forEachIndexed { index, title ->
                 val isSelected = pagerState.currentPage == index
@@ -52,7 +52,7 @@ fun GenericTabRow(
                         )
                     },
                     selectedContentColor = InvitationTheme.colorScheme.brandPrimary,
-                    unselectedContentColor = InvitationTheme.colorScheme.textTertiary
+                    unselectedContentColor = InvitationTheme.colorScheme.textTertiary,
                 )
             }
         }
@@ -60,7 +60,7 @@ fun GenericTabRow(
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.weight(1f),
-            verticalAlignment = Alignment.Top
+            verticalAlignment = Alignment.Top,
         ) { pageIndex ->
             content(pageIndex)
         }
@@ -74,12 +74,12 @@ private fun GenericTabScreenPreview() {
         GenericTabRow(
             tabs = listOf("Tab 1", "Tab 2", "Tab 3"),
             content = { index ->
-                when(index) {
+                when (index) {
                     0 -> Text(text = "Tab 1 Content")
                     1 -> Text(text = "Tab 2 Content")
                     2 -> Text(text = "Tab 3 Content")
                 }
-            }
+            },
         )
     }
 }
