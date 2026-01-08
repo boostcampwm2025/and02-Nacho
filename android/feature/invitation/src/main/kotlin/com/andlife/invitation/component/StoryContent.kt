@@ -8,12 +8,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
+import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.domain.model.MediaType
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiModel
+import com.andlife.invitation.util.toUiType
 import com.andlife.ui.model.UiMediaType
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 @Composable
-fun StoryPageContent(
+fun StoryContent(
     item: InvitationCollectionUiModel,
     isExpanded: Boolean,
     onToggleExpand: () -> Unit,
@@ -46,6 +52,28 @@ fun StoryPageContent(
             isExpanded = isExpanded,
             onToggleExpand = onToggleExpand,
             modifier = Modifier.align(Alignment.BottomCenter),
+        )
+    }
+}
+
+@PreviewTheme
+@Composable
+fun StoryContentPreview() {
+    InvitationTheme {
+        val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        StoryContent(
+            item = InvitationCollectionUiModel(
+                id = 3L,
+                url = "https://picsum.photos/400/600?random=3",
+                type = MediaType.AUDIO.toUiType(),
+                content = "방명록 내용 3",
+                authorName = "사용자3",
+                authorProfileUrl = null,
+                createdAt = now,
+                durationSeconds = 300,
+            ),
+            isExpanded = false,
+            onToggleExpand = {},
         )
     }
 }
