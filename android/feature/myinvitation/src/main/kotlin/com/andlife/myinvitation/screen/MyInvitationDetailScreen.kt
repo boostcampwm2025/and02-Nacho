@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -19,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.andlife.designsystem.component.InvitationButton
 import com.andlife.designsystem.component.InvitationTextField
 import com.andlife.designsystem.R as designR
 import com.andlife.designsystem.theme.InvitationSpacing
@@ -89,6 +89,13 @@ private fun MyInvitationDetailScreen(
                 readOnly = true,
                 modifier = Modifier.fillMaxWidth()
             )
+
+            InvitationButton(
+                onClick = { onEvent(MyInvitationDetailUiEvent.ClickShare) },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("초대장 공유하기")
+            }
         }
     }
 }

@@ -1,8 +1,8 @@
 package com.andlife.myinvitation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.andlife.myinvitation.manager.KakaoShareManager
 import com.andlife.myinvitation.model.MyInvitationDetailSideEffect
 import com.andlife.myinvitation.model.MyInvitationDetailUiEvent
 import com.andlife.myinvitation.model.MyInvitationDetailUiState
@@ -18,6 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MyInvitationDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    private val kakaoShareManager: KakaoShareManager,
 ) : BaseViewModel<MyInvitationDetailUiState, MyInvitationDetailUiEvent, MyInvitationDetailSideEffect>(
     initialState = MyInvitationDetailUiState(),
 ) {
@@ -47,10 +48,19 @@ class MyInvitationDetailViewModel @Inject constructor(
     override fun onEvent(event: MyInvitationDetailUiEvent) {
         when (event) {
             is MyInvitationDetailUiEvent.ClickBack -> clickClose()
+            is MyInvitationDetailUiEvent.ClickShare -> shareInvitation()
         }
     }
 
     private fun clickClose() {
         sendEffect(MyInvitationDetailSideEffect.NavigateBack)
+    }
+
+    private fun shareInvitation() {
+        val currentId = uiState.value.id ?: return
+
+        kakaoShareManager.share(
+            invitationId = currentId,
+        )
     }
 }
