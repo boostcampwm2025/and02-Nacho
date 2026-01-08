@@ -5,11 +5,18 @@ import com.andlife.domain.error.DataError
 import com.andlife.domain.util.Result
 import com.andlife.network.api.guestbook.GuestBookService
 import com.andlife.network.model.invitation.guestbook.CollectionResponse
+import com.andlife.network.model.invitation.guestbook.CreateGuestBookRequest
+import com.andlife.network.model.invitation.guestbook.GuestBookResponse
 import javax.inject.Inject
 
-internal class GuestBookRemoteDataSourceImpl @Inject constructor(
-    private val guestBookService: GuestBookService,
-) : GuestBookRemoteDataSource {
-    override suspend fun getMediaCollection(invitationId: Long): Result<List<CollectionResponse>, DataError> =
-        apiCall { guestBookService.getMediaCollection(invitationId) }
-}
+internal class GuestBookRemoteDataSourceImpl
+    @Inject
+    constructor(
+        private val guestBookService: GuestBookService,
+    ) : GuestBookRemoteDataSource {
+        override suspend fun createGuestBook(request: CreateGuestBookRequest): Result<GuestBookResponse, DataError> =
+            apiCall { guestBookService.createGuestBook(request) }
+
+        override suspend fun getMediaCollection(invitationId: Long): Result<List<CollectionResponse>, DataError> =
+            apiCall { guestBookService.getMediaCollection(invitationId) }
+    }
