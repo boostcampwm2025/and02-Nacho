@@ -30,7 +30,7 @@ fun InvitationCollectionScreen(
             onDismissRequest = { viewModel.onEvent(InvitationCollectionUiEvent.CloseStory) },
             properties = DialogProperties(usePlatformDefaultWidth = false),
         ) {
-            InvitationStoryScreen(
+            InvitationStoryRoute(
                 viewModel = viewModel,
                 initialIndex = uiState.selectedIndex,
                 onClose = { viewModel.onEvent(InvitationCollectionUiEvent.CloseStory) },
