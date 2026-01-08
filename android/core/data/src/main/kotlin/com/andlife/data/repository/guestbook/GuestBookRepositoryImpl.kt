@@ -7,7 +7,7 @@ import com.andlife.domain.model.GuestBookMedia
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.map
-import com.andlife.network.model.invitation.guestbook.CreateGuestBookRequest
+import com.andlife.network.model.invitation.guestbook.GuestBookRequest
 import javax.inject.Inject
 
 internal class GuestBookRepositoryImpl
@@ -22,7 +22,7 @@ internal class GuestBookRepositoryImpl
             medias: List<GuestBookMedia>,
         ): Result<GuestBook, DataError> {
             val request =
-                CreateGuestBookRequest(
+                GuestBookRequest(
                     invitationId = invitationId,
                     userId = userId,
                     textContent = textContent,
