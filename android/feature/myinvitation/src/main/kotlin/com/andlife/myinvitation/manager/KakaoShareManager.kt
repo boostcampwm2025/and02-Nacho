@@ -1,0 +1,53 @@
+package com.andlife.myinvitation.manager
+
+import android.content.Context
+import android.content.Intent
+import com.andlife.deeplink.DeepLinkConfig
+import com.kakao.sdk.share.ShareClient
+import com.kakao.sdk.template.model.Button
+import com.kakao.sdk.template.model.Content
+import com.kakao.sdk.template.model.FeedTemplate
+import com.kakao.sdk.template.model.Link
+import javax.inject.Inject
+
+class KakaoShareManager @Inject constructor(
+    private val context: Context,
+) {
+    fun share(
+        invitationId: Long,
+        imageUrl: String = "https://placehold.jp/400x400.png?text=Invitation%20Image",
+        title: String = "초대장이 도착했습니다! ✨\n정우의 생일 축제",
+        date: String = "2026년 1월 24일(토) 오후 6시 30분",
+        location: String = "그랜드 하얏트 서울"
+    ) {
+        val url = DeepLinkConfig.buildInvitationDeepLink(invitationId)
+        val playStoreUrl = DeepLinkConfig.buildPlayStoreUrl(invitationId) // TODO: 앱 설치 후 referrer 전달 확인
+
+        val feed = FeedTemplate(
+            content = Content(
+                title = title,
+                description = "$date\n$location",
+                imageUrl = imageUrl,
+                link = Link(webUrl = url, mobileWebUrl = playStoreUrl)
+            ),
+            buttons = listOf(
+                Button(
+                    title = "초대장 확인하기",
+                    link = Link(
+                        androidExecutionParams = mapOf(DeepLinkConfig.PARAM_INVITE_ID to invitationId.toString()),
+                        webUrl = url,
+                        mobileWebUrl = playStoreUrl
+                    )
+                )
+            )
+        )
+
+        if (ShareClient.instance.isKakaoTalkSharingAvailable(context)) {
+            ShareClient.instance.shareDefault(context, feed) { result, error ->
+                if (error == null && result != null) {
+                    context.startActivity(result.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                }
+            }
+        }
+    }
+}

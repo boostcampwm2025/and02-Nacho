@@ -34,15 +34,13 @@
                     android:pathPrefix="/invite" />
             </intent-filter>
 
-            <!-- TODO: 로컬 테스트용 ngrok 도메인 삭제 예정 -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
-                    android:scheme="https"
-                    android:host="fenny-dell-unintrigued.ngrok-free.dev"
-                    android:pathPrefix="/invite" />
+                    android:scheme="kakao${KAKAO_NATIVE_APP_KEY}"
+                    android:host="kakaolink" />
             </intent-filter>
         </activity>
     </application>

@@ -15,4 +15,9 @@ object ApiKeyModule {
     @Singleton
     @Named("kakaoApiKey")
     fun provideKakaoApiKey(): String = BuildConfig.KAKAO_REST_API_KEY
+
+    @Provides
+    @Singleton
+    @Named("KakaoNativeKey")
+    fun provideKakaoNativeKey(): String = BuildConfig.KAKAO_NATIVE_APP_KEY
 }
