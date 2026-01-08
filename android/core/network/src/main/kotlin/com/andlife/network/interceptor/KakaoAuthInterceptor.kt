@@ -6,7 +6,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class KakaoAuthInterceptor @Inject constructor(
-    @param:Named("kakaoApiKey")private val apiKey: String,
+    @param:Named("kakaoApiKey") private val apiKey: String,
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()

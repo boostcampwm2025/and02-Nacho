@@ -14,9 +14,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.navigation.compose.NavHost
+import androidx.navigation.navDeepLink
+import com.andlife.deeplink.DeepLinkManager
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.home.homeNavGraph
+import com.andlife.invitation.InvitationDetail
 import com.andlife.invitation.invitationDetailNavGraph
 import com.andlife.invitation.invitationNavGraph
 import com.andlife.invitation_edit.addressSearchNavGraph
@@ -29,6 +32,7 @@ import kotlinx.collections.immutable.toImmutableList
 @Composable
 fun InvitationNavHost(
     navigator: InvitationNavigator,
+    deepLinkManager: DeepLinkManager,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -58,6 +62,10 @@ fun InvitationNavHost(
             )
 
             invitationDetailNavGraph(
+                deepLinks = listOf(
+                    navDeepLink<InvitationDetail>(basePath = deepLinkManager.getWebBase()),
+                    navDeepLink { uriPattern = deepLinkManager.getKakaoPattern() }
+                ),
                 onNavigateBack = navigator::navigatePopBackStack,
             )
 

@@ -1,30 +1,43 @@
 package com.andlife.invitationzzang
 
 import android.content.Intent
-import android.net.Uri
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.andlife.deeplink.DeepLinkConfig
+import com.andlife.deeplink.DeepLinkManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MainActivityViewModel @Inject constructor() : ViewModel() {
-    private val _deepLinkIntent = MutableSharedFlow<Intent>(
-        replay = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-    val deepLinkIntent = _deepLinkIntent.asSharedFlow()
+class MainActivityViewModel @Inject constructor(
+    val deepLinkManager: DeepLinkManager
+) : ViewModel() {
+    private val _deepLinkEvent = Channel<Intent>(capacity = Channel.BUFFERED)
+    val deepLinkEvent = _deepLinkEvent.receiveAsFlow()
+
+    init {
+        viewModelScope.launch {
+            deepLinkManager.deferredDeepLinkId.collect { id ->
+                val intent = createDeepLinkIntent(id)
+                _deepLinkEvent.send(intent)
+            }
+        }
+    }
 
     fun onNewIntent(intent: Intent?) {
         intent?.data ?: return
-        _deepLinkIntent.tryEmit(intent)
+        viewModelScope.launch {
+            _deepLinkEvent.send(intent)
+        }
     }
 
-    fun onDeferredDeepLink(invitationId: String) {
-        val uri = Uri.parse("https://invitationzzang.com/invite/$invitationId")
-        val intent = Intent(Intent.ACTION_VIEW, uri)
-        _deepLinkIntent.tryEmit(intent)
+    private fun createDeepLinkIntent(invitationId: String): Intent {
+        val uri = DeepLinkConfig.buildInvitationDeepLinkUri(invitationId.toLong())
+        return Intent(Intent.ACTION_VIEW, uri).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
     }
 }
