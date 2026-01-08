@@ -50,7 +50,13 @@ fun StoryTextSection(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.BottomStart)
+                .align(
+                    if (isExpanded) {
+                        Alignment.BottomStart
+                    } else {
+                        Alignment.TopStart
+                    }
+                )
                 .padding(InvitationSpacing.large)
                 .animateContentSize()
         ) {
