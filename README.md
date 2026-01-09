@@ -2,7 +2,7 @@
 
 <img src="https://github.com/user-attachments/assets/09d55d61-3c3a-42a3-9e55-63cdef98e3eb" alt="AndLife Logo" width="200"/>
 
-# 🎉 AndLife - 나초(나에게로의 초대)
+# AndLife - 나초(나에게로의 초대)
 
 **초대, 참여, 기록, 감사까지를 하나의 흐름으로 연결하는 서비스**
 
@@ -38,9 +38,13 @@
 
 <br>
 
+## 프로젝트 의존성 구조
+<img width="5442" height="3488" alt="image" src="https://github.com/user-attachments/assets/ca15a5c6-30c8-46bb-b7f1-08d4c25c6503" />
 
-## 👥 And02 팀 소개
+<br/>
+<br/>
 
+## 팀 소개
 
 <table>
   <tr>
