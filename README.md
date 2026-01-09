@@ -9,12 +9,12 @@
 <br>
 
 
-## 📖 개발 배경
+## 개발 배경
 작성중....
 
 <br>
 
-## 🛠 Tech Stack
+## Tech Stack
 ![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)
 ![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)
 ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
@@ -26,7 +26,7 @@
 
 <br>
 
-## 📱 주요 기능
+## 주요 기능
 
 - **초대**: 손쉬운 이벤트 초대 기능
 
