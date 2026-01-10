@@ -5,10 +5,11 @@ import android.util.Log
 import com.android.installreferrer.api.InstallReferrerClient
 import com.android.installreferrer.api.InstallReferrerStateListener
 import com.android.installreferrer.api.ReferrerDetails
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class InstallReferrerHandler @Inject constructor(
-    private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val deepLinkManager: DeepLinkManager,
 ) {
     private var referrerClient: InstallReferrerClient? = null
@@ -27,7 +28,7 @@ class InstallReferrerHandler @Inject constructor(
                                 val referrerUrl = it.installReferrer
                                 Log.d("InstallReferrer", "Referrer: $referrerUrl")
 
-                                DeepLinkParser.parseInvitationId(referrerUrl)?.let { id ->
+                                InstallReferrerParser.parseInvitationId(referrerUrl)?.let { id ->
                                     deepLinkManager.emitInvitationId(id)
                                 }
                             }
