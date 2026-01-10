@@ -11,10 +11,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DeepLinkModule {
-
     @Binds
     @Singleton
-    abstract fun bindDeepLinkManager(
-        deepLinkManagerImpl: DeepLinkManagerImpl
-    ): DeepLinkManager
+    abstract fun bindDeepLinkManager(deepLinkManagerImpl: DeepLinkManagerImpl): DeepLinkManager
 }

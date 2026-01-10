@@ -1,7 +1,7 @@
 package com.andlife.invitationzzang.di
 
-import com.andlife.network.di.KakaoApiKey
 import com.andlife.invitationzzang.BuildConfig
+import com.andlife.network.di.KakaoApiKey
 import com.andlife.network.di.KakaoNativeKey
 import dagger.Module
 import dagger.Provides

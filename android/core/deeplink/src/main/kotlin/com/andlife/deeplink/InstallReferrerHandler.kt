@@ -18,37 +18,40 @@ class InstallReferrerHandler @Inject constructor(
         if (referrerClient != null) return
 
         referrerClient = InstallReferrerClient.newBuilder(context).build()
-        referrerClient?.startConnection(object : InstallReferrerStateListener {
-            override fun onInstallReferrerSetupFinished(responseCode: Int) {
-                when (responseCode) {
-                    InstallReferrerClient.InstallReferrerResponse.OK -> {
-                        try {
-                            val response: ReferrerDetails? = referrerClient?.installReferrer
-                            response?.let {
-                                val referrerUrl = it.installReferrer
-                                Log.d("InstallReferrer", "Referrer: $referrerUrl")
+        referrerClient?.startConnection(
+            object : InstallReferrerStateListener {
+                override fun onInstallReferrerSetupFinished(responseCode: Int) {
+                    when (responseCode) {
+                        InstallReferrerClient.InstallReferrerResponse.OK -> {
+                            try {
+                                val response: ReferrerDetails? = referrerClient?.installReferrer
+                                response?.let {
+                                    val referrerUrl = it.installReferrer
+                                    Log.d("InstallReferrer", "Referrer: $referrerUrl")
 
-                                InstallReferrerParser.parseInvitationId(referrerUrl)?.let { id ->
-                                    deepLinkManager.emitInvitationId(id)
+                                    InstallReferrerParser.parseInvitationId(referrerUrl)?.let { id ->
+                                        deepLinkManager.emitInvitationId(id)
+                                    }
                                 }
+                            } catch (e: Exception) {
+                                Log.e("InstallReferrer", "Error getting referrer", e)
+                            } finally {
+                                endConnection()
                             }
-                        } catch (e: Exception) {
-                            Log.e("InstallReferrer", "Error getting referrer", e)
-                        } finally {
+                        }
+
+                        else -> {
+                            Log.w("InstallReferrer", "Response Code: $responseCode")
                             endConnection()
                         }
                     }
-                    else -> {
-                        Log.w("InstallReferrer", "Response Code: $responseCode")
-                        endConnection()
-                    }
                 }
-            }
 
-            override fun onInstallReferrerServiceDisconnected() {
-                Log.d("InstallReferrer", "Service disconnected")
-            }
-        })
+                override fun onInstallReferrerServiceDisconnected() {
+                    Log.d("InstallReferrer", "Service disconnected")
+                }
+            },
+        )
     }
 
     fun endConnection() {
