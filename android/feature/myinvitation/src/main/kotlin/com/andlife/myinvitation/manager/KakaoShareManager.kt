@@ -22,22 +22,20 @@ class KakaoShareManager @Inject constructor(
         location: String = "그랜드 하얏트 서울",
         btnText: String = "초대장 확인하기",
     ) {
-        val url = DeepLinkConfig.buildInvitationDeepLink(invitationId)
-        val playStoreUrl = DeepLinkConfig.buildPlayStoreUrl(invitationId) // TODO: referrer 포함 URL
+        val playStoreUrl = DeepLinkConfig.buildPlayStoreUrl(invitationId)
 
         val feed = FeedTemplate(
             content = Content(
                 title = title,
                 description = "$date\n$location",
                 imageUrl = imageUrl,
-                link = Link(webUrl = url, mobileWebUrl = playStoreUrl)
+                link = Link(mobileWebUrl = playStoreUrl)
             ),
             buttons = listOf(
                 Button(
                     title = btnText,
                     link = Link(
                         androidExecutionParams = mapOf(DeepLinkConfig.PARAM_INVITE_ID to invitationId.toString()),
-                        webUrl = url,
                         mobileWebUrl = playStoreUrl
                     )
                 )

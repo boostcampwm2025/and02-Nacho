@@ -44,11 +44,11 @@ fun NavGraphBuilder.invitationNavGraph(
 }
 
 fun NavGraphBuilder.invitationDetailNavGraph(
-    deepLinks: List<NavDeepLink>,
+    deepLinks: NavDeepLink,
     onNavigateBack: () -> Unit,
 ) {
     composable<InvitationDetail>(
-        deepLinks = deepLinks,
+        deepLinks = listOf(deepLinks),
     ) {
         InvitationDetailRoute(
             onNavigateBack = onNavigateBack,

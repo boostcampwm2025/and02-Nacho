@@ -76,25 +76,11 @@ private fun MyInvitationDetailScreen(
                     .padding(paddingValues)
                     .padding(horizontal = InvitationSpacing.medium),
         ) {
-            Text(
-                text = "초대장 딥링크",
-                style = InvitationTheme.typography.bodyMediumSemiBold,
-                color = InvitationTheme.colorScheme.textPrimary,
-                modifier = Modifier.padding(bottom = InvitationSpacing.small)
-            )
-            InvitationTextField(
-                value = uiState.deepLinkUrl,
-                onValueChange = { },
-                placeholder = "",
-                readOnly = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-
             InvitationButton(
                 onClick = { onEvent(MyInvitationDetailUiEvent.ClickShare) },
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("초대장 공유하기")
+                Text("초대장 카카오톡 공유하기")
             }
         }
     }
