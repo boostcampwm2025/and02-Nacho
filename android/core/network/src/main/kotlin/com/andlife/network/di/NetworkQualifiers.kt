@@ -13,3 +13,11 @@ annotation class InvitationMedia
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class Kakao
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class KakaoApiKey
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class KakaoNativeKey

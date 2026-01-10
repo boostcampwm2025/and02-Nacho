@@ -18,20 +18,26 @@ fun InvitationRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     InvitationScreen(
-        onNavigateToDetail = onNavigateToDetail,
         uiState = uiState,
+        onNavigateToDetail = onNavigateToDetail,
         modifier = modifier,
     )
 }
 
 @Composable
 private fun InvitationScreen(
-    onNavigateToDetail: (Long) -> Unit,
     uiState: InvitationCollectionUiState,
+    onNavigateToDetail: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // TODO: 초대장 리스트 화면
+    // - 로딩 상태 처리 필요 (uiState.isLoading)
+    // - 에러 상태 처리 필요
+    // - 빈 상태 처리 필요 (초대장이 없을 때)
+    // - Scaffold, TopAppBar 등 추가 필요
     InvitationMediaGridView(
-        uiState.mediaItems,
-        onItemClick = {},
+        items = uiState.mediaItems,
+        onItemClick = onNavigateToDetail,
+        modifier = modifier,
     )
 }

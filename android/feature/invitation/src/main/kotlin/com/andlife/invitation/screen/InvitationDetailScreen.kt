@@ -61,7 +61,7 @@ private fun InvitationDetailScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             InvitationDetailTopBar(
-                title = "초대장 id: ${uiState.id}",
+                title = "초대장 id: ${uiState.id}", // TODO: topbar 임시 제목
                 onBack = { onEvent(InvitationDetailUiEvent.ClickBack) },
             )
         },

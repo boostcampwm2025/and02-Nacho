@@ -8,13 +8,10 @@ import com.andlife.invitation.model.InvitationDetailUiEvent
 import com.andlife.invitation.model.InvitationDetailUiState
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -37,18 +34,16 @@ class InvitationDetailViewModel @Inject constructor(
         )
 
     private fun loadInvitationDetail() {
-        if(invitationId == null) {
+        if (invitationId == null) {
             return
         }
 
         viewModelScope.launch {
-            // TODO: 딥링크를 위한 임시 구조, 초대장 조회 후 성공 시 ID 추가 or Room DB 저장
+            // TODO: 초대장 상세 정보 로드 구현 필요
+            // - Repository를 통해 초대장 정보 조회 (invitationId 사용)
+            // - API 호출 후 uiState 업데이트
             Log.d("DeepLink", "전달받은 ID: $invitationId")
             updateState { copy(id = invitationId) }
-
-            _visitedInvitationIds.update { currentIds ->
-                currentIds + invitationId
-            }
         }
     }
 
@@ -60,11 +55,5 @@ class InvitationDetailViewModel @Inject constructor(
 
     private fun clickClose() {
         sendEffect(InvitationDetailSideEffect.NavigateBack)
-    }
-
-    // TODO: 딥링크를 위한 임시 구조, 추후 repository 변경 필요
-    companion object {
-        private val _visitedInvitationIds = MutableStateFlow<Set<Long>>(emptySet())
-        val visitedInvitationIds: StateFlow<Set<Long>> = _visitedInvitationIds.asStateFlow()
     }
 }
