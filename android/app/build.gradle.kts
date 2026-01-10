@@ -77,6 +77,7 @@ dependencies {
     implementation(projects.feature.myinvitation)
     implementation(projects.feature.invitationEdit)
     implementation(projects.core.data)
+    implementation(projects.core.network)
     implementation(projects.core.designsystem)
     implementation(projects.core.data)
     implementation(libs.androidx.navigation.compose)

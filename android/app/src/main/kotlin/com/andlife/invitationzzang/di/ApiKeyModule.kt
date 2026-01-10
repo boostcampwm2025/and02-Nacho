@@ -1,11 +1,12 @@
 package com.andlife.invitationzzang.di
 
+import com.andlife.network.di.KakaoApiKey
 import com.andlife.invitationzzang.BuildConfig
+import com.andlife.network.di.KakaoNativeKey
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -13,11 +14,11 @@ import javax.inject.Singleton
 object ApiKeyModule {
     @Provides
     @Singleton
-    @Named("kakaoApiKey")
+    @KakaoApiKey
     fun provideKakaoApiKey(): String = BuildConfig.KAKAO_REST_API_KEY
 
     @Provides
     @Singleton
-    @Named("KakaoNativeKey")
+    @KakaoNativeKey
     fun provideKakaoNativeKey(): String = BuildConfig.KAKAO_NATIVE_APP_KEY
 }

@@ -1,15 +1,15 @@
 package com.andlife.invitationzzang
 
 import android.app.Application
+import com.andlife.network.di.KakaoNativeKey
 import dagger.hilt.android.HiltAndroidApp
 import com.kakao.sdk.common.KakaoSdk
 import javax.inject.Inject
-import javax.inject.Named
 
 @HiltAndroidApp
 class InvitationApplication : Application() {
     @Inject
-    @Named("KakaoNativeKey")
+    @KakaoNativeKey
     lateinit var kakaoNativeKey: String
 
     override fun onCreate() {
