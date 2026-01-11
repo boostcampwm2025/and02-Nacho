@@ -212,8 +212,7 @@ class MediaUploaderImpl @Inject constructor(
                                 }
                             }
                         }.awaitAll()
-
-                parts.sortedBy { it.partNumber }
+                parts
             } catch (e: Exception) {
                 null
             }
