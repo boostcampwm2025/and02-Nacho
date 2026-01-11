@@ -4,14 +4,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.domain.model.MediaType
-import com.andlife.invitation.model.guestbook.InvitationCollectionUiModel
+import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiModel
 import com.andlife.invitation.util.toUiType
 import com.andlife.ui.component.media.MediaItem
 import kotlinx.datetime.Clock
@@ -21,7 +21,7 @@ import kotlinx.datetime.toLocalDateTime
 @Composable
 fun InvitationMediaGridView(
     items: List<InvitationCollectionUiModel>,
-    onItemClick: (Long) -> Unit,
+    onItemClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyVerticalGrid(
@@ -31,12 +31,12 @@ fun InvitationMediaGridView(
         horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
         verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
     ) {
-        items(items = items) { item ->
+        itemsIndexed(items = items) { index, item ->
             MediaItem(
                 mediaUrl = item.url,
                 mediaType = item.type,
                 duration = item.durationSeconds,
-                onClick = { onItemClick(item.id) },
+                onClick = { onItemClick(index) },
             )
         }
     }

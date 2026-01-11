@@ -22,6 +22,7 @@ val BackgroundSecondary = Color(0xFFF3F4F6)
 val BackgroundSurface = Color(0xFFFFF8F8)
 val BackgroundBorder = Color(0xFFD1D5DB)
 val BackgroundOverlay = Color(0x80000000)
+val BackgroundInverse = Color(0xFF111111)
 
 // Text
 val TextPrimary = Color(0xFF111827)
@@ -50,6 +51,7 @@ data class InvitationColorScheme(
     val backgroundSurface: Color,
     val backgroundBorder: Color,
     val backgroundOverlay: Color,
+    val backgroundInverse: Color,
     val textPrimary: Color,
     val textSecondary: Color,
     val textTertiary: Color,
@@ -73,6 +75,7 @@ val LightInvitationColorScheme =
         backgroundSurface = BackgroundSurface,
         backgroundBorder = BackgroundBorder,
         backgroundOverlay = BackgroundOverlay,
+        backgroundInverse = BackgroundInverse,
         textPrimary = TextPrimary,
         textSecondary = TextSecondary,
         textTertiary = TextTertiary,

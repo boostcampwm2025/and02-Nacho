@@ -52,7 +52,7 @@ fun InvitationScheduleListItem(
         Column {
             AsyncImage(
                 model = imageUrl,
-                contentDescription = stringResource(R.string.des_schedule_list_image),
+                contentDescription = stringResource(R.string.desc_schedule_list_image),
                 contentScale = ContentScale.Crop,
                 placeholder = painterResource(R.drawable.ic_placeholder_default_24),
                 error = painterResource(R.drawable.ic_error_outline_24),
