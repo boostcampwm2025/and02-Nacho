@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.andlife.common"
+    namespace = "com.andlife.deeplink"
 }
 
 dependencies {
