@@ -16,7 +16,7 @@ data object MyInvitation
 
 @Serializable
 data class MyInvitationDetail(
-    val id: Long,
+    val invite_id: Long,
 )
 
 fun NavController.navigateToMyInvitation(navOptions: NavOptions) {
@@ -50,7 +50,7 @@ fun NavGraphBuilder.myInvitationDetailNavGraph(
     composable<MyInvitationDetail> {
         MyInvitationDetailRoute(
             onNavigateBack = onNavigateBack,
-            modifier = Modifier.padding()
+            modifier = Modifier.padding(),
         )
     }
 }

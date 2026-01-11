@@ -22,17 +22,18 @@ class MyInvitationDetailViewModel @Inject constructor(
 ) : BaseViewModel<MyInvitationDetailUiState, MyInvitationDetailUiEvent, MyInvitationDetailSideEffect>(
     initialState = MyInvitationDetailUiState(),
 ) {
-    private val myInvitationId: Long? = savedStateHandle["id"]
+    private val myInvitationId: Long? = savedStateHandle[KEY_INVITE_ID]
 
-    override val uiState: StateFlow<MyInvitationDetailUiState> = mutableUiState
-        .onStart {
-            loadInvitationDetail()
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = MyInvitationDetailUiState()
-        )
+    override val uiState: StateFlow<MyInvitationDetailUiState> =
+        mutableUiState
+            .onStart {
+                loadInvitationDetail()
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = MyInvitationDetailUiState(),
+            )
 
     private fun loadInvitationDetail() {
         if(myInvitationId == null) {
@@ -57,10 +58,14 @@ class MyInvitationDetailViewModel @Inject constructor(
     }
 
     private fun shareInvitation() {
-        val currentId = uiState.value.id ?: return
+        val currentId = uiState.value.id
 
         kakaoShareManager.share(
             invitationId = currentId,
         )
+    }
+
+    companion object {
+        private const val KEY_INVITE_ID = "invite_id"
     }
 }
