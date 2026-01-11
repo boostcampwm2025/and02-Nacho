@@ -76,7 +76,7 @@ private fun InvitationDetailScreen(
         ) {
             Text(
                 text = "InvitationDetailScreen",
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
             )
         }
     }
@@ -101,7 +101,7 @@ private fun InvitationDetailTopBar(
         navigationIcon = {
             IconButton(onClick = onBack) {
                 Icon(
-                    painter = painterResource( designR.drawable.ic_arrow_back_24),
+                    painter = painterResource(designR.drawable.ic_arrow_back_24),
                     contentDescription = stringResource(R.string.desc_top_bar_back),
                     tint = InvitationTheme.colorScheme.iconSecondary,
                 )

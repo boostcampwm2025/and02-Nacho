@@ -19,7 +19,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.component.InvitationButton
-import com.andlife.designsystem.component.InvitationTextField
 import com.andlife.designsystem.R as designR
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
@@ -105,7 +104,7 @@ private fun MyInvitationDetailTopBar(
         navigationIcon = {
             IconButton(onClick = onBack) {
                 Icon(
-                    painter = painterResource( designR.drawable.ic_arrow_back_24),
+                    painter = painterResource(designR.drawable.ic_arrow_back_24),
                     contentDescription = stringResource(R.string.desc_top_bar_back),
                     tint = InvitationTheme.colorScheme.iconSecondary,
                 )
