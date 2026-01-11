@@ -23,6 +23,8 @@ import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.model.MediaType
 import com.andlife.ui.player.VideoPlayerPool
 import kotlinx.collections.immutable.toImmutableList
+import kotlin.math.max
+import kotlin.math.min
 
 @Composable
 fun HomeScreen(
@@ -36,27 +38,41 @@ fun HomeScreen(
 
     val playVideoIndex by remember {
         derivedStateOf {
-            val visibleItems = lazyListSTate.layoutInfo.visibleItemsInfo
+            val layoutInfo = lazyListSTate.layoutInfo
+            val visibleItems = layoutInfo.visibleItemsInfo
 
-            val visibleItemsWithVisualMedia = visibleItems.filter { itemInfo ->
-                val guestBook = uiState.value.guestBooks.getOrNull(itemInfo.index)
-                guestBook?.visualMedias?.isNotEmpty() == true
+            // visualMedia가 있는 아이템만 필터링하면서 가시성 비율도 함께 계산
+            val candidates = visibleItems.mapNotNull { item ->
+                val guestBook = uiState.value.guestBooks.getOrNull(item.index)
+                if (guestBook?.visualMedias?.isNotEmpty() != true) return@mapNotNull null
+
+                // 실제 화면에 보이는 높이 계산
+                val visibleHeight =
+                    min(item.offset + item.size, layoutInfo.viewportEndOffset) -
+                        max(item.offset, layoutInfo.viewportStartOffset)
+
+                val ratio = visibleHeight.toFloat() / item.size
+
+                item.index to ratio
             }
 
-            when (visibleItemsWithVisualMedia.size) {
-                0 -> -1 // 보이는 아이템이 없으면 -1 반환
-                1 -> visibleItemsWithVisualMedia.first().index // 보이는 아이템이 1개면 그 아이템 인덱스 반환
-                2 -> {
-                    visibleItemsWithVisualMedia.firstOrNull { item ->
-                        item.offset + item.size >= item.size * 0.7f // 70% 이상 보이는 아이템 찾기
-                    }?.index ?: visibleItemsWithVisualMedia.first().index // 없으면 첫 번째 아이템 인덱스 반환
+            when {
+                candidates.isEmpty() -> -1
+                candidates.size == 1 -> {
+                    // 1개만 보일 때도 최소 30% 이상은 보여야 재생
+                    if (candidates.first().second >= 0.9f) {
+                        candidates.first().first
+                    } else {
+                        -1
+                    }
                 }
                 else -> {
-                    if (visibleItemsWithVisualMedia.size >= 3) {
-                        visibleItemsWithVisualMedia[1].index // 3개 이상이면 1 인덱스(두 번째 아이템) 반환
-                    } else {
-                        visibleItemsWithVisualMedia.first().index
-                    }
+                    // 70% 이상 보이는 것 중 가장 많이 보이는 것
+                    candidates
+                        .filter { it.second >= 0.7f }
+                        .maxByOrNull { it.second }
+                        ?.first
+                        ?: candidates.maxByOrNull { it.second }!!.first
                 }
             }
         }
