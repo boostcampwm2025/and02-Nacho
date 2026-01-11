@@ -2,6 +2,7 @@ package com.andlife.data.util.media
 
 import android.content.ContentResolver
 import android.net.Uri
+import android.util.Log
 import androidx.core.net.toUri
 import com.andlife.data.util.apiCall
 import com.andlife.domain.error.DataError
@@ -97,10 +98,12 @@ class MediaUploaderImpl @Inject constructor(
                                             fileName = info.fileName,
                                         )
                                     } else {
+                                        Log.e("MediaUploaderImpl", "uploadSimple 실패: $uploadResult")
                                         null
                                     }
                                 }
                             } catch (e: Exception) {
+                                Log.e("MediaUploaderImpl", "미디어 업로드 중 예외 발생", e)
                                 null
                             }
                         }
@@ -214,6 +217,7 @@ class MediaUploaderImpl @Inject constructor(
                         }.awaitAll()
                 parts
             } catch (e: Exception) {
+                Log.e("MediaUploaderImpl", "멀티파트 업로드 실패", e)
                 null
             }
         }
