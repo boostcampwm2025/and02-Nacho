@@ -223,22 +223,22 @@ private fun GuestBookItemVisualMediaSection(
     val pagerState = rememberPagerState(pageCount = { visualMediaUrls.size })
     val context = LocalContext.current
 
-    LaunchedEffect(pagerState.currentPage) {
-        // 다음 비디오 미리 준비
-        if (pagerState.currentPage < visualMediaUrls.lastIndex) {
-            val nextMedia = visualMediaUrls[pagerState.currentPage + 1]
-            if (nextMedia.type == MediaType.VIDEO) {
-                VideoPlayerPool.preparePlayer(context, nextMedia.url)
-            }
-        }
-        // 이전 비디오도 미리 준비하는 것도 고려
-        if (pagerState.currentPage > 0) {
-            val prevMedia = visualMediaUrls[pagerState.currentPage - 1]
-            if (prevMedia.type == MediaType.VIDEO) {
-                VideoPlayerPool.preparePlayer(context, prevMedia.url)
-            }
-        }
-    }
+//    LaunchedEffect(pagerState.currentPage) {
+//        // 다음 비디오 미리 준비
+//        if (pagerState.currentPage < visualMediaUrls.lastIndex) {
+//            val nextMedia = visualMediaUrls[pagerState.currentPage + 1]
+//            if (nextMedia.type == MediaType.VIDEO) {
+//                VideoPlayerPool.preparePlayer(context, nextMedia.url)
+//            }
+//        }
+//        // 이전 비디오도 미리 준비하는 것도 고려
+//        if (pagerState.currentPage > 0) {
+//            val prevMedia = visualMediaUrls[pagerState.currentPage - 1]
+//            if (prevMedia.type == MediaType.VIDEO) {
+//                VideoPlayerPool.preparePlayer(context, prevMedia.url)
+//            }
+//        }
+//    }
 
     Box(
         modifier = modifier
