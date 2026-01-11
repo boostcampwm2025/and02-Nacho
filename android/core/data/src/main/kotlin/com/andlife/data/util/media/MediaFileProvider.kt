@@ -61,7 +61,7 @@ class MediaFileProvider @Inject constructor(
         if (!extensionFromMap.isNullOrEmpty()) return extensionFromMap
 
         // MimeTypeMap에 없는 경우, 파일명에서 직접 추출
-        return when (uri.scheme) {
+        val extension = when (uri.scheme) {
             "content" -> {
                 contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
                     if (cursor.moveToFirst()) {
@@ -74,5 +74,6 @@ class MediaFileProvider @Inject constructor(
             }
             else -> uri.path?.substringAfterLast('.', "") ?: ""
         }
+        return extension.lowercase()
     }
 }
