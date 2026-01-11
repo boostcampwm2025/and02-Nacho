@@ -1,8 +1,9 @@
 package com.andlife.invitationzzang.di
 
+import com.andlife.deeplink.di.AppsFlyerDevKey
+import com.andlife.deeplink.di.KakaoNativeKey
 import com.andlife.invitationzzang.BuildConfig
 import com.andlife.network.di.KakaoApiKey
-import com.andlife.network.di.KakaoNativeKey
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,4 +22,9 @@ object ApiKeyModule {
     @Singleton
     @KakaoNativeKey
     fun provideKakaoNativeKey(): String = BuildConfig.KAKAO_NATIVE_APP_KEY
+
+    @Provides
+    @Singleton
+    @AppsFlyerDevKey
+    fun provideAppsFlyerDevKey(): String = BuildConfig.APPSFLYER_DEV_KEY
 }

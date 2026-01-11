@@ -61,7 +61,7 @@ fun InvitationNavHost(
             )
 
             invitationDetailNavGraph(
-                deepLinks = navDeepLink { uriPattern = deepLinkManager.getKakaoPattern() },
+                deepLinks = navDeepLink { uriPattern = deepLinkManager.getKakaoDeepLinkPattern() },
                 onNavigateBack = navigator::navigatePopBackStack,
             )
 

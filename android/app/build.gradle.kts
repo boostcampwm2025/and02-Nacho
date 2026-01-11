@@ -20,8 +20,8 @@ android {
         applicationId = "com.andlife.invitationzzang"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -29,6 +29,7 @@ android {
         properties.load(FileInputStream("local.properties"))
         val kakaoRestApiKey = properties.getProperty("KAKAO_REST_API_KEY") ?: ""
         val kakaoNativeAppKey = properties.getProperty("KAKAO_NATIVE_APP_KEY") ?: ""
+        val appsflyerDevKey = properties.getProperty("APPSFLYER_DEV_KEY") ?: ""
 
         buildConfigField(
             "String",
@@ -42,7 +43,14 @@ android {
             "\"$kakaoNativeAppKey\"",
         )
 
+        buildConfigField(
+            "String",
+            "APPSFLYER_DEV_KEY",
+            "\"$appsflyerDevKey\"",
+        )
+
         manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoNativeAppKey
+        manifestPlaceholders["APPSFLYER_DEV_KEY"] = appsflyerDevKey
     }
 
     buildTypes {
@@ -92,6 +100,9 @@ dependencies {
 
     // Kakao
     implementation(libs.kakao.common)
+
+    // AppsFlyer
+    implementation(libs.appsflyer)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

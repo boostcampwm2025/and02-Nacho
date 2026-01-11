@@ -67,7 +67,7 @@ class InvitationNavigator(
 
     fun navigateToInvitationDetail(id: Long = -1) {
         navController.navigateToInvitationDetail(
-            id = id,
+            inviteId = id,
             navOptions = navOptions { launchSingleTop = true },
         )
     }

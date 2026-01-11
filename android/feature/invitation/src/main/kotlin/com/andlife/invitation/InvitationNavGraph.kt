@@ -17,7 +17,7 @@ data object Invitation
 
 @Serializable
 data class InvitationDetail(
-    val id: Long,
+    val invite_id: Long,
 )
 
 fun NavController.navigateToInvitation(navOptions: NavOptions) {
@@ -25,10 +25,10 @@ fun NavController.navigateToInvitation(navOptions: NavOptions) {
 }
 
 fun NavController.navigateToInvitationDetail(
-    id: Long,
+    inviteId: Long,
     navOptions: NavOptions,
 ) {
-    navigate(InvitationDetail(id), navOptions)
+    navigate(InvitationDetail(inviteId), navOptions)
 }
 
 fun NavGraphBuilder.invitationNavGraph(
@@ -52,7 +52,7 @@ fun NavGraphBuilder.invitationDetailNavGraph(
     ) {
         InvitationDetailRoute(
             onNavigateBack = onNavigateBack,
-            modifier = Modifier.padding()
+            modifier = Modifier.padding(),
         )
     }
 }

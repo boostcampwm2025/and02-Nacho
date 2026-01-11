@@ -21,17 +21,18 @@ class InvitationDetailViewModel @Inject constructor(
 ) : BaseViewModel<InvitationDetailUiState, InvitationDetailUiEvent, InvitationDetailSideEffect>(
     initialState = InvitationDetailUiState(),
 ) {
-    private val invitationId: Long? = savedStateHandle["id"]
+    private val invitationId: Long? = savedStateHandle[KEY_INVITE_ID]
 
-    override val uiState: StateFlow<InvitationDetailUiState> = mutableUiState
-        .onStart {
-            loadInvitationDetail()
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = InvitationDetailUiState()
-        )
+    override val uiState: StateFlow<InvitationDetailUiState> =
+        mutableUiState
+            .onStart {
+                loadInvitationDetail()
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = InvitationDetailUiState()
+            )
 
     private fun loadInvitationDetail() {
         if (invitationId == null) {
@@ -55,5 +56,9 @@ class InvitationDetailViewModel @Inject constructor(
 
     private fun clickClose() {
         sendEffect(InvitationDetailSideEffect.NavigateBack)
+    }
+
+    companion object {
+        private const val KEY_INVITE_ID = "invite_id"
     }
 }

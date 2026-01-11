@@ -14,13 +14,37 @@ import javax.inject.Inject
 class MainActivityViewModel @Inject constructor(
     val deepLinkManager: DeepLinkManager,
 ) : ViewModel() {
+    private var lastProcessedId: String? = null
+
     private val _deepLinkEvent = Channel<Intent>(capacity = Channel.BUFFERED)
     val deepLinkEvent = _deepLinkEvent.receiveAsFlow()
 
-    fun onNewIntent(intent: Intent?) {
-        intent?.data ?: return
+    private val _navigateToDetail = Channel<Long>(capacity = Channel.BUFFERED)
+    val navigateToDetail = _navigateToDetail.receiveAsFlow()
+
+    init {
+        handleDeferredDeepLink()
+    }
+
+    fun handleDeepLink(intent: Intent?) {
+        val data = intent?.data ?: return
         viewModelScope.launch {
             _deepLinkEvent.send(intent)
+        }
+    }
+
+    private fun handleDeferredDeepLink() {
+        viewModelScope.launch {
+            deepLinkManager.deferredDeepLinkId.collect { invitationId ->
+                if (invitationId != null && invitationId != lastProcessedId) {
+                    lastProcessedId = invitationId
+
+                    invitationId.toLongOrNull()?.let { id ->
+                        _navigateToDetail.send(id)
+                        deepLinkManager.clearInvitationId()
+                    }
+                }
+            }
         }
     }
 }

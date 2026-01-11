@@ -29,8 +29,7 @@ androidxComposeMaterial3Adaptive = "1.2.0"
 ktlint = "14.0.1"
 compose-ruleset = "0.4.28"
 javaxInject = "1"
-appsflyer = "6.14.2"
-installreferrer = "2.2"
+appsflyer = "6.16.2"
 kakao-sdk = "2.23.2"
 
 [libraries]
@@ -58,7 +57,6 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 appsflyer = { group = "com.appsflyer", name = "af-android-sdk", version.ref = "appsflyer" }
-installreferrer = { group = "com.android.installreferrer", name = "installreferrer", version.ref = "installreferrer" }
 
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidxHiltNavigationCompose" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }

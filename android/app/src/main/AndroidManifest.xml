@@ -12,7 +12,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Invitation"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        tools:replace="android:dataExtractionRules,android:fullBackupContent">
+
         <activity
             android:name="com.andlife.invitationzzang.MainActivity"
             android:exported="true"
@@ -28,9 +30,8 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="kakao${KAKAO_NATIVE_APP_KEY}"
-                    android:host="kakaolink" />
+                <data android:scheme="kakao${KAKAO_NATIVE_APP_KEY}" android:host="kakaolink" />
+                <data android:scheme="https" android:host="invitationzzang.onelink.me" />
             </intent-filter>
         </activity>
     </application>

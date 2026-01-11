@@ -9,9 +9,6 @@ android {
 }
 
 dependencies {
-    // Install Referrer (디퍼드 딥링크용)
-    implementation(libs.installreferrer)
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
