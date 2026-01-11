@@ -15,9 +15,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
+import coil3.compose.SubcomposeAsyncImageContent
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationIconSize
 import com.andlife.designsystem.theme.InvitationSpacing
@@ -45,13 +49,32 @@ fun MediaItem(
     ) {
         when (mediaType) {
             UiMediaType.IMAGE -> {
-                AsyncImage(
-                    model = mediaUrl,
+                SubcomposeAsyncImage(
+                    ImageRequest
+                        .Builder(LocalContext.current)
+                        .data(mediaUrl)
+                        .crossfade(true)
+                        .build(),
                     contentDescription = stringResource(R.string.desc_media_image),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
-                    placeholder = painterResource(R.drawable.ic_image_24),
-                    error = painterResource(R.drawable.ic_error_image_24),
+                    success = {
+                        SubcomposeAsyncImageContent()
+                    },
+                    loading = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_image_24),
+                            contentDescription = null,
+                            tint = InvitationTheme.colorScheme.iconDisabled
+                        )
+                    },
+                    error = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_error_image_24),
+                            contentDescription = null,
+                            tint = InvitationTheme.colorScheme.iconDisabled
+                        )
+                    }
                 )
             }
             UiMediaType.AUDIO -> {
@@ -69,13 +92,32 @@ fun MediaItem(
             }
             UiMediaType.VIDEO -> {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    AsyncImage(
-                        model = mediaUrl,
+                    SubcomposeAsyncImage(
+                        ImageRequest
+                            .Builder(LocalContext.current)
+                            .data(mediaUrl)
+                            .crossfade(true)
+                            .build(),
                         contentDescription = stringResource(R.string.desc_media_video),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,
-                        placeholder = painterResource(R.drawable.ic_image_24),
-                        error = painterResource(R.drawable.ic_error_image_24),
+                        success = {
+                            SubcomposeAsyncImageContent()
+                        },
+                        loading = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_play_circle_24),
+                                contentDescription = null,
+                                tint = InvitationTheme.colorScheme.iconDisabled
+                            )
+                        },
+                        error = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_error_image_24),
+                                contentDescription = null,
+                                tint = InvitationTheme.colorScheme.iconDisabled
+                            )
+                        }
                     )
                     Icon(
                         painter = painterResource(id = R.drawable.ic_play_circle_24),
