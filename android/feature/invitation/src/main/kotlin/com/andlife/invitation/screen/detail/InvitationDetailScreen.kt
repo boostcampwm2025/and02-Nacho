@@ -8,14 +8,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.andlife.designsystem.component.InvitationButton
 import com.andlife.invitation.screen.guestbook.InvitationCollectionRoute
 import com.andlife.invitation.viewmodel.InvitationCollectionViewModel
 import com.andlife.ui.R
 import com.andlife.ui.component.GenericTabRow
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 
 private const val TAG = "InvitationDetailScreen"
 
@@ -38,12 +38,7 @@ private fun InvitationDetailScreen(
     onNavigateBack: () -> Unit,
     collectionViewModel: InvitationCollectionViewModel = hiltViewModel(),
 ) {
-    val tabTitles =
-        persistentListOf(
-            stringResource(R.string.txt_invitation),
-            stringResource(R.string.txt_guestbook),
-            stringResource(R.string.txt_collection),
-        )
+    val tabTitles = stringArrayResource(R.array.tab_titles).toImmutableList()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
