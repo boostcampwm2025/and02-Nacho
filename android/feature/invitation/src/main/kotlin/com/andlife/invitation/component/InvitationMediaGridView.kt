@@ -14,13 +14,15 @@ import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiModel
 import com.andlife.invitation.util.toUiType
 import com.andlife.ui.component.media.MediaItem
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun InvitationMediaGridView(
-    items: List<InvitationCollectionUiModel>,
+    items: ImmutableList<InvitationCollectionUiModel>,
     onItemClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -31,7 +33,10 @@ fun InvitationMediaGridView(
         horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
         verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
     ) {
-        itemsIndexed(items = items) { index, item ->
+        itemsIndexed(
+            items = items,
+            key = { index, item -> "${item.type}_${item.id}" }
+        ) { index, item ->
             MediaItem(
                 mediaUrl = item.url,
                 mediaType = item.type,
@@ -48,7 +53,7 @@ private fun InvitationMediaGridViewPreview() {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
     val mockItems =
-        listOf(
+        persistentListOf(
             InvitationCollectionUiModel(
                 id = 1L,
                 url = "https://picsum.photos/400/600?random=1",
