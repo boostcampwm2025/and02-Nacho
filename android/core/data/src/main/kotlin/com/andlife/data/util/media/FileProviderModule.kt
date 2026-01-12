@@ -1,16 +1,16 @@
 package com.andlife.data.util.media
 
-import com.andlife.domain.util.media.MediaUploader
+import com.andlife.domain.util.media.MediaFileProvider
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import jakarta.inject.Singleton
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class UploaderModule {
+abstract class FileProviderModule {
     @Binds
     @Singleton
-    abstract fun bindMediaUploader(impl: MediaUploaderImpl): MediaUploader
+    abstract fun bindMediaFileProvider(mediaFileProviderImpl: MediaFileProviderImpl): MediaFileProvider
 }

@@ -1,6 +1,7 @@
-package com.andlife.data.util.media
+package com.andlife.domain.util.media
 
 import com.andlife.domain.error.DataError
+import com.andlife.domain.model.MediaFile
 import com.andlife.domain.util.Result
 
 interface MediaUploader {

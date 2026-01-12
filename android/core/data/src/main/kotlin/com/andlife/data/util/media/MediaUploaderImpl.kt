@@ -5,8 +5,10 @@ import android.net.Uri
 import androidx.core.net.toUri
 import com.andlife.data.util.apiCall
 import com.andlife.domain.error.DataError
+import com.andlife.domain.model.MediaFile
 import com.andlife.domain.model.MediaType
 import com.andlife.domain.util.Result
+import com.andlife.domain.util.media.MediaUploader
 import com.andlife.network.api.media.BatchCompleteUploadRequest
 import com.andlife.network.api.media.BatchUploadMediaRequest
 import com.andlife.network.api.media.ChunkUrlResponse
