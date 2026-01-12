@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="back">뒤로가기</string>
+    <string name="save">저장</string>
+    <string name="undo">실행취소</string>
+    <string name="redo">다시실행</string>
+    <string name="selected_color">선택된 색상</string>
+
+</resources>
