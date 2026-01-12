@@ -13,6 +13,7 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -24,6 +25,7 @@ import com.andlife.designsystem.theme.InvitationElevation
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.ui.R
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,6 +37,7 @@ fun InvitationTimePickerBottomSheet(
     initialMinute: Int = 0,
 ) {
     val sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
 
     val timePickerState =
         rememberInvitationTimePickerState(
@@ -68,6 +71,10 @@ fun InvitationTimePickerBottomSheet(
             InvitationButton(
                 onClick = {
                     onConfirm(timePickerState.hour, timePickerState.minute)
+                    scope
+                        .launch {
+                            sheetState.hide()
+                        }.invokeOnCompletion { onDismissRequest() }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(vertical = InvitationSpacing.large),

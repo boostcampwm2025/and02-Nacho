@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,6 +42,7 @@ fun InvitationAddAnnouncementBottomSheet(
     modifier: Modifier = Modifier,
     viewModel: InvitationAddAnnouncementViewModel = viewModel(),
 ) {
+    val keyboardManager = LocalSoftwareKeyboardController.current
     val sheetState =
         rememberModalBottomSheetState(
             skipPartiallyExpanded = true,
@@ -81,10 +83,11 @@ fun InvitationAddAnnouncementBottomSheet(
                         .align(Alignment.CenterEnd)
                         .padding(horizontal = InvitationSpacing.large)
                         .clickable {
-                            scope.launch {
-                                sheetState.hide()
-                                onDismiss()
-                            }
+                            scope
+                                .launch {
+                                    keyboardManager?.hide()
+                                    sheetState.hide()
+                                }.invokeOnCompletion { onDismiss() }
                         },
                 contentAlignment = Alignment.Center,
             ) {
@@ -140,6 +143,11 @@ fun InvitationAddAnnouncementBottomSheet(
                 onClick = {
                     onConfirm(draft.title, draft.content)
                     viewModel.clearDraft()
+                    scope
+                        .launch {
+                            keyboardManager?.hide()
+                            sheetState.hide()
+                        }.invokeOnCompletion { onDismiss() }
                 },
                 enabled = draft.title.isNotBlank() && draft.content.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),

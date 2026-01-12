@@ -2,7 +2,7 @@ package com.andlife.data.repository.di
 
 import com.andlife.data.repository.address.AddressRepositoryImpl
 import com.andlife.data.repository.guestbook.GuestBookRepositoryImpl
-import com.andlife.domain.repository.AddressRepository
+import com.andlife.domain.repository.address.AddressRepository
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import dagger.Binds
 import dagger.Module

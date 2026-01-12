@@ -11,6 +11,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.component.InvitationButton
@@ -21,6 +22,7 @@ import com.andlife.designsystem.theme.InvitationElevation
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.ui.R
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,6 +34,7 @@ fun InvitationDatePickerBottomSheet(
     initialDate: LocalDate? = null,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
 
     val datePickerState =
         rememberInvitationDatePickerState(
@@ -63,9 +66,18 @@ fun InvitationDatePickerBottomSheet(
 
             InvitationButton(
                 onClick = {
-                    selectedDate?.let(onConfirm)
+                    selectedDate?.let {
+                        onConfirm(it)
+                        scope
+                            .launch {
+                                sheetState.hide()
+                            }.invokeOnCompletion { onDismiss() }
+                    }
                 },
-                modifier = Modifier.fillMaxWidth().padding(all = InvitationSpacing.large),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(all = InvitationSpacing.large),
                 enabled = selectedDate != null,
                 contentPadding = PaddingValues(vertical = InvitationSpacing.medium),
                 elevation =

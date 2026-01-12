@@ -49,7 +49,6 @@ fun NavGraphBuilder.invitationNavGraph(
         InvitationDetailRoute(
             id = arguments.id,
             onNavigateBack = onNavigationBack,
-            modifier = Modifier.padding(paddingValues),
         )
     }
 }

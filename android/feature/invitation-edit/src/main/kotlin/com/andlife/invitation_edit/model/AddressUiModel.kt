@@ -1,7 +1,7 @@
 package com.andlife.invitation_edit.model
 
 import android.os.Parcelable
-import com.andlife.domain.model.Address
+import com.andlife.domain.model.address.Address
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
