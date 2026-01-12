@@ -26,4 +26,5 @@ dependencies {
     "implementation"(libs.findLibrary("androidx-lifecycle-viewModelCompose").get())
     "implementation"(libs.findLibrary("kotlinx-immutable").get())
     "implementation"(libs.findLibrary("coil-kt-compose").get())
+    "implementation"(libs.findLibrary("coil-kt-network-okhttp").get())
 }

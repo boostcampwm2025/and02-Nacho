@@ -3,6 +3,8 @@ package com.andlife.designsystem.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -27,6 +29,8 @@ fun InvitationTextField(
     isError: Boolean = false,
     singleLine: Boolean = true,
     minLines: Int = 1,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
 ) {
@@ -56,7 +60,10 @@ fun InvitationTextField(
                 unfocusedPlaceholderColor = InvitationTheme.colorScheme.textTertiary,
                 unfocusedBorderColor = InvitationTheme.colorScheme.backgroundBorder,
                 focusedBorderColor = InvitationTheme.colorScheme.brandPrimary,
+                disabledTextColor = InvitationTheme.colorScheme.textPrimary,
             ),
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
         modifier = modifier.fillMaxWidth(),
     )
 }

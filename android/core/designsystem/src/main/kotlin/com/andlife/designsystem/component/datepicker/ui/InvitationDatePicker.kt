@@ -57,10 +57,11 @@ private fun DateCell(
     cell: InvitationDatePickerCell,
     onClick: (InvitationDatePickerDate) -> Unit,
     colors: InvitationDatePickerColors,
+    modifier: Modifier = Modifier,
 ) {
     Box(
         modifier =
-            Modifier
+            modifier
                 .aspectRatio(1f)
                 .let {
                     if (cell.isDisabled) {

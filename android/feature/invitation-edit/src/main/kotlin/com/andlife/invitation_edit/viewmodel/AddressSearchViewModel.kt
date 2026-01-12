@@ -8,6 +8,7 @@ import com.andlife.domain.repository.AddressRepository
 import com.andlife.invitation_edit.model.AddressSearchSideEffect
 import com.andlife.invitation_edit.model.AddressSearchUiEvent
 import com.andlife.invitation_edit.model.AddressSearchUiState
+import com.andlife.invitation_edit.model.AddressUiModel
 import com.andlife.invitation_edit.model.toUiModel
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +22,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import com.andlife.invitation_edit.model.AddressUiModel
 import javax.inject.Inject
 
 @HiltViewModel
@@ -54,6 +54,7 @@ class AddressSearchViewModel @Inject constructor(
             }.map { pagingData ->
                 pagingData.map { address -> address.toUiModel() }
             }.cachedIn(viewModelScope)
+
     override fun onEvent(event: AddressSearchUiEvent) {
         when (event) {
             is AddressSearchUiEvent.UpdateQuery -> updateQuery(event)

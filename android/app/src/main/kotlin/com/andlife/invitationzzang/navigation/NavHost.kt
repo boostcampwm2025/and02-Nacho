@@ -58,7 +58,6 @@ fun InvitationNavHost(
             )
 
             myInvitationCreateNavGraph(
-                paddingValues = innerPadding,
                 onNavigateToAddressSearch = navigator::navigateToAddressSearch,
                 onNavigateBack = navigator::navigatePopBackStack,
             )
