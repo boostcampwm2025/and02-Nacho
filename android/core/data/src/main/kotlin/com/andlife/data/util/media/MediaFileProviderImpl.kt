@@ -5,7 +5,9 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
 import androidx.core.net.toUri
+import com.andlife.domain.model.guestbook.MediaFile
 import com.andlife.domain.model.guestbook.MediaType
+import com.andlife.domain.util.MediaFileProvider
 import jakarta.inject.Inject
 
 class MediaFileProviderImpl

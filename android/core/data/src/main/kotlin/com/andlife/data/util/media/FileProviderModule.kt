@@ -1,5 +1,6 @@
 package com.andlife.data.util.media
 
+import com.andlife.domain.util.MediaFileProvider
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
