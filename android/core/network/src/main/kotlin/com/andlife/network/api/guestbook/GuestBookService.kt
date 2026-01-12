@@ -2,7 +2,9 @@ package com.andlife.network.api.guestbook
 
 import com.andlife.network.model.BaseResponse
 import com.andlife.network.model.invitation.guestbook.CollectionResponse
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface GuestBookService {
@@ -15,4 +17,9 @@ interface GuestBookService {
     suspend fun getGuestBooksByInvitationId(
         @Path("invitationId") invitationId: Long,
     ): BaseResponse<List<GuestBookResponse>>
+
+    @POST("/api/invitations/{invitationId}/guestbooks")
+    suspend fun createGuestBook(
+        @Body request: GuestBookRequest,
+    ): BaseResponse<GuestBookResponse>
 }
