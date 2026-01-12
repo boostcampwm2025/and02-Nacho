@@ -35,7 +35,7 @@ fun InvitationMediaGridView(
     ) {
         itemsIndexed(
             items = items,
-            key = { index, item -> "${item.type}_${item.id}" }
+            key = { index, item -> "${item.type}_${item.id}" },
         ) { index, item ->
             MediaItem(
                 mediaUrl = item.url,

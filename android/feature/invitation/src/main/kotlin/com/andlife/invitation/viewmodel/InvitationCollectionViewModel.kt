@@ -12,29 +12,22 @@ import com.andlife.invitation.model.guestbook.collection.toUiModel
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.properties.Delegates
 
 @HiltViewModel
 class InvitationCollectionViewModel
     @Inject
     constructor(
-        private val guestBookRepository: GuestBookRepository,
+        private val guestBookRepository: GuestBookRepository
     ) : BaseViewModel<InvitationCollectionUiState, InvitationCollectionUiEvent, InvitationCollectionSideEffect>(
             initialState = InvitationCollectionUiState(),
         ) {
-        override val uiState: StateFlow<InvitationCollectionUiState> =
-            mutableUiState
-                .onStart {
-                    loadMediaCollection(1L)
-                }.stateIn(
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(5000),
-                    initialValue = InvitationCollectionUiState(),
-                )
+        private var invitationId: Long by Delegates.notNull<Long>()
+
+        override val uiState: StateFlow<InvitationCollectionUiState> = mutableUiState
 
         override fun onEvent(event: InvitationCollectionUiEvent) {
             when (event) {
@@ -45,23 +38,33 @@ class InvitationCollectionViewModel
             }
         }
 
-        private suspend fun loadMediaCollection(invitationId: Long) {
-            updateState { copy(isLoading = true) }
+        fun initInvitationId(id: Long) {
+            runCatching { invitationId }.onSuccess { if (it == id) return }
 
-            guestBookRepository
-                .getMediaCollection(invitationId)
-                .onSuccess { mediaList ->
-                    updateState {
-                        copy(
-                            isLoading = false,
-                            mediaItems = mediaList.map { it.toUiModel() }.toImmutableList(),
-                        )
+            invitationId = id
+            loadMediaCollection()
+        }
+
+        private fun loadMediaCollection() {
+            viewModelScope.launch {
+                Log.d("ViewModel", "id:$invitationId")
+                updateState { copy(isLoading = true) }
+
+                guestBookRepository
+                    .getMediaCollection(invitationId)
+                    .onSuccess { mediaList ->
+                        updateState {
+                            copy(
+                                isLoading = false,
+                                mediaItems = mediaList.map { it.toUiModel() }.toImmutableList(),
+                            )
+                        }
+                        Log.d("ViewModel", "미디어 리스트: $mediaList")
+                    }.onFailure {
+                        updateState { copy(isLoading = false) }
+                        Log.e("ViewModel", "에러 발생: $it")
                     }
-                    Log.d("ViewModel", "미디어 리스트: $mediaList")
-                }.onFailure {
-                    updateState { copy(isLoading = false) }
-                    Log.e("ViewModel", "에러 발생: $it")
-                }
+            }
         }
 
         private fun openStory(index: Int) {

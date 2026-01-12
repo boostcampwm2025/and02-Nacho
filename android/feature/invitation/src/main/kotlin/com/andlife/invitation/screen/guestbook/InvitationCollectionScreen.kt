@@ -1,6 +1,7 @@
 package com.andlife.invitation.screen.guestbook
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Dialog
@@ -23,9 +24,14 @@ import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun InvitationCollectionRoute(
+    invitationId: Long,
     modifier: Modifier = Modifier,
     viewModel: InvitationCollectionViewModel = hiltViewModel(),
 ) {
+    LaunchedEffect(invitationId) {
+        viewModel.initInvitationId(invitationId)
+    }
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     InvitationCollectionScreen(
@@ -42,7 +48,7 @@ fun InvitationCollectionRoute(
         onToggleExpand = {
             viewModel.onEvent(InvitationCollectionUiEvent.ToggleExpand)
         },
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -58,7 +64,7 @@ fun InvitationCollectionScreen(
     InvitationMediaGridView(
         items = uiState.mediaItems,
         onItemClick = onOpenStory,
-        modifier = modifier
+        modifier = modifier,
     )
 
     if (uiState.isDetailMode) {
@@ -70,7 +76,7 @@ fun InvitationCollectionScreen(
                 initialIndex = uiState.selectedIndex,
                 onPageChanged = onPageChanged,
                 onToggleExpand = onToggleExpand,
-                onClose = onCloseStory
+                onClose = onCloseStory,
             )
         }
     }
@@ -80,41 +86,43 @@ fun InvitationCollectionScreen(
 @Composable
 private fun InvitationCollectionPreview() {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-    val mockState = InvitationCollectionUiState(
-        mediaItems = persistentListOf(
-            InvitationCollectionUiModel(
-                id = 1L,
-                url = "https://picsum.photos/400/600?random=1",
-                type = MediaType.IMAGE.toUiType(),
-                content = "방명록 내용 1",
-                authorName = "사용자1",
-                authorProfileUrl = null,
-                createdAt = now,
-                durationSeconds = null,
-            ),
-            InvitationCollectionUiModel(
-                id = 2L,
-                url = "https://picsum.photos/400/600?random=2",
-                type = MediaType.VIDEO.toUiType(),
-                content = "방명록 내용 2",
-                authorName = "사용자2",
-                authorProfileUrl = null,
-                createdAt = now,
-                durationSeconds = 120,
-            ),
-            InvitationCollectionUiModel(
-                id = 3L,
-                url = "https://picsum.photos/400/600?random=3",
-                type = MediaType.AUDIO.toUiType(),
-                content = "방명록 내용 3",
-                authorName = "사용자3",
-                authorProfileUrl = null,
-                createdAt = now,
-                durationSeconds = 300,
-            ),
-        ),
-        isTextExpanded = false
-    )
+    val mockState =
+        InvitationCollectionUiState(
+            mediaItems =
+                persistentListOf(
+                    InvitationCollectionUiModel(
+                        id = 1L,
+                        url = "https://picsum.photos/400/600?random=1",
+                        type = MediaType.IMAGE.toUiType(),
+                        content = "방명록 내용 1",
+                        authorName = "사용자1",
+                        authorProfileUrl = null,
+                        createdAt = now,
+                        durationSeconds = null,
+                    ),
+                    InvitationCollectionUiModel(
+                        id = 2L,
+                        url = "https://picsum.photos/400/600?random=2",
+                        type = MediaType.VIDEO.toUiType(),
+                        content = "방명록 내용 2",
+                        authorName = "사용자2",
+                        authorProfileUrl = null,
+                        createdAt = now,
+                        durationSeconds = 120,
+                    ),
+                    InvitationCollectionUiModel(
+                        id = 3L,
+                        url = "https://picsum.photos/400/600?random=3",
+                        type = MediaType.AUDIO.toUiType(),
+                        content = "방명록 내용 3",
+                        authorName = "사용자3",
+                        authorProfileUrl = null,
+                        createdAt = now,
+                        durationSeconds = 300,
+                    ),
+                ),
+            isTextExpanded = false,
+        )
 
     InvitationTheme {
         InvitationCollectionScreen(
@@ -122,7 +130,7 @@ private fun InvitationCollectionPreview() {
             onOpenStory = {},
             onCloseStory = {},
             onPageChanged = {},
-            onToggleExpand = {}
+            onToggleExpand = {},
         )
     }
 }

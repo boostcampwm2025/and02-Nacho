@@ -1,5 +1,6 @@
 package com.andlife.invitation.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import com.andlife.invitation.model.detail.InvitationDetailSideEffect
 import com.andlife.invitation.model.detail.InvitationDetailUiEvent
 import com.andlife.invitation.model.detail.InvitationDetailUiState
@@ -11,10 +12,13 @@ import javax.inject.Inject
 @HiltViewModel
 class InvitationDetailViewModel
     @Inject
-    constructor() :
-    BaseViewModel<InvitationDetailUiState, InvitationDetailUiEvent, InvitationDetailSideEffect>(
+    constructor(
+        savedStateHandle: SavedStateHandle,
+    ) : BaseViewModel<InvitationDetailUiState, InvitationDetailUiEvent, InvitationDetailSideEffect>(
             InvitationDetailUiState(),
         ) {
+        val invitationId: Long = checkNotNull(savedStateHandle["id"])
+
         override val uiState: StateFlow<InvitationDetailUiState>
             get() = TODO("Not yet implemented")
 

@@ -62,16 +62,17 @@ private fun StoryContentPreview() {
     InvitationTheme {
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         StoryContent(
-            item = InvitationCollectionUiModel(
-                id = 3L,
-                url = "https://picsum.photos/400/600?random=3",
-                type = MediaType.AUDIO.toUiType(),
-                content = "방명록 내용 3",
-                authorName = "사용자3",
-                authorProfileUrl = null,
-                createdAt = now,
-                durationSeconds = 300,
-            ),
+            item =
+                InvitationCollectionUiModel(
+                    id = 3L,
+                    url = "https://picsum.photos/400/600?random=3",
+                    type = MediaType.AUDIO.toUiType(),
+                    content = "방명록 내용 3",
+                    authorName = "사용자3",
+                    authorProfileUrl = null,
+                    createdAt = now,
+                    durationSeconds = 300,
+                ),
             isExpanded = false,
             onToggleExpand = {},
         )

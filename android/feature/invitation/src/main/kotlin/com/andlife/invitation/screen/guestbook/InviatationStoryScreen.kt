@@ -60,7 +60,7 @@ fun InvitationStoryRoute(
         initialIndex = initialIndex,
         onPageChanged = onPageChanged,
         onToggleExpand = onToggleExpand,
-        onClose = onClose
+        onClose = onClose,
     )
 }
 
@@ -195,48 +195,50 @@ fun StoryTopHeader(
 private fun InvitationStoryScreenPreview() {
     InvitationTheme {
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        val mockState = InvitationCollectionUiState(
-            mediaItems = persistentListOf(
-                InvitationCollectionUiModel(
-                    id = 1L,
-                    url = "https://picsum.photos/400/600?random=1",
-                    type = MediaType.IMAGE.toUiType(),
-                    content = "방명록 내용 1",
-                    authorName = "사용자1",
-                    authorProfileUrl = null,
-                    createdAt = now,
-                    durationSeconds = null,
-                ),
-                InvitationCollectionUiModel(
-                    id = 2L,
-                    url = "https://picsum.photos/400/600?random=2",
-                    type = MediaType.VIDEO.toUiType(),
-                    content = "방명록 내용 2",
-                    authorName = "사용자2",
-                    authorProfileUrl = null,
-                    createdAt = now,
-                    durationSeconds = 120,
-                ),
-                InvitationCollectionUiModel(
-                    id = 3L,
-                    url = "https://picsum.photos/400/600?random=3",
-                    type = MediaType.AUDIO.toUiType(),
-                    content = "방명록 내용 3",
-                    authorName = "사용자3",
-                    authorProfileUrl = null,
-                    createdAt = now,
-                    durationSeconds = 300,
-                ),
-            ),
-            isTextExpanded = false
-        )
+        val mockState =
+            InvitationCollectionUiState(
+                mediaItems =
+                    persistentListOf(
+                        InvitationCollectionUiModel(
+                            id = 1L,
+                            url = "https://picsum.photos/400/600?random=1",
+                            type = MediaType.IMAGE.toUiType(),
+                            content = "방명록 내용 1",
+                            authorName = "사용자1",
+                            authorProfileUrl = null,
+                            createdAt = now,
+                            durationSeconds = null,
+                        ),
+                        InvitationCollectionUiModel(
+                            id = 2L,
+                            url = "https://picsum.photos/400/600?random=2",
+                            type = MediaType.VIDEO.toUiType(),
+                            content = "방명록 내용 2",
+                            authorName = "사용자2",
+                            authorProfileUrl = null,
+                            createdAt = now,
+                            durationSeconds = 120,
+                        ),
+                        InvitationCollectionUiModel(
+                            id = 3L,
+                            url = "https://picsum.photos/400/600?random=3",
+                            type = MediaType.AUDIO.toUiType(),
+                            content = "방명록 내용 3",
+                            authorName = "사용자3",
+                            authorProfileUrl = null,
+                            createdAt = now,
+                            durationSeconds = 300,
+                        ),
+                    ),
+                isTextExpanded = false,
+            )
 
         InvitationStoryScreen(
             uiState = mockState,
             initialIndex = 0,
             onPageChanged = {},
             onToggleExpand = {},
-            onClose = {}
+            onClose = {},
         )
     }
 }

@@ -24,21 +24,23 @@ import com.andlife.designsystem.theme.InvitationTheme
 fun InvitationDialog(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Card(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(horizontal = InvitationSpacing.large),
+            modifier =
+                modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = InvitationSpacing.large),
             shape = InvitationTheme.shapes.medium,
-            colors = CardDefaults.cardColors(
-                containerColor = InvitationTheme.colorScheme.backgroundTertiary,
-                contentColor = InvitationTheme.colorScheme.textPrimary
-            )
+            colors =
+                CardDefaults.cardColors(
+                    containerColor = InvitationTheme.colorScheme.backgroundTertiary,
+                    contentColor = InvitationTheme.colorScheme.textPrimary,
+                ),
         ) {
             content()
         }
