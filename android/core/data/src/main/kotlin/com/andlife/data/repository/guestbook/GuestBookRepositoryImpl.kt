@@ -14,13 +14,10 @@ internal class GuestBookRepositoryImpl
     constructor(
         private val guestBookRemoteDataSource: GuestBookRemoteDataSource,
     ) : GuestBookRepository {
-        override suspend fun getMediaCollection(invitationId: Long): Result<List<GalleryMedia>, DataError> {
-            val result = guestBookRemoteDataSource.getMediaCollection(invitationId)
-
-            return result.map { list ->
+        override suspend fun getMediaCollection(invitationId: Long): Result<List<GalleryMedia>, DataError> =
+            guestBookRemoteDataSource.getMediaCollection(invitationId).map { list ->
                 list.map { it.toDomain() }
             }
-        }
 
         override suspend fun getGuestBooksByInvitationId(invitationId: Long): Result<List<GuestBook>, DataError> =
             guestBookRemoteDataSource.getGuestBooksByInvitationId(invitationId).map { list ->

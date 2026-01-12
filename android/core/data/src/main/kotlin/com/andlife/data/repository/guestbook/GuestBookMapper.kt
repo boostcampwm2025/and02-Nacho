@@ -16,7 +16,8 @@ fun CollectionResponse.toDomain(): GalleryMedia =
     GalleryMedia(
         id = id,
         type = MediaType.fromString(mediaType),
-        url = mediaUrl,
+        mediaUrl = mediaUrl,
+        thumbnailUrl = thumbnailUrl,
         content = content,
         authorName = author.name,
         authorProfileUrl = author.profileImageUrl,

@@ -20,7 +20,7 @@ fun GalleryMedia.toUiModel(): MyInvitationCollectionUiModel =
     MyInvitationCollectionUiModel(
         id = id,
         type = type.toUiType(),
-        url = url,
+        url = mediaUrl,
         content = content,
         authorName = authorName,
         authorProfileUrl = authorProfileUrl,

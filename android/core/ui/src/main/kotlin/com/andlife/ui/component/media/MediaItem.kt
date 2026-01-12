@@ -35,6 +35,7 @@ fun MediaItem(
     mediaUrl: String,
     mediaType: UiMediaType,
     modifier: Modifier = Modifier,
+    thumbnailUrl: String? = null,
     duration: Int? = null,
     isEditMode: Boolean = false,
     onRemove: (() -> Unit)? = null,
@@ -95,7 +96,7 @@ fun MediaItem(
                     SubcomposeAsyncImage(
                         ImageRequest
                             .Builder(LocalContext.current)
-                            .data(mediaUrl)
+                            .data(thumbnailUrl)
                             .crossfade(true)
                             .build(),
                         contentDescription = stringResource(R.string.desc_media_video),

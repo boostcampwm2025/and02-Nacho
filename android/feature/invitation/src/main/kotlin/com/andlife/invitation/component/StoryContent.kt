@@ -1,5 +1,6 @@
 package com.andlife.invitation.component
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,7 @@ import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiModel
 import com.andlife.invitation.util.toUiType
+import com.andlife.ui.component.media.VideoPlayer
 import com.andlife.ui.model.UiMediaType
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -31,18 +33,22 @@ fun StoryContent(
                 .fillMaxSize()
                 .background(InvitationTheme.colorScheme.backgroundOverlay),
     ) {
+        Log.d("Item", item.toString())
         when (item.type) {
             UiMediaType.IMAGE -> {
                 AsyncImage(
-                    model = item.url,
+                    model = item.mediaUrl,
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
                 )
             }
             UiMediaType.VIDEO -> {
-                // TODO: VideoPlayer 컴포넌트 구현 (ExoPlayer)
-                Box(modifier = Modifier.fillMaxSize().background(InvitationTheme.colorScheme.backgroundOverlay))
+                VideoPlayer(
+                    videoUrl = item.mediaUrl,
+                    isActive = true,
+                    modifier = Modifier.fillMaxSize(),
+                )
             }
             UiMediaType.AUDIO -> {
             }
@@ -65,7 +71,7 @@ private fun StoryContentPreview() {
             item =
                 InvitationCollectionUiModel(
                     id = 3L,
-                    url = "https://picsum.photos/400/600?random=3",
+                    mediaUrl = "https://picsum.photos/400/600?random=3",
                     type = MediaType.AUDIO.toUiType(),
                     content = "방명록 내용 3",
                     authorName = "사용자3",
