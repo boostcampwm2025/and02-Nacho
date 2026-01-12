@@ -164,7 +164,8 @@ class MediaController(
             val uploadInfos = request.files.map { fileInfo ->
                 val mediaType = MediaType.valueOf(fileInfo.mediaType.uppercase())
                 val extension = mediaType.getExtension()
-                val key = "${mediaType.folder}/${UUID.randomUUID()}$extension"
+                val timestamp = System.currentTimeMillis()
+                val key = "${mediaType.folder}/${timestamp}-${UUID.randomUUID()}$extension"
 
                 if (fileInfo.fileSize <= SIZE_THRESHOLD_BYTES) {
                     // 100MB 이하 → 단순 업로드
