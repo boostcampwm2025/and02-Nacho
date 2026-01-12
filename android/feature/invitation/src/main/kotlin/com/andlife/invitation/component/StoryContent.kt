@@ -58,7 +58,7 @@ fun StoryContent(
 
 @PreviewTheme
 @Composable
-fun StoryContentPreview() {
+private fun StoryContentPreview() {
     InvitationTheme {
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         StoryContent(
