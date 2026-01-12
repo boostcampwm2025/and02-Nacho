@@ -66,8 +66,7 @@ fun InvitationCollectionScreen(
             onDismissRequest = onCloseStory,
             properties = DialogProperties(usePlatformDefaultWidth = false),
         ) {
-            InvitationStoryScreen(
-                uiState = uiState,
+            InvitationStoryRoute(
                 initialIndex = uiState.selectedIndex,
                 onPageChanged = onPageChanged,
                 onToggleExpand = onToggleExpand,
