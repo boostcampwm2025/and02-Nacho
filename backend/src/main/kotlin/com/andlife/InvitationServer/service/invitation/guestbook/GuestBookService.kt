@@ -56,7 +56,8 @@ class GuestBookService(
                 collection.add(CollectionResponse(
                     id = video.id,
                     mediaType = MediaType.VIDEO,
-                    mediaUrl = video.thumbnailUrl,
+                    mediaUrl = video.videoUrl,
+                    thumbnailUrl = video.thumbnailUrl,
                     author = author,
                     content = gb.textContent,
                     createdAt = createdAt,
