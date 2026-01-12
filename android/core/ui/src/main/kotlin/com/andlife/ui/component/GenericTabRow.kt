@@ -15,11 +15,13 @@ import androidx.compose.ui.Modifier
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationStroke
 import com.andlife.designsystem.theme.InvitationTheme
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 
 @Composable
 fun GenericTabRow(
-    tabs: List<String>,
+    tabs: ImmutableList<String>,
     content: @Composable (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -72,7 +74,7 @@ fun GenericTabRow(
 private fun GenericTabScreenPreview() {
     InvitationTheme {
         GenericTabRow(
-            tabs = listOf("Tab 1", "Tab 2", "Tab 3"),
+            tabs = persistentListOf("Tab 1", "Tab 2", "Tab 3"),
             content = { index ->
                 when (index) {
                     0 -> Text(text = "Tab 1 Content")

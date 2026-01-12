@@ -15,6 +15,7 @@ import com.andlife.invitation.screen.guestbook.InvitationCollectionRoute
 import com.andlife.invitation.viewmodel.InvitationCollectionViewModel
 import com.andlife.ui.R
 import com.andlife.ui.component.GenericTabRow
+import kotlinx.collections.immutable.persistentListOf
 
 private const val TAG = "InvitationDetailScreen"
 
@@ -38,7 +39,7 @@ private fun InvitationDetailScreen(
     collectionViewModel: InvitationCollectionViewModel = hiltViewModel(),
 ) {
     val tabTitles =
-        listOf(
+        persistentListOf(
             stringResource(R.string.txt_invitation),
             stringResource(R.string.txt_guestbook),
             stringResource(R.string.txt_collection),
