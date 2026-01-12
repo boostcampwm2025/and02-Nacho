@@ -17,10 +17,11 @@ internal object EditorDefaults {
 
     val palette = listOf(Black, White, Red, Blue, Green, Orange, Purple, Gray).toImmutableList()
 
-    const val DEFAULT_TEXT_SIZE = 16f
-    const val MAX_TEXT_SIZE = 36f
-    const val MIN_TEXT_SIZE = 24f
     const val MIN_MEDIUM_TEXT_SIZE = 12f
+    const val DEFAULT_TEXT_SIZE = 16f
+    const val MIN_TEXT_SIZE = 24f
+    const val MAX_TEXT_SIZE = 36f
 
-    val fontFamilies = listOf(MIN_TEXT_SIZE, MIN_MEDIUM_TEXT_SIZE, DEFAULT_TEXT_SIZE, MAX_TEXT_SIZE)
+    val fontFamilies = listOf(MIN_MEDIUM_TEXT_SIZE, DEFAULT_TEXT_SIZE, MIN_TEXT_SIZE, MAX_TEXT_SIZE)
 }
+
