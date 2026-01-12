@@ -1,4 +1,4 @@
-package com.andlife.domain.model
+package com.andlife.domain.model.address
 
 data class Address(
     val id: Long,

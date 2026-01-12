@@ -4,7 +4,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
-import com.andlife.domain.repository.AddressRepository
+import com.andlife.domain.repository.address.AddressRepository
 import com.andlife.invitation_edit.model.AddressSearchSideEffect
 import com.andlife.invitation_edit.model.AddressSearchUiEvent
 import com.andlife.invitation_edit.model.AddressSearchUiState

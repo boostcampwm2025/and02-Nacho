@@ -6,7 +6,7 @@ import android.util.Log
 import androidx.core.net.toUri
 import com.andlife.data.util.apiCall
 import com.andlife.domain.error.DataError
-import com.andlife.domain.model.MediaType
+import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.domain.util.Result
 import com.andlife.network.api.media.BatchCompleteUploadRequest
 import com.andlife.network.api.media.BatchUploadMediaRequest

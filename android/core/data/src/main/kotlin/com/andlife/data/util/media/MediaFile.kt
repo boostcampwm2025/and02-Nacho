@@ -1,6 +1,6 @@
 package com.andlife.data.util.media
 
-import com.andlife.domain.model.MediaType
+import com.andlife.domain.model.guestbook.MediaType
 
 data class MediaFile(
     val uriString: String,

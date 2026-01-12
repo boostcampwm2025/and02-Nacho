@@ -10,4 +10,9 @@ interface GuestBookService {
     suspend fun getMediaCollection(
         @Path("invitationId") invitationId: Long,
     ): BaseResponse<List<CollectionResponse>>
+
+    @GET("/api/invitations/{invitationId}/guestbooks")
+    suspend fun getGuestBooksByInvitationId(
+        @Path("invitationId") invitationId: Long,
+    ): BaseResponse<List<GuestBookResponse>>
 }

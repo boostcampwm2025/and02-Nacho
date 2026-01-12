@@ -1,6 +1,6 @@
 package com.andlife.myinvitation.model
 
-import com.andlife.domain.model.GuestBookMedia
+import com.andlife.domain.model.guestbook.GalleryMedia
 import com.andlife.myinvitation.util.toUiType
 import com.andlife.ui.model.UiMediaType
 import kotlinx.datetime.LocalDateTime
@@ -16,7 +16,7 @@ data class MyInvitationCollectionUiModel(
     val durationSeconds: Int?,
 )
 
-fun GuestBookMedia.toUiModel(): MyInvitationCollectionUiModel =
+fun GalleryMedia.toUiModel(): MyInvitationCollectionUiModel =
     MyInvitationCollectionUiModel(
         id = id,
         type = type.toUiType(),

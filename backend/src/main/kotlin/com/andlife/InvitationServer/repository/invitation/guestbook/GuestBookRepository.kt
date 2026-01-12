@@ -10,4 +10,12 @@ interface GuestBookRepository : JpaRepository<GuestBook, Long> {
             "JOIN FETCH g.user " +
             "WHERE g.invitation.id = :invitationId")
     fun findAllByInvitationIdWithDetails(@Param("invitationId") invitationId: Long): List<GuestBook>
+
+    @Query("""
+        SELECT gb FROM GuestBook gb 
+        JOIN FETCH gb.user
+        WHERE gb.invitation.id = :invitationId 
+        ORDER BY gb.createdAt DESC
+    """)
+    fun findAllByInvitationId(invitationId: Long): List<GuestBook>
 }

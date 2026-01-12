@@ -4,6 +4,9 @@ import com.andlife.InvitationServer.constant.MediaType
 import com.andlife.InvitationServer.repository.invitation.guestbook.GuestBookRepository
 import com.andlife.InvitationServer.response.AuthorResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.CollectionResponse
+import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookInvitationResponse
+import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookMediaResponse
+import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookResponse
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -65,4 +68,46 @@ class GuestBookService(
         return collection.sortedByDescending { it.createdAt }
     }
 
+    fun getGuestBooks(invitationId: Long): List<GuestBookResponse> {
+        val guestBooks = guestBookRepository.findAllByInvitationId(invitationId)
+
+        return guestBooks.map { guestBook ->
+            val allMedia = mutableListOf<GuestBookMediaResponse>()
+
+            guestBook.images.forEach {
+                allMedia.add(GuestBookMediaResponse(it.id, MediaType.IMAGE, it.imageUrl, null, null, it.displayOrder))
+            }
+            guestBook.videos.forEach {
+                allMedia.add(GuestBookMediaResponse(it.id, MediaType.VIDEO, it.videoUrl, it.thumbnailUrl, it.durationSeconds, it.displayOrder))
+            }
+            guestBook.audios.forEach {
+                allMedia.add(GuestBookMediaResponse(it.id, MediaType.AUDIO, it.audioUrl, null, it.durationSeconds, it.displayOrder))
+            }
+
+            val sortedList = allMedia.sortedBy { it.displayOrder }
+
+            val visualMedias = sortedList.filter { it.type != MediaType.AUDIO }
+            val audioMedias = sortedList.filter { it.type == MediaType.AUDIO }
+
+            GuestBookResponse(
+                id = guestBook.id,
+                author = AuthorResponse(
+                    id = guestBook.user.id,
+                    name = guestBook.user.name,
+                    profileImageUrl = guestBook.user.profileImageUrl
+                ),
+                invitation = GuestBookInvitationResponse(
+                    id = guestBook.invitation.id,
+                    title = guestBook.invitation.title
+                ),
+                textContent = guestBook.textContent,
+                visualMedias = visualMedias,
+                audioMedias = audioMedias,
+                totalVisualCount = visualMedias.size,
+                isOwner = false, // TODO: 인증 기능 구현 후 수정 필요
+                createdAt = guestBook.createdAt,
+                updatedAt = guestBook.updatedAt
+            )
+        }
+    }
 }

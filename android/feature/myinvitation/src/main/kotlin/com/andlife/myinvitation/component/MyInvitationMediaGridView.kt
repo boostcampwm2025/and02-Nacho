@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
-import com.andlife.domain.model.MediaType
+import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.myinvitation.model.MyInvitationCollectionUiModel
 import com.andlife.myinvitation.util.toUiType
 import com.andlife.ui.component.media.MediaItem
