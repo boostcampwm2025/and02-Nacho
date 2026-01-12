@@ -10,5 +10,6 @@ data class GuestBook(
     val visualMedias: List<GuestBookMedia>,
     val audioMedias: List<GuestBookMedia>,
     val totalVisualCount: Int,
+    val isOwner: Boolean,
     val createdAt: LocalDateTime,
 )
