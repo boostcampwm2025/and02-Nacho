@@ -1,4 +1,4 @@
-package com.andlife.domain.model
+package com.andlife.domain.model.guestbook
 
 data class GuestBookInvitation(
     val id: Long,

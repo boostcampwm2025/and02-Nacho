@@ -1,6 +1,6 @@
 package com.andlife.invitation.util
 
-import com.andlife.domain.model.MediaType
+import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.ui.model.UiMediaType
 
 /**

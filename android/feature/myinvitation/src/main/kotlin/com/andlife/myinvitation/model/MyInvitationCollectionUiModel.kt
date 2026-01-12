@@ -1,6 +1,6 @@
 package com.andlife.myinvitation.model
 
-import com.andlife.domain.model.GalleryMedia
+import com.andlife.domain.model.guestbook.GalleryMedia
 import com.andlife.myinvitation.util.toUiType
 import com.andlife.ui.model.UiMediaType
 import kotlinx.datetime.LocalDateTime

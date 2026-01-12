@@ -2,8 +2,8 @@ package com.andlife.data.repository.guestbook
 
 import com.andlife.data.datasource.remote.invitation.guestbook.GuestBookRemoteDataSource
 import com.andlife.domain.error.DataError
-import com.andlife.domain.model.GalleryMedia
-import com.andlife.domain.model.GuestBook
+import com.andlife.domain.model.guestbook.GalleryMedia
+import com.andlife.domain.model.guestbook.GuestBook
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.map
