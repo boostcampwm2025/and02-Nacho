@@ -12,4 +12,5 @@ data class GuestBook(
     val totalVisualCount: Int,
     val isOwner: Boolean,
     val createdAt: LocalDateTime,
+    val updatedAt: LocalDateTime,
 )

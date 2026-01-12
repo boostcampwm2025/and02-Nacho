@@ -18,6 +18,7 @@ data class GuestBookResponse(
     val totalVisualCount: Int,
     val isOwner: Boolean,
     val createdAt: LocalDateTime,
+    val updatedAt: LocalDateTime,
 )
 
 @Serializable

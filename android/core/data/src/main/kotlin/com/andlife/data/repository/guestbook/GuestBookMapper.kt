@@ -35,6 +35,7 @@ fun GuestBookResponse.toDomain(): GuestBook =
         totalVisualCount = totalVisualCount,
         isOwner = isOwner,
         createdAt = createdAt,
+        updatedAt = updatedAt,
     )
 
 fun AuthorResponse.toDomain(): Author =
