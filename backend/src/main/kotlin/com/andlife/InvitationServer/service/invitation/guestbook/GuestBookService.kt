@@ -105,7 +105,8 @@ class GuestBookService(
                 audioMedias = audioMedias,
                 totalVisualCount = visualMedias.size,
                 isOwner = false, // TODO: 인증 기능 구현 후 수정 필요
-                createdAt = guestBook.createdAt
+                createdAt = guestBook.createdAt,
+                updatedAt = guestBook.updatedAt
             )
         }
     }
