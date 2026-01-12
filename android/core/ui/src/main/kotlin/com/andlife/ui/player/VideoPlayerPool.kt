@@ -13,87 +13,150 @@ import androidx.media3.exoplayer.source.ProgressiveMediaSource
 @OptIn(UnstableApi::class)
 object VideoPlayerPool {
     private const val MAX_POOL_SIZE = 5
-    private val videoPool = LinkedHashMap<String, VideoPlayer>(MAX_POOL_SIZE, 0.75f)
-    private var lastPlayedUri: String? = null
-    private val protectedUris = mutableSetOf<String>() // 보호할 URI 집합
+//    private val videoPool = LinkedHashMap<String, VideoPlayer>(MAX_POOL_SIZE, 0.75f)
+//    private var lastPlayedUri: String? = null
+//    private val protectedUris = mutableSetOf<String>() // 보호할 URI 집합
 
-    // 현재 재생 중이거나 화면에 보이는 플레이어 보호
-    fun protectPlayer(uri: String) {
-        protectedUris.add(uri)
-        Log.d("eee", "보호된 URI들: $protectedUris")
-    }
+    /*
+    * MutableMap을 활용한 비디오 플레이어 풀 관리
+    * */
 
-    fun unprotectPlayer(uri: String) {
-        protectedUris.remove(uri)
-        Log.d("eee", "보호 X된 URI: $uri")
-        Log.d("eee", "보호된 URI들: $protectedUris")
-    }
+    private val videoPool = mutableMapOf<String, VideoPlayer>()
+    private val lastPlayedVideo =
+        LinkedHashMap<Long, String>(MAX_POOL_SIZE, 0.75f, true) // accessOrder=true -> 최근 접근한 순서대로 정렬
+    private var currentPlayingUri: String? = null
 
     fun getPlayer(context: Context, uri: String): VideoPlayer {
+//        videoPool[uri]?.let { return it }
+//
+//        val reusablePlayer = videoPool.values.find { player ->
+//            player.exoPlayer.isCommandAvailable(Player.COMMAND_SET_VIDEO_SURFACE)
+//        }
+//
+//        return if (reusablePlayer != null && videoPool.size == MAX_POOL_SIZE) {
+//            val oldUri = videoPool.entries.find { it.value == reusablePlayer }?.key
+//            oldUri?.let { videoPool.remove(it) }
+//
+//            reusablePlayer.stop()
+//            val mediaSource = ProgressiveMediaSource.Factory(
+//                DefaultDataSource.Factory(context)
+//            ).createMediaSource(MediaItem.fromUri(uri))
+//            reusablePlayer.setMediaSource(mediaSource)
+//            reusablePlayer.prepare()
+//            reusablePlayer.exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
+//            videoPool[uri] = reusablePlayer
+//            reusablePlayer
+//        } else {
+//            if (videoPool.size >= MAX_POOL_SIZE) {
+//                // 보호되지 않은 가장 오래된 플레이어 찾아서 제거
+//                val oldestEntry = videoPool.keys.firstOrNull { !protectedUris.contains(it) }
+//                    ?: videoPool.keys.first() // 모두 보호 중이면 어쩔 수 없이 첫 번째 제거
+//
+//                videoPool.remove(oldestEntry)?.release()
+//            }
+//
+//            val newExoPlayer = ExoPlayer.Builder(context).build()
+//            val mediaSource = ProgressiveMediaSource.Factory(
+//                DefaultDataSource.Factory(context)
+//            ).createMediaSource(MediaItem.fromUri(uri))
+//            newExoPlayer.setMediaSource(mediaSource)
+//            newExoPlayer.prepare()
+//            newExoPlayer.repeatMode = Player.REPEAT_MODE_ONE
+//
+//            VideoPlayer(newExoPlayer, uri).also {
+//                videoPool[uri] = it
+//            }
+//        }
         videoPool[uri]?.let { return it }
 
-        val reusablePlayer = videoPool.values.find { player ->
-            player.exoPlayer.isCommandAvailable(Player.COMMAND_SET_VIDEO_SURFACE)
+        // 플레이어 풀이 가득 찬 경우
+        if (videoPool.size >= MAX_POOL_SIZE) {
+            val protectedUris = lastPlayedVideo.values.toSet()
+
+            val urlToRemove = videoPool.keys.find { it !in protectedUris }
+                ?: lastPlayedVideo.entries.first()
+
+            Log.d("vvv", "풀 가득 참. 제거하는 URI: $urlToRemove")
+            videoPool.remove(urlToRemove)?.release()
         }
 
-        return if (reusablePlayer != null && videoPool.size == MAX_POOL_SIZE) {
-            val oldUri = videoPool.entries.find { it.value == reusablePlayer }?.key
-            oldUri?.let { videoPool.remove(it) }
+//        val newExoPlayer = ExoPlayer.Builder(context).build()
+//        val mediaSource = ProgressiveMediaSource.Factory(
+//            DefaultDataSource.Factory(context)
+//        ).createMediaSource(MediaItem.fromUri(uri))
+//        newExoPlayer.setMediaSource(mediaSource)
+//        newExoPlayer.prepare()
+//        newExoPlayer.repeatMode = Player.REPEAT_MODE_ONE
 
-            reusablePlayer.stop()
+        val exoPlayer = ExoPlayer.Builder(context).build().apply {
             val mediaSource = ProgressiveMediaSource.Factory(
                 DefaultDataSource.Factory(context)
             ).createMediaSource(MediaItem.fromUri(uri))
-            reusablePlayer.setMediaSource(mediaSource)
-            reusablePlayer.prepare()
-            reusablePlayer.exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
-            videoPool[uri] = reusablePlayer
-            reusablePlayer
-        } else {
-            if (videoPool.size >= MAX_POOL_SIZE) {
-                // 보호되지 않은 가장 오래된 플레이어 찾아서 제거
-                val oldestEntry = videoPool.keys.firstOrNull { !protectedUris.contains(it) }
-                    ?: videoPool.keys.first() // 모두 보호 중이면 어쩔 수 없이 첫 번째 제거
-
-                videoPool.remove(oldestEntry)?.release()
-            }
-
-            val newExoPlayer = ExoPlayer.Builder(context).build()
-            val mediaSource = ProgressiveMediaSource.Factory(
-                DefaultDataSource.Factory(context)
-            ).createMediaSource(MediaItem.fromUri(uri))
-            newExoPlayer.setMediaSource(mediaSource)
-            newExoPlayer.prepare()
-            newExoPlayer.repeatMode = Player.REPEAT_MODE_ONE
-
-            VideoPlayer(newExoPlayer, uri).also {
-                videoPool[uri] = it
-            }
+            setMediaSource(mediaSource)
+            prepare()
+            repeatMode = Player.REPEAT_MODE_ONE
         }
+
+        val newPlayer = VideoPlayer(exoPlayer, uri)
+        videoPool[uri] = newPlayer
+
+        if (uri == currentPlayingUri) {
+            newPlayer.play()
+            Log.d("vvv", "재생 중이던 URI의 플레이어 재사용: $uri")
+        }
+
+        return newPlayer
     }
 
-    fun playPlayer(uri: String) {
-        lastPlayedUri = uri
-        protectPlayer(uri) // 재생 시작하면 보호
-        videoPool[uri]?.play()
+    fun playPlayer(context: Context, uri: String, guestBookId: Long) {
+        currentPlayingUri = uri // 현재 재생 중인 URI 업데이트
+
+        videoPool.values.forEach {
+            if (it.uri != uri) {
+                it.pause() // 다른 플레이어 일시정지
+            }
+        }
+
+        lastPlayedVideo.remove(guestBookId) // 기존에 있던 항목 제거
+        lastPlayedVideo[guestBookId] = uri // 최근 재생한 순서로 갱신
+
+        if (lastPlayedVideo.size > MAX_POOL_SIZE) { // 최대 크기 초과 시 가장 오래된 항목 제거
+            val oldestKey = lastPlayedVideo.keys.first() // 가장 오래된 키 가져오기
+            lastPlayedVideo.remove(oldestKey)
+        }
+
+        val player = videoPool[uri] ?: getPlayer(context, uri) // 플레이어가 없으면 새로 생성
+        player.play()
+
+        Log.d("vvv", "재생하는 URI: $uri")
+        Log.d("vvv", "최근 재생된 URI들: ${lastPlayedVideo.values}")
     }
 
     fun pausePlayer(uri: String) {
+        if (currentPlayingUri == uri) currentPlayingUri = null
         videoPool[uri]?.pause()
-        unprotectPlayer(uri) // 일시정지하면 보호 해제
     }
 
     fun pauseAllPlayers() {
         videoPool.values.forEach { it.pause() }
-        protectedUris.clear() // 전체 일시정지면 모든 보호 해제
     }
 
     fun resumeLastPlayed() {
-        lastPlayedUri?.let { uri ->
-            videoPool[uri]?.play()
-            protectPlayer(uri)
-        }
+        currentPlayingUri?.let { videoPool[it]?.play() }
     }
+
+    // 현재 재생 중이거나 화면에 보이는 플레이어 보호
+//    fun protectPlayer(uri: String) {
+//        protectedUris.add(uri)
+//        Log.d("eee", "보호된 URI들: $protectedUris")
+//    }
+//
+//    fun unprotectPlayer(uri: String) {
+//        protectedUris.remove(uri)
+//        Log.d("eee", "보호 X된 URI: $uri")
+//        Log.d("eee", "보호된 URI들: $protectedUris")
+//    }
+
 
     fun preparePlayer(context: Context, uri: String) {
         if (videoPool.containsKey(uri)) return
@@ -103,8 +166,12 @@ object VideoPlayerPool {
     }
 
     fun releaseAll() {
+//        videoPool.values.forEach { it.release() }
+//        videoPool.clear()
+//        protectedUris.clear()
         videoPool.values.forEach { it.release() }
         videoPool.clear()
-        protectedUris.clear()
+        lastPlayedVideo.clear()
+        currentPlayingUri = null
     }
 }

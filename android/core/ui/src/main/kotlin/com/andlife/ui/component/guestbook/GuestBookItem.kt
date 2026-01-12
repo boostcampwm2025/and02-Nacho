@@ -1,6 +1,5 @@
 package com.andlife.ui.component.guestbook
 
-import androidx.annotation.OptIn
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,7 +24,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,7 +38,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.media3.common.util.UnstableApi
+import androidx.media3.common.Player
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
@@ -48,14 +50,17 @@ import com.andlife.ui.R
 import com.andlife.ui.component.media.MediaOverlay
 import com.andlife.ui.model.GuestBookEntryMediaUiModel
 import com.andlife.ui.model.MediaType
+import com.andlife.ui.player.VideoPlayer
 import com.andlife.ui.player.VideoPlayerPool
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.delay
 import kotlinx.datetime.LocalDateTime
 import com.andlife.designsystem.R as designR
 
 @Composable
 fun GuestBookItem(
+    guestBookId: Long,
     authorName: String,
     createdAt: LocalDateTime,
     textContent: String,
@@ -92,6 +97,7 @@ fun GuestBookItem(
         )
         if (visualMediaUrls.isNotEmpty()) {
             GuestBookItemVisualMediaSection(
+                guestBookId = guestBookId,
                 visualMediaUrls = visualMediaUrls,
                 totalVisualCount = totalVisualCount,
                 shouldPlayVideo = shouldPlayVideo,
@@ -214,6 +220,7 @@ private fun GuestBookItemTextContent(
 
 @Composable
 private fun GuestBookItemVisualMediaSection(
+    guestBookId: Long,
     visualMediaUrls: ImmutableList<GuestBookEntryMediaUiModel>,
     totalVisualCount: Int,
     shouldPlayVideo: Boolean,
@@ -256,8 +263,9 @@ private fun GuestBookItemVisualMediaSection(
                 when (media.type) {
                     MediaType.VIDEO -> {
                         SimpleVideoPlayer(
-                            videoId = media.id,
+                            guestBookId = guestBookId,
                             videoUrl = media.url,
+                            thumbnailUrl = media.thumbnailUrl,
                             shouldPlay = shouldPlayVideo && pagerState.currentPage == page,
                         )
 
@@ -293,50 +301,124 @@ private fun GuestBookItemVisualMediaSection(
     }
 }
 
-@OptIn(UnstableApi::class)
+//@OptIn(UnstableApi::class)
+//@Composable
+//private fun SimpleVideoPlayer(
+//    guestBookId: Long,
+//    videoUrl: String,
+//    shouldPlay: Boolean,
+//    modifier: Modifier = Modifier,
+//) {
+//    val context = LocalContext.current
+//    val videoPlayer = remember(videoUrl) {
+//        VideoPlayerPool.getPlayer(context, videoUrl)
+//    }
+//
+//    // 화면에 보이는 동안 보호
+//    DisposableEffect(videoUrl) {
+//        VideoPlayerPool.protectPlayer(videoUrl)
+//        onDispose {
+//            VideoPlayerPool.unprotectPlayer(videoUrl)
+//            VideoPlayerPool.pausePlayer(videoUrl)
+//        }
+//    }
+//
+//    LaunchedEffect(shouldPlay) {
+//        if (shouldPlay) {
+//            VideoPlayerPool.playPlayer(videoUrl)
+//        } else {
+//            VideoPlayerPool.pausePlayer(videoUrl)
+//        }
+//    }
+//
+//    AndroidView(
+//        factory = { context ->
+//            PlayerView(context).apply {
+//                useController = false
+//                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+//            }
+//        },
+//        update = { playerView ->
+//            playerView.player = videoPlayer.exoPlayer
+//        },
+//        modifier = modifier
+//            .fillMaxSize()
+//            .background(Color.Black)
+//    )
+//}
+
 @Composable
 private fun SimpleVideoPlayer(
-    videoId: Long,
+    guestBookId: Long,
     videoUrl: String,
+    thumbnailUrl: String?,
     shouldPlay: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val videoPlayer = remember(videoUrl) {
-        VideoPlayerPool.getPlayer(context, videoUrl)
-    }
+    var videoPlayer by remember(videoUrl) { mutableStateOf<VideoPlayer?>(null) }
+    var isVideoReady by remember(videoUrl) { mutableStateOf(false) }
 
-    // 화면에 보이는 동안 보호
-    DisposableEffect(videoUrl) {
-        VideoPlayerPool.protectPlayer(videoUrl)
-        onDispose {
-            VideoPlayerPool.unprotectPlayer(videoUrl)
-            VideoPlayerPool.pausePlayer(videoUrl)
+    LaunchedEffect(shouldPlay, videoUrl) {
+        if (shouldPlay && videoPlayer == null) {
+            videoPlayer = VideoPlayerPool.getPlayer(context, videoUrl)
         }
-    }
-
-    LaunchedEffect(shouldPlay) {
+        delay(150L) // 약간의 딜레이 후 재생 시작
         if (shouldPlay) {
-            VideoPlayerPool.playPlayer(videoUrl)
+            VideoPlayerPool.playPlayer(context, videoUrl, guestBookId)
+            if (videoPlayer != null) {
+                videoPlayer = VideoPlayerPool.getPlayer(context, videoUrl)
+            }
         } else {
             VideoPlayerPool.pausePlayer(videoUrl)
         }
     }
 
-    AndroidView(
-        factory = { context ->
-            PlayerView(context).apply {
-                useController = false
-                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+    DisposableEffect(videoPlayer) {
+        if (videoPlayer == null) return@DisposableEffect onDispose { }
+
+        val listener = object : Player.Listener {
+            override fun onPlaybackStateChanged(state: Int) { // 재생 상태 변경 시점
+                isVideoReady = (state == Player.STATE_READY)
             }
-        },
-        update = { playerView ->
-            playerView.player = videoPlayer.exoPlayer
-        },
+
+            override fun onRenderedFirstFrame() { // 첫 프레임 렌더링 시점
+                isVideoReady = true
+            }
+        }
+        videoPlayer?.exoPlayer?.addListener(listener)
+        onDispose {
+            videoPlayer?.exoPlayer?.removeListener(listener)
+        }
+    }
+
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Black)
-    )
+    ) {
+        if (videoPlayer  != null) {
+            AndroidView(
+                factory = { context ->
+                    PlayerView(context).apply {
+                        useController = false
+                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                        player = videoPlayer?.exoPlayer
+                    }
+                },
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+
+        if (!isVideoReady && thumbnailUrl != null) {
+            AsyncImage(
+                model = thumbnailUrl,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit,
+            )
+        }
+    }
 }
 
 @Composable
@@ -418,6 +500,7 @@ private fun GuestBookItemPreview() {
         ) {
             item {
                 GuestBookItem(
+                    guestBookId = 1L,
                     authorName = "홍길동",
                     createdAt = LocalDateTime(2024, 6, 1, 12, 0),
                     textContent = "축하합니다! 행복하세요!",
