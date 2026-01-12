@@ -17,6 +17,12 @@
     <string name="txt_guestbook">방명록</string>
     <string name="txt_collection">모아보기</string>
 
+    <string-array name="tab_titles">
+        <item>@string/txt_invitation</item>
+        <item>@string/txt_guestbook</item>
+        <item>@string/txt_collection</item>
+    </string-array>
+
     <!--  모아보기 Media  -->
     <string name="desc_media_image">방명록의 이미지</string>
     <string name="desc_media_audio">방명록의 오디오</string>

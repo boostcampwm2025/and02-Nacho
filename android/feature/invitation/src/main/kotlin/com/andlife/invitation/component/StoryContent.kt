@@ -10,7 +10,7 @@ import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationTheme
-import com.andlife.domain.model.MediaType
+import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiModel
 import com.andlife.invitation.util.toUiType
 import com.andlife.ui.model.UiMediaType
@@ -58,20 +58,21 @@ fun StoryContent(
 
 @PreviewTheme
 @Composable
-fun StoryContentPreview() {
+private fun StoryContentPreview() {
     InvitationTheme {
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         StoryContent(
-            item = InvitationCollectionUiModel(
-                id = 3L,
-                url = "https://picsum.photos/400/600?random=3",
-                type = MediaType.AUDIO.toUiType(),
-                content = "방명록 내용 3",
-                authorName = "사용자3",
-                authorProfileUrl = null,
-                createdAt = now,
-                durationSeconds = 300,
-            ),
+            item =
+                InvitationCollectionUiModel(
+                    id = 3L,
+                    url = "https://picsum.photos/400/600?random=3",
+                    type = MediaType.AUDIO.toUiType(),
+                    content = "방명록 내용 3",
+                    authorName = "사용자3",
+                    authorProfileUrl = null,
+                    createdAt = now,
+                    durationSeconds = 300,
+                ),
             isExpanded = false,
             onToggleExpand = {},
         )

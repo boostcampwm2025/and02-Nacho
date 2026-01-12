@@ -2,6 +2,7 @@ package com.andlife.InvitationServer.controller.invitation
 
 import com.andlife.InvitationServer.response.BaseResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.CollectionResponse
+import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookResponse
 import com.andlife.InvitationServer.service.invitation.guestbook.GuestBookService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -22,4 +23,10 @@ class InvitationController(
         return BaseResponse.success(result)
     }
 
+    @GetMapping("/{invitationId}/guestbooks")
+    fun getGuestBooks(@PathVariable invitationId: Long): BaseResponse<List<GuestBookResponse>> {
+        val result = guestBookService.getGuestBooks(invitationId)
+
+        return BaseResponse.success(result)
+    }
 }

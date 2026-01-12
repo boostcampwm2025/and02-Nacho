@@ -7,7 +7,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import androidx.navigation.toRoute
 import com.andlife.invitation.screen.InvitationRoute
 import com.andlife.invitation.screen.detail.InvitationDetailRoute
 import kotlinx.serialization.Serializable
@@ -43,13 +42,9 @@ fun NavGraphBuilder.invitationNavGraph(
         )
     }
 
-    composable<InvitationDetail> { backStackEntry ->
-        val arguments = backStackEntry.toRoute<InvitationDetail>()
-
+    composable<InvitationDetail> {
         InvitationDetailRoute(
-            id = arguments.id,
             onNavigateBack = onNavigationBack,
-            modifier = Modifier.padding(paddingValues),
         )
     }
 }

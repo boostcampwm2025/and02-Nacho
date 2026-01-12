@@ -7,6 +7,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -15,11 +16,13 @@ import androidx.compose.ui.Modifier
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationStroke
 import com.andlife.designsystem.theme.InvitationTheme
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 
 @Composable
 fun GenericTabRow(
-    tabs: List<String>,
+    tabs: ImmutableList<String>,
     content: @Composable (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -37,6 +40,12 @@ fun GenericTabRow(
                     color = InvitationTheme.colorScheme.textTertiary,
                 )
             },
+            indicator = {
+                TabRowDefaults.SecondaryIndicator(
+                    modifier = Modifier.tabIndicatorOffset(pagerState.currentPage),
+                    color = InvitationTheme.colorScheme.brandPrimary
+                )
+            }
         ) {
             tabs.forEachIndexed { index, title ->
                 val isSelected = pagerState.currentPage == index
@@ -72,7 +81,7 @@ fun GenericTabRow(
 private fun GenericTabScreenPreview() {
     InvitationTheme {
         GenericTabRow(
-            tabs = listOf("Tab 1", "Tab 2", "Tab 3"),
+            tabs = persistentListOf("Tab 1", "Tab 2", "Tab 3"),
             content = { index ->
                 when (index) {
                     0 -> Text(text = "Tab 1 Content")
