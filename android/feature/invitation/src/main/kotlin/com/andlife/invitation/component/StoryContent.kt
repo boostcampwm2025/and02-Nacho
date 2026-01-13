@@ -5,9 +5,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationTheme
@@ -26,6 +30,8 @@ fun StoryContent(
     item: InvitationCollectionUiModel,
     isExpanded: Boolean,
     onToggleExpand: () -> Unit,
+    exoPlayer: Player,
+    isActive: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -46,8 +52,8 @@ fun StoryContent(
             }
             UiMediaType.VIDEO -> {
                 VideoPlayer(
-                    videoUrl = item.mediaUrl,
-                    isActive = true,
+                    exoPlayer = exoPlayer,
+                    isActive = isActive,
                     modifier = Modifier.fillMaxSize(),
                 )
             }
@@ -68,6 +74,11 @@ fun StoryContent(
 private fun StoryContentPreview() {
     InvitationTheme {
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        val context = LocalContext.current
+        val dummyPlayer = remember {
+            ExoPlayer.Builder(context).build()
+        }
+
         StoryContent(
             item =
                 InvitationCollectionUiModel(
@@ -81,6 +92,8 @@ private fun StoryContentPreview() {
                     durationSeconds = 300,
                 ),
             isExpanded = false,
+            exoPlayer = dummyPlayer,
+            isActive = true,
             onToggleExpand = {},
         )
     }

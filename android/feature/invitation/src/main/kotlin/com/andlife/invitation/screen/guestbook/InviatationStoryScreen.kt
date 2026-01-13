@@ -18,14 +18,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoIconSize
@@ -58,6 +62,7 @@ fun InvitationStoryRoute(
 
     InvitationStoryScreen(
         uiState = uiState,
+        exoPlayer = viewModel.exoPlayer,
         initialIndex = initialIndex,
         onPageChanged = onPageChanged,
         onToggleExpand = onToggleExpand,
@@ -68,6 +73,7 @@ fun InvitationStoryRoute(
 @Composable
 fun InvitationStoryScreen(
     uiState: InvitationCollectionUiState,
+    exoPlayer: Player,
     initialIndex: Int,
     onPageChanged: (Int) -> Unit,
     onToggleExpand: () -> Unit,
@@ -114,6 +120,8 @@ fun InvitationStoryScreen(
                     item = item,
                     isExpanded = uiState.isTextExpanded,
                     onToggleExpand = onToggleExpand,
+                    exoPlayer = exoPlayer,
+                    isActive = (pageIndex == pagerState.currentPage),
                     modifier = Modifier.align(Alignment.BottomCenter),
                 )
             }
@@ -234,11 +242,17 @@ private fun InvitationStoryScreenPreview() {
                 isTextExpanded = false,
             )
 
+        val context = LocalContext.current
+        val dummyPlayer = remember {
+            ExoPlayer.Builder(context).build()
+        }
+
         InvitationStoryScreen(
             uiState = mockState,
             initialIndex = 0,
             onPageChanged = {},
             onToggleExpand = {},
+            exoPlayer = dummyPlayer,
             onClose = {},
         )
     }
