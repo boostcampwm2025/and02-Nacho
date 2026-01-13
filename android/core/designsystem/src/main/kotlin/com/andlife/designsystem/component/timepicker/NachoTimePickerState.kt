@@ -9,7 +9,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 
 @Stable
-interface InvitationTimePickerState {
+interface NachoTimePickerState {
     var hour: Int // 0..23
     var minute: Int
     val minuteInterval: Int
@@ -19,11 +19,11 @@ interface InvitationTimePickerState {
     fun updateHour12(newHour12: Int)
 }
 
-private class InvitationTimePickerStateImpl(
+private class NachoTimePickerStateImpl(
     initialHour: Int,
     initialMinute: Int,
     override val minuteInterval: Int,
-) : InvitationTimePickerState {
+) : NachoTimePickerState {
     private var _hour by mutableIntStateOf(initialHour)
     private var _minute by mutableIntStateOf(initialMinute)
 
@@ -78,9 +78,9 @@ private class InvitationTimePickerStateImpl(
 
     companion object {
         fun Saver() =
-            Saver<InvitationTimePickerStateImpl, List<Int>>(
+            Saver<NachoTimePickerStateImpl, List<Int>>(
                 save = { listOf(it.hour, it.minute, it.minuteInterval) },
-                restore = { InvitationTimePickerStateImpl(it[0], it[1], it[2]) },
+                restore = { NachoTimePickerStateImpl(it[0], it[1], it[2]) },
             )
     }
 }
@@ -89,10 +89,10 @@ private class InvitationTimePickerStateImpl(
 fun rememberInvitationTimePickerState(
     initialHour: Int = 0,
     initialMinute: Int = 0,
-    minuteInterval: Int = InvitationTimePickerDefaults.MINUTE_INTERVAL_5,
-): InvitationTimePickerState =
-    rememberSaveable(saver = InvitationTimePickerStateImpl.Saver()) {
-        InvitationTimePickerStateImpl(
+    minuteInterval: Int = NachoTimePickerDefaults.MINUTE_INTERVAL_5,
+): NachoTimePickerState =
+    rememberSaveable(saver = NachoTimePickerStateImpl.Saver()) {
+        NachoTimePickerStateImpl(
             initialHour = initialHour,
             initialMinute = initialMinute,
             minuteInterval = minuteInterval,

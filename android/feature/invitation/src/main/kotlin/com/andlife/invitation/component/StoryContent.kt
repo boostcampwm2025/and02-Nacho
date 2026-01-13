@@ -10,6 +10,7 @@ import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiModel
 import com.andlife.invitation.util.toUiType
@@ -29,7 +30,7 @@ fun StoryContent(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(InvitationTheme.colorScheme.backgroundOverlay),
+                .background(NachoTheme.colorScheme.backgroundOverlay),
     ) {
         when (item.type) {
             UiMediaType.IMAGE -> {
@@ -42,7 +43,7 @@ fun StoryContent(
             }
             UiMediaType.VIDEO -> {
                 // TODO: VideoPlayer 컴포넌트 구현 (ExoPlayer)
-                Box(modifier = Modifier.fillMaxSize().background(InvitationTheme.colorScheme.backgroundOverlay))
+                Box(modifier = Modifier.fillMaxSize().background(NachoTheme.colorScheme.backgroundOverlay))
             }
             UiMediaType.AUDIO -> {
             }

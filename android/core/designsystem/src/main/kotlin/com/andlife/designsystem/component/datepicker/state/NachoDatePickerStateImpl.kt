@@ -6,48 +6,48 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
-import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerCell
-import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerDate
-import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerYearMonth
+import com.andlife.designsystem.component.datepicker.model.NachoDatePickerCell
+import com.andlife.designsystem.component.datepicker.model.NachoDatePickerDate
+import com.andlife.designsystem.component.datepicker.model.NachoDatePickerYearMonth
 import com.andlife.designsystem.component.datepicker.model.getDaysCountInMonth
 import com.andlife.designsystem.component.datepicker.model.toYearMonth
-import com.andlife.designsystem.component.datepicker.ui.InvitationDatePickerDefaults
+import com.andlife.designsystem.component.datepicker.ui.NachoDatePickerDefaults
 import com.andlife.designsystem.component.datepicker.ui.InvitationDatePickerMode
 import kotlinx.datetime.LocalDate
 
 @Stable
-internal class InvitationDatePickerStateImpl(
-    initialSelectedDate: InvitationDatePickerDate?,
+internal class NachoDatePickerStateImpl(
+    initialSelectedDate: NachoDatePickerDate?,
     initialMode: InvitationDatePickerMode,
-) : InvitationDatePickerState {
+) : NachoDatePickerState {
     private val _selectedDate = mutableStateOf(initialSelectedDate)
     private val _displayedMonth =
         mutableStateOf(
             initialSelectedDate?.toYearMonth()
-                ?: InvitationDatePickerDate(InvitationDatePickerDefaults.today()).toYearMonth(),
+                ?: NachoDatePickerDate(NachoDatePickerDefaults.today()).toYearMonth(),
         )
     private val _mode = mutableStateOf(initialMode)
 
     override val selectedDate: LocalDate?
         get() = _selectedDate.value?.date // InvitationDatePickerDate에서 LocalDate로 변환
 
-    override val displayedMonth: InvitationDatePickerYearMonth
+    override val displayedMonth: NachoDatePickerYearMonth
         get() = _displayedMonth.value
 
     override val mode: InvitationDatePickerMode
         get() = _mode.value
 
-    override val dateCells: List<InvitationDatePickerCell> by derivedStateOf {
+    override val dateCells: List<NachoDatePickerCell> by derivedStateOf {
         val daysCountInMonth = _displayedMonth.value.getDaysCountInMonth()
-        val today = InvitationDatePickerDefaults.today()
+        val today = NachoDatePickerDefaults.today()
 
         (1..daysCountInMonth).map { day ->
             val date =
-                InvitationDatePickerDate(
+                NachoDatePickerDate(
                     LocalDate(_displayedMonth.value.year, _displayedMonth.value.month, day),
                 )
 
-            InvitationDatePickerCell(
+            NachoDatePickerCell(
                 date = date,
                 day = day,
                 isSelected = _selectedDate.value?.date == date.date,
@@ -58,7 +58,7 @@ internal class InvitationDatePickerStateImpl(
     }
 
     override fun selectDate(date: LocalDate) {
-        _selectedDate.value = InvitationDatePickerDate(date) // LocalDate에서 InvitationDatePickerDate로 변환
+        _selectedDate.value = NachoDatePickerDate(date) // LocalDate에서 InvitationDatePickerDate로 변환
     }
 
     override fun moveToPreviousMonth() {
@@ -81,13 +81,13 @@ internal class InvitationDatePickerStateImpl(
         _mode.value = InvitationDatePickerMode.YEAR_MONTH
     }
 
-    override fun showCalendar(yearMonth: InvitationDatePickerYearMonth) {
+    override fun showCalendar(yearMonth: NachoDatePickerYearMonth) {
         _displayedMonth.value = yearMonth
         _mode.value = InvitationDatePickerMode.DATE
     }
 
     companion object {
-        fun Saver(): Saver<InvitationDatePickerStateImpl, Any> =
+        fun Saver(): Saver<NachoDatePickerStateImpl, Any> =
             listSaver(
                 save = {
                     listOf(
@@ -99,15 +99,15 @@ internal class InvitationDatePickerStateImpl(
                 },
                 restore = { value ->
                     val selectedDate =
-                        value[0]?.let { InvitationDatePickerDate(LocalDate.parse(it as String)) }
+                        value[0]?.let { NachoDatePickerDate(LocalDate.parse(it as String)) }
                     val year = value[1] as Int
                     val month = value[2] as Int
                     val mode = value[3] as InvitationDatePickerMode
-                    InvitationDatePickerStateImpl(
+                    NachoDatePickerStateImpl(
                         initialSelectedDate = selectedDate,
                         initialMode = mode,
                     ).apply {
-                        _displayedMonth.value = InvitationDatePickerYearMonth(year, month)
+                        _displayedMonth.value = NachoDatePickerYearMonth(year, month)
                         _mode.value = mode
                     }
                 },

@@ -33,15 +33,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.R
-import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerCell
-import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerDate
-import com.andlife.designsystem.component.datepicker.model.InvitationDatePickerYearMonth
+import com.andlife.designsystem.component.datepicker.model.NachoDatePickerCell
+import com.andlife.designsystem.component.datepicker.model.NachoDatePickerDate
+import com.andlife.designsystem.component.datepicker.model.NachoDatePickerYearMonth
 import com.andlife.designsystem.component.datepicker.model.getFirstDayOfWeek
-import com.andlife.designsystem.component.datepicker.state.InvitationDatePickerState
+import com.andlife.designsystem.component.datepicker.state.NachoDatePickerState
 import com.andlife.designsystem.component.datepicker.state.rememberInvitationDatePickerState
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationSpacing
+import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import java.time.format.TextStyle
@@ -54,8 +55,8 @@ enum class InvitationDatePickerMode {
 
 @Composable
 private fun DateCell(
-    cell: InvitationDatePickerCell,
-    onClick: (InvitationDatePickerDate) -> Unit,
+    cell: NachoDatePickerCell,
+    onClick: (NachoDatePickerDate) -> Unit,
     colors: InvitationDatePickerColors,
     modifier: Modifier = Modifier,
 ) {
@@ -93,9 +94,9 @@ private fun DateCell(
             text = cell.day.toString(),
             style =
                 if (cell.isSelected || cell.isToday) {
-                    InvitationTheme.typography.bodyMediumMedium
+                    NachoTheme.typography.bodyMediumMedium
                 } else {
-                    InvitationTheme.typography.bodyMediumRegular
+                    NachoTheme.typography.bodyMediumRegular
                 },
             color =
                 when {
@@ -109,14 +110,14 @@ private fun DateCell(
 }
 
 @Composable
-fun InvitationDatePicker(
-    state: InvitationDatePickerState,
+fun NachoDatePicker(
+    state: NachoDatePickerState,
     modifier: Modifier = Modifier,
-    colors: InvitationDatePickerColors = InvitationDatePickerDefaults.colors(),
+    colors: InvitationDatePickerColors = NachoDatePickerDefaults.colors(),
     locale: Locale = Locale.getDefault(),
 ) {
-    val yearSuffix = stringResource(InvitationDatePickerDefaults.yearSuffixRes)
-    val monthSuffix = stringResource(InvitationDatePickerDefaults.monthSuffixRes)
+    val yearSuffix = stringResource(NachoDatePickerDefaults.yearSuffixRes)
+    val monthSuffix = stringResource(NachoDatePickerDefaults.monthSuffixRes)
 
     Crossfade(targetState = state.mode) { mode ->
         when (mode) {
@@ -174,7 +175,7 @@ private fun InvitationDatePickerHeader(
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(InvitationSpacing.large),
+                .padding(NachoSpacing.large),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -187,7 +188,7 @@ private fun InvitationDatePickerHeader(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
                     ) { onPreviousClick() }
-                    .padding(InvitationSpacing.small),
+                    .padding(NachoSpacing.small),
             tint = colors.navigationColor,
         )
 
@@ -205,11 +206,11 @@ private fun InvitationDatePickerHeader(
                         } else {
                             modifier
                         }
-                    }.padding(InvitationSpacing.small),
+                    }.padding(NachoSpacing.small),
         ) {
             Text(
                 text = title,
-                style = InvitationTheme.typography.headingMedium,
+                style = NachoTheme.typography.headingMedium,
                 color = colors.headerTextColor,
             )
             if (isClickable) {
@@ -230,7 +231,7 @@ private fun InvitationDatePickerHeader(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
                     ) { onNextClick() }
-                    .padding(InvitationSpacing.small),
+                    .padding(NachoSpacing.small),
             tint = colors.navigationColor,
         )
     }
@@ -238,15 +239,15 @@ private fun InvitationDatePickerHeader(
 
 @Composable
 private fun InvitationDatePickerCalendar(
-    state: InvitationDatePickerState,
-    onDateClick: (InvitationDatePickerDate) -> Unit,
+    state: NachoDatePickerState,
+    onDateClick: (NachoDatePickerDate) -> Unit,
     colors: InvitationDatePickerColors,
     locale: Locale,
     modifier: Modifier = Modifier,
 ) {
     val firstDayOfWeek = state.displayedMonth.getFirstDayOfWeek()
 
-    Column(modifier = modifier.padding(horizontal = InvitationSpacing.large)) {
+    Column(modifier = modifier.padding(horizontal = NachoSpacing.large)) {
         // 요일 헤더
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -261,7 +262,7 @@ private fun InvitationDatePickerCalendar(
                     text = dayOfWeek,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
-                    style = InvitationTheme.typography.bodyMediumSemiBold,
+                    style = NachoTheme.typography.bodyMediumSemiBold,
                     color = colors.weekdayTextColor,
                 )
             }
@@ -298,17 +299,17 @@ private fun InvitationDatePickerCalendar(
 
 @Composable
 private fun InvitationDatePickerYearMonthSelector(
-    yearMonth: InvitationDatePickerYearMonth,
-    onMonthSelect: (InvitationDatePickerYearMonth) -> Unit,
+    yearMonth: NachoDatePickerYearMonth,
+    onMonthSelect: (NachoDatePickerYearMonth) -> Unit,
     colors: InvitationDatePickerColors,
     monthSuffix: String,
     modifier: Modifier = Modifier,
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
-        verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium),
+        verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
         modifier = modifier.padding(),
-        contentPadding = PaddingValues(horizontal = InvitationSpacing.large),
+        contentPadding = PaddingValues(horizontal = NachoSpacing.large),
     ) {
         items(12) { index ->
             val month = index + 1
@@ -319,7 +320,7 @@ private fun InvitationDatePickerYearMonthSelector(
                     Modifier
                         .fillMaxWidth()
                         .height(64.dp)
-                        .clip(InvitationTheme.shapes.small)
+                        .clip(NachoTheme.shapes.small)
                         .background(
                             if (isCurrentMonth) {
                                 colors.selectedMonthColor
@@ -327,7 +328,7 @@ private fun InvitationDatePickerYearMonthSelector(
                                 Color.Transparent
                             },
                         ).clickable {
-                            onMonthSelect(InvitationDatePickerYearMonth(yearMonth.year, month))
+                            onMonthSelect(NachoDatePickerYearMonth(yearMonth.year, month))
                         },
                 contentAlignment = Alignment.Center,
             ) {
@@ -335,9 +336,9 @@ private fun InvitationDatePickerYearMonthSelector(
                     text = (index + 1).toString() + monthSuffix,
                     style =
                         if (isCurrentMonth) {
-                            InvitationTheme.typography.bodyMediumSemiBold
+                            NachoTheme.typography.bodyMediumSemiBold
                         } else {
-                            InvitationTheme.typography.bodyMediumRegular
+                            NachoTheme.typography.bodyMediumRegular
                         },
                     color =
                         if (isCurrentMonth) {
@@ -355,7 +356,7 @@ private fun InvitationDatePickerYearMonthSelector(
 @Composable
 private fun InvitationDatePickerPreview() {
     InvitationTheme {
-        InvitationDatePicker(
+        NachoDatePicker(
             state = rememberInvitationDatePickerState(),
         )
     }
@@ -365,7 +366,7 @@ private fun InvitationDatePickerPreview() {
 @Composable
 private fun DatePickerWithSelectedInvitationDatePreview() {
     InvitationTheme {
-        InvitationDatePicker(
+        NachoDatePicker(
             state =
                 rememberInvitationDatePickerState(
                     initialSelectedDate = LocalDate(2025, 12, 31),
@@ -378,7 +379,7 @@ private fun DatePickerWithSelectedInvitationDatePreview() {
 @Composable
 private fun InvitationDatePickerWithYearMonthModePreview() {
     InvitationTheme {
-        InvitationDatePicker(
+        NachoDatePicker(
             state =
                 rememberInvitationDatePickerState(
                     initialMode = InvitationDatePickerMode.YEAR_MONTH,

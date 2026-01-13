@@ -24,12 +24,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import coil3.compose.AsyncImage
-import com.andlife.designsystem.component.InvitationDdayChip
+import com.andlife.designsystem.component.NachoDdayChip
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationIconSize
-import com.andlife.designsystem.theme.InvitationSpacing
-import com.andlife.designsystem.theme.InvitationStroke
+import com.andlife.designsystem.theme.NachoIconSize
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 
 @Composable
@@ -45,15 +46,15 @@ fun InvitationListItem(
 ) {
     Card(
         onClick = onClick,
-        shape = InvitationTheme.shapes.medium,
+        shape = NachoTheme.shapes.medium,
         colors =
             CardDefaults.cardColors(
-                containerColor = InvitationTheme.colorScheme.backgroundPrimary,
+                containerColor = NachoTheme.colorScheme.backgroundPrimary,
             ),
         border =
             BorderStroke(
-                InvitationStroke.small,
-                InvitationTheme.colorScheme.backgroundBorder,
+                NachoStroke.small,
+                NachoTheme.colorScheme.backgroundBorder,
             ),
         modifier = modifier,
     ) {
@@ -76,11 +77,11 @@ fun InvitationListItem(
                     modifier =
                         Modifier
                             .align(Alignment.TopEnd)
-                            .padding(InvitationSpacing.large)
+                            .padding(NachoSpacing.large)
                             .background(
-                                color = InvitationTheme.colorScheme.backgroundPrimary,
-                                shape = InvitationTheme.shapes.extraLarge,
-                            ).size(InvitationIconSize.large),
+                                color = NachoTheme.colorScheme.backgroundPrimary,
+                                shape = NachoTheme.shapes.extraLarge,
+                            ).size(NachoIconSize.large),
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_more_vert_24),
@@ -90,22 +91,22 @@ fun InvitationListItem(
             }
 
             Column(
-                modifier = Modifier.padding(InvitationSpacing.medium),
-                verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium),
+                modifier = Modifier.padding(NachoSpacing.medium),
+                verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = title,
-                        style = InvitationTheme.typography.headingSmallSemiBold,
-                        color = InvitationTheme.colorScheme.textPrimary,
+                        style = NachoTheme.typography.headingSmallSemiBold,
+                        color = NachoTheme.colorScheme.textPrimary,
                         modifier = Modifier.weight(1f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
 
-                    InvitationDdayChip(
+                    NachoDdayChip(
                         label = dDayText,
                     )
                 }
@@ -113,15 +114,15 @@ fun InvitationListItem(
                 hostName?.let {
                     Text(
                         text = it,
-                        style = InvitationTheme.typography.bodyMediumMedium,
-                        color = InvitationTheme.colorScheme.textSecondary,
+                        style = NachoTheme.typography.bodyMediumMedium,
+                        color = NachoTheme.colorScheme.textSecondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
 
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(InvitationSpacing.xSmall),
+                    verticalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
                 ) {
                     IconTextRow(iconRes = R.drawable.ic_calendar_24, text = startTime)
                     IconTextRow(iconRes = R.drawable.ic_location_24, text = address)
@@ -140,7 +141,7 @@ private fun IconTextRow(
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.xSmall),
+        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
     ) {
         Icon(
             painter = painterResource(id = iconRes),
@@ -150,8 +151,8 @@ private fun IconTextRow(
 
         Text(
             text = text,
-            style = InvitationTheme.typography.bodyMediumRegular,
-            color = InvitationTheme.colorScheme.textSecondary,
+            style = NachoTheme.typography.bodyMediumRegular,
+            color = NachoTheme.colorScheme.textSecondary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -164,7 +165,7 @@ private fun InvitationListItemPreview() {
     InvitationTheme {
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
         ) {
             InvitationListItem(
                 imageUrl = "https://example.com/image.jpg",

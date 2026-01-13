@@ -1,4 +1,4 @@
-package com.andlife.invitationzzang.ui.theme
+package com.andlife.nacho.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

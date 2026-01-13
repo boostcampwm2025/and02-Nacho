@@ -22,9 +22,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationIconSize
-import com.andlife.designsystem.theme.InvitationSpacing
+import com.andlife.designsystem.theme.NachoIconSize
+import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 
 @Composable
@@ -44,9 +45,9 @@ fun StoryTextSection(
                     if (isExpanded) {
                         Modifier.fillMaxSize()
                     } else {
-                        Modifier.heightIn(min = InvitationIconSize.textBox)
+                        Modifier.heightIn(min = NachoIconSize.textBox)
                     },
-                ).background(InvitationTheme.colorScheme.backgroundOverlay)
+                ).background(NachoTheme.colorScheme.backgroundOverlay)
                 .clickable { if (isTextOverflowing || isExpanded) onToggleExpand() },
     ) {
         Column(
@@ -59,13 +60,13 @@ fun StoryTextSection(
                         } else {
                             Alignment.TopStart
                         },
-                    ).padding(InvitationSpacing.large)
+                    ).padding(NachoSpacing.large)
                     .animateContentSize(),
         ) {
             Text(
                 text = content,
-                style = InvitationTheme.typography.bodyMediumSemiBold,
-                color = InvitationTheme.colorScheme.textOnPrimary,
+                style = NachoTheme.typography.bodyMediumSemiBold,
+                color = NachoTheme.colorScheme.textOnPrimary,
                 maxLines = if (isExpanded) Int.MAX_VALUE else 2,
                 overflow = TextOverflow.Ellipsis,
                 onTextLayout = { textLayoutResult ->
@@ -75,7 +76,7 @@ fun StoryTextSection(
             )
 
             if (isTextOverflowing) {
-                Spacer(modifier = Modifier.height(InvitationSpacing.large))
+                Spacer(modifier = Modifier.height(NachoSpacing.large))
                 Text(
                     text =
                         if (isExpanded) {
@@ -85,8 +86,8 @@ fun StoryTextSection(
                         } else {
                             stringResource(R.string.txt_see_more)
                         },
-                    style = InvitationTheme.typography.bodyMediumSemiBold,
-                    color = InvitationTheme.colorScheme.textOnPrimary,
+                    style = NachoTheme.typography.bodyMediumSemiBold,
+                    color = NachoTheme.colorScheme.textOnPrimary,
                     modifier = Modifier.clickable { onToggleExpand() },
                 )
             }

@@ -41,20 +41,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import com.andlife.designsystem.R
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationSpacing
+import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 @Composable
-fun InvitationTimePicker(
-    state: InvitationTimePickerState,
+fun NachoTimePicker(
+    state: NachoTimePickerState,
     modifier: Modifier = Modifier,
-    colors: InvitationTimePickerColors = InvitationTimePickerDefaults.colors(),
-    styles: InvitationTimePickerTextStyles = InvitationTimePickerDefaults.textStyles(),
-    itemVerticalPadding: Dp = InvitationTimePickerDefaults.itemVerticalPadding,
+    colors: InvitationTimePickerColors = NachoTimePickerDefaults.colors(),
+    styles: InvitationTimePickerTextStyles = NachoTimePickerDefaults.textStyles(),
+    itemVerticalPadding: Dp = NachoTimePickerDefaults.itemVerticalPadding,
     isFadeEdgeEnabled: Boolean = false,
 ) {
     val density = LocalDensity.current
@@ -102,7 +103,7 @@ fun InvitationTimePicker(
             text = ":",
             style = styles.textStyle,
             color = colors.selectedTextColor,
-            modifier = Modifier.padding(horizontal = InvitationSpacing.small),
+            modifier = Modifier.padding(horizontal = NachoSpacing.small),
         )
         MinuteColumn(
             minute = state.minute,
@@ -395,11 +396,11 @@ private fun InvitationTimePickerPreview() {
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(InvitationSpacing.large),
+                    .padding(NachoSpacing.large),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            InvitationTimePicker(
+            NachoTimePicker(
                 state = state,
                 modifier =
                     Modifier
@@ -408,10 +409,10 @@ private fun InvitationTimePickerPreview() {
 
             Text(
                 text = "선택된 시간: ${state.hour12}시 ${state.minute}분 ${if (state.isPm) "오후" else "오전"}",
-                style = InvitationTheme.typography.bodyLargeMedium,
+                style = NachoTheme.typography.bodyLargeMedium,
                 modifier =
                     Modifier
-                        .padding(top = InvitationSpacing.large),
+                        .padding(top = NachoSpacing.large),
             )
         }
     }

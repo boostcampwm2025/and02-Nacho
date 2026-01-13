@@ -18,11 +18,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import coil3.compose.AsyncImage
-import com.andlife.designsystem.component.InvitationDdayChip
+import com.andlife.designsystem.component.NachoDdayChip
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationSpacing
-import com.andlife.designsystem.theme.InvitationStroke
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 
 @Composable
@@ -37,15 +38,15 @@ fun InvitationScheduleListItem(
 ) {
     Card(
         onClick = onClick,
-        shape = InvitationTheme.shapes.medium,
+        shape = NachoTheme.shapes.medium,
         colors =
             CardDefaults.cardColors(
-                containerColor = InvitationTheme.colorScheme.backgroundPrimary,
+                containerColor = NachoTheme.colorScheme.backgroundPrimary,
             ),
         border =
             BorderStroke(
-                InvitationStroke.small,
-                InvitationTheme.colorScheme.backgroundBorder,
+                NachoStroke.small,
+                NachoTheme.colorScheme.backgroundBorder,
             ),
         modifier = modifier,
     ) {
@@ -63,38 +64,38 @@ fun InvitationScheduleListItem(
             )
 
             Column(
-                modifier = Modifier.padding(InvitationSpacing.medium),
-                verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
+                modifier = Modifier.padding(NachoSpacing.medium),
+                verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = title,
-                        style = InvitationTheme.typography.bodyLargeSemiBold,
-                        color = InvitationTheme.colorScheme.textPrimary,
+                        style = NachoTheme.typography.bodyLargeSemiBold,
+                        color = NachoTheme.colorScheme.textPrimary,
                         modifier = Modifier.weight(1f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
 
-                    InvitationDdayChip(
+                    NachoDdayChip(
                         label = dDayText,
                     )
                 }
 
                 Text(
                     text = startTime,
-                    style = InvitationTheme.typography.bodyMediumRegular,
-                    color = InvitationTheme.colorScheme.textSecondary,
+                    style = NachoTheme.typography.bodyMediumRegular,
+                    color = NachoTheme.colorScheme.textSecondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
 
                 Text(
                     text = hostName,
-                    style = InvitationTheme.typography.bodyMediumRegular,
-                    color = InvitationTheme.colorScheme.textTertiary,
+                    style = NachoTheme.typography.bodyMediumRegular,
+                    color = NachoTheme.colorScheme.textTertiary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )

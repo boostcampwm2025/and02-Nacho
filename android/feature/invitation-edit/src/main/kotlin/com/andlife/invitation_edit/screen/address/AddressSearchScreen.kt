@@ -33,11 +33,12 @@ import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.andlife.designsystem.component.InvitationTextField
+import com.andlife.designsystem.component.NachoTextField
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationSpacing
-import com.andlife.designsystem.theme.InvitationStroke
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
 import com.andlife.invitation_edit.model.AddressSearchSideEffect
 import com.andlife.invitation_edit.model.AddressSearchUiEvent
@@ -94,14 +95,14 @@ private fun AddressSearchScreen(
                 onBack = { onEvent(AddressSearchUiEvent.ClickBack) },
             )
         },
-        containerColor = InvitationTheme.colorScheme.backgroundPrimary,
+        containerColor = NachoTheme.colorScheme.backgroundPrimary,
     ) { innerPadding ->
         Column(
             modifier =
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(horizontal = InvitationSpacing.medium),
+                    .padding(horizontal = NachoSpacing.medium),
         ) {
             SearchInputField(
                 query = uiState.query,
@@ -151,8 +152,8 @@ private fun AddressSearchTopBar(
         title = {
             Text(
                 text = stringResource(R.string.txt_address_search_title),
-                style = InvitationTheme.typography.headingSmallSemiBold,
-                color = InvitationTheme.colorScheme.textPrimary,
+                style = NachoTheme.typography.headingSmallSemiBold,
+                color = NachoTheme.colorScheme.textPrimary,
             )
         },
         navigationIcon = {
@@ -160,13 +161,13 @@ private fun AddressSearchTopBar(
                 Icon(
                     painter = painterResource(R.drawable.ic_arrow_back_24),
                     contentDescription = stringResource(R.string.desc_top_bar_back),
-                    tint = InvitationTheme.colorScheme.iconSecondary,
+                    tint = NachoTheme.colorScheme.iconSecondary,
                 )
             }
         },
         colors =
             TopAppBarDefaults.topAppBarColors(
-                containerColor = InvitationTheme.colorScheme.backgroundPrimary,
+                containerColor = NachoTheme.colorScheme.backgroundPrimary,
             ),
     )
 }
@@ -177,7 +178,7 @@ private fun SearchInputField(
     onQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    InvitationTextField(
+    NachoTextField(
         value = query,
         onValueChange = onQueryChange,
         placeholder = stringResource(R.string.txt_address_input_hint),
@@ -185,10 +186,10 @@ private fun SearchInputField(
             Icon(
                 painter = painterResource(R.drawable.ic_search_24),
                 contentDescription = stringResource(R.string.desc_search_input_icon),
-                tint = InvitationTheme.colorScheme.iconDisabled,
+                tint = NachoTheme.colorScheme.iconDisabled,
             )
         },
-        modifier = modifier.padding(vertical = InvitationSpacing.medium),
+        modifier = modifier.padding(vertical = NachoSpacing.medium),
     )
 }
 
@@ -200,8 +201,8 @@ private fun EmptySearchGuide(modifier: Modifier = Modifier) {
     ) {
         Text(
             text = stringResource(R.string.msg_search_guide),
-            style = InvitationTheme.typography.bodyMediumRegular,
-            color = InvitationTheme.colorScheme.textTertiary,
+            style = NachoTheme.typography.bodyMediumRegular,
+            color = NachoTheme.colorScheme.textTertiary,
         )
     }
 }
@@ -214,19 +215,19 @@ private fun SearchResultCount(
 ) {
     if (loadState is LoadState.NotLoading) {
         Row(
-            modifier = modifier.padding(InvitationSpacing.small),
+            modifier = modifier.padding(NachoSpacing.small),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.xSmall),
+            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
         ) {
             Text(
                 text = stringResource(R.string.txt_search_result),
-                style = InvitationTheme.typography.bodyMediumRegular,
-                color = InvitationTheme.colorScheme.textPrimary,
+                style = NachoTheme.typography.bodyMediumRegular,
+                color = NachoTheme.colorScheme.textPrimary,
             )
             Text(
                 text = "$itemCount",
-                style = InvitationTheme.typography.bodyMediumRegular,
-                color = InvitationTheme.colorScheme.brandPrimary,
+                style = NachoTheme.typography.bodyMediumRegular,
+                color = NachoTheme.colorScheme.brandPrimary,
             )
         }
     }
@@ -241,8 +242,8 @@ private fun AddressResultList(
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium),
-        contentPadding = PaddingValues(vertical = InvitationSpacing.medium),
+        verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
+        contentPadding = PaddingValues(vertical = NachoSpacing.medium),
     ) {
         items(count = itemCount) { index ->
             val address = getItem(index)
@@ -265,15 +266,15 @@ private fun AddressItem(
     Card(
         modifier =
             modifier.fillMaxWidth(),
-        shape = InvitationTheme.shapes.small,
+        shape = NachoTheme.shapes.small,
         colors =
             CardDefaults.cardColors(
-                containerColor = InvitationTheme.colorScheme.backgroundPrimary,
+                containerColor = NachoTheme.colorScheme.backgroundPrimary,
             ),
         border =
             BorderStroke(
-                InvitationStroke.small,
-                InvitationTheme.colorScheme.backgroundBorder,
+                NachoStroke.small,
+                NachoTheme.colorScheme.backgroundBorder,
             ),
         onClick = onClick,
     ) {
@@ -281,8 +282,8 @@ private fun AddressItem(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(InvitationSpacing.medium),
-            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
+                    .padding(NachoSpacing.medium),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -291,27 +292,27 @@ private fun AddressItem(
             ) {
                 Text(
                     text = address.addressName,
-                    style = InvitationTheme.typography.bodyMediumRegular,
-                    color = InvitationTheme.colorScheme.textPrimary,
+                    style = NachoTheme.typography.bodyMediumRegular,
+                    color = NachoTheme.colorScheme.textPrimary,
                     modifier = Modifier.weight(1f),
                 )
                 Text(
                     text = address.zipCode,
-                    style = InvitationTheme.typography.bodySmallRegular,
-                    color = InvitationTheme.colorScheme.textTertiary,
+                    style = NachoTheme.typography.bodySmallRegular,
+                    color = NachoTheme.colorScheme.textTertiary,
                 )
             }
 
             Text(
                 text = address.placeName,
-                style = InvitationTheme.typography.bodySmallRegular,
-                color = InvitationTheme.colorScheme.textSecondary,
+                style = NachoTheme.typography.bodySmallRegular,
+                color = NachoTheme.colorScheme.textSecondary,
             )
 
             Text(
                 text = address.roadAddressName,
-                style = InvitationTheme.typography.bodySmallRegular,
-                color = InvitationTheme.colorScheme.textTertiary,
+                style = NachoTheme.typography.bodySmallRegular,
+                color = NachoTheme.colorScheme.textTertiary,
             )
         }
     }
@@ -360,7 +361,7 @@ private fun AddressSearchResultPreview() {
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .padding(InvitationSpacing.medium),
+                    .padding(NachoSpacing.medium),
         ) {
             SearchResultCount(
                 itemCount = fakeAddresses.size,
@@ -369,8 +370,8 @@ private fun AddressSearchResultPreview() {
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium),
-                contentPadding = PaddingValues(vertical = InvitationSpacing.medium),
+                verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
+                contentPadding = PaddingValues(vertical = NachoSpacing.medium),
             ) {
                 items(count = fakeAddresses.size) { index ->
                     AddressItem(

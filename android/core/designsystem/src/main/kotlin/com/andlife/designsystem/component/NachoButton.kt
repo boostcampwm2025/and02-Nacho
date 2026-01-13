@@ -20,23 +20,24 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.R
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationElevation
+import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 
 @Composable
-fun InvitationButton(
+fun NachoButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    shape: Shape = InvitationTheme.shapes.small,
+    shape: Shape = NachoTheme.shapes.small,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     elevation: ButtonElevation =
         ButtonDefaults.buttonElevation(
-            defaultElevation = InvitationElevation.small,
-            pressedElevation = InvitationElevation.medium,
+            defaultElevation = NachoElevation.small,
+            pressedElevation = NachoElevation.medium,
         ),
-    containerColor: Color = InvitationTheme.colorScheme.brandPrimary,
-    contentColor: Color = InvitationTheme.colorScheme.brandOnPrimary,
+    containerColor: Color = NachoTheme.colorScheme.brandPrimary,
+    contentColor: Color = NachoTheme.colorScheme.brandOnPrimary,
     content: @Composable RowScope.() -> Unit,
 ) {
     Button(
@@ -63,41 +64,41 @@ private fun InvitationButtonPreview() {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            InvitationButton(
+            NachoButton(
                 onClick = {},
             ) {
                 Text("저장")
             }
 
-            InvitationButton(
+            NachoButton(
                 onClick = {},
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("초대 생성하기")
             }
 
-            InvitationButton(
+            NachoButton(
                 onClick = {},
                 elevation =
                     ButtonDefaults.buttonElevation(
-                        defaultElevation = InvitationElevation.none,
-                        pressedElevation = InvitationElevation.none,
+                        defaultElevation = NachoElevation.none,
+                        pressedElevation = NachoElevation.none,
                     ),
-                containerColor = InvitationTheme.colorScheme.brandOnPrimary,
-                contentColor = InvitationTheme.colorScheme.brandPrimary,
+                containerColor = NachoTheme.colorScheme.brandOnPrimary,
+                contentColor = NachoTheme.colorScheme.brandPrimary,
             ) {
                 Text("미리보기")
             }
 
-            InvitationButton(
+            NachoButton(
                 onClick = {},
                 elevation =
                     ButtonDefaults.buttonElevation(
-                        defaultElevation = InvitationElevation.none,
-                        pressedElevation = InvitationElevation.none,
+                        defaultElevation = NachoElevation.none,
+                        pressedElevation = NachoElevation.none,
                     ),
-                containerColor = InvitationTheme.colorScheme.brandOnPrimary,
-                contentColor = InvitationTheme.colorScheme.brandPrimary,
+                containerColor = NachoTheme.colorScheme.brandOnPrimary,
+                contentColor = NachoTheme.colorScheme.brandPrimary,
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_chevron_down_16),
@@ -107,7 +108,7 @@ private fun InvitationButtonPreview() {
                 Text("초대카드 편집")
             }
 
-            InvitationButton(
+            NachoButton(
                 onClick = {},
                 enabled = false,
             ) {

@@ -1,4 +1,4 @@
-package com.andlife.invitationzzang.navigation
+package com.andlife.nacho.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -19,7 +19,7 @@ import com.andlife.invitation_edit.navigateToMyInvitationCreate
 import com.andlife.myinvitation.navigateToMyInvitation
 
 @Stable
-class InvitationNavigator(
+class NachoNavigator(
     val navController: NavHostController,
 ) {
     val currentDestination: NavDestination?
@@ -90,7 +90,7 @@ class InvitationNavigator(
 @Composable
 internal fun rememberInvitationNavigator(
     navController: NavHostController = rememberNavController(),
-): InvitationNavigator =
+): NachoNavigator =
     remember(navController) {
-        InvitationNavigator(navController)
+        NachoNavigator(navController)
     }

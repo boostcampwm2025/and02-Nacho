@@ -5,14 +5,14 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import com.andlife.designsystem.R
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 
 @Stable
-object InvitationDatePickerDefaults {
+object NachoDatePickerDefaults {
     val monthSuffixRes = R.string.txt_month
     val yearSuffixRes = R.string.txt_year
 
@@ -23,16 +23,16 @@ object InvitationDatePickerDefaults {
 
     @Composable
     fun colors(
-        selectedDateColor: Color = InvitationTheme.colorScheme.textSecondary,
-        selectedTextColor: Color = InvitationTheme.colorScheme.textOnPrimary,
-        todayBackgroundColor: Color = InvitationTheme.colorScheme.backgroundSecondary,
-        todayTextColor: Color = InvitationTheme.colorScheme.textPrimary,
-        selectedMonthColor: Color = InvitationTheme.colorScheme.brandPrimary,
-        normalTextColor: Color = InvitationTheme.colorScheme.textSecondary,
-        disabledTextColor: Color = InvitationTheme.colorScheme.textDisabled,
-        headerTextColor: Color = InvitationTheme.colorScheme.textPrimary,
-        weekdayTextColor: Color = InvitationTheme.colorScheme.textPrimary,
-        navigationColor: Color = InvitationTheme.colorScheme.textPrimary,
+        selectedDateColor: Color = NachoTheme.colorScheme.textSecondary,
+        selectedTextColor: Color = NachoTheme.colorScheme.textOnPrimary,
+        todayBackgroundColor: Color = NachoTheme.colorScheme.backgroundSecondary,
+        todayTextColor: Color = NachoTheme.colorScheme.textPrimary,
+        selectedMonthColor: Color = NachoTheme.colorScheme.brandPrimary,
+        normalTextColor: Color = NachoTheme.colorScheme.textSecondary,
+        disabledTextColor: Color = NachoTheme.colorScheme.textDisabled,
+        headerTextColor: Color = NachoTheme.colorScheme.textPrimary,
+        weekdayTextColor: Color = NachoTheme.colorScheme.textPrimary,
+        navigationColor: Color = NachoTheme.colorScheme.textPrimary,
     ): InvitationDatePickerColors =
         InvitationDatePickerColors(
             selectedDateColor = selectedDateColor,

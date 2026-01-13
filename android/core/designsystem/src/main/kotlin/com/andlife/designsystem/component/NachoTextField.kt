@@ -15,11 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import com.andlife.designsystem.R
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationSpacing
+import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 
 @Composable
-fun InvitationTextField(
+fun NachoTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
@@ -40,7 +41,7 @@ fun InvitationTextField(
         placeholder = {
             Text(
                 text = placeholder,
-                style = InvitationTheme.typography.bodyMediumSemiBold,
+                style = NachoTheme.typography.bodyMediumSemiBold,
             )
         },
         leadingIcon = leadingIcon,
@@ -50,17 +51,17 @@ fun InvitationTextField(
         readOnly = readOnly,
         singleLine = singleLine,
         minLines = if (singleLine) 1 else minLines,
-        textStyle = InvitationTheme.typography.bodyMediumSemiBold,
-        shape = InvitationTheme.shapes.extraSmall,
+        textStyle = NachoTheme.typography.bodyMediumSemiBold,
+        shape = NachoTheme.shapes.extraSmall,
         colors =
             OutlinedTextFieldDefaults.colors(
-                focusedTextColor = InvitationTheme.colorScheme.textPrimary,
-                unfocusedTextColor = InvitationTheme.colorScheme.textPrimary,
-                focusedPlaceholderColor = InvitationTheme.colorScheme.textTertiary,
-                unfocusedPlaceholderColor = InvitationTheme.colorScheme.textTertiary,
-                unfocusedBorderColor = InvitationTheme.colorScheme.backgroundBorder,
-                focusedBorderColor = InvitationTheme.colorScheme.brandPrimary,
-                disabledTextColor = InvitationTheme.colorScheme.textPrimary,
+                focusedTextColor = NachoTheme.colorScheme.textPrimary,
+                unfocusedTextColor = NachoTheme.colorScheme.textPrimary,
+                focusedPlaceholderColor = NachoTheme.colorScheme.textTertiary,
+                unfocusedPlaceholderColor = NachoTheme.colorScheme.textTertiary,
+                unfocusedBorderColor = NachoTheme.colorScheme.backgroundBorder,
+                focusedBorderColor = NachoTheme.colorScheme.brandPrimary,
+                disabledTextColor = NachoTheme.colorScheme.textPrimary,
             ),
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
@@ -74,11 +75,11 @@ private fun InvitationTextFieldPreview() {
     InvitationTheme {
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
         ) {
             var address = ""
 
-            InvitationTextField(
+            NachoTextField(
                 value = address,
                 onValueChange = { address = it },
                 placeholder = "주소를 검색해주세요",
@@ -87,13 +88,13 @@ private fun InvitationTextFieldPreview() {
                         Icon(
                             painter = painterResource(R.drawable.ic_chevron_down_16),
                             contentDescription = "검색",
-                            tint = InvitationTheme.colorScheme.iconPrimary,
+                            tint = NachoTheme.colorScheme.iconPrimary,
                         )
                     }
                 },
             )
 
-            InvitationTextField(
+            NachoTextField(
                 value = "",
                 onValueChange = { address = it },
                 placeholder = "공지사항 추가",

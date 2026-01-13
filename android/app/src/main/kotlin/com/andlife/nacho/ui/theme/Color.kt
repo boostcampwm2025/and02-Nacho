@@ -1,4 +1,4 @@
-package com.andlife.invitationzzang.ui.theme
+package com.andlife.nacho.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

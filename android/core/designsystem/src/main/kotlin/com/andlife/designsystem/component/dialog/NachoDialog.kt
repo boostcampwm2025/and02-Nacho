@@ -17,11 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationSpacing
+import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 
 @Composable
-fun InvitationDialog(
+fun NachoDialog(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
@@ -34,12 +35,12 @@ fun InvitationDialog(
             modifier =
                 modifier
                     .fillMaxWidth()
-                    .padding(horizontal = InvitationSpacing.large),
-            shape = InvitationTheme.shapes.medium,
+                    .padding(horizontal = NachoSpacing.large),
+            shape = NachoTheme.shapes.medium,
             colors =
                 CardDefaults.cardColors(
-                    containerColor = InvitationTheme.colorScheme.backgroundTertiary,
-                    contentColor = InvitationTheme.colorScheme.textPrimary,
+                    containerColor = NachoTheme.colorScheme.backgroundTertiary,
+                    contentColor = NachoTheme.colorScheme.textPrimary,
                 ),
         ) {
             content()
@@ -58,7 +59,7 @@ private fun InvitationDialogPreview() {
             }
         }
         if (dialog) {
-            InvitationDialog(onDismiss = { dialog = false }) {
+            NachoDialog(onDismiss = { dialog = false }) {
                 Text(text = "Dialog")
             }
         }

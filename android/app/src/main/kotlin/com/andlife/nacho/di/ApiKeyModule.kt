@@ -1,6 +1,6 @@
-package com.andlife.invitationzzang.di
+package com.andlife.nacho.di
 
-import com.andlife.invitationzzang.BuildConfig
+import com.andlife.nacho.BuildConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

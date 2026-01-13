@@ -11,11 +11,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.R
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationStroke
+import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 
 @Composable
-fun InvitationFilterChip(
+fun NachoFilterChip(
     label: String,
     selected: Boolean,
     onClick: () -> Unit,
@@ -27,7 +28,7 @@ fun InvitationFilterChip(
         label = {
             Text(
                 text = label,
-                style = InvitationTheme.typography.bodySmallMedium,
+                style = NachoTheme.typography.bodySmallMedium,
             )
         },
         modifier = modifier,
@@ -37,20 +38,20 @@ fun InvitationFilterChip(
                 contentDescription = stringResource(R.string.des_component_filterchip),
             )
         },
-        shape = InvitationTheme.shapes.extraLarge,
+        shape = NachoTheme.shapes.extraLarge,
         colors =
             FilterChipDefaults.filterChipColors(
-                containerColor = InvitationTheme.colorScheme.backgroundSecondary,
-                labelColor = InvitationTheme.colorScheme.textPrimary,
-                iconColor = InvitationTheme.colorScheme.iconSecondary,
-                selectedContainerColor = InvitationTheme.colorScheme.backgroundSecondary,
-                selectedLabelColor = InvitationTheme.colorScheme.textPrimary,
-                selectedTrailingIconColor = InvitationTheme.colorScheme.iconSecondary,
+                containerColor = NachoTheme.colorScheme.backgroundSecondary,
+                labelColor = NachoTheme.colorScheme.textPrimary,
+                iconColor = NachoTheme.colorScheme.iconSecondary,
+                selectedContainerColor = NachoTheme.colorScheme.backgroundSecondary,
+                selectedLabelColor = NachoTheme.colorScheme.textPrimary,
+                selectedTrailingIconColor = NachoTheme.colorScheme.iconSecondary,
             ),
         border =
             BorderStroke(
-                InvitationStroke.small,
-                InvitationTheme.colorScheme.backgroundBorder,
+                NachoStroke.small,
+                NachoTheme.colorScheme.backgroundBorder,
             ),
     )
 }
@@ -59,7 +60,7 @@ fun InvitationFilterChip(
 @Composable
 private fun InvitationFilterChipPreview() {
     InvitationTheme {
-        InvitationFilterChip(
+        NachoFilterChip(
             label = "가까운 순",
             selected = true,
             onClick = {},

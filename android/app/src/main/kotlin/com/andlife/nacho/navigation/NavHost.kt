@@ -1,4 +1,4 @@
-package com.andlife.invitationzzang.navigation
+package com.andlife.nacho.navigation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.material3.Icon
@@ -16,6 +16,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.navigation.compose.NavHost
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.home.homeNavGraph
 import com.andlife.invitation.invitationNavGraph
 import com.andlife.invitation_edit.addressSearchNavGraph
@@ -26,11 +27,11 @@ import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 fun InvitationNavHost(
-    navigator: InvitationNavigator,
+    navigator: NachoNavigator,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
-        containerColor = InvitationTheme.colorScheme.backgroundPrimary,
+        containerColor = NachoTheme.colorScheme.backgroundPrimary,
         bottomBar = {
             AnimatedVisibility(navigator.shouldShowBottomBar()) {
                 InvitationBottomBar(
@@ -83,7 +84,7 @@ private fun InvitationBottomBar(
 ) {
     NavigationBar(
         modifier = modifier,
-        containerColor = InvitationTheme.colorScheme.backgroundPrimary,
+        containerColor = NachoTheme.colorScheme.backgroundPrimary,
     ) {
         tabs.forEach { tab ->
             NavigationBarItem(
@@ -98,15 +99,15 @@ private fun InvitationBottomBar(
                 label = {
                     Text(
                         text = stringResource(tab.labelResId),
-                        style = InvitationTheme.typography.bodySmallMedium,
+                        style = NachoTheme.typography.bodySmallMedium,
                     )
                 },
                 colors =
                     NavigationBarItemDefaults.colors(
-                        selectedIconColor = InvitationTheme.colorScheme.brandPrimary,
-                        unselectedIconColor = InvitationTheme.colorScheme.textTertiary,
-                        selectedTextColor = InvitationTheme.colorScheme.brandPrimary,
-                        unselectedTextColor = InvitationTheme.colorScheme.textTertiary,
+                        selectedIconColor = NachoTheme.colorScheme.brandPrimary,
+                        unselectedIconColor = NachoTheme.colorScheme.textTertiary,
+                        selectedTextColor = NachoTheme.colorScheme.brandPrimary,
+                        unselectedTextColor = NachoTheme.colorScheme.textTertiary,
                         indicatorColor = Color.Transparent,
                     ),
             )

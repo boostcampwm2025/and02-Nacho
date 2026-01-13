@@ -1,12 +1,12 @@
-package com.andlife.invitationzzang
+package com.andlife.nacho
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.andlife.invitationzzang.navigation.InvitationNavHost
-import com.andlife.invitationzzang.navigation.rememberInvitationNavigator
+import com.andlife.nacho.navigation.InvitationNavHost
+import com.andlife.nacho.navigation.rememberInvitationNavigator
 
 @Composable
-fun InvitationApp(modifier: Modifier = Modifier) {
+fun NachoApp(modifier: Modifier = Modifier) {
     val navigator = rememberInvitationNavigator()
     InvitationNavHost(
         navigator = navigator,

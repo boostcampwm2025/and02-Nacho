@@ -7,28 +7,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationSpacing
+import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 
 @Composable
-fun InvitationDdayChip(
+fun NachoDdayChip(
     label: String,
     modifier: Modifier = Modifier,
 ) {
     Surface(
         modifier = modifier,
-        color = InvitationTheme.colorScheme.brandLight,
-        contentColor = InvitationTheme.colorScheme.brandDark,
-        shape = InvitationTheme.shapes.extraLarge,
+        color = NachoTheme.colorScheme.brandLight,
+        contentColor = NachoTheme.colorScheme.brandDark,
+        shape = NachoTheme.shapes.extraLarge,
     ) {
         Text(
             text = label,
-            style = InvitationTheme.typography.bodySmallSemiBold,
+            style = NachoTheme.typography.bodySmallSemiBold,
             modifier =
                 Modifier
                     .padding(
-                        horizontal = InvitationSpacing.medium,
-                        vertical = InvitationSpacing.xSmall,
+                        horizontal = NachoSpacing.medium,
+                        vertical = NachoSpacing.xSmall,
                     ),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -40,7 +41,7 @@ fun InvitationDdayChip(
 @Composable
 private fun InvitationDdayChipPreview() {
     InvitationTheme {
-        InvitationDdayChip(
+        NachoDdayChip(
             label = "D-3",
         )
     }

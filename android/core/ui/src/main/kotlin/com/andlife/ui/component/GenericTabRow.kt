@@ -14,8 +14,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationStroke
+import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
@@ -32,18 +33,18 @@ fun GenericTabRow(
     Column(modifier = modifier.fillMaxSize()) {
         SecondaryTabRow(
             selectedTabIndex = pagerState.currentPage,
-            containerColor = InvitationTheme.colorScheme.backgroundPrimary,
-            contentColor = InvitationTheme.colorScheme.brandPrimary,
+            containerColor = NachoTheme.colorScheme.backgroundPrimary,
+            contentColor = NachoTheme.colorScheme.brandPrimary,
             divider = {
                 HorizontalDivider(
-                    thickness = InvitationStroke.small,
-                    color = InvitationTheme.colorScheme.textTertiary,
+                    thickness = NachoStroke.small,
+                    color = NachoTheme.colorScheme.textTertiary,
                 )
             },
             indicator = {
                 TabRowDefaults.SecondaryIndicator(
                     modifier = Modifier.tabIndicatorOffset(pagerState.currentPage),
-                    color = InvitationTheme.colorScheme.brandPrimary
+                    color = NachoTheme.colorScheme.brandPrimary
                 )
             }
         ) {
@@ -57,11 +58,11 @@ fun GenericTabRow(
                     text = {
                         Text(
                             text = title,
-                            style = InvitationTheme.typography.bodyMediumSemiBold,
+                            style = NachoTheme.typography.bodyMediumSemiBold,
                         )
                     },
-                    selectedContentColor = InvitationTheme.colorScheme.brandPrimary,
-                    unselectedContentColor = InvitationTheme.colorScheme.textTertiary,
+                    selectedContentColor = NachoTheme.colorScheme.brandPrimary,
+                    unselectedContentColor = NachoTheme.colorScheme.textTertiary,
                 )
             }
         }

@@ -7,7 +7,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.andlife.designsystem.component.InvitationButton
+import com.andlife.designsystem.component.NachoButton
 
 @Composable
 fun MyInvitationRoute(
@@ -30,7 +30,7 @@ private fun MyInvitationScreen(
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
             Text(text = "MyInvitationScreen")
-            InvitationButton(
+            NachoButton(
                 onClick = onNavigateToCreate,
             ) {
                 Text("초대 생성")
