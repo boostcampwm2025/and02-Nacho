@@ -107,6 +107,7 @@ fun HomeScreen(
                 key = { _, guestBook -> guestBook.id },
             ) { index, guestBook ->
                 GuestBookItem(
+                    guestBookId = guestBook.id,
                     authorName = guestBook.author.name,
                     createdAt = guestBook.createdAt,
                     textContent = guestBook.textContent,
