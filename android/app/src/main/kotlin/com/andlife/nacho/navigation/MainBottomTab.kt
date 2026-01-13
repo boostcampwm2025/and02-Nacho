@@ -1,8 +1,8 @@
-package com.andlife.invitationzzang.navigation
+package com.andlife.nacho.navigation
 
 import com.andlife.home.Home
 import com.andlife.invitation.Invitation
-import com.andlife.invitationzzang.R
+import com.andlife.nacho.R
 import com.andlife.myinvitation.MyInvitation
 import kotlin.reflect.KClass
 

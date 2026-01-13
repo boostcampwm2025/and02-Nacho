@@ -1,4 +1,4 @@
-package com.andlife.invitationzzang
+package com.andlife.nacho
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             InvitationTheme {
-                InvitationApp()
+                NachoApp()
             }
         }
     }
