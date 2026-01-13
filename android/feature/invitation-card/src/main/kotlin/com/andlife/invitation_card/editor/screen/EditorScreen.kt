@@ -76,6 +76,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.PopupProperties
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
@@ -84,8 +85,10 @@ import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_card.R
 import com.andlife.invitation_card.editor.model.ColorPaletteMode
 import com.andlife.invitation_card.editor.model.EditorDefaults
+import com.andlife.invitation_card.editor.state.EditorState
 import com.andlife.invitation_card.editor.utils.contrastColor
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.launch
 
 @Composable
 fun EditorScreen(
@@ -93,20 +96,24 @@ fun EditorScreen(
     onBackClick: () -> Unit,
     onSaveChangesClick: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: EditorViewModel = hiltViewModel(),
 ) {
+    val state = viewModel.editorState
     var colorPaletteMode by remember { mutableStateOf<ColorPaletteMode?>(null) }
     val scope = rememberCoroutineScope()
     val pickMedia =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
             if (uri != null) {
-                // todo: 이미지 삽입
+               scope.launch {
+                   state.insertImage(uri)
+               }
             }
         }
 
     val colorForPalette = when (colorPaletteMode) {
         ColorPaletteMode.Text -> Color.Black // todo: State 연결
         ColorPaletteMode.Background -> Color.White // todo: State 연결
-        null -> null // 팔레트가 닫혔을 때는 null
+        null -> null
     }
 
     Scaffold(
@@ -170,6 +177,7 @@ fun EditorScreen(
             )
             HorizontalDivider()
             EditCard(
+                state = state,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(NachoSpacing.large),
@@ -393,7 +401,10 @@ private fun EditorToolbar(
 }
 
 @Composable
-private fun EditCard(modifier: Modifier = Modifier) {
+private fun EditCard(
+    state: EditorState,
+    modifier: Modifier = Modifier
+) {
     val scrollState = rememberScrollState()
     Surface(
         modifier = modifier,
@@ -414,7 +425,7 @@ private fun EditCard(modifier: Modifier = Modifier) {
                     AppCompatEditText(context).apply {
                         isFocusable = true
                         isFocusableInTouchMode = true
-                        // todo: State 연결
+                        state.attach(this)
                     }
                 },
             )
@@ -453,7 +464,6 @@ private fun ColorToggleButton(
             border = BorderStroke(borderDp, NachoTheme.colorScheme.backgroundBorder),
         ) { }
     }
-
 }
 
 @Composable
