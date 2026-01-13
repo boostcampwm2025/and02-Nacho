@@ -109,7 +109,7 @@ internal val LocalInvitationColorScheme = staticCompositionLocalOf { LightInvita
 @PreviewTheme
 @Composable
 private fun InvitationColorSchemePreview() {
-    InvitationTheme {
+    NachoTheme {
         Column(
             modifier =
                 Modifier

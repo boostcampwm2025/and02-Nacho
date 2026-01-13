@@ -12,7 +12,6 @@ import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.R
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoStroke
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 
 @Composable
@@ -59,7 +58,7 @@ fun NachoFilterChip(
 @PreviewTheme
 @Composable
 private fun InvitationFilterChipPreview() {
-    InvitationTheme {
+    NachoTheme {
         NachoFilterChip(
             label = "가까운 순",
             selected = true,

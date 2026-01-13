@@ -30,7 +30,6 @@ import com.andlife.designsystem.component.NachoTextField
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 import kotlinx.coroutines.launch
@@ -203,7 +202,7 @@ fun TitleAndTextField(
 @PreviewTheme
 @Composable
 private fun InvitationAddAnnouncementBottomSheetPreview() {
-    InvitationTheme {
+    NachoTheme {
         InvitationAddAnnouncementBottomSheet(
             onConfirm = { _, _ -> },
             onDismiss = {},

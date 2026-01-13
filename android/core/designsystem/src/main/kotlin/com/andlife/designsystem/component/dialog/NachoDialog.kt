@@ -18,7 +18,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 
 @Composable
@@ -51,7 +50,7 @@ fun NachoDialog(
 @Composable
 @PreviewTheme
 private fun InvitationDialogPreview() {
-    InvitationTheme {
+    NachoTheme {
         var dialog by remember { mutableStateOf(false) }
         Column(modifier = Modifier.fillMaxSize()) {
             Button(onClick = { dialog = true }) {

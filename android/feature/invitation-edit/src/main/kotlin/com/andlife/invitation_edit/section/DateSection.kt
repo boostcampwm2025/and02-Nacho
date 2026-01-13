@@ -17,7 +17,6 @@ import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.component.NachoTextField
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
 import com.andlife.invitation_edit.component.FormLabel
@@ -67,7 +66,7 @@ internal fun DateSection(
 @Composable
 @PreviewTheme
 private fun DateSectionPreview() {
-    InvitationTheme {
+    NachoTheme {
         DateSection(
             date = LocalDate(2026, 1, 6),
             onDateClick = {},

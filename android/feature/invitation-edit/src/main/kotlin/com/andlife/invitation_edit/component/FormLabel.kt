@@ -7,7 +7,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 
 @Composable
@@ -33,7 +32,7 @@ internal fun FormLabel(
 @Composable
 @PreviewTheme
 private fun FormLabelPreview() {
-    InvitationTheme {
+    NachoTheme {
         FormLabel("초대 제목")
     }
 }

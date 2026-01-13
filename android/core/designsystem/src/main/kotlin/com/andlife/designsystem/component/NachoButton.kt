@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.R
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoElevation
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 
 @Composable
@@ -60,7 +59,7 @@ fun NachoButton(
 @PreviewTheme
 @Composable
 private fun InvitationButtonPreview() {
-    InvitationTheme {
+    NachoTheme {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {

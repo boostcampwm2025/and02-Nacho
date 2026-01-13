@@ -15,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoStroke
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -80,7 +79,7 @@ fun GenericTabRow(
 @PreviewTheme
 @Composable
 private fun GenericTabScreenPreview() {
-    InvitationTheme {
+    NachoTheme {
         GenericTabRow(
             tabs = persistentListOf("Tab 1", "Tab 2", "Tab 3"),
             content = { index ->

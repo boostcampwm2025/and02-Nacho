@@ -16,7 +16,6 @@ import androidx.compose.ui.res.painterResource
 import com.andlife.designsystem.R
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 
 @Composable
@@ -72,7 +71,7 @@ fun NachoTextField(
 @PreviewTheme
 @Composable
 private fun InvitationTextFieldPreview() {
-    InvitationTheme {
+    NachoTheme {
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),

@@ -15,7 +15,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.navigation.compose.NavHost
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.home.homeNavGraph
 import com.andlife.invitation.invitationNavGraph
@@ -118,7 +117,7 @@ private fun InvitationBottomBar(
 @PreviewTheme
 @Composable
 private fun InvitationBottomBarPreview() {
-    InvitationTheme {
+    NachoTheme {
         InvitationBottomBar(
             currentTab = MainBottomTab.INVITATION,
             tabs =

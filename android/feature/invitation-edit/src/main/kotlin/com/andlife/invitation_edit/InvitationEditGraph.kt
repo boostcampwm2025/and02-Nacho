@@ -19,7 +19,6 @@ data object MyInvitationCreate
 data object AddressSearch
 
 fun NavController.navigateToMyInvitationCreate(
-    id: Long,
     navOptions: NavOptions
 ) {
     navigate(MyInvitationCreate, navOptions)

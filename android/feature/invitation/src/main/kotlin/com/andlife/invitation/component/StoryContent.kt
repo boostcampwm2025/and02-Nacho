@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiModel
@@ -60,7 +59,7 @@ fun StoryContent(
 @PreviewTheme
 @Composable
 private fun StoryContentPreview() {
-    InvitationTheme {
+    NachoTheme {
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         StoryContent(
             item =

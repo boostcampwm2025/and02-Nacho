@@ -26,7 +26,6 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
 
@@ -103,7 +102,7 @@ internal fun RemovableImage(
 @Composable
 @PreviewTheme
 private fun RemovableImagePreview() {
-    InvitationTheme {
+    NachoTheme {
         RemovableImage(
             imageUrl = "https://picsum.photos/200",
             onRemoveClick = {},

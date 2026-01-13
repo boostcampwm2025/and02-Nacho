@@ -76,10 +76,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.PopupProperties
-import com.andlife.designsystem.component.InvitationButton
+import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationSpacing
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoStroke
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_card.R
 import com.andlife.invitation_card.editor.model.ColorPaletteMode
 import com.andlife.invitation_card.editor.model.EditorDefaults
@@ -137,7 +138,7 @@ fun EditorScreen(
         Column(
             modifier =
                 Modifier
-                    .background(InvitationTheme.colorScheme.backgroundTertiary)
+                    .background(NachoTheme.colorScheme.backgroundTertiary)
                     .padding(innerPadding)
                     .fillMaxSize(),
         ) {
@@ -171,7 +172,7 @@ fun EditorScreen(
             EditCard(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(InvitationSpacing.large),
+                    .padding(NachoSpacing.large),
             )
         }
     }
@@ -189,8 +190,8 @@ private fun EditTopBar(
         title = {
             Text(
                 text = titleText,
-                style = InvitationTheme.typography.headingSmallBold,
-                color = InvitationTheme.colorScheme.textPrimary,
+                style = NachoTheme.typography.headingSmallBold,
+                color = NachoTheme.colorScheme.textPrimary,
             )
         },
         navigationIcon = {
@@ -202,18 +203,18 @@ private fun EditTopBar(
             }
         },
         actions = {
-            InvitationButton(
+            NachoButton(
                 onClick = onSaveChangesClick,
             ) {
                 Text(
                     text = stringResource(R.string.save),
-                    style = InvitationTheme.typography.bodyLargeSemiBold,
-                    color = InvitationTheme.colorScheme.textOnPrimary,
+                    style = NachoTheme.typography.bodyLargeSemiBold,
+                    color = NachoTheme.colorScheme.textOnPrimary,
                 )
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = InvitationTheme.colorScheme.backgroundPrimary,
+            containerColor = NachoTheme.colorScheme.backgroundPrimary,
         ),
         modifier = modifier,
     )
@@ -232,7 +233,7 @@ private fun EditorBottomBar(
         modifier =
             modifier
                 .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
-                .background(InvitationTheme.colorScheme.backgroundPrimary),
+                .background(NachoTheme.colorScheme.backgroundPrimary),
     ) {
         AnimatedVisibility(colorPaletteMode != null) {
             ColorPalette(
@@ -245,32 +246,32 @@ private fun EditorBottomBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(InvitationSpacing.large),
+                .padding(NachoSpacing.large),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(
                 modifier = Modifier.clickable { onUndoClick() },
-                horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.xSmall),
+                horizontalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_undo),
                     contentDescription = stringResource(R.string.undo),
-                    tint = InvitationTheme.colorScheme.textSecondary
+                    tint = NachoTheme.colorScheme.textSecondary
                 )
                 Text(text = stringResource(R.string.undo))
             }
             Spacer(modifier = Modifier.weight(1f))
             Row(
                 modifier = Modifier.clickable { onRedoClick() },
-                horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.xSmall),
+                horizontalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(text = stringResource(R.string.redo))
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_redo),
                     contentDescription = stringResource(R.string.redo),
-                    tint = InvitationTheme.colorScheme.textSecondary
+                    tint = NachoTheme.colorScheme.textSecondary
                 )
             }
         }
@@ -292,15 +293,15 @@ private fun EditorToolbar(
                 modifier
                     .height(IntrinsicSize.Min)
                     .horizontalScroll(scrollState)
-                    .background(InvitationTheme.colorScheme.backgroundPrimary)
-                    .padding(vertical = InvitationSpacing.small),
+                    .background(NachoTheme.colorScheme.backgroundPrimary)
+                    .padding(vertical = NachoSpacing.small),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.medium),
+            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
         ) {
             TextSizeBox(
                 currentSize = 16f, // todo: State 연결
                 onSizeChange = { },
-                modifier = Modifier.padding(start = InvitationSpacing.small),
+                modifier = Modifier.padding(start = NachoSpacing.small),
             )
 
             VerticalDivider()
@@ -310,9 +311,9 @@ private fun EditorToolbar(
                 selectedColor = Color.Black, // todo: State 연결
                 onClick = onClickTextColor,
                 color = if (currentPaletteMode == ColorPaletteMode.Text) {
-                    InvitationTheme.colorScheme.brandPrimary
+                    NachoTheme.colorScheme.brandPrimary
                 } else {
-                    InvitationTheme.colorScheme.iconOnSecondary
+                    NachoTheme.colorScheme.iconOnSecondary
                 }
             )
 
@@ -321,9 +322,9 @@ private fun EditorToolbar(
                 selectedColor = Color.White, // todo: State 연결
                 onClick = onClickBackgroundColor,
                 color = if (currentPaletteMode == ColorPaletteMode.Background) {
-                    InvitationTheme.colorScheme.brandPrimary
+                    NachoTheme.colorScheme.brandPrimary
                 } else {
-                    InvitationTheme.colorScheme.iconOnSecondary
+                    NachoTheme.colorScheme.iconOnSecondary
                 }
             )
 
@@ -382,7 +383,7 @@ private fun EditorToolbar(
             )
 
             StyleToggleButton(
-                modifier = Modifier.padding(end = InvitationSpacing.small),
+                modifier = Modifier.padding(end = NachoSpacing.small),
                 icon = Icons.Default.Celebration,
                 isActive = false,
                 onClick = { }, // todo: State 연결
@@ -396,16 +397,16 @@ private fun EditCard(modifier: Modifier = Modifier) {
     val scrollState = rememberScrollState()
     Surface(
         modifier = modifier,
-        shape = InvitationTheme.shapes.medium,
-        color = InvitationTheme.colorScheme.backgroundPrimary,
-        border = BorderStroke(1.dp, InvitationTheme.colorScheme.backgroundBorder),
+        shape = NachoTheme.shapes.medium,
+        color = NachoTheme.colorScheme.backgroundPrimary,
+        border = BorderStroke(NachoStroke.small, NachoTheme.colorScheme.backgroundBorder),
     ) {
         Column(
             modifier =
                 Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)
-                    .padding(InvitationSpacing.large),
+                    .padding(NachoSpacing.large),
         ) {
             AndroidView(
                 modifier = Modifier.fillMaxSize(),
@@ -427,16 +428,16 @@ private fun ColorToggleButton(
     selectedColor: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    color: Color = InvitationTheme.colorScheme.iconOnSecondary,
+    color: Color = NachoTheme.colorScheme.iconOnSecondary,
     contentDescription: String? = null,
 ) {
-    val borderDp = if (selectedColor == Color.White) 1.dp else 0.dp
+    val borderDp = if (selectedColor == Color.White) NachoStroke.small else 0.dp
     Column(
         modifier = modifier
             .width(IntrinsicSize.Min)
             .clickable { onClick() },
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(InvitationSpacing.xSmall)
+        verticalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall)
     ) {
         Icon(
             imageVector = icon,
@@ -446,10 +447,10 @@ private fun ColorToggleButton(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(4.dp),
-            shape = InvitationTheme.shapes.large,
+                .height(NachoSpacing.xSmall),
+            shape = NachoTheme.shapes.large,
             color = selectedColor,
-            border = BorderStroke(borderDp, InvitationTheme.colorScheme.backgroundBorder),
+            border = BorderStroke(borderDp, NachoTheme.colorScheme.backgroundBorder),
         ) { }
     }
 
@@ -473,9 +474,9 @@ private fun StyleToggleButton(
         imageVector = icon,
         contentDescription = contentDescription,
         tint = if (isActive) {
-            InvitationTheme.colorScheme.brandPrimary
+            NachoTheme.colorScheme.brandPrimary
         } else {
-            InvitationTheme.colorScheme.iconOnSecondary
+            NachoTheme.colorScheme.iconOnSecondary
         },
     )
 }
@@ -492,8 +493,8 @@ private fun ColorPalette(
         colorList.forEach { color ->
             ColorBox(
                 modifier = Modifier.padding(
-                    vertical = InvitationSpacing.xSmall,
-                    horizontal = InvitationSpacing.small
+                    vertical = NachoSpacing.xSmall,
+                    horizontal = NachoSpacing.small
                 ),
                 color = color,
                 selected = currentColor == color,
@@ -537,23 +538,23 @@ private fun TextSizeBox(
     currentSize: Float,
     onSizeChange: (Float) -> Unit,
     modifier: Modifier = Modifier,
-    shape: Shape = InvitationTheme.shapes.small,
+    shape: Shape = NachoTheme.shapes.small,
 ) {
     var expanded by remember { mutableStateOf(false) }
     Surface(
         shape = shape,
         onClick = { expanded = !expanded },
-        color = InvitationTheme.colorScheme.backgroundPrimary,
-        border = BorderStroke(1.dp, InvitationTheme.colorScheme.backgroundBorder),
+        color = NachoTheme.colorScheme.backgroundPrimary,
+        border = BorderStroke(1.dp, NachoTheme.colorScheme.backgroundBorder),
         modifier = modifier,
     ) {
         Row(
             modifier = Modifier.padding(
-                horizontal = InvitationSpacing.medium,
-                vertical = InvitationSpacing.small
+                horizontal = NachoSpacing.medium,
+                vertical = NachoSpacing.small
             ),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.xSmall),
+            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
         ) {
             Text(
                 text = currentSize.toInt().toString(),
@@ -567,7 +568,7 @@ private fun TextSizeBox(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
                 properties = PopupProperties(focusable = false),
-                containerColor = InvitationTheme.colorScheme.backgroundPrimary
+                containerColor = NachoTheme.colorScheme.backgroundPrimary
             ) {
                 EditorDefaults.fontFamilies.forEach {
                     DropdownMenuItem(
@@ -586,7 +587,7 @@ private fun TextSizeBox(
 @Composable
 @PreviewTheme
 private fun EditorScreenPreview() {
-    InvitationTheme {
+    NachoTheme {
         EditorScreen(
             titleText = "초대카드 생성",
             onBackClick = {},
