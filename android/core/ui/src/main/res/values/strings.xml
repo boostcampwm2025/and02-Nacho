@@ -32,6 +32,7 @@
     <string name="desc_user_profile">사용자의 프로필 사진</string>
     <string name="desc_btn_back">뒤로가기 버튼</string>
     <string name="desc_btn_download">미디어 다운로드 버튼</string>
+    <string name="desc_ic_mic">오디오 아이콘</string>
 
     <string name="txt_see_more">더보기..</string>
     <string name="txt_collapse">접기</string>

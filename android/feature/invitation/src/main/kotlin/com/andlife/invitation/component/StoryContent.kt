@@ -19,6 +19,7 @@ import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiModel
 import com.andlife.invitation.util.toUiType
+import com.andlife.ui.component.media.AudioPlayer
 import com.andlife.ui.component.media.VideoPlayer
 import com.andlife.ui.model.UiMediaType
 import kotlinx.datetime.Clock
@@ -58,6 +59,11 @@ fun StoryContent(
                 )
             }
             UiMediaType.AUDIO -> {
+                AudioPlayer(
+                    exoPlayer = exoPlayer,
+                    isActive = isActive,
+                    modifier = Modifier.fillMaxSize(),
+                )
             }
         }
         StoryTextSection(
