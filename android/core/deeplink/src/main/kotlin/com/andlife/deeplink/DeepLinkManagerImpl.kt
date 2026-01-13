@@ -1,6 +1,6 @@
 package com.andlife.deeplink
 
-import android.net.Uri
+import androidx.core.net.toUri
 import com.andlife.deeplink.di.KakaoNativeKey
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -31,8 +31,7 @@ class DeepLinkManagerImpl @Inject constructor(
             "${DeepLinkConfig.KAKAO_PARAM_INVITE_ID}=$invitationId"
 
     override fun buildAppsFlyerUrl(invitationId: Long): String =
-        Uri
-            .parse(DeepLinkConfig.AF_BASE_URL)
+        DeepLinkConfig.AF_BASE_URL.toUri()
             .buildUpon()
             .appendQueryParameter("pid", DeepLinkConfig.AF_MEDIA_SOURCE)
             .appendQueryParameter("c", DeepLinkConfig.AF_CAMPAIGN)
