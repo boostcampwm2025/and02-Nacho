@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:name=".InvitationApplication"
+        android:name=".NachoApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -16,7 +16,7 @@
         tools:replace="android:dataExtractionRules,android:fullBackupContent">
 
         <activity
-            android:name="com.andlife.invitationzzang.MainActivity"
+            android:name="com.andlife.nacho.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Invitation"
@@ -31,7 +31,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="kakao${KAKAO_NATIVE_APP_KEY}" android:host="kakaolink" />
-                <data android:scheme="https" android:host="invitationzzang.onelink.me" />
+                <data android:scheme="https" android:host="nacho.onelink.me" />
             </intent-filter>
         </activity>
     </application>

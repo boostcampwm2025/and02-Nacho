@@ -13,15 +13,15 @@ plugins {
 }
 
 android {
-    namespace = "com.andlife.invitationzzang"
+    namespace = "com.andlife.nacho"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.andlife.invitationzzang"
+        applicationId = "com.andlife.nacho"
         minSdk = 26
         targetSdk = 36
-        versionCode = 4
-        versionName = "1.3"
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="desc_top_bar_back">초대장 상세 창을 닫는 뒤로가기 아이콘 버튼</string>
+
+    <!--  방명록 페이지 상단 탭  -->
+    <string-array name="tab_titles">
+        <item>초대장</item>
+        <item>방명록</item>
+        <item>방명록</item>
+    </string-array>
 </resources>
 

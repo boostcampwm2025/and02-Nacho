@@ -14,6 +14,8 @@ internal class GuestBookRemoteDataSourceImpl @Inject constructor(
     override suspend fun getMediaCollection(invitationId: Long): Result<List<CollectionResponse>, DataError> =
         apiCall { guestBookService.getMediaCollection(invitationId) }
 
-    override suspend fun getGuestBooksByInvitationId(invitationId: Long): Result<List<GuestBookResponse>, DataError> =
+    override suspend fun getGuestBooksByInvitationId(
+        invitationId: Long,
+    ): Result<List<GuestBookResponse>, DataError> =
         apiCall { guestBookService.getGuestBooksByInvitationId(invitationId) }
 }

@@ -3,9 +3,9 @@ package com.andlife.invitation.viewmodel
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.andlife.invitation.model.InvitationDetailSideEffect
-import com.andlife.invitation.model.InvitationDetailUiEvent
-import com.andlife.invitation.model.InvitationDetailUiState
+import com.andlife.invitation.model.detail.InvitationDetailSideEffect
+import com.andlife.invitation.model.detail.InvitationDetailUiEvent
+import com.andlife.invitation.model.detail.InvitationDetailUiState
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -59,6 +59,6 @@ class InvitationDetailViewModel @Inject constructor(
     }
 
     companion object {
-        private const val KEY_INVITE_ID = "invite_id"
+        private const val KEY_INVITE_ID = "id"
     }
 }

@@ -19,9 +19,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationIconSize
-import com.andlife.designsystem.theme.InvitationSpacing
+import com.andlife.designsystem.theme.NachoIconSize
+import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 import com.andlife.ui.model.UiMediaType
 import com.andlife.ui.util.toFormatDuration
@@ -40,7 +41,7 @@ fun MediaItem(
         modifier =
             modifier
                 .aspectRatio(1f)
-                .clip(RoundedCornerShape(InvitationSpacing.small))
+                .clip(RoundedCornerShape(NachoSpacing.small))
                 .clickable { onClick() },
     ) {
         when (mediaType) {
@@ -56,13 +57,13 @@ fun MediaItem(
             }
             UiMediaType.AUDIO -> {
                 Box(
-                    modifier = Modifier.fillMaxSize().background(InvitationTheme.colorScheme.backgroundSecondary),
+                    modifier = Modifier.fillMaxSize().background(NachoTheme.colorScheme.backgroundSecondary),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_mic_24),
-                        tint = InvitationTheme.colorScheme.brandPrimary,
-                        modifier = Modifier.size(InvitationIconSize.xLarge),
+                        tint = NachoTheme.colorScheme.brandPrimary,
+                        modifier = Modifier.size(NachoIconSize.xLarge),
                         contentDescription = stringResource(R.string.desc_media_audio),
                     )
                 }
@@ -80,8 +81,8 @@ fun MediaItem(
                     Icon(
                         painter = painterResource(id = R.drawable.ic_play_circle_24),
                         contentDescription = stringResource(R.string.desc_ic_play),
-                        modifier = Modifier.align(Alignment.Center).size(InvitationIconSize.xLarge),
-                        tint = InvitationTheme.colorScheme.iconTertiary.copy(alpha = 0.8f),
+                        modifier = Modifier.align(Alignment.Center).size(NachoIconSize.xLarge),
+                        tint = NachoTheme.colorScheme.iconTertiary.copy(alpha = 0.8f),
                     )
                 }
             }
@@ -90,7 +91,7 @@ fun MediaItem(
         if (duration != null && duration > 0) {
             MediaOverlay(
                 text = duration.toFormatDuration(),
-                modifier = Modifier.align(Alignment.BottomEnd).padding(InvitationSpacing.small),
+                modifier = Modifier.align(Alignment.BottomEnd).padding(NachoSpacing.small),
             )
         }
 
@@ -101,13 +102,13 @@ fun MediaItem(
                     Modifier
                         .align(
                             Alignment.TopEnd,
-                        ).size(InvitationIconSize.medium)
-                        .padding(InvitationSpacing.xSmall),
+                        ).size(NachoIconSize.medium)
+                        .padding(NachoSpacing.xSmall),
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_cancel_24),
                     contentDescription = stringResource(R.string.desc_btn_remove),
-                    tint = InvitationTheme.colorScheme.backgroundOverlay,
+                    tint = NachoTheme.colorScheme.backgroundOverlay,
                 )
             }
         }

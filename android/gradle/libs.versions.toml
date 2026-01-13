@@ -110,8 +110,8 @@ ktlint-gradlePlugin = { group = "org.jlleitschuh.gradle.ktlint", name = "org.jll
 
 kakao-sdk-share = { group = "com.kakao.sdk", name = "v2-share", version.ref = "kakao-sdk" }
 kakao-bom = { module = "com.kakao.sdk:v2-bom", version.ref = "kakao-sdk" }
-kakao-common = { module = "com.kakao.sdk:v2-common" }
-kakao-user = { module = "com.kakao.sdk:v2-user" }
+kakao-common = { module = "com.kakao.sdk:v2-common", version.ref = "kakao-sdk" }
+kakao-user = { module = "com.kakao.sdk:v2-user", version.ref = "kakao-sdk" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

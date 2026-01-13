@@ -23,7 +23,7 @@ class DeepLinkManagerImpl @Inject constructor(
     override fun getKakaoDeepLinkPattern(): String =
         "${DeepLinkConfig.KAKAO_SCHEME_PREFIX}$kakaoNativeKey://" +
             "${DeepLinkConfig.KAKAO_HOST}?" +
-            "${DeepLinkConfig.KAKAO_PARAM_INVITE_ID}={invite_id}"
+            "${DeepLinkConfig.KAKAO_PARAM_INVITE_ID}={id}"
 
     override fun buildKakaoDeepLinkUrl(invitationId: Long): String =
         "${DeepLinkConfig.KAKAO_SCHEME_PREFIX}$kakaoNativeKey://" +
@@ -36,7 +36,7 @@ class DeepLinkManagerImpl @Inject constructor(
             .buildUpon()
             .appendQueryParameter("pid", DeepLinkConfig.AF_MEDIA_SOURCE)
             .appendQueryParameter("c", DeepLinkConfig.AF_CAMPAIGN)
-            .appendQueryParameter(DeepLinkConfig.AF_PARAM_INVITE_ID, invitationId.toString())
+            .appendQueryParameter(DeepLinkConfig.AF_DEEP_LINK_SUB1, invitationId.toString())
             .appendQueryParameter("af_dp", buildKakaoDeepLinkUrl(invitationId))
             .appendQueryParameter("af_android_url", DeepLinkConfig.PLAY_STORE_URL) // TODO: Play Store 정식 출시 후 제거
             .appendQueryParameter("af_web_dp", DeepLinkConfig.PLAY_STORE_URL) // TODO: Play Store 정식 출시 후 제거

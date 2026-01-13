@@ -23,7 +23,7 @@ dependencyResolutionManagement {
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-rootProject.name = "Invitation"
+rootProject.name = "Nacho"
 include(":app")
 include(":feature:home")
 include(":feature:invitation")
@@ -34,8 +34,9 @@ include(":core:data")
 include(":core:network")
 include(":core:datastore")
 include(":core:database")
+include(":core:deeplink")
 include(":domain")
 include(":feature:invitation-edit")
 include(":feature:invitation-card")
 include(":feature:thanks-card")
-include(":core:deeplink")
+include(":feature:model")

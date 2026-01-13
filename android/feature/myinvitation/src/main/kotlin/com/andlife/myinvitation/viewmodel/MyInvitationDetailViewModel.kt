@@ -66,6 +66,6 @@ class MyInvitationDetailViewModel @Inject constructor(
     }
 
     companion object {
-        private const val KEY_INVITE_ID = "invite_id"
+        private const val KEY_INVITE_ID = "id"
     }
 }

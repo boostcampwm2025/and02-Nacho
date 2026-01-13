@@ -8,8 +8,8 @@ import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import com.andlife.invitation.screen.InvitationDetailRoute
 import com.andlife.invitation.screen.InvitationRoute
+import com.andlife.invitation.screen.detail.InvitationDetailRoute
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -17,7 +17,7 @@ data object Invitation
 
 @Serializable
 data class InvitationDetail(
-    val invite_id: Long,
+    val id: Long,
 )
 
 fun NavController.navigateToInvitation(navOptions: NavOptions) {
@@ -25,10 +25,10 @@ fun NavController.navigateToInvitation(navOptions: NavOptions) {
 }
 
 fun NavController.navigateToInvitationDetail(
-    inviteId: Long,
+    id: Long,
     navOptions: NavOptions,
 ) {
-    navigate(InvitationDetail(inviteId), navOptions)
+    navigate(InvitationDetail(id), navOptions)
 }
 
 fun NavGraphBuilder.invitationNavGraph(

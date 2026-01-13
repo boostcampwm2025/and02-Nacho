@@ -16,7 +16,7 @@ data object MyInvitation
 
 @Serializable
 data class MyInvitationDetail(
-    val invite_id: Long,
+    val id: Long,
 )
 
 fun NavController.navigateToMyInvitation(navOptions: NavOptions) {

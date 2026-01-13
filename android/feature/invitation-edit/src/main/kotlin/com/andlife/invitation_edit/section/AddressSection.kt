@@ -12,10 +12,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.andlife.designsystem.component.InvitationTextField
+import com.andlife.designsystem.component.NachoTextField
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationSpacing
+import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
 import com.andlife.invitation_edit.component.FormLabel
 
@@ -29,13 +30,13 @@ internal fun AddressSection(
     onNavigateToAddressSearch: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = modifier.background(InvitationTheme.colorScheme.backgroundPrimary)) {
+    Box(modifier = modifier.background(NachoTheme.colorScheme.backgroundPrimary)) {
         Column(
-            modifier = Modifier.padding(InvitationSpacing.large),
-            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
+            modifier = Modifier.padding(NachoSpacing.large),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
         ) {
             FormLabel(title = stringResource(R.string.txt_invitation_address))
-            InvitationTextField(
+            NachoTextField(
                 value = placeName,
                 onValueChange = {},
                 enabled = false,
@@ -45,17 +46,17 @@ internal fun AddressSection(
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = stringResource(R.string.desc_address),
-                        tint = InvitationTheme.colorScheme.brandPrimary,
+                        tint = NachoTheme.colorScheme.brandPrimary,
                     )
                 },
                 modifier = Modifier.clickable { onNavigateToAddressSearch() },
             )
-            InvitationTextField(
+            NachoTextField(
                 value = placeAddress,
                 onValueChange = onChangePlaceAddress,
                 placeholder = stringResource(R.string.txt_address_detail),
             )
-            InvitationTextField(
+            NachoTextField(
                 value = addressGuide,
                 onValueChange = onChangeAddressGuide,
                 placeholder = stringResource(R.string.txt_guide_address),

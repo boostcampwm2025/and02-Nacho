@@ -7,7 +7,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.andlife.designsystem.component.InvitationButton
+import com.andlife.designsystem.component.NachoButton
 
 @Composable
 fun MyInvitationRoute(
@@ -34,17 +34,17 @@ private fun MyInvitationScreen(
         // TODO: 임시 나의 초대 화면
         Column(modifier = Modifier.padding(padding)) {
             Text(text = "MyInvitationScreen")
-            InvitationButton(
+            NachoButton(
                 onClick = onNavigateToCreate,
             ) {
                 Text("초대 생성")
             }
-            InvitationButton(
+            NachoButton(
                 onClick = { onNavigateToDetail(123L) }, // TODO: 실제 초대장 id 전달 필요
             ) {
                 Text("임시 초대장 123")
             }
-            InvitationButton(
+            NachoButton(
                 onClick = { onNavigateToDetail(456L) }, // TODO: 실제 초대장 id 전달 필요
             ) {
                 Text("임시 초대장 456")
