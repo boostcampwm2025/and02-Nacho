@@ -6,6 +6,7 @@ import com.andlife.ui.component.invitation.SelectedMedia
 
 data class InvitationDetailUiState(
     val selectedMedias: List<SelectedMedia> = emptyList(),
+    val textContent: String = "",
     val isUploading: Boolean = false,
     val errorMessage: String? = null,
     val guestBooks: List<GuestBook> = emptyList(),

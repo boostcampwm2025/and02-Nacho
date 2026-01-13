@@ -11,14 +11,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.andlife.designsystem.component.InvitationButton
+import com.andlife.designsystem.component.InvitationTextField
 import com.andlife.designsystem.theme.InvitationSpacing
 
 @Composable
 fun InvitationGuestBookForm(
     selectedMedias: List<SelectedMedia>,
+    textContent: String,
     isUploading: Boolean,
     onMediasSelected: (List<SelectedMedia>) -> Unit,
     onMediaRemove: (SelectedMedia) -> Unit,
+    onTextContentChange: (String) -> Unit,
     onUploadClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -33,7 +36,18 @@ fun InvitationGuestBookForm(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(modifier = Modifier.height(InvitationSpacing.large))
+        Spacer(modifier = Modifier.height(InvitationSpacing.small))
+
+        InvitationTextField(
+            value = textContent,
+            onValueChange = onTextContentChange,
+            placeholder = "메시지를 남겨주세요.",
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = false,
+            minLines = 3,
+        )
+
+        Spacer(modifier = Modifier.height(InvitationSpacing.small))
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             // 업로드 버튼

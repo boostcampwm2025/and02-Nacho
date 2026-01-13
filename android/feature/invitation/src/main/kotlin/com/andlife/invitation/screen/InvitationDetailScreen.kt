@@ -85,12 +85,16 @@ private fun GuestBookFormSection(
 ) {
     InvitationGuestBookForm(
         selectedMedias = uiState.selectedMedias,
+        textContent = uiState.textContent,
         isUploading = uiState.isUploading,
         onMediasSelected = { medias ->
             onEvent(InvitationDetailUiEvent.UpdateSelectedMedias(medias))
         },
         onMediaRemove = { media ->
             onEvent(InvitationDetailUiEvent.RemoveMedia(media))
+        },
+        onTextContentChange = { text ->
+            onEvent(InvitationDetailUiEvent.UpdateTextContent(text))
         },
         onUploadClick = {
             onEvent(InvitationDetailUiEvent.UploadMedias)

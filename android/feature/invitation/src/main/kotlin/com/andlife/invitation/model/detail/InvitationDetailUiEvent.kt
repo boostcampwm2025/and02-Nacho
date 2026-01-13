@@ -8,6 +8,10 @@ sealed interface InvitationDetailUiEvent : BaseUiEvent {
         val medias: List<SelectedMedia>,
     ) : InvitationDetailUiEvent
 
+    data class UpdateTextContent(
+        val textContent: String,
+    ) : InvitationDetailUiEvent
+
     data class RemoveMedia(
         val media: SelectedMedia,
     ) : InvitationDetailUiEvent

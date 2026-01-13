@@ -48,6 +48,7 @@ class InvitationDetailViewModel
         override fun onEvent(event: InvitationDetailUiEvent) {
             when (event) {
                 is InvitationDetailUiEvent.UpdateSelectedMedias -> updateSelectedMedias(event.medias)
+                is InvitationDetailUiEvent.UpdateTextContent -> updateTextContent(event.textContent)
                 is InvitationDetailUiEvent.RemoveMedia -> removeMedia(event.media)
                 is InvitationDetailUiEvent.UploadMedias -> uploadMedias()
                 is InvitationDetailUiEvent.ClearError -> clearError()
@@ -56,6 +57,10 @@ class InvitationDetailViewModel
 
         private fun updateSelectedMedias(medias: List<SelectedMedia>) {
             updateState { copy(selectedMedias = medias) }
+        }
+
+        private fun updateTextContent(textContent: String) {
+            updateState { copy(textContent = textContent) }
         }
 
         private fun removeMedia(media: SelectedMedia) {
@@ -136,7 +141,7 @@ class InvitationDetailViewModel
                     guestBookRepository.createGuestBook(
                         invitationId = 1, // 임시
                         userId = 1, // 임시
-                        textContent = "방명록 메시지입니다", // TODO: 실제 입력한 텍스트로 변경
+                        textContent = mutableUiState.value.textContent,
                         medias = guestBookMedias,
                     )
 
@@ -146,6 +151,7 @@ class InvitationDetailViewModel
                             copy(
                                 isUploading = false,
                                 selectedMedias = emptyList(),
+                                textContent = "",
                                 errorMessage = null,
                             )
                         }
