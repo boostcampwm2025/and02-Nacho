@@ -45,7 +45,7 @@ fun StoryTextSection(
                     if (isExpanded) {
                         Modifier.fillMaxSize()
                     } else {
-                        Modifier.heightIn(min = NachoIconSize.textBox)
+                        Modifier.heightIn(min = NachoIconSize.huge)
                     },
                 ).background(NachoTheme.colorScheme.backgroundOverlay)
                 .clickable { if (isTextOverflowing || isExpanded) onToggleExpand() },
