@@ -6,13 +6,20 @@ import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.datasource.cache.CacheDataSource
+import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
+import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import java.io.File
 
 @OptIn(UnstableApi::class)
 object VideoPlayerPool {
     private const val MAX_POOL_SIZE = 5
+    private const val CACHED_SIZE = 300 * 1024 * 1024L // 300MB
 //    private val videoPool = LinkedHashMap<String, VideoPlayer>(MAX_POOL_SIZE, 0.75f)
 //    private var lastPlayedUri: String? = null
 //    private val protectedUris = mutableSetOf<String>() // 보호할 URI 집합
@@ -26,7 +33,31 @@ object VideoPlayerPool {
         LinkedHashMap<Long, String>(MAX_POOL_SIZE, 0.75f, true) // accessOrder=true -> 최근 접근한 순서대로 정렬
     private var currentPlayingUri: String? = null
 
+    private var simpleCache: SimpleCache? = null
+    private var cacheDataSourceFactory: CacheDataSource.Factory? = null
+
+    fun initializeCache(context: Context) {
+        if (simpleCache != null) return
+
+        val cacheDir = File(context.cacheDir, "video_cache") // 캐시 디렉토리 설정
+        val databaseProvider = StandaloneDatabaseProvider(context) // 데이터베이스 제공자 생성
+        val evictor = LeastRecentlyUsedCacheEvictor(CACHED_SIZE) // LRU 캐시 제거자 생성, LRU란: 가장 오랫동안 사용되지 않은 항목을 제거
+        simpleCache = SimpleCache(cacheDir, evictor, databaseProvider) // SimpleCache 생성
+
+        cacheDataSourceFactory = CacheDataSource.Factory()
+            .setCache(simpleCache!!)
+            .setUpstreamDataSourceFactory(DefaultDataSource.Factory(context))
+            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR) // 캐시 오류 무시 설정, 오류 발생 시 캐시를 무시하고 원본 데이터 소스에서 데이터를 가져옴
+
+        Log.d("cachevvv", "비디오 캐시 초기화 완료")
+    }
+
     fun getPlayer(context: Context, uri: String): VideoPlayer {
+        if (cacheDataSourceFactory == null) {
+            initializeCache(context)
+            Log.d("cachevvv", "getPlayer: 캐시 데이터 소스 팩토리 초기화 완료")
+        }
+
         videoPool[uri]?.let { return it }
 
         // 플레이어 풀이 가득 찬 경우
@@ -40,13 +71,37 @@ object VideoPlayerPool {
             videoPool.remove(urlToRemove)?.release()
         }
 
+//        val exoPlayer = ExoPlayer.Builder(context).build().apply {
+//            val mediaSource = ProgressiveMediaSource.Factory(
+//                DefaultDataSource.Factory(context)
+//            ).createMediaSource(MediaItem.fromUri(uri))
+//            setMediaSource(mediaSource)
+//            prepare()
+//            repeatMode = Player.REPEAT_MODE_ONE
+//        }
+
         val exoPlayer = ExoPlayer.Builder(context).build().apply {
             val mediaSource = ProgressiveMediaSource.Factory(
-                DefaultDataSource.Factory(context)
+                cacheDataSourceFactory!!
             ).createMediaSource(MediaItem.fromUri(uri))
             setMediaSource(mediaSource)
             prepare()
             repeatMode = Player.REPEAT_MODE_ONE
+
+            addAnalyticsListener(object : AnalyticsListener {
+                override fun onBandwidthEstimate(
+                    eventTime: AnalyticsListener.EventTime,
+                    totalLoadTimeMs: Int,
+                    totalBytesLoaded: Long,
+                    bitrateEstimate: Long
+                ) {
+                    if (totalBytesLoaded > 0) {
+                        Log.d("cachevvv", "네트워크에서 다운로드: ${totalBytesLoaded / 1024}KB")
+                    } else {
+                        Log.d("cachevvv", "캐시에서 로드!")
+                    }
+                }
+            })
         }
 
         val newPlayer = VideoPlayer(exoPlayer, uri)
@@ -56,6 +111,9 @@ object VideoPlayerPool {
             newPlayer.play()
             Log.d("vvv", "재생 중이던 URI의 플레이어 재사용: $uri")
         }
+
+        Log.d("cachevvv", "getPlayer: 새 플레이어 생성 및 캐시 사용 중인 URI: $uri")
+        Log.d("cachevvv", "현재 캐시 사용 중인 URI들: ${videoPool.keys}")
 
         return newPlayer
     }
@@ -105,12 +163,14 @@ object VideoPlayerPool {
     }
 
     fun releaseAll() {
-//        videoPool.values.forEach { it.release() }
-//        videoPool.clear()
-//        protectedUris.clear()
         videoPool.values.forEach { it.release() }
         videoPool.clear()
         lastPlayedVideo.clear()
         currentPlayingUri = null
+
+        simpleCache?.release()
+        simpleCache = null
+        cacheDataSourceFactory = null
+        Log.d("cachevvv", "모든 비디오 플레이어 및 캐시 해제 완료")
     }
 }
