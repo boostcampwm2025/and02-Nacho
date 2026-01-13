@@ -13,6 +13,7 @@ dependencies {
     "implementation"(project(":domain"))
     "implementation"(project(":core:designsystem"))
     "implementation"(project(":core:ui"))
+    "implementation"(project(":feature:model"))
 
     "implementation"(libs.findLibrary("androidx-hilt-navigation-compose").get())
     "implementation"(libs.findLibrary("androidx-navigation-compose").get())

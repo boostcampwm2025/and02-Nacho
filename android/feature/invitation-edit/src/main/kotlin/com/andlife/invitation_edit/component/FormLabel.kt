@@ -8,6 +8,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 
 @Composable
 internal fun FormLabel(
@@ -19,12 +20,12 @@ internal fun FormLabel(
             buildAnnotatedString {
                 append(title)
                 append(" ")
-                withStyle(style = SpanStyle(color = InvitationTheme.colorScheme.brandPrimary)) {
+                withStyle(style = SpanStyle(color = NachoTheme.colorScheme.brandPrimary)) {
                     append("*")
                 }
             },
-        style = InvitationTheme.typography.bodyMediumSemiBold,
-        color = InvitationTheme.colorScheme.textPrimary,
+        style = NachoTheme.typography.bodyMediumSemiBold,
+        color = NachoTheme.colorScheme.textPrimary,
         modifier = modifier,
     )
 }

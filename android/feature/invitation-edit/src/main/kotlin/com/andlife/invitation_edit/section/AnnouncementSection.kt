@@ -32,8 +32,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationSpacing
+import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
 import com.andlife.invitation_edit.model.create.AnnouncementUiModel
 import kotlinx.collections.immutable.ImmutableList
@@ -45,31 +46,31 @@ fun LazyListScope.announcementSection(
     modifier: Modifier = Modifier,
 ) {
     item {
-        Box(modifier = modifier.background(InvitationTheme.colorScheme.backgroundPrimary)) {
+        Box(modifier = modifier.background(NachoTheme.colorScheme.backgroundPrimary)) {
             Row(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = InvitationSpacing.large)
-                        .padding(top = InvitationSpacing.large),
+                        .padding(horizontal = NachoSpacing.large)
+                        .padding(top = NachoSpacing.large),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = stringResource(R.string.txt_announcement),
-                    style = InvitationTheme.typography.bodyMediumSemiBold,
-                    color = InvitationTheme.colorScheme.textPrimary,
+                    style = NachoTheme.typography.bodyMediumSemiBold,
+                    color = NachoTheme.colorScheme.textPrimary,
                 )
                 TextButton(onAddAnnouncementClick) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = stringResource(R.string.desc_add_announcement),
-                        tint = InvitationTheme.colorScheme.brandPrimary,
+                        tint = NachoTheme.colorScheme.brandPrimary,
                     )
                     Text(
                         text = stringResource(R.string.txt_add_announcement),
-                        style = InvitationTheme.typography.bodyMediumMedium,
-                        color = InvitationTheme.colorScheme.brandPrimary,
+                        style = NachoTheme.typography.bodyMediumMedium,
+                        color = NachoTheme.colorScheme.brandPrimary,
                     )
                 }
             }
@@ -81,16 +82,16 @@ fun LazyListScope.announcementSection(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .background(InvitationTheme.colorScheme.backgroundPrimary),
+                        .background(NachoTheme.colorScheme.backgroundPrimary),
             ) {
                 Text(
                     text = stringResource(R.string.desc_add_announcement),
-                    style = InvitationTheme.typography.bodyMediumSemiBold,
-                    color = InvitationTheme.colorScheme.textTertiary,
+                    style = NachoTheme.typography.bodyMediumSemiBold,
+                    color = NachoTheme.colorScheme.textTertiary,
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(vertical = InvitationSpacing.threeXLarge),
+                            .padding(vertical = NachoSpacing.threeXLarge),
                     textAlign = TextAlign.Center,
                 )
             }
@@ -104,7 +105,7 @@ fun LazyListScope.announcementSection(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .background(InvitationTheme.colorScheme.backgroundPrimary),
+                        .background(NachoTheme.colorScheme.backgroundPrimary),
             ) {
                 AnnouncementItem(
                     announcementUiModel = item,
@@ -120,14 +121,14 @@ private fun AnnouncementItem(
     announcementUiModel: AnnouncementUiModel,
     onRemoveClick: () -> Unit,
     modifier: Modifier = Modifier,
-    shape: Shape = InvitationTheme.shapes.small,
-    color: Color = InvitationTheme.colorScheme.backgroundSecondary,
+    shape: Shape = NachoTheme.shapes.small,
+    color: Color = NachoTheme.colorScheme.backgroundSecondary,
 ) {
     Surface(
         modifier =
             modifier.padding(
-                horizontal = InvitationSpacing.large,
-                vertical = InvitationSpacing.small,
+                horizontal = NachoSpacing.large,
+                vertical = NachoSpacing.small,
             ),
         shape = shape,
         color = color,
@@ -135,36 +136,36 @@ private fun AnnouncementItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = InvitationSpacing.large, vertical = InvitationSpacing.medium)
+                .padding(horizontal = NachoSpacing.large, vertical = NachoSpacing.medium)
                 .height(IntrinsicSize.Min),
         ) {
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium),
+                verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
             ) {
                 Text(
                     text = announcementUiModel.title,
-                    style = InvitationTheme.typography.bodyLargeMedium,
-                    color = InvitationTheme.colorScheme.textPrimary,
+                    style = NachoTheme.typography.bodyLargeMedium,
+                    color = NachoTheme.colorScheme.textPrimary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
 
                 Text(
                     text = announcementUiModel.content,
-                    style = InvitationTheme.typography.bodyMediumMedium,
-                    color = InvitationTheme.colorScheme.textSecondary,
+                    style = NachoTheme.typography.bodyMediumMedium,
+                    color = NachoTheme.colorScheme.textSecondary,
                 )
             }
             Column(modifier = Modifier) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_reorder),
                     contentDescription = null,
-                    tint = InvitationTheme.colorScheme.textTertiary
+                    tint = NachoTheme.colorScheme.textTertiary
                 )
                 Spacer(
                     modifier = Modifier
-                        .heightIn(min = InvitationSpacing.xLarge)
+                        .heightIn(min = NachoSpacing.xLarge)
                         .weight(1f)
                 )
                 Icon(
@@ -175,7 +176,7 @@ private fun AnnouncementItem(
                         ),
                     imageVector = ImageVector.vectorResource(R.drawable.ic_trash),
                     contentDescription = null,
-                    tint = InvitationTheme.colorScheme.textTertiary
+                    tint = NachoTheme.colorScheme.textTertiary
                 )
             }
         }

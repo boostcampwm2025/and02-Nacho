@@ -22,6 +22,7 @@ val BackgroundSecondary = Color(0xFFF3F4F6)
 val BackgroundSurface = Color(0xFFFFF8F8)
 val BackgroundBorder = Color(0xFFD1D5DB)
 val BackgroundOverlay = Color(0x80000000)
+val BackgroundInverse = Color(0xFF111111)
 val BackgroundTertiary = Color(0xFFF9FAFB)
 
 // Text
@@ -53,6 +54,7 @@ data class InvitationColorScheme(
     val backgroundBorder: Color,
     val backgroundOverlay: Color,
     val backgroundTertiary: Color,
+    val backgroundInverse: Color,
     val textPrimary: Color,
     val textSecondary: Color,
     val textTertiary: Color,
@@ -77,6 +79,7 @@ val LightInvitationColorScheme =
         backgroundSurface = BackgroundSurface,
         backgroundBorder = BackgroundBorder,
         backgroundOverlay = BackgroundOverlay,
+        backgroundInverse = BackgroundInverse,
         backgroundTertiary = BackgroundTertiary,
         textPrimary = TextPrimary,
         textSecondary = TextSecondary,
@@ -111,21 +114,21 @@ private fun InvitationColorSchemePreview() {
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(InvitationTheme.colorScheme.backgroundPrimary)
-                    .padding(InvitationSpacing.medium),
-            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.large),
+                    .background(NachoTheme.colorScheme.backgroundPrimary)
+                    .padding(NachoSpacing.medium),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
         ) {
             Text(
                 text = "Hello",
-                color = InvitationTheme.colorScheme.textTertiary,
-                style = InvitationTheme.typography.headingLarge,
+                color = NachoTheme.colorScheme.textTertiary,
+                style = NachoTheme.typography.headingLarge,
             )
 
             Box(
                 modifier =
                     Modifier
                         .size(50.dp)
-                        .background(InvitationTheme.colorScheme.brandPrimary),
+                        .background(NachoTheme.colorScheme.brandPrimary),
             )
         }
     }

@@ -23,7 +23,7 @@ fun InvitationTheme(
     }
 }
 
-object InvitationTheme {
+object NachoTheme {
     val colorScheme: InvitationColorScheme
         @Composable
         get() = LocalInvitationColorScheme.current

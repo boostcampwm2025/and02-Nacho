@@ -8,4 +8,7 @@ data class MyInvitationCollectionUiState(
     val isLoading: Boolean = false,
     val mediaItems: ImmutableList<MyInvitationCollectionUiModel> = persistentListOf(),
     val errorMessage: String? = null,
+    val isDetailMode: Boolean = false,
+    val selectedIndex: Int = 0,
+    val isTextExpanded: Boolean = false,
 ) : BaseUiState

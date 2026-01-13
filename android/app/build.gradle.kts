@@ -13,11 +13,11 @@ plugins {
 }
 
 android {
-    namespace = "com.andlife.invitationzzang"
+    namespace = "com.andlife.nacho"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.andlife.invitationzzang"
+        applicationId = "com.andlife.nacho"
         minSdk = 26
         targetSdk = 36
         versionCode = 1

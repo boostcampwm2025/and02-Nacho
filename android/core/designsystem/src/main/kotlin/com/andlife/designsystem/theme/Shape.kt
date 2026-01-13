@@ -40,27 +40,27 @@ private fun InvitationShapesPreview() {
         ) {
             Button(
                 onClick = {},
-                shape = InvitationTheme.shapes.extraSmall,
+                shape = NachoTheme.shapes.extraSmall,
             ) {}
 
             Button(
                 onClick = {},
-                shape = InvitationTheme.shapes.small,
+                shape = NachoTheme.shapes.small,
             ) {}
 
             Button(
                 onClick = {},
-                shape = InvitationTheme.shapes.medium,
+                shape = NachoTheme.shapes.medium,
             ) {}
 
             Button(
                 onClick = {},
-                shape = InvitationTheme.shapes.large,
+                shape = NachoTheme.shapes.large,
             ) {}
 
             Button(
                 onClick = {},
-                shape = InvitationTheme.shapes.extraLarge,
+                shape = NachoTheme.shapes.extraLarge,
             ) {}
         }
     }
