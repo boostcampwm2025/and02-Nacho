@@ -71,7 +71,7 @@ class InvitationDetailViewModel
             }
         }
 
-        // asdf
+        // 등록 버튼 누를 시 호출
         private fun uploadMedias() {
             val medias = mutableUiState.value.selectedMedias
             val textContent = mutableUiState.value.textContent
