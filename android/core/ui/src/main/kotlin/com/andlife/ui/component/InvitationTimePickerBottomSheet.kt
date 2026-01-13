@@ -17,13 +17,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.andlife.designsystem.component.InvitationButton
-import com.andlife.designsystem.component.timepicker.InvitationTimePicker
+import com.andlife.designsystem.component.NachoButton
+import com.andlife.designsystem.component.timepicker.NachoTimePicker
 import com.andlife.designsystem.component.timepicker.rememberInvitationTimePickerState
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationElevation
-import com.andlife.designsystem.theme.InvitationSpacing
+import com.andlife.designsystem.theme.NachoElevation
+import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 import kotlinx.coroutines.launch
 
@@ -48,10 +49,10 @@ fun InvitationTimePickerBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
-        containerColor = InvitationTheme.colorScheme.backgroundPrimary,
+        containerColor = NachoTheme.colorScheme.backgroundPrimary,
         dragHandle = {
             BottomSheetDefaults.DragHandle(
-                color = InvitationTheme.colorScheme.backgroundBorder,
+                color = NachoTheme.colorScheme.backgroundBorder,
             )
         },
         modifier = modifier,
@@ -60,15 +61,15 @@ fun InvitationTimePickerBottomSheet(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = InvitationSpacing.large)
-                    .padding(bottom = InvitationSpacing.large),
+                    .padding(horizontal = NachoSpacing.large)
+                    .padding(bottom = NachoSpacing.large),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.xLarge),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.xLarge),
         ) {
-            InvitationTimePicker(
+            NachoTimePicker(
                 state = timePickerState,
             )
-            InvitationButton(
+            NachoButton(
                 onClick = {
                     onConfirm(timePickerState.hour, timePickerState.minute)
                     scope
@@ -77,16 +78,16 @@ fun InvitationTimePickerBottomSheet(
                         }.invokeOnCompletion { onDismissRequest() }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(vertical = InvitationSpacing.large),
+                contentPadding = PaddingValues(vertical = NachoSpacing.large),
                 elevation =
                     ButtonDefaults.buttonElevation(
-                        defaultElevation = InvitationElevation.none,
-                        pressedElevation = InvitationElevation.none,
+                        defaultElevation = NachoElevation.none,
+                        pressedElevation = NachoElevation.none,
                     ),
             ) {
                 Text(
                     text = stringResource(id = R.string.btn_label_confirm),
-                    style = InvitationTheme.typography.bodyLargeSemiBold,
+                    style = NachoTheme.typography.bodyLargeSemiBold,
                 )
             }
         }

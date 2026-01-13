@@ -11,10 +11,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import com.andlife.designsystem.component.InvitationTextField
+import com.andlife.designsystem.component.NachoTextField
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationSpacing
+import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
 import com.andlife.invitation_edit.component.FormLabel
 
@@ -24,13 +25,13 @@ internal fun TitleSection(
     onTitleChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = modifier.background(InvitationTheme.colorScheme.backgroundPrimary)) {
+    Box(modifier = modifier.background(NachoTheme.colorScheme.backgroundPrimary)) {
         Column(
-            modifier = Modifier.padding(InvitationSpacing.large),
-            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
+            modifier = Modifier.padding(NachoSpacing.large),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
         ) {
             FormLabel(title = stringResource(R.string.txt_title))
-            InvitationTextField(
+            NachoTextField(
                 value = title,
                 onValueChange = onTitleChange,
                 placeholder = stringResource(R.string.desc_title),

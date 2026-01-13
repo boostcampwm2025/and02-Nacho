@@ -111,21 +111,21 @@ private fun InvitationColorSchemePreview() {
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(InvitationTheme.colorScheme.backgroundPrimary)
-                    .padding(InvitationSpacing.medium),
-            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.large),
+                    .background(NachoTheme.colorScheme.backgroundPrimary)
+                    .padding(NachoSpacing.medium),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
         ) {
             Text(
                 text = "Hello",
-                color = InvitationTheme.colorScheme.textTertiary,
-                style = InvitationTheme.typography.headingLarge,
+                color = NachoTheme.colorScheme.textTertiary,
+                style = NachoTheme.typography.headingLarge,
             )
 
             Box(
                 modifier =
                     Modifier
                         .size(50.dp)
-                        .background(InvitationTheme.colorScheme.brandPrimary),
+                        .background(NachoTheme.colorScheme.brandPrimary),
             )
         }
     }

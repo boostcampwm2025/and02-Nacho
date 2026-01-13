@@ -6,10 +6,11 @@ import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.andlife.designsystem.component.InvitationButton
+import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationSpacing
+import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 
 @Composable
 internal fun BottomBarSection(
@@ -19,19 +20,19 @@ internal fun BottomBarSection(
 ) {
     BottomAppBar(
         modifier = modifier,
-        containerColor = InvitationTheme.colorScheme.backgroundPrimary,
+        containerColor = NachoTheme.colorScheme.backgroundPrimary,
     ) {
-        InvitationButton(
+        NachoButton(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(InvitationSpacing.large),
+                    .padding(NachoSpacing.large),
             onClick = onClick,
         ) {
             Text(
                 text = title,
-                style = InvitationTheme.typography.bodyLargeSemiBold,
-                color = InvitationTheme.colorScheme.textOnPrimary,
+                style = NachoTheme.typography.bodyLargeSemiBold,
+                color = NachoTheme.colorScheme.textOnPrimary,
             )
         }
     }

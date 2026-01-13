@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringArrayResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.andlife.designsystem.component.InvitationButton
+import com.andlife.designsystem.component.NachoButton
 import com.andlife.invitation.screen.guestbook.InvitationCollectionRoute
 import com.andlife.invitation.viewmodel.InvitationDetailViewModel
 import com.andlife.ui.R
@@ -53,7 +53,7 @@ private fun InvitationDetailScreen(
                     .fillMaxSize()
                     .padding(innerPadding),
         ) {
-            InvitationButton(
+            NachoButton(
                 onClick = onNavigateBack,
             ) {
                 Text("뒤로가기")

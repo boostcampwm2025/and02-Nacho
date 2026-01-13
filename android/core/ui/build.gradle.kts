@@ -8,6 +8,7 @@ android {
 }
 
 dependencies {
+    implementation(projects.feature.model)
     // designSystem
     implementation(projects.core.designsystem)
 

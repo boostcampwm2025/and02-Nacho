@@ -10,9 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.andlife.designsystem.component.InvitationButton
-import com.andlife.designsystem.theme.InvitationSpacing
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.component.NachoButton
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
 
 @Composable
@@ -24,38 +24,38 @@ internal fun DeleteDialogContent(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(InvitationSpacing.large),
+            .padding(NachoSpacing.large),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = stringResource(R.string.txt_remove_announcement),
-            style = InvitationTheme.typography.bodyLargeSemiBold
+            style = NachoTheme.typography.bodyLargeSemiBold
         )
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = InvitationSpacing.large),
-            horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.medium)
+                .padding(top = NachoSpacing.large),
+            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
         ) {
-            InvitationButton(
+            NachoButton(
                 modifier = Modifier.weight(1f),
                 onClick = onDismiss,
-                containerColor = InvitationTheme.colorScheme.backgroundBorder,
+                containerColor = NachoTheme.colorScheme.backgroundBorder,
             ) {
                 Text(
                     text = stringResource(R.string.txt_cancel),
-                    style = InvitationTheme.typography.bodyMediumMedium
+                    style = NachoTheme.typography.bodyMediumMedium
                 )
             }
 
-            InvitationButton(
+            NachoButton(
                 modifier = Modifier.weight(1f),
                 onClick = onConfirm
             ) {
                 Text(
                     text = stringResource(R.string.txt_remove),
-                    style = InvitationTheme.typography.bodyMediumMedium
+                    style = NachoTheme.typography.bodyMediumMedium
                 )
             }
 

@@ -9,8 +9,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationSpacing
+import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiModel
 import com.andlife.invitation.util.toUiType
@@ -29,14 +30,14 @@ fun InvitationMediaGridView(
 ) {
     Surface(
         modifier = modifier,
-        color = InvitationTheme.colorScheme.backgroundPrimary
+        color = NachoTheme.colorScheme.backgroundPrimary
     ) {
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
             modifier = modifier,
-            contentPadding = PaddingValues(InvitationSpacing.small),
-            horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
-            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
+            contentPadding = PaddingValues(NachoSpacing.small),
+            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
         ) {
             itemsIndexed(
                 items = items,
