@@ -1,5 +1,6 @@
 package com.andlife.ui.component.guestbook
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -356,39 +357,34 @@ private fun SimpleVideoPlayer(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    var videoPlayer by remember(videoUrl) { mutableStateOf<VideoPlayer?>(null) }
     var isVideoReady by remember(videoUrl) { mutableStateOf(false) }
 
     LaunchedEffect(shouldPlay, videoUrl) {
-        if (shouldPlay && videoPlayer == null) {
-            videoPlayer = VideoPlayerPool.getPlayer(context, videoUrl)
-        }
-        delay(150L) // 약간의 딜레이 후 재생 시작
         if (shouldPlay) {
             VideoPlayerPool.playPlayer(context, videoUrl, guestBookId)
-            if (videoPlayer != null) {
-                videoPlayer = VideoPlayerPool.getPlayer(context, videoUrl)
-            }
         } else {
             VideoPlayerPool.pausePlayer(videoUrl)
+            isVideoReady = false // 재생 멈추면 썸네일 다시 표시
         }
     }
 
-    DisposableEffect(videoPlayer) {
-        if (videoPlayer == null) return@DisposableEffect onDispose { }
+    val currentPlayer = if (shouldPlay) {
+        Log.d("qqq", "SimpleVideoPlayer: 재생할 플레이어 요청: $videoUrl")
+        VideoPlayerPool.getPlayer(context, videoUrl)
+    } else null
+
+    DisposableEffect(currentPlayer) {
+        if (currentPlayer == null) return@DisposableEffect onDispose { }
 
         val listener = object : Player.Listener {
-            override fun onPlaybackStateChanged(state: Int) { // 재생 상태 변경 시점
-                isVideoReady = (state == Player.STATE_READY)
-            }
-
-            override fun onRenderedFirstFrame() { // 첫 프레임 렌더링 시점
+            override fun onRenderedFirstFrame() {
                 isVideoReady = true
             }
         }
-        videoPlayer?.exoPlayer?.addListener(listener)
+        currentPlayer.exoPlayer.addListener(listener)
+
         onDispose {
-            videoPlayer?.exoPlayer?.removeListener(listener)
+            currentPlayer.exoPlayer.removeListener(listener)
         }
     }
 
@@ -397,27 +393,31 @@ private fun SimpleVideoPlayer(
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        if (videoPlayer  != null) {
+        // 재생할 때만 PlayerView 표시
+        if (currentPlayer != null) {
             AndroidView(
-                factory = { context ->
-                    PlayerView(context).apply {
+                factory = { ctx ->
+                    PlayerView(ctx).apply {
                         useController = false
                         resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-                        player = videoPlayer?.exoPlayer
                     }
+                },
+                update = { playerView ->
+                    playerView.player = currentPlayer.exoPlayer
                 },
                 modifier = Modifier.fillMaxSize(),
             )
         }
 
-        if (!isVideoReady && thumbnailUrl != null) {
-            AsyncImage(
-                model = thumbnailUrl,
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit,
-            )
-        }
+        // 비디오 준비 안 됐거나 재생 안 할 때 썸네일 표시
+//        if ((!isVideoReady || !shouldPlay) && thumbnailUrl != null) {
+//            AsyncImage(
+//                model = thumbnailUrl,
+//                contentDescription = null,
+//                modifier = Modifier.fillMaxSize(),
+//                contentScale = ContentScale.Fit,
+//            )
+//        }
     }
 }
 

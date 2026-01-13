@@ -8,9 +8,12 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -23,6 +26,7 @@ import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.model.MediaType
 import com.andlife.ui.player.VideoPlayerPool
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.delay
 import kotlin.math.max
 import kotlin.math.min
 
@@ -33,20 +37,36 @@ fun HomeScreen(
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
+    val lazyListState = rememberLazyListState()
 
-    val lazyListSTate = rememberLazyListState()
+    // 스크롤 상태 추적
+    var isScrolling by remember { mutableStateOf(false) }
+    var currentPlayingIndex by remember { mutableStateOf(-1) }
 
+    // 스크롤 멈춤 감지 및 딜레이
+    LaunchedEffect(lazyListState.isScrollInProgress) {
+        if (lazyListState.isScrollInProgress) {
+            isScrolling = true
+        } else {
+            // 스크롤 멈춤 - 300ms 딜레이 후 재생 시작
+            delay(300L)
+            if (!lazyListState.isScrollInProgress) {
+                isScrolling = false
+            }
+        }
+    }
+
+    // 재생할 비디오 인덱스 결정
     val playVideoIndex by remember {
         derivedStateOf {
-            val layoutInfo = lazyListSTate.layoutInfo
+            val layoutInfo = lazyListState.layoutInfo
             val visibleItems = layoutInfo.visibleItemsInfo
 
-            // visualMedia가 있는 아이템만 필터링하면서 가시성 비율도 함께 계산
+            // 비디오가 있는 아이템만 필터링하고 가시성 비율 계산
             val candidates = visibleItems.mapNotNull { item ->
                 val guestBook = uiState.value.guestBooks.getOrNull(item.index)
                 if (guestBook?.visualMedias?.isNotEmpty() != true) return@mapNotNull null
 
-                // 실제 화면에 보이는 높이 계산
                 val visibleHeight =
                     min(item.offset + item.size, layoutInfo.viewportEndOffset) -
                         max(item.offset, layoutInfo.viewportStartOffset)
@@ -57,22 +77,34 @@ fun HomeScreen(
             }
 
             when {
-                candidates.isEmpty() -> -1
-                candidates.size == 1 -> {
-                    // 1개만 보일 때도 최소 30% 이상은 보여야 재생
-                    if (candidates.first().second >= 0.9f) {
-                        candidates.first().first
-                    } else {
+                // 스크롤 중일 때
+                isScrolling -> {
+                    // 현재 재생 중인 비디오의 가시성 확인
+                    val currentPlayingVisibility = candidates
+                        .find { it.first == currentPlayingIndex }
+                        ?.second ?: 0f
+
+                    // 20% 이하면 정지, 아니면 계속 재생
+                    if (currentPlayingVisibility < 0.2f) {
+                        currentPlayingIndex = -1
                         -1
+                    } else {
+                        currentPlayingIndex
                     }
                 }
+                // 스크롤 멈춤 - 중앙 비디오 찾기
+                candidates.isEmpty() -> {
+                    currentPlayingIndex = -1
+                    -1
+                }
                 else -> {
-                    // 70% 이상 보이는 것 중 가장 많이 보이는 것
-                    candidates
-                        .filter { it.second >= 0.7f }
+                    // 가장 많이 보이는 (중앙에 가까운) 비디오 선택
+                    val centerIndex = candidates
                         .maxByOrNull { it.second }
-                        ?.first
-                        ?: candidates.maxByOrNull { it.second }!!.first
+                        ?.first ?: -1
+
+                    currentPlayingIndex = centerIndex
+                    centerIndex
                 }
             }
         }
@@ -96,10 +128,8 @@ fun HomeScreen(
         modifier = modifier
     ) { innerPadding ->
         LazyColumn(
-            state = lazyListSTate,
-            modifier =
-                Modifier
-                    .padding(horizontal = InvitationSpacing.large),
+            state = lazyListState,
+            modifier = Modifier.padding(horizontal = InvitationSpacing.large),
             verticalArrangement = Arrangement.spacedBy(InvitationSpacing.large),
         ) {
             itemsIndexed(
