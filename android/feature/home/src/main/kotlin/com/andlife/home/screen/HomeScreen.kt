@@ -49,7 +49,7 @@ fun HomeScreen(
     var lastScrollOffset by remember { mutableIntStateOf(0) }
     var scrollVelocity by remember { mutableFloatStateOf(0f) }
 
-    val SLOW_SCROLL_THRESHOLD = 50f 
+    val SLOW_SCROLL_THRESHOLD = 50f
 
     LaunchedEffect(lazyListState) {
         snapshotFlow { lazyListState.firstVisibleItemScrollOffset }

@@ -32,83 +32,105 @@ INSERT INTO guestbooks (id, invitation_id, user_id, text_content, created_at, up
 (20, 1, 3, '20번째 마지막 방명록 샘플입니다.', NOW(), NOW());
 
 -- 4. 미디어 상세 데이터 삽입 (제공해주신 URL 매칭)
+-- =========================================================
+-- Guestbook Videos Seed (20 posts, no reused videos)
+-- Zero-video posts: 5, 10, 15, 20
+-- =========================================================
 
--- [1번] 세로 영상 1, 이미지 1, 세로 영상 1
-INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order)
-VALUES (1, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/08b80407-0ed5-4ba0-bf32-2d11432fc2d8.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png', 15, 0);
-INSERT INTO guestbook_images (guestbook_post_id, image_url, display_order)
-VALUES (1, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg', 1);
-INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order)
-VALUES (1, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/0e9697ca-2fe8-4f46-96c5-fcc2228c59a1.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png', 12, 2);
+-- ========================
+-- test01 (posts 1~10)
+-- ========================
 
--- [2번] 가로 영상 3개
+-- 1 (3개)
 INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order) VALUES
-(2, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png', 60, 0),
-(2, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png', 50, 1),
-(2, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png', 45, 2);
+(1,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/08b80407-0ed5-4ba0-bf32-2d11432fc2d8.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,0),
+(1,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/0e9697ca-2fe8-4f46-96c5-fcc2228c59a1.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,1),
+(1,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/11cbb9c6-71e4-4e02-9f8b-0005e68c9af2.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,2);
 
--- [4번] 세로 영상 4개
+-- 2 (3개)
 INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order) VALUES
-(4, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/11cbb9c6-71e4-4e02-9f8b-0005e68c9af2.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png', 10, 0),
-(4, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/2106c39b-c8fd-4743-9648-7b9337333e6f.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png', 10, 1),
-(4, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/3472f283-6b6a-4fa4-b349-8c7effc8c672.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png', 10, 2),
-(4, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/3d41811a-afc8-4597-be41-cf8fc72ddb34.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png', 10, 3);
+(2,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/2106c39b-c8fd-4743-9648-7b9337333e6f.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,0),
+(2,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/3472f283-6b6a-4fa4-b349-8c7effc8c672.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,1),
+(2,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/3d41811a-afc8-4597-be41-cf8fc72ddb34.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,2);
 
--- [5번] 이미지 4개
-INSERT INTO guestbook_images (guestbook_post_id, image_url, display_order) VALUES
-(5, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/091bd2e7-424b-41c0-8b0b-9bbc833b6ea7.jpg', 0),
-(5, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/0e133f1a-1442-45c7-994a-19c72d061cb2.jpg', 1),
-(5, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/11eeefc1-c820-4deb-89fd-325b920f70d9.jpg', 2),
-(5, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/125850ad-64af-4305-b9a8-f97763197199.jpg', 3);
-
--- [6번] 음성 전용 2개
-INSERT INTO guestbook_audios (guestbook_post_id, audio_url, duration_seconds, display_order) VALUES
-(6, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/audios/000test01.mp3', 45, 0),
-(6, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/audios/000test02.mp3', 30, 1);
-
--- [7번] 이미지 + 가로 영상 + 음성 혼합
-INSERT INTO guestbook_images (guestbook_post_id, image_url, display_order) VALUES (7, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/13d03d07-75d4-4c45-ba4d-d1308b78d8a4.jpg', 0);
-INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order)
-VALUES (7, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png', 120, 1);
-INSERT INTO guestbook_audios (guestbook_post_id, audio_url, duration_seconds, display_order) VALUES (7, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/audios/000test03.mp3', 15, 2);
-
--- [9번] 세로 영상 + 음성
-INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order)
-VALUES (9, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/51997dee-9294-4928-ad7a-b47fc4f46dbf.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png', 8, 0);
-INSERT INTO guestbook_audios (guestbook_post_id, audio_url, duration_seconds, display_order) VALUES (9, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/audios/000test04.mp3', 20, 1);
-
--- [10번] 가로 영상 + 이미지 교차
-INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order)
-VALUES (10, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png', 30, 0);
-INSERT INTO guestbook_images (guestbook_post_id, image_url, display_order) VALUES (10, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/19ccbac5-14ad-4d6e-b679-0ae4b44d7305.jpg', 1);
-
--- [12번] 가로 영상 대량 (5개)
+-- 3 (2개)
 INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order) VALUES
-(12, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png', 10, 0),
-(12, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png', 10, 1),
-(12, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png', 10, 2),
-(12, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png', 10, 3),
-(12, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png', 10, 4);
+(3,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/51997dee-9294-4928-ad7a-b47fc4f46dbf.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,0),
+(3,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/6e01402e-e5c6-4d26-92d6-55a6893ca5c6.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,1);
 
--- [13번] 세로 영상 + 이미지
-INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order)
-VALUES (13, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/6e01402e-e5c6-4d26-92d6-55a6893ca5c6.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png', 15, 0);
-INSERT INTO guestbook_images (guestbook_post_id, image_url, display_order) VALUES (13, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/1d0bc0a4-200c-4e27-9160-2f0dcda56ac9.jpg', 1);
+-- 4 (2개)
+INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order) VALUES
+(4,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/7376e27c-81af-49b6-b39d-cab40e0dbf0e.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,0),
+(4,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/75890f9f-2e36-4cf4-8999-19eb4786e54e.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,1);
 
--- [15번] 음성 3개
-INSERT INTO guestbook_audios (guestbook_post_id, audio_url, duration_seconds, display_order) VALUES
-(15, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/audios/000test05.mp3', 30, 0),
-(15, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/audios/000test06.mp3', 30, 1),
-(15, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/audios/000test07.mp3', 30, 2);
+-- 5 (0개)
 
--- [19번] 올인원 혼합 (세로영상 + 가로영상 + 이미지 + 음성)
-INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order)
-VALUES (19, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/7376e27c-81af-49b6-b39d-cab40e0dbf0e.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png', 10, 0);
-INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order)
-VALUES (19, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png', 40, 1);
-INSERT INTO guestbook_images (guestbook_post_id, image_url, display_order) VALUES (19, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/2091bc48-f506-430b-8533-48da2ea33fff.jpg', 2);
-INSERT INTO guestbook_audios (guestbook_post_id, audio_url, duration_seconds, display_order) VALUES (19, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/audios/000test01.mp3', 5, 3);
+-- 6 (2개)
+INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order) VALUES
+(6,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/76aadf88-4287-432d-9da3-44b765d16c2d.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,0),
+(6,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/7fff5624-5c72-483d-8e67-909b96ba4609.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,1);
 
--- [20번] 가로 영상 1개 피날레
-INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order)
-VALUES (20, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png', 25, 0);
+-- 7 (2개)
+INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order) VALUES
+(7,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/9618021c-7b90-45fa-be5d-c73bb90af4f3.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,0),
+(7,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/98e99d7b-ab70-4445-872b-fae30091282c.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,1);
+
+-- 8 (2개)
+INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order) VALUES
+(8,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/bf4155d0-20a2-4f19-965f-40a7d634c8be.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,0),
+(8,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/cffcfbe2-e14b-4fdd-b807-9973f9b8fe7a.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,1);
+
+-- 9 (0개)
+-- 10 (0개)
+
+-- ========================
+-- test02 (posts 11~20)
+-- ========================
+
+-- 11 (3개)
+INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order) VALUES
+(11,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/24ecd1d1-d271-4359-9751-7b3a8176ac23.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png',10,0),
+(11,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/6cfbc48b-1272-4d2b-bd68-370816a520a7.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png',10,1),
+(11,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/bec2c2af-7cad-4705-ac34-83a58672bd23.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png',10,2);
+
+-- 12 (3개)
+INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order) VALUES
+(12,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/d017f428-cbad-446b-a627-68debb045dd8.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png',10,0),
+(12,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/d127fe56-1b1a-41cd-825e-fc23356a7481.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png',10,1),
+(12,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/dbeb1cd0-28df-4381-997d-4daecefbd97f.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png',10,2);
+
+-- 13 (3개)
+INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order) VALUES
+(13,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/fcf31769-b53c-4fc9-aa17-2d6efef8a04a.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png',10,0),
+(13,'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png',60,1),
+(13,'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png',50,2);
+
+-- 14 (2개)
+INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order) VALUES
+(14,'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png',45,0),
+(14,'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png',30,1);
+
+-- 15 (0개)
+
+-- 16 (3개)
+INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order) VALUES
+(16,'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png',30,0),
+(16,'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png',10,1),
+(16,'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png',10,2);
+
+-- 17 (3개)
+INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order) VALUES
+(17,'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png',10,0),
+(17,'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png',10,1),
+(17,'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png',10,2);
+
+-- 18 (2개)
+INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order) VALUES
+(18,'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png',10,0),
+(18,'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png',10,1);
+
+-- 19 (1개)
+INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order) VALUES
+(19,'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test02.png',10,0);
+
+-- 20 (0개)
