@@ -393,7 +393,6 @@ private fun SimpleVideoPlayer(
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        // 재생할 때만 PlayerView 표시
         if (currentPlayer != null) {
             AndroidView(
                 factory = { ctx ->
@@ -409,15 +408,14 @@ private fun SimpleVideoPlayer(
             )
         }
 
-        // 비디오 준비 안 됐거나 재생 안 할 때 썸네일 표시
-//        if ((!isVideoReady || !shouldPlay) && thumbnailUrl != null) {
-//            AsyncImage(
-//                model = thumbnailUrl,
-//                contentDescription = null,
-//                modifier = Modifier.fillMaxSize(),
-//                contentScale = ContentScale.Fit,
-//            )
-//        }
+        if ((!isVideoReady || !shouldPlay) && thumbnailUrl != null) {
+            AsyncImage(
+                model = thumbnailUrl,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit,
+            )
+        }
     }
 }
 
