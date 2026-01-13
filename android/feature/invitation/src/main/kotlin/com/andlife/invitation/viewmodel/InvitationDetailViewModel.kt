@@ -3,7 +3,6 @@ package com.andlife.invitation.viewmodel
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.andlife.domain.model.guestbook.GuestBookMedia
-import com.andlife.domain.model.guestbook.MediaFile
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.MediaFileProvider
@@ -14,6 +13,7 @@ import com.andlife.invitation.model.detail.InvitationDetailUiEvent
 import com.andlife.invitation.model.detail.InvitationDetailUiState
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
+import com.andlife.ui.model.UiMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -71,6 +71,7 @@ class InvitationDetailViewModel
             }
         }
 
+        // asdf
         private fun uploadMedias() {
             val medias = mutableUiState.value.selectedMedias
             val textContent = mutableUiState.value.textContent
@@ -94,10 +95,10 @@ class InvitationDetailViewModel
 
                             when (result) {
                                 is Result.Success -> {
-                                    val uploadedUrls = result.data.filterNotNull()
+                                    val uploadedUrls = result.data // 업로드된 미디어 URL 리스트: 업로드 실패한 미디어는 null 가능
 
                                     // 미디어 업로드 성공 후 GuestBook 생성
-                                    createGuestBook(uploadedUrls, mediaFiles, medias)
+                                    createGuestBook(uploadedUrls, medias)
                                 }
 
                                 is Result.Error -> {
@@ -111,7 +112,7 @@ class InvitationDetailViewModel
                         }
                     } else {
                         // 미디어가 없고 텍스트만 있는 경우 바로 GuestBook 생성
-                        createGuestBook(emptyList(), emptyList(), emptyList())
+                        createGuestBook(emptyList(), emptyList())
                     }
                 } catch (e: Exception) {
                     updateState { copy(isUploading = false) }
@@ -125,26 +126,32 @@ class InvitationDetailViewModel
         }
 
         private suspend fun createGuestBook(
-            uploadedUrls: List<String>,
-            mediaFiles: List<MediaFile>,
+            uploadedUrls: List<String?>,
             selectedMedias: List<SelectedMedia>,
         ) {
             try {
                 val guestBookMedias =
-                    uploadedUrls.mapIndexed { index, url ->
-                        val mediaFile = mediaFiles.getOrNull(index)
-                        val selectedMedia = selectedMedias.getOrNull(index)
-                        val thumbnailUrl =
-                            if (mediaFile?.mediaType == MediaType.VIDEO) "https://thumbnailurl.com" else null // TODO: 썸네일 URL 처리
-                        GuestBookMedia(
-                            id = 0L,
-                            type = mediaFile?.mediaType ?: MediaType.IMAGE,
-                            url = url,
-                            thumbnailUrl = thumbnailUrl,
-                            durationSeconds = selectedMedia?.duration,
-                            displayOrder = index,
-                        )
-                    }
+                    uploadedUrls
+                        .mapIndexed { index, url ->
+                            if (url == null) return@mapIndexed null // 업로드 실패한 미디어는 건너뜀
+                            val selectedMedia = selectedMedias.getOrNull(index)
+                            val thumbnailUrl =
+                                if (selectedMedia?.type == UiMediaType.VIDEO) "https://thumbnailurl.com" else null // TODO: 썸네일 URL 처리
+                            GuestBookMedia(
+                                id = 0L,
+                                type =
+                                    when (selectedMedia?.type) {
+                                        UiMediaType.IMAGE -> MediaType.IMAGE
+                                        UiMediaType.VIDEO -> MediaType.VIDEO
+                                        UiMediaType.AUDIO -> MediaType.AUDIO
+                                        else -> MediaType.IMAGE
+                                    },
+                                url = url,
+                                thumbnailUrl = thumbnailUrl,
+                                durationSeconds = selectedMedia?.duration,
+                                displayOrder = index,
+                            )
+                        }.filterNotNull()
 
                 val result =
                     guestBookRepository.createGuestBook(
