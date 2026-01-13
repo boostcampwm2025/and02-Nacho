@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.component.InvitationButton
 import com.andlife.designsystem.component.InvitationTextField
+import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationIconSize
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
@@ -70,5 +71,21 @@ fun InvitationGuestBookForm(
                 }
             }
         }
+    }
+}
+
+@PreviewTheme
+@Composable
+private fun InvitationGuestBookFormPreview() {
+    InvitationTheme {
+        InvitationGuestBookForm(
+            selectedMedias = listOf(),
+            textContent = "",
+            isUploading = false,
+            onMediasSelected = {},
+            onMediaRemove = {},
+            onTextContentChange = {},
+            onUploadClick = {},
+        )
     }
 }
