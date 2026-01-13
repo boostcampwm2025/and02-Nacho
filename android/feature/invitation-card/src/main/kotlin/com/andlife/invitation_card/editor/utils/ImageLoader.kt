@@ -127,11 +127,20 @@ class ImageLoaderImpl @Inject constructor() : ImageLoader {
         val scaleY = targetHeight.toFloat() / source.height
         val scale = max(scaleX, scaleY)
 
-        val scaledWidth = scale * source.width
-        val scaledHeight = scale * source.height
+        val scaledSrcWidth = targetWidth / scale
+        val scaledSrcHeight = targetHeight / scale
 
-        val left = (targetWidth - scaledWidth) / 2
-        val top = (targetHeight - scaledHeight) / 2
+        val srcLeft = (source.width - scaledSrcWidth) / 2f
+        val srcTop = (source.height - scaledSrcHeight) / 2f
+
+        val srcRect = android.graphics.Rect(
+            srcLeft.toInt(),
+            srcTop.toInt(),
+            (srcLeft + scaledSrcWidth).toInt(),
+            (srcTop + scaledSrcHeight).toInt()
+        )
+
+        val dstRect = android.graphics.Rect(0, 0, targetWidth, targetHeight)
 
         val output = createBitmap(targetWidth, targetHeight)
         val canvas = Canvas(output)
@@ -139,14 +148,10 @@ class ImageLoaderImpl @Inject constructor() : ImageLoader {
         val paint = Paint().apply {
             isAntiAlias = true
             isFilterBitmap = true
+            isDither = true
         }
 
-        canvas.drawBitmap(
-            source,
-            null,
-            RectF(left, top, left + scaledWidth, top + scaledHeight),
-            paint
-        )
+        canvas.drawBitmap(source, srcRect, dstRect, paint)
 
         if (source != output && !source.isRecycled) {
             source.recycle()
