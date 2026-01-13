@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.andlife.designsystem.component.InvitationButton
+import com.andlife.designsystem.component.NachoButton
 
 @Composable
 fun InvitationRoute(
@@ -25,7 +25,7 @@ fun InvitationScreen(
     Column(
         modifier = modifier,
     ) {
-        InvitationButton(
+        NachoButton(
             // 임시로 ID 1번 전달
             onClick = { onInvitationClick(1L) },
         ) {

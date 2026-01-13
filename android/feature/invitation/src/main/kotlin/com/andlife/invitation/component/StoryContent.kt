@@ -11,6 +11,7 @@ import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiModel
 import com.andlife.invitation.util.toUiType
@@ -31,7 +32,7 @@ fun StoryContent(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(InvitationTheme.colorScheme.backgroundOverlay),
+                .background(NachoTheme.colorScheme.backgroundOverlay),
     ) {
         Log.d("Item", item.toString())
         when (item.type) {

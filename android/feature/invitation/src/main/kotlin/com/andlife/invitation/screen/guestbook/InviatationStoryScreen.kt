@@ -28,9 +28,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationIconSize
-import com.andlife.designsystem.theme.InvitationSpacing
+import com.andlife.designsystem.theme.NachoIconSize
+import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.invitation.component.StoryContent
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiModel
@@ -89,7 +90,7 @@ fun InvitationStoryScreen(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(InvitationTheme.colorScheme.backgroundInverse),
+                .background(NachoTheme.colorScheme.backgroundInverse),
     ) {
         currentItem?.let { item ->
             StoryTopHeader(
@@ -103,7 +104,7 @@ fun InvitationStoryScreen(
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize(),
-            pageSpacing = InvitationSpacing.none,
+            pageSpacing = NachoSpacing.none,
             userScrollEnabled = true,
         ) { pageIndex ->
             val item = uiState.mediaItems[pageIndex]
@@ -136,16 +137,16 @@ fun StoryTopHeader(
             Icon(
                 painter = painterResource(id = R.drawable.ic_back_24),
                 contentDescription = "Back",
-                tint = InvitationTheme.colorScheme.iconTertiary,
+                tint = NachoTheme.colorScheme.iconTertiary,
             )
         }
 
         Box(
             modifier =
                 Modifier
-                    .size(InvitationIconSize.large)
+                    .size(NachoIconSize.large)
                     .clip(CircleShape)
-                    .background(InvitationTheme.colorScheme.backgroundSecondary),
+                    .background(NachoTheme.colorScheme.backgroundSecondary),
             contentAlignment = Alignment.Center,
         ) {
             if (!profileUrl.isNullOrEmpty()) {
@@ -159,24 +160,24 @@ fun StoryTopHeader(
                 Icon(
                     painter = painterResource(id = R.drawable.ic_person_24),
                     contentDescription = stringResource(R.string.desc_btn_back),
-                    tint = InvitationTheme.colorScheme.iconSecondary,
-                    modifier = Modifier.size(InvitationIconSize.medium),
+                    tint = NachoTheme.colorScheme.iconSecondary,
+                    modifier = Modifier.size(NachoIconSize.medium),
                 )
             }
         }
 
-        Spacer(modifier = Modifier.width(InvitationSpacing.medium))
+        Spacer(modifier = Modifier.width(NachoSpacing.medium))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = name,
-                color = InvitationTheme.colorScheme.textOnPrimary,
-                style = InvitationTheme.typography.bodyMediumMedium,
+                color = NachoTheme.colorScheme.textOnPrimary,
+                style = NachoTheme.typography.bodyMediumMedium,
             )
             Text(
                 text = date.toDateTimeFormat(),
-                color = InvitationTheme.colorScheme.textTertiary,
-                style = InvitationTheme.typography.bodySmallRegular,
+                color = NachoTheme.colorScheme.textTertiary,
+                style = NachoTheme.typography.bodySmallRegular,
             )
         }
 
@@ -184,7 +185,7 @@ fun StoryTopHeader(
             Icon(
                 painter = painterResource(id = R.drawable.ic_download_24),
                 contentDescription = stringResource(R.string.desc_btn_download),
-                tint = InvitationTheme.colorScheme.iconTertiary,
+                tint = NachoTheme.colorScheme.iconTertiary,
             )
         }
     }
