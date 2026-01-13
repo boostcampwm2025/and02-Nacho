@@ -11,11 +11,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.component.InvitationButton
 import com.andlife.designsystem.component.InvitationTextField
 import com.andlife.designsystem.theme.InvitationIconSize
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.ui.R
 
 @Composable
 fun InvitationGuestBookForm(
@@ -44,7 +46,7 @@ fun InvitationGuestBookForm(
         InvitationTextField(
             value = textContent,
             onValueChange = onTextContentChange,
-            placeholder = "메시지를 남겨주세요.",
+            placeholder = stringResource(R.string.ph_please_leave_a_message),
             modifier = Modifier.fillMaxWidth(),
             singleLine = false,
             minLines = 3,
@@ -64,7 +66,7 @@ fun InvitationGuestBookForm(
                         color = InvitationTheme.colorScheme.brandOnPrimary,
                     )
                 } else {
-                    Text(text = "등록")
+                    Text(text = stringResource(R.string.txt_submit))
                 }
             }
         }

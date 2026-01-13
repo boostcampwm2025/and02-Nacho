@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.InvitationIconSize
@@ -133,7 +134,7 @@ private fun AddMediaCard(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_add_24),
-                contentDescription = null,
+                contentDescription = stringResource(R.string.desc_add),
                 tint =
                     if (enabled) {
                         InvitationTheme.colorScheme.iconPrimary
@@ -146,7 +147,7 @@ private fun AddMediaCard(
             Spacer(modifier = Modifier.height(InvitationSpacing.xSmall))
 
             Text(
-                text = "미디어 추가",
+                text = stringResource(R.string.txt_add_media),
                 style = InvitationTheme.typography.bodySmallRegular,
                 color =
                     if (enabled) {
