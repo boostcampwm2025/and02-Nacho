@@ -2,12 +2,14 @@ package com.andlife.nacho
 
 import android.util.Log
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.andlife.invitation.InvitationDetail
+import com.andlife.nacho.model.MainSideEffect
 import com.andlife.nacho.navigation.NachoNavHost
 import com.andlife.nacho.navigation.rememberInvitationNavigator
+import com.andlife.nacho.viewmodel.MainViewModel
+import com.andlife.ui.util.collectWithLifecycle
 
 @Composable
 fun NachoApp(
@@ -17,20 +19,19 @@ fun NachoApp(
     val navigator = rememberInvitationNavigator()
     val deepLinkManager = viewModel.deepLinkManager
 
+    viewModel.effectFlow.collectWithLifecycle { effect ->
+        when (effect) {
+            is MainSideEffect.HandleDeepLink -> {
+                Log.d("NachoApp", "Received deepLink intent: ${effect.intent.data}")
+                navigator.navController.handleDeepLink(effect.intent)
+            }
 
-    LaunchedEffect(Unit) {
-        viewModel.deepLinkEvent.collect { intent ->
-            Log.d("NachoApp", "Received deepLink intent: ${intent.data}")
-            navigator.navController.handleDeepLink(intent)
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.navigateToDetail.collect { invitationId ->
-            Log.d("NachoApp", "Received Deferred DeepLink invitationId: $invitationId")
-            navigator.navController.navigate(InvitationDetail(invitationId)) {
-                popUpTo(navigator.navController.graph.startDestinationId)
-                launchSingleTop = true
+            is MainSideEffect.NavigateToDetail -> {
+                Log.d("NachoApp", "Received Deferred DeepLink invitationId: ${effect.invitationId}")
+                navigator.navController.navigate(InvitationDetail(effect.invitationId)) {
+                    popUpTo(navigator.navController.graph.startDestinationId)
+                    launchSingleTop = true
+                }
             }
         }
     }

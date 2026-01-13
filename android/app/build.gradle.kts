@@ -87,6 +87,7 @@ dependencies {
     implementation(projects.core.data)
     implementation(projects.core.network)
     implementation(projects.core.designsystem)
+    implementation(projects.core.ui)
     implementation(projects.core.data)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
