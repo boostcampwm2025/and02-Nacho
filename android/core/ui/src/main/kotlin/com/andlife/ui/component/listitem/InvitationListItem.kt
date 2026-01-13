@@ -61,7 +61,7 @@ fun InvitationListItem(
             Box {
                 AsyncImage(
                     model = imageUrl,
-                    contentDescription = stringResource(R.string.des_invitation_list_image),
+                    contentDescription = stringResource(R.string.desc_invitation_list_image),
                     contentScale = ContentScale.Crop,
                     placeholder = painterResource(R.drawable.ic_placeholder_default_24),
                     error = painterResource(R.drawable.ic_error_outline_24),
@@ -84,7 +84,7 @@ fun InvitationListItem(
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_more_vert_24),
-                        contentDescription = stringResource(R.string.des_invitation_more_btn),
+                        contentDescription = stringResource(R.string.desc_invitation_more_btn),
                     )
                 }
             }
@@ -144,7 +144,7 @@ private fun IconTextRow(
     ) {
         Icon(
             painter = painterResource(id = iconRes),
-            contentDescription = stringResource(R.string.des_invitation_icon),
+            contentDescription = stringResource(R.string.desc_invitation_icon),
             tint = Color.Unspecified,
         )
 

@@ -3,6 +3,7 @@ package com.andlife.designsystem.theme
 import androidx.compose.ui.unit.dp
 
 object InvitationSpacing {
+    val none = 0.dp
     val twoXSmall = 2.dp
     val xSmall = 4.dp
     val small = 8.dp
@@ -19,6 +20,7 @@ object InvitationIconSize {
     val medium = 24.dp
     val large = 32.dp
     val xLarge = 48.dp
+    val textBox = 120.dp
 }
 
 object InvitationStroke {
