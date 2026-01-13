@@ -69,7 +69,7 @@ fun HomeScreen(
         if (lazyListState.isScrollInProgress) {
             isScrolling = true
         } else {
-            delay(300) // 스크롤 완전히 멈춘 후 대기
+            delay(100L)
             if (!lazyListState.isScrollInProgress) {
                 isScrolling = false
             }

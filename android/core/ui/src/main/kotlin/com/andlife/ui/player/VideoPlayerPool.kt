@@ -58,6 +58,25 @@ object VideoPlayerPool {
             Log.d("cachevvv", "getPlayer: 캐시 데이터 소스 팩토리 초기화 완료")
         }
 
+        simpleCache?.let { cache ->
+            val cacheSpace = cache.cacheSpace
+            val keys = cache.keys.toList()
+
+            // 이 URI와 관련된 캐시 청크 찾기
+            val cachedChunks = keys.filter { it.contains(uri.hashCode().toString()) }
+            val cachedBytes = cachedChunks.sumOf { key ->
+                cache.getCachedLength(key, 0, Long.MAX_VALUE)
+            }
+
+            Log.d("cachevvv", "=== 캐시 상태 ===")
+            Log.d("cachevvv", "총 캐시 크기: ${cacheSpace / 1024 / 1024}MB")
+            Log.d("cachevvv", "캐시된 파일 수: ${keys.size}개")
+            Log.d("cachevvv", "URI: $uri")
+            Log.d("cachevvv", "관련 캐시 청크: ${cachedChunks.size}개")
+            Log.d("cachevvv", "캐시된 바이트: ${cachedBytes / 1024}KB")
+            Log.d("cachevvv", "부분 캐시 여부: ${cachedChunks.isNotEmpty()}")
+        }
+
         videoPool[uri]?.let { return it }
 
         // 플레이어 풀이 가득 찬 경우
