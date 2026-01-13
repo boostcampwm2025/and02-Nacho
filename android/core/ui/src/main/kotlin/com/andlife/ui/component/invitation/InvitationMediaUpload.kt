@@ -21,6 +21,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -180,15 +181,23 @@ private fun SelectedMediaCard(
             onClick = onRemove,
             modifier =
                 Modifier
+                    .padding(InvitationSpacing.xSmall)
                     .align(Alignment.TopEnd)
                     .size(InvitationIconSize.medium),
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_close_16),
-                contentDescription = "미디어 제거",
-                tint = InvitationTheme.colorScheme.brandOnPrimary,
-                modifier = Modifier.size(InvitationIconSize.xSmall),
-            )
+            Surface(
+                modifier = modifier,
+                shape = InvitationTheme.shapes.small,
+                color = InvitationTheme.colorScheme.backgroundOverlay,
+                contentColor = InvitationTheme.colorScheme.textOnPrimary,
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_close_12),
+                    contentDescription = stringResource(R.string.desc_remove_media),
+                    tint = InvitationTheme.colorScheme.brandOnPrimary,
+                    modifier = Modifier.size(InvitationIconSize.xSmall),
+                )
+            }
         }
     }
 }
