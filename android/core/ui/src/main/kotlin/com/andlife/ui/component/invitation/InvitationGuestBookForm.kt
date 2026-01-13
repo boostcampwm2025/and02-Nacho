@@ -6,13 +6,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.andlife.designsystem.component.InvitationButton
 import com.andlife.designsystem.component.InvitationTextField
+import com.andlife.designsystem.theme.InvitationIconSize
 import com.andlife.designsystem.theme.InvitationSpacing
+import com.andlife.designsystem.theme.InvitationTheme
 
 @Composable
 fun InvitationGuestBookForm(
@@ -56,7 +59,10 @@ fun InvitationGuestBookForm(
                 enabled = selectedMedias.isNotEmpty() && !isUploading,
             ) {
                 if (isUploading) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(
+                        modifier = modifier.size(InvitationIconSize.small),
+                        color = InvitationTheme.colorScheme.brandOnPrimary,
+                    )
                 } else {
                     Text(text = "등록")
                 }
