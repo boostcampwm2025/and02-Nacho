@@ -27,46 +27,6 @@ object VideoPlayerPool {
     private var currentPlayingUri: String? = null
 
     fun getPlayer(context: Context, uri: String): VideoPlayer {
-//        videoPool[uri]?.let { return it }
-//
-//        val reusablePlayer = videoPool.values.find { player ->
-//            player.exoPlayer.isCommandAvailable(Player.COMMAND_SET_VIDEO_SURFACE)
-//        }
-//
-//        return if (reusablePlayer != null && videoPool.size == MAX_POOL_SIZE) {
-//            val oldUri = videoPool.entries.find { it.value == reusablePlayer }?.key
-//            oldUri?.let { videoPool.remove(it) }
-//
-//            reusablePlayer.stop()
-//            val mediaSource = ProgressiveMediaSource.Factory(
-//                DefaultDataSource.Factory(context)
-//            ).createMediaSource(MediaItem.fromUri(uri))
-//            reusablePlayer.setMediaSource(mediaSource)
-//            reusablePlayer.prepare()
-//            reusablePlayer.exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
-//            videoPool[uri] = reusablePlayer
-//            reusablePlayer
-//        } else {
-//            if (videoPool.size >= MAX_POOL_SIZE) {
-//                // 보호되지 않은 가장 오래된 플레이어 찾아서 제거
-//                val oldestEntry = videoPool.keys.firstOrNull { !protectedUris.contains(it) }
-//                    ?: videoPool.keys.first() // 모두 보호 중이면 어쩔 수 없이 첫 번째 제거
-//
-//                videoPool.remove(oldestEntry)?.release()
-//            }
-//
-//            val newExoPlayer = ExoPlayer.Builder(context).build()
-//            val mediaSource = ProgressiveMediaSource.Factory(
-//                DefaultDataSource.Factory(context)
-//            ).createMediaSource(MediaItem.fromUri(uri))
-//            newExoPlayer.setMediaSource(mediaSource)
-//            newExoPlayer.prepare()
-//            newExoPlayer.repeatMode = Player.REPEAT_MODE_ONE
-//
-//            VideoPlayer(newExoPlayer, uri).also {
-//                videoPool[uri] = it
-//            }
-//        }
         videoPool[uri]?.let { return it }
 
         // 플레이어 풀이 가득 찬 경우
@@ -79,14 +39,6 @@ object VideoPlayerPool {
             Log.d("vvv", "풀 가득 참. 제거하는 URI: $urlToRemove")
             videoPool.remove(urlToRemove)?.release()
         }
-
-//        val newExoPlayer = ExoPlayer.Builder(context).build()
-//        val mediaSource = ProgressiveMediaSource.Factory(
-//            DefaultDataSource.Factory(context)
-//        ).createMediaSource(MediaItem.fromUri(uri))
-//        newExoPlayer.setMediaSource(mediaSource)
-//        newExoPlayer.prepare()
-//        newExoPlayer.repeatMode = Player.REPEAT_MODE_ONE
 
         val exoPlayer = ExoPlayer.Builder(context).build().apply {
             val mediaSource = ProgressiveMediaSource.Factory(
@@ -144,19 +96,6 @@ object VideoPlayerPool {
     fun resumeLastPlayed() {
         currentPlayingUri?.let { videoPool[it]?.play() }
     }
-
-    // 현재 재생 중이거나 화면에 보이는 플레이어 보호
-//    fun protectPlayer(uri: String) {
-//        protectedUris.add(uri)
-//        Log.d("eee", "보호된 URI들: $protectedUris")
-//    }
-//
-//    fun unprotectPlayer(uri: String) {
-//        protectedUris.remove(uri)
-//        Log.d("eee", "보호 X된 URI: $uri")
-//        Log.d("eee", "보호된 URI들: $protectedUris")
-//    }
-
 
     fun preparePlayer(context: Context, uri: String) {
         if (videoPool.containsKey(uri)) return
