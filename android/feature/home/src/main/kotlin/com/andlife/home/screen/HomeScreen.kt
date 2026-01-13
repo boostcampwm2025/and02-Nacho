@@ -11,9 +11,13 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -23,10 +27,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.home.viewmodel.HomeViewModel
 import com.andlife.ui.component.guestbook.GuestBookItem
-import com.andlife.ui.model.MediaType
 import com.andlife.ui.player.VideoPlayerPool
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -39,30 +43,44 @@ fun HomeScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val lazyListState = rememberLazyListState()
 
-    // 스크롤 상태 추적
     var isScrolling by remember { mutableStateOf(false) }
-    var currentPlayingIndex by remember { mutableStateOf(-1) }
+    var currentPlayingIndex by remember { mutableIntStateOf(-1) }
+    var lastScrollTime by remember { mutableLongStateOf(0L) }
+    var lastScrollOffset by remember { mutableIntStateOf(0) }
+    var scrollVelocity by remember { mutableFloatStateOf(0f) }
 
-    // 스크롤 멈춤 감지 및 딜레이
+    val SLOW_SCROLL_THRESHOLD = 50f 
+
+    LaunchedEffect(lazyListState) {
+        snapshotFlow { lazyListState.firstVisibleItemScrollOffset }
+            .collect { offset ->
+                val currentTime = System.currentTimeMillis()
+                val timeDiff = (currentTime - lastScrollTime).coerceAtLeast(1)
+                val offsetDiff = abs(offset - lastScrollOffset)
+
+                scrollVelocity = (offsetDiff.toFloat() / timeDiff) * 1000 // px/s
+
+                lastScrollTime = currentTime
+                lastScrollOffset = offset
+            }
+    }
+
     LaunchedEffect(lazyListState.isScrollInProgress) {
         if (lazyListState.isScrollInProgress) {
             isScrolling = true
         } else {
-            // 스크롤 멈춤 - 300ms 딜레이 후 재생 시작
-            delay(300L)
+            delay(300) // 스크롤 완전히 멈춘 후 대기
             if (!lazyListState.isScrollInProgress) {
                 isScrolling = false
             }
         }
     }
 
-    // 재생할 비디오 인덱스 결정
     val playVideoIndex by remember {
         derivedStateOf {
             val layoutInfo = lazyListState.layoutInfo
             val visibleItems = layoutInfo.visibleItemsInfo
 
-            // 비디오가 있는 아이템만 필터링하고 가시성 비율 계산
             val candidates = visibleItems.mapNotNull { item ->
                 val guestBook = uiState.value.guestBooks.getOrNull(item.index)
                 if (guestBook?.visualMedias?.isNotEmpty() != true) return@mapNotNull null
@@ -72,33 +90,39 @@ fun HomeScreen(
                         max(item.offset, layoutInfo.viewportStartOffset)
 
                 val ratio = visibleHeight.toFloat() / item.size
-
                 item.index to ratio
             }
 
             when {
-                // 스크롤 중일 때
-                isScrolling -> {
-                    // 현재 재생 중인 비디오의 가시성 확인
-                    val currentPlayingVisibility = candidates
-                        .find { it.first == currentPlayingIndex }
-                        ?.second ?: 0f
-
-                    // 20% 이하면 정지, 아니면 계속 재생
-                    if (currentPlayingVisibility < 0.2f) {
-                        currentPlayingIndex = -1
-                        -1
-                    } else {
-                        currentPlayingIndex
-                    }
-                }
-                // 스크롤 멈춤 - 중앙 비디오 찾기
                 candidates.isEmpty() -> {
                     currentPlayingIndex = -1
                     -1
                 }
+                // 스크롤 중
+                isScrolling -> {
+                    val currentPlayingVisibility = candidates
+                        .find { it.first == currentPlayingIndex }
+                        ?.second ?: 0f
+
+                    // 현재 재생 중인 영상이 20% 이하면 무조건 정지
+                    if (currentPlayingVisibility < 0.2f) {
+                        currentPlayingIndex = -1
+                    }
+
+                    // 스크롤 속도가 느리면 (손 댄 상태로 천천히) → 중앙 영상 재생
+                    if (scrollVelocity < SLOW_SCROLL_THRESHOLD) {
+                        val centerIndex = candidates
+                            .maxByOrNull { it.second }
+                            ?.first ?: -1
+                        currentPlayingIndex = centerIndex
+                        centerIndex
+                    } else {
+                        // 빠른 스크롤 (손 댄 상태로 빠르게) → 기존 재생 유지만
+                        currentPlayingIndex
+                    }
+                }
+                // 스크롤 멈춤 (손 뗀 후) - 중앙 비디오 재생
                 else -> {
-                    // 가장 많이 보이는 (중앙에 가까운) 비디오 선택
                     val centerIndex = candidates
                         .maxByOrNull { it.second }
                         ?.first ?: -1
