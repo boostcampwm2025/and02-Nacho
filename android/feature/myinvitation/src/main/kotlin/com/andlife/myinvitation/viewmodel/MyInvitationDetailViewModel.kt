@@ -2,6 +2,8 @@ package com.andlife.myinvitation.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
+import com.andlife.myinvitation.MyInvitationDetail
 import com.andlife.myinvitation.manager.KakaoShareManager
 import com.andlife.myinvitation.model.MyInvitationDetailSideEffect
 import com.andlife.myinvitation.model.MyInvitationDetailUiEvent
@@ -22,7 +24,7 @@ class MyInvitationDetailViewModel @Inject constructor(
 ) : BaseViewModel<MyInvitationDetailUiState, MyInvitationDetailUiEvent, MyInvitationDetailSideEffect>(
     initialState = MyInvitationDetailUiState(),
 ) {
-    private val myInvitationId: Long? = savedStateHandle[KEY_INVITE_ID]
+    private val myInvitationId: Long = savedStateHandle.toRoute<MyInvitationDetail>().id
 
     override val uiState: StateFlow<MyInvitationDetailUiState> =
         mutableUiState
@@ -36,9 +38,6 @@ class MyInvitationDetailViewModel @Inject constructor(
             )
 
     private fun loadInvitationDetail() {
-        if(myInvitationId == null) {
-            return
-        }
 
         viewModelScope.launch {
             // TODO: Repository 호출
@@ -63,9 +62,5 @@ class MyInvitationDetailViewModel @Inject constructor(
         kakaoShareManager.share(
             invitationId = currentId,
         )
-    }
-
-    companion object {
-        private const val KEY_INVITE_ID = "id"
     }
 }

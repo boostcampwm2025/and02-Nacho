@@ -3,6 +3,8 @@ package com.andlife.invitation.viewmodel
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
+import com.andlife.invitation.InvitationDetail
 import com.andlife.invitation.model.detail.InvitationDetailSideEffect
 import com.andlife.invitation.model.detail.InvitationDetailUiEvent
 import com.andlife.invitation.model.detail.InvitationDetailUiState
@@ -21,7 +23,7 @@ class InvitationDetailViewModel @Inject constructor(
 ) : BaseViewModel<InvitationDetailUiState, InvitationDetailUiEvent, InvitationDetailSideEffect>(
     initialState = InvitationDetailUiState(),
 ) {
-    private val invitationId: Long? = savedStateHandle[KEY_INVITE_ID]
+    private val invitationId: Long = savedStateHandle.toRoute<InvitationDetail>().id
 
     override val uiState: StateFlow<InvitationDetailUiState> =
         mutableUiState
@@ -35,9 +37,6 @@ class InvitationDetailViewModel @Inject constructor(
             )
 
     private fun loadInvitationDetail() {
-        if (invitationId == null) {
-            return
-        }
 
         viewModelScope.launch {
             // TODO: 초대장 상세 정보 로드 구현 필요
@@ -56,9 +55,5 @@ class InvitationDetailViewModel @Inject constructor(
 
     private fun clickClose() {
         sendEffect(InvitationDetailSideEffect.NavigateBack)
-    }
-
-    companion object {
-        private const val KEY_INVITE_ID = "id"
     }
 }
