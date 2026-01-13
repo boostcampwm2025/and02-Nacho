@@ -104,6 +104,7 @@ class InvitationCollectionViewModel
                     selectedIndex = -1,
                 )
             }
+            exoPlayer.pause()
         }
 
         private fun pageChanged(index: Int) {
@@ -114,7 +115,7 @@ class InvitationCollectionViewModel
             if (selectedMedia?.type == UiMediaType.VIDEO) {
                 prepareVideo(selectedMedia.mediaUrl)
             } else {
-                exoPlayer.stop()
+                exoPlayer.pause()
             }
         }
 
