@@ -68,13 +68,5 @@ fun InvitationGuestBookForm(
                 }
             }
         }
-
-        // 업로드된 미디어 URL 표시
-//        if (uploadedMediaUrls.isNotEmpty()) {
-//            Text(text = "업로드된 미디어:")
-//            uploadedMediaUrls.forEach { url ->
-//                Text(text = url)
-//            }
-//        }
     }
 }
