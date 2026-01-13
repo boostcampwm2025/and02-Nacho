@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,7 +29,6 @@ import com.andlife.ui.util.toFormatDuration
 fun SelectedMediaItem(
     media: SelectedMedia,
     modifier: Modifier = Modifier,
-    onRemove: (() -> Unit)? = null,
 ) {
     Box(
         modifier =
@@ -99,22 +97,6 @@ fun SelectedMediaItem(
                         .padding(InvitationSpacing.small),
             )
         }
-
-        IconButton(
-            onClick = { onRemove?.invoke() },
-            modifier =
-                Modifier
-                    .align(
-                        Alignment.TopEnd,
-                    ).size(InvitationIconSize.medium)
-                    .padding(InvitationSpacing.xSmall),
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_cancel_24),
-                contentDescription = null,
-                tint = InvitationTheme.colorScheme.backgroundOverlay,
-            )
-        }
     }
 }
 
@@ -128,7 +110,6 @@ private fun EditModeVideoItemPreview() {
                 UiMediaType.VIDEO,
                 828,
             ),
-            onRemove = {},
         )
     }
 }
@@ -143,7 +124,6 @@ private fun EditModeAudioItemPreview() {
                 UiMediaType.AUDIO,
                 314,
             ),
-            onRemove = {},
         )
     }
 }
