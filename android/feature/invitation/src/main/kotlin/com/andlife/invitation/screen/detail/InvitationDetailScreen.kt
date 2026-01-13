@@ -62,7 +62,7 @@ private fun InvitationDetailScreen(
     onEvent: (InvitationDetailUiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val tabTitles = stringArrayResource(R.array.tab_titles).toImmutableList()
+    val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
