@@ -56,7 +56,7 @@ fun InvitationGuestBookForm(
             // 업로드 버튼
             InvitationButton(
                 onClick = onUploadClick,
-                enabled = selectedMedias.isNotEmpty() && !isUploading,
+                enabled = (selectedMedias.isNotEmpty() || textContent.isNotEmpty()) && !isUploading,
             ) {
                 if (isUploading) {
                     CircularProgressIndicator(

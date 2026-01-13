@@ -73,36 +73,45 @@ class InvitationDetailViewModel
 
         private fun uploadMedias() {
             val medias = mutableUiState.value.selectedMedias
-            if (medias.isEmpty()) return
+            val textContent = mutableUiState.value.textContent
+
+            // 미디어와 텍스트 둘 다 없으면 리턴
+            if (medias.isEmpty() && textContent.isBlank()) return
 
             viewModelScope.launch {
                 updateState { copy(isUploading = true) }
 
                 try {
-                    val mediaFiles =
-                        mediaFileProvider.createFromUris(
-                            medias.map { it.uri },
-                        )
+                    // 미디어가 있는 경우에만 업로드
+                    if (medias.isNotEmpty()) {
+                        val mediaFiles =
+                            mediaFileProvider.createFromUris(
+                                medias.map { it.uri },
+                            )
 
-                    if (mediaFiles.isNotEmpty()) {
-                        val result = mediaUploader.uploadMedias(mediaFiles)
+                        if (mediaFiles.isNotEmpty()) {
+                            val result = mediaUploader.uploadMedias(mediaFiles)
 
-                        when (result) {
-                            is Result.Success -> {
-                                val uploadedUrls = result.data.filterNotNull()
+                            when (result) {
+                                is Result.Success -> {
+                                    val uploadedUrls = result.data.filterNotNull()
 
-                                // 미디어 업로드 성공 후 GuestBook 생성
-                                createGuestBook(uploadedUrls, mediaFiles, medias)
+                                    // 미디어 업로드 성공 후 GuestBook 생성
+                                    createGuestBook(uploadedUrls, mediaFiles, medias)
+                                }
+
+                                is Result.Error -> {
+                                    updateState { copy(isUploading = false) }
+                                    sendEffect(InvitationDetailSideEffect.ShowSnackbar("업로드 실패: ${result.message}"))
+                                }
                             }
-
-                            is Result.Error -> {
-                                updateState { copy(isUploading = false) }
-                                sendEffect(InvitationDetailSideEffect.ShowSnackbar("업로드 실패: ${result.message}"))
-                            }
+                        } else {
+                            updateState { copy(isUploading = false) }
+                            sendEffect(InvitationDetailSideEffect.ShowSnackbar("유효하지 않은 미디어 파일입니다"))
                         }
                     } else {
-                        updateState { copy(isUploading = false) }
-                        sendEffect(InvitationDetailSideEffect.ShowSnackbar("유효하지 않은 미디어 파일입니다"))
+                        // 미디어가 없고 텍스트만 있는 경우 바로 GuestBook 생성
+                        createGuestBook(emptyList(), emptyList(), emptyList())
                     }
                 } catch (e: Exception) {
                     updateState { copy(isUploading = false) }
