@@ -1,6 +1,5 @@
 plugins {
     id("invitation.android.library")
-    id("invitation.android.compose")
     id("invitation.android.hilt")
 }
 
