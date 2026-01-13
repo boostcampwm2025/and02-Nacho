@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MainActivityViewModel @Inject constructor(
+class MainViewModel @Inject constructor(
     val deepLinkManager: DeepLinkManager,
 ) : ViewModel() {
     private var lastProcessedId: String? = null

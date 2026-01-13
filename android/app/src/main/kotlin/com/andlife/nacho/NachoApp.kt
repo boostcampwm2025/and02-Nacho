@@ -12,10 +12,11 @@ import com.andlife.nacho.navigation.rememberInvitationNavigator
 @Composable
 fun NachoApp(
     modifier: Modifier = Modifier,
-    viewModel: MainActivityViewModel = hiltViewModel(),
+    viewModel: MainViewModel = hiltViewModel(),
 ) {
     val navigator = rememberInvitationNavigator()
     val deepLinkManager = viewModel.deepLinkManager
+
 
     LaunchedEffect(Unit) {
         viewModel.deepLinkEvent.collect { intent ->
