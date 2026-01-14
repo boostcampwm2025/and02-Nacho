@@ -1,5 +1,8 @@
 package com.andlife.ui.component.invitation
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,10 +13,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.component.InvitationButton
 import com.andlife.designsystem.component.InvitationTextField
@@ -22,8 +28,10 @@ import com.andlife.designsystem.theme.InvitationIconSize
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.ui.R
+import com.andlife.ui.util.media.uriToSelectedMedia
 
 private const val MAX_LENGTH = 500
+private const val MAX_MEDIAS_COUNT = 5
 
 @Composable
 fun InvitationGuestBookForm(
@@ -36,13 +44,31 @@ fun InvitationGuestBookForm(
     onUploadClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
+
+    val launcher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.GetMultipleContents(),
+        ) { uris ->
+            val uriStrings = uris.map { it.toString() }
+            val availableSlots = MAX_MEDIAS_COUNT - selectedMedias.size
+
+            if (availableSlots <= 0) return@rememberLauncherForActivityResult
+
+            val mediasToAdd =
+                uriStrings
+                    .take(availableSlots)
+                    .map { uriToSelectedMedia(context, it) }
+
+            onMediasSelected(selectedMedias + mediasToAdd)
+        }
+
     Column(
         modifier = modifier,
     ) {
         // 미디어 업로드 UI
         InvitationMediaUpload(
             selectedMedias = selectedMedias,
-            onMediasSelected = onMediasSelected,
             onMediaRemove = onMediaRemove,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -76,7 +102,73 @@ fun InvitationGuestBookForm(
 
         Spacer(modifier = Modifier.height(InvitationSpacing.small))
 
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // 미디어 아이콘 표시
+            // TODO: 각 아이콘 클릭 시 해당 미디어 타입 선택하도록 변경
+            val isMediaAddEnabled = selectedMedias.size < MAX_MEDIAS_COUNT
+            val iconColor = if (isMediaAddEnabled) {
+                InvitationTheme.colorScheme.brandPrimary
+            } else {
+                InvitationTheme.colorScheme.iconDisabled
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.small)) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_image_16),
+                    contentDescription = null,
+                    tint = iconColor,
+                    modifier =
+                        Modifier
+                            .size(InvitationIconSize.medium)
+                            .let {
+                                if (isMediaAddEnabled) {
+                                    it.clickable {
+                                        launcher.launch("*/*")
+                                        // launcher.launch("image/*")
+                                    }
+                                } else {
+                                    it
+                                }
+                            },
+                )
+                Icon(
+                    painter = painterResource(R.drawable.ic_camera_16),
+                    contentDescription = null,
+                    tint = iconColor,
+                    modifier =
+                        Modifier
+                            .size(InvitationIconSize.medium)
+                            .clickable {
+                                launcher.launch("*/*")
+                            },
+                )
+                Icon(
+                    painter = painterResource(R.drawable.ic_file_16),
+                    contentDescription = null,
+                    tint = iconColor,
+                    modifier =
+                        Modifier
+                            .size(InvitationIconSize.medium)
+                            .clickable {
+                                launcher.launch("*/*")
+                            },
+                )
+                Icon(
+                    painter = painterResource(R.drawable.ic_mic_16),
+                    contentDescription = null,
+                    tint = iconColor,
+                    modifier =
+                        Modifier
+                            .size(InvitationIconSize.medium)
+                            .clickable {
+                                launcher.launch("*/*")
+                            },
+                )
+            }
+
             // 업로드 버튼
             InvitationButton(
                 onClick = onUploadClick,
