@@ -9,6 +9,7 @@ android {
 
 dependencies {
     implementation(projects.feature.model)
+    implementation(projects.core.media)
     // designSystem
     implementation(projects.core.designsystem)
 
