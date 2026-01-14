@@ -27,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.andlife.designsystem.R as designR
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
@@ -157,7 +158,7 @@ fun StoryTopHeader(
                 )
             } else {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_person_24),
+                    painter = painterResource(designR.drawable.ic_person_24),
                     contentDescription = stringResource(R.string.desc_btn_back),
                     tint = NachoTheme.colorScheme.iconSecondary,
                     modifier = Modifier.size(NachoIconSize.medium),
