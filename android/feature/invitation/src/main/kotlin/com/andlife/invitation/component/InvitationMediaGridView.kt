@@ -29,7 +29,7 @@ fun InvitationMediaGridView(
 ) {
     Surface(
         modifier = modifier,
-        color = NachoTheme.colorScheme.backgroundPrimary
+        color = NachoTheme.colorScheme.backgroundPrimary,
     ) {
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),

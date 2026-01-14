@@ -14,8 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.myinvitation.R
 import com.andlife.myinvitation.model.MyInvitationDetailUiState
 import com.andlife.ui.section.invitation.AddressSection
@@ -36,22 +36,23 @@ fun MyInvitationContentsScreen(
 ) {
     if (uiState.isLoading) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(NachoTheme.colorScheme.backgroundTertiary),
-            contentAlignment = Alignment.Center
+            modifier =
+                modifier
+                    .fillMaxSize()
+                    .background(NachoTheme.colorScheme.backgroundTertiary),
+            contentAlignment = Alignment.Center,
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
+                verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
             ) {
                 CircularProgressIndicator(
-                    color = NachoTheme.colorScheme.brandPrimary
+                    color = NachoTheme.colorScheme.brandPrimary,
                 )
                 Text(
                     text = stringResource(R.string.txt_loading_invitation),
                     style = NachoTheme.typography.bodyMediumRegular,
-                    color = NachoTheme.colorScheme.textSecondary
+                    color = NachoTheme.colorScheme.textSecondary,
                 )
             }
         }
@@ -63,7 +64,7 @@ fun MyInvitationContentsScreen(
     LazyColumn(
         state = listState,
         modifier =
-            Modifier
+            modifier
                 .fillMaxSize()
                 .background(NachoTheme.colorScheme.backgroundTertiary),
     ) {
@@ -71,34 +72,29 @@ fun MyInvitationContentsScreen(
             ImageSection(
                 imageUrls = model.imageList,
                 onImageClick = onClickImage,
-                modifier = modifier,
             )
         }
         item {
             TitleSection(
                 title = model.title,
-                modifier = modifier,
             )
         }
         item {
             AuthorSection(
                 profileUrl = model.hostInfo.profileUrl,
                 author = model.hostInfo.name,
-                modifier = modifier,
             )
         }
         item {
             DateSection(
                 date = model.dateTime.date,
                 startTime = model.dateTime.startTime,
-                modifier = modifier,
             )
         }
         item {
             AddressSection(
                 placeName = model.location.name,
                 placeAddress = model.location.address,
-                modifier = modifier,
             )
         }
         item {
@@ -107,20 +103,17 @@ fun MyInvitationContentsScreen(
                     invitationCardUiModel = card,
                     isEditable = true,
                     onEditClick = onClickEditCard,
-                    modifier = modifier,
                 )
             }
         }
         item {
             AnnouncementSection(
                 announcements = model.announcement,
-                modifier = modifier,
             )
         }
         item {
             PlaceGuideSection(
                 location = model.location,
-                modifier = modifier,
             )
         }
     }
@@ -131,9 +124,10 @@ fun MyInvitationContentsScreen(
 private fun MyInvitationContentsScreenPreview() {
     NachoTheme {
         MyInvitationContentsScreen(
-            uiState = MyInvitationDetailUiState(
-                isLoading = false
-            ),
+            uiState =
+                MyInvitationDetailUiState(
+                    isLoading = false,
+                ),
             onClickImage = {},
             onClickEditCard = {},
         )

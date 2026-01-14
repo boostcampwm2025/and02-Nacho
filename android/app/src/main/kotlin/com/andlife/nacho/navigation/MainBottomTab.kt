@@ -2,8 +2,8 @@ package com.andlife.nacho.navigation
 
 import com.andlife.home.Home
 import com.andlife.invitation.Invitation
-import com.andlife.nacho.R
 import com.andlife.myinvitation.MyInvitation
+import com.andlife.nacho.R
 import kotlin.reflect.KClass
 
 enum class MainBottomTab(

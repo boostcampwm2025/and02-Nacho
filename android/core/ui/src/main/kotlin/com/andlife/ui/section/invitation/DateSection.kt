@@ -16,11 +16,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import com.andlife.ui.R
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.model.invitation.InvitationTimeUiModel
+import com.andlife.ui.R
 import kotlinx.datetime.LocalDate
 
 @Composable
@@ -29,26 +29,28 @@ fun DateSection(
     startTime: InvitationTimeUiModel?,
     modifier: Modifier = Modifier,
 ) {
-
-    val formattedDate = date?.let {
-        "${it.year}${stringResource(R.string.txt_year)} " +
-            "${it.monthNumber}${stringResource(R.string.txt_month)} " +
-            "${it.dayOfMonth}${stringResource(R.string.txt_day)}"
-    } ?: ""
+    val formattedDate =
+        date?.let {
+            "${it.year}${stringResource(R.string.txt_year)} " +
+                "${it.monthNumber}${stringResource(R.string.txt_month)} " +
+                "${it.dayOfMonth}${stringResource(R.string.txt_day)}"
+        } ?: ""
 
     val formattedTime = formatInvitationTime(startTime)
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(NachoTheme.colorScheme.backgroundPrimary)
-            .padding(vertical = NachoSpacing.xSmall, horizontal = NachoSpacing.large),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(NachoTheme.colorScheme.backgroundPrimary)
+                .padding(vertical = NachoSpacing.xSmall, horizontal = NachoSpacing.large),
     ) {
         date?.let {
             IconTextRow(
                 iconRes = R.drawable.ic_calendar_24,
                 date = formattedDate,
                 time = formattedTime,
+                modifier = Modifier.fillMaxWidth(),
             )
         }
     }
@@ -73,7 +75,7 @@ private fun IconTextRow(
         )
 
         Column(
-            modifier = modifier.padding(NachoSpacing.small),
+            modifier = Modifier.padding(NachoSpacing.small),
             verticalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
         ) {
             Text(
@@ -104,11 +106,12 @@ private fun formatInvitationTime(time: InvitationTimeUiModel?): String {
 
     val period = if (time.hour < 12) amPmArray[0] else amPmArray[1]
 
-    val displayHour = when {
-        time.hour == 0 -> 12
-        time.hour > 12 -> time.hour - 12
-        else -> time.hour
-    }
+    val displayHour =
+        when {
+            time.hour == 0 -> 12
+            time.hour > 12 -> time.hour - 12
+            else -> time.hour
+        }
 
     val minuteSuffix = if (time.min == 0) "" else " ${time.min}$minSuffix"
 

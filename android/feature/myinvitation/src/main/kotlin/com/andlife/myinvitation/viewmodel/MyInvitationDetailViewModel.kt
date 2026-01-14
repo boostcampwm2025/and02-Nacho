@@ -40,8 +40,7 @@ class MyInvitationDetailViewModel @Inject constructor(
         mutableUiState
             .onStart {
                 loadInvitationDetail()
-            }
-            .stateIn(
+            }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = MyInvitationDetailUiState(),
@@ -61,40 +60,47 @@ class MyInvitationDetailViewModel @Inject constructor(
                     title = "2026년 나초 개발 네트워킹 데이",
                     isLoading = false,
                     hasThanksCard = true,
-                    invitationContentsUiModel = InvitationContentsUiModel(
-                        title = "2026년 나초 개발 네트워킹 데이",
-                        hostInfo = HostInfo(
-                            name = "안드라이프",
-                            profileUrl = "https://picsum.photos/200",
+                    invitationContentsUiModel =
+                        InvitationContentsUiModel(
+                            title = "2026년 나초 개발 네트워킹 데이",
+                            hostInfo =
+                                HostInfo(
+                                    name = "안드라이프",
+                                    profileUrl = "https://picsum.photos/200",
+                                ),
+                            imageList = persistentListOf("https://picsum.photos/800/600?random=1"),
+                            dateTime =
+                                DateTimeInfo(
+                                    date = LocalDate(2026, 1, 31),
+                                    startTime = InvitationTimeUiModel(hour = 13, min = 0),
+                                ),
+                            location =
+                                LocationInfo(
+                                    name = "코드스쿼드",
+                                    address = "서울시 강남구 테헤란로 521 3층",
+                                    guide = "삼성역 5번 출구에서 도보 5분 거리입니다.",
+                                    latLng =
+                                        LatLngUiModel(
+                                            latitude = 37.5111,
+                                            longitude = 127.0601,
+                                        ),
+                                ),
+                            invitationCard =
+                                InvitationCardUiModel(
+                                    contentJson = "안녕하세요! 2026년 새해를 맞아 개발자분들과 함께 지식을 나누는 자리를 마련했습니다.",
+                                ),
+                            announcement =
+                                persistentListOf(
+                                    AnnouncementUiModel(
+                                        title = "준비물",
+                                        content = " - 코딩할 수 있는 노트북 \n - 건강한 정신",
+                                    ),
+                                    AnnouncementUiModel(
+                                        title = "이벤트 안내",
+                                        content = " - 코딩할 수 있는 노트북 \n - 건강한 정신",
+                                    ),
+                                ),
                         ),
-                        imageList = persistentListOf("https://picsum.photos/800/600?random=1",),
-                        dateTime = DateTimeInfo(
-                            date = LocalDate(2026, 1, 31),
-                            startTime = InvitationTimeUiModel(hour = 13, min = 0)
-                        ),
-                        location = LocationInfo(
-                            name = "코드스쿼드",
-                            address = "서울시 강남구 테헤란로 521 3층",
-                            guide = "삼성역 5번 출구에서 도보 5분 거리입니다.",
-                            latLng = LatLngUiModel(
-                                latitude = 37.5111,
-                                longitude = 127.0601
-                            )
-                        ),
-                        invitationCard = InvitationCardUiModel(
-                            contentJson = "안녕하세요! 2026년 새해를 맞아 개발자분들과 함께 지식을 나누는 자리를 마련했습니다."
-                        ),
-                        announcement = persistentListOf(
-                            AnnouncementUiModel(
-                                title = "준비물",
-                                content = " - 코딩할 수 있는 노트북 \n - 건강한 정신",
-                            ),
-                            AnnouncementUiModel(
-                                title = "이벤트 안내",
-                                content = " - 코딩할 수 있는 노트북 \n - 건강한 정신",
-                            ),
-                        )
-                    )
                 )
             }
         }
@@ -108,16 +114,21 @@ class MyInvitationDetailViewModel @Inject constructor(
             is MyInvitationDetailUiEvent.ClickEdit -> {}
             is MyInvitationDetailUiEvent.ClickThanksCard -> {}
             is MyInvitationDetailUiEvent.CreateThanksCard -> {}
-            is MyInvitationDetailUiEvent.ClickEditCard -> sendEffect(MyInvitationDetailSideEffect.NavigateToEditCard(myInvitationId))
+            is MyInvitationDetailUiEvent.ClickEditCard ->
+                sendEffect(
+                    MyInvitationDetailSideEffect.NavigateToEditCard(
+                        myInvitationId,
+                    ),
+                )
+
             is MyInvitationDetailUiEvent.ClickImage -> {
                 sendEffect(
                     MyInvitationDetailSideEffect.NavigateToImageDetail(
                         imageList = event.imageList,
-                        index = event.index
-                    )
+                        index = event.index,
+                    ),
                 )
             }
-
         }
     }
 

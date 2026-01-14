@@ -12,8 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.model.invitation.AnnouncementUiModel
 import com.andlife.ui.R
 import kotlinx.collections.immutable.ImmutableList
@@ -27,10 +27,11 @@ fun AnnouncementSection(
     if (announcements.isEmpty()) return
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(NachoTheme.colorScheme.backgroundPrimary)
-            .padding(vertical = NachoSpacing.large, horizontal = NachoSpacing.medium),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(NachoTheme.colorScheme.backgroundPrimary)
+                .padding(vertical = NachoSpacing.large, horizontal = NachoSpacing.medium),
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
         Text(
@@ -46,13 +47,14 @@ fun AnnouncementSection(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = NachoTheme.shapes.small,
-                    colors = CardDefaults.cardColors(
-                        containerColor = NachoTheme.colorScheme.backgroundSecondary,
-                    ),
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor = NachoTheme.colorScheme.backgroundSecondary,
+                        ),
                 ) {
                     Column(
                         modifier = Modifier.padding(NachoSpacing.large),
-                        verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
+                        verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
                     ) {
                         Text(
                             text = announcement.title,
@@ -77,16 +79,17 @@ fun AnnouncementSection(
 private fun AnnouncementSectionPreview() {
     NachoTheme {
         AnnouncementSection(
-            announcements = persistentListOf(
-                AnnouncementUiModel(
-                    title = "준비물",
-                    content = " - 코딩할 수 있는 노트북 \n - 건강한 정신",
+            announcements =
+                persistentListOf(
+                    AnnouncementUiModel(
+                        title = "준비물",
+                        content = " - 코딩할 수 있는 노트북 \n - 건강한 정신",
+                    ),
+                    AnnouncementUiModel(
+                        title = "이벤트 안내",
+                        content = "소정의 경품 행사가 있습니다~ 많이 많이 참석",
+                    ),
                 ),
-                AnnouncementUiModel(
-                    title = "이벤트 안내",
-                    content = "소정의 경품 행사가 있습니다~ 많이 많이 참석",
-                ),
-            ),
         )
     }
 }

@@ -27,7 +27,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import com.andlife.designsystem.R as designR
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
@@ -45,6 +44,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import com.andlife.designsystem.R as designR
 
 @Composable
 fun InvitationStoryRoute(

@@ -29,7 +29,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.component.NachoDivider
-import com.andlife.designsystem.R as designR
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
@@ -50,6 +49,7 @@ import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.LocalDate
+import com.andlife.designsystem.R as designR
 
 @Composable
 fun MyInvitationDetailRoute(
@@ -65,12 +65,13 @@ fun MyInvitationDetailRoute(
             MyInvitationDetailSideEffect.NavigateBack -> {
                 onNavigateBack()
             }
+
             is MyInvitationDetailSideEffect.NavigateToEditCard -> {
                 onNavigateToEditCard(effect.myInvitationId)
             }
+
             is MyInvitationDetailSideEffect.NavigateToImageDetail -> {
                 // TODO: 이미지 전체보기 화면 구현 보류
-                //onNavigateToImageDetail(effect.imageList, effect.index)
             }
         }
     }
@@ -110,22 +111,34 @@ private fun MyInvitationDetailScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
+                    .padding(paddingValues),
         ) {
             GenericTabRow(
                 tabs = tabTitles,
-                content = { index ->
-                    when (index) {
-                        0 -> MyInvitationContentsScreen(
-                            uiState = uiState,
-                            onClickImage = { idx -> onEvent(MyInvitationDetailUiEvent.ClickImage(uiState.invitationContentsUiModel.imageList, idx)) },
-                            onClickEditCard = { onEvent(MyInvitationDetailUiEvent.ClickEditCard) },
-                            modifier = Modifier.fillMaxSize(),
-                        )
-                        1 -> {}// TODO: 방명록 조회 및 작성
-                        2 -> {} // TODO: 미디어 모아보기
-                    }
-                },
+                content =
+                    { index ->
+                        when (index) {
+                            0 -> {
+                                MyInvitationContentsScreen(
+                                    uiState = uiState,
+                                    onClickImage =
+                                        { idx ->
+                                            onEvent(
+                                                MyInvitationDetailUiEvent.ClickImage(
+                                                    uiState.invitationContentsUiModel.imageList,
+                                                    idx,
+                                                ),
+                                            )
+                                        },
+                                    onClickEditCard = { onEvent(MyInvitationDetailUiEvent.ClickEditCard) },
+                                    modifier = Modifier.fillMaxSize(),
+                                )
+                            }
+
+                            1 -> {} // TODO: 방명록 조회 및 작성
+                            2 -> {} // TODO: 미디어 모아보기
+                        }
+                    },
             )
         }
     }
@@ -135,7 +148,6 @@ private fun MyInvitationDetailScreen(
 @Composable
 private fun MyInvitationDetailTopBar(
     title: String,
-    hasThanksCard: Boolean = false,
     onBack: () -> Unit,
     onClickThanksCard: () -> Unit,
     onShare: () -> Unit,
@@ -143,6 +155,7 @@ private fun MyInvitationDetailTopBar(
     onDelete: () -> Unit,
     onCreateThanksCard: () -> Unit,
     modifier: Modifier = Modifier,
+    hasThanksCard: Boolean = false,
 ) {
     TopAppBar(
         modifier = modifier,
@@ -165,12 +178,12 @@ private fun MyInvitationDetailTopBar(
             }
         },
         actions = {
-            if(hasThanksCard) {
+            if (hasThanksCard) {
                 IconButton(onClick = onClickThanksCard) {
                     Icon(
                         painter = painterResource(designR.drawable.ic_thankscard),
                         contentDescription = stringResource(R.string.desc_top_bar_thanks_card),
-                        tint = Color.Unspecified
+                        tint = Color.Unspecified,
                     )
                 }
             }
@@ -178,7 +191,7 @@ private fun MyInvitationDetailTopBar(
                 Icon(
                     painter = painterResource(R.drawable.ic_share_24),
                     contentDescription = stringResource(R.string.desc_top_bar_share),
-                    tint = NachoTheme.colorScheme.iconSecondary
+                    tint = NachoTheme.colorScheme.iconSecondary,
                 )
             }
 
@@ -202,10 +215,11 @@ private fun InvitationMoreMenu(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     onCreateThanksCard: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var isMenuExpanded by remember { mutableStateOf(false) }
 
-    Box {
+    Box(modifier = modifier) {
         IconButton(onClick = { isMenuExpanded = true }) {
             Icon(
                 painter = painterResource(designR.drawable.ic_more_vert_24),
@@ -225,13 +239,13 @@ private fun InvitationMoreMenu(
                     Text(
                         text = stringResource(R.string.txt_edit),
                         style = NachoTheme.typography.bodyMediumMedium,
-                        color = NachoTheme.colorScheme.textPrimary
+                        color = NachoTheme.colorScheme.textPrimary,
                     )
                 },
                 onClick = {
                     isMenuExpanded = false
                     onEdit()
-                }
+                },
             )
 
             NachoDivider()
@@ -241,13 +255,13 @@ private fun InvitationMoreMenu(
                     Text(
                         text = stringResource(R.string.txt_delete),
                         style = NachoTheme.typography.bodyMediumMedium,
-                        color = NachoTheme.colorScheme.textPrimary
+                        color = NachoTheme.colorScheme.textPrimary,
                     )
                 },
                 onClick = {
                     isMenuExpanded = false
                     onDelete()
-                }
+                },
             )
 
             NachoDivider()
@@ -255,16 +269,20 @@ private fun InvitationMoreMenu(
             DropdownMenuItem(
                 text = {
                     Text(
-                        text = if (hasThanksCard) stringResource(R.string.txt_send_thanks_card)
-                        else stringResource(R.string.txt_create_thanks_card),
+                        text =
+                            if (hasThanksCard) {
+                                stringResource(R.string.txt_send_thanks_card)
+                            } else {
+                                stringResource(R.string.txt_create_thanks_card)
+                            },
                         style = NachoTheme.typography.bodyMediumMedium,
-                        color = NachoTheme.colorScheme.textPrimary
+                        color = NachoTheme.colorScheme.textPrimary,
                     )
                 },
                 onClick = {
                     isMenuExpanded = false
                     onCreateThanksCard()
-                }
+                },
             )
         }
     }
@@ -272,39 +290,46 @@ private fun InvitationMoreMenu(
 
 @Composable
 @PreviewTheme
-fun MyInvitationDetailScreenPreview() {
+private fun MyInvitationDetailScreenPreview() {
     NachoTheme {
         MyInvitationDetailScreen(
-            uiState = MyInvitationDetailUiState(
-                id = 1L,
-                title = "2026년 나초 개발 네트워킹 데이",
-                isLoading = false,
-                hasThanksCard = true,
-                invitationContentsUiModel = InvitationContentsUiModel(
+            uiState =
+                MyInvitationDetailUiState(
+                    id = 1L,
                     title = "2026년 나초 개발 네트워킹 데이",
-                    hostInfo = HostInfo(
-                        name = "안드라이프",
-                        profileUrl = "https://picsum.photos/200",
-                    ),
-                    imageList = persistentListOf("https://picsum.photos/800/600?random=1",),
-                    dateTime = DateTimeInfo(
-                        date = LocalDate(2026, 1, 31),
-                        startTime = InvitationTimeUiModel(hour = 13, min = 0)
-                    ),
-                    location = LocationInfo(
-                        name = "코드스쿼드",
-                        address = "서울시 강남구 테헤란로 521 3층",
-                        guide = "삼성역 5번 출구에서 도보 5분 거리입니다.",
-                        latLng = LatLngUiModel(
-                            latitude = 37.5111,
-                            longitude = 127.0601
-                        )
-                    ),
-                    invitationCard = InvitationCardUiModel(
-                        contentJson = "안녕하세요! 2026년 새해를 맞아 개발자분들과 함께 지식을 나누는 자리를 마련했습니다."
-                    )
-                )
-            ),
+                    isLoading = false,
+                    hasThanksCard = true,
+                    invitationContentsUiModel =
+                        InvitationContentsUiModel(
+                            title = "2026년 나초 개발 네트워킹 데이",
+                            hostInfo =
+                                HostInfo(
+                                    name = "안드라이프",
+                                    profileUrl = "https://picsum.photos/200",
+                                ),
+                            imageList = persistentListOf("https://picsum.photos/800/600?random=1"),
+                            dateTime =
+                                DateTimeInfo(
+                                    date = LocalDate(2026, 1, 31),
+                                    startTime = InvitationTimeUiModel(hour = 13, min = 0),
+                                ),
+                            location =
+                                LocationInfo(
+                                    name = "코드스쿼드",
+                                    address = "서울시 강남구 테헤란로 521 3층",
+                                    guide = "삼성역 5번 출구에서 도보 5분 거리입니다.",
+                                    latLng =
+                                        LatLngUiModel(
+                                            latitude = 37.5111,
+                                            longitude = 127.0601,
+                                        ),
+                                ),
+                            invitationCard =
+                                InvitationCardUiModel(
+                                    contentJson = "안녕하세요! 2026년 새해를 맞아 개발자분들과 함께 지식을 나누는 자리를 마련했습니다.",
+                                ),
+                        ),
+                ),
             onEvent = {},
         )
     }

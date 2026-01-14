@@ -133,10 +133,11 @@ private fun AnnouncementItem(
         color = color,
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = NachoSpacing.large, vertical = NachoSpacing.medium)
-                .height(IntrinsicSize.Min),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = NachoSpacing.large, vertical = NachoSpacing.medium)
+                    .height(IntrinsicSize.Min),
         ) {
             Column(
                 modifier = Modifier.weight(1f),
@@ -147,7 +148,7 @@ private fun AnnouncementItem(
                     style = NachoTheme.typography.bodyLargeMedium,
                     color = NachoTheme.colorScheme.textPrimary,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
 
                 Text(
@@ -160,22 +161,24 @@ private fun AnnouncementItem(
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_reorder),
                     contentDescription = null,
-                    tint = NachoTheme.colorScheme.textTertiary
+                    tint = NachoTheme.colorScheme.textTertiary,
                 )
                 Spacer(
-                    modifier = Modifier
-                        .heightIn(min = NachoSpacing.xLarge)
-                        .weight(1f)
+                    modifier =
+                        Modifier
+                            .heightIn(min = NachoSpacing.xLarge)
+                            .weight(1f),
                 )
                 Icon(
-                    modifier = Modifier
-                        .clickable(
-                            role = Role.Button,
-                            onClick = onRemoveClick
-                        ),
+                    modifier =
+                        Modifier
+                            .clickable(
+                                role = Role.Button,
+                                onClick = onRemoveClick,
+                            ),
                     imageVector = ImageVector.vectorResource(R.drawable.ic_trash),
                     contentDescription = null,
-                    tint = NachoTheme.colorScheme.textTertiary
+                    tint = NachoTheme.colorScheme.textTertiary,
                 )
             }
         }

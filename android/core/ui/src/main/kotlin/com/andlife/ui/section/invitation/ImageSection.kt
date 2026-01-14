@@ -34,7 +34,7 @@ import kotlinx.collections.immutable.toImmutableList
 fun ImageSection(
     imageUrls: ImmutableList<String>,
     onImageClick: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     if (imageUrls.isEmpty()) return
 
@@ -46,23 +46,26 @@ fun ImageSection(
         Box(modifier = Modifier.fillMaxWidth()) {
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f),
-                key = { index -> index }
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f),
+                key = { index -> index },
             ) { page ->
                 SubcomposeAsyncImage(
                     model = imageUrls[page],
                     contentDescription = stringResource(R.string.desc_invitation_image),
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable { onImageClick(page) },
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .clickable { onImageClick(page) },
                     loading = {
                         Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(NachoTheme.colorScheme.backgroundSecondary),
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .background(NachoTheme.colorScheme.backgroundSecondary),
                             contentAlignment = Alignment.Center,
                         ) {
                             CircularProgressIndicator(
@@ -75,9 +78,10 @@ fun ImageSection(
                     },
                     error = {
                         Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(NachoTheme.colorScheme.backgroundSecondary),
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .background(NachoTheme.colorScheme.backgroundSecondary),
                             contentAlignment = Alignment.Center,
                         ) {
                             Icon(
@@ -94,12 +98,13 @@ fun ImageSection(
                 MediaOverlay(
                     text = "${pagerState.currentPage + 1}/${imageUrls.size}",
                     shape = NachoTheme.shapes.medium,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(
-                            top = NachoSpacing.medium,
-                            end = NachoSpacing.medium
-                        )
+                    modifier =
+                        Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(
+                                top = NachoSpacing.medium,
+                                end = NachoSpacing.medium,
+                            ),
                 )
             }
         }
@@ -111,11 +116,12 @@ fun ImageSection(
 private fun ImageSectionPreview() {
     NachoTheme {
         ImageSection(
-            imageUrls = listOf(
-                "https://example.com/image.jpg",
-                "https://example.com/image.jpg",
-                "https://example.com/image.jpg"
-            ).toImmutableList(),
+            imageUrls =
+                listOf(
+                    "https://example.com/image.jpg",
+                    "https://example.com/image.jpg",
+                    "https://example.com/image.jpg",
+                ).toImmutableList(),
             onImageClick = { },
         )
     }

@@ -14,10 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import com.andlife.ui.R
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.ui.R
 
 @Composable
 fun AddressSection(
@@ -26,15 +26,17 @@ fun AddressSection(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(NachoTheme.colorScheme.backgroundPrimary)
-            .padding(vertical = NachoSpacing.xSmall, horizontal = NachoSpacing.large),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(NachoTheme.colorScheme.backgroundPrimary)
+                .padding(vertical = NachoSpacing.xSmall, horizontal = NachoSpacing.large),
     ) {
         IconTextRow(
             iconRes = R.drawable.ic_location_24,
             placeName = placeName,
             placeAddress = placeAddress,
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -58,7 +60,7 @@ private fun IconTextRow(
         )
 
         Column(
-            modifier = modifier.padding(NachoSpacing.small),
+            modifier = Modifier.padding(NachoSpacing.small),
             verticalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
         ) {
             if (placeName.isNotEmpty()) {

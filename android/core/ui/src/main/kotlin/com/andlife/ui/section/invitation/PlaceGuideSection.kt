@@ -16,8 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.model.invitation.LocationInfo
 import com.andlife.ui.R
 
@@ -29,10 +29,11 @@ fun PlaceGuideSection(
     val hasGuide = location.guide.isNotBlank()
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(NachoTheme.colorScheme.backgroundPrimary)
-            .padding(vertical = NachoSpacing.large, horizontal = NachoSpacing.medium),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(NachoTheme.colorScheme.backgroundPrimary)
+                .padding(vertical = NachoSpacing.large, horizontal = NachoSpacing.medium),
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
         Text(
@@ -47,32 +48,34 @@ fun PlaceGuideSection(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = NachoTheme.shapes.small,
-                colors = CardDefaults.cardColors(
-                    containerColor = NachoTheme.colorScheme.backgroundSecondary,
-                ),
+                colors =
+                    CardDefaults.cardColors(
+                        containerColor = NachoTheme.colorScheme.backgroundSecondary,
+                    ),
             ) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(color = NachoTheme.colorScheme.backgroundSecondary)
-                        .padding(vertical = NachoSpacing.threeXLarge),
-                    contentAlignment = Alignment.Center
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .background(color = NachoTheme.colorScheme.backgroundSecondary)
+                            .padding(vertical = NachoSpacing.threeXLarge),
+                    contentAlignment = Alignment.Center,
                 ) {
                     // TODO: NaverMap 구현
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
+                        verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_map_32),
                             contentDescription = null,
                             tint = NachoTheme.colorScheme.textTertiary,
-                            modifier = Modifier.padding(NachoSpacing.small)
+                            modifier = Modifier.padding(NachoSpacing.small),
                         )
                         Text(
                             text = stringResource(R.string.txt_map_loading),
                             style = NachoTheme.typography.bodyMediumMedium,
-                            color = NachoTheme.colorScheme.textTertiary
+                            color = NachoTheme.colorScheme.textTertiary,
                         )
                     }
                 }

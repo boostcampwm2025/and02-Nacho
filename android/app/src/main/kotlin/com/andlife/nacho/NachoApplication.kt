@@ -45,7 +45,6 @@ class NachoApplication : Application() {
                     Log.d("AppsFlyer", "invitationId: $invitationId")
                     deepLinkManager.emitInvitationId(invitationId)
                 }
-
             } else if (status == DeepLinkResult.Status.ERROR) {
                 Log.e("AppsFlyer", "DeepLink error: ${deepLinkResult.error}")
             } else {

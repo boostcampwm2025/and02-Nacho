@@ -9,8 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 
 @Composable
 fun TitleSection(
@@ -18,10 +18,11 @@ fun TitleSection(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(NachoTheme.colorScheme.backgroundPrimary)
-            .padding(vertical = NachoSpacing.xLarge, horizontal = NachoSpacing.large),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(NachoTheme.colorScheme.backgroundPrimary)
+                .padding(vertical = NachoSpacing.xLarge, horizontal = NachoSpacing.large),
     ) {
         Text(
             text = title,

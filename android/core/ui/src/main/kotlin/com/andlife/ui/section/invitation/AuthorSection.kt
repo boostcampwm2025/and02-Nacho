@@ -18,12 +18,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import coil3.compose.AsyncImage
-import com.andlife.designsystem.R as designR
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
+import com.andlife.designsystem.R as designR
 
 @Composable
 fun AuthorSection(
@@ -32,13 +32,14 @@ fun AuthorSection(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(NachoTheme.colorScheme.backgroundPrimary)
-            .padding(NachoSpacing.medium),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(NachoTheme.colorScheme.backgroundPrimary)
+                .padding(NachoSpacing.medium),
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
     ) {
-        Row (
+        Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
             verticalAlignment = Alignment.CenterVertically,
@@ -49,9 +50,10 @@ fun AuthorSection(
                 contentScale = ContentScale.Crop,
                 placeholder = painterResource(designR.drawable.ic_person_24),
                 error = painterResource(designR.drawable.ic_person_24),
-                modifier = Modifier
-                    .size(NachoIconSize.xLarge)
-                    .clip(CircleShape),
+                modifier =
+                    Modifier
+                        .size(NachoIconSize.xLarge)
+                        .clip(CircleShape),
             )
 
             Text(
