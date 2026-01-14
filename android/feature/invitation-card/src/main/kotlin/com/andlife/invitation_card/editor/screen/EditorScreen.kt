@@ -450,7 +450,10 @@ private fun ColorToggleButton(
                 .height(NachoSpacing.xSmall),
             shape = NachoTheme.shapes.large,
             color = selectedColor,
-            border = BorderStroke(borderDp, NachoTheme.colorScheme.backgroundBorder),
+            border = BorderStroke(
+                borderDp,
+                NachoTheme.colorScheme.backgroundBorder
+            ),
         ) { }
     }
 
@@ -519,7 +522,11 @@ private fun ColorBox(
                 .size(size)
                 .clip(shape)
                 .background(color)
-                .border(NachoStroke.medium, Color.Gray.copy(alpha = 0.3f), shape)
+                .border(
+                    NachoStroke.medium,
+                    Color.Gray.copy(alpha = 0.3f),
+                    shape
+                )
                 .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -545,7 +552,10 @@ private fun TextSizeBox(
         shape = shape,
         onClick = { expanded = !expanded },
         color = NachoTheme.colorScheme.backgroundPrimary,
-        border = BorderStroke(NachoStroke.small, NachoTheme.colorScheme.backgroundBorder),
+        border = BorderStroke(
+            NachoStroke.small,
+            NachoTheme.colorScheme.backgroundBorder
+        ),
         modifier = modifier,
     ) {
         Row(
