@@ -20,6 +20,7 @@ object NachoIconSize {
     val medium = 24.dp
     val large = 32.dp
     val xLarge = 48.dp
+    val twoXLarge = 64.dp
     val huge = 120.dp
 }
 
