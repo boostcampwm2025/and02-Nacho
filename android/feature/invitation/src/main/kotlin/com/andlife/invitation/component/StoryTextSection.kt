@@ -24,7 +24,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 
@@ -98,7 +97,7 @@ fun StoryTextSection(
 @PreviewTheme
 @Composable
 private fun StoryTextSectionPreview() {
-    InvitationTheme {
+    NachoTheme {
         StoryTextSection(
             content =
                 "계절이 지나가는 하늘에는 \n" +

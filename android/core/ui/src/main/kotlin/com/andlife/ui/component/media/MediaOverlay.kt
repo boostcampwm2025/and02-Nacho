@@ -10,7 +10,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 
 @Composable
@@ -39,7 +38,7 @@ fun MediaOverlay(
 @PreviewTheme
 @Composable
 private fun ImageOverlayPreview() {
-    InvitationTheme {
+    NachoTheme {
         MediaOverlay(
             text = "1/10",
             shape = NachoTheme.shapes.medium,
@@ -50,7 +49,7 @@ private fun ImageOverlayPreview() {
 @PreviewTheme
 @Composable
 private fun VideoOverlayPreview() {
-    InvitationTheme {
+    NachoTheme {
         MediaOverlay(
             text = "8:28",
         )

@@ -14,7 +14,6 @@ import androidx.compose.ui.text.input.ImeAction
 import com.andlife.designsystem.component.NachoTextField
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
 import com.andlife.invitation_edit.component.FormLabel
@@ -48,7 +47,7 @@ internal fun TitleSection(
 @Composable
 @PreviewTheme
 private fun TitleSectionPreview() {
-    InvitationTheme {
+    NachoTheme {
         TitleSection(
             title = "초대장 제목",
             onTitleChange = {},

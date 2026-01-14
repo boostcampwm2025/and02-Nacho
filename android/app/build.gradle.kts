@@ -84,6 +84,7 @@ dependencies {
     implementation(projects.feature.invitation)
     implementation(projects.feature.myinvitation)
     implementation(projects.feature.invitationEdit)
+    implementation(projects.feature.invitationCard)
     implementation(projects.core.data)
     implementation(projects.core.network)
     implementation(projects.core.designsystem)

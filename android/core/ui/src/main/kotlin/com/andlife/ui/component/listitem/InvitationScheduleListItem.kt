@@ -22,7 +22,6 @@ import com.andlife.designsystem.component.NachoDdayChip
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 
@@ -107,7 +106,7 @@ fun InvitationScheduleListItem(
 @PreviewTheme
 @Composable
 private fun InvitationScheduleListItemPreview() {
-    InvitationTheme {
+    NachoTheme {
         InvitationScheduleListItem(
             imageUrl = "https://example.com/image.jpg",
             title = "네부캠 송년회",

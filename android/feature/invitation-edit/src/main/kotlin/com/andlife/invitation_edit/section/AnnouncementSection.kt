@@ -33,7 +33,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
 import com.andlife.invitation_edit.model.create.AnnouncementUiModel
@@ -186,6 +185,6 @@ private fun AnnouncementItem(
 @Composable
 @PreviewTheme
 private fun AnnouncementSectionPreview() {
-    InvitationTheme {
+    NachoTheme {
     }
 }

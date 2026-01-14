@@ -37,7 +37,6 @@ import com.andlife.designsystem.component.NachoTextField
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.designsystem.R as designR
 import com.andlife.invitation_edit.R
@@ -323,7 +322,7 @@ private fun AddressItem(
 @Composable
 private fun AddressSearchScreenPreview() {
     val emptyPagingItems = flowOf(PagingData.empty<AddressUiModel>()).collectAsLazyPagingItems()
-    InvitationTheme {
+    NachoTheme {
         AddressSearchScreen(
             uiState = AddressSearchUiState("강남"),
             onEvent = {},
@@ -357,7 +356,7 @@ private fun AddressSearchResultPreview() {
             ),
         )
 
-    InvitationTheme {
+    NachoTheme {
         Column(
             modifier =
                 Modifier

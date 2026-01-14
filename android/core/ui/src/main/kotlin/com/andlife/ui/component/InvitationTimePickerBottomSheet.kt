@@ -23,7 +23,6 @@ import com.andlife.designsystem.component.timepicker.rememberInvitationTimePicke
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 import kotlinx.coroutines.launch
@@ -98,7 +97,7 @@ fun InvitationTimePickerBottomSheet(
 @PreviewTheme
 @Composable
 private fun InvitationTimePickerBottomSheetPreview() {
-    InvitationTheme {
+    NachoTheme {
         InvitationTimePickerBottomSheet(
             onConfirm = { _, _ -> },
             onDismissRequest = {},

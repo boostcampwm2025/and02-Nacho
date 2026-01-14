@@ -34,7 +34,7 @@ internal val LocalInvitationShapes = staticCompositionLocalOf { invitationShapes
 @Preview
 @Composable
 private fun InvitationShapesPreview() {
-    InvitationTheme {
+    NachoTheme {
         Column(
             modifier = Modifier,
         ) {

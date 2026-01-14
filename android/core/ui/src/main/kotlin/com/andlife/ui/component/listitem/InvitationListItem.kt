@@ -29,7 +29,6 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 
@@ -162,7 +161,7 @@ private fun IconTextRow(
 @PreviewTheme
 @Composable
 private fun InvitationListItemPreview() {
-    InvitationTheme {
+    NachoTheme {
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),

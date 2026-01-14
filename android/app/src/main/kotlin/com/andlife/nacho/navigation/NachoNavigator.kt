@@ -73,7 +73,9 @@ class NachoNavigator(
     }
 
     fun navigateToMyInvitationCreate() {
-        navController.navigateToMyInvitationCreate(navOptions = navOptions { launchSingleTop = true })
+        navController.navigateToMyInvitationCreate(
+            navOptions = navOptions { launchSingleTop = true },
+        )
     }
 
     fun navigateToMyInvitationDetail(id: Long) {
