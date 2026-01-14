@@ -74,7 +74,7 @@ fun GuestBookItem(
             isOwner = guestBook.isOwner,
             onMenuClick = onMenuClick,
         )
-        GuestBookItemTextContent(
+        GuestBookItemTextSection(
             invitation = guestBook.invitation,
             textContent = guestBook.textContent,
             onInvitationTitleClick = onInvitationTitleClick,
@@ -159,7 +159,7 @@ private fun GuestBookItemHeader(
 }
 
 @Composable
-private fun GuestBookItemTextContent(
+private fun GuestBookItemTextSection(
     invitation: GuestBookInvitationUiModel?,
     textContent: String,
     onInvitationTitleClick: (Long) -> Unit,
