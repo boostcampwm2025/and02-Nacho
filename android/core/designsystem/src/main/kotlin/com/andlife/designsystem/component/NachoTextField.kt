@@ -70,7 +70,7 @@ fun NachoTextField(
 
 @PreviewTheme
 @Composable
-private fun NachoTextFieldPreview() {
+private fun InvitationTextFieldPreview() {
     NachoTheme {
         Column(
             modifier = Modifier.fillMaxWidth(),

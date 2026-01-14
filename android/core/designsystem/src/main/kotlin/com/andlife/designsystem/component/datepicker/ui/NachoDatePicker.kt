@@ -353,7 +353,7 @@ private fun InvitationDatePickerYearMonthSelector(
 
 @PreviewTheme
 @Composable
-private fun NachoDatePickerPreview() {
+private fun InvitationDatePickerPreview() {
     NachoTheme {
         NachoDatePicker(
             state = rememberInvitationDatePickerState(),
@@ -363,7 +363,7 @@ private fun NachoDatePickerPreview() {
 
 @PreviewTheme
 @Composable
-private fun DatePickerWithSelectedNachoDatePreview() {
+private fun DatePickerWithSelectedInvitationDatePreview() {
     NachoTheme {
         NachoDatePicker(
             state =
@@ -376,7 +376,7 @@ private fun DatePickerWithSelectedNachoDatePreview() {
 
 @PreviewTheme
 @Composable
-private fun NachoDatePickerWithYearMonthModePreview() {
+private fun InvitationDatePickerWithYearMonthModePreview() {
     NachoTheme {
         NachoDatePicker(
             state =

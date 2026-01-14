@@ -96,7 +96,7 @@ fun InvitationTimePickerBottomSheet(
 @OptIn(ExperimentalMaterial3Api::class)
 @PreviewTheme
 @Composable
-private fun NachoTimePickerBottomSheetPreview() {
+private fun InvitationTimePickerBottomSheetPreview() {
     NachoTheme {
         InvitationTimePickerBottomSheet(
             onConfirm = { _, _ -> },

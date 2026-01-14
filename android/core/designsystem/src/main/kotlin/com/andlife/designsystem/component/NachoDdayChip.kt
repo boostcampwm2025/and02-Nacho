@@ -38,7 +38,7 @@ fun NachoDdayChip(
 
 @PreviewTheme
 @Composable
-private fun NachoDdayChipPreview() {
+private fun InvitationDdayChipPreview() {
     NachoTheme {
         NachoDdayChip(
             label = "D-3",

@@ -49,7 +49,7 @@ fun NachoDialog(
 
 @Composable
 @PreviewTheme
-private fun NachoDialogPreview() {
+private fun InvitationDialogPreview() {
     NachoTheme {
         var dialog by remember { mutableStateOf(false) }
         Column(modifier = Modifier.fillMaxSize()) {

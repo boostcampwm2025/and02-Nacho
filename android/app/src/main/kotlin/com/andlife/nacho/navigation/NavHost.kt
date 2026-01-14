@@ -14,19 +14,24 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.navigation.compose.NavHost
+import androidx.navigation.navDeepLink
+import com.andlife.deeplink.DeepLinkManager
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.home.homeNavGraph
+import com.andlife.invitation.invitationDetailNavGraph
 import com.andlife.invitation.invitationNavGraph
 import com.andlife.invitation_edit.addressSearchNavGraph
 import com.andlife.invitation_edit.myInvitationCreateNavGraph
+import com.andlife.myinvitation.myInvitationDetailNavGraph
 import com.andlife.myinvitation.myInvitationNavGraph
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
 @Composable
-fun InvitationNavHost(
+fun NachoNavHost(
     navigator: NachoNavigator,
+    deepLinkManager: DeepLinkManager,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -52,13 +57,22 @@ fun InvitationNavHost(
 
             invitationNavGraph(
                 paddingValues = innerPadding,
-                onInvitationClick = navigator::navigateToInvitationDetail,
-                onNavigationBack = navigator::navigatePopBackStack,
+                onNavigateToDetail = navigator::navigateToInvitationDetail,
+            )
+
+            invitationDetailNavGraph(
+                deepLinks = navDeepLink { uriPattern = deepLinkManager.getKakaoDeepLinkPattern() },
+                onNavigateBack = navigator::navigatePopBackStack,
             )
 
             myInvitationNavGraph(
                 paddingValues = innerPadding,
                 onNavigateToCreate = navigator::navigateToMyInvitationCreate,
+                onNavigateToDetail = navigator::navigateToMyInvitationDetail,
+            )
+
+            myInvitationDetailNavGraph(
+                onNavigateBack = navigator::navigatePopBackStack,
             )
 
             myInvitationCreateNavGraph(
@@ -116,7 +130,7 @@ private fun InvitationBottomBar(
 
 @PreviewTheme
 @Composable
-private fun NachoBottomBarPreview() {
+private fun InvitationBottomBarPreview() {
     NachoTheme {
         InvitationBottomBar(
             currentTab = MainBottomTab.INVITATION,

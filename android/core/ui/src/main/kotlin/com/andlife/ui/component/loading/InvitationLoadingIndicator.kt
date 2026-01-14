@@ -21,7 +21,7 @@ fun InvitationLoadingIndicator(modifier: Modifier = Modifier) {
 
 @PreviewTheme
 @Composable
-private fun NachoLoadingIndicatorPreview() {
+private fun InvitationLoadingIndicatorPreview() {
     NachoTheme {
         InvitationLoadingIndicator()
     }

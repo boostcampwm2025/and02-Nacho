@@ -105,7 +105,7 @@ fun InvitationScheduleListItem(
 
 @PreviewTheme
 @Composable
-private fun NachoScheduleListItemPreview() {
+private fun InvitationScheduleListItemPreview() {
     NachoTheme {
         InvitationScheduleListItem(
             imageUrl = "https://example.com/image.jpg",

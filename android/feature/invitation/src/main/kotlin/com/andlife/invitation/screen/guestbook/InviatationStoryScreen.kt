@@ -192,7 +192,7 @@ fun StoryTopHeader(
 
 @PreviewTheme
 @Composable
-private fun NachoStoryScreenPreview() {
+private fun InvitationStoryScreenPreview() {
     NachoTheme {
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         val mockState =

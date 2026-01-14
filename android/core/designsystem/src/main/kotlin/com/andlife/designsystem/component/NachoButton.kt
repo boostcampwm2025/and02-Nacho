@@ -58,7 +58,7 @@ fun NachoButton(
 
 @PreviewTheme
 @Composable
-private fun NachoButtonPreview() {
+private fun InvitationButtonPreview() {
     NachoTheme {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),

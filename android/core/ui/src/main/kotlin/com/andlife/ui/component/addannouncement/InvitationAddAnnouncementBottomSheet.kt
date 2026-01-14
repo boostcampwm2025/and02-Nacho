@@ -201,7 +201,7 @@ fun TitleAndTextField(
 @OptIn(ExperimentalMaterial3Api::class)
 @PreviewTheme
 @Composable
-private fun NachoAddAnnouncementBottomSheetPreview() {
+private fun InvitationAddAnnouncementBottomSheetPreview() {
     NachoTheme {
         InvitationAddAnnouncementBottomSheet(
             onConfirm = { _, _ -> },

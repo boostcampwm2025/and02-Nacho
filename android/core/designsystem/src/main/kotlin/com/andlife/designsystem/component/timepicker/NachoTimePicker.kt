@@ -382,7 +382,7 @@ private fun Modifier.fadeEdge(color: Color): Modifier {
 
 @PreviewTheme
 @Composable
-private fun NachoTimePickerPreview() {
+private fun InvitationTimePickerPreview() {
     NachoTheme {
         val state =
             rememberInvitationTimePickerState(

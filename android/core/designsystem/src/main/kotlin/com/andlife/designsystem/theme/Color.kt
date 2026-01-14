@@ -42,6 +42,7 @@ val BrandDark = Color(0xFFBE123C)
 // Icon
 val IconPrimary = Color(0xFFF43F5E)
 val IconSecondary = Color(0xFF111827)
+val IconOnSecondary = Color(0xFF374151)
 val IconTertiary = Color(0xFFFFFFFF)
 val IconDisabled = Color(0xFFE5E7EB)
 
@@ -66,6 +67,7 @@ data class InvitationColorScheme(
     val brandOnPrimary: Color,
     val iconPrimary: Color,
     val iconSecondary: Color,
+    val iconOnSecondary: Color,
     val iconTertiary: Color,
     val iconDisabled: Color,
 )
@@ -91,6 +93,7 @@ val LightInvitationColorScheme =
         brandOnPrimary = BrandOnPrimary,
         iconPrimary = IconPrimary,
         iconSecondary = IconSecondary,
+        iconOnSecondary = IconOnSecondary,
         iconTertiary = IconTertiary,
         iconDisabled = IconDisabled,
     )
@@ -105,7 +108,7 @@ internal val LocalInvitationColorScheme = staticCompositionLocalOf { LightInvita
 
 @PreviewTheme
 @Composable
-private fun NachoColorSchemePreview() {
+private fun InvitationColorSchemePreview() {
     NachoTheme {
         Column(
             modifier =

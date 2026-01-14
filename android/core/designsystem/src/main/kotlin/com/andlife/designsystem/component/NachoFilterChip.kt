@@ -57,7 +57,7 @@ fun NachoFilterChip(
 
 @PreviewTheme
 @Composable
-private fun NachoFilterChipPreview() {
+private fun InvitationFilterChipPreview() {
     NachoTheme {
         NachoFilterChip(
             label = "가까운 순",

@@ -160,7 +160,7 @@ private fun IconTextRow(
 
 @PreviewTheme
 @Composable
-private fun NachoListItemPreview() {
+private fun InvitationListItemPreview() {
     NachoTheme {
         Column(
             modifier = Modifier.fillMaxWidth(),

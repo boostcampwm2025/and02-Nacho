@@ -29,6 +29,8 @@ androidxComposeMaterial3Adaptive = "1.2.0"
 ktlint = "14.0.1"
 compose-ruleset = "0.4.28"
 javaxInject = "1"
+appsflyer = "6.16.2"
+kakao-sdk = "2.23.2"
 media3Exoplayer = "1.9.0"
 
 [libraries]
@@ -54,6 +56,8 @@ androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-te
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+
+appsflyer = { group = "com.appsflyer", name = "af-android-sdk", version.ref = "appsflyer" }
 
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidxHiltNavigationCompose" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
@@ -108,6 +112,11 @@ kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-pl
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 room-gradlePlugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
 ktlint-gradlePlugin = { group = "org.jlleitschuh.gradle.ktlint", name = "org.jlleitschuh.gradle.ktlint.gradle.plugin", version.ref = "ktlint" }
+
+kakao-sdk-share = { group = "com.kakao.sdk", name = "v2-share", version.ref = "kakao-sdk" }
+kakao-bom = { module = "com.kakao.sdk:v2-bom", version.ref = "kakao-sdk" }
+kakao-common = { module = "com.kakao.sdk:v2-common", version.ref = "kakao-sdk" }
+kakao-user = { module = "com.kakao.sdk:v2-user", version.ref = "kakao-sdk" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

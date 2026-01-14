@@ -50,7 +50,7 @@ fun InvitationLoadingError(
 
 @PreviewTheme
 @Composable
-private fun NachoLoadingErrorPreview() {
+private fun InvitationLoadingErrorPreview() {
     NachoTheme {
         InvitationLoadingError(onRetry = {})
     }
