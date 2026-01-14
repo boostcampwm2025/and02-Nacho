@@ -28,12 +28,12 @@ data class LocationInfo(
     val name: String = "",
     val address: String = "",
     val guide: String = "",
-    val latLng: LatLngUiModel? = null,
+    val latLng: LatLngUiModel = LatLngUiModel(),
 )
 
 data class LatLngUiModel(
-    val latitude: Double,
-    val longitude: Double,
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0,
 )
 
 data class InvitationTimeUiModel(
