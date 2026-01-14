@@ -46,13 +46,16 @@ class EditorState @Inject constructor(
 
         override fun afterTextChanged(s: Editable?) {
             updateToolbarState()
-            editText.post {
-                val pos = editText.selectionStart
-                editText.text?.let {
-                    editText.setSelection(pos.coerceIn(0, it.length))
+            val editable = s
+            if (editable == null) return
+            val cursor = selectionStart
+            val isEnterPressed = cursor > 0 && editable.isNotEmpty() && editable[cursor - 1] == '\n'
+            if (isEnterPressed) {
+                val alignment = currentTextStyle.alignment
+                if (alignment != Layout.Alignment.ALIGN_NORMAL) {
+                    s.insert(cursor, "\u200B")
                 }
             }
-            debugSpans()
         }
 
         override fun beforeTextChanged(
@@ -394,6 +397,13 @@ class EditorState @Inject constructor(
         val lineStart = findParagraphStart(editable, start)
         val lineEnd = findParagraphEnd(editable, if (hasSelection) end else start)
 
+        if (lineStart == lineEnd) {
+            editable.insert(lineStart, "\u200B")
+            editText.setSelection(lineStart + 1)
+            updateAlignment(alignment)
+            return
+        }
+
         val existingSpans = editable.getSpans(lineStart, lineEnd, AlignmentSpan.Standard::class.java)
         for (span in existingSpans) {
             val spanStart = editable.getSpanStart(span)
@@ -428,6 +438,13 @@ class EditorState @Inject constructor(
         }
 
         currentTextStyle = currentTextStyle.copy(alignment = alignment)
+
+        if (!hasSelection && start == lineStart) {
+            val newPos = (start + 1).coerceAtMost(editable.length)
+            if (editable[start] == '\u200B') {
+                editText.setSelection(newPos)
+            }
+        }
     }
 
     private fun removeZeroLengthSpans(editable: Editable) {
@@ -542,29 +559,21 @@ class EditorState @Inject constructor(
                 updateToolbarState()
             }
         }
-    }
-
-    private fun debugSpans() {
-        val editable = editText.text ?: return
-        val spans = editable.getSpans(0, editable.length, ForegroundColorSpan::class.java)
-
-        Log.d("EditorDebug", "=== Color Spans ===")
-        for (span in spans) {
-            val start = editable.getSpanStart(span)
-            val end = editable.getSpanEnd(span)
-            val flags = editable.getSpanFlags(span)
-            val color = span.foregroundColor
-            Log.d("EditorDebug", "Color: $color, Range: $start-$end, Flags: $flags")
-        }
-        Log.d("EditorDebug", "Cursor: $selectionStart")
-
-        val sizeSpans = editable.getSpans(0, editable.length, AbsoluteSizeSpan::class.java)
-        for (span in sizeSpans) {
-            val start = editable.getSpanStart(span)
-            val end = editable.getSpanEnd(span)
-            val flags = editable.getSpanFlags(span)
-            val size = span.size
-            Log.d("EditorDebug", "size: $size, Range: $start-$end, Flags: $flags")
+        view.setOnKeyListener { _, keyCode, event ->
+            if (keyCode == android.view.KeyEvent.KEYCODE_DEL && event.action == android.view.KeyEvent.ACTION_DOWN) {
+                val text = editText.text
+                val cursor = editText.selectionStart
+                if (cursor > 0 && text.length >= cursor && text[cursor - 1] == '\u200B') {
+                    val hasNewLineBefore = cursor - 2 >= 0 && text[cursor - 2] == '\n'
+                    if (hasNewLineBefore) {
+                        text.delete(cursor - 2, cursor)
+                    } else {
+                        text.delete(cursor - 1, cursor)
+                    }
+                    return@setOnKeyListener true
+                }
+            }
+            false
         }
     }
 }
