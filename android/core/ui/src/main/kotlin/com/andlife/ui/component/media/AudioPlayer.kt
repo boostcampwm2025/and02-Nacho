@@ -59,6 +59,7 @@ fun AudioPlayer(
         modifier = modifier
             .fillMaxSize()
             .background(NachoTheme.colorScheme.backgroundPrimary)
+            .background(NachoTheme.colorScheme.backgroundOverlay)
             .padding(horizontal = NachoSpacing.twoXLarge),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -107,7 +108,7 @@ fun AudioPlayer(
                 painter = painterResource(
                     id = if (isPlaying) R.drawable.ic_pause_24 else R.drawable.ic_play_arrow_24
                 ),
-                contentDescription = "Play/Pause",
+                contentDescription = stringResource(R.string.desc_btn_play),
                 tint = NachoTheme.colorScheme.iconTertiary,
                 modifier = Modifier.size(NachoIconSize.large)
             )
