@@ -18,9 +18,7 @@ data object MyInvitationCreate
 @Serializable
 data object AddressSearch
 
-fun NavController.navigateToMyInvitationCreate(
-    navOptions: NavOptions
-) {
+fun NavController.navigateToMyInvitationCreate(navOptions: NavOptions) {
     navigate(MyInvitationCreate, navOptions)
 }
 

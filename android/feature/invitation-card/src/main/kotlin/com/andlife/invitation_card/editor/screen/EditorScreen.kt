@@ -85,8 +85,8 @@ import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_card.R
 import com.andlife.invitation_card.editor.model.ColorPaletteMode
 import com.andlife.invitation_card.editor.model.EditorDefaults
+import com.andlife.invitation_card.editor.util.contrastColor
 import com.andlife.invitation_card.editor.state.EditorState
-import com.andlife.invitation_card.editor.utils.contrastColor
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.launch
 
@@ -206,7 +206,7 @@ private fun EditTopBar(
             IconButton(onClick = onBackClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                    contentDescription = stringResource(R.string.back),
+                    contentDescription = stringResource(R.string.btn_back),
                 )
             }
         },
@@ -215,7 +215,7 @@ private fun EditTopBar(
                 onClick = onSaveChangesClick,
             ) {
                 Text(
-                    text = stringResource(R.string.save),
+                    text = stringResource(R.string.btn_save),
                     style = NachoTheme.typography.bodyLargeSemiBold,
                     color = NachoTheme.colorScheme.textOnPrimary,
                 )
@@ -264,10 +264,10 @@ private fun EditorBottomBar(
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_undo),
-                    contentDescription = stringResource(R.string.undo),
+                    contentDescription = stringResource(R.string.btn_undo),
                     tint = NachoTheme.colorScheme.textSecondary
                 )
-                Text(text = stringResource(R.string.undo))
+                Text(text = stringResource(R.string.btn_undo))
             }
             Spacer(modifier = Modifier.weight(1f))
             Row(
@@ -275,10 +275,10 @@ private fun EditorBottomBar(
                 horizontalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = stringResource(R.string.redo))
+                Text(text = stringResource(R.string.btn_redo))
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_redo),
-                    contentDescription = stringResource(R.string.redo),
+                    contentDescription = stringResource(R.string.btn_redo),
                     tint = NachoTheme.colorScheme.textSecondary
                 )
             }
@@ -442,7 +442,7 @@ private fun ColorToggleButton(
     color: Color = NachoTheme.colorScheme.iconOnSecondary,
     contentDescription: String? = null,
 ) {
-    val borderDp = if (selectedColor == Color.White) NachoStroke.small else 0.dp
+    val borderDp = if (selectedColor == Color.White) NachoStroke.small else NachoStroke.none
     Column(
         modifier = modifier
             .width(IntrinsicSize.Min)
@@ -461,9 +461,13 @@ private fun ColorToggleButton(
                 .height(NachoSpacing.xSmall),
             shape = NachoTheme.shapes.large,
             color = selectedColor,
-            border = BorderStroke(borderDp, NachoTheme.colorScheme.backgroundBorder),
+            border = BorderStroke(
+                borderDp,
+                NachoTheme.colorScheme.backgroundBorder
+            ),
         ) { }
     }
+
 }
 
 @Composable
@@ -529,14 +533,18 @@ private fun ColorBox(
                 .size(size)
                 .clip(shape)
                 .background(color)
-                .border(2.dp, Color.Gray.copy(alpha = 0.3f), shape)
+                .border(
+                    NachoStroke.medium,
+                    Color.Gray.copy(alpha = 0.3f),
+                    shape
+                )
                 .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         if (selected) {
             Icon(
                 imageVector = Icons.Default.Check,
-                contentDescription = stringResource(R.string.selected_color),
+                contentDescription = stringResource(R.string.desc_selected_color),
                 tint = color.contrastColor(),
             )
         }
@@ -555,7 +563,10 @@ private fun TextSizeBox(
         shape = shape,
         onClick = { expanded = !expanded },
         color = NachoTheme.colorScheme.backgroundPrimary,
-        border = BorderStroke(1.dp, NachoTheme.colorScheme.backgroundBorder),
+        border = BorderStroke(
+            NachoStroke.small,
+            NachoTheme.colorScheme.backgroundBorder
+        ),
         modifier = modifier,
     ) {
         Row(

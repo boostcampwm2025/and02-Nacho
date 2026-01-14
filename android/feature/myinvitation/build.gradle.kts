@@ -7,6 +7,11 @@ android {
 }
 
 dependencies {
+    // kakao 공유
+    implementation(libs.kakao.sdk.share)
+
+    implementation(projects.core.deeplink)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
