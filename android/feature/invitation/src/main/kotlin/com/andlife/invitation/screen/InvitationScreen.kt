@@ -1,22 +1,35 @@
 package com.andlife.invitation.screen
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.andlife.invitation.viewmodel.InvitationViewModel
-import com.andlife.invitation.component.InvitationMediaGridView
+import com.andlife.designsystem.component.NachoButton
+
+@Composable
+fun InvitationRoute(
+    onInvitationClick: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    InvitationScreen(
+        modifier = modifier,
+        onInvitationClick = onInvitationClick,
+    )
+}
 
 @Composable
 fun InvitationScreen(
     modifier: Modifier = Modifier,
-    viewModel: InvitationViewModel = hiltViewModel()
+    onInvitationClick: (Long) -> Unit,
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    InvitationMediaGridView(
-        uiState.mediaItems,
-        onItemClick = {}
-    )
+    Column(
+        modifier = modifier,
+    ) {
+        NachoButton(
+            // 임시로 ID 1번 전달
+            onClick = { onInvitationClick(1L) },
+        ) {
+            Text("초대장으로 이동")
+        }
+    }
 }

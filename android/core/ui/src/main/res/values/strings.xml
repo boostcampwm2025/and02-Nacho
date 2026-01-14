@@ -7,10 +7,21 @@
     <string name="label_loading_retry">재시도</string>
     <string name="label_paging_empty_result">결과가 없습니다.</string>
 
-    <string name="des_schedule_list_image">다가오는 초대의 이미지</string>
-    <string name="des_invitation_list_image">초대장 리스트 카드의 이미지</string>
-    <string name="des_invitation_more_btn">초대장 리스트 카드의 더보기 아이콘 버튼</string>
-    <string name="des_invitation_icon">초대장 시간 장소 아이콘</string>
+    <string name="desc_schedule_list_image">다가오는 초대의 이미지</string>
+    <string name="desc_invitation_list_image">초대장 리스트 카드의 이미지</string>
+    <string name="desc_invitation_more_btn">초대장 리스트 카드의 더보기 아이콘 버튼</string>
+    <string name="desc_invitation_icon">초대장 시간 장소 아이콘</string>
+
+    <!--  방명록 페이지 상단 탭  -->
+    <string name="txt_invitation">초대장</string>
+    <string name="txt_guestbook">방명록</string>
+    <string name="txt_collection">모아보기</string>
+
+    <string-array name="tab_titles">
+        <item>@string/txt_invitation</item>
+        <item>@string/txt_guestbook</item>
+        <item>@string/txt_collection</item>
+    </string-array>
 
     <!--  모아보기 Media  -->
     <string name="desc_media_image">방명록의 이미지</string>
@@ -18,6 +29,12 @@
     <string name="desc_media_video">방명록의 영상 썸네일</string>
     <string name="desc_ic_play">방명록의 영상 재생 아이콘</string>
     <string name="desc_btn_remove">편집 모드 아이템 삭제 버튼</string>
+    <string name="desc_user_profile">사용자의 프로필 사진</string>
+    <string name="desc_btn_back">뒤로가기 버튼</string>
+    <string name="desc_btn_download">미디어 다운로드 버튼</string>
+
+    <string name="txt_see_more">더보기..</string>
+    <string name="txt_collapse">접기</string>
 
     <string name="label_add_announcement">공지사항 추가</string>
     <string name="label_announcement_title">공지사항 제목</string>

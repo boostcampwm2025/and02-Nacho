@@ -2,10 +2,10 @@ package com.andlife.home.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
-import com.andlife.domain.model.GuestBook
-import com.andlife.domain.model.GuestBookAuthor
-import com.andlife.domain.model.GuestBookEntryMedia
-import com.andlife.domain.model.GuestBookInvitation
+import com.andlife.domain.model.guestbook.Author
+import com.andlife.domain.model.guestbook.GuestBook
+import com.andlife.domain.model.guestbook.GuestBookInvitation
+import com.andlife.domain.model.guestbook.GuestBookMedia
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
@@ -14,7 +14,7 @@ import com.andlife.ui.base.BaseUiEvent
 import com.andlife.ui.base.BaseUiState
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.model.GuestBookEntryMediaUiModel
-import com.andlife.ui.model.MediaType
+import com.andlife.ui.model.UiMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -34,20 +34,21 @@ fun GuestBook.toUiModel(): GuestBookUiModel = GuestBookUiModel(
     visualMedias = visualMedias.map { it.toUiModel() }.toImmutableList(),
     audioMedias = audioMedias.map { it.toUiModel() }.toImmutableList(),
     totalVisualCount = totalVisualCount,
-    isAuthorSelf = isAuthorSelf,
+    isOwner = isOwner,
     createdAt = createdAt,
+    updatedAt = updatedAt,
 )
 
-fun GuestBookEntryMedia.toUiModel(): GuestBookEntryMediaUiModel = GuestBookEntryMediaUiModel(
+fun GuestBookMedia.toUiModel(): GuestBookEntryMediaUiModel = GuestBookEntryMediaUiModel(
     id = id,
-    type = MediaType.safeValueOf(type.name),
+    type = UiMediaType.safeValueOf(type.name),
     url = url,
     thumbnailUrl = thumbnailUrl,
     durationSeconds = durationSeconds,
     displayOrder = displayOrder,
 )
 
-fun GuestBookAuthor.toUiModel(): GuestBookAuthorUiModel = GuestBookAuthorUiModel(
+fun Author.toUiModel(): GuestBookAuthorUiModel = GuestBookAuthorUiModel(
     id = id,
     name = name,
     profileImageUrl = profileImageUrl,
@@ -66,8 +67,9 @@ data class GuestBookUiModel(
     val visualMedias: ImmutableList<GuestBookEntryMediaUiModel>,
     val audioMedias: ImmutableList<GuestBookEntryMediaUiModel>,
     val totalVisualCount: Int,
-    val isAuthorSelf: Boolean,
+    val isOwner: Boolean,
     val createdAt: LocalDateTime,
+    val updatedAt: LocalDateTime,
 )
 
 data class GuestBookAuthorUiModel(

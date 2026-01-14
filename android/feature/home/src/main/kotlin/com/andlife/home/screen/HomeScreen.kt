@@ -17,12 +17,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.andlife.designsystem.theme.InvitationSpacing
+import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.home.viewmodel.HomeViewModel
 import com.andlife.ui.component.guestbook.GuestBookItem
-import com.andlife.ui.model.MediaType
 import com.andlife.ui.player.VideoPlayerPool
-import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 fun HomeScreen(
@@ -51,6 +49,7 @@ fun HomeScreen(
                         item.offset + item.size >= item.size * 0.7f // 70% 이상 보이는 아이템 찾기
                     }?.index ?: visibleItemsWithVisualMedia.first().index // 없으면 첫 번째 아이템 인덱스 반환
                 }
+
                 else -> {
                     if (visibleItemsWithVisualMedia.size >= 3) {
                         visibleItemsWithVisualMedia[1].index // 3개 이상이면 1 인덱스(두 번째 아이템) 반환
@@ -83,8 +82,9 @@ fun HomeScreen(
             state = lazyListSTate,
             modifier =
                 Modifier
-                    .padding(horizontal = InvitationSpacing.large),
-            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.large),
+                    .padding(innerPadding)
+                    .padding(horizontal = NachoSpacing.large),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
         ) {
             itemsIndexed(
                 items = uiState.value.guestBooks,
@@ -100,7 +100,7 @@ fun HomeScreen(
                     authorProfileImageUrl = guestBook.author.profileImageUrl,
                     invitationTitle = guestBook.invitation.title,
                     invitationId = guestBook.invitation.id,
-                    isAuthorSelf = guestBook.isAuthorSelf,
+                    isAuthorSelf = guestBook.isOwner,
                     shouldPlayVideo = index == playVideoIndex,
                 )
             }

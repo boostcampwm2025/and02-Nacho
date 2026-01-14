@@ -9,49 +9,49 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationSpacing
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 
 @Composable
 fun MediaOverlay(
     text: String,
     modifier: Modifier = Modifier,
-    shape: CornerBasedShape = InvitationTheme.shapes.extraSmall,
-    backgroundColor: Color = InvitationTheme.colorScheme.backgroundOverlay,
-    contentColor: Color = InvitationTheme.colorScheme.textOnPrimary,
-    textStyle: TextStyle = InvitationTheme.typography.bodyMediumRegular
+    shape: CornerBasedShape = NachoTheme.shapes.extraSmall,
+    backgroundColor: Color = NachoTheme.colorScheme.backgroundOverlay,
+    contentColor: Color = NachoTheme.colorScheme.textOnPrimary,
+    textStyle: TextStyle = NachoTheme.typography.bodyMediumRegular,
 ) {
     Surface(
         modifier = modifier,
         shape = shape,
         color = backgroundColor,
-        contentColor = contentColor
+        contentColor = contentColor,
     ) {
         Text(
             text = text,
             style = textStyle,
-            modifier = Modifier.padding(horizontal = InvitationSpacing.small, vertical = InvitationSpacing.xSmall)
+            modifier = Modifier.padding(horizontal = NachoSpacing.small, vertical = NachoSpacing.xSmall),
         )
     }
 }
 
 @PreviewTheme
 @Composable
-fun ImageOverlayPreview() {
-    InvitationTheme {
+private fun ImageOverlayPreview() {
+    NachoTheme {
         MediaOverlay(
             text = "1/10",
-            shape = InvitationTheme.shapes.medium,
+            shape = NachoTheme.shapes.medium,
         )
     }
 }
 
 @PreviewTheme
 @Composable
-fun VideoOverlayPreview() {
-    InvitationTheme {
+private fun VideoOverlayPreview() {
+    NachoTheme {
         MediaOverlay(
-            text = "8:28"
+            text = "8:28",
         )
     }
 }

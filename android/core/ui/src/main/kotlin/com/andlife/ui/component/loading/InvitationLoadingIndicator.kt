@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 
 @Composable
 fun InvitationLoadingIndicator(modifier: Modifier = Modifier) {
@@ -21,8 +21,8 @@ fun InvitationLoadingIndicator(modifier: Modifier = Modifier) {
 
 @PreviewTheme
 @Composable
-private fun InvitationLoadingIndicatorPreview() {
-    InvitationTheme {
+private fun NachoLoadingIndicatorPreview() {
+    NachoTheme {
         InvitationLoadingIndicator()
     }
 }

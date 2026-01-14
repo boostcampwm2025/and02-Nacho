@@ -2,7 +2,7 @@ package com.andlife.data.datasource.remote.address
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.andlife.domain.model.Address
+import com.andlife.domain.model.address.Address
 import com.andlife.domain.util.Result
 
 class AddressSearchPagingSource(

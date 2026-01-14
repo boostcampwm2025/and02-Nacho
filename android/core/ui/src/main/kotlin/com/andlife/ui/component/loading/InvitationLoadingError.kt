@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationSpacing
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 
 @Composable
@@ -30,16 +30,16 @@ fun InvitationLoadingError(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = stringResource(R.string.label_loading_fetch_failed),
-                color = InvitationTheme.colorScheme.textTertiary,
+                color = NachoTheme.colorScheme.textTertiary,
                 textAlign = TextAlign.Center,
             )
-            Spacer(modifier = Modifier.height(InvitationSpacing.medium))
+            Spacer(modifier = Modifier.height(NachoSpacing.medium))
             Button(
                 onClick = onRetry,
                 colors =
                     ButtonDefaults.buttonColors(
-                        containerColor = InvitationTheme.colorScheme.backgroundBorder,
-                        contentColor = InvitationTheme.colorScheme.textPrimary,
+                        containerColor = NachoTheme.colorScheme.backgroundBorder,
+                        contentColor = NachoTheme.colorScheme.textPrimary,
                     ),
             ) {
                 Text(text = stringResource(R.string.label_loading_retry))
@@ -50,8 +50,8 @@ fun InvitationLoadingError(
 
 @PreviewTheme
 @Composable
-private fun InvitationLoadingErrorPreview() {
-    InvitationTheme {
+private fun NachoLoadingErrorPreview() {
+    NachoTheme {
         InvitationLoadingError(onRetry = {})
     }
 }

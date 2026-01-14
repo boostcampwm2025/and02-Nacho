@@ -8,6 +8,7 @@ android {
 }
 
 dependencies {
+    implementation(projects.feature.model)
     // designSystem
     implementation(projects.core.designsystem)
 
@@ -16,6 +17,7 @@ dependencies {
 
     // coil
     implementation(libs.coil.kt.compose)
+    implementation(libs.coil.kt.network.okhttp)
 
     // paging
     implementation(libs.androidx.paging.compose)
