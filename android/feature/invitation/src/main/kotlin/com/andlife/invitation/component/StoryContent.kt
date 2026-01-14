@@ -32,7 +32,6 @@ fun StoryContent(
     isExpanded: Boolean,
     onToggleExpand: () -> Unit,
     exoPlayer: Player,
-    isActive: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -54,14 +53,12 @@ fun StoryContent(
             UiMediaType.VIDEO -> {
                 VideoPlayer(
                     exoPlayer = exoPlayer,
-                    isActive = isActive,
                     modifier = Modifier.fillMaxSize(),
                 )
             }
             UiMediaType.AUDIO -> {
                 AudioPlayer(
                     exoPlayer = exoPlayer,
-                    isActive = isActive,
                     modifier = Modifier.fillMaxSize(),
                 )
             }
@@ -99,7 +96,6 @@ private fun StoryContentPreview() {
                 ),
             isExpanded = false,
             exoPlayer = dummyPlayer,
-            isActive = true,
             onToggleExpand = {},
         )
     }

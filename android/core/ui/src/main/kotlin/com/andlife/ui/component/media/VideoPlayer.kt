@@ -14,13 +14,8 @@ import androidx.media3.ui.PlayerView
 @Composable
 fun VideoPlayer(
     exoPlayer: Player,
-    isActive: Boolean,
     modifier: Modifier = Modifier
 ) {
-    LaunchedEffect(isActive) {
-        exoPlayer.playWhenReady = isActive
-    }
-
     AndroidView(
         factory = { ctx ->
             PlayerView(ctx).apply {
@@ -34,5 +29,4 @@ fun VideoPlayer(
         },
         modifier = modifier
     )
-
 }

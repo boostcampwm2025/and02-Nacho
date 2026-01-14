@@ -121,7 +121,6 @@ fun InvitationStoryScreen(
                     isExpanded = uiState.isTextExpanded,
                     onToggleExpand = onToggleExpand,
                     exoPlayer = exoPlayer,
-                    isActive = (pageIndex == pagerState.currentPage),
                     modifier = Modifier.align(Alignment.BottomCenter),
                 )
             }

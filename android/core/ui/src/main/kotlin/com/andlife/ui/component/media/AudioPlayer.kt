@@ -11,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.media3.common.Player
@@ -20,11 +19,11 @@ import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 import kotlinx.coroutines.delay
+import java.util.Locale
 
 @Composable
 fun AudioPlayer(
     exoPlayer: Player,
-    isActive: Boolean,
     modifier: Modifier = Modifier
 ) {
     var isPlaying by remember { mutableStateOf(exoPlayer.isPlaying) }
@@ -133,7 +132,7 @@ fun formatTime(ms: Long): String {
     val totalSeconds = ms / 1000
     val minutes = totalSeconds / 60
     val seconds = totalSeconds % 60
-    return String.format("%02d:%02d", minutes, seconds)
+    return String.format(Locale.US, "%02d:%02d", minutes, seconds)
 }
 
 @Composable
