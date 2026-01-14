@@ -122,12 +122,12 @@ class GuestBookService(
     }
 
     @Transactional
-    fun createGuestBook(request: GuestBookRequest): GuestBookResponse {
+    fun createGuestBook(invitationId: Long, request: GuestBookRequest): GuestBookResponse {
         val user = userRepository.findById(request.userId)
             .orElseThrow { IllegalArgumentException("User not found with id: ${request.userId}") }
 
-        val invitation = invitationRepository.findById(request.invitationId)
-            .orElseThrow { IllegalArgumentException("Invitation not found with id: ${request.invitationId}") }
+        val invitation = invitationRepository.findById(invitationId)
+            .orElseThrow { IllegalArgumentException("Invitation not found with id: $invitationId") }
 
         // GuestBook 생성
         val guestBook = GuestBook(

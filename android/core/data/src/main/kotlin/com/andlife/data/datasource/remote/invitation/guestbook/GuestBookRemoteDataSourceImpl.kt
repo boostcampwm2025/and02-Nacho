@@ -22,6 +22,6 @@ internal class GuestBookRemoteDataSourceImpl
         ): Result<List<GuestBookResponse>, DataError> =
             apiCall { guestBookService.getGuestBooksByInvitationId(invitationId) }
 
-        override suspend fun createGuestBook(request: GuestBookRequest): Result<GuestBookResponse, DataError> =
-            apiCall { guestBookService.createGuestBook(request) }
+        override suspend fun createGuestBook(invitationId: Long, request: GuestBookRequest): Result<GuestBookResponse, DataError> =
+            apiCall { guestBookService.createGuestBook(invitationId, request) }
     }

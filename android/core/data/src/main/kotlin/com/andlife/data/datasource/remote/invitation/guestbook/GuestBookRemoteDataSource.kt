@@ -11,5 +11,5 @@ interface GuestBookRemoteDataSource {
 
     suspend fun getGuestBooksByInvitationId(invitationId: Long): Result<List<GuestBookResponse>, DataError>
 
-    suspend fun createGuestBook(request: GuestBookRequest): Result<GuestBookResponse, DataError>
+    suspend fun createGuestBook(invitationId: Long, request: GuestBookRequest): Result<GuestBookResponse, DataError>
 }

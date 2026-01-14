@@ -37,12 +37,11 @@ internal class GuestBookRepositoryImpl
         ): Result<GuestBook, DataError> {
             val request =
                 GuestBookRequest(
-                    invitationId = invitationId,
                     userId = userId,
                     textContent = textContent,
                     medias = medias.map { it.toRequest() },
                 )
-            val result = guestBookRemoteDataSource.createGuestBook(request)
+            val result = guestBookRemoteDataSource.createGuestBook(invitationId, request)
             return result.map { it.toDomain() }
         }
     }
