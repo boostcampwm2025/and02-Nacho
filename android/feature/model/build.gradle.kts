@@ -9,6 +9,10 @@ android {
 
 dependencies {
     implementation(projects.domain)
+
+    implementation(libs.kotlinx.immutable)
+    implementation(libs.kotlinx.datetime)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
