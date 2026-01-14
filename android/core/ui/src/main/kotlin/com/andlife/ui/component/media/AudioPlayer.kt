@@ -18,8 +18,8 @@ import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
+import com.andlife.ui.util.toDurationFormat
 import kotlinx.coroutines.delay
-import java.util.Locale
 
 @Composable
 fun AudioPlayer(
@@ -59,7 +59,6 @@ fun AudioPlayer(
         modifier = modifier
             .fillMaxSize()
             .background(NachoTheme.colorScheme.backgroundPrimary)
-            .background(NachoTheme.colorScheme.backgroundOverlay)
             .padding(horizontal = NachoSpacing.twoXLarge),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -82,7 +81,7 @@ fun AudioPlayer(
         Spacer(modifier = Modifier.height(NachoSpacing.threeXLarge))
 
         Text(
-            text = formatTime(currentPosition),
+            text = currentPosition.toDurationFormat(),
             style = NachoTheme.typography.headingMedium.copy(
                 color = NachoTheme.colorScheme.textOnPrimary
             )
@@ -118,7 +117,7 @@ fun AudioPlayer(
 
         val progress = if (duration > 0) currentPosition.toFloat() / duration.toFloat() else 0f
 
-        CustomProgressBar(
+        AudioProgressBar(
             progress = progress,
             modifier = Modifier
                 .fillMaxWidth()
@@ -127,16 +126,8 @@ fun AudioPlayer(
     }
 }
 
-// 시간 포맷팅 함수 (밀리초 -> 00:00)
-fun formatTime(ms: Long): String {
-    val totalSeconds = ms / 1000
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-    return String.format(Locale.US, "%02d:%02d", minutes, seconds)
-}
-
 @Composable
-fun CustomProgressBar(
+fun AudioProgressBar(
     progress: Float,
     modifier: Modifier = Modifier
 ) {
