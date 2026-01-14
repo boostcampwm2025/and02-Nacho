@@ -3,7 +3,10 @@ package com.andlife.InvitationServer.service.invitation.guestbook
 import com.andlife.InvitationServer.constant.MediaType
 import com.andlife.InvitationServer.repository.invitation.guestbook.GuestBookRepository
 import com.andlife.InvitationServer.response.AuthorResponse
-import com.andlife.InvitationServer.response.invitation.guestbook.*
+import com.andlife.InvitationServer.response.invitation.guestbook.CollectionResponse
+import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookInvitationResponse
+import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookMediaResponse
+import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookResponse
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -19,7 +22,7 @@ class GuestBookService(
 
         guestBooks.forEach { gb ->
             val author = AuthorResponse(
-                userId = gb.user.id,
+                id = gb.user.id,
                 name = gb.user.name,
                 profileImageUrl = gb.user.profileImageUrl
             )
@@ -69,16 +72,16 @@ class GuestBookService(
         val guestBooks = guestBookRepository.findAllByInvitationId(invitationId)
 
         return guestBooks.map { guestBook ->
-            val allMedia = mutableListOf<GuestBookEntryMediaResponse>()
+            val allMedia = mutableListOf<GuestBookMediaResponse>()
 
             guestBook.images.forEach {
-                allMedia.add(GuestBookEntryMediaResponse(it.id, MediaType.IMAGE, it.imageUrl, null, null, it.displayOrder))
+                allMedia.add(GuestBookMediaResponse(it.id, MediaType.IMAGE, it.imageUrl, null, null, it.displayOrder))
             }
             guestBook.videos.forEach {
-                allMedia.add(GuestBookEntryMediaResponse(it.id, MediaType.VIDEO, it.videoUrl, it.thumbnailUrl, it.durationSeconds, it.displayOrder))
+                allMedia.add(GuestBookMediaResponse(it.id, MediaType.VIDEO, it.videoUrl, it.thumbnailUrl, it.durationSeconds, it.displayOrder))
             }
             guestBook.audios.forEach {
-                allMedia.add(GuestBookEntryMediaResponse(it.id, MediaType.AUDIO, it.audioUrl, null, it.durationSeconds, it.displayOrder))
+                allMedia.add(GuestBookMediaResponse(it.id, MediaType.AUDIO, it.audioUrl, null, it.durationSeconds, it.displayOrder))
             }
 
             val sortedList = allMedia.sortedBy { it.displayOrder }
@@ -88,7 +91,7 @@ class GuestBookService(
 
             GuestBookResponse(
                 id = guestBook.id,
-                author = GuestBookAuthorResponse(
+                author = AuthorResponse(
                     id = guestBook.user.id,
                     name = guestBook.user.name,
                     profileImageUrl = guestBook.user.profileImageUrl
@@ -101,8 +104,9 @@ class GuestBookService(
                 visualMedias = visualMedias,
                 audioMedias = audioMedias,
                 totalVisualCount = visualMedias.size,
-                isAuthorSelf = false, // TODO: 인증 기능 구현 후 수정 필요
-                createdAt = guestBook.createdAt
+                isOwner = false, // TODO: 인증 기능 구현 후 수정 필요
+                createdAt = guestBook.createdAt,
+                updatedAt = guestBook.updatedAt
             )
         }
     }

@@ -20,16 +20,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.andlife.designsystem.component.InvitationButton
-import com.andlife.designsystem.component.InvitationTextField
+import com.andlife.designsystem.component.NachoButton
+import com.andlife.designsystem.component.NachoTextField
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationElevation
-import com.andlife.designsystem.theme.InvitationSpacing
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoElevation
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 import kotlinx.coroutines.launch
 
@@ -41,6 +42,7 @@ fun InvitationAddAnnouncementBottomSheet(
     modifier: Modifier = Modifier,
     viewModel: InvitationAddAnnouncementViewModel = viewModel(),
 ) {
+    val keyboardManager = LocalSoftwareKeyboardController.current
     val sheetState =
         rememberModalBottomSheetState(
             skipPartiallyExpanded = true,
@@ -52,7 +54,7 @@ fun InvitationAddAnnouncementBottomSheet(
     ModalBottomSheet(
         onDismissRequest = { }, // 사용하지 않음
         sheetState = sheetState,
-        containerColor = InvitationTheme.colorScheme.backgroundPrimary,
+        containerColor = NachoTheme.colorScheme.backgroundPrimary,
         dragHandle = null,
         sheetGesturesEnabled = false,
         properties =
@@ -66,12 +68,12 @@ fun InvitationAddAnnouncementBottomSheet(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(top = InvitationSpacing.twoXLarge),
+                    .padding(top = NachoSpacing.twoXLarge),
         ) {
             Text(
                 text = stringResource(R.string.label_add_announcement),
-                style = InvitationTheme.typography.headingSmallSemiBold,
-                color = InvitationTheme.colorScheme.textPrimary,
+                style = NachoTheme.typography.headingSmallSemiBold,
+                color = NachoTheme.colorScheme.textPrimary,
                 modifier = Modifier.align(Alignment.Center),
             )
 
@@ -79,19 +81,20 @@ fun InvitationAddAnnouncementBottomSheet(
                 modifier =
                     Modifier
                         .align(Alignment.CenterEnd)
-                        .padding(horizontal = InvitationSpacing.large)
+                        .padding(horizontal = NachoSpacing.large)
                         .clickable {
-                            scope.launch {
-                                sheetState.hide()
-                                onDismiss()
-                            }
+                            scope
+                                .launch {
+                                    keyboardManager?.hide()
+                                    sheetState.hide()
+                                }.invokeOnCompletion { onDismiss() }
                         },
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_close_24),
                     contentDescription = stringResource(R.string.desc_close),
-                    tint = InvitationTheme.colorScheme.textPrimary,
+                    tint = NachoTheme.colorScheme.textPrimary,
                 )
             }
         }
@@ -99,8 +102,8 @@ fun InvitationAddAnnouncementBottomSheet(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(all = InvitationSpacing.large),
-            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium),
+                    .padding(all = NachoSpacing.large),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
         ) {
             TitleAndTextField(
                 title = stringResource(R.string.label_announcement_title),
@@ -131,28 +134,33 @@ fun InvitationAddAnnouncementBottomSheet(
                             .clickable {
                                 viewModel.clearDraft()
                             },
-                    color = InvitationTheme.colorScheme.iconPrimary,
-                    style = InvitationTheme.typography.bodyMediumSemiBold,
+                    color = NachoTheme.colorScheme.iconPrimary,
+                    style = NachoTheme.typography.bodyMediumSemiBold,
                 )
             }
 
-            InvitationButton(
+            NachoButton(
                 onClick = {
                     onConfirm(draft.title, draft.content)
                     viewModel.clearDraft()
+                    scope
+                        .launch {
+                            keyboardManager?.hide()
+                            sheetState.hide()
+                        }.invokeOnCompletion { onDismiss() }
                 },
                 enabled = draft.title.isNotBlank() && draft.content.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(vertical = InvitationSpacing.medium),
+                contentPadding = PaddingValues(vertical = NachoSpacing.medium),
                 elevation =
                     ButtonDefaults.buttonElevation(
-                        defaultElevation = InvitationElevation.none,
-                        pressedElevation = InvitationElevation.none,
+                        defaultElevation = NachoElevation.none,
+                        pressedElevation = NachoElevation.none,
                     ),
             ) {
                 Text(
                     text = stringResource(R.string.txt_submit),
-                    style = InvitationTheme.typography.bodyLargeSemiBold,
+                    style = NachoTheme.typography.bodyLargeSemiBold,
                 )
             }
         }
@@ -170,16 +178,16 @@ fun TitleAndTextField(
     minLines: Int = 1,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
+        verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
         horizontalAlignment = Alignment.Start,
         modifier = modifier,
     ) {
         Text(
             text = title,
-            style = InvitationTheme.typography.bodyMediumSemiBold,
-            color = InvitationTheme.colorScheme.textPrimary,
+            style = NachoTheme.typography.bodyMediumSemiBold,
+            color = NachoTheme.colorScheme.textPrimary,
         )
-        InvitationTextField(
+        NachoTextField(
             value = textFieldValue,
             onValueChange = onTextFieldValueChange,
             placeholder = textFieldPlaceholder,
@@ -194,7 +202,7 @@ fun TitleAndTextField(
 @PreviewTheme
 @Composable
 private fun InvitationAddAnnouncementBottomSheetPreview() {
-    InvitationTheme {
+    NachoTheme {
         InvitationAddAnnouncementBottomSheet(
             onConfirm = { _, _ -> },
             onDismiss = {},

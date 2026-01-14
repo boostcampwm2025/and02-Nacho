@@ -2,6 +2,7 @@
 
 package com.andlife.network.api.guestbook
 
+import com.andlife.network.model.AuthorResponse
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
@@ -9,14 +10,15 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class GuestBookResponse(
     val id: Long,
-    val author: GuestBookAuthorResponse,
+    val author: AuthorResponse,
     val invitation: GuestBookInvitationResponse,
     val textContent: String,
-    val visualMedias: List<GuestBookEntryMediaResponse>,
-    val audioMedias: List<GuestBookEntryMediaResponse>,
+    val visualMedias: List<GuestBookMediaResponse>,
+    val audioMedias: List<GuestBookMediaResponse>,
     val totalVisualCount: Int,
-    val isAuthorSelf: Boolean,
+    val isOwner: Boolean,
     val createdAt: LocalDateTime,
+    val updatedAt: LocalDateTime,
 )
 
 @Serializable
@@ -26,14 +28,7 @@ data class GuestBookInvitationResponse(
 )
 
 @Serializable
-data class GuestBookAuthorResponse(
-    val id: Long,
-    val name: String,
-    val profileImageUrl: String?,
-)
-
-@Serializable
-data class GuestBookEntryMediaResponse(
+data class GuestBookMediaResponse(
     val id: Long,
     val type: String,
     val url: String,

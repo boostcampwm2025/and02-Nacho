@@ -6,129 +6,84 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.andlife.designsystem.theme.InvitationSpacing
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.home.viewmodel.HomeSideEffect
+import com.andlife.home.viewmodel.HomeUiEvent
+import com.andlife.home.viewmodel.HomeUiState
 import com.andlife.home.viewmodel.HomeViewModel
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.player.VideoPlayerPool
-import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.delay
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.min
+import com.andlife.ui.util.collectWithLifecycle
 
 @Composable
-fun HomeScreen(
+fun HomeRoute(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
-    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val lazyListState = rememberLazyListState()
-
-    var isScrolling by remember { mutableStateOf(false) }
-    var currentPlayingIndex by remember { mutableIntStateOf(-1) }
-    var lastScrollTime by remember { mutableLongStateOf(0L) }
-    var lastScrollOffset by remember { mutableIntStateOf(0) }
-    var scrollVelocity by remember { mutableFloatStateOf(0f) }
-
-    val SLOW_SCROLL_THRESHOLD = 50f
-
-    LaunchedEffect(lazyListState) {
-        snapshotFlow { lazyListState.firstVisibleItemScrollOffset }
-            .collect { offset ->
-                val currentTime = System.currentTimeMillis()
-                val timeDiff = (currentTime - lastScrollTime).coerceAtLeast(1)
-                val offsetDiff = abs(offset - lastScrollOffset)
-
-                scrollVelocity = (offsetDiff.toFloat() / timeDiff) * 1000 // px/s
-
-                lastScrollTime = currentTime
-                lastScrollOffset = offset
-            }
-    }
-
-    LaunchedEffect(lazyListState.isScrollInProgress) {
-        if (lazyListState.isScrollInProgress) {
-            isScrolling = true
-        } else {
-            delay(100L)
-            if (!lazyListState.isScrollInProgress) {
-                isScrolling = false
-            }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    viewModel.effectFlow.collectWithLifecycle { effect ->
+        when (effect) {
+            is HomeSideEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
         }
     }
 
-    val playVideoIndex by remember {
+    HomeScreen(
+        uiState = uiState,
+        onEvent = viewModel::onEvent,
+        snackbarHostState = snackbarHostState,
+        modifier = modifier,
+    )
+}
+
+@Composable
+fun HomeScreen(
+    uiState: HomeUiState,
+    onEvent: (HomeUiEvent) -> Unit,
+    snackbarHostState: SnackbarHostState,
+    modifier: Modifier = Modifier,
+) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val lazyListState = rememberLazyListState()
+
+    val playVideoIndex by remember(uiState) {
         derivedStateOf {
-            val layoutInfo = lazyListState.layoutInfo
-            val visibleItems = layoutInfo.visibleItemsInfo
+            val visibleItems = lazyListState.layoutInfo.visibleItemsInfo
+            if (visibleItems.isEmpty()) return@derivedStateOf -1
 
-            val candidates = visibleItems.mapNotNull { item ->
-                val guestBook = uiState.value.guestBooks.getOrNull(item.index)
-                if (guestBook?.visualMedias?.isNotEmpty() != true) return@mapNotNull null
-
-                val visibleHeight =
-                    min(item.offset + item.size, layoutInfo.viewportEndOffset) -
-                        max(item.offset, layoutInfo.viewportStartOffset)
-
-                val ratio = visibleHeight.toFloat() / item.size
-                item.index to ratio
+            val visibleItemsWithVisualMedia = visibleItems.filter { itemInfo ->
+                val guestBook = uiState.guestBooks.getOrNull(itemInfo.index)
+                guestBook?.visualMedias?.isNotEmpty() == true
             }
 
-            when {
-                candidates.isEmpty() -> {
-                    currentPlayingIndex = -1
-                    -1
+            when (visibleItemsWithVisualMedia.size) {
+                0 -> -1 // 보이는 아이템이 없으면 -1 반환
+                1 -> visibleItemsWithVisualMedia.first().index // 보이는 아이템이 1개면 그 아이템 인덱스 반환
+                2 -> {
+                    visibleItemsWithVisualMedia.firstOrNull { item ->
+                        item.offset + item.size >= item.size * 0.7f // 70% 이상 보이는 아이템 찾기
+                    }?.index ?: visibleItemsWithVisualMedia.first().index // 없으면 첫 번째 아이템 인덱스 반환
                 }
-                // 스크롤 중
-                isScrolling -> {
-                    val currentPlayingVisibility = candidates
-                        .find { it.first == currentPlayingIndex }
-                        ?.second ?: 0f
 
-                    // 현재 재생 중인 영상이 20% 이하면 무조건 정지
-                    if (currentPlayingVisibility < 0.2f) {
-                        currentPlayingIndex = -1
-                    }
-
-                    // 스크롤 속도가 느리면 (손 댄 상태로 천천히) → 중앙 영상 재생
-                    if (scrollVelocity < SLOW_SCROLL_THRESHOLD) {
-                        val centerIndex = candidates
-                            .maxByOrNull { it.second }
-                            ?.first ?: -1
-                        currentPlayingIndex = centerIndex
-                        centerIndex
-                    } else {
-                        // 빠른 스크롤 (손 댄 상태로 빠르게) → 기존 재생 유지만
-                        currentPlayingIndex
-                    }
-                }
-                // 스크롤 멈춤 (손 뗀 후) - 중앙 비디오 재생
                 else -> {
-                    val centerIndex = candidates
-                        .maxByOrNull { it.second }
-                        ?.first ?: -1
-
-                    currentPlayingIndex = centerIndex
-                    centerIndex
+                    if (visibleItemsWithVisualMedia.size >= 3) {
+                        visibleItemsWithVisualMedia[1].index // 3개 이상이면 1 인덱스(두 번째 아이템) 반환
+                    } else {
+                        visibleItemsWithVisualMedia.first().index
+                    }
                 }
             }
         }
@@ -149,30 +104,28 @@ fun HomeScreen(
     }
 
     Scaffold(
-        modifier = modifier
+        modifier = modifier,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         LazyColumn(
             state = lazyListState,
-            modifier = Modifier.padding(horizontal = InvitationSpacing.large),
-            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.large),
+            modifier =
+                Modifier
+                    .padding(innerPadding)
+                    .padding(horizontal = NachoSpacing.large),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
         ) {
             itemsIndexed(
-                items = uiState.value.guestBooks,
+                items = uiState.guestBooks,
                 key = { _, guestBook -> guestBook.id },
             ) { index, guestBook ->
                 GuestBookItem(
-                    guestBookId = guestBook.id,
-                    authorName = guestBook.author.name,
-                    createdAt = guestBook.createdAt,
-                    textContent = guestBook.textContent,
-                    visualMediaUrls = guestBook.visualMedias.toImmutableList(),
-                    audioMediaUrls = guestBook.audioMedias.toImmutableList(),
-                    totalVisualCount = guestBook.totalVisualCount,
-                    authorProfileImageUrl = guestBook.author.profileImageUrl,
-                    invitationTitle = guestBook.invitation.title,
-                    invitationId = guestBook.invitation.id,
-                    isAuthorSelf = guestBook.isAuthorSelf,
+                    guestBook = guestBook,
                     shouldPlayVideo = index == playVideoIndex,
+                    onInvitationTitleClick = { onEvent(HomeUiEvent.ClickInvitationTitle(guestBook.invitation?.id ?: -1L)) },
+                    onVisualMediaClick = { onEvent(HomeUiEvent.ClickVisualMedia(it.url)) },
+                    onAudioMediaClick = { onEvent(HomeUiEvent.ClickAudioMedia(it.url)) },
+                    onMenuClick = { onEvent(HomeUiEvent.ClickGuestBookMenu(guestBook.id)) },
                 )
             }
         }

@@ -13,5 +13,5 @@ data class CollectionResponse(
     val author: AuthorResponse,
     val content: String,
     val createdAt: LocalDateTime,
-    val durationSeconds: Int? = null
+    val durationSeconds: Int? = null,
 )

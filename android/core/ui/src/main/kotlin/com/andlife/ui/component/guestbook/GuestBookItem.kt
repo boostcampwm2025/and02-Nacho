@@ -1,6 +1,6 @@
 package com.andlife.ui.component.guestbook
 
-import android.util.Log
+import androidx.annotation.OptIn
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,8 +22,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,143 +29,129 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.media3.common.Player
-import androidx.media3.ui.AspectRatioFrameLayout
-import androidx.media3.ui.PlayerView
+import androidx.media3.common.util.UnstableApi
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationSpacing
-import com.andlife.designsystem.theme.InvitationStroke
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoStroke
+import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.model.common.AuthorUiModel
+import com.andlife.model.guestbook.GuestBookInvitationUiModel
+import com.andlife.model.guestbook.GuestBookMediaUiModel
+import com.andlife.model.guestbook.GuestBookUiModel
+import com.andlife.model.guestbook.MediaUiType
 import com.andlife.ui.R
 import com.andlife.ui.component.media.MediaOverlay
-import com.andlife.ui.model.GuestBookEntryMediaUiModel
-import com.andlife.ui.model.MediaType
-import com.andlife.ui.player.VideoPlayer
-import com.andlife.ui.player.VideoPlayerPool
+import com.andlife.ui.util.toFormatDuration
+import com.andlife.ui.util.toRelativeTimeString
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.delay
 import kotlinx.datetime.LocalDateTime
 import com.andlife.designsystem.R as designR
 
 @Composable
 fun GuestBookItem(
-    guestBookId: Long,
-    authorName: String,
-    createdAt: LocalDateTime,
-    textContent: String,
-    visualMediaUrls: ImmutableList<GuestBookEntryMediaUiModel>,
-    audioMediaUrls: ImmutableList<GuestBookEntryMediaUiModel>,
-    totalVisualCount: Int,
+    guestBook: GuestBookUiModel,
+    onInvitationTitleClick: (Long) -> Unit,
+    onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
+    onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
+    onMenuClick: () -> Unit,
     modifier: Modifier = Modifier,
-    authorProfileImageUrl: String? = null,
-    invitationTitle: String? = null,
-    invitationId: Long? = null,
-    isAuthorSelf: Boolean = false,
     shouldPlayVideo: Boolean = false,
-    onInvitationTitleClick: (Long) -> Unit = {},
-    onVisualMediaClick: (GuestBookEntryMediaUiModel) -> Unit = {},
-    onAudioMediaClick: (GuestBookEntryMediaUiModel) -> Unit = {},
-    onMoreOptionsClick: () -> Unit = {}
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium)
+        verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
         GuestBookItemHeader(
-            authorName = authorName,
-            authorProfileImageUrl = authorProfileImageUrl,
-            createdAt = createdAt,
-            isAuthorSelf = isAuthorSelf,
-            onMoreOptionsClick = onMoreOptionsClick,
+            author = guestBook.author,
+            createdAt = guestBook.createdAt,
+            isOwner = guestBook.isOwner,
+            onMenuClick = onMenuClick,
         )
-        GuestBookItemTextContent(
-            invitationId = invitationId,
-            invitationTitle = invitationTitle,
-            textContent = textContent,
+        GuestBookItemTextSection(
+            invitation = guestBook.invitation,
+            textContent = guestBook.textContent,
             onInvitationTitleClick = onInvitationTitleClick,
         )
-        if (visualMediaUrls.isNotEmpty()) {
+        if (guestBook.visualMedias.isNotEmpty()) {
             GuestBookItemVisualMediaSection(
-                guestBookId = guestBookId,
-                visualMediaUrls = visualMediaUrls,
-                totalVisualCount = totalVisualCount,
+                visualMediaUrls = guestBook.visualMedias,
+                totalVisualCount = guestBook.totalVisualCount,
                 shouldPlayVideo = shouldPlayVideo,
                 onVisualMediaClick = onVisualMediaClick,
             )
         }
-        if (audioMediaUrls.isNotEmpty()) {
+        if (guestBook.audioMedias.isNotEmpty()) {
             Column(
                 modifier = Modifier,
-                verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
+                verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
             ) {
-                audioMediaUrls.forEach { audio ->
+                guestBook.audioMedias.forEach { audio ->
                     GuestBookAudioItem(
                         audio = audio,
-                        onAudioMediaClick = onAudioMediaClick
+                        onAudioMediaClick = onAudioMediaClick,
                     )
                 }
             }
         }
         HorizontalDivider(
-            modifier = Modifier.padding(top = InvitationSpacing.xSmall),
-            color = InvitationTheme.colorScheme.backgroundBorder,
+            modifier = Modifier.padding(top = NachoSpacing.xSmall),
+            color = NachoTheme.colorScheme.backgroundBorder,
         )
     }
 }
 
 @Composable
 private fun GuestBookItemHeader(
-    authorName: String,
-    authorProfileImageUrl: String?,
+    author: AuthorUiModel,
     createdAt: LocalDateTime,
-    isAuthorSelf: Boolean,
-    onMoreOptionsClick: (() -> Unit),
+    isOwner: Boolean,
+    onMenuClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
+        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AsyncImage(
-            model = authorProfileImageUrl,
-            error = painterResource(R.drawable.ic_error_outline_24),
-            contentDescription = null,
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape),
+            model = author.profileImageUrl,
+            contentDescription = stringResource(R.string.desc_author_profile_image),
+            modifier =
+                Modifier
+                    .size(40.dp)
+                    .clip(CircleShape),
             contentScale = ContentScale.Crop,
+            placeholder = painterResource(R.drawable.ic_image_24),
+            error = painterResource(R.drawable.ic_error_image_24),
         )
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.xSmall),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
         ) {
             Text(
-                text = authorName,
-                style = InvitationTheme.typography.bodyMediumMedium,
-                color = InvitationTheme.colorScheme.textPrimary,
+                text = author.name,
+                style = NachoTheme.typography.bodyMediumMedium,
+                color = NachoTheme.colorScheme.textPrimary,
             )
             Text(
-                text = createdAt.toString(), // TODO: 포맷팅 필요
-                style = InvitationTheme.typography.bodySmallRegular,
-                color = InvitationTheme.colorScheme.textTertiary,
+                text = createdAt.toRelativeTimeString(),
+                style = NachoTheme.typography.bodySmallRegular,
+                color = NachoTheme.colorScheme.textTertiary,
             )
         }
-        if (isAuthorSelf) {
-            IconButton(onClick = onMoreOptionsClick) {
+        if (isOwner) {
+            IconButton(onClick = onMenuClick) {
                 Icon(
                     painter = painterResource(R.drawable.ic_more_vert_24),
                     contentDescription = stringResource(R.string.desc_edit_guest_book),
-                    tint = InvitationTheme.colorScheme.textPrimary,
+                    tint = NachoTheme.colorScheme.textPrimary,
                 )
             }
         }
@@ -176,95 +159,109 @@ private fun GuestBookItemHeader(
 }
 
 @Composable
-private fun GuestBookItemTextContent(
-    invitationId: Long?,
-    invitationTitle: String?,
+private fun GuestBookItemTextSection(
+    invitation: GuestBookInvitationUiModel?,
     textContent: String,
     onInvitationTitleClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var isExpanded by remember { mutableStateOf(false) }
+    var isOverflowed by remember { mutableStateOf(false) }
+
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(InvitationSpacing.medium),
+        verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
-        invitationTitle?.let {
+        invitation?.let {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        invitationId?.let { id ->
-                            onInvitationTitleClick(id)
-                        }
-                    },
+                modifier =
+                    Modifier
+                        .clickable { onInvitationTitleClick(invitation.id) }
+                        .padding(vertical = NachoSpacing.xSmall),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.xSmall),
+                horizontalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
             ) {
                 Text(
-                    text = invitationTitle,
-                    style = InvitationTheme.typography.bodyLargeMedium,
-                    color = InvitationTheme.colorScheme.textPrimary,
+                    text = invitation.title,
+                    style = NachoTheme.typography.bodyLargeMedium,
+                    color = NachoTheme.colorScheme.textPrimary,
                 )
                 Icon(
                     painter = painterResource(designR.drawable.ic_chevron_right_24),
                     contentDescription = stringResource(R.string.desc_move_to_invitation),
-                    tint = InvitationTheme.colorScheme.textPrimary,
+                    tint = NachoTheme.colorScheme.textPrimary,
                 )
             }
         }
-        Text(
-            text = textContent,
-            style = InvitationTheme.typography.bodyMediumRegular,
-            color = InvitationTheme.colorScheme.textPrimary,
-        )
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        if (isOverflowed) {
+                            isExpanded = !isExpanded
+                        }
+                    },
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
+        ) {
+            Text(
+                text = textContent,
+                style = NachoTheme.typography.bodyMediumRegular,
+                color = NachoTheme.colorScheme.textPrimary,
+                maxLines = if (isExpanded) Int.MAX_VALUE else 2,
+                overflow = TextOverflow.Ellipsis,
+                onTextLayout = { textLayoutResult ->
+                    if (!isExpanded) {
+                        isOverflowed = textLayoutResult.hasVisualOverflow
+                    }
+                },
+            )
+            if (isOverflowed) {
+                Text(
+                    text =
+                        if (isExpanded) {
+                            stringResource(
+                                R.string.txt_show_less,
+                            )
+                        } else {
+                            stringResource(R.string.txt_show_more)
+                        },
+                    style = NachoTheme.typography.bodyMediumSemiBold,
+                    color = NachoTheme.colorScheme.brandPrimary,
+                )
+            }
+        }
     }
 }
 
 @Composable
 private fun GuestBookItemVisualMediaSection(
-    guestBookId: Long,
-    visualMediaUrls: ImmutableList<GuestBookEntryMediaUiModel>,
+    visualMediaUrls: ImmutableList<GuestBookMediaUiModel>,
     totalVisualCount: Int,
     shouldPlayVideo: Boolean,
-    onVisualMediaClick: (GuestBookEntryMediaUiModel) -> Unit,
+    onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val pagerState = rememberPagerState(pageCount = { visualMediaUrls.size })
-    val context = LocalContext.current
-
-//    LaunchedEffect(pagerState.currentPage) {
-//        // 다음 비디오 미리 준비
-//        if (pagerState.currentPage < visualMediaUrls.lastIndex) {
-//            val nextMedia = visualMediaUrls[pagerState.currentPage + 1]
-//            if (nextMedia.type == MediaType.VIDEO) {
-//                VideoPlayerPool.preparePlayer(context, nextMedia.url)
-//            }
-//        }
-//        // 이전 비디오도 미리 준비하는 것도 고려
-//        if (pagerState.currentPage > 0) {
-//            val prevMedia = visualMediaUrls[pagerState.currentPage - 1]
-//            if (prevMedia.type == MediaType.VIDEO) {
-//                VideoPlayerPool.preparePlayer(context, prevMedia.url)
-//            }
-//        }
-//    }
 
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .aspectRatio(1f)
-            .clip(InvitationTheme.shapes.small),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .aspectRatio(1f) // TODO: 추후 미디어 비율에 맞게 조정 필요, 일단 정사각형으로 고정
+                .clip(NachoTheme.shapes.small),
     ) {
         HorizontalPager(state = pagerState) { page ->
             val media = visualMediaUrls[page]
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onVisualMediaClick(media) }
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable { onVisualMediaClick(media) },
             ) {
                 when (media.type) {
-                    MediaType.VIDEO -> {
+                    MediaUiType.VIDEO -> {
                         SimpleVideoPlayer(
-                            guestBookId = guestBookId,
                             videoUrl = media.url,
                             thumbnailUrl = media.thumbnailUrl,
                             shouldPlay = shouldPlayVideo && pagerState.currentPage == page,
@@ -272,10 +269,11 @@ private fun GuestBookItemVisualMediaSection(
 
                         media.durationSeconds?.let {
                             MediaOverlay(
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(InvitationSpacing.small),
-                                text = "$it 초", // TODO: 포맷팅 필요
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .padding(NachoSpacing.small),
+                                text = it.toFormatDuration(), // TODO: 타이머 기능 추가해야 함.
                             )
                         }
                     }
@@ -292,195 +290,98 @@ private fun GuestBookItemVisualMediaSection(
             }
         }
 
-        MediaOverlay(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(InvitationSpacing.small),
-            text = "${pagerState.currentPage + 1}/$totalVisualCount", // TODO: 포맷팅 필요
-            shape = InvitationTheme.shapes.medium,
-        )
+        if (visualMediaUrls.size > 1) {
+            MediaOverlay(
+                modifier =
+                    Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(NachoSpacing.small),
+                text = "${pagerState.currentPage + 1}/$totalVisualCount",
+                shape = NachoTheme.shapes.medium,
+            )
+        }
     }
 }
 
-//@OptIn(UnstableApi::class)
-//@Composable
-//private fun SimpleVideoPlayer(
-//    guestBookId: Long,
-//    videoUrl: String,
-//    shouldPlay: Boolean,
-//    modifier: Modifier = Modifier,
-//) {
-//    val context = LocalContext.current
-//    val videoPlayer = remember(videoUrl) {
-//        VideoPlayerPool.getPlayer(context, videoUrl)
-//    }
-//
-//    // 화면에 보이는 동안 보호
-//    DisposableEffect(videoUrl) {
-//        VideoPlayerPool.protectPlayer(videoUrl)
-//        onDispose {
-//            VideoPlayerPool.unprotectPlayer(videoUrl)
-//            VideoPlayerPool.pausePlayer(videoUrl)
-//        }
-//    }
-//
-//    LaunchedEffect(shouldPlay) {
-//        if (shouldPlay) {
-//            VideoPlayerPool.playPlayer(videoUrl)
-//        } else {
-//            VideoPlayerPool.pausePlayer(videoUrl)
-//        }
-//    }
-//
-//    AndroidView(
-//        factory = { context ->
-//            PlayerView(context).apply {
-//                useController = false
-//                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-//            }
-//        },
-//        update = { playerView ->
-//            playerView.player = videoPlayer.exoPlayer
-//        },
-//        modifier = modifier
-//            .fillMaxSize()
-//            .background(Color.Black)
-//    )
-//}
-
+@OptIn(UnstableApi::class)
 @Composable
 private fun SimpleVideoPlayer(
-    guestBookId: Long,
     videoUrl: String,
     thumbnailUrl: String?,
     shouldPlay: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    var isVideoReady by remember(videoUrl) { mutableStateOf(false) }
-
-    LaunchedEffect(shouldPlay, videoUrl) {
-        if (shouldPlay) {
-            VideoPlayerPool.playPlayer(context, videoUrl, guestBookId)
-        } else {
-            VideoPlayerPool.pausePlayer(videoUrl)
-            isVideoReady = false // 재생 멈추면 썸네일 다시 표시
-        }
-    }
-
-    val currentPlayer = if (shouldPlay) {
-        Log.d("qqq", "SimpleVideoPlayer: 재생할 플레이어 요청: $videoUrl")
-        VideoPlayerPool.getPlayer(context, videoUrl)
-    } else null
-
-    DisposableEffect(currentPlayer) {
-        if (currentPlayer == null) return@DisposableEffect onDispose { }
-
-        val listener = object : Player.Listener {
-            override fun onRenderedFirstFrame() {
-                isVideoReady = true
-            }
-        }
-        currentPlayer.exoPlayer.addListener(listener)
-
-        onDispose {
-            currentPlayer.exoPlayer.removeListener(listener)
-        }
-    }
-
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color.Black)
-    ) {
-        if (currentPlayer != null) {
-            AndroidView(
-                factory = { ctx ->
-                    PlayerView(ctx).apply {
-                        useController = false
-                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-                    }
-                },
-                update = { playerView ->
-                    playerView.player = currentPlayer.exoPlayer
-                },
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
-
-        if ((!isVideoReady || !shouldPlay) && thumbnailUrl != null) {
-            AsyncImage(
-                model = thumbnailUrl,
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit,
-            )
-        }
-    }
+    // TODO: Exoplayer 사용 예정
 }
 
 @Composable
 private fun GuestBookAudioItem(
-    audio: GuestBookEntryMediaUiModel,
-    onAudioMediaClick: (GuestBookEntryMediaUiModel) -> Unit,
+    audio: GuestBookMediaUiModel,
+    onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = InvitationTheme.colorScheme.brandLight,
-                shape = InvitationTheme.shapes.small,
-            )
-            .padding(InvitationSpacing.large),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(
+                    color = NachoTheme.colorScheme.brandLight,
+                    shape = NachoTheme.shapes.small,
+                ).padding(NachoSpacing.large),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
+        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
     ) {
         Box(
-            modifier = Modifier
-                .size(48.dp)
-                .background(
-                    color = InvitationTheme.colorScheme.brandPrimary,
-                    shape = CircleShape,
-                ),
+            modifier =
+                Modifier
+                    .size(48.dp)
+                    .background(
+                        color = NachoTheme.colorScheme.brandPrimary,
+                        shape = CircleShape,
+                    ),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_mic_filled_18),
                 contentDescription = stringResource(R.string.desc_audio_media_icon),
-                tint = InvitationTheme.colorScheme.iconTertiary,
+                tint = NachoTheme.colorScheme.iconTertiary,
             )
         }
         Column(
             modifier =
-                Modifier.weight(1f)
+                Modifier.weight(1f),
         ) {
             Text(
                 text = "오디오 제목", // TODO: 오디오 제목 필요
-                style = InvitationTheme.typography.bodyMediumMedium,
-                color = InvitationTheme.colorScheme.textPrimary,
+                style = NachoTheme.typography.bodyMediumMedium,
+                color = NachoTheme.colorScheme.textPrimary,
             )
             Text(
-                text = "${audio.durationSeconds} 초", // TODO: 포맷팅 필요
-                style = InvitationTheme.typography.bodySmallRegular,
-                color = InvitationTheme.colorScheme.textSecondary,
+                text =
+                    stringResource(
+                        R.string.format_audio_duration,
+                        audio.durationSeconds ?: 0,
+                    ),
+                style = NachoTheme.typography.bodySmallRegular,
+                color = NachoTheme.colorScheme.textSecondary,
             )
         }
         Surface(
             modifier = Modifier.size(40.dp),
             shape = CircleShape,
-            color = InvitationTheme.colorScheme.backgroundPrimary,
-            border = BorderStroke(
-                width = InvitationStroke.small,
-                color = InvitationTheme.colorScheme.iconDisabled,
-            ),
-            onClick = { onAudioMediaClick(audio) }
+            color = NachoTheme.colorScheme.backgroundPrimary,
+            border =
+                BorderStroke(
+                    width = NachoStroke.small,
+                    color = NachoTheme.colorScheme.iconDisabled,
+                ),
+            onClick = { onAudioMediaClick(audio) },
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     painter = painterResource(R.drawable.ic_play_arrow_24),
                     contentDescription = stringResource(R.string.desc_play_audio),
-                    tint = InvitationTheme.colorScheme.textSecondary,
+                    tint = NachoTheme.colorScheme.textSecondary,
                 )
             }
         }
@@ -490,47 +391,70 @@ private fun GuestBookAudioItem(
 @PreviewTheme
 @Composable
 private fun GuestBookItemPreview() {
-    InvitationTheme {
+    NachoTheme {
         LazyColumn(
-            modifier = Modifier
-                .padding(InvitationSpacing.large),
-            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.large),
+            modifier =
+                Modifier
+                    .padding(NachoSpacing.large),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
         ) {
             item {
                 GuestBookItem(
-                    guestBookId = 1L,
-                    authorName = "홍길동",
-                    createdAt = LocalDateTime(2024, 6, 1, 12, 0),
-                    textContent = "축하합니다! 행복하세요!",
-                    visualMediaUrls = listOf(
-                        GuestBookEntryMediaUiModel(
+                    guestBook =
+                        GuestBookUiModel(
                             id = 1L,
-                            type = MediaType.IMAGE,
-                            url = "https://via.placeholder.com/150",
-                            displayOrder = 0,
+                            invitation =
+                                GuestBookInvitationUiModel(
+                                    id = 1001L,
+                                    title = "우리 결혼해요!",
+                                ),
+                            author =
+                                AuthorUiModel(
+                                    id = 5001L,
+                                    name = "홍길동",
+                                    profileImageUrl = null,
+                                ),
+                            textContent = "축하합니다!\n 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하",
+                            visualMedias =
+                                listOf(
+                                    GuestBookMediaUiModel(
+                                        id = 1L,
+                                        type = MediaUiType.IMAGE,
+                                        url = "",
+                                        thumbnailUrl = "",
+                                        durationSeconds = 34,
+                                        displayOrder = 0,
+                                    ),
+                                    GuestBookMediaUiModel(
+                                        id = 2L,
+                                        type = MediaUiType.VIDEO,
+                                        url = "",
+                                        thumbnailUrl = "",
+                                        durationSeconds = 30,
+                                        displayOrder = 1,
+                                    ),
+                                ).toImmutableList(),
+                            audioMedias =
+                                listOf(
+                                    GuestBookMediaUiModel(
+                                        id = 3L,
+                                        type = MediaUiType.AUDIO,
+                                        url = "",
+                                        thumbnailUrl = "",
+                                        durationSeconds = 45,
+                                        displayOrder = 0,
+                                    ),
+                                ).toImmutableList(),
+                            totalVisualCount = 2,
+                            isOwner = true,
+                            createdAt = LocalDateTime(2025, 6, 1, 12, 0),
+                            updatedAt = LocalDateTime(2025, 6, 1, 12, 0),
                         ),
-                        GuestBookEntryMediaUiModel(
-                            id = 2L,
-                            type = MediaType.VIDEO,
-                            url = "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
-                            durationSeconds = 30,
-                            displayOrder = 1,
-                        )
-                    ).toImmutableList(),
-                    audioMediaUrls = listOf(
-                        GuestBookEntryMediaUiModel(
-                            id = 3L,
-                            type = MediaType.AUDIO,
-                            url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-                            durationSeconds = 45,
-                            displayOrder = 0,
-                        )
-                    ).toImmutableList(),
-                    totalVisualCount = 2,
-                    authorProfileImageUrl = null,
-                    invitationTitle = "우리 결혼해요!",
-                    invitationId = 1001L,
-                    isAuthorSelf = true,
+                    shouldPlayVideo = false,
+                    onInvitationTitleClick = {},
+                    onVisualMediaClick = {},
+                    onAudioMediaClick = {},
+                    onMenuClick = {},
                 )
             }
         }

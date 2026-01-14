@@ -1,7 +1,6 @@
 package com.andlife.invitation_edit
 
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -9,23 +8,18 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.andlife.invitation_edit.model.AddressUiModel
-import com.andlife.invitation_edit.screen.AddressSearchRoute
-import com.andlife.invitation_edit.screen.MyInvitationCreateRoute
+import com.andlife.invitation_edit.screen.address.AddressSearchRoute
+import com.andlife.invitation_edit.screen.create.MyInvitationCreateRoute
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MyInvitationCreate(
-    val id: Long,
-)
+data object MyInvitationCreate
 
 @Serializable
 data object AddressSearch
 
-fun NavController.navigateToMyInvitationCreate(
-    id: Long,
-    navOptions: NavOptions,
-) {
-    navigate(MyInvitationCreate(id), navOptions)
+fun NavController.navigateToMyInvitationCreate(navOptions: NavOptions) {
+    navigate(MyInvitationCreate, navOptions)
 }
 
 fun NavController.navigateToAddressSearch(navOptions: NavOptions) {
@@ -33,21 +27,20 @@ fun NavController.navigateToAddressSearch(navOptions: NavOptions) {
 }
 
 fun NavGraphBuilder.myInvitationCreateNavGraph(
-    paddingValues: PaddingValues,
     onNavigateToAddressSearch: () -> Unit,
     onNavigateBack: () -> Unit,
 ) {
     composable<MyInvitationCreate> { backStackEntry ->
-        val selectedAddressUiModel =
+        val selectedAddressUiModel by
             backStackEntry.savedStateHandle
                 .getStateFlow<AddressUiModel?>("selected_address", null)
                 .collectAsStateWithLifecycle()
 
         MyInvitationCreateRoute(
-            selectedAddress = selectedAddressUiModel.value,
             onNavigateToAddressSearch = onNavigateToAddressSearch,
             onNavigateBack = onNavigateBack,
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier,
+            address = selectedAddressUiModel,
         )
     }
 }

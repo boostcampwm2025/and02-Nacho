@@ -7,11 +7,10 @@ android {
 }
 
 dependencies {
-    // domain module
-    implementation(projects.domain)
+    // kakao 공유
+    implementation(libs.kakao.sdk.share)
 
-    // ui module
-    implementation(projects.core.ui)
+    implementation(projects.core.deeplink)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
