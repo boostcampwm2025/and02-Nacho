@@ -17,6 +17,7 @@ import com.andlife.invitation.navigateToInvitationDetail
 import com.andlife.invitation_edit.navigateToAddressSearch
 import com.andlife.invitation_edit.navigateToMyInvitationCreate
 import com.andlife.myinvitation.navigateToMyInvitation
+import com.andlife.myinvitation.navigateToMyInvitationDetail
 
 @Stable
 class NachoNavigator(
@@ -73,6 +74,13 @@ class NachoNavigator(
 
     fun navigateToMyInvitationCreate() {
         navController.navigateToMyInvitationCreate(
+            navOptions = navOptions { launchSingleTop = true },
+        )
+    }
+
+    fun navigateToMyInvitationDetail(id: Long) {
+        navController.navigateToMyInvitationDetail(
+            id = id,
             navOptions = navOptions { launchSingleTop = true },
         )
     }
