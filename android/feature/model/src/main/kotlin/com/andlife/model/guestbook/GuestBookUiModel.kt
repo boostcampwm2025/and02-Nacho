@@ -47,7 +47,7 @@ fun GuestBookInvitation.toUiModel(): GuestBookInvitationUiModel = GuestBookInvit
 
 data class GuestBookMediaUiModel(
     val id: Long,
-    val type: UiMediaType,
+    val type: MediaUiType,
     val url: String,
     val thumbnailUrl: String? = null,
     val durationSeconds: Int? = null,
@@ -56,7 +56,7 @@ data class GuestBookMediaUiModel(
 
 fun GuestBookMedia.toUiModel(): GuestBookMediaUiModel = GuestBookMediaUiModel(
     id = id,
-    type = UiMediaType.safeValueOf(type.name),
+    type = MediaUiType.safeValueOf(type.name),
     url = url,
     thumbnailUrl = thumbnailUrl,
     durationSeconds = durationSeconds,

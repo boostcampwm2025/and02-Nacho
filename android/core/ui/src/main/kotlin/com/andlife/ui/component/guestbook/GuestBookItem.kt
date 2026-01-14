@@ -44,7 +44,7 @@ import com.andlife.model.common.AuthorUiModel
 import com.andlife.model.guestbook.GuestBookInvitationUiModel
 import com.andlife.model.guestbook.GuestBookMediaUiModel
 import com.andlife.model.guestbook.GuestBookUiModel
-import com.andlife.model.guestbook.UiMediaType
+import com.andlife.model.guestbook.MediaUiType
 import com.andlife.ui.R
 import com.andlife.ui.component.media.MediaOverlay
 import com.andlife.ui.util.toFormatDuration
@@ -260,7 +260,7 @@ private fun GuestBookItemVisualMediaSection(
                         .clickable { onVisualMediaClick(media) },
             ) {
                 when (media.type) {
-                    UiMediaType.VIDEO -> {
+                    MediaUiType.VIDEO -> {
                         SimpleVideoPlayer(
                             videoUrl = media.url,
                             thumbnailUrl = media.thumbnailUrl,
@@ -419,7 +419,7 @@ private fun GuestBookItemPreview() {
                                 listOf(
                                     GuestBookMediaUiModel(
                                         id = 1L,
-                                        type = UiMediaType.IMAGE,
+                                        type = MediaUiType.IMAGE,
                                         url = "",
                                         thumbnailUrl = "",
                                         durationSeconds = 34,
@@ -427,7 +427,7 @@ private fun GuestBookItemPreview() {
                                     ),
                                     GuestBookMediaUiModel(
                                         id = 2L,
-                                        type = UiMediaType.VIDEO,
+                                        type = MediaUiType.VIDEO,
                                         url = "",
                                         thumbnailUrl = "",
                                         durationSeconds = 30,
@@ -438,7 +438,7 @@ private fun GuestBookItemPreview() {
                                 listOf(
                                     GuestBookMediaUiModel(
                                         id = 3L,
-                                        type = UiMediaType.AUDIO,
+                                        type = MediaUiType.AUDIO,
                                         url = "",
                                         thumbnailUrl = "",
                                         durationSeconds = 45,
