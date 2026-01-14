@@ -30,4 +30,8 @@ class VideoPlayer(
     fun prepare() {
         exoPlayer.prepare()
     }
+
+    fun updateUri(newUri: String): VideoPlayer {
+        return VideoPlayer(exoPlayer, newUri)
+    }
 }

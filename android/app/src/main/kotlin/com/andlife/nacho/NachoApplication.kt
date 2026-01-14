@@ -31,7 +31,6 @@ class NachoApplication : Application() {
 
         KakaoSdk.init(this, kakaoNativeKey)
         initAppsFlyer()
-        VideoPlayerPool.initializeCache(this)
     }
 
     private fun initAppsFlyer() {

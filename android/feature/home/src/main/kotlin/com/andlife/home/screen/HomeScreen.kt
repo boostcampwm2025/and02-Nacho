@@ -49,11 +49,16 @@ fun HomeRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is HomeSideEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
         }
+    }
+
+    LaunchedEffect(Unit) {
+        VideoPlayerPool.preparePlayers(context)
     }
 
     HomeScreen(

@@ -316,6 +316,75 @@ private fun GuestBookItemVisualMediaSection(
     }
 }
 
+//@OptIn(UnstableApi::class)
+//@Composable
+//private fun SimpleVideoPlayer(
+//    guestBookId: Long,
+//    videoUrl: String,
+//    thumbnailUrl: String?,
+//    shouldPlay: Boolean,
+//    modifier: Modifier = Modifier,
+//) {
+//    val context = LocalContext.current
+//    var isVideoReady by remember(videoUrl) { mutableStateOf(false) }
+//
+//    LaunchedEffect(shouldPlay, videoUrl) {
+//        if (shouldPlay) {
+//            VideoPlayerPool.playPlayer(context, videoUrl, guestBookId)
+//        } else {
+//            VideoPlayerPool.pausePlayer(uri = videoUrl)
+//            isVideoReady = false
+//        }
+//    }
+//
+//    val currentPlayer = if (shouldPlay) {
+//        Log.d("vvv", "SimpleVideoPlayer: 재생 중인 플레이어 요청: $videoUrl")
+//        VideoPlayerPool.getPlayer(context, videoUrl)
+//    } else {
+//        null
+//    }
+//
+//    DisposableEffect(currentPlayer) {
+//        if (currentPlayer == null) return@DisposableEffect onDispose {}
+//
+//        val listener = object : Player.Listener {
+//            override fun onRenderedFirstFrame() {
+//                super.onRenderedFirstFrame()
+//                isVideoReady = true
+//            }
+//        }
+//        currentPlayer.exoPlayer.addListener(listener)
+//        onDispose { currentPlayer.exoPlayer.removeListener(listener) }
+//    }
+//
+//    Box(
+//        modifier = modifier
+//            .fillMaxSize()
+//            .background(Color.Black)
+//    ) {
+//        currentPlayer?.let {
+//            AndroidView(
+//                factory = { context ->
+//                    PlayerView(context).apply {
+//                        useController = false
+//                        player = it.exoPlayer // TODO: update와 차이 확인 필요
+//                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+//                    }
+//                },
+//                modifier = Modifier.fillMaxSize(),
+//            )
+//        }
+//        if (!isVideoReady && thumbnailUrl != null) { // TODO: if (!isVideoReady || !shouldPlay) && thumbnailUrl != null) 이거랑 차이 보기, 일단 지금도 잘 동작하긴 함.
+//            AsyncImage(
+//                model = thumbnailUrl,
+//                contentDescription = null,
+//                modifier = Modifier.fillMaxSize(),
+//                contentScale = ContentScale.Fit,
+//            )
+//        }
+//    }
+//}
+
 @OptIn(UnstableApi::class)
 @Composable
 private fun SimpleVideoPlayer(
@@ -326,35 +395,15 @@ private fun SimpleVideoPlayer(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    var isVideoReady by remember(videoUrl) { mutableStateOf(false) }
+    var isVideoReady by remember(videoUrl, shouldPlay) { mutableStateOf(false) }
 
-    LaunchedEffect(shouldPlay, videoUrl) {
+    LaunchedEffect(shouldPlay) {
         if (shouldPlay) {
-            VideoPlayerPool.playPlayer(context, videoUrl, guestBookId)
+            VideoPlayerPool.playPlayer(videoUrl)
         } else {
             VideoPlayerPool.pausePlayer(uri = videoUrl)
-            isVideoReady = false
+            //isVideoReady = false 위의 remember 블록에서 videoUrl이 바뀔 때 초기화되므로 여기서는 초기화하지 않음.
         }
-    }
-
-    val currentPlayer = if (shouldPlay) {
-        Log.d("vvv", "SimpleVideoPlayer: 재생 중인 플레이어 요청: $videoUrl")
-        VideoPlayerPool.getPlayer(context, videoUrl)
-    } else {
-        null
-    }
-
-    DisposableEffect(currentPlayer) {
-        if (currentPlayer == null) return@DisposableEffect onDispose {}
-
-        val listener = object : Player.Listener {
-            override fun onRenderedFirstFrame() {
-                super.onRenderedFirstFrame()
-                isVideoReady = true
-            }
-        }
-        currentPlayer.exoPlayer.addListener(listener)
-        onDispose { currentPlayer.exoPlayer.removeListener(listener) }
     }
 
     Box(
@@ -362,19 +411,31 @@ private fun SimpleVideoPlayer(
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        currentPlayer?.let {
+        if (shouldPlay) {
+            val currentPlayer = VideoPlayerPool.getPlayer(videoUrl)
+
+            DisposableEffect(currentPlayer) {
+                val listener = object : Player.Listener {
+                    override fun onRenderedFirstFrame() {
+                        isVideoReady = true
+                    }
+                }
+                currentPlayer.exoPlayer.addListener(listener)
+                onDispose { currentPlayer.exoPlayer.removeListener(listener) }
+            }
+
             AndroidView(
                 factory = { context ->
                     PlayerView(context).apply {
                         useController = false
-                        player = it.exoPlayer // TODO: update와 차이 확인 필요
+                        player = currentPlayer.exoPlayer
                         resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                     }
                 },
                 modifier = Modifier.fillMaxSize(),
             )
         }
-        if (!isVideoReady && thumbnailUrl != null) { // TODO: if (!isVideoReady || !shouldPlay) && thumbnailUrl != null) 이거랑 차이 보기, 일단 지금도 잘 동작하긴 함.
+        if (!isVideoReady && thumbnailUrl != null) {
             AsyncImage(
                 model = thumbnailUrl,
                 contentDescription = null,
