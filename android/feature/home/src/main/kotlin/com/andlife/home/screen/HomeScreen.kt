@@ -24,9 +24,9 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.home.viewmodel.HomeSideEffect
-import com.andlife.home.viewmodel.HomeUiEvent
-import com.andlife.home.viewmodel.HomeUiState
+import com.andlife.home.model.HomeSideEffect
+import com.andlife.home.model.HomeUiEvent
+import com.andlife.home.model.HomeUiState
 import com.andlife.home.viewmodel.HomeViewModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.ui.component.guestbook.GuestBookItem
