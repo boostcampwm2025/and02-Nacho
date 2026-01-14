@@ -28,9 +28,9 @@ import com.andlife.home.model.HomeSideEffect
 import com.andlife.home.model.HomeUiEvent
 import com.andlife.home.model.HomeUiState
 import com.andlife.home.viewmodel.HomeViewModel
+import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.ui.component.guestbook.GuestBookItem
-import com.andlife.ui.player.VideoPlayerPool
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -57,14 +57,15 @@ fun HomeRoute(
         }
     }
 
-    LaunchedEffect(Unit) {
-        VideoPlayerPool.preparePlayers(context)
-    }
+//    LaunchedEffect(Unit) {
+//        viewModel.videoPlayerPool.preparePlayers()
+//    }
 
     HomeScreen(
         uiState = uiState,
         onEvent = viewModel::onEvent,
         snackbarHostState = snackbarHostState,
+        videoPlayerPool = viewModel.videoPlayerPool,
         modifier = modifier,
     )
 }
@@ -74,6 +75,7 @@ fun HomeScreen(
     uiState: HomeUiState,
     onEvent: (HomeUiEvent) -> Unit,
     snackbarHostState: SnackbarHostState,
+    videoPlayerPool: AutoVideoPlayerPool,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -155,9 +157,9 @@ fun HomeScreen(
         val observer =
             LifecycleEventObserver { _, event ->
                 when (event) {
-                    Lifecycle.Event.ON_RESUME -> VideoPlayerPool.resumeLastPlayed()
-                    Lifecycle.Event.ON_PAUSE -> VideoPlayerPool.pauseAllPlayers()
-                    Lifecycle.Event.ON_DESTROY -> VideoPlayerPool.releaseAll()
+                    Lifecycle.Event.ON_RESUME -> videoPlayerPool.resumeLastPlayed()
+                    Lifecycle.Event.ON_PAUSE -> videoPlayerPool.pauseAllPlayers()
+                    Lifecycle.Event.ON_DESTROY -> videoPlayerPool.releaseAllPlayers()
                     else -> {}
                 }
             }
@@ -183,6 +185,7 @@ fun HomeScreen(
             ) { index, guestBook ->
                 GuestBookItem(
                     guestBook = guestBook,
+                    videoPlayerPool = videoPlayerPool,
                     shouldPlayVideo = index == playVideoIndex,
                     onInvitationTitleClick = {
                         onEvent(

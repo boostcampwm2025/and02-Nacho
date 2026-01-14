@@ -8,6 +8,7 @@ import com.andlife.domain.util.onSuccess
 import com.andlife.home.model.HomeSideEffect
 import com.andlife.home.model.HomeUiEvent
 import com.andlife.home.model.HomeUiState
+import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.model.guestbook.toUiModel
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +24,7 @@ class HomeViewModel
 @Inject
 constructor(
     private val guestBookRepository: GuestBookRepository,
+    val videoPlayerPool: AutoVideoPlayerPool
 ) : BaseViewModel<HomeUiState, HomeUiEvent, HomeSideEffect>(initialState = HomeUiState()) {
     override val uiState: StateFlow<HomeUiState> =
         mutableUiState
@@ -69,5 +71,10 @@ constructor(
                     Log.e("HomeViewModel", "방명록 불러오기 실패: $error")
                 }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        videoPlayerPool.releaseAllPlayers()
     }
 }

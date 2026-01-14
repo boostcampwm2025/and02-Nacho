@@ -44,16 +44,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.Player
-import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.database.StandaloneDatabaseProvider
+import androidx.media3.datasource.cache.NoOpCacheEvictor
+import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
-import coil3.util.Logger
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.media.video.AutoVideoPlayerPool
+import com.andlife.media.video.AutoVideoPlayerPoolImpl
 import com.andlife.model.common.AuthorUiModel
 import com.andlife.model.guestbook.GuestBookInvitationUiModel
 import com.andlife.model.guestbook.GuestBookMediaUiModel
@@ -61,17 +64,18 @@ import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.ui.R
 import com.andlife.ui.component.media.MediaOverlay
-import com.andlife.ui.player.VideoPlayerPool
 import com.andlife.ui.util.toFormatDuration
 import com.andlife.ui.util.toRelativeTimeString
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.LocalDateTime
+import java.io.File
 import com.andlife.designsystem.R as designR
 
 @Composable
 fun GuestBookItem(
     guestBook: GuestBookUiModel,
+    videoPlayerPool: AutoVideoPlayerPool,
     onInvitationTitleClick: (Long) -> Unit,
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
@@ -100,6 +104,7 @@ fun GuestBookItem(
                 visualMediaUrls = guestBook.visualMedias,
                 totalVisualCount = guestBook.totalVisualCount,
                 shouldPlayVideo = shouldPlayVideo,
+                videoPlayerPool = videoPlayerPool,
                 onVisualMediaClick = onVisualMediaClick,
             )
         }
@@ -256,6 +261,7 @@ private fun GuestBookItemVisualMediaSection(
     visualMediaUrls: ImmutableList<GuestBookMediaUiModel>,
     totalVisualCount: Int,
     shouldPlayVideo: Boolean,
+    videoPlayerPool: AutoVideoPlayerPool,
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -283,6 +289,7 @@ private fun GuestBookItemVisualMediaSection(
                             videoUrl = media.url,
                             thumbnailUrl = media.thumbnailUrl,
                             shouldPlay = shouldPlayVideo && pagerState.currentPage == page,
+                            videoPlayerPool = videoPlayerPool,
                         )
 
                         media.durationSeconds?.let {
@@ -321,75 +328,6 @@ private fun GuestBookItemVisualMediaSection(
     }
 }
 
-//@OptIn(UnstableApi::class)
-//@Composable
-//private fun SimpleVideoPlayer(
-//    guestBookId: Long,
-//    videoUrl: String,
-//    thumbnailUrl: String?,
-//    shouldPlay: Boolean,
-//    modifier: Modifier = Modifier,
-//) {
-//    val context = LocalContext.current
-//    var isVideoReady by remember(videoUrl) { mutableStateOf(false) }
-//
-//    LaunchedEffect(shouldPlay, videoUrl) {
-//        if (shouldPlay) {
-//            VideoPlayerPool.playPlayer(context, videoUrl, guestBookId)
-//        } else {
-//            VideoPlayerPool.pausePlayer(uri = videoUrl)
-//            isVideoReady = false
-//        }
-//    }
-//
-//    val currentPlayer = if (shouldPlay) {
-//        Log.d("vvv", "SimpleVideoPlayer: 재생 중인 플레이어 요청: $videoUrl")
-//        VideoPlayerPool.getPlayer(context, videoUrl)
-//    } else {
-//        null
-//    }
-//
-//    DisposableEffect(currentPlayer) {
-//        if (currentPlayer == null) return@DisposableEffect onDispose {}
-//
-//        val listener = object : Player.Listener {
-//            override fun onRenderedFirstFrame() {
-//                super.onRenderedFirstFrame()
-//                isVideoReady = true
-//            }
-//        }
-//        currentPlayer.exoPlayer.addListener(listener)
-//        onDispose { currentPlayer.exoPlayer.removeListener(listener) }
-//    }
-//
-//    Box(
-//        modifier = modifier
-//            .fillMaxSize()
-//            .background(Color.Black)
-//    ) {
-//        currentPlayer?.let {
-//            AndroidView(
-//                factory = { context ->
-//                    PlayerView(context).apply {
-//                        useController = false
-//                        player = it.exoPlayer // TODO: update와 차이 확인 필요
-//                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-//                    }
-//                },
-//                modifier = Modifier.fillMaxSize(),
-//            )
-//        }
-//        if (!isVideoReady && thumbnailUrl != null) { // TODO: if (!isVideoReady || !shouldPlay) && thumbnailUrl != null) 이거랑 차이 보기, 일단 지금도 잘 동작하긴 함.
-//            AsyncImage(
-//                model = thumbnailUrl,
-//                contentDescription = null,
-//                modifier = Modifier.fillMaxSize(),
-//                contentScale = ContentScale.Fit,
-//            )
-//        }
-//    }
-//}
-
 @OptIn(UnstableApi::class)
 @Composable
 private fun SimpleVideoPlayer(
@@ -397,9 +335,9 @@ private fun SimpleVideoPlayer(
     videoUrl: String,
     thumbnailUrl: String?,
     shouldPlay: Boolean,
+    videoPlayerPool: AutoVideoPlayerPool,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
     var isVideoReady by remember(videoUrl, shouldPlay) { mutableStateOf(false) }
 
     val thumbnailAlpha by animateFloatAsState(
@@ -409,9 +347,9 @@ private fun SimpleVideoPlayer(
 
     LaunchedEffect(shouldPlay) {
         if (shouldPlay) {
-            VideoPlayerPool.playPlayer(videoUrl, guestBookId)
+            videoPlayerPool.playPlayer(videoUrl, guestBookId)
         } else {
-            VideoPlayerPool.pausePlayer(uri = videoUrl)
+            videoPlayerPool.pausePlayer(videoUrl)
             //isVideoReady = false 위의 remember 블록에서 videoUrl이 바뀔 때 초기화되므로 여기서는 초기화하지 않음.
         }
     }
@@ -422,7 +360,7 @@ private fun SimpleVideoPlayer(
             .background(Color.Black)
     ) {
         if (shouldPlay) {
-            val currentPlayer = VideoPlayerPool.getPlayer(videoUrl)
+            val currentPlayer = videoPlayerPool.getPlayer(videoUrl)
 
             DisposableEffect(currentPlayer) {
                 val listener = object : Player.Listener {
@@ -595,6 +533,12 @@ private fun GuestBookItemPreview() {
                             createdAt = LocalDateTime(2025, 6, 1, 12, 0),
                             updatedAt = LocalDateTime(2025, 6, 1, 12, 0),
                         ),
+                    videoPlayerPool = AutoVideoPlayerPoolImpl(
+                        LocalContext.current, SimpleCache(
+                            File("cacheDir"),
+                            NoOpCacheEvictor(), StandaloneDatabaseProvider(LocalContext.current)
+                        )
+                    ),
                     shouldPlayVideo = false,
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},
