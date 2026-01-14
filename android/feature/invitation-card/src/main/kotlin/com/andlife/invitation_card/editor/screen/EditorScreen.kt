@@ -431,7 +431,7 @@ private fun ColorToggleButton(
     color: Color = NachoTheme.colorScheme.iconOnSecondary,
     contentDescription: String? = null,
 ) {
-    val borderDp = if (selectedColor == Color.White) NachoStroke.small else 0.dp
+    val borderDp = if (selectedColor == Color.White) NachoStroke.small else NachoStroke.none
     Column(
         modifier = modifier
             .width(IntrinsicSize.Min)
@@ -519,7 +519,7 @@ private fun ColorBox(
                 .size(size)
                 .clip(shape)
                 .background(color)
-                .border(2.dp, Color.Gray.copy(alpha = 0.3f), shape)
+                .border(NachoStroke.medium, Color.Gray.copy(alpha = 0.3f), shape)
                 .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -545,7 +545,7 @@ private fun TextSizeBox(
         shape = shape,
         onClick = { expanded = !expanded },
         color = NachoTheme.colorScheme.backgroundPrimary,
-        border = BorderStroke(1.dp, NachoTheme.colorScheme.backgroundBorder),
+        border = BorderStroke(NachoStroke.small, NachoTheme.colorScheme.backgroundBorder),
         modifier = modifier,
     ) {
         Row(
