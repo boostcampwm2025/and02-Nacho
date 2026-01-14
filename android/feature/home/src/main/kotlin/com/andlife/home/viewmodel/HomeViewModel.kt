@@ -19,17 +19,20 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class HomeUiState(
+data class HomeUiState( // TODO: 임시로 그냥 ViewModel 파일에 전부 작성
     val isLoading: Boolean = false,
     val guestBooks: List<GuestBookUiModel> = emptyList()
 ) : BaseUiState
 
 sealed interface HomeUiEvent : BaseUiEvent {
-    // UI 이벤트 정의
+    data class ClickInvitationTitle(val invitationId: Long) : HomeUiEvent
+    data class ClickGuestBookMenu(val guestBookId: Long) : HomeUiEvent
+    data class ClickVisualMedia(val url: String) : HomeUiEvent
+    data class ClickAudioMedia(val url: String) : HomeUiEvent
 }
 
 sealed interface HomeSideEffect : BaseSideEffect {
-    // 사이드 이펙트 정의
+    data class ShowMessage(val message: String) : HomeSideEffect // TODO: 임시
 }
 
 @HiltViewModel
@@ -48,7 +51,12 @@ class HomeViewModel @Inject constructor(
         )
 
     override fun onEvent(event: HomeUiEvent) {
-
+        when (event) {
+            is HomeUiEvent.ClickInvitationTitle -> sendEffect(HomeSideEffect.ShowMessage("초대장 제목 클릭됨: ${event.invitationId}"))
+            is HomeUiEvent.ClickGuestBookMenu -> sendEffect(HomeSideEffect.ShowMessage("방명록 메뉴 클릭됨: ${event.guestBookId}"))
+            is HomeUiEvent.ClickVisualMedia -> sendEffect(HomeSideEffect.ShowMessage("비주얼 미디어 클릭됨: ${event.url}"))
+            is HomeUiEvent.ClickAudioMedia -> sendEffect(HomeSideEffect.ShowMessage("오디오 미디어 클릭됨: ${event.url}"))
+        }
     }
 
     private fun fetchGuestBooks() {

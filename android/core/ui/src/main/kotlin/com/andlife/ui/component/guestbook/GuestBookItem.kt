@@ -67,12 +67,12 @@ import com.andlife.designsystem.R as designR
 @Composable
 fun GuestBookItem(
     guestBook: GuestBookUiModel,
+    onInvitationTitleClick: (Long) -> Unit,
+    onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
+    onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
+    onMenuClick: () -> Unit,
     modifier: Modifier = Modifier,
     shouldPlayVideo: Boolean = false,
-    onInvitationTitleClick: (Long) -> Unit = {},
-    onVisualMediaClick: (GuestBookMediaUiModel) -> Unit = {},
-    onAudioMediaClick: (GuestBookMediaUiModel) -> Unit = {},
-    onMenuClick: () -> Unit = {}
 ) {
     Column(
         modifier = modifier,
@@ -539,6 +539,10 @@ private fun GuestBookItemPreview() {
                         updatedAt = LocalDateTime(2025, 6, 1, 12, 0),
                     ),
                     shouldPlayVideo = false,
+                    onInvitationTitleClick = {},
+                    onVisualMediaClick = {},
+                    onAudioMediaClick = {},
+                    onMenuClick = {},
                 )
             }
         }

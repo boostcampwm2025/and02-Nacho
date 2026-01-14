@@ -6,6 +6,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
@@ -18,26 +20,52 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.home.viewmodel.HomeSideEffect
+import com.andlife.home.viewmodel.HomeUiEvent
+import com.andlife.home.viewmodel.HomeUiState
 import com.andlife.home.viewmodel.HomeViewModel
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.player.VideoPlayerPool
+import com.andlife.ui.util.collectWithLifecycle
 
 @Composable
-fun HomeScreen(
+fun HomeRoute(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
-    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
-    val lifecycleOwner = LocalLifecycleOwner.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    viewModel.effectFlow.collectWithLifecycle { effect ->
+        when (effect) {
+            is HomeSideEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
+        }
+    }
 
+    HomeScreen(
+        uiState = uiState,
+        onEvent = viewModel::onEvent,
+        snackbarHostState = snackbarHostState,
+        modifier = modifier,
+    )
+}
+
+@Composable
+fun HomeScreen(
+    uiState: HomeUiState,
+    onEvent: (HomeUiEvent) -> Unit,
+    snackbarHostState: SnackbarHostState,
+    modifier: Modifier = Modifier,
+) {
+    val lifecycleOwner = LocalLifecycleOwner.current
     val lazyListSTate = rememberLazyListState()
 
-    val playVideoIndex by remember {
+    val playVideoIndex by remember(uiState) {
         derivedStateOf {
             val visibleItems = lazyListSTate.layoutInfo.visibleItemsInfo
+            if (visibleItems.isEmpty()) return@derivedStateOf -1
 
             val visibleItemsWithVisualMedia = visibleItems.filter { itemInfo ->
-                val guestBook = uiState.value.guestBooks.getOrNull(itemInfo.index)
+                val guestBook = uiState.guestBooks.getOrNull(itemInfo.index)
                 guestBook?.visualMedias?.isNotEmpty() == true
             }
 
@@ -76,7 +104,8 @@ fun HomeScreen(
     }
 
     Scaffold(
-        modifier = modifier
+        modifier = modifier,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         LazyColumn(
             state = lazyListSTate,
@@ -87,22 +116,16 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
         ) {
             itemsIndexed(
-                items = uiState.value.guestBooks,
+                items = uiState.guestBooks,
                 key = { _, guestBook -> guestBook.id },
             ) { index, guestBook ->
                 GuestBookItem(
-//                    authorName = guestBook.author.name,
-//                    createdAt = guestBook.createdAt,
-//                    textContent = guestBook.textContent,
-//                    visualMediaUrls = guestBook.visualMedias,
-//                    audioMediaUrls = guestBook.audioMedias,
-//                    totalVisualCount = guestBook.totalVisualCount,
-//                    authorProfileImageUrl = guestBook.author.profileImageUrl,
-//                    invitationTitle = guestBook.invitation.title,
-//                    invitationId = guestBook.invitation.id,
-//                    isAuthorSelf = guestBook.isOwner,
                     guestBook = guestBook,
                     shouldPlayVideo = index == playVideoIndex,
+                    onInvitationTitleClick = { onEvent(HomeUiEvent.ClickInvitationTitle(guestBook.invitation.id)) },
+                    onVisualMediaClick = { onEvent(HomeUiEvent.ClickVisualMedia(it.url)) },
+                    onAudioMediaClick = { onEvent(HomeUiEvent.ClickAudioMedia(it.url)) },
+                    onMenuClick = { onEvent(HomeUiEvent.ClickGuestBookMenu(guestBook.id)) },
                 )
             }
         }
