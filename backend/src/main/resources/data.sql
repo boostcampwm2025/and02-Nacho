@@ -47,11 +47,15 @@ INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, durat
 (1,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/0e9697ca-2fe8-4f46-96c5-fcc2228c59a1.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,1),
 (1,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/11cbb9c6-71e4-4e02-9f8b-0005e68c9af2.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,2);
 
+
 -- 2 (3개)
 INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order) VALUES
 (2,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/2106c39b-c8fd-4743-9648-7b9337333e6f.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,0),
 (2,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/3472f283-6b6a-4fa4-b349-8c7effc8c672.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,1),
-(2,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/3d41811a-afc8-4597-be41-cf8fc72ddb34.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,2);
+(2,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/3d41811a-afc8-4597-be41-cf8fc72ddb34.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000thumb_test01.png',10,2),
+(2,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/000-test-01.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000-test-01.jpeg',130,3),
+(2,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/000-test-02.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000-test-01.jpeg',120,4),
+(2,'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/000-test-03.mp4','https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/000-test-01.jpeg',440,5);
 
 -- 3 (2개)
 INSERT INTO guestbook_videos (guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order) VALUES

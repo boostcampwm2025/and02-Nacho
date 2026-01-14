@@ -61,7 +61,7 @@ constructor(
                     updateState {
                         copy(
                             isLoading = false,
-                            guestBooks = guestBooks.map { it.toUiModel() },
+                            guestBooks = guestBooks.map { it.toUiModel() }.sortedBy { it.id } // 임시로 id 기준 정렬
                         )
                     }
                 }.onFailure { error ->

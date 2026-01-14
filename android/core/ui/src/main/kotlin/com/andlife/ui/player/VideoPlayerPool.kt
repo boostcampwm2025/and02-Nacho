@@ -132,8 +132,8 @@ object VideoPlayerPool {
         val player = getPlayer(uri)
         player.play()
 
-        Log.d("vvv", "재생하는 URI: $uri")
-        Log.d("vvv", "최근 재생된 URI들: ${activePlayers.keys}")
+        Log.d("eee", "재생하는 URI: $uri")
+        Log.d("eee", "최근 재생된 URI들: ${activePlayers.keys}")
     }
 
     fun pausePlayer(uri: String) {
