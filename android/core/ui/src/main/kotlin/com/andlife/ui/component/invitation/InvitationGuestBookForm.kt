@@ -1,15 +1,18 @@
 package com.andlife.ui.component.invitation
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.component.InvitationButton
@@ -19,6 +22,8 @@ import com.andlife.designsystem.theme.InvitationIconSize
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.ui.R
+
+private const val MAX_LENGTH = 500
 
 @Composable
 fun InvitationGuestBookForm(
@@ -44,14 +49,30 @@ fun InvitationGuestBookForm(
 
         Spacer(modifier = Modifier.height(InvitationSpacing.small))
 
-        InvitationTextField(
-            value = textContent,
-            onValueChange = onTextContentChange,
-            placeholder = stringResource(R.string.ph_please_leave_a_message),
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = false,
-            minLines = 3,
-        )
+        Box {
+            InvitationTextField(
+                value = textContent,
+                onValueChange = { newValue ->
+                    if (newValue.length <= MAX_LENGTH) {
+                        onTextContentChange(newValue)
+                    }
+                },
+                placeholder = stringResource(R.string.ph_please_leave_a_message),
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = false,
+                minLines = 3,
+            )
+
+            Text(
+                text = "${textContent.length}/$MAX_LENGTH",
+                style = InvitationTheme.typography.bodySmallRegular,
+                color = InvitationTheme.colorScheme.textTertiary,
+                modifier =
+                    Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(InvitationSpacing.small),
+            )
+        }
 
         Spacer(modifier = Modifier.height(InvitationSpacing.small))
 
