@@ -108,13 +108,13 @@ fun InvitationGuestBookForm(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // 미디어 아이콘 표시
-            // TODO: 각 아이콘 클릭 시 해당 미디어 타입 선택하도록 변경
             val isMediaAddEnabled = selectedMedias.size < MAX_MEDIAS_COUNT
-            val iconColor = if (isMediaAddEnabled) {
-                InvitationTheme.colorScheme.brandPrimary
-            } else {
-                InvitationTheme.colorScheme.iconDisabled
-            }
+            val iconColor =
+                if (isMediaAddEnabled) {
+                    InvitationTheme.colorScheme.brandPrimary
+                } else {
+                    InvitationTheme.colorScheme.iconDisabled
+                }
             Row(horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.small)) {
                 Icon(
                     painter = painterResource(R.drawable.ic_image_16),
@@ -126,8 +126,7 @@ fun InvitationGuestBookForm(
                             .let {
                                 if (isMediaAddEnabled) {
                                     it.clickable {
-                                        launcher.launch("*/*")
-                                        // launcher.launch("image/*")
+                                        launcher.launch("image/*")
                                     }
                                 } else {
                                     it
@@ -142,7 +141,7 @@ fun InvitationGuestBookForm(
                         Modifier
                             .size(InvitationIconSize.medium)
                             .clickable {
-                                launcher.launch("*/*")
+                                // TODO: 카메라 촬영 기능 추가
                             },
                 )
                 Icon(
@@ -164,7 +163,7 @@ fun InvitationGuestBookForm(
                         Modifier
                             .size(InvitationIconSize.medium)
                             .clickable {
-                                launcher.launch("*/*")
+                                // TODO: 마이크 녹음 기능 추가
                             },
                 )
             }
