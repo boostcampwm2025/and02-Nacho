@@ -57,7 +57,7 @@ fun SelectedMediaItem(
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_mic_24),
+                        painter = painterResource(R.drawable.ic_mic_16),
                         tint = InvitationTheme.colorScheme.brandPrimary,
                         modifier = Modifier.size(InvitationIconSize.large),
                         contentDescription = stringResource(R.string.desc_media_audio),
@@ -68,7 +68,7 @@ fun SelectedMediaItem(
             UiMediaType.VIDEO -> {
                 Box(modifier = Modifier.fillMaxSize()) {
                     AsyncImage(
-                        model = media.uri,
+                        model = media.uri, // TODO: 영상 썸네일 이미지로 변경
                         contentDescription = stringResource(R.string.desc_media_video),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,
