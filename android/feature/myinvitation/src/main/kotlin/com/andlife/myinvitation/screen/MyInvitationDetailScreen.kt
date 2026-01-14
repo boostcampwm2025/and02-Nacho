@@ -40,9 +40,9 @@ import com.andlife.model.invitation.InvitationTimeUiModel
 import com.andlife.model.invitation.LatLngUiModel
 import com.andlife.model.invitation.LocationInfo
 import com.andlife.myinvitation.R
-import com.andlife.myinvitation.model.MyInvitationDetailSideEffect
-import com.andlife.myinvitation.model.MyInvitationDetailUiEvent
-import com.andlife.myinvitation.model.MyInvitationDetailUiState
+import com.andlife.myinvitation.model.detail.MyInvitationDetailSideEffect
+import com.andlife.myinvitation.model.detail.MyInvitationDetailUiEvent
+import com.andlife.myinvitation.model.detail.MyInvitationDetailUiState
 import com.andlife.myinvitation.viewmodel.MyInvitationDetailViewModel
 import com.andlife.ui.component.GenericTabRow
 import com.andlife.ui.util.collectWithLifecycle

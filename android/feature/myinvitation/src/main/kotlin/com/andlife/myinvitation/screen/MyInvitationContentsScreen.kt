@@ -17,15 +17,15 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.myinvitation.R
-import com.andlife.myinvitation.model.MyInvitationDetailUiState
-import com.andlife.ui.section.invitation.AddressSection
-import com.andlife.ui.section.invitation.AnnouncementSection
-import com.andlife.ui.section.invitation.AuthorSection
-import com.andlife.ui.section.invitation.DateSection
-import com.andlife.ui.section.invitation.ImageSection
-import com.andlife.ui.section.invitation.InvitationCardSection
-import com.andlife.ui.section.invitation.PlaceGuideSection
-import com.andlife.ui.section.invitation.TitleSection
+import com.andlife.myinvitation.model.detail.MyInvitationDetailUiState
+import com.andlife.ui.section.detail.AddressSection
+import com.andlife.ui.section.detail.AnnouncementSection
+import com.andlife.ui.section.detail.AuthorSection
+import com.andlife.ui.section.detail.DateSection
+import com.andlife.ui.section.detail.ImageSection
+import com.andlife.ui.section.detail.InvitationCardSection
+import com.andlife.ui.section.detail.PlaceGuideSection
+import com.andlife.ui.section.detail.TitleSection
 
 @Composable
 fun MyInvitationContentsScreen(

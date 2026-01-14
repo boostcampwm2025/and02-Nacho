@@ -13,9 +13,9 @@ import com.andlife.model.invitation.LatLngUiModel
 import com.andlife.model.invitation.LocationInfo
 import com.andlife.myinvitation.MyInvitationDetail
 import com.andlife.myinvitation.manager.KakaoShareManager
-import com.andlife.myinvitation.model.MyInvitationDetailSideEffect
-import com.andlife.myinvitation.model.MyInvitationDetailUiEvent
-import com.andlife.myinvitation.model.MyInvitationDetailUiState
+import com.andlife.myinvitation.model.detail.MyInvitationDetailSideEffect
+import com.andlife.myinvitation.model.detail.MyInvitationDetailUiEvent
+import com.andlife.myinvitation.model.detail.MyInvitationDetailUiState
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf

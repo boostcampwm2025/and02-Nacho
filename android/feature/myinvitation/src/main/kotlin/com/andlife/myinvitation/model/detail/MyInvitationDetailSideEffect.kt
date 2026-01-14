@@ -1,4 +1,4 @@
-package com.andlife.myinvitation.model
+package com.andlife.myinvitation.model.detail
 
 import com.andlife.ui.base.BaseSideEffect
 import kotlinx.collections.immutable.ImmutableList

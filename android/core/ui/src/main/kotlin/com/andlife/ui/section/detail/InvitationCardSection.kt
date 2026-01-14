@@ -1,4 +1,4 @@
-package com.andlife.ui.section.invitation
+package com.andlife.ui.section.detail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
