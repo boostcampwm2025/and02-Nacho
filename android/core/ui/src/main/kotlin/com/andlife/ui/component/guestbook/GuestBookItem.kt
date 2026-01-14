@@ -1,6 +1,8 @@
 package com.andlife.ui.component.guestbook
 
 import androidx.annotation.OptIn
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -397,6 +400,11 @@ private fun SimpleVideoPlayer(
     val context = LocalContext.current
     var isVideoReady by remember(videoUrl, shouldPlay) { mutableStateOf(false) }
 
+    val thumbnailAlpha by animateFloatAsState(
+        targetValue = if (isVideoReady) 0f else 1f,
+        animationSpec = tween(durationMillis = 300),
+    )
+
     LaunchedEffect(shouldPlay) {
         if (shouldPlay) {
             VideoPlayerPool.playPlayer(videoUrl)
@@ -435,11 +443,13 @@ private fun SimpleVideoPlayer(
                 modifier = Modifier.fillMaxSize(),
             )
         }
-        if (!isVideoReady && thumbnailUrl != null) {
+        if (thumbnailUrl != null) {
             AsyncImage(
                 model = thumbnailUrl,
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(thumbnailAlpha),
                 contentScale = ContentScale.Fit,
             )
         }
