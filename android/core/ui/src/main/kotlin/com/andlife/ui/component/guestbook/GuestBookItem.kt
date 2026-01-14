@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,6 +23,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,13 +32,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.Player
+import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
+import coil3.util.Logger
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
@@ -47,6 +58,7 @@ import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.ui.R
 import com.andlife.ui.component.media.MediaOverlay
+import com.andlife.ui.player.VideoPlayerPool
 import com.andlife.ui.util.toFormatDuration
 import com.andlife.ui.util.toRelativeTimeString
 import kotlinx.collections.immutable.ImmutableList
@@ -262,6 +274,7 @@ private fun GuestBookItemVisualMediaSection(
                 when (media.type) {
                     MediaUiType.VIDEO -> {
                         SimpleVideoPlayer(
+                            guestBookId = media.id,
                             videoUrl = media.url,
                             thumbnailUrl = media.thumbnailUrl,
                             shouldPlay = shouldPlayVideo && pagerState.currentPage == page,
@@ -306,12 +319,70 @@ private fun GuestBookItemVisualMediaSection(
 @OptIn(UnstableApi::class)
 @Composable
 private fun SimpleVideoPlayer(
+    guestBookId: Long,
     videoUrl: String,
     thumbnailUrl: String?,
     shouldPlay: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    // TODO: Exoplayer 사용 예정
+    val context = LocalContext.current
+    var isVideoReady by remember(videoUrl) { mutableStateOf(false) }
+
+    LaunchedEffect(shouldPlay, videoUrl) {
+        if (shouldPlay) {
+            VideoPlayerPool.playPlayer(context, videoUrl, guestBookId)
+        } else {
+            VideoPlayerPool.pausePlayer(uri = videoUrl)
+            isVideoReady = false
+        }
+    }
+
+    val currentPlayer = if (shouldPlay) {
+        Log.d("vvv", "SimpleVideoPlayer: 재생 중인 플레이어 요청: $videoUrl")
+        VideoPlayerPool.getPlayer(context, videoUrl)
+    } else {
+        null
+    }
+
+    DisposableEffect(currentPlayer) {
+        if (currentPlayer == null) return@DisposableEffect onDispose {}
+
+        val listener = object : Player.Listener {
+            override fun onRenderedFirstFrame() {
+                super.onRenderedFirstFrame()
+                isVideoReady = true
+            }
+        }
+        currentPlayer.exoPlayer.addListener(listener)
+        onDispose { currentPlayer.exoPlayer.removeListener(listener) }
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
+        currentPlayer?.let {
+            AndroidView(
+                factory = { context ->
+                    PlayerView(context).apply {
+                        player = it.exoPlayer // TODO: update와 차이 확인 필요
+                        useController = false
+                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                    }
+                },
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+        if (!isVideoReady && thumbnailUrl != null) { // TODO: if (!isVideoReady || !shouldPlay) && thumbnailUrl != null) 이거랑 차이 보기, 일단 지금도 잘 동작하긴 함.
+            AsyncImage(
+                model = thumbnailUrl,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit,
+            )
+        }
+    }
 }
 
 @Composable
@@ -327,7 +398,8 @@ private fun GuestBookAudioItem(
                 .background(
                     color = NachoTheme.colorScheme.brandLight,
                     shape = NachoTheme.shapes.small,
-                ).padding(NachoSpacing.large),
+                )
+                .padding(NachoSpacing.large),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
     ) {
