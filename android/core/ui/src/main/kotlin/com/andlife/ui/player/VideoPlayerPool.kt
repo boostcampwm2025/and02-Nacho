@@ -25,8 +25,8 @@ object VideoPlayerPool {
 //    private val protectedUris = mutableSetOf<String>() // 보호할 URI 집합
 
     /*
-    * MutableMap을 활용한 비디오 플레이어 풀 관리
-    * */
+     * MutableMap을 활용한 비디오 플레이어 풀 관리
+     * */
 
     private val videoPool = mutableMapOf<String, VideoPlayer>()
     private val lastPlayedVideo =
@@ -44,15 +44,20 @@ object VideoPlayerPool {
         val evictor = LeastRecentlyUsedCacheEvictor(CACHED_SIZE) // LRU 캐시 제거자 생성, LRU란: 가장 오랫동안 사용되지 않은 항목을 제거
         simpleCache = SimpleCache(cacheDir, evictor, databaseProvider) // SimpleCache 생성
 
-        cacheDataSourceFactory = CacheDataSource.Factory()
-            .setCache(simpleCache!!)
-            .setUpstreamDataSourceFactory(DefaultDataSource.Factory(context))
-            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR) // 캐시 오류 무시 설정, 오류 발생 시 캐시를 무시하고 원본 데이터 소스에서 데이터를 가져옴
+        cacheDataSourceFactory =
+            CacheDataSource
+                .Factory()
+                .setCache(simpleCache!!)
+                .setUpstreamDataSourceFactory(DefaultDataSource.Factory(context))
+                .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR) // 캐시 오류 무시 설정, 오류 발생 시 캐시를 무시하고 원본 데이터 소스에서 데이터를 가져옴
 
         Log.d("cachevvv", "비디오 캐시 초기화 완료")
     }
 
-    fun getPlayer(context: Context, uri: String): VideoPlayer {
+    fun getPlayer(
+        context: Context,
+        uri: String,
+    ): VideoPlayer {
         if (cacheDataSourceFactory == null) {
             initializeCache(context)
             Log.d("cachevvv", "getPlayer: 캐시 데이터 소스 팩토리 초기화 완료")
@@ -64,9 +69,10 @@ object VideoPlayerPool {
 
             // 이 URI와 관련된 캐시 청크 찾기
             val cachedChunks = keys.filter { it.contains(uri.hashCode().toString()) }
-            val cachedBytes = cachedChunks.sumOf { key ->
-                cache.getCachedLength(key, 0, Long.MAX_VALUE)
-            }
+            val cachedBytes =
+                cachedChunks.sumOf { key ->
+                    cache.getCachedLength(key, 0, Long.MAX_VALUE)
+                }
 
             Log.d("cachevvv", "=== 캐시 상태 ===")
             Log.d("cachevvv", "총 캐시 크기: ${cacheSpace / 1024 / 1024}MB")
@@ -83,8 +89,9 @@ object VideoPlayerPool {
         if (videoPool.size >= MAX_POOL_SIZE) {
             val protectedUris = lastPlayedVideo.values.toSet()
 
-            val urlToRemove = videoPool.keys.find { it !in protectedUris }
-                ?: lastPlayedVideo.entries.first()
+            val urlToRemove =
+                videoPool.keys.find { it !in protectedUris }
+                    ?: lastPlayedVideo.entries.first()
 
             Log.d("vvv", "풀 가득 참. 제거하는 URI: $urlToRemove")
             videoPool.remove(urlToRemove)?.release()
@@ -99,29 +106,34 @@ object VideoPlayerPool {
 //            repeatMode = Player.REPEAT_MODE_ONE
 //        }
 
-        val exoPlayer = ExoPlayer.Builder(context).build().apply {
-            val mediaSource = ProgressiveMediaSource.Factory(
-                cacheDataSourceFactory!!
-            ).createMediaSource(MediaItem.fromUri(uri))
-            setMediaSource(mediaSource)
-            prepare()
-            repeatMode = Player.REPEAT_MODE_ONE
+        val exoPlayer =
+            ExoPlayer.Builder(context).build().apply {
+                val mediaSource =
+                    ProgressiveMediaSource
+                        .Factory(
+                            cacheDataSourceFactory!!,
+                        ).createMediaSource(MediaItem.fromUri(uri))
+                setMediaSource(mediaSource)
+                prepare()
+                repeatMode = Player.REPEAT_MODE_ONE
 
-            addAnalyticsListener(object : AnalyticsListener {
-                override fun onBandwidthEstimate(
-                    eventTime: AnalyticsListener.EventTime,
-                    totalLoadTimeMs: Int,
-                    totalBytesLoaded: Long,
-                    bitrateEstimate: Long
-                ) {
-                    if (totalBytesLoaded > 0) {
-                        Log.d("cachevvv", "네트워크에서 다운로드: ${totalBytesLoaded / 1024}KB")
-                    } else {
-                        Log.d("cachevvv", "캐시에서 로드!")
-                    }
-                }
-            })
-        }
+                addAnalyticsListener(
+                    object : AnalyticsListener {
+                        override fun onBandwidthEstimate(
+                            eventTime: AnalyticsListener.EventTime,
+                            totalLoadTimeMs: Int,
+                            totalBytesLoaded: Long,
+                            bitrateEstimate: Long,
+                        ) {
+                            if (totalBytesLoaded > 0) {
+                                Log.d("cachevvv", "네트워크에서 다운로드: ${totalBytesLoaded / 1024}KB")
+                            } else {
+                                Log.d("cachevvv", "캐시에서 로드!")
+                            }
+                        }
+                    },
+                )
+            }
 
         val newPlayer = VideoPlayer(exoPlayer, uri)
         videoPool[uri] = newPlayer
@@ -137,7 +149,11 @@ object VideoPlayerPool {
         return newPlayer
     }
 
-    fun playPlayer(context: Context, uri: String, guestBookId: Long) {
+    fun playPlayer(
+        context: Context,
+        uri: String,
+        guestBookId: Long,
+    ) {
         currentPlayingUri = uri // 현재 재생 중인 URI 업데이트
 
         videoPool.values.forEach {
@@ -174,7 +190,10 @@ object VideoPlayerPool {
         currentPlayingUri?.let { videoPool[it]?.play() }
     }
 
-    fun preparePlayer(context: Context, uri: String) {
+    fun preparePlayer(
+        context: Context,
+        uri: String,
+    ) {
         if (videoPool.containsKey(uri)) return
         // 풀이 거의 가득 찬 경우 미리 준비하지 않음 (메모리 절약)
         if (videoPool.size >= MAX_POOL_SIZE - 2) return

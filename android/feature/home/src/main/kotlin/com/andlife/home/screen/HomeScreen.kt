@@ -64,18 +64,20 @@ fun HomeScreen(
             val visibleItems = lazyListState.layoutInfo.visibleItemsInfo
             if (visibleItems.isEmpty()) return@derivedStateOf -1
 
-            val visibleItemsWithVisualMedia = visibleItems.filter { itemInfo ->
-                val guestBook = uiState.guestBooks.getOrNull(itemInfo.index)
-                guestBook?.visualMedias?.isNotEmpty() == true
-            }
+            val visibleItemsWithVisualMedia =
+                visibleItems.filter { itemInfo ->
+                    val guestBook = uiState.guestBooks.getOrNull(itemInfo.index)
+                    guestBook?.visualMedias?.isNotEmpty() == true
+                }
 
             when (visibleItemsWithVisualMedia.size) {
                 0 -> -1 // 보이는 아이템이 없으면 -1 반환
                 1 -> visibleItemsWithVisualMedia.first().index // 보이는 아이템이 1개면 그 아이템 인덱스 반환
                 2 -> {
-                    visibleItemsWithVisualMedia.firstOrNull { item ->
-                        item.offset + item.size >= item.size * 0.7f // 70% 이상 보이는 아이템 찾기
-                    }?.index ?: visibleItemsWithVisualMedia.first().index // 없으면 첫 번째 아이템 인덱스 반환
+                    visibleItemsWithVisualMedia
+                        .firstOrNull { item ->
+                            item.offset + item.size >= item.size * 0.7f // 70% 이상 보이는 아이템 찾기
+                        }?.index ?: visibleItemsWithVisualMedia.first().index // 없으면 첫 번째 아이템 인덱스 반환
                 }
 
                 else -> {
@@ -90,13 +92,14 @@ fun HomeScreen(
     }
 
     DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_RESUME -> VideoPlayerPool.resumeLastPlayed()
-                Lifecycle.Event.ON_PAUSE -> VideoPlayerPool.pauseAllPlayers()
-                else -> {}
+        val observer =
+            LifecycleEventObserver { _, event ->
+                when (event) {
+                    Lifecycle.Event.ON_RESUME -> VideoPlayerPool.resumeLastPlayed()
+                    Lifecycle.Event.ON_PAUSE -> VideoPlayerPool.pauseAllPlayers()
+                    else -> {}
+                }
             }
-        }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
@@ -122,7 +125,11 @@ fun HomeScreen(
                 GuestBookItem(
                     guestBook = guestBook,
                     shouldPlayVideo = index == playVideoIndex,
-                    onInvitationTitleClick = { onEvent(HomeUiEvent.ClickInvitationTitle(guestBook.invitation?.id ?: -1L)) },
+                    onInvitationTitleClick = {
+                        onEvent(
+                            HomeUiEvent.ClickInvitationTitle(guestBook.invitation?.id ?: -1L),
+                        )
+                    },
                     onVisualMediaClick = { onEvent(HomeUiEvent.ClickVisualMedia(it.url)) },
                     onAudioMediaClick = { onEvent(HomeUiEvent.ClickAudioMedia(it.url)) },
                     onMenuClick = { onEvent(HomeUiEvent.ClickGuestBookMenu(guestBook.id)) },

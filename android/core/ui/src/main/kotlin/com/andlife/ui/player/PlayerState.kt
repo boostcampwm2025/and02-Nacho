@@ -2,11 +2,13 @@ package com.andlife.ui.player
 
 interface PlayerState {
     fun play(player: VideoPlayer)
+
     fun pause(player: VideoPlayer)
+
     fun stop(player: VideoPlayer)
 }
 
-class PlayingState: PlayerState {
+class PlayingState : PlayerState {
     override fun play(player: VideoPlayer) {
         // 이미 재생 중인 상태이므로 아무 작업도 수행하지 않음
     }
@@ -22,7 +24,7 @@ class PlayingState: PlayerState {
     }
 }
 
-class PausedState: PlayerState {
+class PausedState : PlayerState {
     override fun play(player: VideoPlayer) {
         player.exoPlayer.play()
         player.setState(PlayingState())
@@ -38,7 +40,7 @@ class PausedState: PlayerState {
     }
 }
 
-class StoppedState: PlayerState {
+class StoppedState : PlayerState {
     override fun play(player: VideoPlayer) {
         player.exoPlayer.prepare()
         player.exoPlayer.play()

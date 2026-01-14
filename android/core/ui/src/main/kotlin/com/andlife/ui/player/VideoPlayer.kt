@@ -14,7 +14,9 @@ class VideoPlayer(
     }
 
     fun play() = currentState.play(this)
+
     fun pause() = currentState.pause(this)
+
     fun stop() = currentState.stop(this)
 
     fun release() {
