@@ -69,14 +69,21 @@ class MediaFileProviderImpl
             val extension =
                 when (uri.scheme) {
                     "content" -> {
-                        contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
-                            if (cursor.moveToFirst()) {
-                                val displayName = cursor.getString(0)
-                                displayName.substringAfterLast('.', "")
-                            } else {
-                                ""
-                            }
-                        } ?: ""
+                        contentResolver
+                            .query(
+                                uri,
+                                arrayOf(OpenableColumns.DISPLAY_NAME),
+                                null,
+                                null,
+                                null,
+                            )?.use { cursor ->
+                                if (cursor.moveToFirst()) {
+                                    val displayName = cursor.getString(0)
+                                    displayName.substringAfterLast('.', "")
+                                } else {
+                                    ""
+                                }
+                            } ?: ""
                     }
 
                     else -> {
