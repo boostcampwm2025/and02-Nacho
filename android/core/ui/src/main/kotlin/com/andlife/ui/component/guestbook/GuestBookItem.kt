@@ -79,15 +79,13 @@ fun GuestBookItem(
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
     ) {
         GuestBookItemHeader(
-            authorName = guestBook.author.name,
-            authorProfileImageUrl = guestBook.author.profileImageUrl,
+            author = guestBook.author,
             createdAt = guestBook.createdAt,
             isOwner = guestBook.isOwner,
             onMenuClick = onMenuClick,
         )
         GuestBookItemTextContent(
-            invitationId = guestBook.invitation.id,
-            invitationTitle = guestBook.invitation.title,
+            invitation = guestBook.invitation,
             textContent = guestBook.textContent,
             onInvitationTitleClick = onInvitationTitleClick,
         )
@@ -121,8 +119,7 @@ fun GuestBookItem(
 
 @Composable
 private fun GuestBookItemHeader(
-    authorName: String,
-    authorProfileImageUrl: String?,
+    author: AuthorUiModel,
     createdAt: LocalDateTime,
     isOwner: Boolean,
     onMenuClick: () -> Unit,
@@ -134,20 +131,21 @@ private fun GuestBookItemHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AsyncImage(
-            model = authorProfileImageUrl,
-            error = painterResource(R.drawable.ic_error_outline_24),
-            contentDescription = null,
+            model = author.profileImageUrl,
+            contentDescription = stringResource(R.string.desc_author_profile_image),
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape),
             contentScale = ContentScale.Crop,
+            placeholder = painterResource(R.drawable.ic_image_24),
+            error = painterResource(R.drawable.ic_error_image_24),
         )
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
         ) {
             Text(
-                text = authorName,
+                text = author.name,
                 style = NachoTheme.typography.bodyMediumMedium,
                 color = NachoTheme.colorScheme.textPrimary,
             )
@@ -171,8 +169,7 @@ private fun GuestBookItemHeader(
 
 @Composable
 private fun GuestBookItemTextContent(
-    invitationId: Long?,
-    invitationTitle: String?,
+    invitation: GuestBookInvitationUiModel?,
     textContent: String,
     onInvitationTitleClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
@@ -184,20 +181,16 @@ private fun GuestBookItemTextContent(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
-        invitationTitle?.let {
+        invitation?.let {
             Row(
                 modifier = Modifier
-                    .clickable {
-                        invitationId?.let { id ->
-                            onInvitationTitleClick(id)
-                        }
-                    }
+                    .clickable { onInvitationTitleClick(invitation.id) }
                     .padding(vertical = NachoSpacing.xSmall),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
             ) {
                 Text(
-                    text = invitationTitle,
+                    text = invitation.title,
                     style = NachoTheme.typography.bodyLargeMedium,
                     color = NachoTheme.colorScheme.textPrimary,
                 )
@@ -250,24 +243,6 @@ private fun GuestBookItemVisualMediaSection(
     modifier: Modifier = Modifier,
 ) {
     val pagerState = rememberPagerState(pageCount = { visualMediaUrls.size })
-    val context = LocalContext.current
-
-    LaunchedEffect(pagerState.currentPage) {
-        // 다음 비디오 미리 준비
-        if (pagerState.currentPage < visualMediaUrls.lastIndex) {
-            val nextMedia = visualMediaUrls[pagerState.currentPage + 1]
-            if (nextMedia.type == UiMediaType.VIDEO) {
-                VideoPlayerPool.preparePlayer(context, nextMedia.url)
-            }
-        }
-        // 이전 비디오도 미리 준비하는 것도 고려
-        if (pagerState.currentPage > 0) {
-            val prevMedia = visualMediaUrls[pagerState.currentPage - 1]
-            if (prevMedia.type == UiMediaType.VIDEO) {
-                VideoPlayerPool.preparePlayer(context, prevMedia.url)
-            }
-        }
-    }
 
     Box(
         modifier = modifier
@@ -332,83 +307,83 @@ private fun SimpleVideoPlayer(
     shouldPlay: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val videoPlayer = remember(videoUrl) {
-        VideoPlayerPool.getPlayer(context, videoUrl)
-    }
-
-    var isVideoReady by remember(videoUrl) {
-        mutableStateOf(videoPlayer.exoPlayer.playbackState == Player.STATE_READY)
-    }
-
-    DisposableEffect(videoPlayer) {
-        isVideoReady = videoPlayer.exoPlayer.playbackState == Player.STATE_READY
-
-        val listener = object : Player.Listener {
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                isVideoReady = playbackState == Player.STATE_READY ||
-                    playbackState == Player.STATE_BUFFERING
-            }
-
-            override fun onRenderedFirstFrame() {
-                isVideoReady = true
-            }
-        }
-
-        videoPlayer.exoPlayer.addListener(listener)
-
-        onDispose {
-            videoPlayer.exoPlayer.removeListener(listener)
-        }
-    }
-
-    DisposableEffect(videoUrl) {
-        VideoPlayerPool.protectPlayer(videoUrl)
-        onDispose {
-            VideoPlayerPool.unprotectPlayer(videoUrl)
-            VideoPlayerPool.pausePlayer(videoUrl)
-        }
-    }
-
-    LaunchedEffect(shouldPlay) {
-        if (shouldPlay) {
-            VideoPlayerPool.playPlayer(videoUrl)
-        } else {
-            VideoPlayerPool.pausePlayer(videoUrl)
-        }
-    }
-
-    Box(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .background(Color.Black)
-    ) {
-        AndroidView(
-            factory = { context ->
-                PlayerView(context).apply {
-                    player = videoPlayer.exoPlayer
-                    useController = false
-                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-                }
-            },
-            update = { playerView ->
-                playerView.player = videoPlayer.exoPlayer
-            },
-            modifier = Modifier.fillMaxSize()
-        )
-
-        if (!isVideoReady && thumbnailUrl != null) {
-            AsyncImage(
-                model = thumbnailUrl,
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black),
-                contentScale = ContentScale.Fit,
-            )
-        }
-    }
+//    val context = LocalContext.current
+//    val videoPlayer = remember(videoUrl) {
+//        VideoPlayerPool.getPlayer(context, videoUrl)
+//    }
+//
+//    var isVideoReady by remember(videoUrl) {
+//        mutableStateOf(videoPlayer.exoPlayer.playbackState == Player.STATE_READY)
+//    }
+//
+//    DisposableEffect(videoPlayer) {
+//        isVideoReady = videoPlayer.exoPlayer.playbackState == Player.STATE_READY
+//
+//        val listener = object : Player.Listener {
+//            override fun onPlaybackStateChanged(playbackState: Int) {
+//                isVideoReady = playbackState == Player.STATE_READY ||
+//                    playbackState == Player.STATE_BUFFERING
+//            }
+//
+//            override fun onRenderedFirstFrame() {
+//                isVideoReady = true
+//            }
+//        }
+//
+//        videoPlayer.exoPlayer.addListener(listener)
+//
+//        onDispose {
+//            videoPlayer.exoPlayer.removeListener(listener)
+//        }
+//    }
+//
+//    DisposableEffect(videoUrl) {
+//        VideoPlayerPool.protectPlayer(videoUrl)
+//        onDispose {
+//            VideoPlayerPool.unprotectPlayer(videoUrl)
+//            VideoPlayerPool.pausePlayer(videoUrl)
+//        }
+//    }
+//
+//    LaunchedEffect(shouldPlay) {
+//        if (shouldPlay) {
+//            VideoPlayerPool.playPlayer(videoUrl)
+//        } else {
+//            VideoPlayerPool.pausePlayer(videoUrl)
+//        }
+//    }
+//
+//    Box(
+//        modifier =
+//            modifier
+//                .fillMaxSize()
+//                .background(Color.Black)
+//    ) {
+//        AndroidView(
+//            factory = { context ->
+//                PlayerView(context).apply {
+//                    player = videoPlayer.exoPlayer
+//                    useController = false
+//                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+//                }
+//            },
+//            update = { playerView ->
+//                playerView.player = videoPlayer.exoPlayer
+//            },
+//            modifier = Modifier.fillMaxSize()
+//        )
+//
+//        if (!isVideoReady && thumbnailUrl != null) {
+//            AsyncImage(
+//                model = thumbnailUrl,
+//                contentDescription = null,
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .background(Color.Black),
+//                contentScale = ContentScale.Fit,
+//            )
+//        }
+//    }
 }
 
 @Composable

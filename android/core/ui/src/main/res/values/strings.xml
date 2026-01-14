@@ -54,5 +54,6 @@
     <string name="format_weeks_ago">%1$d주 전</string>
     <string name="format_months_ago">%1$d개월 전</string>
     <string name="format_years_ago">%1$d년 전</string>
+    <string name="desc_author_profile_image">방명록 작성자 프로필 이미지</string>
 
 </resources>

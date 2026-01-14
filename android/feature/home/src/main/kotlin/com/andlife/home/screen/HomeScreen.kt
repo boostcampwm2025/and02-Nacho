@@ -122,7 +122,7 @@ fun HomeScreen(
                 GuestBookItem(
                     guestBook = guestBook,
                     shouldPlayVideo = index == playVideoIndex,
-                    onInvitationTitleClick = { onEvent(HomeUiEvent.ClickInvitationTitle(guestBook.invitation.id)) },
+                    onInvitationTitleClick = { onEvent(HomeUiEvent.ClickInvitationTitle(guestBook.invitation?.id ?: -1L)) },
                     onVisualMediaClick = { onEvent(HomeUiEvent.ClickVisualMedia(it.url)) },
                     onAudioMediaClick = { onEvent(HomeUiEvent.ClickAudioMedia(it.url)) },
                     onMenuClick = { onEvent(HomeUiEvent.ClickGuestBookMenu(guestBook.id)) },
