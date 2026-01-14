@@ -49,35 +49,29 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
-import com.andlife.designsystem.R as designR
+import com.andlife.model.common.AuthorUiModel
+import com.andlife.model.guestbook.GuestBookInvitationUiModel
+import com.andlife.model.guestbook.GuestBookMediaUiModel
+import com.andlife.model.guestbook.GuestBookUiModel
+import com.andlife.model.guestbook.UiMediaType
 import com.andlife.ui.R
 import com.andlife.ui.component.media.MediaOverlay
-import com.andlife.ui.model.GuestBookEntryMediaUiModel
-import com.andlife.ui.model.UiMediaType
 import com.andlife.ui.player.VideoPlayerPool
 import com.andlife.ui.util.toFormatDuration
 import com.andlife.ui.util.toRelativeTimeString
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.LocalDateTime
+import com.andlife.designsystem.R as designR
 
 @Composable
 fun GuestBookItem(
-    authorName: String,
-    createdAt: LocalDateTime,
-    textContent: String,
-    visualMediaUrls: ImmutableList<GuestBookEntryMediaUiModel>,
-    audioMediaUrls: ImmutableList<GuestBookEntryMediaUiModel>,
-    totalVisualCount: Int,
+    guestBook: GuestBookUiModel,
     modifier: Modifier = Modifier,
-    authorProfileImageUrl: String? = null,
-    invitationTitle: String? = null,
-    invitationId: Long? = null,
-    isAuthorSelf: Boolean = false,
     shouldPlayVideo: Boolean = false,
     onInvitationTitleClick: (Long) -> Unit = {},
-    onVisualMediaClick: (GuestBookEntryMediaUiModel) -> Unit = {},
-    onAudioMediaClick: (GuestBookEntryMediaUiModel) -> Unit = {},
+    onVisualMediaClick: (GuestBookMediaUiModel) -> Unit = {},
+    onAudioMediaClick: (GuestBookMediaUiModel) -> Unit = {},
     onMenuClick: () -> Unit = {}
 ) {
     Column(
@@ -85,32 +79,32 @@ fun GuestBookItem(
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
     ) {
         GuestBookItemHeader(
-            authorName = authorName,
-            authorProfileImageUrl = authorProfileImageUrl,
-            createdAt = createdAt,
-            isAuthorSelf = isAuthorSelf,
+            authorName = guestBook.author.name,
+            authorProfileImageUrl = guestBook.author.profileImageUrl,
+            createdAt = guestBook.createdAt,
+            isOwner = guestBook.isOwner,
             onMenuClick = onMenuClick,
         )
         GuestBookItemTextContent(
-            invitationId = invitationId,
-            invitationTitle = invitationTitle,
-            textContent = textContent,
+            invitationId = guestBook.invitation.id,
+            invitationTitle = guestBook.invitation.title,
+            textContent = guestBook.textContent,
             onInvitationTitleClick = onInvitationTitleClick,
         )
-        if (visualMediaUrls.isNotEmpty()) {
+        if (guestBook.visualMedias.isNotEmpty()) {
             GuestBookItemVisualMediaSection(
-                visualMediaUrls = visualMediaUrls,
-                totalVisualCount = totalVisualCount,
+                visualMediaUrls = guestBook.visualMedias,
+                totalVisualCount = guestBook.totalVisualCount,
                 shouldPlayVideo = shouldPlayVideo,
                 onVisualMediaClick = onVisualMediaClick,
             )
         }
-        if (audioMediaUrls.isNotEmpty()) {
+        if (guestBook.audioMedias.isNotEmpty()) {
             Column(
                 modifier = Modifier,
                 verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
             ) {
-                audioMediaUrls.forEach { audio ->
+                guestBook.audioMedias.forEach { audio ->
                     GuestBookAudioItem(
                         audio = audio,
                         onAudioMediaClick = onAudioMediaClick
@@ -130,7 +124,7 @@ private fun GuestBookItemHeader(
     authorName: String,
     authorProfileImageUrl: String?,
     createdAt: LocalDateTime,
-    isAuthorSelf: Boolean,
+    isOwner: Boolean,
     onMenuClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -163,7 +157,7 @@ private fun GuestBookItemHeader(
                 color = NachoTheme.colorScheme.textTertiary,
             )
         }
-        if (isAuthorSelf) {
+        if (isOwner) {
             IconButton(onClick = onMenuClick) {
                 Icon(
                     painter = painterResource(R.drawable.ic_more_vert_24),
@@ -255,10 +249,10 @@ private fun GuestBookItemTextContent(
 
 @Composable
 private fun GuestBookItemVisualMediaSection(
-    visualMediaUrls: ImmutableList<GuestBookEntryMediaUiModel>,
+    visualMediaUrls: ImmutableList<GuestBookMediaUiModel>,
     totalVisualCount: Int,
     shouldPlayVideo: Boolean,
-    onVisualMediaClick: (GuestBookEntryMediaUiModel) -> Unit,
+    onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val pagerState = rememberPagerState(pageCount = { visualMediaUrls.size })
@@ -425,8 +419,8 @@ private fun SimpleVideoPlayer(
 
 @Composable
 private fun GuestBookAudioItem(
-    audio: GuestBookEntryMediaUiModel,
-    onAudioMediaClick: (GuestBookEntryMediaUiModel) -> Unit,
+    audio: GuestBookMediaUiModel,
+    onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -497,7 +491,7 @@ private fun GuestBookAudioItem(
 @PreviewTheme
 @Composable
 private fun GuestBookItemPreview() {
-    NachoTheme{
+    NachoTheme {
         LazyColumn(
             modifier = Modifier
                 .padding(NachoSpacing.large),
@@ -505,42 +499,52 @@ private fun GuestBookItemPreview() {
         ) {
             item {
                 GuestBookItem(
-                    authorName = "홍길동",
-                    createdAt = LocalDateTime(2024, 6, 1, 12, 0),
-                    textContent = "축하합니다!\n 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!",
-                    visualMediaUrls = listOf(
-                        GuestBookEntryMediaUiModel(
-                            id = 1L,
-                            type = UiMediaType.IMAGE,
-                            url = "https://via.placeholder.com/150",
-                            thumbnailUrl = "https://via.placeholder.com/150",
-                            durationSeconds = 34,
-                            displayOrder = 0,
+                    guestBook = GuestBookUiModel(
+                        id = 1L,
+                        invitation = GuestBookInvitationUiModel(
+                            id = 1001L,
+                            title = "우리 결혼해요!"
                         ),
-                        GuestBookEntryMediaUiModel(
-                            id = 2L,
-                            type = UiMediaType.VIDEO,
-                            url = "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
-                            thumbnailUrl = "https://via.placeholder.com/150",
-                            durationSeconds = 30,
-                            displayOrder = 1,
-                        )
-                    ).toImmutableList(),
-                    audioMediaUrls = listOf(
-                        GuestBookEntryMediaUiModel(
-                            id = 3L,
-                            type = UiMediaType.AUDIO,
-                            url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-                            thumbnailUrl = "https://via.placeholder.com/150",
-                            durationSeconds = 45,
-                            displayOrder = 0,
-                        )
-                    ).toImmutableList(),
-                    totalVisualCount = 2,
-                    authorProfileImageUrl = null,
-                    invitationTitle = "우리 결혼해요!",
-                    invitationId = 1001L,
-                    isAuthorSelf = true,
+                        author = AuthorUiModel(
+                            id = 5001L,
+                            name = "홍길동",
+                            profileImageUrl = null
+                        ),
+                        textContent = "축하합니다!\n 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하",
+                        visualMedias = listOf(
+                            GuestBookMediaUiModel(
+                                id = 1L,
+                                type = UiMediaType.IMAGE,
+                                url = "",
+                                thumbnailUrl = "",
+                                durationSeconds = 34,
+                                displayOrder = 0,
+                            ),
+                            GuestBookMediaUiModel(
+                                id = 2L,
+                                type = UiMediaType.VIDEO,
+                                url = "",
+                                thumbnailUrl = "",
+                                durationSeconds = 30,
+                                displayOrder = 1,
+                            )
+                        ).toImmutableList(),
+                        audioMedias = listOf(
+                            GuestBookMediaUiModel(
+                                id = 3L,
+                                type = UiMediaType.AUDIO,
+                                url = "",
+                                thumbnailUrl = "",
+                                durationSeconds = 45,
+                                displayOrder = 0,
+                            )
+                        ).toImmutableList(),
+                        totalVisualCount = 2,
+                        isOwner = true,
+                        createdAt = LocalDateTime(2025, 6, 1, 12, 0),
+                        updatedAt = LocalDateTime(2025, 6, 1, 12, 0),
+                    ),
+                    shouldPlayVideo = false,
                 )
             }
         }

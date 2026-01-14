@@ -91,16 +91,17 @@ fun HomeScreen(
                 key = { _, guestBook -> guestBook.id },
             ) { index, guestBook ->
                 GuestBookItem(
-                    authorName = guestBook.author.name,
-                    createdAt = guestBook.createdAt,
-                    textContent = guestBook.textContent,
-                    visualMediaUrls = guestBook.visualMedias,
-                    audioMediaUrls = guestBook.audioMedias,
-                    totalVisualCount = guestBook.totalVisualCount,
-                    authorProfileImageUrl = guestBook.author.profileImageUrl,
-                    invitationTitle = guestBook.invitation.title,
-                    invitationId = guestBook.invitation.id,
-                    isAuthorSelf = guestBook.isOwner,
+//                    authorName = guestBook.author.name,
+//                    createdAt = guestBook.createdAt,
+//                    textContent = guestBook.textContent,
+//                    visualMediaUrls = guestBook.visualMedias,
+//                    audioMediaUrls = guestBook.audioMedias,
+//                    totalVisualCount = guestBook.totalVisualCount,
+//                    authorProfileImageUrl = guestBook.author.profileImageUrl,
+//                    invitationTitle = guestBook.invitation.title,
+//                    invitationId = guestBook.invitation.id,
+//                    isAuthorSelf = guestBook.isOwner,
+                    guestBook = guestBook,
                     shouldPlayVideo = index == playVideoIndex,
                 )
             }
