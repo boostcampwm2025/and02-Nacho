@@ -156,7 +156,7 @@ class EditorState @Inject constructor(
 
             else -> {
                 val charBefore = if (start > 0) editable.getOrNull(start - 1) else null
-                val isAfterWordBoundary = charBefore == null || charBefore == ' ' || charBefore == '\n'
+                val isAfterWordBoundary = isAfterWordBoundary(charBefore)
 
                 if (isAfterWordBoundary) {
                     val spans = editable.getSpans(start, start, ForegroundColorSpan::class.java)
@@ -236,7 +236,7 @@ class EditorState @Inject constructor(
 
             else -> {
                 val charBefore = if (start > 0) editable.getOrNull(start - 1) else null
-                val isAfterWordBoundary = charBefore == null || charBefore == ' ' || charBefore == '\n'
+                val isAfterWordBoundary = isAfterWordBoundary(charBefore)
 
                 if (isAfterWordBoundary) {
                     val spans = editable.getSpans(0, editable.length, AbsoluteSizeSpan::class.java)
@@ -292,7 +292,7 @@ class EditorState @Inject constructor(
 
             else -> {
                 val charBefore = if (start > 0) editable.getOrNull(start - 1) else null
-                val isAfterWordBoundary = charBefore == null || charBefore == ' ' || charBefore == '\n'
+                val isAfterWordBoundary = isAfterWordBoundary(charBefore)
 
                 if (isAfterWordBoundary) {
                     val newState = !currentState
@@ -398,7 +398,7 @@ class EditorState @Inject constructor(
         val lineEnd = findParagraphEnd(editable, if (hasSelection) end else start)
 
         if (lineStart == lineEnd) {
-            editable.insert(lineStart, "\u200B")
+            editable.insert(lineStart, "$EMPTY_TEXT")
             editText.setSelection(lineStart + 1)
             updateAlignment(alignment)
             return
@@ -441,7 +441,7 @@ class EditorState @Inject constructor(
 
         if (!hasSelection && start == lineStart) {
             val newPos = (start + 1).coerceAtMost(editable.length)
-            if (editable[start] == '\u200B') {
+            if (editable[start] == EMPTY_TEXT) {
                 editText.setSelection(newPos)
             }
         }
@@ -477,6 +477,9 @@ class EditorState @Inject constructor(
         return pos
     }
 
+    private fun isAfterWordBoundary(charBefore: Char?): Boolean {
+        return charBefore == null || charBefore == SPACE || charBefore == NEXT_LINE || charBefore == EMPTY_TEXT
+    }
 
     private fun updateToolbarState() {
         val editable = editText.text ?: return
@@ -563,8 +566,8 @@ class EditorState @Inject constructor(
             if (keyCode == android.view.KeyEvent.KEYCODE_DEL && event.action == android.view.KeyEvent.ACTION_DOWN) {
                 val text = editText.text
                 val cursor = editText.selectionStart
-                if (cursor > 0 && text.length >= cursor && text[cursor - 1] == '\u200B') {
-                    val hasNewLineBefore = cursor - 2 >= 0 && text[cursor - 2] == '\n'
+                if (cursor > 0 && text.length >= cursor && text[cursor - 1] == EMPTY_TEXT) {
+                    val hasNewLineBefore = cursor - 2 >= 0 && text[cursor - 2] == NEXT_LINE
                     if (hasNewLineBefore) {
                         text.delete(cursor - 2, cursor)
                     } else {
@@ -575,6 +578,12 @@ class EditorState @Inject constructor(
             }
             false
         }
+    }
+
+    companion object {
+        private const val EMPTY_TEXT = '\u200B'
+        private const val NEXT_LINE = '\n'
+        private const val SPACE = ' '
     }
 }
 
