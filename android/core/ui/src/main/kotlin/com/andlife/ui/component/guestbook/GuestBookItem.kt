@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,8 +22,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,18 +29,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.ui.AspectRatioFrameLayout
-import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
@@ -56,7 +47,6 @@ import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.UiMediaType
 import com.andlife.ui.R
 import com.andlife.ui.component.media.MediaOverlay
-import com.andlife.ui.player.VideoPlayerPool
 import com.andlife.ui.util.toFormatDuration
 import com.andlife.ui.util.toRelativeTimeString
 import kotlinx.collections.immutable.ImmutableList
@@ -76,7 +66,7 @@ fun GuestBookItem(
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
+        verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
         GuestBookItemHeader(
             author = guestBook.author,
@@ -105,7 +95,7 @@ fun GuestBookItem(
                 guestBook.audioMedias.forEach { audio ->
                     GuestBookAudioItem(
                         audio = audio,
-                        onAudioMediaClick = onAudioMediaClick
+                        onAudioMediaClick = onAudioMediaClick,
                     )
                 }
             }
@@ -133,9 +123,10 @@ private fun GuestBookItemHeader(
         AsyncImage(
             model = author.profileImageUrl,
             contentDescription = stringResource(R.string.desc_author_profile_image),
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape),
+            modifier =
+                Modifier
+                    .size(40.dp)
+                    .clip(CircleShape),
             contentScale = ContentScale.Crop,
             placeholder = painterResource(R.drawable.ic_image_24),
             error = painterResource(R.drawable.ic_error_image_24),
@@ -183,9 +174,10 @@ private fun GuestBookItemTextContent(
     ) {
         invitation?.let {
             Row(
-                modifier = Modifier
-                    .clickable { onInvitationTitleClick(invitation.id) }
-                    .padding(vertical = NachoSpacing.xSmall),
+                modifier =
+                    Modifier
+                        .clickable { onInvitationTitleClick(invitation.id) }
+                        .padding(vertical = NachoSpacing.xSmall),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
             ) {
@@ -202,14 +194,15 @@ private fun GuestBookItemTextContent(
             }
         }
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    if (isOverflowed) {
-                        isExpanded = !isExpanded
-                    }
-                },
-            verticalArrangement = Arrangement.spacedBy(NachoSpacing.small)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        if (isOverflowed) {
+                            isExpanded = !isExpanded
+                        }
+                    },
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
         ) {
             Text(
                 text = textContent,
@@ -221,11 +214,18 @@ private fun GuestBookItemTextContent(
                     if (!isExpanded) {
                         isOverflowed = textLayoutResult.hasVisualOverflow
                     }
-                }
+                },
             )
             if (isOverflowed) {
                 Text(
-                    text = if (isExpanded) stringResource(R.string.txt_show_less) else stringResource(R.string.txt_show_more),
+                    text =
+                        if (isExpanded) {
+                            stringResource(
+                                R.string.txt_show_less,
+                            )
+                        } else {
+                            stringResource(R.string.txt_show_more)
+                        },
                     style = NachoTheme.typography.bodyMediumSemiBold,
                     color = NachoTheme.colorScheme.brandPrimary,
                 )
@@ -245,17 +245,19 @@ private fun GuestBookItemVisualMediaSection(
     val pagerState = rememberPagerState(pageCount = { visualMediaUrls.size })
 
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .aspectRatio(1f) // TODO: 추후 미디어 비율에 맞게 조정 필요, 일단 정사각형으로 고정
-            .clip(NachoTheme.shapes.small),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .aspectRatio(1f) // TODO: 추후 미디어 비율에 맞게 조정 필요, 일단 정사각형으로 고정
+                .clip(NachoTheme.shapes.small),
     ) {
         HorizontalPager(state = pagerState) { page ->
             val media = visualMediaUrls[page]
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onVisualMediaClick(media) }
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable { onVisualMediaClick(media) },
             ) {
                 when (media.type) {
                     UiMediaType.VIDEO -> {
@@ -267,10 +269,11 @@ private fun GuestBookItemVisualMediaSection(
 
                         media.durationSeconds?.let {
                             MediaOverlay(
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(NachoSpacing.small),
-                                text = it.toFormatDuration() // TODO: 타이머 기능 추가해야 함.
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .padding(NachoSpacing.small),
+                                text = it.toFormatDuration(), // TODO: 타이머 기능 추가해야 함.
                             )
                         }
                     }
@@ -289,9 +292,10 @@ private fun GuestBookItemVisualMediaSection(
 
         if (visualMediaUrls.size > 1) {
             MediaOverlay(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(NachoSpacing.small),
+                modifier =
+                    Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(NachoSpacing.small),
                 text = "${pagerState.currentPage + 1}/$totalVisualCount",
                 shape = NachoTheme.shapes.medium,
             )
@@ -307,83 +311,7 @@ private fun SimpleVideoPlayer(
     shouldPlay: Boolean,
     modifier: Modifier = Modifier,
 ) {
-//    val context = LocalContext.current
-//    val videoPlayer = remember(videoUrl) {
-//        VideoPlayerPool.getPlayer(context, videoUrl)
-//    }
-//
-//    var isVideoReady by remember(videoUrl) {
-//        mutableStateOf(videoPlayer.exoPlayer.playbackState == Player.STATE_READY)
-//    }
-//
-//    DisposableEffect(videoPlayer) {
-//        isVideoReady = videoPlayer.exoPlayer.playbackState == Player.STATE_READY
-//
-//        val listener = object : Player.Listener {
-//            override fun onPlaybackStateChanged(playbackState: Int) {
-//                isVideoReady = playbackState == Player.STATE_READY ||
-//                    playbackState == Player.STATE_BUFFERING
-//            }
-//
-//            override fun onRenderedFirstFrame() {
-//                isVideoReady = true
-//            }
-//        }
-//
-//        videoPlayer.exoPlayer.addListener(listener)
-//
-//        onDispose {
-//            videoPlayer.exoPlayer.removeListener(listener)
-//        }
-//    }
-//
-//    DisposableEffect(videoUrl) {
-//        VideoPlayerPool.protectPlayer(videoUrl)
-//        onDispose {
-//            VideoPlayerPool.unprotectPlayer(videoUrl)
-//            VideoPlayerPool.pausePlayer(videoUrl)
-//        }
-//    }
-//
-//    LaunchedEffect(shouldPlay) {
-//        if (shouldPlay) {
-//            VideoPlayerPool.playPlayer(videoUrl)
-//        } else {
-//            VideoPlayerPool.pausePlayer(videoUrl)
-//        }
-//    }
-//
-//    Box(
-//        modifier =
-//            modifier
-//                .fillMaxSize()
-//                .background(Color.Black)
-//    ) {
-//        AndroidView(
-//            factory = { context ->
-//                PlayerView(context).apply {
-//                    player = videoPlayer.exoPlayer
-//                    useController = false
-//                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-//                }
-//            },
-//            update = { playerView ->
-//                playerView.player = videoPlayer.exoPlayer
-//            },
-//            modifier = Modifier.fillMaxSize()
-//        )
-//
-//        if (!isVideoReady && thumbnailUrl != null) {
-//            AsyncImage(
-//                model = thumbnailUrl,
-//                contentDescription = null,
-//                modifier = Modifier
-//                    .fillMaxSize()
-//                    .background(Color.Black),
-//                contentScale = ContentScale.Fit,
-//            )
-//        }
-//    }
+    // TODO: Exoplayer 사용 예정
 }
 
 @Composable
@@ -393,23 +321,24 @@ private fun GuestBookAudioItem(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = NachoTheme.colorScheme.brandLight,
-                shape = NachoTheme.shapes.small,
-            )
-            .padding(NachoSpacing.large),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(
+                    color = NachoTheme.colorScheme.brandLight,
+                    shape = NachoTheme.shapes.small,
+                ).padding(NachoSpacing.large),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
     ) {
         Box(
-            modifier = Modifier
-                .size(48.dp)
-                .background(
-                    color = NachoTheme.colorScheme.brandPrimary,
-                    shape = CircleShape,
-                ),
+            modifier =
+                Modifier
+                    .size(48.dp)
+                    .background(
+                        color = NachoTheme.colorScheme.brandPrimary,
+                        shape = CircleShape,
+                    ),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
@@ -420,7 +349,7 @@ private fun GuestBookAudioItem(
         }
         Column(
             modifier =
-                Modifier.weight(1f)
+                Modifier.weight(1f),
         ) {
             Text(
                 text = "오디오 제목", // TODO: 오디오 제목 필요
@@ -428,10 +357,11 @@ private fun GuestBookAudioItem(
                 color = NachoTheme.colorScheme.textPrimary,
             )
             Text(
-                text = stringResource(
-                    R.string.format_audio_duration,
-                    audio.durationSeconds ?: 0
-                ),
+                text =
+                    stringResource(
+                        R.string.format_audio_duration,
+                        audio.durationSeconds ?: 0,
+                    ),
                 style = NachoTheme.typography.bodySmallRegular,
                 color = NachoTheme.colorScheme.textSecondary,
             )
@@ -440,11 +370,12 @@ private fun GuestBookAudioItem(
             modifier = Modifier.size(40.dp),
             shape = CircleShape,
             color = NachoTheme.colorScheme.backgroundPrimary,
-            border = BorderStroke(
-                width = NachoStroke.small,
-                color = NachoTheme.colorScheme.iconDisabled,
-            ),
-            onClick = { onAudioMediaClick(audio) }
+            border =
+                BorderStroke(
+                    width = NachoStroke.small,
+                    color = NachoTheme.colorScheme.iconDisabled,
+                ),
+            onClick = { onAudioMediaClick(audio) },
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
@@ -462,57 +393,63 @@ private fun GuestBookAudioItem(
 private fun GuestBookItemPreview() {
     NachoTheme {
         LazyColumn(
-            modifier = Modifier
-                .padding(NachoSpacing.large),
+            modifier =
+                Modifier
+                    .padding(NachoSpacing.large),
             verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
         ) {
             item {
                 GuestBookItem(
-                    guestBook = GuestBookUiModel(
-                        id = 1L,
-                        invitation = GuestBookInvitationUiModel(
-                            id = 1001L,
-                            title = "우리 결혼해요!"
+                    guestBook =
+                        GuestBookUiModel(
+                            id = 1L,
+                            invitation =
+                                GuestBookInvitationUiModel(
+                                    id = 1001L,
+                                    title = "우리 결혼해요!",
+                                ),
+                            author =
+                                AuthorUiModel(
+                                    id = 5001L,
+                                    name = "홍길동",
+                                    profileImageUrl = null,
+                                ),
+                            textContent = "축하합니다!\n 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하",
+                            visualMedias =
+                                listOf(
+                                    GuestBookMediaUiModel(
+                                        id = 1L,
+                                        type = UiMediaType.IMAGE,
+                                        url = "",
+                                        thumbnailUrl = "",
+                                        durationSeconds = 34,
+                                        displayOrder = 0,
+                                    ),
+                                    GuestBookMediaUiModel(
+                                        id = 2L,
+                                        type = UiMediaType.VIDEO,
+                                        url = "",
+                                        thumbnailUrl = "",
+                                        durationSeconds = 30,
+                                        displayOrder = 1,
+                                    ),
+                                ).toImmutableList(),
+                            audioMedias =
+                                listOf(
+                                    GuestBookMediaUiModel(
+                                        id = 3L,
+                                        type = UiMediaType.AUDIO,
+                                        url = "",
+                                        thumbnailUrl = "",
+                                        durationSeconds = 45,
+                                        displayOrder = 0,
+                                    ),
+                                ).toImmutableList(),
+                            totalVisualCount = 2,
+                            isOwner = true,
+                            createdAt = LocalDateTime(2025, 6, 1, 12, 0),
+                            updatedAt = LocalDateTime(2025, 6, 1, 12, 0),
                         ),
-                        author = AuthorUiModel(
-                            id = 5001L,
-                            name = "홍길동",
-                            profileImageUrl = null
-                        ),
-                        textContent = "축하합니다!\n 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하",
-                        visualMedias = listOf(
-                            GuestBookMediaUiModel(
-                                id = 1L,
-                                type = UiMediaType.IMAGE,
-                                url = "",
-                                thumbnailUrl = "",
-                                durationSeconds = 34,
-                                displayOrder = 0,
-                            ),
-                            GuestBookMediaUiModel(
-                                id = 2L,
-                                type = UiMediaType.VIDEO,
-                                url = "",
-                                thumbnailUrl = "",
-                                durationSeconds = 30,
-                                displayOrder = 1,
-                            )
-                        ).toImmutableList(),
-                        audioMedias = listOf(
-                            GuestBookMediaUiModel(
-                                id = 3L,
-                                type = UiMediaType.AUDIO,
-                                url = "",
-                                thumbnailUrl = "",
-                                durationSeconds = 45,
-                                displayOrder = 0,
-                            )
-                        ).toImmutableList(),
-                        totalVisualCount = 2,
-                        isOwner = true,
-                        createdAt = LocalDateTime(2025, 6, 1, 12, 0),
-                        updatedAt = LocalDateTime(2025, 6, 1, 12, 0),
-                    ),
                     shouldPlayVideo = false,
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},
