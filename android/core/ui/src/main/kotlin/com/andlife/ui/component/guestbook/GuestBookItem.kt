@@ -366,8 +366,8 @@ private fun SimpleVideoPlayer(
             AndroidView(
                 factory = { context ->
                     PlayerView(context).apply {
-                        player = it.exoPlayer // TODO: update와 차이 확인 필요
                         useController = false
+                        player = it.exoPlayer // TODO: update와 차이 확인 필요
                         resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                     }
                 },

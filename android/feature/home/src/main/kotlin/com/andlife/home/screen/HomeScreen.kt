@@ -10,10 +10,14 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -24,9 +28,19 @@ import com.andlife.home.viewmodel.HomeSideEffect
 import com.andlife.home.viewmodel.HomeUiEvent
 import com.andlife.home.viewmodel.HomeUiState
 import com.andlife.home.viewmodel.HomeViewModel
+import com.andlife.model.guestbook.MediaUiType
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.player.VideoPlayerPool
 import com.andlife.ui.util.collectWithLifecycle
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.max
+import kotlin.math.min
+
+data class VideoCandidate(
+    val index: Int,
+    val visibilityRatio: Float,
+)
 
 @Composable
 fun HomeRoute(
@@ -35,6 +49,7 @@ fun HomeRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is HomeSideEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
@@ -56,39 +71,79 @@ fun HomeScreen(
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val lazyListState = rememberLazyListState()
+    var playVideoIndex by remember { mutableStateOf(-1) }
 
-    val playVideoIndex by remember(uiState) {
-        derivedStateOf {
-            val visibleItems = lazyListState.layoutInfo.visibleItemsInfo
-            if (visibleItems.isEmpty()) return@derivedStateOf -1
+    LaunchedEffect(lazyListState, uiState.guestBooks) {
+        var pendingIndex = -1 // 재생 대기 중인 인덱스 초기화
+        var lastChangedTime = 0L // 마지막으로 변경된 시간 초기화
 
-            val visibleItemsWithVisualMedia =
-                visibleItems.filter { itemInfo ->
+        snapshotFlow { lazyListState.layoutInfo } // layout 정보를 관찰함
+            .collect { layoutInfo ->
+                val visibleItems = layoutInfo.visibleItemsInfo
+                if (visibleItems.isEmpty()) return@collect
+
+//                val videoCandidates = visibleItems.filter { itemInfo ->
+//                    val item = uiState.guestBooks.getOrNull(itemInfo.index)
+//                    val hasVideo = item?.visualMedias?.any { it.type == MediaUiType.VIDEO } == true
+//                    hasVideo
+//                }
+                val videoCandidates = visibleItems.mapNotNull { itemInfo ->
                     val guestBook = uiState.guestBooks.getOrNull(itemInfo.index)
-                    guestBook?.visualMedias?.isNotEmpty() == true
+                    val hasVideo = guestBook?.visualMedias?.any { it.type == MediaUiType.VIDEO } == true
+                    if (!hasVideo) return@mapNotNull null
+
+                    val visibleHeight = min(itemInfo.offset + itemInfo.size, layoutInfo.viewportEndOffset) -
+                        max(itemInfo.offset, layoutInfo.viewportStartOffset)
+                    val visibilityRatio = visibleHeight.toFloat() / itemInfo.size
+//                    itemInfo.index to visibilityRatio // 인덱스와 가시성 비율을 Pair로 반환(예: (index, 0.75f)) -> 0번 인덱스가 75% 보임
+                    VideoCandidate(itemInfo.index, visibilityRatio)
                 }
 
-            when (visibleItemsWithVisualMedia.size) {
-                0 -> -1 // 보이는 아이템이 없으면 -1 반환
-                1 -> visibleItemsWithVisualMedia.first().index // 보이는 아이템이 1개면 그 아이템 인덱스 반환
-                2 -> {
-                    visibleItemsWithVisualMedia
-                        .firstOrNull { item ->
-                            item.offset + item.size >= item.size * 0.7f // 70% 이상 보이는 아이템 찾기
-                        }?.index ?: visibleItemsWithVisualMedia.first().index // 없으면 첫 번째 아이템 인덱스 반환
+                if (videoCandidates.isEmpty()) {
+                    playVideoIndex = -1 // 만약 보이는 비디오 후보가 없다면 pendingIndex를 -1로 설정 -> 재생할 비디오 없음
+                    return@collect
                 }
 
-                else -> {
-                    if (visibleItemsWithVisualMedia.size >= 3) {
-                        visibleItemsWithVisualMedia[1].index // 3개 이상이면 1 인덱스(두 번째 아이템) 반환
-                    } else {
-                        visibleItemsWithVisualMedia.first().index
+                val (bestIndex, bestVisibilityRatio) = videoCandidates.maxBy { it.visibilityRatio } // 가장 많이 보이는 비디오 후보 선택
+                val currentPlayingItem = videoCandidates.find { it.index == playVideoIndex }
+                val currentPlayingRatio = currentPlayingItem?.visibilityRatio ?: 0f
+
+                val shouldChangeTo = when {
+                    // 1. 현재 영상 거의 안 보이면 즉시 정지
+                    playVideoIndex != -1 && currentPlayingRatio < 0.2f -> -1
+
+                    // 2. 재생 중인 게 없을 때만 새 후보 탐색
+                    playVideoIndex == -1 ->
+                        if (bestVisibilityRatio >= 0.6f) bestIndex else -1
+
+                    // 3. 더 잘 보이는 영상이 충분히 우세하면 교체
+                    bestIndex != playVideoIndex &&
+                        bestVisibilityRatio > currentPlayingRatio + 0.3f -> bestIndex
+
+                    else -> playVideoIndex
+                }
+
+
+                if (shouldChangeTo == -1 && playVideoIndex != -1) { // 재생 중인 비디오가 있는데, 이제 재생할 비디오가 없을 때
+                    // 재생할 비디오가 변경되는 경우, 즉시 변경
+                    playVideoIndex = -1
+                    pendingIndex = -1
+                } else if (shouldChangeTo != playVideoIndex && shouldChangeTo != pendingIndex) { // 재생되어야 하는 비디오가 현재 재생 중인 비디오와 다르고, 대기 중인 인덱스와도 다를 때
+                    pendingIndex = shouldChangeTo // 재생 대기 인덱스 설정
+                    lastChangedTime = System.currentTimeMillis()
+                    launch {
+                        delay(200L)
+                        // 200ms 후에도 동일한 대기 인덱스라면 재생 변경
+                        if (pendingIndex == shouldChangeTo && System.currentTimeMillis() - lastChangedTime >= 200L) {
+                            playVideoIndex = shouldChangeTo
+//                            pendingIndex = -1
+                        }
                     }
                 }
             }
-        }
     }
 
     DisposableEffect(lifecycleOwner) {
@@ -97,13 +152,12 @@ fun HomeScreen(
                 when (event) {
                     Lifecycle.Event.ON_RESUME -> VideoPlayerPool.resumeLastPlayed()
                     Lifecycle.Event.ON_PAUSE -> VideoPlayerPool.pauseAllPlayers()
+                    Lifecycle.Event.ON_DESTROY -> VideoPlayerPool.releaseAll()
                     else -> {}
                 }
             }
         lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     Scaffold(
