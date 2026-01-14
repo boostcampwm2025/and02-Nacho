@@ -92,8 +92,9 @@ class InvitationCollectionViewModel
                 )
             }
             val selectedMedia = uiState.value.mediaItems.getOrNull(index)
-            if (selectedMedia?.type == UiMediaType.VIDEO) {
-                prepareVideo(selectedMedia.mediaUrl)
+
+            if (selectedMedia?.type == UiMediaType.VIDEO || selectedMedia?.type == UiMediaType.AUDIO) {
+                prepareMedia(selectedMedia.mediaUrl)
             }
         }
 
@@ -112,21 +113,29 @@ class InvitationCollectionViewModel
 
             val selectedMedia = uiState.value.mediaItems.getOrNull(index)
 
-            if (selectedMedia?.type == UiMediaType.VIDEO) {
-                prepareVideo(selectedMedia.mediaUrl)
-            } else {
-                exoPlayer.pause()
+            when (selectedMedia?.type) {
+                UiMediaType.VIDEO, UiMediaType.AUDIO -> {
+                    prepareMedia(selectedMedia.mediaUrl)
+                }
+                else -> {
+                    exoPlayer.pause()
+                }
             }
         }
 
-        private fun prepareVideo(url: String) {
+        private fun prepareMedia(url: String) {
             if (url.isEmpty()) return
 
             val currentUri = exoPlayer.currentMediaItem?.localConfiguration?.uri?.toString()
+
             if (currentUri == url) {
+                exoPlayer.seekTo(0)
                 exoPlayer.play()
                 return
             }
+
+            exoPlayer.stop()
+            exoPlayer.clearMediaItems()
 
             val mediaItem = MediaItem.fromUri(url)
             exoPlayer.setMediaItem(mediaItem)
