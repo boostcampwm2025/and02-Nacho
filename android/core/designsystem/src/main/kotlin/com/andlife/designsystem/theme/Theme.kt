@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 
 @Composable
-fun InvitationTheme(
+fun NachoTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
@@ -23,7 +23,7 @@ fun InvitationTheme(
     }
 }
 
-object InvitationTheme {
+object NachoTheme {
     val colorScheme: InvitationColorScheme
         @Composable
         get() = LocalInvitationColorScheme.current

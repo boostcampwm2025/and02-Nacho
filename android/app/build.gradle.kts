@@ -13,27 +13,44 @@ plugins {
 }
 
 android {
-    namespace = "com.andlife.invitationzzang"
+    namespace = "com.andlife.nacho"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.andlife.invitationzzang"
+        applicationId = "com.andlife.nacho"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         var properties = Properties()
         properties.load(FileInputStream("local.properties"))
         val kakaoRestApiKey = properties.getProperty("KAKAO_REST_API_KEY") ?: ""
+        val kakaoNativeAppKey = properties.getProperty("KAKAO_NATIVE_APP_KEY") ?: ""
+        val appsflyerDevKey = properties.getProperty("APPSFLYER_DEV_KEY") ?: ""
 
         buildConfigField(
             "String",
             "KAKAO_REST_API_KEY",
             "\"$kakaoRestApiKey\"",
         )
+
+        buildConfigField(
+            "String",
+            "KAKAO_NATIVE_APP_KEY",
+            "\"$kakaoNativeAppKey\"",
+        )
+
+        buildConfigField(
+            "String",
+            "APPSFLYER_DEV_KEY",
+            "\"$appsflyerDevKey\"",
+        )
+
+        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoNativeAppKey
+        manifestPlaceholders["APPSFLYER_DEV_KEY"] = appsflyerDevKey
     }
 
     buildTypes {
@@ -67,16 +84,27 @@ dependencies {
     implementation(projects.feature.invitation)
     implementation(projects.feature.myinvitation)
     implementation(projects.feature.invitationEdit)
+    implementation(projects.feature.invitationCard)
     implementation(projects.core.data)
+    implementation(projects.core.network)
     implementation(projects.core.designsystem)
+    implementation(projects.core.ui)
     implementation(projects.core.data)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.immutable)
+    implementation(projects.core.deeplink)
 
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+
+    // Kakao
+    implementation(libs.kakao.common)
+
+    // AppsFlyer
+    implementation(libs.appsflyer)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -24,9 +24,9 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.andlife.designsystem.component.dialog.InvitationDialog
-import com.andlife.designsystem.theme.InvitationSpacing
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.component.dialog.NachoDialog
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
 import com.andlife.invitation_edit.component.DeleteDialogContent
 import com.andlife.invitation_edit.model.AddressUiModel
@@ -162,7 +162,7 @@ fun MyInvitationCreateRoute(
     }
 
     if (isShowDeleteAnnouncement) {
-        InvitationDialog(onDismiss = { isShowDeleteAnnouncement = false }) {
+        NachoDialog(onDismiss = { isShowDeleteAnnouncement = false }) {
             DeleteDialogContent(
                 onConfirm = {
                     selectedAnnouncement?.let {
@@ -219,7 +219,7 @@ private fun MyInvitationCreateScreen(
                 Modifier
                     .padding(padding)
                     .fillMaxSize()
-                    .background(InvitationTheme.colorScheme.backgroundTertiary),
+                    .background(NachoTheme.colorScheme.backgroundTertiary),
         ) {
             item {
                 TitleSection(
@@ -232,7 +232,7 @@ private fun MyInvitationCreateScreen(
                 AuthorSection(
                     authorName = uiState.createInvitationUiModel.author,
                     onAuthorNameChange = { onEvent(CreateInvitationUiEvent.UpdateAuthor(it)) },
-                    modifier = Modifier.padding(top = InvitationSpacing.medium),
+                    modifier = Modifier.padding(top = NachoSpacing.medium),
                 )
             }
 
@@ -244,7 +244,7 @@ private fun MyInvitationCreateScreen(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(top = InvitationSpacing.medium),
+                            .padding(top = NachoSpacing.medium),
                 )
             }
 
@@ -252,7 +252,7 @@ private fun MyInvitationCreateScreen(
                 DateSection(
                     date = uiState.createInvitationUiModel.date,
                     onDateClick = onDateClick,
-                    modifier = Modifier.padding(top = InvitationSpacing.medium),
+                    modifier = Modifier.padding(top = NachoSpacing.medium),
                 )
             }
 
@@ -262,7 +262,7 @@ private fun MyInvitationCreateScreen(
                     endTime = uiState.createInvitationUiModel.endTime,
                     onStartTimeClick = onStartTimeClick,
                     onEndTimeClick = onEndTimeClick,
-                    modifier = Modifier.padding(top = InvitationSpacing.medium),
+                    modifier = Modifier.padding(top = NachoSpacing.medium),
                 )
             }
 
@@ -274,7 +274,7 @@ private fun MyInvitationCreateScreen(
                     onChangePlaceAddress = { onEvent(CreateInvitationUiEvent.UpdatePlaceAddress(it)) },
                     onChangeAddressGuide = { onEvent(CreateInvitationUiEvent.UpdateAddressGuide(it)) },
                     onNavigateToAddressSearch = onNavigateToAddressSearch,
-                    modifier = Modifier.padding(top = InvitationSpacing.medium),
+                    modifier = Modifier.padding(top = NachoSpacing.medium),
                 )
             }
 
@@ -282,7 +282,7 @@ private fun MyInvitationCreateScreen(
                 announcementList = uiState.createInvitationUiModel.announcement,
                 onAddAnnouncementClick = onAddAnnouncementClick,
                 onRemoveAnnouncementClick = onRemoveAnnouncementClick,
-                modifier = Modifier.padding(top = InvitationSpacing.medium),
+                modifier = Modifier.padding(top = NachoSpacing.medium),
             )
         }
     }

@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,8 +28,8 @@ internal fun TopBarSection(
         title = {
             Text(
                 text = title,
-                style = InvitationTheme.typography.headingSmallSemiBold,
-                color = InvitationTheme.colorScheme.textPrimary,
+                style = NachoTheme.typography.headingSmallSemiBold,
+                color = NachoTheme.colorScheme.textPrimary,
             )
         },
         navigationIcon = {
@@ -44,14 +44,14 @@ internal fun TopBarSection(
             TextButton(onPreviewClick) {
                 Text(
                     text = stringResource(R.string.txt_preview),
-                    style = InvitationTheme.typography.bodyLargeSemiBold,
-                    color = InvitationTheme.colorScheme.brandPrimary,
+                    style = NachoTheme.typography.bodyLargeSemiBold,
+                    color = NachoTheme.colorScheme.brandPrimary,
                 )
             }
         },
         colors =
             TopAppBarDefaults.topAppBarColors(
-                containerColor = InvitationTheme.colorScheme.backgroundPrimary,
+                containerColor = NachoTheme.colorScheme.backgroundPrimary,
             ),
         modifier = modifier,
     )
@@ -60,7 +60,7 @@ internal fun TopBarSection(
 @Composable
 @PreviewTheme
 private fun TopBarSectionPreview() {
-    InvitationTheme {
+    NachoTheme {
         TopBarSection(
             title = "초대 생성",
             onBackClick = {},
