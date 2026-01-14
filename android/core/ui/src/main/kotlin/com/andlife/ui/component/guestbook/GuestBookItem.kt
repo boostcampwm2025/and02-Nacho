@@ -233,12 +233,6 @@ private fun GuestBookItemTextContent(
             if (isOverflowed) {
                 Text(
                     text = if (isExpanded) stringResource(R.string.txt_show_less) else stringResource(R.string.txt_show_more),
-                    modifier =
-                        Modifier
-                            .clickable {
-                                isExpanded = !isExpanded
-                            }
-                            .padding(NachoSpacing.xSmall),
                     style = NachoTheme.typography.bodyMediumSemiBold,
                     color = NachoTheme.colorScheme.brandPrimary,
                 )
