@@ -90,6 +90,7 @@ import com.andlife.invitation_card.editor.model.EditorDefaults
 import com.andlife.invitation_card.editor.util.contrastColor
 import com.andlife.invitation_card.editor.state.EditorState
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 
 @Composable
@@ -251,9 +252,14 @@ private fun EditorBottomBar(
                 .background(NachoTheme.colorScheme.backgroundPrimary),
     ) {
         AnimatedVisibility(colorPaletteMode != null) {
+            val colorList = when (colorPaletteMode) {
+                ColorPaletteMode.Text -> EditorDefaults.textColorPalette
+                ColorPaletteMode.Background -> EditorDefaults.backgroundColorPalette
+                else -> persistentListOf()
+            }
             ColorPalette(
                 modifier = Modifier.fillMaxWidth(),
-                colorList = EditorDefaults.palette,
+                colorList = colorList,
                 onColorChange = onColorChange,
                 currentColor = colorForPalette,
             )
