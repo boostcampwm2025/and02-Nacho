@@ -16,9 +16,9 @@ class AutoVideoPlayerPoolImpl @Inject constructor(
     private val simpleCache: Cache,
 ) : AutoVideoPlayerPool {
 
-    private val playerInstances = mutableListOf<AutoVideoPlayer>()
-    private val activePlayers = mutableMapOf<String, AutoVideoPlayer>()
-    private val lastPlayedUrlByGuestBookId = LinkedHashMap<Long, String>(MAX_POOL_SIZE, 0.75f, true)
+    private val playerInstances = mutableListOf<AutoVideoPlayer>() // 재사용 가능한 플레이어 인스턴스 풀
+    private val activePlayers = mutableMapOf<String, AutoVideoPlayer>() // 현재 사용 중인 플레이어 매핑
+    private val lastPlayedUrlByGuestBookId = LinkedHashMap<Long, String>(MAX_POOL_SIZE, 0.75f, true) // 방명록 ID별 마지막 재생 URL 추적
 
     private var currentPlayingUrl: String? = null
     private val cacheDataSourceFactory: CacheDataSource.Factory by lazy {
@@ -105,6 +105,13 @@ class AutoVideoPlayerPoolImpl @Inject constructor(
 
     override fun resumeLastPlayed() {
         currentPlayingUrl?.let { activePlayers[it]?.play() }
+    }
+
+    override fun resetPool() { // 추후 상세 화면의 방명록 탭으로 진입 시 호출하면 될 것 같음.
+        activePlayers.values.forEach { it.stop() } // 모든 활성 플레이어 정지
+        activePlayers.clear() // 활성 플레이어 매핑 초기화
+        lastPlayedUrlByGuestBookId.clear() // 마지막 재생 URL 기록 초기화
+        currentPlayingUrl = null
     }
 
     override fun releaseAllPlayers() {

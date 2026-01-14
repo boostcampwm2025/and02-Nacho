@@ -7,5 +7,6 @@ interface AutoVideoPlayerPool {
     fun pausePlayer(url: String)
     fun pauseAllPlayers()
     fun resumeLastPlayed()
+    fun resetPool()
     fun releaseAllPlayers()
 }
