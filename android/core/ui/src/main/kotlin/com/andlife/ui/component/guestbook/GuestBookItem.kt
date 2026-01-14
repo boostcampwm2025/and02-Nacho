@@ -96,6 +96,7 @@ fun GuestBookItem(
         )
         if (guestBook.visualMedias.isNotEmpty()) {
             GuestBookItemVisualMediaSection(
+                guestBookId = guestBook.id,
                 visualMediaUrls = guestBook.visualMedias,
                 totalVisualCount = guestBook.totalVisualCount,
                 shouldPlayVideo = shouldPlayVideo,
@@ -251,6 +252,7 @@ private fun GuestBookItemTextSection(
 
 @Composable
 private fun GuestBookItemVisualMediaSection(
+    guestBookId: Long,
     visualMediaUrls: ImmutableList<GuestBookMediaUiModel>,
     totalVisualCount: Int,
     shouldPlayVideo: Boolean,
@@ -277,7 +279,7 @@ private fun GuestBookItemVisualMediaSection(
                 when (media.type) {
                     MediaUiType.VIDEO -> {
                         SimpleVideoPlayer(
-                            guestBookId = media.id,
+                            guestBookId = guestBookId,
                             videoUrl = media.url,
                             thumbnailUrl = media.thumbnailUrl,
                             shouldPlay = shouldPlayVideo && pagerState.currentPage == page,
@@ -407,7 +409,7 @@ private fun SimpleVideoPlayer(
 
     LaunchedEffect(shouldPlay) {
         if (shouldPlay) {
-            VideoPlayerPool.playPlayer(videoUrl)
+            VideoPlayerPool.playPlayer(videoUrl, guestBookId)
         } else {
             VideoPlayerPool.pausePlayer(uri = videoUrl)
             //isVideoReady = false 위의 remember 블록에서 videoUrl이 바뀔 때 초기화되므로 여기서는 초기화하지 않음.
