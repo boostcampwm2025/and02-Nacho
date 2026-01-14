@@ -57,11 +57,11 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val lazyListSTate = rememberLazyListState()
+    val lazyListState = rememberLazyListState()
 
     val playVideoIndex by remember(uiState) {
         derivedStateOf {
-            val visibleItems = lazyListSTate.layoutInfo.visibleItemsInfo
+            val visibleItems = lazyListState.layoutInfo.visibleItemsInfo
             if (visibleItems.isEmpty()) return@derivedStateOf -1
 
             val visibleItemsWithVisualMedia = visibleItems.filter { itemInfo ->
@@ -108,7 +108,7 @@ fun HomeScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         LazyColumn(
-            state = lazyListSTate,
+            state = lazyListState,
             modifier =
                 Modifier
                     .padding(innerPadding)
