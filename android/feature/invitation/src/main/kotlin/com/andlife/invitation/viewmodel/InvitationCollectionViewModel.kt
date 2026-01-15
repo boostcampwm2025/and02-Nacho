@@ -40,6 +40,7 @@ class InvitationCollectionViewModel
         ) {
 
         private val invitationId: Long = savedStateHandle.toRoute<InvitationDetail>().id
+
         override val uiState: StateFlow<InvitationCollectionUiState> =
             mutableUiState
                 .onStart {
