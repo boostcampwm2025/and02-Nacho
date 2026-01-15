@@ -79,18 +79,21 @@ private fun InvitationDetailScreen(
                 Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(horizontal = NachoSpacing.medium),
         ) {
-
             GenericTabRow(
                 tabs = tabTitles,
                 content = { index ->
-                    when (index) {
-                        0 -> Text("초대장 콘텐츠")
-                        1 -> Text("방명록 화면")
-                        2 -> InvitationCollectionRoute(
-                            uiState.id,
-                        )
+                    Column(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = NachoSpacing.medium)
+                    ) {
+                        when (index) {
+                            0 -> Text("초대장 콘텐츠")
+                            1 -> Text("방명록 화면")
+                            2 -> InvitationCollectionRoute()
+                        }
                     }
                 },
             )

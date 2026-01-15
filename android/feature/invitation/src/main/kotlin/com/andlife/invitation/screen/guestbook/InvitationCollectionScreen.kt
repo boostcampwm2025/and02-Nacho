@@ -1,7 +1,6 @@
 package com.andlife.invitation.screen.guestbook
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Dialog
@@ -24,14 +23,9 @@ import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun InvitationCollectionRoute(
-    invitationId: Long,
     modifier: Modifier = Modifier,
     viewModel: InvitationCollectionViewModel = hiltViewModel(),
 ) {
-    LaunchedEffect(invitationId) {
-        viewModel.initInvitationId(invitationId)
-    }
-
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     InvitationCollectionScreen(
