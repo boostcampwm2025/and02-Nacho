@@ -15,6 +15,8 @@ import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
 import com.andlife.ui.model.UiMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onStart
@@ -56,7 +58,7 @@ constructor(
     }
 
     private fun updateSelectedMedias(medias: List<SelectedMedia>) {
-        updateState { copy(selectedMedias = medias) }
+        updateState { copy(selectedMedias = medias.toPersistentList()) }
     }
 
     private fun updateTextContent(textContent: String) {
@@ -65,9 +67,7 @@ constructor(
 
     private fun removeMedia(media: SelectedMedia) {
         updateState {
-            val currentMedias = selectedMedias.toMutableList()
-            currentMedias.remove(media)
-            copy(selectedMedias = currentMedias)
+            copy(selectedMedias = selectedMedias.toPersistentList().remove(media))
         }
     }
 
@@ -166,7 +166,7 @@ constructor(
                     updateState {
                         copy(
                             isUploading = false,
-                            selectedMedias = emptyList(),
+                            selectedMedias = persistentListOf(),
                             textContent = "",
                             errorMessage = null,
                         )

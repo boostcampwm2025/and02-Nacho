@@ -29,16 +29,17 @@ import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.ui.R
 import com.andlife.ui.util.media.uriToSelectedMedia
+import kotlinx.collections.immutable.ImmutableList
 
 private const val MAX_LENGTH = 500
 private const val MAX_MEDIAS_COUNT = 5
 
 @Composable
 fun InvitationGuestBookForm(
-    selectedMedias: List<SelectedMedia>,
+    selectedMedias: ImmutableList<SelectedMedia>,
     textContent: String,
     isUploading: Boolean,
-    onMediasSelected: (List<SelectedMedia>) -> Unit,
+    onMediasSelected: (ImmutableList<SelectedMedia>) -> Unit,
     onMediaRemove: (SelectedMedia) -> Unit,
     onTextContentChange: (String) -> Unit,
     onUploadClick: () -> Unit,

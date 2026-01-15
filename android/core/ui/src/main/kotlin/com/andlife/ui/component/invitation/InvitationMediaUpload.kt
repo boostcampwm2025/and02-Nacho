@@ -25,10 +25,11 @@ import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.ui.R
 import com.andlife.ui.model.UiMediaType
+import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun InvitationMediaUpload(
-    selectedMedias: List<SelectedMedia>,
+    selectedMedias: ImmutableList<SelectedMedia>,
     onMediaRemove: (SelectedMedia) -> Unit,
     modifier: Modifier = Modifier,
 ) {
