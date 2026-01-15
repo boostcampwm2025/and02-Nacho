@@ -281,7 +281,7 @@ private fun GuestBookItemVisualMediaSection(
             ) {
                 when (media.type) {
                     MediaUiType.VIDEO -> {
-                        SimpleVideoPlayer(
+                        VideoPlayerContainer(
                             guestBookId = guestBookId,
                             videoUrl = media.url,
                             thumbnailUrl = media.thumbnailUrl,
@@ -327,7 +327,7 @@ private fun GuestBookItemVisualMediaSection(
 
 @OptIn(UnstableApi::class)
 @Composable
-private fun SimpleVideoPlayer(
+private fun VideoPlayerContainer(
     guestBookId: Long,
     videoUrl: String,
     thumbnailUrl: String?,
