@@ -265,6 +265,17 @@ private fun GuestBookItemVisualMediaSection(
     modifier: Modifier = Modifier,
 ) {
     val pagerState = rememberPagerState(pageCount = { visualMediaUrls.size })
+    var beyondViewportPageCount by remember { mutableStateOf(0) }
+
+    LaunchedEffect(pagerState.currentPage) {
+        val nextPage = pagerState.currentPage + 1
+        if (nextPage < visualMediaUrls.size) {
+            val nextMedia = visualMediaUrls[nextPage]
+            beyondViewportPageCount = if (nextMedia.type == MediaUiType.IMAGE) 1 else 0
+        } else {
+            beyondViewportPageCount = 0
+        }
+    }
 
     Box(
         modifier =
@@ -273,7 +284,10 @@ private fun GuestBookItemVisualMediaSection(
                 .aspectRatio(1f) // TODO: 추후 미디어 비율에 맞게 조정 필요, 일단 정사각형으로 고정
                 .clip(NachoTheme.shapes.small),
     ) {
-        HorizontalPager(state = pagerState) { page ->
+        HorizontalPager(
+            state = pagerState,
+            beyondViewportPageCount = beyondViewportPageCount,
+        ) { page ->
             val media = visualMediaUrls[page]
             Box(
                 modifier =
