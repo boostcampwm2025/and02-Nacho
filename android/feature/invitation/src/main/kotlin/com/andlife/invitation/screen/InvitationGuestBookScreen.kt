@@ -16,24 +16,24 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.theme.InvitationSpacing
 import com.andlife.designsystem.theme.InvitationTheme
-import com.andlife.invitation.model.detail.InvitationDetailSideEffect
-import com.andlife.invitation.model.detail.InvitationDetailUiEvent
-import com.andlife.invitation.model.detail.InvitationDetailUiState
-import com.andlife.invitation.viewmodel.InvitationDetailViewModel
+import com.andlife.invitation.model.guestbook.InvitationGuestBookSideEffect
+import com.andlife.invitation.model.guestbook.InvitationGuestBookUiEvent
+import com.andlife.invitation.model.guestbook.InvitationGuestBookUiState
+import com.andlife.invitation.viewmodel.InvitationGuestBookViewModel
 import com.andlife.ui.component.invitation.InvitationGuestBookForm
 import com.andlife.ui.util.collectWithLifecycle
 
 @Composable
-fun InvitationDetailRoute(
+fun InvitationGuestBookRoute(
     modifier: Modifier = Modifier,
-    viewModel: InvitationDetailViewModel = hiltViewModel(),
+    viewModel: InvitationGuestBookViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
-            is InvitationDetailSideEffect.ShowSnackbar -> {
+            is InvitationGuestBookSideEffect.ShowSnackbar -> {
                 snackbarHostState.showSnackbar(
                     message = effect.message,
                     duration = SnackbarDuration.Short,
@@ -42,7 +42,7 @@ fun InvitationDetailRoute(
         }
     }
 
-    InvitationDetailScreen(
+    InvitationGuestBookScreen(
         uiState = uiState,
         onEvent = viewModel::onEvent,
         snackbarHostState = snackbarHostState,
@@ -51,9 +51,9 @@ fun InvitationDetailRoute(
 }
 
 @Composable
-private fun InvitationDetailScreen(
-    uiState: InvitationDetailUiState,
-    onEvent: (InvitationDetailUiEvent) -> Unit,
+private fun InvitationGuestBookScreen(
+    uiState: InvitationGuestBookUiState,
+    onEvent: (InvitationGuestBookUiEvent) -> Unit,
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
 ) {
@@ -75,39 +75,39 @@ private fun InvitationDetailScreen(
 
 @Composable
 private fun TitleSection() {
-    Text(text = "InvitationDetailScreen")
+    Text(text = "InvitationGuestBookScreen")
 }
 
 @Composable
 private fun GuestBookFormSection(
-    uiState: InvitationDetailUiState,
-    onEvent: (InvitationDetailUiEvent) -> Unit,
+    uiState: InvitationGuestBookUiState,
+    onEvent: (InvitationGuestBookUiEvent) -> Unit,
 ) {
     InvitationGuestBookForm(
         selectedMedias = uiState.selectedMedias,
         textContent = uiState.textContent,
         isUploading = uiState.isUploading,
         onMediasSelected = { medias ->
-            onEvent(InvitationDetailUiEvent.UpdateSelectedMedias(medias))
+            onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(medias))
         },
         onMediaRemove = { media ->
-            onEvent(InvitationDetailUiEvent.RemoveMedia(media))
+            onEvent(InvitationGuestBookUiEvent.RemoveMedia(media))
         },
         onTextContentChange = { text ->
-            onEvent(InvitationDetailUiEvent.UpdateTextContent(text))
+            onEvent(InvitationGuestBookUiEvent.UpdateTextContent(text))
         },
         onUploadClick = {
-            onEvent(InvitationDetailUiEvent.UploadMedias)
+            onEvent(InvitationGuestBookUiEvent.UploadMedias)
         },
     )
 }
 
 @Composable
 @Preview
-private fun InvitationDetailScreenPreview() {
+private fun InvitationGuestBookScreenPreview() {
     InvitationTheme {
-        InvitationDetailScreen(
-            uiState = InvitationDetailUiState(),
+        InvitationGuestBookScreen(
+            uiState = InvitationGuestBookUiState(),
             onEvent = {},
             snackbarHostState = SnackbarHostState(),
         )

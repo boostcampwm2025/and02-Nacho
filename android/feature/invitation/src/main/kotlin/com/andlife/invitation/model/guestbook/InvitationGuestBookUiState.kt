@@ -1,10 +1,10 @@
-package com.andlife.invitation.model.detail
+package com.andlife.invitation.model.guestbook
 
 import com.andlife.domain.model.guestbook.GuestBook
 import com.andlife.ui.base.BaseUiState
 import com.andlife.ui.component.invitation.SelectedMedia
 
-data class InvitationDetailUiState(
+data class InvitationGuestBookUiState(
     val selectedMedias: List<SelectedMedia> = emptyList(),
     val textContent: String = "",
     val isUploading: Boolean = false,
