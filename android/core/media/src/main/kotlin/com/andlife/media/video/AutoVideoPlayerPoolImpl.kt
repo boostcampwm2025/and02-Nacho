@@ -1,10 +1,7 @@
 package com.andlife.media.video
 
 import android.content.Context
-import android.util.Log
 import androidx.media3.common.MediaItem
-import androidx.media3.datasource.DefaultHttpDataSource
-import androidx.media3.datasource.cache.Cache
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
@@ -74,7 +71,7 @@ class AutoVideoPlayerPoolImpl @Inject constructor(
             lastPlayedUrlByGuestBookId.remove(lastPlayedUrlByGuestBookId.keys.first())
         }
 
-        activePlayers.values.toList().forEach { // toList()로 복사본 생성하여 수정 중 예외 방지
+        activePlayers.values.toList().forEach {
             if (it.url != url) {
                 it.pause()
             }
@@ -82,10 +79,6 @@ class AutoVideoPlayerPoolImpl @Inject constructor(
 
         val player = getPlayer(url)
         player.play()
-
-        Log.d("rere", "재생: $url (방명록 id: $itemId)")
-        Log.d("rerere", "보호 중인 URI 목록: ${lastPlayedUrlByGuestBookId.values}")
-        Log.d("rererere", "활성 플레이어 목록: ${activePlayers.keys}")
     }
 
     override fun pausePlayer(url: String) {
@@ -101,10 +94,10 @@ class AutoVideoPlayerPoolImpl @Inject constructor(
         currentPlayingUrl?.let { activePlayers[it]?.play() }
     }
 
-    override fun resetPool() { // 추후 상세 화면의 방명록 탭으로 진입 시 호출하면 될 것 같음.
-        activePlayers.values.forEach { it.stop() } // 모든 활성 플레이어 정지
-        activePlayers.clear() // 활성 플레이어 매핑 초기화
-        lastPlayedUrlByGuestBookId.clear() // 마지막 재생 URL 기록 초기화
+    override fun resetPool() {
+        activePlayers.values.forEach { it.stop() }
+        activePlayers.clear()
+        lastPlayedUrlByGuestBookId.clear()
         currentPlayingUrl = null
     }
 

@@ -45,10 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.cache.CacheDataSource
-import androidx.media3.datasource.cache.NoOpCacheEvictor
-import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
@@ -70,7 +67,6 @@ import com.andlife.ui.util.toRelativeTimeString
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.LocalDateTime
-import java.io.File
 import com.andlife.designsystem.R as designR
 
 @Composable
@@ -351,7 +347,6 @@ private fun SimpleVideoPlayer(
             videoPlayerPool.playPlayer(videoUrl, guestBookId)
         } else {
             videoPlayerPool.pausePlayer(videoUrl)
-            //isVideoReady = false 위의 remember 블록에서 videoUrl이 바뀔 때 초기화되므로 여기서는 초기화하지 않음.
         }
     }
 
