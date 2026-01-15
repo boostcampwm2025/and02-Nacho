@@ -17,6 +17,7 @@ import com.andlife.myinvitation.model.detail.MyInvitationDetailSideEffect
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiEvent
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiState
 import com.andlife.ui.base.BaseViewModel
+import com.andlife.ui.util.toDateTimeSingleLine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.SharingStarted
@@ -72,7 +73,7 @@ class MyInvitationDetailViewModel @Inject constructor(
                             dateTime =
                                 DateTimeInfo(
                                     date = LocalDate(2026, 1, 31),
-                                    startTime = InvitationTimeUiModel(hour = 13, min = 0),
+                                    startTime = InvitationTimeUiModel(hour = 13, min = 30),
                                 ),
                             location =
                                 LocationInfo(
@@ -141,6 +142,18 @@ class MyInvitationDetailViewModel @Inject constructor(
     }
 
     private fun shareInvitation() {
-        kakaoShareManager.share(invitationId = uiState.value.id)
+        val state = uiState.value
+        val content = state.invitationContentsUiModel
+        val dateText = content.dateTime.toDateTimeSingleLine()
+        val locationText = content.location.name
+        val firstImage = content.imageList.firstOrNull()
+
+        kakaoShareManager.share(
+            invitationId = state.id,
+            title = content.title,
+            imageUrl = firstImage,
+            date = dateText,
+            location = locationText,
+        )
     }
 }
