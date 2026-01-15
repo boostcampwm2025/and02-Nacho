@@ -28,6 +28,7 @@ fun NavController.navigateToAddressSearch(navOptions: NavOptions) {
 
 fun NavGraphBuilder.myInvitationCreateNavGraph(
     onNavigateToAddressSearch: () -> Unit,
+    onNavigateToEditor: () -> Unit,
     onNavigateBack: () -> Unit,
 ) {
     composable<MyInvitationCreate> { backStackEntry ->
@@ -40,6 +41,7 @@ fun NavGraphBuilder.myInvitationCreateNavGraph(
             onNavigateToAddressSearch = onNavigateToAddressSearch,
             onNavigateBack = onNavigateBack,
             modifier = Modifier,
+            onNavigateToEditor = onNavigateToEditor,
             address = selectedAddressUiModel,
         )
     }

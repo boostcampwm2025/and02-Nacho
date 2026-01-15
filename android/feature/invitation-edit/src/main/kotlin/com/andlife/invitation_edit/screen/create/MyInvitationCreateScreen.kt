@@ -4,6 +4,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,6 +14,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,9 +23,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.component.dialog.NachoDialog
@@ -56,6 +62,7 @@ fun MyInvitationCreateRoute(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
     address: AddressUiModel? = null,
+    onNavigateToEditor: () -> Unit,
     viewModel: CreateInvitationViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -120,6 +127,7 @@ fun MyInvitationCreateRoute(
             selectedAnnouncement = it
             isShowDeleteAnnouncement = true
         },
+        onNavigateToEditor = onNavigateToEditor,
         modifier = modifier,
     )
 
@@ -189,6 +197,7 @@ private fun MyInvitationCreateScreen(
     onEndTimeClick: () -> Unit,
     onNavigateToAddressSearch: () -> Unit,
     onAddAnnouncementClick: () -> Unit,
+    onNavigateToEditor: () -> Unit,
     onRemoveAnnouncementClick: (AnnouncementUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -276,6 +285,34 @@ private fun MyInvitationCreateScreen(
                     onNavigateToAddressSearch = onNavigateToAddressSearch,
                     modifier = Modifier.padding(top = NachoSpacing.medium),
                 )
+            }
+
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(NachoTheme.colorScheme.backgroundPrimary)
+                        .padding(vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        modifier = Modifier.padding(start = 16.dp),
+                        text = "초대카드",
+                        style = NachoTheme.typography.bodyMediumSemiBold,
+                        color = NachoTheme.colorScheme.textPrimary,
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    TextButton(
+                        modifier = Modifier.padding(end = 16.dp),
+                        onClick = onNavigateToEditor
+                    ) {
+                        Text(
+                            text = "초대카드 작성",
+                            style = NachoTheme.typography.bodyMediumSemiBold,
+                            color = NachoTheme.colorScheme.brandPrimary,
+                        )
+                    }
+                }
             }
 
             announcementSection(

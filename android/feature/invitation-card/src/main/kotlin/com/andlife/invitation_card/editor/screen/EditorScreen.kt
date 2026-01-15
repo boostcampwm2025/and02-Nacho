@@ -54,6 +54,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -118,14 +120,22 @@ fun EditorScreen(
         ColorPaletteMode.Background -> state.currentTextStyle.backgroundColor
         null -> null
     }
+    val snackbarHost = remember { SnackbarHostState() }
 
     Scaffold(
         topBar = {
             EditTopBar(
                 titleText = titleText,
                 onBackClick = onBackClick,
-                onSaveChangesClick = onSaveChangesClick,
+                onSaveChangesClick = {
+                    scope.launch {
+                        snackbarHost.showSnackbar("개발 진행 중 많관부")
+                    }
+                },
             )
+        },
+        snackbarHost = {
+            SnackbarHost(snackbarHost)
         },
         bottomBar = {
             EditorBottomBar(
