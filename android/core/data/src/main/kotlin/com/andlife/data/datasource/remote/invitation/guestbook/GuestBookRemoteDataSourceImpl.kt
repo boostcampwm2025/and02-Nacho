@@ -9,19 +9,20 @@ import com.andlife.network.api.guestbook.GuestBookService
 import com.andlife.network.model.invitation.guestbook.CollectionResponse
 import javax.inject.Inject
 
-internal class GuestBookRemoteDataSourceImpl
-    @Inject
-    constructor(
-        private val guestBookService: GuestBookService,
-    ) : GuestBookRemoteDataSource {
-        override suspend fun getMediaCollection(invitationId: Long): Result<List<CollectionResponse>, DataError> =
-            apiCall { guestBookService.getMediaCollection(invitationId) }
+internal class GuestBookRemoteDataSourceImpl @Inject constructor(
+    private val guestBookService: GuestBookService,
+) : GuestBookRemoteDataSource {
+    override suspend fun getMediaCollection(invitationId: Long): Result<List<CollectionResponse>, DataError> =
+        apiCall { guestBookService.getMediaCollection(invitationId) }
 
-        override suspend fun getGuestBooksByInvitationId(
-            invitationId: Long,
-        ): Result<List<GuestBookResponse>, DataError> =
-            apiCall { guestBookService.getGuestBooksByInvitationId(invitationId) }
+    override suspend fun getGuestBooksByInvitationId(
+        invitationId: Long,
+    ): Result<List<GuestBookResponse>, DataError> =
+        apiCall { guestBookService.getGuestBooksByInvitationId(invitationId) }
 
-        override suspend fun createGuestBook(invitationId: Long, request: GuestBookRequest): Result<GuestBookResponse, DataError> =
-            apiCall { guestBookService.createGuestBook(invitationId, request) }
-    }
+    override suspend fun createGuestBook(
+        invitationId: Long,
+        request: GuestBookRequest
+    ): Result<GuestBookResponse, DataError> =
+        apiCall { guestBookService.createGuestBook(invitationId, request) }
+}
