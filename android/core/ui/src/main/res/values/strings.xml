@@ -34,7 +34,7 @@
     <string name="txt_delete_all">모두 지우기</string>
     <string name="txt_submit">등록</string>
 
-    <!-- 방명록 -->
+    <!-- GuestBook -->
     <string name="desc_edit_guest_book">수정을 위한 더보기 아이콘</string>
     <string name="desc_move_to_invitation">초대장으로 이동하는 아이콘</string>
     <string name="desc_guest_book_author_profile_image">프로필 이미지</string>
@@ -47,6 +47,8 @@
     <string name="txt_show_more">더보기</string>
     <string name="desc_author_profile_image">방명록 작성자 프로필 이미지</string>
     <string name="desc_video_thumbnail">비디오 썸네일 이미지</string>
+    <string name="desc_guest_book_image_media">방명록에 게시된 이미지</string>
+    <string name="desc_error_image">이미지 불러오기 에러</string>
 
     <!-- DateUtils -->
     <string name="txt_just_now">방금 전</string>

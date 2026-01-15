@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -49,6 +50,7 @@ import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
@@ -301,11 +303,35 @@ private fun GuestBookItemVisualMediaSection(
                     }
 
                     else -> {
-                        AsyncImage(
+                        SubcomposeAsyncImage(
                             model = media.url,
-                            contentDescription = null,
+                            contentDescription = stringResource(R.string.desc_guest_book_image_media),
                             modifier = Modifier.fillMaxWidth(),
                             contentScale = ContentScale.Crop,
+                            loading = {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(NachoTheme.colorScheme.backgroundSecondary),
+                                )
+                            },
+                            error = {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(NachoTheme.colorScheme.backgroundSecondary),
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_error_image_24),
+                                        contentDescription = stringResource(R.string.desc_error_image),
+                                        tint = NachoTheme.colorScheme.iconDisabled,
+                                        modifier =
+                                            Modifier
+                                                .size(60.dp)
+                                                .align(Alignment.Center),
+                                    )
+                                }
+                            }
                         )
                     }
                 }
