@@ -25,7 +25,6 @@ import coil3.request.crossfade
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 import com.andlife.ui.model.UiMediaType
@@ -161,7 +160,7 @@ fun MediaItem(
 @PreviewTheme
 @Composable
 private fun EditModeVideoItemPreview() {
-    InvitationTheme {
+    NachoTheme {
         MediaItem(
             mediaUrl = "https://picsum.photos/400/600?random=3",
             mediaType = UiMediaType.VIDEO,
@@ -175,7 +174,7 @@ private fun EditModeVideoItemPreview() {
 @PreviewTheme
 @Composable
 private fun EditModeAudioItemPreview() {
-    InvitationTheme {
+    NachoTheme {
         MediaItem(
             mediaUrl = "https://picsum.photos/400/600?random=3",
             mediaType = UiMediaType.AUDIO,

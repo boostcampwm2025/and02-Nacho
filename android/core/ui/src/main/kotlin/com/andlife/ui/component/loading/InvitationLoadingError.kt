@@ -15,7 +15,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 
@@ -52,7 +51,7 @@ fun InvitationLoadingError(
 @PreviewTheme
 @Composable
 private fun InvitationLoadingErrorPreview() {
-    InvitationTheme {
+    NachoTheme {
         InvitationLoadingError(onRetry = {})
     }
 }

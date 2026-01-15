@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
 
@@ -61,7 +60,7 @@ internal fun TopBarSection(
 @Composable
 @PreviewTheme
 private fun TopBarSectionPreview() {
-    InvitationTheme {
+    NachoTheme {
         TopBarSection(
             title = "초대 생성",
             onBackClick = {},

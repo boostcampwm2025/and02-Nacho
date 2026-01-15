@@ -25,6 +25,7 @@ object NachoIconSize {
 }
 
 object NachoStroke {
+    val none = 0.dp
     val small = 1.dp
     val medium = 2.dp
 }

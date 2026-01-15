@@ -8,7 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 
 @Composable
@@ -40,7 +39,7 @@ fun NachoDdayChip(
 @PreviewTheme
 @Composable
 private fun InvitationDdayChipPreview() {
-    InvitationTheme {
+    NachoTheme {
         NachoDdayChip(
             label = "D-3",
         )

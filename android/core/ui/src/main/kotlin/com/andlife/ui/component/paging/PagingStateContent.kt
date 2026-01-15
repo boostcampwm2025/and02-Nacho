@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.paging.LoadState
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 import com.andlife.ui.component.loading.InvitationLoadingError
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
@@ -51,7 +51,7 @@ fun PagingStateContent(
 @PreviewTheme
 @Composable
 private fun PagingStateContentPreview_Loading() {
-    InvitationTheme {
+    NachoTheme {
         PagingStateContent(
             loadState = LoadState.Loading,
             itemCount = 0,
@@ -64,7 +64,7 @@ private fun PagingStateContentPreview_Loading() {
 @PreviewTheme
 @Composable
 private fun PagingStateContentPreview_Error() {
-    InvitationTheme {
+    NachoTheme {
         PagingStateContent(
             loadState = LoadState.Error(Throwable("네트워크 오류 발생")),
             itemCount = 0,
@@ -77,7 +77,7 @@ private fun PagingStateContentPreview_Error() {
 @PreviewTheme
 @Composable
 private fun PagingStateContentPreview_Empty() {
-    InvitationTheme {
+    NachoTheme {
         PagingStateContent(
             loadState = LoadState.NotLoading(endOfPaginationReached = true),
             itemCount = 0,

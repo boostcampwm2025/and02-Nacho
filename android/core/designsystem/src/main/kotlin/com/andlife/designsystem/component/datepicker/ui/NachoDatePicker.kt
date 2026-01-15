@@ -41,7 +41,6 @@ import com.andlife.designsystem.component.datepicker.state.NachoDatePickerState
 import com.andlife.designsystem.component.datepicker.state.rememberInvitationDatePickerState
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -355,7 +354,7 @@ private fun InvitationDatePickerYearMonthSelector(
 @PreviewTheme
 @Composable
 private fun InvitationDatePickerPreview() {
-    InvitationTheme {
+    NachoTheme {
         NachoDatePicker(
             state = rememberInvitationDatePickerState(),
         )
@@ -365,7 +364,7 @@ private fun InvitationDatePickerPreview() {
 @PreviewTheme
 @Composable
 private fun DatePickerWithSelectedInvitationDatePreview() {
-    InvitationTheme {
+    NachoTheme {
         NachoDatePicker(
             state =
                 rememberInvitationDatePickerState(
@@ -378,7 +377,7 @@ private fun DatePickerWithSelectedInvitationDatePreview() {
 @PreviewTheme
 @Composable
 private fun InvitationDatePickerWithYearMonthModePreview() {
-    InvitationTheme {
+    NachoTheme {
         NachoDatePicker(
             state =
                 rememberInvitationDatePickerState(

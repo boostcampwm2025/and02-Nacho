@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.Dp
 import com.andlife.designsystem.R
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -384,7 +383,7 @@ private fun Modifier.fadeEdge(color: Color): Modifier {
 @PreviewTheme
 @Composable
 private fun InvitationTimePickerPreview() {
-    InvitationTheme {
+    NachoTheme {
         val state =
             rememberInvitationTimePickerState(
                 initialHour = 10,

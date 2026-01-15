@@ -34,7 +34,6 @@ import coil3.compose.AsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.invitation.component.StoryContent
@@ -201,7 +200,7 @@ fun StoryTopHeader(
 @PreviewTheme
 @Composable
 private fun InvitationStoryScreenPreview() {
-    InvitationTheme {
+    NachoTheme {
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         val mockState =
             InvitationCollectionUiState(
@@ -261,7 +260,7 @@ private fun InvitationStoryScreenPreview() {
 @Composable
 private fun StoryTopHeaderPreview() {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-    InvitationTheme {
+    NachoTheme {
         StoryTopHeader(
             name = "사용자 이름",
             date = now,

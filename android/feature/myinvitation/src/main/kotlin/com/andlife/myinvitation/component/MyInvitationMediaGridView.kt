@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.myinvitation.model.MyInvitationCollectionUiModel
 import com.andlife.myinvitation.util.toUiType
@@ -81,7 +81,7 @@ private fun InvitationMediaGridViewPreview() {
             ),
         )
 
-    InvitationTheme {
+    NachoTheme {
         MyInvitationMediaGridView(
             items = mockItems,
             onItemClick = {},

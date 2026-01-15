@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.designsystem.theme.InvitationTheme
 import com.andlife.designsystem.theme.NachoTheme
 
 @Composable
@@ -41,7 +40,7 @@ internal fun BottomBarSection(
 @Composable
 @PreviewTheme
 private fun BottomBarSectionPreview() {
-    InvitationTheme {
+    NachoTheme {
         BottomBarSection(
             title = "제목",
             onClick = {},
