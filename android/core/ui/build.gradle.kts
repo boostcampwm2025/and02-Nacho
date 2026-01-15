@@ -9,6 +9,7 @@ android {
 
 dependencies {
     implementation(projects.feature.model)
+    implementation(projects.core.media)
     // designSystem
     implementation(projects.core.designsystem)
 
@@ -28,6 +29,9 @@ dependencies {
     // lifecycle
     implementation(libs.androidx.lifecycle.viewModelCompose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+
+    // ExoPlayer
+    implementation(libs.bundles.exoplayer)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
