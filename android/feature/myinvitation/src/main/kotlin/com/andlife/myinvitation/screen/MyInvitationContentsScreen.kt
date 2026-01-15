@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +32,7 @@ fun MyInvitationContentsScreen(
     uiState: MyInvitationDetailUiState,
     onClickImage: (Int) -> Unit,
     onClickEditCard: () -> Unit,
+    onMapError: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (uiState.isLoading) {
@@ -58,64 +59,57 @@ fun MyInvitationContentsScreen(
         }
         return
     }
-    val model = uiState.invitationContentsUiModel
-    val listState = rememberLazyListState()
 
-    LazyColumn(
-        state = listState,
+    val model = uiState.invitationContentsUiModel
+    val scrollState = rememberScrollState()
+
+    Column(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(NachoTheme.colorScheme.backgroundTertiary),
+                .background(NachoTheme.colorScheme.backgroundTertiary)
+                .verticalScroll(scrollState),
     ) {
-        item {
-            ImageSection(
-                imageUrls = model.imageList,
-                onImageClick = onClickImage,
+        ImageSection(
+            imageUrls = model.imageList,
+            onImageClick = onClickImage,
+        )
+
+        TitleSection(
+            title = model.title,
+        )
+
+        AuthorSection(
+            profileUrl = model.hostInfo.profileUrl,
+            author = model.hostInfo.name,
+        )
+
+        DateSection(
+            date = model.dateTime.date,
+            startTime = model.dateTime.startTime,
+        )
+
+        AddressSection(
+            placeName = model.location.name,
+            placeAddress = model.location.address,
+        )
+
+        model.invitationCard?.let { card ->
+            InvitationCardSection(
+                invitationCardUiModel = card,
+                isEditable = true,
+                onEditClick = onClickEditCard,
             )
         }
-        item {
-            TitleSection(
-                title = model.title,
-            )
-        }
-        item {
-            AuthorSection(
-                profileUrl = model.hostInfo.profileUrl,
-                author = model.hostInfo.name,
-            )
-        }
-        item {
-            DateSection(
-                date = model.dateTime.date,
-                startTime = model.dateTime.startTime,
-            )
-        }
-        item {
-            AddressSection(
-                placeName = model.location.name,
-                placeAddress = model.location.address,
-            )
-        }
-        item {
-            model.invitationCard?.let { card ->
-                InvitationCardSection(
-                    invitationCardUiModel = card,
-                    isEditable = true,
-                    onEditClick = onClickEditCard,
-                )
-            }
-        }
-        item {
-            AnnouncementSection(
-                announcements = model.announcement,
-            )
-        }
-        item {
-            PlaceGuideSection(
-                location = model.location,
-            )
-        }
+
+        AnnouncementSection(
+            announcements = model.announcement,
+        )
+
+        PlaceGuideSection(
+            location = model.location,
+            onMapError = onMapError,
+        )
     }
 }
 
@@ -130,6 +124,7 @@ private fun MyInvitationContentsScreenPreview() {
                 ),
             onClickImage = {},
             onClickEditCard = {},
+            onMapError = {},
         )
     }
 }
