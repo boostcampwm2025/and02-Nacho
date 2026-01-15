@@ -20,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.preview.PreviewTheme
+import com.andlife.designsystem.theme.NachoCardSize
 import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
@@ -61,7 +62,7 @@ private fun SelectedMediaCard(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier.size(90.dp),
+        modifier = modifier.size(NachoCardSize.media),
     ) {
         Card(
             modifier = Modifier.fillMaxSize(),
