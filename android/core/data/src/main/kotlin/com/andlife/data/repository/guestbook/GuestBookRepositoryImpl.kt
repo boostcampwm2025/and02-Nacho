@@ -11,15 +11,6 @@ import com.andlife.domain.util.map
 import com.andlife.network.api.guestbook.GuestBookRequest
 import javax.inject.Inject
 
-internal class GuestBookRepositoryImpl
-    @Inject
-    constructor(
-        private val guestBookRemoteDataSource: GuestBookRemoteDataSource,
-    ) : GuestBookRepository {
-        override suspend fun getMediaCollection(invitationId: Long): Result<List<GalleryMedia>, DataError> =
-            guestBookRemoteDataSource.getMediaCollection(invitationId).map { list ->
-                list.map { it.toDomain() }
-            }
 internal class GuestBookRepositoryImpl @Inject constructor(
     private val guestBookRemoteDataSource: GuestBookRemoteDataSource,
 ) : GuestBookRepository {
