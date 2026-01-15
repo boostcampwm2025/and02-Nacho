@@ -23,7 +23,7 @@ dependencyResolutionManagement {
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-rootProject.name = "Nacho"
+rootProject.name = "Invitation"
 include(":app")
 include(":feature:home")
 include(":feature:invitation")

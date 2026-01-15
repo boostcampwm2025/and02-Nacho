@@ -6,7 +6,6 @@ import com.andlife.deeplink.DeepLinkConfig
 import com.andlife.deeplink.DeepLinkManager
 import com.andlife.deeplink.di.AppsFlyerDevKey
 import com.andlife.deeplink.di.KakaoNativeKey
-import com.andlife.ui.player.VideoPlayerPool
 import com.appsflyer.AppsFlyerLib
 import com.appsflyer.deeplink.DeepLinkResult
 import com.kakao.sdk.common.KakaoSdk
