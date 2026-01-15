@@ -47,6 +47,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.cache.CacheDataSource
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
@@ -407,15 +408,8 @@ private fun VideoPlayerContainer(
                 currentPlayer.exoPlayer.addListener(listener)
                 onDispose { currentPlayer.exoPlayer.removeListener(listener) }
             }
-
-            AndroidView(
-                factory = { context ->
-                    PlayerView(context).apply {
-                        useController = false
-                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-                        player = currentPlayer.exoPlayer
-                    }
-                },
+            VideoPlayerView(
+                player = currentPlayer.exoPlayer,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -428,6 +422,23 @@ private fun VideoPlayerContainer(
             )
         }
     }
+}
+
+@Composable
+private fun VideoPlayerView(
+    player: ExoPlayer,
+    modifier: Modifier = Modifier,
+) {
+    AndroidView(
+        factory = { context ->
+            PlayerView(context).apply {
+                useController = false
+                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                this.player = player
+            }
+        },
+        modifier = modifier,
+    )
 }
 
 @Composable
