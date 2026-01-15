@@ -9,7 +9,7 @@ interface AutoPlayerState {
 }
 
 class AutoPlayingState : AutoPlayerState {
-    override fun play(player: AutoVideoPlayer) { /* 이미 재생 중 */}
+    override fun play(player: AutoVideoPlayer) { /* 이미 재생 중 */ }
 
     override fun pause(player: AutoVideoPlayer) {
         player.exoPlayer.pause()

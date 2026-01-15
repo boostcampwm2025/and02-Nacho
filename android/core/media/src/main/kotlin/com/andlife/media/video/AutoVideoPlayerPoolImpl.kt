@@ -15,7 +15,8 @@ class AutoVideoPlayerPoolImpl @Inject constructor(
 
     private val playerInstances = mutableListOf<AutoVideoPlayer>() // 재사용 가능한 플레이어 인스턴스 풀
     private val activePlayers = mutableMapOf<String, AutoVideoPlayer>() // 현재 사용 중인 플레이어 매핑
-    private val lastPlayedUrlByGuestBookId = LinkedHashMap<Long, String>(MAX_POOL_SIZE, 0.75f, true) // 방명록 ID별 마지막 재생 URL 추적
+    private val lastPlayedUrlByGuestBookId =
+        LinkedHashMap<Long, String>(MAX_POOL_SIZE, 0.75f, true) // 방명록 ID별 마지막 재생 URL 추적
 
     private var currentPlayingUrl: String? = null
 
@@ -26,9 +27,10 @@ class AutoVideoPlayerPoolImpl @Inject constructor(
     override fun preparePlayers() {
         if (playerInstances.isNotEmpty()) return
         repeat(MAX_POOL_SIZE) {
-            val exoPlayer = ExoPlayer.Builder(context).build().apply {
-                repeatMode = ExoPlayer.REPEAT_MODE_ONE
-            }
+            val exoPlayer =
+                ExoPlayer.Builder(context).build().apply {
+                    repeatMode = ExoPlayer.REPEAT_MODE_ONE
+                }
             playerInstances.add(AutoVideoPlayer(exoPlayer, ""))
         }
     }
@@ -36,34 +38,40 @@ class AutoVideoPlayerPoolImpl @Inject constructor(
     override fun getPlayer(url: String): AutoVideoPlayer {
         activePlayers[url]?.let { return it }
 
-        val playerToUse = if (activePlayers.size < playerInstances.size) {
-            playerInstances[activePlayers.size]
-        } else {
-            val protectedUrls = lastPlayedUrlByGuestBookId.values.toSet()
-
-            val playerToRemoveUrl = activePlayers.keys.firstOrNull { it !in protectedUrls }
-                ?: activePlayers.keys.firstOrNull()
-
-            if (playerToRemoveUrl != null) {
-                val removedPlayer = activePlayers.remove(playerToRemoveUrl)!!
-                removedPlayer.stop()
-                removedPlayer
+        val playerToUse =
+            if (activePlayers.size < playerInstances.size) {
+                playerInstances[activePlayers.size]
             } else {
-                playerInstances.first()
+                val protectedUrls = lastPlayedUrlByGuestBookId.values.toSet()
+
+                val playerToRemoveUrl =
+                    activePlayers.keys.firstOrNull { it !in protectedUrls }
+                        ?: activePlayers.keys.firstOrNull()
+
+                if (playerToRemoveUrl != null) {
+                    val removedPlayer = activePlayers.remove(playerToRemoveUrl)!!
+                    removedPlayer.stop()
+                    removedPlayer
+                } else {
+                    playerInstances.first()
+                }
             }
-        }
 
         playerToUse.url = url
-        val mediaSource = ProgressiveMediaSource
-            .Factory(cacheDataSourceFactory)
-            .createMediaSource(MediaItem.fromUri(url))
+        val mediaSource =
+            ProgressiveMediaSource
+                .Factory(cacheDataSourceFactory)
+                .createMediaSource(MediaItem.fromUri(url))
 
         playerToUse.exoPlayer.setMediaSource(mediaSource)
         activePlayers[url] = playerToUse
         return playerToUse
     }
 
-    override fun playPlayer(url: String, itemId: Long) {
+    override fun playPlayer(
+        url: String,
+        itemId: Long,
+    ) {
         currentPlayingUrl = url
         lastPlayedUrlByGuestBookId[itemId] = url
 

@@ -74,7 +74,6 @@ fun HomeScreen(
     videoPlayerPool: AutoVideoPlayerPool,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val lazyListState = rememberLazyListState()
     var playVideoIndex by remember { mutableStateOf(-1) }

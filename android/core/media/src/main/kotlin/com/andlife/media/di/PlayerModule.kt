@@ -13,7 +13,5 @@ import javax.inject.Singleton
 internal abstract class PlayerModule {
     @Binds
     @Singleton
-    abstract fun bindVideoPlayerPool(
-        impl: AutoVideoPlayerPoolImpl
-    ): AutoVideoPlayerPool
+    abstract fun bindVideoPlayerPool(impl: AutoVideoPlayerPoolImpl): AutoVideoPlayerPool
 }

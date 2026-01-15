@@ -18,13 +18,14 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object CacheModule {
-
     const val DIR_VIDEO_CACHE = "video_cache"
     const val VIDEO_CACHE_SIZE = 300 * 1024 * 1024L
 
     @Provides
     @Singleton
-    fun provideSimpleVideoCache(@ApplicationContext context: Context): Cache {
+    fun provideSimpleVideoCache(
+        @ApplicationContext context: Context,
+    ): Cache {
         val cacheDir = File(context.cacheDir, DIR_VIDEO_CACHE)
         val databaseProvider = StandaloneDatabaseProvider(context)
         val evictor = LeastRecentlyUsedCacheEvictor(VIDEO_CACHE_SIZE)
@@ -35,11 +36,11 @@ object CacheModule {
     @Singleton
     fun provideCacheDataSourceFactory(
         @ApplicationContext context: Context,
-        simpleCache: Cache
-    ): CacheDataSource.Factory {
-        return CacheDataSource.Factory()
+        simpleCache: Cache,
+    ): CacheDataSource.Factory =
+        CacheDataSource
+            .Factory()
             .setCache(simpleCache)
             .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())
             .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
-    }
 }
