@@ -19,4 +19,6 @@
     </string-array>
 
     <string name="snack_load_error_map">설치된 지도 앱이 없습니다.</string>
+
+    <string name="btn_invitation_click">초대장 확인하기</string>
 </resources>
