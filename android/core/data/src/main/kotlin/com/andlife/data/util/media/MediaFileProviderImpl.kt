@@ -5,16 +5,18 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
 import androidx.core.net.toUri
+import com.andlife.domain.model.guestbook.MediaFile
 import com.andlife.domain.model.guestbook.MediaType
+import com.andlife.domain.util.MediaFileProvider
 import jakarta.inject.Inject
 
-class MediaFileProvider
+class MediaFileProviderImpl
     @Inject
     constructor(
         private val contentResolver: ContentResolver,
-    ) {
+    ) : MediaFileProvider {
         // Uri로부터 MediaFileInfo 생성
-        fun createFromUri(uriString: String): MediaFile? {
+        override fun createFromUri(uriString: String): MediaFile? {
             val uri = uriString.toUri()
             val (fileName, fileSize) = getFileInfoFromUri(uri) ?: return null
             val mediaType = getMediaTypeFromUri(uri)
@@ -27,7 +29,8 @@ class MediaFileProvider
             )
         }
 
-        fun createFromUris(uriStrings: List<String>): List<MediaFile> = uriStrings.mapNotNull { createFromUri(it) }
+        override fun createFromUris(uriStrings: List<String>): List<MediaFile> =
+            uriStrings.mapNotNull { createFromUri(it) }
 
         // Uri로부터 파일 이름과 크기 가져오기
         private fun getFileInfoFromUri(uri: Uri): Pair<String, Long>? =
@@ -66,16 +69,26 @@ class MediaFileProvider
             val extension =
                 when (uri.scheme) {
                     "content" -> {
-                        contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
-                            if (cursor.moveToFirst()) {
-                                val displayName = cursor.getString(0)
-                                displayName.substringAfterLast('.', "")
-                            } else {
-                                ""
-                            }
-                        } ?: ""
+                        contentResolver
+                            .query(
+                                uri,
+                                arrayOf(OpenableColumns.DISPLAY_NAME),
+                                null,
+                                null,
+                                null,
+                            )?.use { cursor ->
+                                if (cursor.moveToFirst()) {
+                                    val displayName = cursor.getString(0)
+                                    displayName.substringAfterLast('.', "")
+                                } else {
+                                    ""
+                                }
+                            } ?: ""
                     }
-                    else -> uri.path?.substringAfterLast('.', "") ?: ""
+
+                    else -> {
+                        uri.path?.substringAfterLast('.', "") ?: ""
+                    }
                 }
             return extension.lowercase()
         }
