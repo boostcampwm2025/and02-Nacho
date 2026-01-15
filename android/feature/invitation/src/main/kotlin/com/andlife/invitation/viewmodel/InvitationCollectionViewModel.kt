@@ -117,7 +117,12 @@ constructor(
     }
 
     private fun pageChanged(index: Int) {
-        updateState { copy(selectedIndex = index) }
+        updateState {
+            copy(
+                selectedIndex = index,
+                isTextExpanded = false
+            )
+        }
 
         val selectedMedia = uiState.value.mediaItems.getOrNull(index)
 
