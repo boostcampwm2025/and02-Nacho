@@ -30,6 +30,8 @@ import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 import com.andlife.ui.util.media.uriToSelectedMedia
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 
 private const val MAX_LENGTH = 500
 private const val MAX_MEDIAS_COUNT = 5
@@ -61,7 +63,7 @@ fun InvitationGuestBookForm(
                     .take(availableSlots)
                     .map { uriToSelectedMedia(context, it) }
 
-            onMediasSelected(selectedMedias + mediasToAdd)
+            onMediasSelected((selectedMedias + mediasToAdd).toImmutableList())
         }
 
     Column(
@@ -192,7 +194,7 @@ fun InvitationGuestBookForm(
 private fun InvitationGuestBookFormPreview() {
     NachoTheme {
         InvitationGuestBookForm(
-            selectedMedias = listOf(),
+            selectedMedias = persistentListOf(),
             textContent = "",
             isUploading = false,
             onMediasSelected = {},

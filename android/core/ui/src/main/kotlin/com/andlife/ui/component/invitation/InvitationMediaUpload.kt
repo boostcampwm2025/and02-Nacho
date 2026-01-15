@@ -26,6 +26,7 @@ import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 import com.andlife.ui.model.UiMediaType
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 fun InvitationMediaUpload(
@@ -113,7 +114,7 @@ private fun InvitationMediaUploadPreview() {
                         uri = "https://via.placeholder.com/150",
                         type = UiMediaType.AUDIO,
                     ),
-                ),
+                ).toImmutableList(),
             onMediaRemove = {},
         )
     }
