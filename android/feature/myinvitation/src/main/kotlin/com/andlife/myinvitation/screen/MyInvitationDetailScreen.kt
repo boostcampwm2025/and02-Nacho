@@ -77,9 +77,6 @@ fun MyInvitationDetailRoute(
                 onNavigateToEditCard(effect.myInvitationId)
             }
 
-            is MyInvitationDetailSideEffect.NavigateToImageDetail -> {
-                // TODO: 이미지 전체보기 화면 구현 보류
-            }
             MyInvitationDetailSideEffect.ShowMapErrorSnackbar -> {
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar(

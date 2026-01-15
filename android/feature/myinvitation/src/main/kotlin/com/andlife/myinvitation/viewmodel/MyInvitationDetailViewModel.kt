@@ -19,6 +19,7 @@ import com.andlife.myinvitation.model.detail.MyInvitationDetailUiState
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.util.toDateTimeSingleLine
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -110,30 +111,14 @@ class MyInvitationDetailViewModel @Inject constructor(
     override fun onEvent(event: MyInvitationDetailUiEvent) {
         when (event) {
             is MyInvitationDetailUiEvent.ClickBack -> clickClose()
+            is MyInvitationDetailUiEvent.ClickThanksCard -> showThanksCardOnboarding()
             is MyInvitationDetailUiEvent.ClickShare -> shareInvitation()
-            is MyInvitationDetailUiEvent.ClickDelete -> {}
-            is MyInvitationDetailUiEvent.ClickEdit -> {}
-            is MyInvitationDetailUiEvent.ClickThanksCard -> {}
-            is MyInvitationDetailUiEvent.CreateThanksCard -> {}
-            is MyInvitationDetailUiEvent.ClickEditCard ->
-                sendEffect(
-                    MyInvitationDetailSideEffect.NavigateToEditCard(
-                        myInvitationId,
-                    ),
-                )
-
-            is MyInvitationDetailUiEvent.ClickImage -> {
-                sendEffect(
-                    MyInvitationDetailSideEffect.NavigateToImageDetail(
-                        imageList = event.imageList,
-                        index = event.index,
-                    ),
-                )
-            }
-
-            MyInvitationDetailUiEvent.MapError -> {
-                sendEffect(MyInvitationDetailSideEffect.ShowMapErrorSnackbar)
-            }
+            is MyInvitationDetailUiEvent.ClickEdit -> navigateToEditInvitation()
+            is MyInvitationDetailUiEvent.ClickDelete -> deleteInvitation()
+            is MyInvitationDetailUiEvent.CreateThanksCard -> navigateToCreateThanksCard()
+            is MyInvitationDetailUiEvent.ClickEditCard -> navigateToEditCard()
+            is MyInvitationDetailUiEvent.ClickImage -> navigateToFullScreenImage(event.imageList, event.index)
+            is MyInvitationDetailUiEvent.MapError -> showMapErrorSnackbar()
         }
     }
 
@@ -155,5 +140,20 @@ class MyInvitationDetailViewModel @Inject constructor(
             date = dateText,
             location = locationText,
         )
+    }
+
+    private fun deleteInvitation() { /* TODO: 초대장 삭제 로직 */ }
+    private fun navigateToEditInvitation() { /* TODO: 초대장 편집 이동 */ }
+    private fun showThanksCardOnboarding() { /* TODO: 감사카드 온보딩 */ }
+    private fun navigateToCreateThanksCard() { /* TODO: 감사카드 작성 이동 */ }
+
+    private fun navigateToEditCard() { // TODO: 초대카드 편집 이동
+        sendEffect(MyInvitationDetailSideEffect.NavigateToEditCard(myInvitationId))
+    }
+
+    private fun navigateToFullScreenImage(imageList: ImmutableList<String>, index: Int) { /* TODO: 이미지 풀스크린*/ }
+
+    private fun showMapErrorSnackbar() {
+        sendEffect(MyInvitationDetailSideEffect.ShowMapErrorSnackbar)
     }
 }
