@@ -85,8 +85,7 @@ fun MyInvitationContentsScreen(
         )
 
         DateSection(
-            date = model.dateTime.date,
-            startTime = model.dateTime.startTime,
+            dateTime = model.dateTime,
         )
 
         AddressSection(
