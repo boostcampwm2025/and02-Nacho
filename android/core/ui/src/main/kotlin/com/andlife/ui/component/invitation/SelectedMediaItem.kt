@@ -17,9 +17,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationIconSize
-import com.andlife.designsystem.theme.InvitationSpacing
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoIconSize
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 import com.andlife.ui.component.media.MediaOverlay
 import com.andlife.ui.model.UiMediaType
@@ -34,7 +34,7 @@ fun SelectedMediaItem(
         modifier =
             modifier
                 .aspectRatio(1f)
-                .clip(RoundedCornerShape(InvitationSpacing.small)),
+                .clip(RoundedCornerShape(NachoSpacing.small)),
     ) {
         when (media.type) {
             UiMediaType.IMAGE -> {
@@ -53,13 +53,13 @@ fun SelectedMediaItem(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .background(InvitationTheme.colorScheme.backgroundSecondary),
+                            .background(NachoTheme.colorScheme.backgroundSecondary),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_mic_16),
-                        tint = InvitationTheme.colorScheme.brandPrimary,
-                        modifier = Modifier.size(InvitationIconSize.large),
+                        tint = NachoTheme.colorScheme.brandPrimary,
+                        modifier = Modifier.size(NachoIconSize.large),
                         contentDescription = stringResource(R.string.desc_media_audio),
                     )
                 }
@@ -81,8 +81,8 @@ fun SelectedMediaItem(
                         modifier =
                             Modifier
                                 .align(Alignment.Center)
-                                .size(InvitationIconSize.xLarge),
-                        tint = InvitationTheme.colorScheme.iconTertiary.copy(alpha = 0.8f),
+                                .size(NachoIconSize.xLarge),
+                        tint = NachoTheme.colorScheme.iconTertiary.copy(alpha = 0.8f),
                     )
                 }
             }
@@ -94,7 +94,7 @@ fun SelectedMediaItem(
                 modifier =
                     Modifier
                         .align(Alignment.BottomStart)
-                        .padding(InvitationSpacing.small),
+                        .padding(NachoSpacing.small),
             )
         }
     }
@@ -103,7 +103,7 @@ fun SelectedMediaItem(
 @PreviewTheme
 @Composable
 private fun EditModeVideoItemPreview() {
-    InvitationTheme {
+    NachoTheme {
         SelectedMediaItem(
             SelectedMedia(
                 "https://picsum.photos/400/600?random=3",
@@ -117,7 +117,7 @@ private fun EditModeVideoItemPreview() {
 @PreviewTheme
 @Composable
 private fun EditModeAudioItemPreview() {
-    InvitationTheme {
+    NachoTheme {
         SelectedMediaItem(
             SelectedMedia(
                 "https://picsum.photos/400/600?random=3",

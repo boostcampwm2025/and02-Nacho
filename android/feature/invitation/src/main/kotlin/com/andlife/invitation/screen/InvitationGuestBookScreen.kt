@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.andlife.designsystem.theme.InvitationSpacing
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation.model.guestbook.InvitationGuestBookSideEffect
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiEvent
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiState
@@ -58,8 +58,8 @@ private fun InvitationGuestBookScreen(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.padding(InvitationSpacing.large),
-        verticalArrangement = Arrangement.spacedBy(InvitationSpacing.xLarge),
+        modifier = modifier.padding(NachoSpacing.large),
+        verticalArrangement = Arrangement.spacedBy(NachoSpacing.xLarge),
     ) {
         TitleSection()
 
@@ -105,7 +105,7 @@ private fun GuestBookFormSection(
 @Composable
 @Preview
 private fun InvitationGuestBookScreenPreview() {
-    InvitationTheme {
+    NachoTheme {
         InvitationGuestBookScreen(
             uiState = InvitationGuestBookUiState(),
             onEvent = {},

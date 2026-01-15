@@ -21,12 +21,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import com.andlife.designsystem.component.InvitationButton
-import com.andlife.designsystem.component.InvitationTextField
+import com.andlife.designsystem.component.NachoButton
+import com.andlife.designsystem.component.NachoTextField
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationIconSize
-import com.andlife.designsystem.theme.InvitationSpacing
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoIconSize
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 import com.andlife.ui.util.media.uriToSelectedMedia
 import kotlinx.collections.immutable.ImmutableList
@@ -74,10 +74,10 @@ fun InvitationGuestBookForm(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(modifier = Modifier.height(InvitationSpacing.small))
+        Spacer(modifier = Modifier.height(NachoSpacing.small))
 
         Box {
-            InvitationTextField(
+            NachoTextField(
                 value = textContent,
                 onValueChange = { newValue ->
                     if (newValue.length <= MAX_LENGTH) {
@@ -92,16 +92,16 @@ fun InvitationGuestBookForm(
 
             Text(
                 text = "${textContent.length}/$MAX_LENGTH",
-                style = InvitationTheme.typography.bodySmallRegular,
-                color = InvitationTheme.colorScheme.textTertiary,
+                style = NachoTheme.typography.bodySmallRegular,
+                color = NachoTheme.colorScheme.textTertiary,
                 modifier =
                     Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(InvitationSpacing.small),
+                        .padding(NachoSpacing.small),
             )
         }
 
-        Spacer(modifier = Modifier.height(InvitationSpacing.small))
+        Spacer(modifier = Modifier.height(NachoSpacing.small))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -112,18 +112,18 @@ fun InvitationGuestBookForm(
             val isMediaAddEnabled = selectedMedias.size < MAX_MEDIAS_COUNT
             val iconColor =
                 if (isMediaAddEnabled) {
-                    InvitationTheme.colorScheme.brandPrimary
+                    NachoTheme.colorScheme.brandPrimary
                 } else {
-                    InvitationTheme.colorScheme.iconDisabled
+                    NachoTheme.colorScheme.iconDisabled
                 }
-            Row(horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.small)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small)) {
                 Icon(
                     painter = painterResource(R.drawable.ic_image_16),
                     contentDescription = null,
                     tint = iconColor,
                     modifier =
                         Modifier
-                            .size(InvitationIconSize.medium)
+                            .size(NachoIconSize.medium)
                             .let {
                                 if (isMediaAddEnabled) {
                                     it.clickable {
@@ -140,7 +140,7 @@ fun InvitationGuestBookForm(
                     tint = iconColor,
                     modifier =
                         Modifier
-                            .size(InvitationIconSize.medium)
+                            .size(NachoIconSize.medium)
                             .clickable {
                                 // TODO: 카메라 촬영 기능 추가
                             },
@@ -151,7 +151,7 @@ fun InvitationGuestBookForm(
                     tint = iconColor,
                     modifier =
                         Modifier
-                            .size(InvitationIconSize.medium)
+                            .size(NachoIconSize.medium)
                             .clickable {
                                 launcher.launch("*/*")
                             },
@@ -162,7 +162,7 @@ fun InvitationGuestBookForm(
                     tint = iconColor,
                     modifier =
                         Modifier
-                            .size(InvitationIconSize.medium)
+                            .size(NachoIconSize.medium)
                             .clickable {
                                 // TODO: 마이크 녹음 기능 추가
                             },
@@ -170,14 +170,14 @@ fun InvitationGuestBookForm(
             }
 
             // 업로드 버튼
-            InvitationButton(
+            NachoButton(
                 onClick = onUploadClick,
                 enabled = (selectedMedias.isNotEmpty() || textContent.isNotEmpty()) && !isUploading,
             ) {
                 if (isUploading) {
                     CircularProgressIndicator(
-                        modifier = modifier.size(InvitationIconSize.small),
-                        color = InvitationTheme.colorScheme.brandOnPrimary,
+                        modifier = modifier.size(NachoIconSize.small),
+                        color = NachoTheme.colorScheme.brandOnPrimary,
                     )
                 } else {
                     Text(text = stringResource(R.string.txt_submit))
@@ -190,7 +190,7 @@ fun InvitationGuestBookForm(
 @PreviewTheme
 @Composable
 private fun InvitationGuestBookFormPreview() {
-    InvitationTheme {
+    NachoTheme {
         InvitationGuestBookForm(
             selectedMedias = listOf(),
             textContent = "",

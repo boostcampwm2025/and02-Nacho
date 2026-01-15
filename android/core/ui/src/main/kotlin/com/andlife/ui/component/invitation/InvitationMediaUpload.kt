@@ -20,9 +20,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationIconSize
-import com.andlife.designsystem.theme.InvitationSpacing
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoIconSize
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 import com.andlife.ui.model.UiMediaType
 import kotlinx.collections.immutable.ImmutableList
@@ -35,11 +35,11 @@ fun InvitationMediaUpload(
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
+        verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
     ) {
         if (selectedMedias.isNotEmpty()) {
             LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
+                horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 items(selectedMedias) { media ->
@@ -64,7 +64,7 @@ private fun SelectedMediaCard(
     ) {
         Card(
             modifier = Modifier.fillMaxSize(),
-            shape = InvitationTheme.shapes.small,
+            shape = NachoTheme.shapes.small,
         ) {
             SelectedMediaItem(media)
         }
@@ -73,21 +73,21 @@ private fun SelectedMediaCard(
             onClick = onRemove,
             modifier =
                 Modifier
-                    .padding(InvitationSpacing.xSmall)
+                    .padding(NachoSpacing.xSmall)
                     .align(Alignment.TopEnd)
-                    .size(InvitationIconSize.medium),
+                    .size(NachoIconSize.medium),
         ) {
             Surface(
                 modifier = modifier,
-                shape = InvitationTheme.shapes.small,
-                color = InvitationTheme.colorScheme.backgroundOverlay,
-                contentColor = InvitationTheme.colorScheme.textOnPrimary,
+                shape = NachoTheme.shapes.small,
+                color = NachoTheme.colorScheme.backgroundOverlay,
+                contentColor = NachoTheme.colorScheme.textOnPrimary,
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_close_12),
                     contentDescription = stringResource(R.string.desc_remove_media),
-                    tint = InvitationTheme.colorScheme.brandOnPrimary,
-                    modifier = Modifier.size(InvitationIconSize.xSmall),
+                    tint = NachoTheme.colorScheme.brandOnPrimary,
+                    modifier = Modifier.size(NachoIconSize.xSmall),
                 )
             }
         }
@@ -97,7 +97,7 @@ private fun SelectedMediaCard(
 @PreviewTheme
 @Composable
 private fun InvitationMediaUploadPreview() {
-    InvitationTheme {
+    NachoTheme {
         InvitationMediaUpload(
             selectedMedias =
                 listOf(
