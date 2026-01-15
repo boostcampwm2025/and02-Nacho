@@ -339,7 +339,7 @@ private fun VideoPlayerContainer(
 
     val thumbnailAlpha by animateFloatAsState(
         targetValue = if (isVideoReady) 0f else 1f,
-        animationSpec = tween(durationMillis = 300),
+        animationSpec = tween(durationMillis = 200),
     )
 
     LaunchedEffect(shouldPlay) {
@@ -380,13 +380,45 @@ private fun VideoPlayerContainer(
             )
         }
         thumbnailUrl?.let {
-            AsyncImage(
-                model = it,
-                contentDescription = stringResource(R.string.desc_video_thumbnail),
+            ThumbnailWrapper(
+                thumbnailUrl = it,
                 modifier = Modifier
                     .fillMaxSize()
                     .alpha(thumbnailAlpha),
-                contentScale = ContentScale.Fit,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ThumbnailWrapper(
+    thumbnailUrl: String?,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+    ) {
+        AsyncImage(
+            model = thumbnailUrl,
+            contentDescription = stringResource(R.string.desc_video_thumbnail),
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Fit,
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(48.dp)
+                .background(
+                    color = NachoTheme.colorScheme.iconSecondary.copy(alpha = 0.6f),
+                    shape = CircleShape,
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_play_arrow_24),
+                contentDescription = stringResource(R.string.desc_play_video),
+                tint = NachoTheme.colorScheme.iconTertiary,
+                modifier = Modifier.size(24.dp),
             )
         }
     }
