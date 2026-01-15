@@ -51,20 +51,15 @@ class MyInvitationDetailViewModel @Inject constructor(
     private fun loadInvitationDetail() {
         viewModelScope.launch {
             updateState { copy(id = myInvitationId, isLoading = true) }
-
-            // TODO: 실제 서버에서 데이터를 가져오는 로직 (임시 데이터로 대체)
-            // val result = invitationRepository.getDetail(myInvitationId)
-
-            // 성공 시 상태 업데이트
             updateState {
                 copy(
                     id = 1L,
-                    title = "2026년 나초 개발 네트워킹 데이",
+                    title = "2026년 안드라이프 신년회",
                     isLoading = false,
                     hasThanksCard = true,
                     invitationContentsUiModel =
                         InvitationContentsUiModel(
-                            title = "2026년 나초 개발 네트워킹 데이",
+                            title = "2026년 안드라이프 신년회",
                             hostInfo =
                                 HostInfo(
                                     name = "안드라이프",
@@ -79,27 +74,27 @@ class MyInvitationDetailViewModel @Inject constructor(
                             location =
                                 LocationInfo(
                                     name = "코드스쿼드",
-                                    address = "서울시 강남구 테헤란로 521 3층",
-                                    guide = "삼성역 5번 출구에서 도보 5분 거리입니다.",
+                                    address = "서울특별시 강남구 강남대로62길 23, 4층 역삼빌딩",
+                                    guide = "양재역 3번 출구에서 801m",
                                     latLng =
                                         LatLngUiModel(
-                                            latitude = 37.5111,
-                                            longitude = 127.0601,
+                                            latitude = 37.4936874,
+                                            longitude = 127.0302304,
                                         ),
                                 ),
                             invitationCard =
                                 InvitationCardUiModel(
-                                    contentJson = "안녕하세요! 2026년 새해를 맞아 개발자분들과 함께 지식을 나누는 자리를 마련했습니다.",
+                                    contentJson = "안드라이프 한해 잘 보내봅시다~",
                                 ),
                             announcement =
                                 persistentListOf(
                                     AnnouncementUiModel(
                                         title = "준비물",
-                                        content = " - 코딩할 수 있는 노트북 \n - 건강한 정신",
+                                        content = " - 건강한 마음 \n - 건강한 정신",
                                     ),
                                     AnnouncementUiModel(
                                         title = "이벤트 안내",
-                                        content = " - 코딩할 수 있는 노트북 \n - 건강한 정신",
+                                        content = " - 소정의 행사가 있습니다. \n - 입구에서 참여해보세요~",
                                     ),
                                 ),
                         ),
