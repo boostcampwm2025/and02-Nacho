@@ -39,13 +39,13 @@ class AutoVideoPlayerPoolImpl @Inject constructor(
         val playerToUse = if (activePlayers.size < playerInstances.size) {
             playerInstances[activePlayers.size]
         } else {
-            val protectedUris = lastPlayedUrlByGuestBookId.values.toSet()
+            val protectedUrls = lastPlayedUrlByGuestBookId.values.toSet()
 
-            val playerToRemoveUri = activePlayers.keys.firstOrNull { it !in protectedUris }
+            val playerToRemoveUrl = activePlayers.keys.firstOrNull { it !in protectedUrls }
                 ?: activePlayers.keys.firstOrNull()
 
-            if (playerToRemoveUri != null) {
-                val removedPlayer = activePlayers.remove(playerToRemoveUri)!!
+            if (playerToRemoveUrl != null) {
+                val removedPlayer = activePlayers.remove(playerToRemoveUrl)!!
                 removedPlayer.stop()
                 removedPlayer
             } else {
