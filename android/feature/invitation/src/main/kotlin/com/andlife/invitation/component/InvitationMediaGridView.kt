@@ -43,7 +43,8 @@ fun InvitationMediaGridView(
                 key = { index, item -> "${item.type}_${item.id}" },
             ) { index, item ->
                 MediaItem(
-                    mediaUrl = item.url,
+                    mediaUrl = item.mediaUrl,
+                    thumbnailUrl = item.thumbnailUrl,
                     mediaType = item.type,
                     duration = item.durationSeconds,
                     onClick = { onItemClick(index) },
@@ -62,7 +63,7 @@ private fun InvitationMediaGridViewPreview() {
         persistentListOf(
             InvitationCollectionUiModel(
                 id = 1L,
-                url = "https://picsum.photos/400/600?random=1",
+                mediaUrl = "https://picsum.photos/400/600?random=1",
                 type = MediaType.IMAGE.toUiType(),
                 content = "방명록 내용 1",
                 authorName = "사용자1",
@@ -72,7 +73,7 @@ private fun InvitationMediaGridViewPreview() {
             ),
             InvitationCollectionUiModel(
                 id = 2L,
-                url = "https://picsum.photos/400/600?random=2",
+                mediaUrl = "https://picsum.photos/400/600?random=2",
                 type = MediaType.VIDEO.toUiType(),
                 content = "방명록 내용 2",
                 authorName = "사용자2",
@@ -82,7 +83,7 @@ private fun InvitationMediaGridViewPreview() {
             ),
             InvitationCollectionUiModel(
                 id = 3L,
-                url = "https://picsum.photos/400/600?random=3",
+                mediaUrl = "https://picsum.photos/400/600?random=3",
                 type = MediaType.AUDIO.toUiType(),
                 content = "방명록 내용 3",
                 authorName = "사용자3",

@@ -18,18 +18,18 @@ import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.andlife.designsystem.R as designR
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
-import com.andlife.invitation.R
 import com.andlife.invitation.model.detail.InvitationDetailSideEffect
 import com.andlife.invitation.model.detail.InvitationDetailUiEvent
 import com.andlife.invitation.model.detail.InvitationDetailUiState
 import com.andlife.invitation.screen.guestbook.InvitationCollectionRoute
 import com.andlife.invitation.viewmodel.InvitationDetailViewModel
+import com.andlife.invitation.R
 import com.andlife.ui.component.GenericTabRow
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.collections.immutable.toImmutableList
-import com.andlife.designsystem.R as designR
 
 private const val TAG = "InvitationDetailScreen"
 
@@ -79,18 +79,23 @@ private fun InvitationDetailScreen(
                 Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(horizontal = NachoSpacing.medium),
         ) {
             GenericTabRow(
                 tabs = tabTitles,
                 content = { index ->
-                    when (index) {
-                        0 -> Text("초대장 콘텐츠")
-                        1 -> Text("방명록 화면")
-                        2 ->
-                            InvitationCollectionRoute(
+                    Column(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = NachoSpacing.medium)
+                    ) {
+                        when (index) {
+                            0 -> Text("초대장 콘텐츠")
+                            1 -> Text("방명록 화면")
+                            2 -> InvitationCollectionRoute(
                                 uiState.id,
                             )
+                        }
                     }
                 },
             )

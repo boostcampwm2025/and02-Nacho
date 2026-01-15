@@ -34,7 +34,7 @@ dependencies {
     implementation(libs.naver.map.compose)
 
     // ExoPlayer
-    implementation(libs.bundles.exoplayer)
+    implementation(libs.bundles.media3)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

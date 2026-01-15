@@ -5,7 +5,8 @@ import kotlinx.datetime.LocalDateTime
 data class GalleryMedia(
     val id: Long,
     val type: MediaType,
-    val url: String,
+    val mediaUrl: String,
+    val thumbnailUrl: String?,
     val content: String,
     val authorName: String,
     val authorProfileUrl: String?,
