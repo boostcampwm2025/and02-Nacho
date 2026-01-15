@@ -92,9 +92,7 @@ private fun InvitationDetailScreen(
                         when (index) {
                             0 -> Text("초대장 콘텐츠")
                             1 -> Text("방명록 화면")
-                            2 -> InvitationCollectionRoute(
-                                uiState.id,
-                            )
+                            2 -> InvitationCollectionRoute()
                         }
                     }
                 },

@@ -2,13 +2,16 @@ package com.andlife.invitation.viewmodel
 
 import android.content.Context
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.navigation.toRoute
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
+import com.andlife.invitation.InvitationDetail
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionSideEffect
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiEvent
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiState
@@ -18,10 +21,12 @@ import com.andlife.ui.model.UiMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.properties.Delegates
 
 @HiltViewModel
 class InvitationCollectionViewModel
@@ -29,12 +34,22 @@ class InvitationCollectionViewModel
 constructor(
     private val guestBookRepository: GuestBookRepository,
     @param:ApplicationContext private val context: Context,
+    savedStateHandle: SavedStateHandle
 ) : BaseViewModel<InvitationCollectionUiState, InvitationCollectionUiEvent, InvitationCollectionSideEffect>(
     initialState = InvitationCollectionUiState(),
 ) {
-    override val uiState: StateFlow<InvitationCollectionUiState> = mutableUiState
 
-    private var invitationId: Long by Delegates.notNull<Long>()
+    private val invitationId: Long = savedStateHandle.toRoute<InvitationDetail>().id
+
+    override val uiState: StateFlow<InvitationCollectionUiState> =
+        mutableUiState
+            .onStart {
+                loadMediaCollection()
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = InvitationCollectionUiState(),
+            )
 
     val exoPlayer: ExoPlayer = ExoPlayer.Builder(context).build().apply {
         repeatMode = Player.REPEAT_MODE_ONE
@@ -53,13 +68,6 @@ constructor(
     override fun onCleared() {
         super.onCleared()
         exoPlayer.release()
-    }
-
-    fun initInvitationId(id: Long) {
-        runCatching { invitationId }.onSuccess { if (it == id) return }
-
-        invitationId = id
-        loadMediaCollection()
     }
 
     private fun loadMediaCollection() {
