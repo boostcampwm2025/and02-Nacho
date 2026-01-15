@@ -34,6 +34,11 @@ appsflyer = "6.16.2"
 kakao-sdk = "2.23.2"
 media3Exoplayer = "1.9.0"
 
+# naver Map
+naver-map = "3.23.0"
+naver-map-compose = "1.7.2"
+naver-map-location = "21.0.2"
+
 [libraries]
 androidx-compose-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "materialIconsCore" }
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsCore" }
@@ -65,7 +70,6 @@ hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref
 hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
-
 
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidxNavigation" }
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "androidxNavigation" }
@@ -119,6 +123,11 @@ kakao-sdk-share = { group = "com.kakao.sdk", name = "v2-share", version.ref = "k
 kakao-bom = { module = "com.kakao.sdk:v2-bom", version.ref = "kakao-sdk" }
 kakao-common = { module = "com.kakao.sdk:v2-common", version.ref = "kakao-sdk" }
 kakao-user = { module = "com.kakao.sdk:v2-user", version.ref = "kakao-sdk" }
+
+# naver map
+naver-map = { group = "com.naver.maps", name = "map-sdk", version.ref = "naver-map" }
+naver-map-compose = { group = "io.github.fornewid", name = "naver-map-compose", version.ref = "naver-map-compose" }
+naver-map-location = { group = "io.github.fornewid", name = "naver-map-location", version.ref = "naver-map-location" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

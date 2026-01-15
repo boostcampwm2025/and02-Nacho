@@ -59,4 +59,23 @@
     <string name="format_months_ago">%1$d개월 전</string>
     <string name="format_years_ago">%1$d년 전</string>
 
+
+    <!--  ImageSection  -->
+    <string name="desc_invitation_image">초대장 상세 이미지</string>
+    <!--  AuthorSection  -->
+    <string name="desc_profile_image">프로필 이미지</string>
+    <string name="txt_host">주최자</string>
+    <!--  InvitationCardSection  -->
+    <string name="txt_card_create">초대카드 생성</string>
+    <string name="txt_card_edit">초대카드 편집</string>
+    <string name="txt_invitation_card_title">초대 카드</string>
+    <string name="txt_card_empty_guide">초대카드를 꾸며보세요</string>
+    <string name="txt_card_empty_description">현재 해당 영역은 초대장에서 보여지지 않습니다.</string>
+    <!--  AnnouncementSection  -->
+    <string name="txt_announcement_title">공지 사항</string>
+    <!--  PlaceGuideSection  -->
+    <string name="txt_place_guide_title">오시는 길</string>
+    <string name="txt_map_loading">지도 로딩중...</string>
+    <string name="btn_open_map_app">지도 앱으로 열기</string>
+
 </resources>

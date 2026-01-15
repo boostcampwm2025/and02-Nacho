@@ -30,6 +30,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewModelCompose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
+    // Naver Map
+    implementation(libs.naver.map.compose)
+
     // ExoPlayer
     implementation(libs.bundles.exoplayer)
 

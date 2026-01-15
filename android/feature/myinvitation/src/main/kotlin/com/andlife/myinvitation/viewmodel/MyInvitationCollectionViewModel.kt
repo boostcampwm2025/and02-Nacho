@@ -5,10 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
-import com.andlife.myinvitation.model.MyInvitationCollectionSideEffect
-import com.andlife.myinvitation.model.MyInvitationCollectionUiEvent
-import com.andlife.myinvitation.model.MyInvitationCollectionUiState
-import com.andlife.myinvitation.model.toUiModel
+import com.andlife.myinvitation.model.guestbook.MyInvitationCollectionSideEffect
+import com.andlife.myinvitation.model.guestbook.MyInvitationCollectionUiEvent
+import com.andlife.myinvitation.model.guestbook.MyInvitationCollectionUiState
+import com.andlife.myinvitation.model.guestbook.toUiModel
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList

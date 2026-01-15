@@ -73,6 +73,7 @@ fun NachoNavHost(
 
             myInvitationDetailNavGraph(
                 onNavigateBack = navigator::navigatePopBackStack,
+                onNavigateToEditCard = { /* TODO: 초대카드 편집 */ },
             )
 
             myInvitationCreateNavGraph(

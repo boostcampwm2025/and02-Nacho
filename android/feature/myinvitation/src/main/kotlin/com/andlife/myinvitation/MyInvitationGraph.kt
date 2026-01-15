@@ -46,10 +46,12 @@ fun NavGraphBuilder.myInvitationNavGraph(
 
 fun NavGraphBuilder.myInvitationDetailNavGraph(
     onNavigateBack: () -> Unit,
+    onNavigateToEditCard: (Long) -> Unit,
 ) {
     composable<MyInvitationDetail> {
         MyInvitationDetailRoute(
             onNavigateBack = onNavigateBack,
+            onNavigateToEditCard = onNavigateToEditCard,
             modifier = Modifier.padding(),
         )
     }
