@@ -19,12 +19,13 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object CacheModule {
 
-    const val VIDEO_CACHE_SIZE = 300 * 1024 * 1024L // 300MB
+    const val DIR_VIDEO_CACHE = "video_cache"
+    const val VIDEO_CACHE_SIZE = 300 * 1024 * 1024L
 
     @Provides
     @Singleton
     fun provideSimpleVideoCache(@ApplicationContext context: Context): Cache {
-        val cacheDir = File(context.cacheDir, "video_cache")
+        val cacheDir = File(context.cacheDir, DIR_VIDEO_CACHE)
         val databaseProvider = StandaloneDatabaseProvider(context)
         val evictor = LeastRecentlyUsedCacheEvictor(VIDEO_CACHE_SIZE)
         return SimpleCache(cacheDir, evictor, databaseProvider)
