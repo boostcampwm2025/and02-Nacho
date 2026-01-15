@@ -68,6 +68,7 @@ fun InvitationGuestBookForm(
 
     Column(
         modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
     ) {
         // 미디어 업로드 UI
         InvitationMediaUpload(
@@ -75,8 +76,6 @@ fun InvitationGuestBookForm(
             onMediaRemove = onMediaRemove,
             modifier = Modifier.fillMaxWidth(),
         )
-
-        Spacer(modifier = Modifier.height(NachoSpacing.small))
 
         Box {
             NachoTextField(
@@ -102,9 +101,7 @@ fun InvitationGuestBookForm(
                         .padding(NachoSpacing.small),
             )
         }
-
-        Spacer(modifier = Modifier.height(NachoSpacing.small))
-
+        
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
