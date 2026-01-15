@@ -18,4 +18,5 @@
         <item>모아보기</item>
     </string-array>
 
+    <string name="snack_load_error_map">설치된 지도 앱이 없습니다.</string>
 </resources>

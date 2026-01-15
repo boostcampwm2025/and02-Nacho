@@ -57,8 +57,9 @@
     <string name="txt_card_empty_guide">초대카드를 꾸며보세요</string>
     <string name="txt_card_empty_description">현재 해당 영역은 초대장에서 보여지지 않습니다.</string>
     <!--  AnnouncementSection  -->
-    <string name="txt_announcement">공지 사항</string>
+    <string name="txt_announcement_title">공지 사항</string>
     <!--  PlaceGuideSection  -->
-    <string name="txt_place_guide">오시는 길</string>
+    <string name="txt_place_guide_title">오시는 길</string>
     <string name="txt_map_loading">지도 로딩중...</string>
+    <string name="btn_open_map_app">지도 앱으로 열기</string>
 </resources>

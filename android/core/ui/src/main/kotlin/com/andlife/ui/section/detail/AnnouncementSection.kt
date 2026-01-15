@@ -35,7 +35,7 @@ fun AnnouncementSection(
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
         Text(
-            text = stringResource(R.string.txt_announcement),
+            text = stringResource(R.string.txt_announcement_title),
             style = NachoTheme.typography.headingSmallSemiBold,
             color = NachoTheme.colorScheme.textPrimary,
         )
