@@ -20,8 +20,13 @@ data class HostInfo(
 )
 
 data class DateTimeInfo(
-    val date: LocalDate? = null,
-    val startTime: InvitationTimeUiModel? = null,
+    val date: LocalDate = LocalDate(2026, 1, 1),
+    val startTime: InvitationTimeUiModel = InvitationTimeUiModel(0, 0),
+)
+
+data class InvitationTimeUiModel(
+    val hour: Int,
+    val min: Int,
 )
 
 data class LocationInfo(
@@ -36,19 +41,14 @@ data class LatLngUiModel(
     val longitude: Double = 0.0,
 )
 
-data class InvitationTimeUiModel(
-    val hour: Int,
-    val min: Int,
-)
-
 data class AnnouncementUiModel(
-    val id: String = "",
+    val id: Long = 0L,
     val title: String,
     val content: String,
 )
 
 data class InvitationCardUiModel(
-    val id: String = "",
+    val id: Long = 0L,
     val invitationId: Long = 0L,
     val contentJson: String = "",
     val backgroundImageUrl: String? = null,
