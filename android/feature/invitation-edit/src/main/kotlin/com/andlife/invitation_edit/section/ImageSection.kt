@@ -20,8 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationSpacing
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
 import com.andlife.invitation_edit.component.RemovableImage
 import com.andlife.invitation_edit.model.create.ThumbnailImageUiModel
@@ -36,18 +36,18 @@ internal fun ImageSection(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.background(InvitationTheme.colorScheme.backgroundPrimary),
-        verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
+        modifier = modifier.background(NachoTheme.colorScheme.backgroundPrimary),
+        verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
     ) {
         Text(
             text = stringResource(R.string.txt_add_image),
-            style = InvitationTheme.typography.bodyMediumSemiBold,
-            color = InvitationTheme.colorScheme.textPrimary,
-            modifier = Modifier.padding(start = InvitationSpacing.large, top = InvitationSpacing.large),
+            style = NachoTheme.typography.bodyMediumSemiBold,
+            color = NachoTheme.colorScheme.textPrimary,
+            modifier = Modifier.padding(start = NachoSpacing.large, top = NachoSpacing.large),
         )
         LazyRow(
-            contentPadding = PaddingValues(horizontal = InvitationSpacing.large),
-            horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
+            contentPadding = PaddingValues(horizontal = NachoSpacing.large),
+            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
         ) {
             item {
                 AddImageButton(
@@ -71,9 +71,9 @@ internal fun ImageSection(
         }
         Text(
             text = stringResource(R.string.txt_add_image_desc),
-            style = InvitationTheme.typography.bodySmallMedium,
-            color = InvitationTheme.colorScheme.textTertiary,
-            modifier = Modifier.padding(start = InvitationSpacing.large, bottom = InvitationSpacing.large),
+            style = NachoTheme.typography.bodySmallMedium,
+            color = NachoTheme.colorScheme.textTertiary,
+            modifier = Modifier.padding(start = NachoSpacing.large, bottom = NachoSpacing.large),
         )
     }
 }
@@ -84,8 +84,8 @@ private fun AddImageButton(
     modifier: Modifier = Modifier,
 ) {
     Surface(
-        shape = InvitationTheme.shapes.small,
-        border = BorderStroke(InvitationSpacing.twoXSmall, InvitationTheme.colorScheme.backgroundBorder),
+        shape = NachoTheme.shapes.small,
+        border = BorderStroke(NachoSpacing.twoXSmall, NachoTheme.colorScheme.backgroundBorder),
         modifier = modifier,
         onClick = onClick,
     ) {
@@ -93,19 +93,19 @@ private fun AddImageButton(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(InvitationTheme.colorScheme.backgroundTertiary),
+                    .background(NachoTheme.colorScheme.backgroundTertiary),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = stringResource(R.string.desc_add_image),
-                tint = InvitationTheme.colorScheme.backgroundBorder,
+                tint = NachoTheme.colorScheme.backgroundBorder,
             )
             Text(
                 text = stringResource(R.string.txt_add_image),
-                style = InvitationTheme.typography.bodySmallMedium,
-                color = InvitationTheme.colorScheme.backgroundBorder,
+                style = NachoTheme.typography.bodySmallMedium,
+                color = NachoTheme.colorScheme.backgroundBorder,
             )
         }
     }

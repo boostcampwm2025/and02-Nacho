@@ -25,8 +25,8 @@ import coil3.compose.SubcomposeAsyncImageContent
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationSpacing
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
 
 @Composable
@@ -38,7 +38,7 @@ internal fun RemovableImage(
     Box(
         modifier =
             modifier
-                .clip(InvitationTheme.shapes.small),
+                .clip(NachoTheme.shapes.small),
         contentAlignment = Alignment.TopEnd,
     ) {
         SubcomposeAsyncImage(
@@ -56,7 +56,7 @@ internal fun RemovableImage(
                     contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator(
-                        color = InvitationTheme.colorScheme.brandPrimary,
+                        color = NachoTheme.colorScheme.brandPrimary,
                     )
                 }
             },
@@ -66,7 +66,7 @@ internal fun RemovableImage(
                     modifier =
                         Modifier
                             .align(Alignment.TopEnd)
-                            .padding(InvitationSpacing.xSmall)
+                            .padding(NachoSpacing.xSmall)
                             .clip(CircleShape)
                             .background(Color.Black.copy(alpha = 0.6f))
                             .clickable { onRemoveClick() },
@@ -76,7 +76,7 @@ internal fun RemovableImage(
                         imageVector = Icons.Default.Close,
                         contentDescription = stringResource(R.string.desc_remove_image),
                         tint = Color.White,
-                        modifier = Modifier.padding(InvitationSpacing.xSmall),
+                        modifier = Modifier.padding(NachoSpacing.xSmall),
                     )
                 }
             },
@@ -85,13 +85,13 @@ internal fun RemovableImage(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .background(InvitationTheme.colorScheme.backgroundTertiary),
+                            .background(NachoTheme.colorScheme.backgroundTertiary),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.ic_error_24),
                         contentDescription = stringResource(R.string.desc_image_error),
-                        tint = InvitationTheme.colorScheme.brandPrimary,
+                        tint = NachoTheme.colorScheme.brandPrimary,
                     )
                 }
             },
@@ -102,7 +102,7 @@ internal fun RemovableImage(
 @Composable
 @PreviewTheme
 private fun RemovableImagePreview() {
-    InvitationTheme {
+    NachoTheme {
         RemovableImage(
             imageUrl = "https://picsum.photos/200",
             onRemoveClick = {},

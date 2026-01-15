@@ -20,6 +20,7 @@ interface GuestBookService {
 
     @POST("/api/invitations/{invitationId}/guestbooks")
     suspend fun createGuestBook(
+        @Path("invitationId") invitationId: Long,
         @Body request: GuestBookRequest,
     ): BaseResponse<GuestBookResponse>
 }

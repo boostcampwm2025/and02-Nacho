@@ -36,17 +36,18 @@ class InvitationController(
 
     @PostMapping("/{invitationId}/guestbooks")
     fun createGuestBook(
+        @PathVariable invitationId: Long,
         @RequestBody request: GuestBookRequest
-    ): BaseResponse<GuestBookResponse> {
+    ): BaseResponse<*> {
         return try {
-            val guestBookResponse = guestBookService.createGuestBook(request)
+            val guestBookResponse = guestBookService.createGuestBook(invitationId, request)
             BaseResponse.success(guestBookResponse)
         } catch (e: IllegalArgumentException) {
-            BaseResponse.success(
+            BaseResponse.error(
                 responseCode = CommonResponseCode.BAD_REQUEST,
             )
         } catch (e: Exception) {
-            BaseResponse.success(
+            BaseResponse.error(
                 responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR,
             )
         }

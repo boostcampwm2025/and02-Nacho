@@ -19,10 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
-import com.andlife.designsystem.component.InvitationTextField
+import com.andlife.designsystem.component.NachoTextField
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationSpacing
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
 import com.andlife.invitation_edit.component.FormLabel
 import com.andlife.invitation_edit.model.create.InvitationTimeUiModel
@@ -55,17 +55,17 @@ internal fun TimeSection(
             }
         }
 
-    Box(modifier = modifier.background(InvitationTheme.colorScheme.backgroundPrimary)) {
+    Box(modifier = modifier.background(NachoTheme.colorScheme.backgroundPrimary)) {
         Column(
-            modifier = Modifier.padding(InvitationSpacing.large),
-            verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
+            modifier = Modifier.padding(NachoSpacing.large),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
         ) {
             FormLabel(title = stringResource(R.string.txt_invitation_time))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                InvitationTextField(
+                NachoTextField(
                     value = startTimeString,
                     onValueChange = {},
                     placeholder = stringResource(R.string.desc_start_time),
@@ -84,10 +84,10 @@ internal fun TimeSection(
                 )
                 Text(
                     text = "~",
-                    color = InvitationTheme.colorScheme.textSecondary,
-                    modifier = Modifier.padding(horizontal = InvitationSpacing.medium),
+                    color = NachoTheme.colorScheme.textSecondary,
+                    modifier = Modifier.padding(horizontal = NachoSpacing.medium),
                 )
-                InvitationTextField(
+                NachoTextField(
                     value = endTimeString,
                     onValueChange = {},
                     placeholder = stringResource(R.string.desc_end_time),
@@ -112,7 +112,7 @@ internal fun TimeSection(
 @Composable
 @PreviewTheme
 private fun TimeSectionPreview() {
-    InvitationTheme {
+    NachoTheme {
         TimeSection(
             startTime = InvitationTimeUiModel(10, 30),
             endTime = InvitationTimeUiModel(11, 30),

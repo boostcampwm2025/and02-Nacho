@@ -123,10 +123,7 @@ class MediaUploaderImpl
                 val completeResult = apiCall { mediaService.batchCompleteUpload(completeRequest) }
 
                 return@withContext when (completeResult) {
-                    is Result.Error -> {
-                        completeResult
-                    }
-
+                    is Result.Error -> completeResult
                     is Result.Success -> {
                         val completedData = completeResult.data.files
 

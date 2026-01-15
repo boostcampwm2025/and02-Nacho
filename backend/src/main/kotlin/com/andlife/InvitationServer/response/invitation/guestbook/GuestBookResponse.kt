@@ -42,8 +42,6 @@ fun GuestBook.toGuestBookResponse(): GuestBookResponse {
     val visualMedias = mutableListOf<GuestBookMediaResponse>()
     val audioMedias = mutableListOf<GuestBookMediaResponse>()
 
-
-    // 이미지 추가
     images.forEach { image ->
         visualMedias.add(GuestBookMediaResponse(
             id = image.id,
@@ -53,7 +51,6 @@ fun GuestBook.toGuestBookResponse(): GuestBookResponse {
         ))
     }
 
-    // 오디오 추가
     audios.forEach { audio ->
         audioMedias.add(GuestBookMediaResponse(
             id = audio.id,
@@ -64,7 +61,6 @@ fun GuestBook.toGuestBookResponse(): GuestBookResponse {
         ))
     }
 
-    // 비디오 추가
     videos.forEach { video ->
         visualMedias.add(GuestBookMediaResponse(
             id = video.id,

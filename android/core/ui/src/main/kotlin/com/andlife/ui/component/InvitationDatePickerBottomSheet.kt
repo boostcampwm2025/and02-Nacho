@@ -14,13 +14,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.andlife.designsystem.component.InvitationButton
+import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.component.datepicker.state.rememberInvitationDatePickerState
-import com.andlife.designsystem.component.datepicker.ui.InvitationDatePicker
+import com.andlife.designsystem.component.datepicker.ui.NachoDatePicker
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationElevation
-import com.andlife.designsystem.theme.InvitationSpacing
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoElevation
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
@@ -46,10 +46,10 @@ fun InvitationDatePickerBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = InvitationTheme.colorScheme.backgroundPrimary,
+        containerColor = NachoTheme.colorScheme.backgroundPrimary,
         dragHandle = {
             BottomSheetDefaults.DragHandle(
-                color = InvitationTheme.colorScheme.textSecondary,
+                color = NachoTheme.colorScheme.textSecondary,
             )
         },
         modifier = modifier,
@@ -59,12 +59,12 @@ fun InvitationDatePickerBottomSheet(
                 Modifier
                     .fillMaxWidth(),
         ) {
-            InvitationDatePicker(
+            NachoDatePicker(
                 state = datePickerState,
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            InvitationButton(
+            NachoButton(
                 onClick = {
                     selectedDate?.let {
                         onConfirm(it)
@@ -77,19 +77,19 @@ fun InvitationDatePickerBottomSheet(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(all = InvitationSpacing.large),
+                        .padding(all = NachoSpacing.large),
                 enabled = selectedDate != null,
-                contentPadding = PaddingValues(vertical = InvitationSpacing.medium),
+                contentPadding = PaddingValues(vertical = NachoSpacing.medium),
                 elevation =
                     ButtonDefaults.buttonElevation(
-                        defaultElevation = InvitationElevation.none,
-                        pressedElevation = InvitationElevation.none,
-                        disabledElevation = InvitationElevation.none,
+                        defaultElevation = NachoElevation.none,
+                        pressedElevation = NachoElevation.none,
+                        disabledElevation = NachoElevation.none,
                     ),
             ) {
                 Text(
                     text = stringResource(id = R.string.btn_label_confirm),
-                    style = InvitationTheme.typography.bodyLargeSemiBold,
+                    style = NachoTheme.typography.bodyLargeSemiBold,
                 )
             }
         }
@@ -100,7 +100,7 @@ fun InvitationDatePickerBottomSheet(
 @PreviewTheme
 @Composable
 private fun InvitationDatePickerBottomSheetPreview() {
-    InvitationTheme {
+    NachoTheme {
         InvitationDatePickerBottomSheet(
             onConfirm = {},
             onDismiss = {},

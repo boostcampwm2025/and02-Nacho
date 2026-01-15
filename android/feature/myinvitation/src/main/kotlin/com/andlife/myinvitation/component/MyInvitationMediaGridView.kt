@@ -4,12 +4,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.InvitationSpacing
-import com.andlife.designsystem.theme.InvitationTheme
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.myinvitation.model.MyInvitationCollectionUiModel
 import com.andlife.myinvitation.util.toUiType
@@ -21,22 +21,22 @@ import kotlinx.datetime.toLocalDateTime
 @Composable
 fun MyInvitationMediaGridView(
     items: List<MyInvitationCollectionUiModel>,
-    onItemClick: (Long) -> Unit,
+    onItemClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
         modifier = modifier,
-        contentPadding = PaddingValues(InvitationSpacing.small),
-        horizontalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
-        verticalArrangement = Arrangement.spacedBy(InvitationSpacing.small),
+        contentPadding = PaddingValues(NachoSpacing.small),
+        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
+        verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
     ) {
-        items(items = items) { item ->
+        itemsIndexed(items = items) { index, item ->
             MediaItem(
                 mediaUrl = item.url,
                 mediaType = item.type,
                 duration = item.durationSeconds,
-                onClick = { onItemClick(item.id) },
+                onClick = { onItemClick(index) },
             )
         }
     }
@@ -44,7 +44,7 @@ fun MyInvitationMediaGridView(
 
 @PreviewTheme
 @Composable
-private fun MyInvitationMediaGridViewPreview() {
+private fun InvitationMediaGridViewPreview() {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
     val mockItems =
@@ -81,7 +81,7 @@ private fun MyInvitationMediaGridViewPreview() {
             ),
         )
 
-    InvitationTheme {
+    NachoTheme {
         MyInvitationMediaGridView(
             items = mockItems,
             onItemClick = {},
