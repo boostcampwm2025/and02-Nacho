@@ -5,6 +5,9 @@ services:
     restart: always
     env_file:
       - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: andlife
     ports:
       - "${DB_PORT}:3306"
 
