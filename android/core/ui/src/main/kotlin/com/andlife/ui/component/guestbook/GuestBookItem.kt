@@ -46,6 +46,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.StandaloneDatabaseProvider
+import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.NoOpCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.ui.AspectRatioFrameLayout
@@ -383,7 +384,7 @@ private fun SimpleVideoPlayer(
                 modifier = Modifier.fillMaxSize(),
             )
         }
-        thumbnailUrl?.let  {
+        thumbnailUrl?.let {
             AsyncImage(
                 model = it,
                 contentDescription = stringResource(R.string.desc_video_thumbnail),
@@ -533,12 +534,7 @@ private fun GuestBookItemPreview() {
                             createdAt = LocalDateTime(2025, 6, 1, 12, 0),
                             updatedAt = LocalDateTime(2025, 6, 1, 12, 0),
                         ),
-                    videoPlayerPool = AutoVideoPlayerPoolImpl(
-                        LocalContext.current, SimpleCache(
-                            File("cacheDir"),
-                            NoOpCacheEvictor(), StandaloneDatabaseProvider(LocalContext.current)
-                        )
-                    ),
+                    videoPlayerPool = AutoVideoPlayerPoolImpl(LocalContext.current, CacheDataSource.Factory()),
                     shouldPlayVideo = false,
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},

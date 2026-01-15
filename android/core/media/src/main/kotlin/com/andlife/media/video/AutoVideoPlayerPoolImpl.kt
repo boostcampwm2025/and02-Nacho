@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 class AutoVideoPlayerPoolImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    private val simpleCache: Cache,
+    private val cacheDataSourceFactory: CacheDataSource.Factory,
 ) : AutoVideoPlayerPool {
 
     private val playerInstances = mutableListOf<AutoVideoPlayer>() // 재사용 가능한 플레이어 인스턴스 풀
@@ -21,12 +21,6 @@ class AutoVideoPlayerPoolImpl @Inject constructor(
     private val lastPlayedUrlByGuestBookId = LinkedHashMap<Long, String>(MAX_POOL_SIZE, 0.75f, true) // 방명록 ID별 마지막 재생 URL 추적
 
     private var currentPlayingUrl: String? = null
-    private val cacheDataSourceFactory: CacheDataSource.Factory by lazy {
-        CacheDataSource.Factory()
-            .setCache(simpleCache)
-            .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())
-            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
-    }
 
     init {
         preparePlayers()
