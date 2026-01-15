@@ -83,7 +83,7 @@ fun InvitationGuestBookForm(
                         onTextContentChange(newValue)
                     }
                 },
-                placeholder = stringResource(R.string.ph_please_leave_a_message),
+                placeholder = stringResource(R.string.txt_please_leave_a_message),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = false,
                 minLines = 3,
