@@ -45,6 +45,8 @@
     <string name="format_media_pager_indicator">%1$d/%2$d</string>
     <string name="txt_show_less">접기</string>
     <string name="txt_show_more">더보기</string>
+    <string name="desc_author_profile_image">방명록 작성자 프로필 이미지</string>
+    <string name="desc_video_thumbnail">비디오 썸네일 이미지</string>
 
     <!-- DateUtils -->
     <string name="txt_just_now">방금 전</string>
@@ -54,6 +56,5 @@
     <string name="format_weeks_ago">%1$d주 전</string>
     <string name="format_months_ago">%1$d개월 전</string>
     <string name="format_years_ago">%1$d년 전</string>
-    <string name="desc_author_profile_image">방명록 작성자 프로필 이미지</string>
 
 </resources>

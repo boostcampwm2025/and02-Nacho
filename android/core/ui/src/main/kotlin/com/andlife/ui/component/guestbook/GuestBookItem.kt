@@ -376,17 +376,17 @@ private fun SimpleVideoPlayer(
                 factory = { context ->
                     PlayerView(context).apply {
                         useController = false
-                        player = currentPlayer.exoPlayer
                         resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                        player = currentPlayer.exoPlayer
                     }
                 },
                 modifier = Modifier.fillMaxSize(),
             )
         }
-        if (thumbnailUrl != null) {
+        thumbnailUrl?.let  {
             AsyncImage(
-                model = thumbnailUrl,
-                contentDescription = null,
+                model = it,
+                contentDescription = stringResource(R.string.desc_video_thumbnail),
                 modifier = Modifier
                     .fillMaxSize()
                     .alpha(thumbnailAlpha),
