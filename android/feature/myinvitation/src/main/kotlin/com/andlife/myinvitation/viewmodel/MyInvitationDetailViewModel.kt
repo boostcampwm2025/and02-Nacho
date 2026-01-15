@@ -129,6 +129,10 @@ class MyInvitationDetailViewModel @Inject constructor(
                     ),
                 )
             }
+
+            MyInvitationDetailUiEvent.MapError -> {
+                sendEffect(MyInvitationDetailSideEffect.ShowMapErrorSnackbar)
+            }
         }
     }
 

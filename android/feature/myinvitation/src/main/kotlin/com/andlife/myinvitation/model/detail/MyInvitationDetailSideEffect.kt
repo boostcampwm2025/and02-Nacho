@@ -14,4 +14,6 @@ sealed interface MyInvitationDetailSideEffect : BaseSideEffect {
         val imageList: ImmutableList<String>,
         val index: Int,
     ) : MyInvitationDetailSideEffect
+
+    data object ShowMapErrorSnackbar : MyInvitationDetailSideEffect
 }

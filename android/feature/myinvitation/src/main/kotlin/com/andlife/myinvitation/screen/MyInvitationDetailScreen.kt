@@ -12,6 +12,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -19,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,6 +51,7 @@ import com.andlife.ui.component.GenericTabRow
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import com.andlife.designsystem.R as designR
 
@@ -59,6 +63,9 @@ fun MyInvitationDetailRoute(
     viewModel: MyInvitationDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+    val mapErrorMessage = stringResource(R.string.snack_load_error_map)
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
@@ -73,11 +80,19 @@ fun MyInvitationDetailRoute(
             is MyInvitationDetailSideEffect.NavigateToImageDetail -> {
                 // TODO: 이미지 전체보기 화면 구현 보류
             }
+            MyInvitationDetailSideEffect.ShowMapErrorSnackbar -> {
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = mapErrorMessage
+                    )
+                }
+            }
         }
     }
 
     MyInvitationDetailScreen(
         uiState = uiState,
+        snackbarHostState = snackbarHostState,
         onEvent = viewModel::onEvent,
         modifier = modifier,
     )
@@ -86,6 +101,7 @@ fun MyInvitationDetailRoute(
 @Composable
 private fun MyInvitationDetailScreen(
     uiState: MyInvitationDetailUiState,
+    snackbarHostState: SnackbarHostState,
     onEvent: (MyInvitationDetailUiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -93,6 +109,9 @@ private fun MyInvitationDetailScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        snackbarHost = {
+            SnackbarHost(snackbarHostState)
+        },
         topBar = {
             MyInvitationDetailTopBar(
                 title = uiState.title,
@@ -131,6 +150,7 @@ private fun MyInvitationDetailScreen(
                                             )
                                         },
                                     onClickEditCard = { onEvent(MyInvitationDetailUiEvent.ClickEditCard) },
+                                    onMapError = { onEvent(MyInvitationDetailUiEvent.MapError) },
                                     modifier = Modifier.fillMaxSize(),
                                 )
                             }
@@ -330,6 +350,7 @@ private fun MyInvitationDetailScreenPreview() {
                                 ),
                         ),
                 ),
+            snackbarHostState = remember { SnackbarHostState() },
             onEvent = {},
         )
     }
