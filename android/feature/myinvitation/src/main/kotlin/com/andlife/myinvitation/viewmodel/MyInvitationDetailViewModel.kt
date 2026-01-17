@@ -1,16 +1,13 @@
 package com.andlife.myinvitation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.andlife.model.invitation.AnnouncementUiModel
-import com.andlife.model.invitation.DateTimeInfo
-import com.andlife.model.invitation.HostInfo
-import com.andlife.model.invitation.InvitationCardUiModel
-import com.andlife.model.invitation.InvitationContentsUiModel
-import com.andlife.model.invitation.InvitationTimeUiModel
-import com.andlife.model.invitation.LatLngUiModel
-import com.andlife.model.invitation.LocationInfo
+import com.andlife.domain.repository.invitation.InvitationRepository
+import com.andlife.domain.util.onFailure
+import com.andlife.domain.util.onSuccess
+import com.andlife.model.invitation.toContentsUiModel
 import com.andlife.myinvitation.MyInvitationDetail
 import com.andlife.myinvitation.manager.KakaoShareManager
 import com.andlife.myinvitation.model.detail.MyInvitationDetailSideEffect
@@ -20,19 +17,18 @@ import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.util.toDateTimeSingleLine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.datetime.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class MyInvitationDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val kakaoShareManager: KakaoShareManager,
+    private val invitationRepository: InvitationRepository,
 ) : BaseViewModel<MyInvitationDetailUiState, MyInvitationDetailUiEvent, MyInvitationDetailSideEffect>(
     initialState = MyInvitationDetailUiState(),
 ) {
@@ -41,66 +37,30 @@ class MyInvitationDetailViewModel @Inject constructor(
     override val uiState: StateFlow<MyInvitationDetailUiState> =
         mutableUiState
             .onStart {
-                loadInvitationDetail()
+                loadInvitation()
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = MyInvitationDetailUiState(),
             )
 
-    private fun loadInvitationDetail() {
-        viewModelScope.launch {
-            updateState { copy(id = myInvitationId, isLoading = true) }
-            updateState {
-                copy(
-                    id = 1L,
-                    title = "2026년 안드라이프 신년회",
-                    isLoading = false,
-                    hasThanksCard = true,
-                    invitationContentsUiModel =
-                        InvitationContentsUiModel(
-                            title = "2026년 안드라이프 신년회",
-                            hostInfo =
-                                HostInfo(
-                                    name = "안드라이프",
-                                    profileUrl = "https://picsum.photos/200",
-                                ),
-                            imageList = persistentListOf("https://picsum.photos/800/600?random=1"),
-                            dateTime =
-                                DateTimeInfo(
-                                    date = LocalDate(2026, 1, 31),
-                                    startTime = InvitationTimeUiModel(hour = 13, min = 30),
-                                ),
-                            location =
-                                LocationInfo(
-                                    name = "코드스쿼드",
-                                    address = "서울특별시 강남구 강남대로62길 23, 4층 역삼빌딩",
-                                    guide = "양재역 3번 출구에서 801m",
-                                    latLng =
-                                        LatLngUiModel(
-                                            latitude = 37.4936874,
-                                            longitude = 127.0302304,
-                                        ),
-                                ),
-                            invitationCard =
-                                InvitationCardUiModel(
-                                    contentJson = "안드라이프 한해 잘 보내봅시다~",
-                                ),
-                            announcement =
-                                persistentListOf(
-                                    AnnouncementUiModel(
-                                        title = "준비물",
-                                        content = " - 건강한 마음 \n - 건강한 정신",
-                                    ),
-                                    AnnouncementUiModel(
-                                        title = "이벤트 안내",
-                                        content = " - 소정의 행사가 있습니다. \n - 입구에서 참여해보세요~",
-                                    ),
-                                ),
-                        ),
-                )
+    private suspend fun loadInvitation() {
+        updateState { copy(isLoading = true, isError = false) }
+
+        invitationRepository.getInvitation(myInvitationId)
+            .onSuccess { invitation ->
+                updateState {
+                    copy(
+                        isLoading = false,
+                        isError = false,
+                        hasThanksCard = false, // TODO: 감사카드 존재 여부는 별도 API로 확인 필요
+                        invitationContentsUiModel = invitation.toContentsUiModel(),
+                    )
+                }
+            }.onFailure {
+                updateState { copy(isLoading = false, isError = true) }
+                Log.e("MyInvitationDetailViewModel", "에러 발생: $it")
             }
-        }
     }
 
     override fun onEvent(event: MyInvitationDetailUiEvent) {
@@ -114,6 +74,9 @@ class MyInvitationDetailViewModel @Inject constructor(
             is MyInvitationDetailUiEvent.ClickEditCard -> navigateToEditCard()
             is MyInvitationDetailUiEvent.ClickImage -> navigateToFullScreenImage(event.imageList, event.index)
             is MyInvitationDetailUiEvent.MapError -> showMapErrorSnackbar()
+            is MyInvitationDetailUiEvent.RetryLoad -> {
+                viewModelScope.launch { loadInvitation() }
+            }
         }
     }
 
@@ -129,7 +92,7 @@ class MyInvitationDetailViewModel @Inject constructor(
         val firstImage = content.imageList.firstOrNull()
 
         kakaoShareManager.share(
-            invitationId = state.id,
+            invitationId = myInvitationId,
             title = content.title,
             imageUrl = firstImage,
             date = dateText,

@@ -40,14 +40,14 @@ private fun MyInvitationScreen(
                 Text("초대 생성")
             }
             NachoButton(
-                onClick = { onNavigateToDetail(123L) }, // TODO: 실제 초대장 id 전달 필요
+                onClick = { onNavigateToDetail(1L) }, // TODO: 실제 초대장 id 전달 필요
             ) {
-                Text("임시 초대장 123")
+                Text("초대장 1")
             }
             NachoButton(
-                onClick = { onNavigateToDetail(456L) }, // TODO: 실제 초대장 id 전달 필요
+                onClick = { onNavigateToDetail(2L) }, // TODO: 실제 초대장 id 전달 필요
             ) {
-                Text("임시 초대장 456")
+                Text("초대장 2")
             }
         }
     }
