@@ -39,15 +39,17 @@ import com.andlife.model.invitation.DateTimeInfo
 import com.andlife.model.invitation.HostInfo
 import com.andlife.model.invitation.InvitationCardUiModel
 import com.andlife.model.invitation.InvitationContentsUiModel
-import com.andlife.model.invitation.InvitationTimeUiModel
 import com.andlife.model.invitation.LatLngUiModel
 import com.andlife.model.invitation.LocationInfo
+import com.andlife.model.invitation.TimeUiModel
 import com.andlife.myinvitation.R
 import com.andlife.myinvitation.model.detail.MyInvitationDetailSideEffect
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiEvent
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiState
 import com.andlife.myinvitation.viewmodel.MyInvitationDetailViewModel
 import com.andlife.ui.component.GenericTabRow
+import com.andlife.ui.component.loading.InvitationLoadingError
+import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -111,8 +113,9 @@ private fun MyInvitationDetailScreen(
         },
         topBar = {
             MyInvitationDetailTopBar(
-                title = uiState.title,
+                title = uiState.invitationContentsUiModel.title,
                 hasThanksCard = uiState.hasThanksCard,
+                showActions = !uiState.isLoading && !uiState.isError,
                 onBack = { onEvent(MyInvitationDetailUiEvent.ClickBack) },
                 onClickThanksCard = { onEvent(MyInvitationDetailUiEvent.ClickThanksCard) },
                 onShare = { onEvent(MyInvitationDetailUiEvent.ClickShare) },
@@ -123,6 +126,25 @@ private fun MyInvitationDetailScreen(
         },
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
     ) { paddingValues ->
+        if (uiState.isLoading) {
+            InvitationLoadingIndicator(
+                modifier = Modifier
+                    .padding(paddingValues),
+                text = stringResource(R.string.txt_loading_invitation),
+            )
+            return@Scaffold
+        }
+
+        if (uiState.isError) {
+            InvitationLoadingError(
+                onRetry = { onEvent(MyInvitationDetailUiEvent.RetryLoad) },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+            )
+            return@Scaffold
+        }
+
         Column(
             modifier =
                 Modifier
@@ -172,6 +194,7 @@ private fun MyInvitationDetailTopBar(
     onDelete: () -> Unit,
     onCreateThanksCard: () -> Unit,
     modifier: Modifier = Modifier,
+    showActions: Boolean = true,
     hasThanksCard: Boolean = false,
 ) {
     TopAppBar(
@@ -195,29 +218,31 @@ private fun MyInvitationDetailTopBar(
             }
         },
         actions = {
-            if (hasThanksCard) {
-                IconButton(onClick = onClickThanksCard) {
+            if (showActions) {
+                if (hasThanksCard) {
+                    IconButton(onClick = onClickThanksCard) {
+                        Icon(
+                            painter = painterResource(designR.drawable.ic_thankscard),
+                            contentDescription = stringResource(R.string.desc_top_bar_thanks_card),
+                            tint = Color.Unspecified,
+                        )
+                    }
+                }
+                IconButton(onClick = onShare) {
                     Icon(
-                        painter = painterResource(designR.drawable.ic_thankscard),
-                        contentDescription = stringResource(R.string.desc_top_bar_thanks_card),
-                        tint = Color.Unspecified,
+                        painter = painterResource(R.drawable.ic_share_24),
+                        contentDescription = stringResource(R.string.desc_top_bar_share),
+                        tint = NachoTheme.colorScheme.iconSecondary,
                     )
                 }
-            }
-            IconButton(onClick = onShare) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_share_24),
-                    contentDescription = stringResource(R.string.desc_top_bar_share),
-                    tint = NachoTheme.colorScheme.iconSecondary,
+
+                InvitationMoreMenu(
+                    hasThanksCard = hasThanksCard,
+                    onEdit = onEdit,
+                    onDelete = onDelete,
+                    onCreateThanksCard = onCreateThanksCard,
                 )
             }
-
-            InvitationMoreMenu(
-                hasThanksCard = hasThanksCard,
-                onEdit = onEdit,
-                onDelete = onDelete,
-                onCreateThanksCard = onCreateThanksCard,
-            )
         },
         colors =
             TopAppBarDefaults.topAppBarColors(
@@ -312,8 +337,6 @@ private fun MyInvitationDetailScreenPreview() {
         MyInvitationDetailScreen(
             uiState =
                 MyInvitationDetailUiState(
-                    id = 1L,
-                    title = "2026년 나초 개발 네트워킹 데이",
                     isLoading = false,
                     hasThanksCard = true,
                     invitationContentsUiModel =
@@ -328,7 +351,7 @@ private fun MyInvitationDetailScreenPreview() {
                             dateTime =
                                 DateTimeInfo(
                                     date = LocalDate(2026, 1, 31),
-                                    startTime = InvitationTimeUiModel(hour = 13, min = 0),
+                                    startTime = TimeUiModel(hour = 13, min = 0),
                                 ),
                             location =
                                 LocationInfo(

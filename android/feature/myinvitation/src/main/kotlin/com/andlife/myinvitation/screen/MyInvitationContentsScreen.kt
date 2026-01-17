@@ -1,22 +1,14 @@
 package com.andlife.myinvitation.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
-import com.andlife.myinvitation.R
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiState
 import com.andlife.ui.section.detail.AddressSection
 import com.andlife.ui.section.detail.AnnouncementSection
@@ -35,31 +27,6 @@ fun MyInvitationContentsScreen(
     onMapError: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (uiState.isLoading) {
-        Box(
-            modifier =
-                modifier
-                    .fillMaxSize()
-                    .background(NachoTheme.colorScheme.backgroundTertiary),
-            contentAlignment = Alignment.Center,
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
-            ) {
-                CircularProgressIndicator(
-                    color = NachoTheme.colorScheme.brandPrimary,
-                )
-                Text(
-                    text = stringResource(R.string.txt_loading_invitation),
-                    style = NachoTheme.typography.bodyMediumRegular,
-                    color = NachoTheme.colorScheme.textSecondary,
-                )
-            }
-        }
-        return
-    }
-
     val model = uiState.invitationContentsUiModel
     val scrollState = rememberScrollState()
 
@@ -93,13 +60,11 @@ fun MyInvitationContentsScreen(
             placeAddress = model.location.address,
         )
 
-        model.invitationCard?.let { card ->
-            InvitationCardSection(
-                invitationCardUiModel = card,
-                isEditable = true,
-                onEditClick = onClickEditCard,
-            )
-        }
+        InvitationCardSection(
+            invitationCardUiModel = model.invitationCard,
+            isEditable = true,
+            onEditClick = onClickEditCard,
+        )
 
         AnnouncementSection(
             announcements = model.announcement,

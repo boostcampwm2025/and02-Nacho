@@ -24,4 +24,6 @@ sealed interface MyInvitationDetailUiEvent : BaseUiEvent {
     ) : MyInvitationDetailUiEvent
 
     data object MapError : MyInvitationDetailUiEvent
+
+    data object RetryLoad : MyInvitationDetailUiEvent
 }
