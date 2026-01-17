@@ -27,7 +27,7 @@ import com.andlife.designsystem.R as designR
 
 @Composable
 fun AuthorSection(
-    profileUrl: String,
+    profileUrl: String?,
     author: String,
     modifier: Modifier = Modifier,
 ) {

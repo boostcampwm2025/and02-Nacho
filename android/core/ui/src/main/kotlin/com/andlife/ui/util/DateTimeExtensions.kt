@@ -1,7 +1,7 @@
 package com.andlife.ui.util
 
 import com.andlife.model.invitation.DateTimeInfo
-import com.andlife.model.invitation.InvitationTimeUiModel
+import com.andlife.model.invitation.TimeUiModel
 import kotlinx.datetime.LocalDate
 
 object DateTimeConstants {
@@ -17,7 +17,7 @@ fun LocalDate.toDisplayDateString(): String {
     return "${year}${DateTimeConstants.YEAR} ${monthNumber}${DateTimeConstants.MONTH} ${dayOfMonth}${DateTimeConstants.DAY}"
 }
 
-fun InvitationTimeUiModel.toDisplayTimeString(): String {
+fun TimeUiModel.toDisplayTimeString(): String {
     val period = if (hour < 12) DateTimeConstants.AM_PM[0] else DateTimeConstants.AM_PM[1]
     val displayHour = when {
         hour == 0 -> 12

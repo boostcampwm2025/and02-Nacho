@@ -34,11 +34,13 @@ import com.andlife.ui.R
 
 @Composable
 fun InvitationCardSection(
-    invitationCardUiModel: InvitationCardUiModel,
+    invitationCardUiModel: InvitationCardUiModel?,
     modifier: Modifier = Modifier,
     isEditable: Boolean = false,
     onEditClick: () -> Unit = {},
 ) {
+    if (invitationCardUiModel == null) return
+
     val isCardEmpty = invitationCardUiModel.contentJson.isEmpty()
     val iconRes = if (isCardEmpty) R.drawable.ic_add_24 else R.drawable.ic_edit_24
     val buttonText =
@@ -134,10 +136,12 @@ fun InvitationCardSection(
 }
 
 @Composable
-private fun EmptyCardGuide(modifier: Modifier = Modifier) {
+private fun EmptyCardGuide(
+    modifier: Modifier = Modifier,
+) {
     Row(
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .padding(NachoSpacing.threeXLarge),
         verticalAlignment = Alignment.CenterVertically,

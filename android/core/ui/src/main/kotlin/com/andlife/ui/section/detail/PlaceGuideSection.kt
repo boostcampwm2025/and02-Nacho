@@ -5,13 +5,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,6 +24,7 @@ import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.model.invitation.LatLngUiModel
 import com.andlife.model.invitation.LocationInfo
 import com.andlife.ui.R
+import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.util.openExternalMap
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraPosition
@@ -66,9 +65,9 @@ fun PlaceGuideSection(
                 onMapError = onMapError,
             )
 
-            if (location.guide.isNotBlank()) {
+            location.guide?.takeIf {it.isNotBlank() }?.let { guide ->
                 Text(
-                    text = location.guide,
+                    text = guide,
                     style = NachoTheme.typography.bodyMediumRegular,
                     color = NachoTheme.colorScheme.textSecondary,
                     modifier =
@@ -146,30 +145,11 @@ private fun PlaceMapCard(
                 }
             }
             if (!isMapReady) {
-                MapLoadingOverlay()
+                InvitationLoadingIndicator(
+                    modifier = Modifier.background(NachoTheme.colorScheme.backgroundSecondary),
+                    text = stringResource(R.string.txt_map_loading),
+                )
             }
-        }
-    }
-}
-
-@Composable
-private fun MapLoadingOverlay() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(NachoTheme.colorScheme.backgroundSecondary),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
-        ) {
-            CircularProgressIndicator(color = NachoTheme.colorScheme.brandPrimary)
-            Text(
-                text = stringResource(R.string.txt_map_loading),
-                style = NachoTheme.typography.bodyMediumMedium,
-                color = NachoTheme.colorScheme.textTertiary,
-            )
         }
     }
 }

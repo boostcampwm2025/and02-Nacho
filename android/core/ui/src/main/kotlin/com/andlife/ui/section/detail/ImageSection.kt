@@ -1,5 +1,6 @@
 package com.andlife.ui.section.detail
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import coil3.compose.SubcomposeAsyncImage
@@ -36,76 +38,87 @@ fun ImageSection(
     onImageClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (imageUrls.isEmpty()) return
-
-    val pagerState = rememberPagerState(pageCount = { imageUrls.size })
 
     Column(
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            HorizontalPager(
-                state = pagerState,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(16f / 9f),
-                key = { index -> index },
-            ) { page ->
-                SubcomposeAsyncImage(
-                    model = imageUrls[page],
-                    contentDescription = stringResource(R.string.desc_invitation_image),
+        if (imageUrls.isEmpty()) {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Image(
+                    painter = painterResource(R.drawable.bg_thumbnail),
+                    contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .clickable { onImageClick(page) },
-                    loading = {
-                        Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .background(NachoTheme.colorScheme.backgroundSecondary),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            CircularProgressIndicator(
-                                color = NachoTheme.colorScheme.brandPrimary,
-                            )
-                        }
-                    },
-                    success = {
-                        SubcomposeAsyncImageContent()
-                    },
-                    error = {
-                        Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .background(NachoTheme.colorScheme.backgroundSecondary),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.ic_error_outline_24),
-                                contentDescription = null,
-                                tint = NachoTheme.colorScheme.textTertiary,
-                            )
-                        }
-                    },
+                    modifier = Modifier.fillMaxSize()
                 )
             }
+        } else {
+            val pagerState = rememberPagerState(pageCount = { imageUrls.size })
 
-            if (imageUrls.size >= 2) {
-                MediaOverlay(
-                    text = "${pagerState.currentPage + 1}/${imageUrls.size}",
-                    shape = NachoTheme.shapes.medium,
+            Box(modifier = Modifier.fillMaxWidth()) {
+                HorizontalPager(
+                    state = pagerState,
                     modifier =
                         Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(
-                                top = NachoSpacing.medium,
-                                end = NachoSpacing.medium,
-                            ),
-                )
+                            .fillMaxWidth()
+                            .aspectRatio(16f / 9f),
+                    key = { index -> index },
+                ) { page ->
+                    SubcomposeAsyncImage(
+                        model = imageUrls[page],
+                        contentDescription = stringResource(R.string.desc_invitation_image),
+                        contentScale = ContentScale.Crop,
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .clickable { onImageClick(page) },
+                        loading = {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .fillMaxSize()
+                                        .background(NachoTheme.colorScheme.backgroundSecondary),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                CircularProgressIndicator(
+                                    color = NachoTheme.colorScheme.brandPrimary,
+                                )
+                            }
+                        },
+                        success = {
+                            SubcomposeAsyncImageContent()
+                        },
+                        error = {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .fillMaxSize()
+                                        .background(NachoTheme.colorScheme.backgroundSecondary),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(R.drawable.ic_error_outline_24),
+                                    contentDescription = null,
+                                    tint = NachoTheme.colorScheme.textTertiary,
+                                )
+                            }
+                        },
+                    )
+                }
+
+                if (imageUrls.size >= 2) {
+                    MediaOverlay(
+                        text = "${pagerState.currentPage + 1}/${imageUrls.size}",
+                        shape = NachoTheme.shapes.medium,
+                        modifier =
+                            Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(
+                                    top = NachoSpacing.medium,
+                                    end = NachoSpacing.medium,
+                                ),
+                    )
+                }
             }
         }
     }

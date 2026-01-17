@@ -21,10 +21,10 @@ import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun AnnouncementSection(
-    announcements: ImmutableList<AnnouncementUiModel>,
+    announcements: ImmutableList<AnnouncementUiModel>?,
     modifier: Modifier = Modifier,
 ) {
-    if (announcements.isEmpty()) return
+    if (announcements.isNullOrEmpty()) return
 
     Column(
         modifier =
