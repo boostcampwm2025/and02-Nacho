@@ -34,6 +34,12 @@
     <string name="txt_delete_all">모두 지우기</string>
     <string name="txt_submit">등록</string>
 
+    <!--  방명록 등록  -->
+    <string name="desc_add">추가</string>
+    <string name="txt_add_media">미디어 추가</string>
+    <string name="desc_remove_media">미디어 제거</string>
+    <string name="txt_please_leave_a_message">메시지를 남겨주세요.</string>
+
 
     <!--  ImageSection  -->
     <string name="desc_invitation_image">초대장 상세 이미지</string>
