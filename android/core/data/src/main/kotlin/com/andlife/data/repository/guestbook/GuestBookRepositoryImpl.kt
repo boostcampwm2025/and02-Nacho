@@ -4,9 +4,11 @@ import com.andlife.data.datasource.remote.invitation.guestbook.GuestBookRemoteDa
 import com.andlife.domain.error.DataError
 import com.andlife.domain.model.guestbook.GalleryMedia
 import com.andlife.domain.model.guestbook.GuestBook
+import com.andlife.domain.model.guestbook.GuestBookMedia
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.map
+import com.andlife.network.api.guestbook.GuestBookRequest
 import javax.inject.Inject
 
 internal class GuestBookRepositoryImpl @Inject constructor(
@@ -24,4 +26,20 @@ internal class GuestBookRepositoryImpl @Inject constructor(
         guestBookRemoteDataSource.getGuestBooksByInvitationId(invitationId).map { list ->
             list.map { it.toDomain() }
         }
+
+    override suspend fun createGuestBook(
+        invitationId: Long,
+        userId: Long,
+        textContent: String,
+        medias: List<GuestBookMedia>,
+    ): Result<GuestBook, DataError> {
+        val request =
+            GuestBookRequest(
+                userId = userId,
+                textContent = textContent,
+                medias = medias.map { it.toRequest() },
+            )
+        val result = guestBookRemoteDataSource.createGuestBook(invitationId, request)
+        return result.map { it.toDomain() }
+    }
 }
