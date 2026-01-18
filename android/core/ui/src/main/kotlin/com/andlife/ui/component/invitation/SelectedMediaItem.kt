@@ -68,7 +68,7 @@ fun SelectedMediaItem(
             UiMediaType.VIDEO -> {
                 Box(modifier = Modifier.fillMaxSize()) {
                     AsyncImage(
-                        model = media.uri, // TODO: 영상 썸네일 이미지로 변경
+                        model = media.uri,
                         contentDescription = stringResource(R.string.desc_media_video),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,
