@@ -18,6 +18,7 @@ dependencies {
     // coil
     implementation(libs.coil.kt.compose)
     implementation(libs.coil.kt.network.okhttp)
+    implementation(libs.coil.kt.video)
 
     // paging
     implementation(libs.androidx.paging.compose)
