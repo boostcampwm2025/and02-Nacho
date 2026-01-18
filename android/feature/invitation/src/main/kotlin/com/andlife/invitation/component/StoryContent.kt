@@ -4,9 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.media3.common.Player
@@ -32,31 +37,40 @@ fun StoryContent(
     exoPlayer: Player?,
     modifier: Modifier = Modifier,
 ) {
+    var isVideoReady by remember(exoPlayer) { mutableStateOf(false) }
+
+    LaunchedEffect(exoPlayer) {
+        if (exoPlayer == null) {
+            isVideoReady = false
+            return@LaunchedEffect
+        }
+
+        val listener = object : Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (playbackState == Player.STATE_READY) {
+                    isVideoReady = true
+                }
+            }
+        }
+        exoPlayer.addListener(listener)
+
+        if (exoPlayer.playbackState == Player.STATE_READY) {
+            isVideoReady = true
+        }
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(NachoTheme.colorScheme.backgroundOverlay),
     ) {
-        when (item.type) {
-            UiMediaType.IMAGE -> {
-                AsyncImage(
-                    model = item.mediaUrl,
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop,
-                )
-            }
-            UiMediaType.VIDEO -> {
-                if (!item.thumbnailUrl.isNullOrEmpty()) {
-                    AsyncImage(
-                        model = item.thumbnailUrl,
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                    )
-                }
-            }
-            else -> { /* AUDIO는 기본 배경 필요 없음 */ }
+        if (item.type == UiMediaType.IMAGE || !item.thumbnailUrl.isNullOrEmpty()) {
+            AsyncImage(
+                model = if (item.type == UiMediaType.IMAGE) item.mediaUrl else item.thumbnailUrl,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+            )
         }
 
         if (exoPlayer != null) {
@@ -64,7 +78,11 @@ fun StoryContent(
                 UiMediaType.VIDEO -> {
                     VideoPlayer(
                         exoPlayer = exoPlayer,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .graphicsLayer {
+                                alpha = if (isVideoReady) 1f else 0f
+                            },
                     )
                 }
                 UiMediaType.AUDIO -> {
