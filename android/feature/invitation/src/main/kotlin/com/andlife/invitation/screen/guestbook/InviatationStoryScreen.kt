@@ -113,13 +113,14 @@ fun InvitationStoryScreen(
             userScrollEnabled = true,
         ) { pageIndex ->
             val item = uiState.mediaItems[pageIndex]
+            val isCurrentPage = pagerState.currentPage == pageIndex
 
             Box(modifier = Modifier.fillMaxSize()) {
                 StoryContent(
                     item = item,
                     isExpanded = uiState.isTextExpanded,
                     onToggleExpand = onToggleExpand,
-                    exoPlayer = exoPlayer,
+                    exoPlayer = if (isCurrentPage) exoPlayer else null,
                     modifier = Modifier.align(Alignment.BottomCenter),
                 )
             }

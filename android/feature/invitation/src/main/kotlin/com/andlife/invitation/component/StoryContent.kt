@@ -1,6 +1,5 @@
 package com.andlife.invitation.component
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,16 +29,14 @@ fun StoryContent(
     item: InvitationCollectionUiModel,
     isExpanded: Boolean,
     onToggleExpand: () -> Unit,
-    exoPlayer: Player,
+    exoPlayer: Player?,
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .background(NachoTheme.colorScheme.backgroundOverlay),
+        modifier = modifier
+            .fillMaxSize()
+            .background(NachoTheme.colorScheme.backgroundOverlay),
     ) {
-        Log.d("Item", item.toString())
         when (item.type) {
             UiMediaType.IMAGE -> {
                 AsyncImage(
@@ -50,18 +47,36 @@ fun StoryContent(
                 )
             }
             UiMediaType.VIDEO -> {
-                VideoPlayer(
-                    exoPlayer = exoPlayer,
-                    modifier = Modifier.fillMaxSize(),
-                )
+                if (!item.thumbnailUrl.isNullOrEmpty()) {
+                    AsyncImage(
+                        model = item.thumbnailUrl,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                    )
+                }
             }
-            UiMediaType.AUDIO -> {
-                AudioPlayer(
-                    exoPlayer = exoPlayer,
-                    modifier = Modifier.fillMaxSize(),
-                )
+            else -> { /* AUDIO는 기본 배경 필요 없음 */ }
+        }
+
+        if (exoPlayer != null) {
+            when (item.type) {
+                UiMediaType.VIDEO -> {
+                    VideoPlayer(
+                        exoPlayer = exoPlayer,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+                UiMediaType.AUDIO -> {
+                    AudioPlayer(
+                        exoPlayer = exoPlayer,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+                else -> { /* IMAGE는 플레이어 필요 없음 */ }
             }
         }
+
         StoryTextSection(
             content = item.content,
             isExpanded = isExpanded,
