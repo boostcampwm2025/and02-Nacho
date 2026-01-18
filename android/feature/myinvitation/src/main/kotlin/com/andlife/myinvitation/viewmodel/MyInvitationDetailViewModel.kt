@@ -74,9 +74,7 @@ class MyInvitationDetailViewModel @Inject constructor(
             is MyInvitationDetailUiEvent.ClickEditCard -> navigateToEditCard()
             is MyInvitationDetailUiEvent.ClickImage -> navigateToFullScreenImage(event.imageList, event.index)
             is MyInvitationDetailUiEvent.MapError -> showMapErrorSnackbar()
-            is MyInvitationDetailUiEvent.RetryLoad -> {
-                viewModelScope.launch { loadInvitation() }
-            }
+            is MyInvitationDetailUiEvent.RetryLoad -> retryLoad()
         }
     }
 
@@ -113,5 +111,11 @@ class MyInvitationDetailViewModel @Inject constructor(
 
     private fun showMapErrorSnackbar() {
         sendEffect(MyInvitationDetailSideEffect.ShowMapErrorSnackbar)
+    }
+
+    private fun retryLoad() {
+        viewModelScope.launch {
+            loadInvitation()
+        }
     }
 }
