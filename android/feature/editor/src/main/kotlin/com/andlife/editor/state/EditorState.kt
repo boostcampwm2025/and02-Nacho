@@ -545,10 +545,20 @@ class EditorState @Inject constructor(
         )
     }
 
-    private fun restartInput() {
+    fun restartInput() {
         val imm = editText.context.getSystemService(Context.INPUT_METHOD_SERVICE)
             as? InputMethodManager
         imm?.restartInput(editText)
+    }
+
+    fun clearFocusAndHideKeyboard() {
+        editText.clearFocus()
+        val imm = editText.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(editText.windowToken, 0)
+    }
+
+    fun setEditable(editable: Editable) {
+        editText.text = editable
     }
 
     fun attach(view: EditText) {
