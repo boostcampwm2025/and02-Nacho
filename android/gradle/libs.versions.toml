@@ -29,6 +29,7 @@ androidxComposeMaterial3Adaptive = "1.2.0"
 ktlint = "14.0.1"
 compose-ruleset = "0.4.28"
 javaxInject = "1"
+exifinterface = "1.3.6"
 appsflyer = "6.16.2"
 kakao-sdk = "2.23.2"
 
@@ -111,6 +112,7 @@ kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-pl
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 room-gradlePlugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
 ktlint-gradlePlugin = { group = "org.jlleitschuh.gradle.ktlint", name = "org.jlleitschuh.gradle.ktlint.gradle.plugin", version.ref = "ktlint" }
+androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 
 kakao-sdk-share = { group = "com.kakao.sdk", name = "v2-share", version.ref = "kakao-sdk" }
 kakao-bom = { module = "com.kakao.sdk:v2-bom", version.ref = "kakao-sdk" }
