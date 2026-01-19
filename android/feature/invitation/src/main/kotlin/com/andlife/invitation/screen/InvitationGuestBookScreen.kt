@@ -2,15 +2,16 @@ package com.andlife.invitation.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -33,7 +34,9 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation.model.guestbook.InvitationGuestBookSideEffect
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiEvent
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiState
@@ -170,21 +173,41 @@ private fun InvitationGuestBookScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    PagingStateContent(
-        loadState = guestBooks.loadState.refresh,
-        itemCount = guestBooks.itemCount,
-        onRetry = { guestBooks.retry() },
-    ) {
-
-        Column(modifier = modifier.fillMaxSize()) {
+    Scaffold(
+        modifier = modifier
+            .fillMaxSize(),
+        containerColor = NachoTheme.colorScheme.backgroundPrimary,
+        bottomBar = {
+            Surface(
+                tonalElevation = NachoElevation.medium,
+                shadowElevation = NachoElevation.large,
+                color = NachoTheme.colorScheme.backgroundPrimary
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(NachoSpacing.large)
+                        .navigationBarsPadding()
+                        .imePadding()
+                ) {
+                    GuestBookFormSection(uiState = uiState, onEvent = onEvent)
+                }
+            }
+        }
+    ) { innerPadding ->
+        PagingStateContent(
+            loadState = guestBooks.loadState.refresh,
+            itemCount = guestBooks.itemCount,
+            onRetry = { guestBooks.retry() },
+        ) {
             LazyColumn(
                 state = lazyListState,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(horizontal = NachoSpacing.large),
+                modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
-                contentPadding = PaddingValues(vertical = NachoSpacing.large) // 상하단 여백 추가
+                contentPadding = PaddingValues(
+                    top = NachoSpacing.large,
+                    bottom = innerPadding.calculateBottomPadding()
+                )
             ) {
                 items(
                     count = guestBooks.itemCount,
@@ -214,19 +237,6 @@ private fun InvitationGuestBookScreen(
                             CircularProgressIndicator()
                         }
                     }
-                }
-            }
-
-            Surface(
-                tonalElevation = NachoSpacing.small,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .padding(NachoSpacing.large)
-                        .navigationBarsPadding()
-                ) {
-                    GuestBookFormSection(uiState = uiState, onEvent = onEvent)
                 }
             }
         }
