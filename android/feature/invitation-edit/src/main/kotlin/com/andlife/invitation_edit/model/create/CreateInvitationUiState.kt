@@ -5,4 +5,7 @@ import com.andlife.ui.base.BaseUiState
 data class CreateInvitationUiState(
     val createInvitationUiModel: CreateInvitationUiModel = CreateInvitationUiModel(),
     val isLoading: Boolean = false,
-) : BaseUiState
+) : BaseUiState {
+    val isValid: Boolean
+        get() = createInvitationUiModel.isValid
+}
