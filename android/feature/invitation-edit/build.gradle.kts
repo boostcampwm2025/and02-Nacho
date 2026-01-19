@@ -8,6 +8,7 @@ android {
 }
 
 dependencies {
+    implementation(projects.feature.editor)
     implementation(libs.androidx.compose.material.icons.extended)
     // paging
     implementation(libs.androidx.paging.compose)
