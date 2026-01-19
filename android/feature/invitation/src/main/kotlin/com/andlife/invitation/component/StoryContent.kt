@@ -24,7 +24,7 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiModel
-import com.andlife.invitation.util.toUiType
+import com.andlife.model.util.toUiType
 import com.andlife.ui.component.media.AudioPlayer
 import com.andlife.ui.component.media.VideoPlayer
 import com.andlife.model.guestbook.UiMediaType

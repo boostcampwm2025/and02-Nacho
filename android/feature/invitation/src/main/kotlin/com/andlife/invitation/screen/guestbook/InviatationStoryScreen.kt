@@ -39,10 +39,10 @@ import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.invitation.component.StoryContent
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiModel
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiState
-import com.andlife.invitation.util.toDateTimeFormat
-import com.andlife.invitation.util.toUiType
+import com.andlife.model.util.toUiType
 import com.andlife.invitation.viewmodel.InvitationCollectionViewModel
 import com.andlife.ui.R
+import com.andlife.ui.util.toDateTimeFormat
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime

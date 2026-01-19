@@ -13,7 +13,7 @@ import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiModel
-import com.andlife.invitation.util.toUiType
+import com.andlife.model.util.toUiType
 import com.andlife.ui.component.media.MediaItem
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
