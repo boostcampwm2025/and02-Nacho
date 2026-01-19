@@ -5,7 +5,6 @@ INSERT INTO users (id, email, name, profile_image_url, created_at, updated_at) V
 (4, 'jeongwoo@boostcamp.com', '정우', 'https://picsum.photos/200/200?random=14', NOW(), NOW()),
 (5, 'jimin@boostcamp.com', '지민', 'https://picsum.photos/200/200?random=15', NOW(), NOW()),
 (6, 'andlife@example.com', '안드라이프', 'https://picsum.photos/200', NOW(), NOW());
-
 INSERT INTO `invitations` (
     `id`, `host_id`, `title`, `display_host_name`, `thumbnail_urls`,
     `invitation_date`, `start_time`, `end_time`,
@@ -44,39 +43,13 @@ VALUES
 
 INSERT INTO guestbooks (invitation_id, user_id, text_content, created_at, updated_at)
 VALUES (1, 1, '오늘 파티 너무 즐거웠어요! 사진 공유합니다.', '2026-01-01 18:00:00', '2026-01-01 18:00:00');
+
 INSERT INTO guestbooks (invitation_id, user_id, text_content, created_at, updated_at)
 VALUES (1, 2, '다들 새해 복 많이 받으세요!', '2026-01-02 10:00:00', '2026-01-02 10:00:00');
+
 INSERT INTO guestbooks (invitation_id, user_id, text_content, created_at, updated_at)
 VALUES (1, 3, '생생한 현장 영상입니다 ㅎㅎ', '2026-01-03 12:00:00', '2026-01-03 12:00:00');
-INSERT INTO guestbooks (invitation_id, user_id, text_content, created_at, updated_at)
-VALUES (1, 4, '계절이 지나가는 하늘에는
-가을로 가득 차 있습니다.
-나는 아무 걱정도 없이
-가을 속의 별들을 다 헤일 듯합니다.
-가슴속에 하나둘 새겨지는 별을
-이제 다 못 헤는 것은
-쉬이 아침이 오는 까닭이요,
-내일 밤이 남은 까닭이요,
-아직 나의 청춘이 다하지 않은 까닭입니다.
-별 하나에 추억과
-별 하나에 사랑과
-별 하나에 쓸쓸함과
-별 하나에 동경과
-별 하나에 시와
-별 하나에 어머니, 어머니.', '2026-01-04 14:30:00', '2026-01-04 14:30:00');
-INSERT INTO guestbooks (invitation_id, user_id, text_content, created_at, updated_at)
-VALUES (1, 5, '2026년 송년회 정말 멋진 시간이었습니다!
-함께한 모든 순간들이 소중한 추억으로 남을 것 같아요.
-특히 다같이 게임하면서 웃었던 시간들,
-맛있는 음식을 나누며 이야기 나눴던 순간들,
-그리고 새해를 맞이하며 함께 카운트다운 했던 그 순간까지
-모든 것이 완벽했습니다.
-이렇게 좋은 사람들과 함께할 수 있어서 너무 행복했어요.
-내년에도 꼭 다시 만나요!
-모두 건강하시고 2026년도 행복한 일만 가득하길 바랍니다.
-사진도 많이 찍었는데 공유할게요.
-다들 정말 수고 많으셨고 감사합니다.
-새해 복 많이 받으세요!', '2026-01-05 09:15:00', '2026-01-05 09:15:00');
+
 
 INSERT INTO guestbook_images (guestbook_post_id, image_url, display_order)
 VALUES (1, 'https://picsum.photos/400/600?random=1', 0);
