@@ -1,4 +1,4 @@
-package com.andlife.myinvitation.model
+package com.andlife.myinvitation.model.guestbook
 
 import com.andlife.ui.base.BaseUiEvent
 

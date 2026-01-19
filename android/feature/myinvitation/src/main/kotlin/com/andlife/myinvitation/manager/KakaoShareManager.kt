@@ -28,30 +28,33 @@ class KakaoShareManager @Inject constructor(
         val appsFlyerUrl = deepLinkManager.buildAppsFlyerUrl(invitationId)
         Log.d("KakaoShare", "invitationId: $invitationId, appsFlyerUrl: $appsFlyerUrl")
 
-        val feed = FeedTemplate(
-            content =
-                Content(
-                    title = title,
-                    description = "$date\n$location",
-                    imageUrl = imageUrl,
-                    link = Link(
-                        androidExecutionParams = emptyMap(),
-                        webUrl = appsFlyerUrl,
-                        mobileWebUrl = appsFlyerUrl,
-                    )
-                ),
-            buttons =
-                listOf(
-                    Button(
-                        title = btnText,
-                        link = Link(
-                            androidExecutionParams = emptyMap(),
-                            webUrl = appsFlyerUrl,
-                            mobileWebUrl = appsFlyerUrl,
-                        )
-                    )
+        val feed =
+            FeedTemplate(
+                content =
+                    Content(
+                        title = title,
+                        description = "$date\n$location",
+                        imageUrl = imageUrl,
+                        link =
+                            Link(
+                                androidExecutionParams = emptyMap(),
+                                webUrl = appsFlyerUrl,
+                                mobileWebUrl = appsFlyerUrl,
+                            ),
+                    ),
+                buttons =
+                    listOf(
+                        Button(
+                            title = btnText,
+                            link =
+                                Link(
+                                    androidExecutionParams = emptyMap(),
+                                    webUrl = appsFlyerUrl,
+                                    mobileWebUrl = appsFlyerUrl,
+                                ),
+                        ),
+                    ),
             )
-        )
 
         if (ShareClient.instance.isKakaoTalkSharingAvailable(context)) {
             ShareClient.instance.shareDefault(context, feed) { result, error ->
