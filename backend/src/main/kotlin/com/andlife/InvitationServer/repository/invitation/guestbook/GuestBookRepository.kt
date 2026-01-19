@@ -18,6 +18,7 @@ interface GuestBookRepository : JpaRepository<GuestBook, Long> {
         JOIN FETCH gb.user
         JOIN FETCH gb.invitation
         WHERE gb.invitation.id = :invitationId
+        ORDER BY gb.createdAt DESC, gb.id DESC
     """)
     fun findAllByInvitationId(invitationId: Long, pageable: Pageable): Page<GuestBook>
 }
