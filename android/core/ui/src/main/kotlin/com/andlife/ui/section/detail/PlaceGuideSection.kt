@@ -70,7 +70,7 @@ fun PlaceGuideSection(
                 )
             }
 
-            location.guide?.takeIf {it.isNotBlank() }?.let { guide ->
+            location.guide?.takeIf { it.isNotBlank() }?.let { guide ->
                 Text(
                     text = guide,
                     style = NachoTheme.typography.bodyMediumRegular,

@@ -107,7 +107,6 @@ private fun MyInvitationDetailScreen(
     modifier: Modifier = Modifier,
 ) {
     val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()
-
     val coroutineScope = rememberCoroutineScope()
     var isMapVisible by remember { mutableStateOf(true) }
 
