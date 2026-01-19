@@ -44,6 +44,7 @@ data class VideoCandidate(
 
 @Composable
 fun HomeRoute(
+    onNavigateToInvitationDetail: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
@@ -54,6 +55,7 @@ fun HomeRoute(
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is HomeSideEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
+            is HomeSideEffect.NavigateToInvitationDetail -> onNavigateToInvitationDetail(effect.invitationId)
         }
     }
 

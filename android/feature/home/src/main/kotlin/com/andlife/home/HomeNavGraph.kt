@@ -17,8 +17,14 @@ fun NavController.navigateToHome(navOptions: NavOptions) {
     navigate(Home, navOptions)
 }
 
-fun NavGraphBuilder.homeNavGraph(paddingValues: PaddingValues) {
+fun NavGraphBuilder.homeNavGraph(
+    paddingValues: PaddingValues,
+    onNavigateToInvitationDetail: (Long) -> Unit,
+) {
     composable<Home> {
-        HomeRoute(modifier = Modifier.padding(paddingValues))
+        HomeRoute(
+            onNavigateToInvitationDetail = onNavigateToInvitationDetail,
+            modifier = Modifier.padding(paddingValues),
+        )
     }
 }

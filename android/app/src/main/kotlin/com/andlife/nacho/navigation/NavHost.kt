@@ -53,7 +53,10 @@ fun NachoNavHost(
             navController = navigator.navController,
             startDestination = navigator.startDestination,
         ) {
-            homeNavGraph(innerPadding)
+            homeNavGraph(
+                paddingValues = innerPadding,
+                onNavigateToInvitationDetail = navigator::navigateToInvitationDetail,
+            )
 
             invitationNavGraph(
                 paddingValues = innerPadding,

@@ -40,7 +40,7 @@ constructor(
         when (event) {
             is HomeUiEvent.ClickInvitationTitle ->
                 sendEffect(
-                    HomeSideEffect.ShowMessage("초대장 제목 클릭됨: ${event.invitationId}"),
+                    HomeSideEffect.NavigateToInvitationDetail(event.invitationId),
                 )
 
             is HomeUiEvent.ClickGuestBookMenu ->

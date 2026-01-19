@@ -6,4 +6,8 @@ sealed interface HomeSideEffect : BaseSideEffect {
     data class ShowMessage(
         val message: String,
     ) : HomeSideEffect
+
+    data class NavigateToInvitationDetail(
+        val invitationId: Long,
+    ) : HomeSideEffect
 }
