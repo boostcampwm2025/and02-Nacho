@@ -62,6 +62,7 @@ fun InvitationGuestBookRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val guestBooks = viewModel.guestBooksPagingFlow.collectAsLazyPagingItems()
     val snackbarHostState = remember { SnackbarHostState() }
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
@@ -72,6 +73,26 @@ fun InvitationGuestBookRoute(
                 )
             }
         }
+    }
+
+    DisposableEffect(Unit) {
+        viewModel.videoPlayerPool.preparePlayers()
+        onDispose {
+            viewModel.videoPlayerPool.releaseAllPlayers()
+        }
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> viewModel.videoPlayerPool.resumeLastPlayed()
+                Lifecycle.Event.ON_PAUSE -> viewModel.videoPlayerPool.pauseAllPlayers()
+                Lifecycle.Event.ON_DESTROY -> viewModel.videoPlayerPool.resetPool()
+                else -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     InvitationGuestBookScreen(
@@ -93,7 +114,6 @@ private fun InvitationGuestBookScreen(
     videoPlayerPool: AutoVideoPlayerPool,
     modifier: Modifier = Modifier,
 ) {
-    val lifecycleOwner = LocalLifecycleOwner.current
     val lazyListState = rememberLazyListState()
     var playVideoIndex by remember { mutableStateOf(-1) }
 
@@ -158,19 +178,6 @@ private fun InvitationGuestBookScreen(
                     }
                 }
             }
-    }
-
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_RESUME -> videoPlayerPool.resumeLastPlayed()
-                Lifecycle.Event.ON_PAUSE -> videoPlayerPool.pauseAllPlayers()
-                Lifecycle.Event.ON_DESTROY -> videoPlayerPool.resetPool()
-                else -> {}
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     Scaffold(
