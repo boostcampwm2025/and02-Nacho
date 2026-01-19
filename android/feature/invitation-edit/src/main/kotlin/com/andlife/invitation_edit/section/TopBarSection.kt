@@ -23,6 +23,7 @@ internal fun TopBarSection(
     onBackClick: () -> Unit,
     onPreviewClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     TopAppBar(
         title = {
@@ -33,7 +34,10 @@ internal fun TopBarSection(
             )
         },
         navigationIcon = {
-            IconButton(onBackClick) {
+            IconButton(
+                onClick = onBackClick,
+                enabled = !isLoading,
+            ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.ArrowBack,
                     contentDescription = stringResource(R.string.desc_back),
