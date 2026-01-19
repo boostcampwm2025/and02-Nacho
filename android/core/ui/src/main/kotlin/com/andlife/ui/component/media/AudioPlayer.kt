@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -122,8 +121,6 @@ fun AudioPlayer(
 
         Spacer(modifier = Modifier.height(NachoSpacing.threeXLarge))
 
-        val progress = if (duration > 0) currentPosition.toFloat() / duration.toFloat() else 0f
-
         Slider(
             value = if (isDragging) sliderPosition else {
                 if (duration > 0) currentPosition.toFloat() / duration.toFloat() else 0f
@@ -145,26 +142,6 @@ fun AudioPlayer(
                 activeTrackColor = NachoTheme.colorScheme.iconPrimary,
                 inactiveTrackColor = NachoTheme.colorScheme.backgroundPrimary.copy(alpha = 0.5f)
             )
-        )
-    }
-}
-
-@Composable
-fun AudioProgressBar(
-    progress: Float,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(50))
-            .background(NachoTheme.colorScheme.backgroundPrimary.copy(alpha = 0.5f))
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(fraction = progress)
-                .clip(RoundedCornerShape(50))
-                .background(NachoTheme.colorScheme.backgroundPrimary)
         )
     }
 }
