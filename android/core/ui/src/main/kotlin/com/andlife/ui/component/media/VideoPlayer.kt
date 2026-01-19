@@ -2,7 +2,6 @@ package com.andlife.ui.component.media
 
 import androidx.annotation.OptIn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.Player
@@ -25,7 +24,9 @@ fun VideoPlayer(
             }
         },
         update = { playerView ->
-            playerView.player = exoPlayer
+            if (playerView.player != exoPlayer) {
+                playerView.player = exoPlayer
+            }
         },
         modifier = modifier
     )
