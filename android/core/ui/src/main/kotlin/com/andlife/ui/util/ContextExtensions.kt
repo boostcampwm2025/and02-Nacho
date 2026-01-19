@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import androidx.core.net.toUri
 
 fun Context.openExternalMap(
     lat: Double,
@@ -11,7 +12,7 @@ fun Context.openExternalMap(
     label: String,
     onFail: () -> Unit,
 ) {
-    val uri = Uri.parse("geo:$lat,$lng?q=${Uri.encode(label)}")
+    val uri = "geo:$lat,$lng?q=${Uri.encode(label)}".toUri()
     val mapIntent = Intent(Intent.ACTION_VIEW, uri)
 
     try {
