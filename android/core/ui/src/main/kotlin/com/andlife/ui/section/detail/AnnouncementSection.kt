@@ -40,7 +40,7 @@ fun AnnouncementSection(
             color = NachoTheme.colorScheme.textPrimary,
         )
 
-        announcements.forEachIndexed { index, announcement ->
+        announcements.forEach { announcement ->
             Column(
                 verticalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
             ) {
