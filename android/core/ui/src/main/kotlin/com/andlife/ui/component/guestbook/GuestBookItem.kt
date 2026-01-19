@@ -75,12 +75,12 @@ import com.andlife.designsystem.R as designR
 fun GuestBookItem(
     guestBook: GuestBookUiModel,
     videoPlayerPool: AutoVideoPlayerPool,
-    onInvitationTitleClick: (Long) -> Unit,
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
     onMenuClick: () -> Unit,
     modifier: Modifier = Modifier,
     shouldPlayVideo: Boolean = false,
+    onInvitationTitleClick: (Long) -> Unit? = {},
 ) {
     Column(
         modifier = modifier,
@@ -182,7 +182,7 @@ private fun GuestBookItemHeader(
 private fun GuestBookItemTextSection(
     invitation: GuestBookInvitationUiModel?,
     textContent: String,
-    onInvitationTitleClick: (Long) -> Unit,
+    onInvitationTitleClick: (Long) -> Unit?,
     modifier: Modifier = Modifier,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
