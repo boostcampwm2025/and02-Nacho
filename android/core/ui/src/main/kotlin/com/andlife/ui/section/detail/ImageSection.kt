@@ -98,7 +98,7 @@ fun ImageSection(
                             ) {
                                 Icon(
                                     imageVector = ImageVector.vectorResource(R.drawable.ic_error_outline_24),
-                                    contentDescription = null,
+                                    contentDescription = stringResource(R.string.desc_invitation_image_error),
                                     tint = NachoTheme.colorScheme.textTertiary,
                                 )
                             }

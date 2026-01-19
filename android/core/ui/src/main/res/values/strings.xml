@@ -68,6 +68,7 @@
 
     <!--  ImageSection  -->
     <string name="desc_invitation_image">초대장 상세 이미지</string>
+    <string name="desc_invitation_image_error">초대장 상세 이미지 에러</string>
     <!--  AuthorSection  -->
     <string name="desc_profile_image">프로필 이미지</string>
     <string name="txt_host">주최자</string>
