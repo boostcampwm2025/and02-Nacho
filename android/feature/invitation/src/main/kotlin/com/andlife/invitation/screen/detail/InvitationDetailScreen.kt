@@ -65,6 +65,7 @@ fun InvitationDetailRoute(
             InvitationDetailSideEffect.NavigateBack -> {
                 onNavigateBack()
             }
+
             InvitationDetailSideEffect.ShowMapErrorSnackbar -> {
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar(
@@ -123,8 +124,7 @@ private fun InvitationDetailScreen(
     ) { paddingValues ->
         if (uiState.isLoading) {
             InvitationLoadingIndicator(
-                modifier = Modifier
-                    .padding(paddingValues),
+                modifier = Modifier.padding(paddingValues),
                 text = stringResource(R.string.txt_loading_invitation),
             )
             return@Scaffold
@@ -141,38 +141,33 @@ private fun InvitationDetailScreen(
         }
 
         Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
             GenericTabRow(
                 tabs = tabTitles,
-                content =
-                    { index ->
+                content = { index ->
                     when (index) {
                         0 -> {
                             InvitationContentsScreen(
                                 uiState = uiState,
-                                onClickImage =
-                                    { idx ->
-                                        onEvent(
-                                            InvitationDetailUiEvent.ClickImage(
-                                                uiState.invitationContentsUiModel.imageList,
-                                                idx,
-                                            ),
-                                        )
-                                    },
+                                onClickImage = { idx ->
+                                    onEvent(
+                                        InvitationDetailUiEvent.ClickImage(
+                                            uiState.invitationContentsUiModel.imageList,
+                                            idx,
+                                        ),
+                                    )
+                                },
                                 onMapError = { onEvent(InvitationDetailUiEvent.MapError) },
                                 isMapVisible = isMapVisible,
                                 modifier = Modifier.fillMaxSize(),
                             )
                         }
+
                         1 -> Text("방명록 화면")
-                        2 ->
-                            InvitationCollectionRoute(
-                                //uiState.id,
-                            )
+                        2 -> InvitationCollectionRoute()
                     }
                 },
             )
@@ -227,10 +222,9 @@ private fun InvitationDetailTopBar(
                 )
             }
         },
-        colors =
-            TopAppBarDefaults.topAppBarColors(
-                containerColor = NachoTheme.colorScheme.backgroundPrimary,
-            ),
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = NachoTheme.colorScheme.backgroundPrimary,
+        ),
     )
 }
 
