@@ -1,4 +1,4 @@
-package com.andlife.invitation.screen.guestbook
+package com.andlife.invitation.screen.guestbook.collection
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

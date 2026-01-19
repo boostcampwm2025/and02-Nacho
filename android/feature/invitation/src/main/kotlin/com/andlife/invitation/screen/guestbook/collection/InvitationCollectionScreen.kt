@@ -1,4 +1,4 @@
-package com.andlife.invitation.screen.guestbook
+package com.andlife.invitation.screen.guestbook.collection
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue

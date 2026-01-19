@@ -14,9 +14,9 @@ import com.andlife.domain.util.onSuccess
 import com.andlife.model.guestbook.UiMediaType
 import com.andlife.model.invitation.collection.toUiModel
 import com.andlife.myinvitation.MyInvitationDetail
-import com.andlife.myinvitation.model.guestbook.MyInvitationCollectionSideEffect
-import com.andlife.myinvitation.model.guestbook.MyInvitationCollectionUiEvent
-import com.andlife.myinvitation.model.guestbook.MyInvitationCollectionUiState
+import com.andlife.myinvitation.model.guestbook.collection.MyInvitationCollectionSideEffect
+import com.andlife.myinvitation.model.guestbook.collection.MyInvitationCollectionUiEvent
+import com.andlife.myinvitation.model.guestbook.collection.MyInvitationCollectionUiState
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext

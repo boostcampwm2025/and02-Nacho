@@ -22,7 +22,6 @@ import androidx.media3.exoplayer.ExoPlayer
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoTheme
-import com.andlife.model.util.toUiType
 import com.andlife.ui.component.media.AudioPlayer
 import com.andlife.ui.component.media.VideoPlayer
 import com.andlife.model.guestbook.UiMediaType

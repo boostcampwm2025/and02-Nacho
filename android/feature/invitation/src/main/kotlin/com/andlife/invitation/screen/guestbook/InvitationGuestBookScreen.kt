@@ -1,4 +1,4 @@
-package com.andlife.invitation.screen
+package com.andlife.invitation.screen.guestbook
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
