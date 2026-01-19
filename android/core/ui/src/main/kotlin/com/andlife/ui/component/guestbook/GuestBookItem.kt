@@ -1,6 +1,8 @@
 package com.andlife.ui.component.guestbook
 
 import androidx.annotation.OptIn
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,24 +25,38 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.cache.CacheDataSource
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.media.video.AutoVideoPlayerPool
+import com.andlife.media.video.AutoVideoPlayerPoolImpl
 import com.andlife.model.common.AuthorUiModel
 import com.andlife.model.guestbook.GuestBookInvitationUiModel
 import com.andlife.model.guestbook.GuestBookMediaUiModel
@@ -57,6 +74,7 @@ import com.andlife.designsystem.R as designR
 @Composable
 fun GuestBookItem(
     guestBook: GuestBookUiModel,
+    videoPlayerPool: AutoVideoPlayerPool,
     onInvitationTitleClick: (Long) -> Unit,
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
@@ -81,9 +99,11 @@ fun GuestBookItem(
         )
         if (guestBook.visualMedias.isNotEmpty()) {
             GuestBookItemVisualMediaSection(
+                guestBookId = guestBook.id,
                 visualMediaUrls = guestBook.visualMedias,
                 totalVisualCount = guestBook.totalVisualCount,
                 shouldPlayVideo = shouldPlayVideo,
+                videoPlayerPool = videoPlayerPool,
                 onVisualMediaClick = onVisualMediaClick,
             )
         }
@@ -236,13 +256,26 @@ private fun GuestBookItemTextSection(
 
 @Composable
 private fun GuestBookItemVisualMediaSection(
+    guestBookId: Long,
     visualMediaUrls: ImmutableList<GuestBookMediaUiModel>,
     totalVisualCount: Int,
     shouldPlayVideo: Boolean,
+    videoPlayerPool: AutoVideoPlayerPool,
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val pagerState = rememberPagerState(pageCount = { visualMediaUrls.size })
+    var beyondViewportPageCount by remember { mutableStateOf(0) }
+
+    LaunchedEffect(pagerState.currentPage) {
+        val nextPage = pagerState.currentPage + 1
+        if (nextPage < visualMediaUrls.size) {
+            val nextMedia = visualMediaUrls[nextPage]
+            beyondViewportPageCount = if (nextMedia.type == MediaUiType.IMAGE) 1 else 0
+        } else {
+            beyondViewportPageCount = 0
+        }
+    }
 
     Box(
         modifier =
@@ -251,7 +284,10 @@ private fun GuestBookItemVisualMediaSection(
                 .aspectRatio(1f) // TODO: 추후 미디어 비율에 맞게 조정 필요, 일단 정사각형으로 고정
                 .clip(NachoTheme.shapes.small),
     ) {
-        HorizontalPager(state = pagerState) { page ->
+        HorizontalPager(
+            state = pagerState,
+            beyondViewportPageCount = beyondViewportPageCount,
+        ) { page ->
             val media = visualMediaUrls[page]
             Box(
                 modifier =
@@ -261,10 +297,12 @@ private fun GuestBookItemVisualMediaSection(
             ) {
                 when (media.type) {
                     MediaUiType.VIDEO -> {
-                        SimpleVideoPlayer(
+                        VideoPlayerContainer(
+                            guestBookId = guestBookId,
                             videoUrl = media.url,
                             thumbnailUrl = media.thumbnailUrl,
                             shouldPlay = shouldPlayVideo && pagerState.currentPage == page,
+                            videoPlayerPool = videoPlayerPool,
                         )
 
                         media.durationSeconds?.let {
@@ -279,11 +317,35 @@ private fun GuestBookItemVisualMediaSection(
                     }
 
                     else -> {
-                        AsyncImage(
+                        SubcomposeAsyncImage(
                             model = media.url,
-                            contentDescription = null,
+                            contentDescription = stringResource(R.string.desc_guest_book_image_media),
                             modifier = Modifier.fillMaxWidth(),
                             contentScale = ContentScale.Crop,
+                            loading = {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(NachoTheme.colorScheme.backgroundSecondary),
+                                )
+                            },
+                            error = {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(NachoTheme.colorScheme.backgroundSecondary),
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_error_image_24),
+                                        contentDescription = stringResource(R.string.desc_error_image),
+                                        tint = NachoTheme.colorScheme.iconDisabled,
+                                        modifier =
+                                            Modifier
+                                                .size(60.dp)
+                                                .align(Alignment.Center),
+                                    )
+                                }
+                            }
                         )
                     }
                 }
@@ -305,13 +367,111 @@ private fun GuestBookItemVisualMediaSection(
 
 @OptIn(UnstableApi::class)
 @Composable
-private fun SimpleVideoPlayer(
+private fun VideoPlayerContainer(
+    guestBookId: Long,
     videoUrl: String,
     thumbnailUrl: String?,
     shouldPlay: Boolean,
+    videoPlayerPool: AutoVideoPlayerPool,
     modifier: Modifier = Modifier,
 ) {
-    // TODO: Exoplayer 사용 예정
+    var isVideoReady by remember(videoUrl, shouldPlay) { mutableStateOf(false) }
+
+    val thumbnailAlpha by animateFloatAsState(
+        targetValue = if (isVideoReady) 0f else 1f,
+        animationSpec = tween(durationMillis = 200),
+    )
+
+    LaunchedEffect(shouldPlay) {
+        if (shouldPlay) {
+            videoPlayerPool.playPlayer(videoUrl, guestBookId)
+        } else {
+            videoPlayerPool.pausePlayer(videoUrl)
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
+        if (shouldPlay) {
+            val currentPlayer = videoPlayerPool.getPlayer(videoUrl)
+
+            DisposableEffect(currentPlayer) {
+                val listener = object : Player.Listener {
+                    override fun onRenderedFirstFrame() {
+                        isVideoReady = true
+                    }
+                }
+                currentPlayer.exoPlayer.addListener(listener)
+                onDispose { currentPlayer.exoPlayer.removeListener(listener) }
+            }
+            VideoPlayerView(
+                player = currentPlayer.exoPlayer,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+        thumbnailUrl?.let {
+            ThumbnailWrapper(
+                thumbnailUrl = it,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(thumbnailAlpha),
+            )
+        }
+    }
+}
+
+@Composable
+private fun VideoPlayerView(
+    player: ExoPlayer,
+    modifier: Modifier = Modifier,
+) {
+    AndroidView(
+        factory = { context ->
+            PlayerView(context).apply {
+                useController = false
+                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                this.player = player
+            }
+        },
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun ThumbnailWrapper(
+    thumbnailUrl: String?,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+    ) {
+        AsyncImage(
+            model = thumbnailUrl,
+            contentDescription = stringResource(R.string.desc_video_thumbnail),
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Fit,
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(48.dp)
+                .background(
+                    color = NachoTheme.colorScheme.iconSecondary.copy(alpha = 0.6f),
+                    shape = CircleShape,
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_play_arrow_24),
+                contentDescription = stringResource(R.string.desc_play_video),
+                tint = NachoTheme.colorScheme.iconTertiary,
+                modifier = Modifier.size(24.dp),
+            )
+        }
+    }
 }
 
 @Composable
@@ -327,7 +487,8 @@ private fun GuestBookAudioItem(
                 .background(
                     color = NachoTheme.colorScheme.brandLight,
                     shape = NachoTheme.shapes.small,
-                ).padding(NachoSpacing.large),
+                )
+                .padding(NachoSpacing.large),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
     ) {
@@ -450,6 +611,7 @@ private fun GuestBookItemPreview() {
                             createdAt = LocalDateTime(2025, 6, 1, 12, 0),
                             updatedAt = LocalDateTime(2025, 6, 1, 12, 0),
                         ),
+                    videoPlayerPool = AutoVideoPlayerPoolImpl(LocalContext.current, CacheDataSource.Factory()),
                     shouldPlayVideo = false,
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},

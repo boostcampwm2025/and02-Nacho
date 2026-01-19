@@ -14,6 +14,8 @@ dependencies {
     // Kotlin DateTime
     implementation(libs.kotlinx.datetime)
 
+    implementation(projects.core.media)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
