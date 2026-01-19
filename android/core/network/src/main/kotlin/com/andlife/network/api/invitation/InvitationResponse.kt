@@ -30,6 +30,7 @@ data class InvitationCardResponse(
     val id: Long,
     val invitationId: Long,
     val contentJson: String,
+    val backgroundColor: Long,
     val backgroundImageUrl: String?,
 )
 
