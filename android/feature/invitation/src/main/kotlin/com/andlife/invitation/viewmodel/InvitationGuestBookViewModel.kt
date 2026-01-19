@@ -46,7 +46,7 @@ constructor(
     private val mediaUploader: MediaUploader,
     private val mediaFileProvider: MediaFileProvider,
     private val guestBookRepository: GuestBookRepository,
-    private val audioPlayerManager: AudioPlayerManager,
+    val audioPlayerManager: AudioPlayerManager,
     val videoPlayerPool: AutoVideoPlayerPool,
 ) : BaseViewModel<InvitationGuestBookUiState, InvitationGuestBookUiEvent, InvitationGuestBookSideEffect>(
     InvitationGuestBookUiState(),

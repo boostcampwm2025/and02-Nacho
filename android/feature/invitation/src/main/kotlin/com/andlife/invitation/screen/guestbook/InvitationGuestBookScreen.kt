@@ -79,15 +79,24 @@ fun InvitationGuestBookRoute(
         viewModel.videoPlayerPool.preparePlayers()
         onDispose {
             viewModel.videoPlayerPool.releaseAllPlayers()
+            viewModel.audioPlayerManager.release()
         }
     }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
-                Lifecycle.Event.ON_RESUME -> viewModel.videoPlayerPool.resumeLastPlayed()
-                Lifecycle.Event.ON_PAUSE -> viewModel.videoPlayerPool.pauseAllPlayers()
-                Lifecycle.Event.ON_DESTROY -> viewModel.videoPlayerPool.resetPool()
+                Lifecycle.Event.ON_RESUME -> {
+                    viewModel.videoPlayerPool.resumeLastPlayed()
+                }
+                Lifecycle.Event.ON_PAUSE -> {
+                    viewModel.videoPlayerPool.pauseAllPlayers()
+                    viewModel.audioPlayerManager.pause()
+                }
+                Lifecycle.Event.ON_DESTROY -> {
+                    viewModel.videoPlayerPool.releaseAllPlayers()
+                    viewModel.audioPlayerManager.stopAll()
+                }
                 else -> {}
             }
         }
