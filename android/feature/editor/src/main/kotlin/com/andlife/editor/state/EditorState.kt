@@ -380,7 +380,7 @@ class EditorState @Inject constructor(
         val context = editText.context
         imageLoader.loadBitmap(context, uri, targetWidth, targetHeight)
             .onSuccess { bitmap ->
-                editText.insertImageSpan(bitmap)
+                editText.insertImageSpan(bitmap, uri.toString())
             }
             .onFailure { error ->
                 Log.e("EditorState", "insertImage: $error")
@@ -599,7 +599,7 @@ class EditorState @Inject constructor(
     }
 }
 
-private fun EditText.insertImageSpan(bitmap: Bitmap) {
+private fun EditText.insertImageSpan(bitmap: Bitmap, imageSource: String) {
     val editable = this.text ?: return
     val cursorPos = this.selectionStart
     val context = this.context
@@ -619,7 +619,7 @@ private fun EditText.insertImageSpan(bitmap: Bitmap) {
     val imageStart = cursorPos + if (needNewLineBefore) 1 else 0
     val imageEnd = imageStart + 1
 
-    val imageSpan = CenteredImageSpan(drawable, this.width)
+    val imageSpan = CenteredImageSpan(drawable, this.width, imageSource)
 
     editable.setSpan(imageSpan, imageStart, imageEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
 
