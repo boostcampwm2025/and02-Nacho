@@ -3,6 +3,7 @@ package com.andlife.model.invitation
 import com.andlife.domain.model.invitation.Announcement
 import com.andlife.domain.model.invitation.InvitationCard
 import com.andlife.domain.model.invitation.Invitation
+import com.andlife.model.editor.toUiModel
 import kotlinx.collections.immutable.toImmutableList
 
 
@@ -50,7 +51,8 @@ fun InvitationCard.toUiModel(): InvitationCardUiModel {
     return InvitationCardUiModel(
         id = id,
         invitationId = invitationId,
-        contentJson = contentJson,
-        backgroundImageUrl = backgroundImageUrl,
+        card = card.toUiModel(),
+        backgroundColor = card.backgroundColor,
+        backgroundImageUrl = card.backgroundImageUrl,
     )
 }
