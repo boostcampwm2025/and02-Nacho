@@ -36,6 +36,8 @@ import com.naver.maps.map.compose.NaverMap
 import com.naver.maps.map.compose.rememberCameraPositionState
 import com.naver.maps.map.util.MarkerIcons
 
+private const val DEFAULT_ZOOM_LEVEL = 15.0
+
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
 fun PlaceGuideSection(
@@ -91,7 +93,7 @@ private fun PlaceMapCard(
     val context = LocalContext.current
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition(
-            LatLng(location.latLng.latitude, location.latLng.longitude), 15.0
+            LatLng(location.latLng.latitude, location.latLng.longitude), DEFAULT_ZOOM_LEVEL
         )
     }
 
