@@ -1,6 +1,8 @@
 package com.andlife.invitation_edit.viewmodel
 
+import com.andlife.editor.util.CreateCardSession
 import com.andlife.invitation_edit.model.create.AnnouncementUiModel
+import com.andlife.invitation_edit.model.create.CardUiModel
 import com.andlife.invitation_edit.model.create.CreateInvitationSideEffect
 import com.andlife.invitation_edit.model.create.CreateInvitationUiEvent
 import com.andlife.invitation_edit.model.create.CreateInvitationUiState
@@ -14,9 +16,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
-class CreateInvitationViewModel
-@Inject
-constructor() :
+class CreateInvitationViewModel @Inject constructor(
+    private val createCardSession: CreateCardSession
+) :
     BaseViewModel<CreateInvitationUiState, CreateInvitationUiEvent, CreateInvitationSideEffect>(
         CreateInvitationUiState(),
     ) {
@@ -70,6 +72,10 @@ constructor() :
 
             is CreateInvitationUiEvent.RemoveAnnouncement -> {
                 updateRemoveAnnouncement(event)
+            }
+
+            CreateInvitationUiEvent.OnClickBack -> {
+                onBackClick()
             }
         }
     }
@@ -179,6 +185,20 @@ constructor() :
                 createInvitationUiModel = createInvitationUiModel.copy(announcement = newAnnouncementList),
             )
         }
+    }
+
+    fun getCardEditorResult() {
+        val editable = createCardSession.editable ?: return
+        val backgroundColor = createCardSession.backgroundColor
+        val card = CardUiModel(editable, backgroundColor)
+        updateState {
+            copy(createInvitationUiModel = createInvitationUiModel.copy(card = card))
+        }
+    }
+
+    private fun onBackClick() {
+        createCardSession.clear()
+        sendEffect(CreateInvitationSideEffect.OnBack)
     }
 
     companion object {
