@@ -1,5 +1,16 @@
 package com.andlife.invitation_edit.viewmodel
 
+import android.util.Log
+import androidx.lifecycle.viewModelScope
+import com.andlife.domain.util.Result
+import com.andlife.domain.error.DataError
+import com.andlife.domain.repository.invitation.InvitationRepository
+import com.andlife.domain.util.MediaFileProvider
+import com.andlife.domain.util.MediaUploader
+import com.andlife.domain.util.map
+import com.andlife.domain.util.onFailure
+import com.andlife.domain.util.onSuccess
+import com.andlife.editor.util.CardConverter
 import com.andlife.editor.util.CreateCardSession
 import com.andlife.invitation_edit.model.create.AnnouncementUiModel
 import com.andlife.invitation_edit.model.create.CardUiModel
@@ -8,16 +19,26 @@ import com.andlife.invitation_edit.model.create.CreateInvitationUiEvent
 import com.andlife.invitation_edit.model.create.CreateInvitationUiState
 import com.andlife.invitation_edit.model.create.InvitationTimeUiModel
 import com.andlife.invitation_edit.model.create.ThumbnailImageUiModel
+import com.andlife.invitation_edit.model.create.toCreateParam
+import com.andlife.invitation_edit.model.create.toLocalTime
+import com.andlife.model.editor.CardImage
+import com.andlife.model.editor.NachoUiCard
+import com.andlife.model.editor.toDomain
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CreateInvitationViewModel @Inject constructor(
-    private val createCardSession: CreateCardSession
+    private val createCardSession: CreateCardSession,
+    private val mediaFileProvider: MediaFileProvider,
+    private val mediaUploader: MediaUploader,
+    private val editorConverter: CardConverter,
+    private val invitationRepository: InvitationRepository,
 ) :
     BaseViewModel<CreateInvitationUiState, CreateInvitationUiEvent, CreateInvitationSideEffect>(
         CreateInvitationUiState(),
@@ -76,6 +97,10 @@ class CreateInvitationViewModel @Inject constructor(
 
             CreateInvitationUiEvent.OnClickBack -> {
                 onBackClick()
+            }
+
+            CreateInvitationUiEvent.OnClickCreate -> {
+                createInvitation()
             }
         }
     }
@@ -199,6 +224,109 @@ class CreateInvitationViewModel @Inject constructor(
     private fun onBackClick() {
         createCardSession.clear()
         sendEffect(CreateInvitationSideEffect.OnBack)
+    }
+
+    private fun createInvitation() {
+        val uiModel = uiState.value.createInvitationUiModel
+
+        val date = uiModel.date ?: run {
+            return
+        }
+        val startTime = uiModel.startTime?.toLocalTime() ?: run {
+            return
+        }
+
+        viewModelScope.launch {
+            updateState { copy(isLoading = true) }
+            val thumbnails = uiState.value.createInvitationUiModel.imageList.map { it.url }
+            val uploadedThumbnailsResult = uploadImages(thumbnails)
+            if (uploadedThumbnailsResult !is Result.Success) {
+                return@launch
+            }
+
+            val cardResult = processCardAndUploadImages(uiModel.card)
+            if (cardResult !is Result.Success) {
+                return@launch
+            }
+
+            val nachoCard = cardResult.data?.toDomain()
+
+            val createParam = uiModel.toCreateParam(
+                thumbnails = uploadedThumbnailsResult.data,
+                date = date,
+                startTime = startTime,
+                endTime = uiModel.endTime?.toLocalTime(),
+                invitationCard = nachoCard,
+            )
+
+            invitationRepository.createInvitation(params = createParam)
+                .onSuccess {
+                    updateState { copy(isLoading = false) }
+                    Log.d("CreateInvitationViewModel", "createInvitation Success: $it")
+                }
+                .onFailure {
+                    updateState { copy(isLoading = false) }
+                    Log.d("CreateInvitationViewModel", "createInvitation Fail: $it")
+                }
+        }
+    }
+
+    private suspend fun processCardAndUploadImages(
+        cardUiModel: CardUiModel?
+    ): Result<NachoUiCard?, DataError> {
+        if (cardUiModel == null) return Result.Success(null)
+
+        val richTextContent = editorConverter.toRichTextContent(cardUiModel.editable)
+
+        val localImagesToUpload = richTextContent.images.filterIsInstance<CardImage.Local>()
+
+        if (localImagesToUpload.isEmpty()) {
+            return Result.Success(
+                NachoUiCard(
+                    content = richTextContent,
+                    backgroundColor = cardUiModel.backgroundColor.toLong()
+                )
+            )
+        }
+        val uploadResult = uploadImages(localImagesToUpload.map { it.uri })
+        if (uploadResult !is Result.Success) {
+            return Result.Error((uploadResult as Result.Error).error)
+        }
+
+        val uploadedUrls = uploadResult.data
+        val urlIterator = uploadedUrls.iterator()
+
+        val newImages = richTextContent.images.map { image ->
+            when (image) {
+                is CardImage.Remote -> image
+
+                is CardImage.Local -> {
+                    if (urlIterator.hasNext()) {
+                        CardImage.Remote(urlIterator.next())
+                    } else {
+                        return Result.Error(DataError.LocalImage.NotFound)
+                    }
+                }
+            }
+        }
+
+        val newRichTextContent = richTextContent.copy(images = newImages)
+        return Result.Success(
+            NachoUiCard(
+                content = newRichTextContent,
+                backgroundColor = cardUiModel.backgroundColor.toLong()
+            )
+        )
+    }
+
+    private suspend fun uploadImages(
+        images: List<String>
+    ): Result<List<String>, DataError> {
+        if (images.isEmpty()) return Result.Success(emptyList())
+
+        val mediaFiles = mediaFileProvider.createFromUris(images)
+        return mediaUploader.uploadMedias(mediaFiles)
+            .map { urls -> urls.filterNotNull() }
     }
 
     companion object {
