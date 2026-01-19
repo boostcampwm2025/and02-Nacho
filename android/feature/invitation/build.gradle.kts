@@ -19,6 +19,9 @@ dependencies {
     // ExoPlayer
     implementation(libs.bundles.media3)
 
+    // Paging
+    implementation(libs.androidx.paging.compose)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
