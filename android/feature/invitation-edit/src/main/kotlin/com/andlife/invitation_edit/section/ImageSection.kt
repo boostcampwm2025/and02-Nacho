@@ -34,6 +34,7 @@ internal fun ImageSection(
     onAddImageClick: () -> Unit,
     onRemoveClick: (ThumbnailImageUiModel) -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     Column(
         modifier = modifier.background(NachoTheme.colorScheme.backgroundPrimary),
@@ -52,6 +53,7 @@ internal fun ImageSection(
             item {
                 AddImageButton(
                     onClick = onAddImageClick,
+                    isLoading = isLoading,
                     modifier =
                         Modifier
                             .fillParentMaxWidth(1f / 3f)
@@ -82,11 +84,13 @@ internal fun ImageSection(
 private fun AddImageButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     Surface(
         shape = NachoTheme.shapes.small,
         border = BorderStroke(NachoSpacing.twoXSmall, NachoTheme.colorScheme.backgroundBorder),
         modifier = modifier,
+        enabled = !isLoading,
         onClick = onClick,
     ) {
         Column(
