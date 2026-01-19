@@ -2,7 +2,7 @@ package com.andlife.invitation.model.guestbook.collection
 
 import com.andlife.domain.model.guestbook.GalleryMedia
 import com.andlife.invitation.util.toUiType
-import com.andlife.ui.model.UiMediaType
+import com.andlife.model.guestbook.UiMediaType
 import kotlinx.datetime.LocalDateTime
 
 data class InvitationCollectionUiModel(

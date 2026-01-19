@@ -1,7 +1,7 @@
 package com.andlife.invitation.util
 
 import com.andlife.domain.model.guestbook.MediaType
-import com.andlife.ui.model.UiMediaType
+import com.andlife.model.guestbook.UiMediaType
 
 /**
  * Domain의 MediaType을 UI의 UiMediaType으로 변환하는 확장 함수

@@ -22,7 +22,7 @@ import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 import com.andlife.ui.component.media.MediaOverlay
-import com.andlife.ui.model.UiMediaType
+import com.andlife.model.guestbook.UiMediaType
 import com.andlife.ui.util.toFormatDuration
 
 @Composable

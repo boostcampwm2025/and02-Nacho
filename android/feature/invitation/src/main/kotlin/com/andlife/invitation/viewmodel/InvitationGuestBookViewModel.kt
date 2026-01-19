@@ -13,7 +13,7 @@ import com.andlife.invitation.model.guestbook.InvitationGuestBookUiEvent
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiState
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
-import com.andlife.ui.model.UiMediaType
+import com.andlife.model.guestbook.UiMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList

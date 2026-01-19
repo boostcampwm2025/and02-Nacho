@@ -17,7 +17,7 @@ import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiE
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiState
 import com.andlife.invitation.model.guestbook.collection.toUiModel
 import com.andlife.ui.base.BaseViewModel
-import com.andlife.ui.model.UiMediaType
+import com.andlife.model.guestbook.UiMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.toImmutableList

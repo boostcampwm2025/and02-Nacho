@@ -27,7 +27,7 @@ import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiM
 import com.andlife.invitation.util.toUiType
 import com.andlife.ui.component.media.AudioPlayer
 import com.andlife.ui.component.media.VideoPlayer
-import com.andlife.ui.model.UiMediaType
+import com.andlife.model.guestbook.UiMediaType
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
