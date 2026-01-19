@@ -1,5 +1,7 @@
 package com.andlife.invitation_card.editor.screen
 
+import android.text.Layout
+import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -88,6 +90,7 @@ import com.andlife.invitation_card.editor.model.EditorDefaults
 import com.andlife.invitation_card.editor.util.contrastColor
 import com.andlife.invitation_card.editor.state.EditorState
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 
 @Composable
@@ -111,8 +114,8 @@ fun EditorScreen(
         }
 
     val colorForPalette = when (colorPaletteMode) {
-        ColorPaletteMode.Text -> Color.Black // todo: State 연결
-        ColorPaletteMode.Background -> Color.White // todo: State 연결
+        ColorPaletteMode.Text -> state.currentTextStyle.textColor
+        ColorPaletteMode.Background -> state.currentTextStyle.backgroundColor
         null -> null
     }
 
@@ -129,8 +132,12 @@ fun EditorScreen(
                 colorForPalette = colorForPalette,
                 onColorChange = { newColor ->
                     when (colorPaletteMode) {
-                        ColorPaletteMode.Text -> {} // todo: State 연결
-                        ColorPaletteMode.Background -> {} // todo: State 연결
+                        ColorPaletteMode.Text -> {
+                            state.updateTextColor(newColor)
+                        }
+                        ColorPaletteMode.Background -> {
+                            state.updateBackgroundColor(newColor)
+                        }
                         null -> {}
                     }
                 },
@@ -151,6 +158,7 @@ fun EditorScreen(
         ) {
             HorizontalDivider()
             EditorToolbar(
+                state = state,
                 currentPaletteMode = colorPaletteMode,
                 onClickTextColor = {
                     colorPaletteMode = if (colorPaletteMode == ColorPaletteMode.Text) {
@@ -244,9 +252,14 @@ private fun EditorBottomBar(
                 .background(NachoTheme.colorScheme.backgroundPrimary),
     ) {
         AnimatedVisibility(colorPaletteMode != null) {
+            val colorList = when (colorPaletteMode) {
+                ColorPaletteMode.Text -> EditorDefaults.textColorPalette
+                ColorPaletteMode.Background -> EditorDefaults.backgroundColorPalette
+                else -> persistentListOf()
+            }
             ColorPalette(
                 modifier = Modifier.fillMaxWidth(),
-                colorList = EditorDefaults.palette,
+                colorList = colorList,
                 onColorChange = onColorChange,
                 currentColor = colorForPalette,
             )
@@ -288,6 +301,7 @@ private fun EditorBottomBar(
 
 @Composable
 private fun EditorToolbar(
+    state: EditorState,
     currentPaletteMode: ColorPaletteMode?,
     onClickTextColor: () -> Unit,
     onClickBackgroundColor: () -> Unit,
@@ -307,8 +321,8 @@ private fun EditorToolbar(
             horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
         ) {
             TextSizeBox(
-                currentSize = 16f, // todo: State 연결
-                onSizeChange = { },
+                currentSize = state.currentTextStyle.fontSize,
+                onSizeChange = state::updateFontSize,
                 modifier = Modifier.padding(start = NachoSpacing.small),
             )
 
@@ -316,7 +330,7 @@ private fun EditorToolbar(
 
             ColorToggleButton(
                 icon = Icons.Default.TextFields,
-                selectedColor = Color.Black, // todo: State 연결
+                selectedColor = state.currentTextStyle.textColor,
                 onClick = onClickTextColor,
                 color = if (currentPaletteMode == ColorPaletteMode.Text) {
                     NachoTheme.colorScheme.brandPrimary
@@ -327,7 +341,7 @@ private fun EditorToolbar(
 
             ColorToggleButton(
                 icon = Icons.Default.Brush,
-                selectedColor = Color.White, // todo: State 연결
+                selectedColor = state.currentTextStyle.backgroundColor,
                 onClick = onClickBackgroundColor,
                 color = if (currentPaletteMode == ColorPaletteMode.Background) {
                     NachoTheme.colorScheme.brandPrimary
@@ -340,46 +354,46 @@ private fun EditorToolbar(
 
             StyleToggleButton(
                 icon = Icons.Default.FormatBold,
-                isActive = false, // todo: State 연결
-                onClick = {}, // todo: State 연결
+                isActive = state.currentTextStyle.isBold,
+                onClick = state::toggleBold,
             )
 
             StyleToggleButton(
                 icon = Icons.Default.FormatItalic,
-                isActive = false, // todo: State 연결
-                onClick = { }, // todo: State 연결
+                isActive = state.currentTextStyle.isItalic,
+                onClick = state::toggleItalic
             )
 
             StyleToggleButton(
                 icon = Icons.Default.FormatUnderlined,
-                isActive = false, // todo: State 연결
-                onClick = { }, // todo: State 연결
+                isActive = state.currentTextStyle.isUnderline,
+                onClick = state::toggleUnderline
             )
 
             StyleToggleButton(
                 icon = Icons.Default.FormatStrikethrough,
-                isActive = false, // todo: State 연결
-                onClick = { }, // todo: State 연결
+                isActive = state.currentTextStyle.isStrikethrough,
+                onClick = state::toggleStrikethrough
             )
 
             VerticalDivider()
 
             StyleToggleButton(
                 icon = Icons.AutoMirrored.Default.FormatAlignLeft,
-                isActive = false, // todo: State 연결
-                onClick = { }, // todo: State 연결
+                isActive = state.currentTextStyle.alignment == Layout.Alignment.ALIGN_NORMAL,
+                onClick = state::alignLeft,
             )
 
             StyleToggleButton(
                 icon = Icons.Default.FormatAlignCenter,
-                isActive = false, // todo: State 연결
-                onClick = { }, // todo: State 연결
+                isActive = state.currentTextStyle.alignment == Layout.Alignment.ALIGN_CENTER,
+                onClick = state::alignCenter,
             )
 
             StyleToggleButton(
                 icon = Icons.AutoMirrored.Default.FormatAlignRight,
-                isActive = false, // todo: State 연결
-                onClick = { }, // todo: State 연결
+                isActive = state.currentTextStyle.alignment == Layout.Alignment.ALIGN_OPPOSITE,
+                onClick = state::alignRight
             )
 
             VerticalDivider()
@@ -409,7 +423,7 @@ private fun EditCard(
     Surface(
         modifier = modifier,
         shape = NachoTheme.shapes.medium,
-        color = NachoTheme.colorScheme.backgroundPrimary,
+        color = state.currentTextStyle.backgroundColor,
         border = BorderStroke(NachoStroke.small, NachoTheme.colorScheme.backgroundBorder),
     ) {
         Column(
@@ -423,6 +437,12 @@ private fun EditCard(
                 modifier = Modifier.fillMaxSize(),
                 factory = { context ->
                     AppCompatEditText(context).apply {
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
+                        minHeight = resources.displayMetrics.heightPixels
+                        hint = context.getString(R.string.desc_edit_text_hint)
                         isFocusable = true
                         isFocusableInTouchMode = true
                         state.attach(this)
