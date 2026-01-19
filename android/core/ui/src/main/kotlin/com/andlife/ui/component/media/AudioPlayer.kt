@@ -86,8 +86,14 @@ fun AudioPlayer(
 
         Spacer(modifier = Modifier.height(NachoSpacing.threeXLarge))
 
+        val displayTime = if (isDragging) {
+            (sliderPosition * duration).toLong() // 드래그 중일 때는 슬라이더 위치 기반 시간으로 표시
+        } else {
+            currentPosition
+        }
+
         Text(
-            text = currentPosition.toDurationFormat(),
+            text = displayTime.toDurationFormat(),
             style = NachoTheme.typography.headingMedium.copy(
                 color = NachoTheme.colorScheme.textOnPrimary
             )
