@@ -21,7 +21,7 @@ import kotlin.properties.Delegates
 class InvitationCollectionViewModel
     @Inject
     constructor(
-        private val guestBookRepository: GuestBookRepository
+        private val guestBookRepository: GuestBookRepository,
     ) : BaseViewModel<InvitationCollectionUiState, InvitationCollectionUiEvent, InvitationCollectionSideEffect>(
             initialState = InvitationCollectionUiState(),
         ) {

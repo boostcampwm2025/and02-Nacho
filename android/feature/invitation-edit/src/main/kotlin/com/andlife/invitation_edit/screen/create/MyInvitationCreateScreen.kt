@@ -35,7 +35,6 @@ import com.andlife.invitation_edit.model.create.CreateInvitationSideEffect
 import com.andlife.invitation_edit.model.create.CreateInvitationUiEvent
 import com.andlife.invitation_edit.model.create.CreateInvitationUiState
 import com.andlife.invitation_edit.section.AddressSection
-import com.andlife.invitation_edit.section.announcementSection
 import com.andlife.invitation_edit.section.AuthorSection
 import com.andlife.invitation_edit.section.BottomBarSection
 import com.andlife.invitation_edit.section.DateSection
@@ -43,6 +42,7 @@ import com.andlife.invitation_edit.section.ImageSection
 import com.andlife.invitation_edit.section.TimeSection
 import com.andlife.invitation_edit.section.TitleSection
 import com.andlife.invitation_edit.section.TopBarSection
+import com.andlife.invitation_edit.section.announcementSection
 import com.andlife.invitation_edit.viewmodel.CreateInvitationViewModel
 import com.andlife.ui.component.InvitationDatePickerBottomSheet
 import com.andlife.ui.component.InvitationTimePickerBottomSheet
@@ -171,7 +171,7 @@ fun MyInvitationCreateRoute(
                     }
                     isShowDeleteAnnouncement = false
                 },
-                onDismiss = { isShowDeleteAnnouncement = false }
+                onDismiss = { isShowDeleteAnnouncement = false },
             )
         }
     }

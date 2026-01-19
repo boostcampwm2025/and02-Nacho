@@ -25,6 +25,9 @@ dependencies {
     // kotlinx datetime
     implementation(libs.kotlinx.datetime)
 
+    // Activity Compose
+    implementation(libs.androidx.activity.compose)
+
     // lifecycle
     implementation(libs.androidx.lifecycle.viewModelCompose)
     implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -3,7 +3,6 @@ package com.andlife.nacho.viewmodel
 import android.content.Intent
 import androidx.lifecycle.viewModelScope
 import com.andlife.deeplink.DeepLinkManager
-import com.andlife.invitation_edit.model.create.CreateInvitationUiState
 import com.andlife.nacho.model.MainSideEffect
 import com.andlife.nacho.model.MainUiEvent
 import com.andlife.nacho.model.MainUiState
@@ -31,17 +30,17 @@ class MainViewModel @Inject constructor(
         // No events yet
     }
 
-    private val deferredDeepLinkJob = deepLinkManager.deferredDeepLinkId
-        .filterNotNull()
-        .filter { it != lastProcessedId }
-        .onEach { invitationId ->
-            lastProcessedId = invitationId
-            invitationId.toLongOrNull()?.let { id ->
-                sendEffect(MainSideEffect.NavigateToDetail(id))
-                deepLinkManager.clearInvitationId()
-            }
-        }
-        .launchIn(viewModelScope)
+    private val deferredDeepLinkJob =
+        deepLinkManager.deferredDeepLinkId
+            .filterNotNull()
+            .filter { it != lastProcessedId }
+            .onEach { invitationId ->
+                lastProcessedId = invitationId
+                invitationId.toLongOrNull()?.let { id ->
+                    sendEffect(MainSideEffect.NavigateToDetail(id))
+                    deepLinkManager.clearInvitationId()
+                }
+            }.launchIn(viewModelScope)
 
     fun handleDeepLink(intent: Intent?) {
         val data = intent?.data ?: return

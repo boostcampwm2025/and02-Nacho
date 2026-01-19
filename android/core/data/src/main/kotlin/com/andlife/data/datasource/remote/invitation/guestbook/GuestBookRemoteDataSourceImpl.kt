@@ -3,6 +3,7 @@ package com.andlife.data.datasource.remote.invitation.guestbook
 import com.andlife.data.util.apiCall
 import com.andlife.domain.error.DataError
 import com.andlife.domain.util.Result
+import com.andlife.network.api.guestbook.GuestBookRequest
 import com.andlife.network.api.guestbook.GuestBookResponse
 import com.andlife.network.api.guestbook.GuestBookService
 import com.andlife.network.model.invitation.guestbook.CollectionResponse
@@ -18,4 +19,10 @@ internal class GuestBookRemoteDataSourceImpl @Inject constructor(
         invitationId: Long,
     ): Result<List<GuestBookResponse>, DataError> =
         apiCall { guestBookService.getGuestBooksByInvitationId(invitationId) }
+
+    override suspend fun createGuestBook(
+        invitationId: Long,
+        request: GuestBookRequest
+    ): Result<GuestBookResponse, DataError> =
+        apiCall { guestBookService.createGuestBook(invitationId, request) }
 }
