@@ -1,7 +1,7 @@
 package com.andlife.editor.util
 
-import android.graphics.Color
 import android.text.Editable
+import androidx.compose.ui.graphics.Color
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -11,16 +11,16 @@ class CreateCardSession @Inject constructor() {
     var editable: Editable? = null
         private set
 
-    var backgroundColor: Int = Color.WHITE
+    var backgroundColor: Color = Color.White
         private set
 
-    fun save(editable: Editable, backgroundColor: Int) {
+    fun save(editable: Editable, backgroundColor: Color) {
         this.editable = editable
         this.backgroundColor = backgroundColor
     }
 
     fun clear() {
         editable = null
-        backgroundColor = Color.WHITE
+        backgroundColor = Color.White
     }
 }

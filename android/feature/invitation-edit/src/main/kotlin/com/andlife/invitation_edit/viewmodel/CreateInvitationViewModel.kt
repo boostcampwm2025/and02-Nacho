@@ -1,6 +1,7 @@
 package com.andlife.invitation_edit.viewmodel
 
 import android.util.Log
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.viewModelScope
 import com.andlife.domain.util.Result
 import com.andlife.domain.error.DataError
@@ -215,7 +216,7 @@ class CreateInvitationViewModel @Inject constructor(
     fun getCardEditorResult() {
         val editable = createCardSession.editable ?: return
         val backgroundColor = createCardSession.backgroundColor
-        val card = CardUiModel(editable, backgroundColor)
+        val card = CardUiModel(editable, backgroundColor.toArgb())
         updateState {
             copy(createInvitationUiModel = createInvitationUiModel.copy(card = card))
         }

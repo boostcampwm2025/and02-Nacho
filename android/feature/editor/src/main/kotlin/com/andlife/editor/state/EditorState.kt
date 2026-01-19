@@ -561,6 +561,10 @@ class EditorState @Inject constructor(
         editText.text = editable
     }
 
+    fun setBackground(color: Color) {
+        currentTextStyle = currentTextStyle.copy(backgroundColor = color)
+    }
+
     fun attach(view: EditText) {
         editText = view
 
