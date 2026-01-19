@@ -9,6 +9,7 @@ android {
 
 dependencies {
     implementation(projects.feature.model)
+    implementation(projects.core.media)
     // designSystem
     implementation(projects.core.designsystem)
 
@@ -25,12 +26,18 @@ dependencies {
     // kotlinx datetime
     implementation(libs.kotlinx.datetime)
 
+    // Activity Compose
+    implementation(libs.androidx.activity.compose)
+
     // lifecycle
     implementation(libs.androidx.lifecycle.viewModelCompose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
     // ExoPlayer
     implementation(libs.bundles.media3)
+
+    // Naver Map
+    implementation(libs.naver.map.compose)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

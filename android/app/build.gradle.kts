@@ -30,6 +30,8 @@ android {
         val kakaoRestApiKey = properties.getProperty("KAKAO_REST_API_KEY") ?: ""
         val kakaoNativeAppKey = properties.getProperty("KAKAO_NATIVE_APP_KEY") ?: ""
         val appsflyerDevKey = properties.getProperty("APPSFLYER_DEV_KEY") ?: ""
+        val naverMapClientId = properties.getProperty("NAVER_MAP_CLIENT_ID") ?: ""
+
 
         buildConfigField(
             "String",
@@ -47,6 +49,12 @@ android {
             "String",
             "APPSFLYER_DEV_KEY",
             "\"$appsflyerDevKey\"",
+        )
+
+        buildConfigField(
+            "String",
+            "NAVER_MAP_CLIENT_ID",
+            "\"$naverMapClientId\"",
         )
 
         manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoNativeAppKey
@@ -105,6 +113,9 @@ dependencies {
 
     // AppsFlyer
     implementation(libs.appsflyer)
+
+    // Naver Map
+    implementation(libs.naver.map)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

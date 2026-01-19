@@ -2,13 +2,18 @@ package com.andlife.nacho.di
 
 import com.andlife.deeplink.di.AppsFlyerDevKey
 import com.andlife.deeplink.di.KakaoNativeKey
-import com.andlife.network.di.KakaoApiKey
 import com.andlife.nacho.BuildConfig
+import com.andlife.network.di.KakaoApiKey
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Qualifier
 import javax.inject.Singleton
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class NaverMapClientId
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -22,6 +27,11 @@ object ApiKeyModule {
     @Singleton
     @KakaoNativeKey
     fun provideKakaoNativeKey(): String = BuildConfig.KAKAO_NATIVE_APP_KEY
+
+    @Provides
+    @Singleton
+    @NaverMapClientId
+    fun provideNaverMapClientId(): String = BuildConfig.NAVER_MAP_CLIENT_ID
 
     @Provides
     @Singleton

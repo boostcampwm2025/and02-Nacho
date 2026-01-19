@@ -7,7 +7,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import com.andlife.home.screen.HomeScreen
+import com.andlife.home.screen.HomeRoute
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -19,6 +19,6 @@ fun NavController.navigateToHome(navOptions: NavOptions) {
 
 fun NavGraphBuilder.homeNavGraph(paddingValues: PaddingValues) {
     composable<Home> {
-        HomeScreen(modifier = Modifier.padding(paddingValues))
+        HomeRoute(modifier = Modifier.padding(paddingValues))
     }
 }

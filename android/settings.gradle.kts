@@ -17,7 +17,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url = uri("https://devrepo.kakao.com/nexus/content/groups/public/") }
+        maven(url = "https://devrepo.kakao.com/nexus/content/groups/public/")
+        maven(url = "https://repository.map.naver.com/archive/maven")
     }
 }
 
@@ -40,3 +41,4 @@ include(":feature:invitation-edit")
 include(":feature:invitation-card")
 include(":feature:thanks-card")
 include(":feature:model")
+include(":core:media")

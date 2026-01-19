@@ -36,3 +36,7 @@ object NachoElevation {
     val medium = 4.dp
     val large = 8.dp
 }
+
+object NachoCardSize {
+    val media = 90.dp
+}

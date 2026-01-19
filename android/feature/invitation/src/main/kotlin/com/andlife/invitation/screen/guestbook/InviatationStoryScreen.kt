@@ -48,6 +48,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import com.andlife.designsystem.R as designR
 
 @Composable
 fun InvitationStoryRoute(
@@ -165,7 +166,7 @@ fun StoryTopHeader(
                 )
             } else {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_person_24),
+                    painter = painterResource(designR.drawable.ic_person_24),
                     contentDescription = stringResource(R.string.desc_btn_back),
                     tint = NachoTheme.colorScheme.iconSecondary,
                     modifier = Modifier.size(NachoIconSize.medium),

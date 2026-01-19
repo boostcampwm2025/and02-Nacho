@@ -11,7 +11,7 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.guestbook.MediaType
-import com.andlife.myinvitation.model.MyInvitationCollectionUiModel
+import com.andlife.myinvitation.model.guestbook.MyInvitationCollectionUiModel
 import com.andlife.myinvitation.util.toUiType
 import com.andlife.ui.component.media.MediaItem
 import kotlinx.datetime.Clock
@@ -44,7 +44,7 @@ fun MyInvitationMediaGridView(
 
 @PreviewTheme
 @Composable
-private fun InvitationMediaGridViewPreview() {
+private fun NachoMediaGridViewPreview() {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
     val mockItems =
