@@ -31,9 +31,11 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
+import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
@@ -41,16 +43,23 @@ import com.andlife.invitation.model.guestbook.InvitationGuestBookSideEffect
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiEvent
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiState
 import com.andlife.invitation.viewmodel.InvitationGuestBookViewModel
+import com.andlife.media.video.AutoVideoPlayer
 import com.andlife.media.video.AutoVideoPlayerPool
+import com.andlife.model.common.AuthorUiModel
 import com.andlife.model.common.VideoCandidate
+import com.andlife.model.guestbook.GuestBookInvitationUiModel
+import com.andlife.model.guestbook.GuestBookMediaUiModel
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.invitation.InvitationGuestBookForm
 import com.andlife.ui.component.paging.PagingStateContent
 import com.andlife.ui.util.collectWithLifecycle
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDateTime
 import kotlin.math.max
 import kotlin.math.min
 
@@ -274,15 +283,90 @@ private fun GuestBookFormSection(
     )
 }
 
-//@Composable
-//@Preview
-//private fun InvitationGuestBookScreenPreview() {
-//    NachoTheme {
-//        InvitationGuestBookScreen(
-//            uiState = InvitationGuestBookUiState(),
-//            guestBooks = flowOf(PagingData.from(emptyList())).collectAsLazyPagingItems(),
-//            onEvent = {},
-//            snackbarHostState = SnackbarHostState(),
-//        )
-//    }
-//}
+@PreviewTheme
+@Composable
+private fun InvitationGuestBookEmptyPreview() {
+    val emptyGuestBooks = flowOf(PagingData.empty<GuestBookUiModel>()).collectAsLazyPagingItems()
+    NachoTheme {
+        InvitationGuestBookScreen(
+            uiState = InvitationGuestBookUiState(isLoadingGuestBooks = false),
+            guestBooks = emptyGuestBooks,
+            onEvent = {},
+            videoPlayerPool = FakeVideoPlayerPool(),
+            snackbarHostState = SnackbarHostState(),
+        )
+    }
+}
+
+@PreviewTheme
+@Composable
+private fun InvitationGuestBookResultPreview() {
+    val fakeGuestBooks = listOf(
+        GuestBookUiModel(
+            id = 1L,
+            invitation = GuestBookInvitationUiModel(id = 222L, title = "우리 결혼해요!"),
+            author = AuthorUiModel(id = 111L, name = "홍길동", profileImageUrl = null),
+            textContent = "결혼 축하드려요! 행복하게 잘 사세요~!",
+            visualMedias = emptyList<GuestBookMediaUiModel>().toImmutableList(),
+            audioMedias = listOf(
+                GuestBookMediaUiModel(
+                    id = 10L,
+                    type = MediaUiType.AUDIO,
+                    url = "https://example.com/audio.m4a",
+                    durationSeconds = 15,
+                    displayOrder = 1
+                )
+            ).toImmutableList(),
+            totalVisualCount = 0,
+            isOwner = true,
+            createdAt = LocalDateTime(2026, 1, 20, 10, 0),
+            updatedAt = LocalDateTime(2026, 1, 20, 10, 0),
+        ),
+        GuestBookUiModel(
+            id = 2L,
+            author = AuthorUiModel(id = 112L, name = "이순신", profileImageUrl = null),
+            textContent = "직접 가서 축하해주고 싶었는데 아쉽네요. 멀리서나마 응원합니다!",
+            visualMedias = emptyList<GuestBookMediaUiModel>().toImmutableList(),
+            audioMedias = emptyList<GuestBookMediaUiModel>().toImmutableList(),
+            totalVisualCount = 0,
+            isOwner = false,
+            createdAt = LocalDateTime(2026, 1, 19, 15, 30),
+            updatedAt = LocalDateTime(2026, 1, 19, 15, 30),
+        )
+    )
+
+    NachoTheme {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(NachoSpacing.large),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.large)
+        ) {
+            items(fakeGuestBooks.size) { index ->
+                GuestBookItem(
+                    guestBook = fakeGuestBooks[index],
+                    videoPlayerPool = FakeVideoPlayerPool(),
+                    shouldPlayVideo = false,
+                    onInvitationTitleClick = {},
+                    onVisualMediaClick = {},
+                    onAudioMediaClick = {},
+                    onMenuClick = {},
+                )
+            }
+        }
+    }
+}
+
+class FakeVideoPlayerPool : AutoVideoPlayerPool {
+    override fun preparePlayers() {}
+    override fun getPlayer(url: String): AutoVideoPlayer {
+        throw NotImplementedError()
+    }
+
+    override fun playPlayer(url: String, itemId: Long) {}
+    override fun pausePlayer(url: String) {}
+    override fun pauseAllPlayers() {}
+    override fun resumeLastPlayed() {}
+    override fun resetPool() {}
+    override fun releaseAllPlayers() {}
+}
