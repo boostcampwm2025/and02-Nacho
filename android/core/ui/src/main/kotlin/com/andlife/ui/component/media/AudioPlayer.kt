@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,6 +31,8 @@ fun AudioPlayer(
     var isPlaying by remember { mutableStateOf(exoPlayer.isPlaying) }
     var currentPosition by remember { mutableLongStateOf(0L) }
     var duration by remember { mutableLongStateOf(exoPlayer.duration.coerceAtLeast(0L)) }
+    var isDragging by remember { mutableStateOf(false) }
+    var sliderPosition by remember { mutableFloatStateOf(0f) }
 
     // ExoPlayer 이벤트 리스너 (재생/일시정지 상태 감지)
     DisposableEffect(exoPlayer) {
@@ -48,10 +52,12 @@ fun AudioPlayer(
     }
 
     // 재생 바 업데이트를 위한 루프
-    LaunchedEffect(isPlaying) {
-        while (isPlaying) {
-            currentPosition = exoPlayer.currentPosition
-            delay(100)
+    LaunchedEffect(isPlaying, isDragging) {
+        if (!isDragging) {
+            while (isPlaying) {
+                currentPosition = exoPlayer.currentPosition
+                delay(100)
+            }
         }
     }
 
@@ -118,11 +124,27 @@ fun AudioPlayer(
 
         val progress = if (duration > 0) currentPosition.toFloat() / duration.toFloat() else 0f
 
-        AudioProgressBar(
-            progress = progress,
+        Slider(
+            value = if (isDragging) sliderPosition else {
+                if (duration > 0) currentPosition.toFloat() / duration.toFloat() else 0f
+            },
+            onValueChange = {
+                isDragging = true
+                sliderPosition = it
+            },
+            onValueChangeFinished = {
+                val seekTo = (sliderPosition * duration).toLong()
+                exoPlayer.seekTo(seekTo)
+                isDragging = false
+            },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(NachoIconSize.xSmall)
+                .padding(horizontal = NachoSpacing.medium),
+            colors = SliderDefaults.colors(
+                thumbColor = NachoTheme.colorScheme.iconPrimary,
+                activeTrackColor = NachoTheme.colorScheme.iconPrimary,
+                inactiveTrackColor = NachoTheme.colorScheme.backgroundPrimary.copy(alpha = 0.5f)
+            )
         )
     }
 }
