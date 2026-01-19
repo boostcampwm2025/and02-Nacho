@@ -84,7 +84,7 @@ fun InvitationCollectionScreen(
 
 @PreviewTheme
 @Composable
-private fun InvitationCollectionPreview() {
+private fun NachoCollectionPreview() {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
     val mockState =
         InvitationCollectionUiState(
