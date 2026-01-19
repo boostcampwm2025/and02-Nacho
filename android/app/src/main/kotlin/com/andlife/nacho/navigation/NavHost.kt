@@ -19,6 +19,7 @@ import com.andlife.deeplink.DeepLinkManager
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.home.homeNavGraph
+import com.andlife.home.settingNavGraph
 import com.andlife.invitation.invitationDetailNavGraph
 import com.andlife.invitation.invitationNavGraph
 import com.andlife.invitation_edit.addressSearchNavGraph
@@ -56,6 +57,11 @@ fun NachoNavHost(
             homeNavGraph(
                 paddingValues = innerPadding,
                 onNavigateToInvitationDetail = navigator::navigateToInvitationDetail,
+                onNavigateToSetting = navigator::navigateToSetting,
+            )
+
+            settingNavGraph(
+                onNavigateBack = navigator::navigatePopBackStack,
             )
 
             invitationNavGraph(

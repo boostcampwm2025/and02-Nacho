@@ -12,6 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.andlife.home.Home
 import com.andlife.home.navigateToHome
+import com.andlife.home.navigateToSetting
 import com.andlife.invitation.navigateToInvitation
 import com.andlife.invitation.navigateToInvitationDetail
 import com.andlife.invitation_edit.navigateToAddressSearch
@@ -63,6 +64,12 @@ class NachoNavigator(
                 navController.navigateToMyInvitation(navOptions)
             }
         }
+    }
+
+    fun navigateToSetting() {
+        navController.navigateToSetting(
+            navOptions = navOptions { launchSingleTop = true },
+        )
     }
 
     fun navigateToInvitationDetail(id: Long) {
