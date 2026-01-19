@@ -1,4 +1,4 @@
-package com.andlife.invitation_card.editor.screen
+package com.andlife.editor.screen
 
 import android.text.Layout
 import android.view.ViewGroup
@@ -85,10 +85,10 @@ import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_card.R
-import com.andlife.invitation_card.editor.model.ColorPaletteMode
-import com.andlife.invitation_card.editor.model.EditorDefaults
-import com.andlife.invitation_card.editor.util.contrastColor
-import com.andlife.invitation_card.editor.state.EditorState
+import com.andlife.editor.model.ColorPaletteMode
+import com.andlife.editor.model.EditorDefaults
+import com.andlife.editor.util.contrastColor
+import com.andlife.editor.state.EditorState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch

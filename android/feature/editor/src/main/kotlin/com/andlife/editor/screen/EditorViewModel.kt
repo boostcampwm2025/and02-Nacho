@@ -1,7 +1,7 @@
-package com.andlife.invitation_card.editor.screen
+package com.andlife.editor.screen
 
 import androidx.lifecycle.ViewModel
-import com.andlife.invitation_card.editor.state.EditorState
+import com.andlife.editor.state.EditorState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

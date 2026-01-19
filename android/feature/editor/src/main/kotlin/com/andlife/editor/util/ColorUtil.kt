@@ -1,4 +1,4 @@
-package com.andlife.invitation_card.editor.util
+package com.andlife.editor.util
 
 import androidx.compose.ui.graphics.Color
 

@@ -1,4 +1,4 @@
-package com.andlife.invitation_card.editor.state
+package com.andlife.editor.state
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -16,7 +16,9 @@ import android.text.style.StrikethroughSpan
 import android.text.style.StyleSpan
 import android.text.style.UnderlineSpan
 import android.util.Log
+import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -27,8 +29,8 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.drawable.toDrawable
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
-import com.andlife.invitation_card.editor.model.EditTextStyle
-import com.andlife.invitation_card.editor.model.EditorDefaults
+import com.andlife.editor.model.EditTextStyle
+import com.andlife.editor.model.EditorDefaults
 import com.andlife.invitation_card.editor.utils.CenteredImageSpan
 import com.andlife.invitation_card.editor.utils.ImageLoader
 import javax.inject.Inject
@@ -545,7 +547,7 @@ class EditorState @Inject constructor(
 
     private fun restartInput() {
         val imm = editText.context.getSystemService(Context.INPUT_METHOD_SERVICE)
-            as? android.view.inputmethod.InputMethodManager
+            as? InputMethodManager
         imm?.restartInput(editText)
     }
 
@@ -563,7 +565,7 @@ class EditorState @Inject constructor(
             }
         }
         view.setOnKeyListener { _, keyCode, event ->
-            if (keyCode == android.view.KeyEvent.KEYCODE_DEL && event.action == android.view.KeyEvent.ACTION_DOWN) {
+            if (keyCode == KeyEvent.KEYCODE_DEL && event.action == KeyEvent.ACTION_DOWN) {
                 val text = editText.text
                 val cursor = editText.selectionStart
                 if (cursor > 0 && text.length >= cursor && text[cursor - 1] == EMPTY_TEXT) {
