@@ -36,7 +36,13 @@ class AutoVideoPlayerPoolImpl @Inject constructor(
     }
 
     override fun getPlayer(url: String): AutoVideoPlayer {
+        if (playerInstances.isEmpty()) {
+            preparePlayers()
+        }
         activePlayers[url]?.let { return it }
+        if (playerInstances.isEmpty()) {
+            preparePlayers()
+        }
 
         val playerToUse =
             if (activePlayers.size < playerInstances.size) {
