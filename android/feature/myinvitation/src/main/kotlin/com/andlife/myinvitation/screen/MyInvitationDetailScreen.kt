@@ -54,6 +54,7 @@ import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import com.andlife.designsystem.R as designR
@@ -107,12 +108,18 @@ private fun MyInvitationDetailScreen(
 ) {
     val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()
 
+    val coroutineScope = rememberCoroutineScope()
     var isMapVisible by remember { mutableStateOf(true) }
 
-    BackHandler {
+    val navigateBackWithMapCleanup: () -> Unit = {
         isMapVisible = false
-        onEvent(MyInvitationDetailUiEvent.ClickBack)
+        coroutineScope.launch {
+            delay(50L)
+            onEvent(MyInvitationDetailUiEvent.ClickBack)
+        }
     }
+
+    BackHandler(onBack = navigateBackWithMapCleanup)
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -124,10 +131,7 @@ private fun MyInvitationDetailScreen(
                 title = uiState.invitationContentsUiModel.title,
                 hasThanksCard = uiState.hasThanksCard,
                 showActions = !uiState.isLoading && !uiState.isError,
-                onBack = {
-                    isMapVisible = false
-                    onEvent(MyInvitationDetailUiEvent.ClickBack)
-                },
+                onBack = navigateBackWithMapCleanup,
                 onClickThanksCard = { onEvent(MyInvitationDetailUiEvent.ClickThanksCard) },
                 onShare = { onEvent(MyInvitationDetailUiEvent.ClickShare) },
                 onEdit = { onEvent(MyInvitationDetailUiEvent.ClickEdit) },
