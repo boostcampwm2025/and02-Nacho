@@ -11,7 +11,7 @@ import kotlinx.datetime.LocalDateTime
 
 data class GuestBookUiModel(
     val id: Long,
-    val invitation: GuestBookInvitationUiModel?,
+    val invitation: GuestBookInvitationUiModel? = null,
     val author: AuthorUiModel,
     val textContent: String,
     val visualMedias: ImmutableList<GuestBookMediaUiModel>,
@@ -24,7 +24,7 @@ data class GuestBookUiModel(
 
 fun GuestBook.toUiModel(): GuestBookUiModel = GuestBookUiModel(
     id = id,
-    invitation = invitation.toUiModel(),
+    invitation = invitation?.toUiModel(),
     author = author.toUiModel(),
     textContent = textContent,
     visualMedias = visualMedias.map { it.toUiModel() }.toImmutableList(),
