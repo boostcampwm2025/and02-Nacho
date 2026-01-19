@@ -14,6 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import coil3.compose.AsyncImage
@@ -38,8 +41,9 @@ fun StoryContent(
     modifier: Modifier = Modifier,
 ) {
     var isVideoReady by remember(exoPlayer) { mutableStateOf(false) }
+    val lifecycleOwner = LocalLifecycleOwner.current
 
-    DisposableEffect(exoPlayer) {
+    DisposableEffect(exoPlayer, lifecycleOwner) {
         if (exoPlayer == null) return@DisposableEffect onDispose {}
 
         val listener = object : Player.Listener {
@@ -50,15 +54,28 @@ fun StoryContent(
             }
         }
 
-        exoPlayer.addListener(listener)
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_PAUSE -> {
+                    exoPlayer.pause()
+                }
+                Lifecycle.Event.ON_RESUME -> {
+                    exoPlayer.play()
+                }
+                else -> {}
+            }
+        }
 
-        // 초기 상태 확인
+        exoPlayer.addListener(listener)
+        lifecycleOwner.lifecycle.addObserver(observer)
+
         if (exoPlayer.playbackState == Player.STATE_READY) {
             isVideoReady = true
         }
 
         onDispose {
             exoPlayer.removeListener(listener)
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 
