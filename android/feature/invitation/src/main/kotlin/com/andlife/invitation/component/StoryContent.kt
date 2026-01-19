@@ -4,7 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,11 +39,8 @@ fun StoryContent(
 ) {
     var isVideoReady by remember(exoPlayer) { mutableStateOf(false) }
 
-    LaunchedEffect(exoPlayer) {
-        if (exoPlayer == null) {
-            isVideoReady = false
-            return@LaunchedEffect
-        }
+    DisposableEffect(exoPlayer) {
+        if (exoPlayer == null) return@DisposableEffect onDispose {}
 
         val listener = object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
@@ -52,10 +49,16 @@ fun StoryContent(
                 }
             }
         }
+
         exoPlayer.addListener(listener)
 
+        // 초기 상태 확인
         if (exoPlayer.playbackState == Player.STATE_READY) {
             isVideoReady = true
+        }
+
+        onDispose {
+            exoPlayer.removeListener(listener)
         }
     }
 
