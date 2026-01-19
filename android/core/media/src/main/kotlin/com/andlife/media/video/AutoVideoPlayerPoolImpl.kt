@@ -126,6 +126,7 @@ class AutoVideoPlayerPoolImpl @Inject constructor(
         activePlayers.values.forEach { it.release() }
         activePlayers.clear()
         lastPlayedUrlByGuestBookId.clear()
+        currentPlayingUrl = null
     }
 
     companion object {
