@@ -14,6 +14,7 @@ import com.andlife.domain.util.Result
 import com.andlife.invitation.model.guestbook.InvitationGuestBookSideEffect
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiEvent
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiState
+import com.andlife.media.audio.AudioPlayerManager
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.toUiModel
@@ -28,8 +29,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
@@ -43,6 +46,7 @@ constructor(
     private val mediaUploader: MediaUploader,
     private val mediaFileProvider: MediaFileProvider,
     private val guestBookRepository: GuestBookRepository,
+    private val audioPlayerManager: AudioPlayerManager,
     val videoPlayerPool: AutoVideoPlayerPool,
 ) : BaseViewModel<InvitationGuestBookUiState, InvitationGuestBookUiEvent, InvitationGuestBookSideEffect>(
     InvitationGuestBookUiState(),
@@ -51,11 +55,31 @@ constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val guestBooksPagingFlow: Flow<PagingData<GuestBookUiModel>> =
-        flowOf(1L).flatMapLatest { invitationId ->
-            guestBookRepository.getGuestBooksByInvitationId(invitationId)
-        }.map { pagingData ->
-            pagingData.map { it.toUiModel() }
-        }.cachedIn(viewModelScope)
+        flowOf(1L)
+            .flatMapLatest { id ->
+                guestBookRepository.getGuestBooksByInvitationId(id)
+            }
+            .map { pagingData ->
+                pagingData.map { it.toUiModel() }
+            }
+            .cachedIn(viewModelScope)
+
+    init {
+        observeAudioPlayerState()
+    }
+
+    private fun observeAudioPlayerState() {
+        audioPlayerManager.currentAudioUrl
+            .combine(audioPlayerManager.isPlaying) { url, isPlaying ->
+                updateState {
+                    copy(
+                        playingAudioUrl = url,
+                        isAudioPlaying = isPlaying,
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
+    }
 
     override fun onEvent(event: InvitationGuestBookUiEvent) {
         when (event) {
@@ -64,15 +88,19 @@ constructor(
             is InvitationGuestBookUiEvent.RemoveMedia -> removeMedia(event.media)
             is InvitationGuestBookUiEvent.UploadMedias -> uploadMedias()
             is InvitationGuestBookUiEvent.ClearError -> clearError()
-            is InvitationGuestBookUiEvent.ClickAudioMedia -> sendEffect(
-                InvitationGuestBookSideEffect.ShowSnackbar("초대장 제목 클릭됨: ${event.url}"),
-            )
+            is InvitationGuestBookUiEvent.ClickAudioMedia -> {
+                videoPlayerPool.pauseAllPlayers()
+                audioPlayerManager.togglePlay(event.url)
+            }
+
             is InvitationGuestBookUiEvent.ClickGuestBookMenu -> sendEffect(
                 InvitationGuestBookSideEffect.ShowSnackbar("방명록 메뉴 클릭됨: ${event.guestBookId}"),
             )
+
             is InvitationGuestBookUiEvent.ClickInvitationTitle -> sendEffect(
                 InvitationGuestBookSideEffect.ShowSnackbar("초대장 제목 클릭됨: ${event.invitationId}"),
             )
+
             is InvitationGuestBookUiEvent.ClickVisualMedia -> sendEffect(
                 InvitationGuestBookSideEffect.ShowSnackbar("비주얼 미디어 클릭됨: ${event.url}"),
             )

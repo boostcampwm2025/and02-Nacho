@@ -225,7 +225,9 @@ private fun InvitationGuestBookScreen(
                             guestBook = guestBook,
                             videoPlayerPool = videoPlayerPool,
                             shouldPlayVideo = index == playVideoIndex,
-                            onInvitationTitleClick = { /* 필요 시 구현 */ },
+                            isAudioPlaying = uiState.isAudioPlaying &&
+                                guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
+                            playingAudioUrl = uiState.playingAudioUrl,
                             onVisualMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
                             onAudioMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
                             onMenuClick = { onEvent(InvitationGuestBookUiEvent.ClickGuestBookMenu(guestBook.id)) },
