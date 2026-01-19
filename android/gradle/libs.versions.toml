@@ -30,9 +30,9 @@ ktlint = "14.0.1"
 compose-ruleset = "0.4.28"
 javaxInject = "1"
 exifinterface = "1.3.6"
+media3 = "1.9.0"
 appsflyer = "6.16.2"
 kakao-sdk = "2.23.2"
-media3Exoplayer = "1.9.0"
 
 # naver Map
 naver-map = "3.23.0"
@@ -106,10 +106,6 @@ javax-inject = { group = "javax.inject", name = "javax.inject", version.ref = "j
 
 ktlint-compose-rules = { group = "io.nlopez.compose.rules", name = "ktlint", version.ref = "compose-ruleset" }
 
-androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3Exoplayer" }
-androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3Exoplayer" }
-
-
 # Dependencies of the included build-logic
 ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
 android-gradleApiPlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
@@ -118,6 +114,11 @@ compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-
 room-gradlePlugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
 ktlint-gradlePlugin = { group = "org.jlleitschuh.gradle.ktlint", name = "org.jlleitschuh.gradle.ktlint.gradle.plugin", version.ref = "ktlint" }
 androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
+
+# ExoPlayer
+androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
+androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
+androidx-media3-common = { group = "androidx.media3", name = "media3-common", version.ref = "media3" }
 
 kakao-sdk-share = { group = "com.kakao.sdk", name = "v2-share", version.ref = "kakao-sdk" }
 kakao-bom = { module = "com.kakao.sdk:v2-bom", version.ref = "kakao-sdk" }
@@ -149,7 +150,5 @@ compose = [
     "androidx-compose-ui-tooling-preview",
     "androidx-compose-material3"
 ]
-exoplayer = [
-    "androidx-media3-exoplayer",
-    "androidx-media3-ui"
-]
+
+media3 = ["androidx-media3-exoplayer", "androidx-media3-ui", "androidx-media3-common"]
