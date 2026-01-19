@@ -7,8 +7,8 @@ android {
 }
 
 dependencies {
-    // feature modules
-    implementation(projects.feature.model) // 공통 UI 모델
+    // feature modules 공통 UI 모델
+    implementation(projects.feature.model)
 
     // kakao 공유
     implementation(libs.kakao.sdk.share)

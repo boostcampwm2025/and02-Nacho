@@ -22,4 +22,8 @@ sealed interface MyInvitationDetailUiEvent : BaseUiEvent {
         val imageList: ImmutableList<String>,
         val index: Int,
     ) : MyInvitationDetailUiEvent
+
+    data object MapError : MyInvitationDetailUiEvent
+
+    data object RetryLoad : MyInvitationDetailUiEvent
 }

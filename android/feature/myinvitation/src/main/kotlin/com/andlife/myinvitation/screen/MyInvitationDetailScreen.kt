@@ -1,5 +1,6 @@
 package com.andlife.myinvitation.screen
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -19,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,18 +40,22 @@ import com.andlife.model.invitation.DateTimeInfo
 import com.andlife.model.invitation.HostInfo
 import com.andlife.model.invitation.InvitationCardUiModel
 import com.andlife.model.invitation.InvitationContentsUiModel
-import com.andlife.model.invitation.InvitationTimeUiModel
 import com.andlife.model.invitation.LatLngUiModel
 import com.andlife.model.invitation.LocationInfo
+import com.andlife.model.invitation.TimeUiModel
 import com.andlife.myinvitation.R
 import com.andlife.myinvitation.model.detail.MyInvitationDetailSideEffect
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiEvent
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiState
 import com.andlife.myinvitation.viewmodel.MyInvitationDetailViewModel
 import com.andlife.ui.component.GenericTabRow
+import com.andlife.ui.component.loading.InvitationLoadingError
+import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import com.andlife.designsystem.R as designR
 
@@ -59,6 +67,9 @@ fun MyInvitationDetailRoute(
     viewModel: MyInvitationDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+    val mapErrorMessage = stringResource(R.string.snack_load_error_map)
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
@@ -70,14 +81,19 @@ fun MyInvitationDetailRoute(
                 onNavigateToEditCard(effect.myInvitationId)
             }
 
-            is MyInvitationDetailSideEffect.NavigateToImageDetail -> {
-                // TODO: 이미지 전체보기 화면 구현 보류
+            MyInvitationDetailSideEffect.ShowMapErrorSnackbar -> {
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = mapErrorMessage
+                    )
+                }
             }
         }
     }
 
     MyInvitationDetailScreen(
         uiState = uiState,
+        snackbarHostState = snackbarHostState,
         onEvent = viewModel::onEvent,
         modifier = modifier,
     )
@@ -86,18 +102,35 @@ fun MyInvitationDetailRoute(
 @Composable
 private fun MyInvitationDetailScreen(
     uiState: MyInvitationDetailUiState,
+    snackbarHostState: SnackbarHostState,
     onEvent: (MyInvitationDetailUiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()
+    val coroutineScope = rememberCoroutineScope()
+    var isMapVisible by remember { mutableStateOf(true) }
+
+    val navigateBackWithMapCleanup: () -> Unit = {
+        isMapVisible = false
+        coroutineScope.launch {
+            delay(50L)
+            onEvent(MyInvitationDetailUiEvent.ClickBack)
+        }
+    }
+
+    BackHandler(onBack = navigateBackWithMapCleanup)
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        snackbarHost = {
+            SnackbarHost(snackbarHostState)
+        },
         topBar = {
             MyInvitationDetailTopBar(
-                title = uiState.title,
+                title = uiState.invitationContentsUiModel.title,
                 hasThanksCard = uiState.hasThanksCard,
-                onBack = { onEvent(MyInvitationDetailUiEvent.ClickBack) },
+                showActions = !uiState.isLoading && !uiState.isError,
+                onBack = navigateBackWithMapCleanup,
                 onClickThanksCard = { onEvent(MyInvitationDetailUiEvent.ClickThanksCard) },
                 onShare = { onEvent(MyInvitationDetailUiEvent.ClickShare) },
                 onEdit = { onEvent(MyInvitationDetailUiEvent.ClickEdit) },
@@ -107,6 +140,25 @@ private fun MyInvitationDetailScreen(
         },
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
     ) { paddingValues ->
+        if (uiState.isLoading) {
+            InvitationLoadingIndicator(
+                modifier = Modifier
+                    .padding(paddingValues),
+                text = stringResource(R.string.txt_loading_invitation),
+            )
+            return@Scaffold
+        }
+
+        if (uiState.isError) {
+            InvitationLoadingError(
+                onRetry = { onEvent(MyInvitationDetailUiEvent.RetryLoad) },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+            )
+            return@Scaffold
+        }
+
         Column(
             modifier =
                 Modifier
@@ -131,6 +183,8 @@ private fun MyInvitationDetailScreen(
                                             )
                                         },
                                     onClickEditCard = { onEvent(MyInvitationDetailUiEvent.ClickEditCard) },
+                                    onMapError = { onEvent(MyInvitationDetailUiEvent.MapError) },
+                                    isMapVisible = isMapVisible,
                                     modifier = Modifier.fillMaxSize(),
                                 )
                             }
@@ -155,6 +209,7 @@ private fun MyInvitationDetailTopBar(
     onDelete: () -> Unit,
     onCreateThanksCard: () -> Unit,
     modifier: Modifier = Modifier,
+    showActions: Boolean = true,
     hasThanksCard: Boolean = false,
 ) {
     TopAppBar(
@@ -178,29 +233,31 @@ private fun MyInvitationDetailTopBar(
             }
         },
         actions = {
-            if (hasThanksCard) {
-                IconButton(onClick = onClickThanksCard) {
+            if (showActions) {
+                if (hasThanksCard) {
+                    IconButton(onClick = onClickThanksCard) {
+                        Icon(
+                            painter = painterResource(designR.drawable.ic_thankscard),
+                            contentDescription = stringResource(R.string.desc_top_bar_thanks_card),
+                            tint = Color.Unspecified,
+                        )
+                    }
+                }
+                IconButton(onClick = onShare) {
                     Icon(
-                        painter = painterResource(designR.drawable.ic_thankscard),
-                        contentDescription = stringResource(R.string.desc_top_bar_thanks_card),
-                        tint = Color.Unspecified,
+                        painter = painterResource(R.drawable.ic_share_24),
+                        contentDescription = stringResource(R.string.desc_top_bar_share),
+                        tint = NachoTheme.colorScheme.iconSecondary,
                     )
                 }
-            }
-            IconButton(onClick = onShare) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_share_24),
-                    contentDescription = stringResource(R.string.desc_top_bar_share),
-                    tint = NachoTheme.colorScheme.iconSecondary,
+
+                InvitationMoreMenu(
+                    hasThanksCard = hasThanksCard,
+                    onEdit = onEdit,
+                    onDelete = onDelete,
+                    onCreateThanksCard = onCreateThanksCard,
                 )
             }
-
-            InvitationMoreMenu(
-                hasThanksCard = hasThanksCard,
-                onEdit = onEdit,
-                onDelete = onDelete,
-                onCreateThanksCard = onCreateThanksCard,
-            )
         },
         colors =
             TopAppBarDefaults.topAppBarColors(
@@ -295,8 +352,6 @@ private fun MyInvitationDetailScreenPreview() {
         MyInvitationDetailScreen(
             uiState =
                 MyInvitationDetailUiState(
-                    id = 1L,
-                    title = "2026년 나초 개발 네트워킹 데이",
                     isLoading = false,
                     hasThanksCard = true,
                     invitationContentsUiModel =
@@ -311,7 +366,7 @@ private fun MyInvitationDetailScreenPreview() {
                             dateTime =
                                 DateTimeInfo(
                                     date = LocalDate(2026, 1, 31),
-                                    startTime = InvitationTimeUiModel(hour = 13, min = 0),
+                                    startTime = TimeUiModel(hour = 13, min = 0),
                                 ),
                             location =
                                 LocationInfo(
@@ -330,6 +385,7 @@ private fun MyInvitationDetailScreenPreview() {
                                 ),
                         ),
                 ),
+            snackbarHostState = remember { SnackbarHostState() },
             onEvent = {},
         )
     }

@@ -6,9 +6,11 @@ import com.andlife.deeplink.DeepLinkConfig
 import com.andlife.deeplink.DeepLinkManager
 import com.andlife.deeplink.di.AppsFlyerDevKey
 import com.andlife.deeplink.di.KakaoNativeKey
+import com.andlife.nacho.di.NaverMapClientId
 import com.appsflyer.AppsFlyerLib
 import com.appsflyer.deeplink.DeepLinkResult
 import com.kakao.sdk.common.KakaoSdk
+import com.naver.maps.map.NaverMapSdk
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
@@ -23,13 +25,20 @@ class NachoApplication : Application() {
     lateinit var appsFlyerDevKey: String
 
     @Inject
+    @NaverMapClientId
+    lateinit var naverMapClientId: String
+
+    @Inject
     lateinit var deepLinkManager: DeepLinkManager
 
     override fun onCreate() {
         super.onCreate()
 
-        KakaoSdk.init(this, kakaoNativeKey)
         initAppsFlyer()
+
+        KakaoSdk.init(this, kakaoNativeKey)
+        NaverMapSdk.getInstance(this).client =
+            NaverMapSdk.NcpKeyClient(naverMapClientId)
     }
 
     private fun initAppsFlyer() {

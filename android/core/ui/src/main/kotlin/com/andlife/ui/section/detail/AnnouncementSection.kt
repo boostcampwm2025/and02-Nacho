@@ -21,10 +21,10 @@ import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun AnnouncementSection(
-    announcements: ImmutableList<AnnouncementUiModel>,
+    announcements: ImmutableList<AnnouncementUiModel>?,
     modifier: Modifier = Modifier,
 ) {
-    if (announcements.isEmpty()) return
+    if (announcements.isNullOrEmpty()) return
 
     Column(
         modifier =
@@ -35,12 +35,12 @@ fun AnnouncementSection(
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
         Text(
-            text = stringResource(R.string.txt_announcement),
+            text = stringResource(R.string.txt_announcement_title),
             style = NachoTheme.typography.headingSmallSemiBold,
             color = NachoTheme.colorScheme.textPrimary,
         )
 
-        announcements.forEachIndexed { index, announcement ->
+        announcements.forEach { announcement ->
             Column(
                 verticalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
             ) {

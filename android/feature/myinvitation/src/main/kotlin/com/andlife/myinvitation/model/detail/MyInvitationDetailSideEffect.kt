@@ -10,8 +10,5 @@ sealed interface MyInvitationDetailSideEffect : BaseSideEffect {
         val myInvitationId: Long,
     ) : MyInvitationDetailSideEffect
 
-    data class NavigateToImageDetail(
-        val imageList: ImmutableList<String>,
-        val index: Int,
-    ) : MyInvitationDetailSideEffect
+    data object ShowMapErrorSnackbar : MyInvitationDetailSideEffect
 }
