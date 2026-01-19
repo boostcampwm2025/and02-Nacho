@@ -10,12 +10,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.guestbook.MediaType
-import com.andlife.invitation.component.InvitationMediaGridView
+import com.andlife.ui.component.invitation.collection.NachoMediaGridView
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiEvent
-import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiModel
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiState
 import com.andlife.model.util.toUiType
 import com.andlife.invitation.viewmodel.InvitationCollectionViewModel
+import com.andlife.model.invitation.collection.CollectionUiModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -55,7 +55,7 @@ fun InvitationCollectionScreen(
     onToggleExpand: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    InvitationMediaGridView(
+    NachoMediaGridView(
         items = uiState.mediaItems,
         onItemClick = onOpenStory,
         modifier = modifier,
@@ -84,7 +84,7 @@ private fun NachoCollectionPreview() {
         InvitationCollectionUiState(
             mediaItems =
                 persistentListOf(
-                    InvitationCollectionUiModel(
+                    CollectionUiModel(
                         id = 1L,
                         mediaUrl = "https://picsum.photos/400/600?random=1",
                         type = MediaType.IMAGE.toUiType(),
@@ -94,7 +94,7 @@ private fun NachoCollectionPreview() {
                         createdAt = now,
                         durationSeconds = null,
                     ),
-                    InvitationCollectionUiModel(
+                    CollectionUiModel(
                         id = 2L,
                         mediaUrl = "https://picsum.photos/400/600?random=2",
                         type = MediaType.VIDEO.toUiType(),
@@ -104,7 +104,7 @@ private fun NachoCollectionPreview() {
                         createdAt = now,
                         durationSeconds = 120,
                     ),
-                    InvitationCollectionUiModel(
+                    CollectionUiModel(
                         id = 3L,
                         mediaUrl = "https://picsum.photos/400/600?random=3",
                         type = MediaType.AUDIO.toUiType(),

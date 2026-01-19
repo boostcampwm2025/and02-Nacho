@@ -1,4 +1,4 @@
-package com.andlife.invitation.component
+package com.andlife.ui.component.invitation.collection
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -22,19 +22,18 @@ import androidx.media3.exoplayer.ExoPlayer
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoTheme
-import com.andlife.domain.model.guestbook.MediaType
-import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiModel
 import com.andlife.model.util.toUiType
 import com.andlife.ui.component.media.AudioPlayer
 import com.andlife.ui.component.media.VideoPlayer
 import com.andlife.model.guestbook.UiMediaType
+import com.andlife.model.invitation.collection.CollectionUiModel
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun StoryContent(
-    item: InvitationCollectionUiModel,
+    item: CollectionUiModel,
     isExpanded: Boolean,
     onToggleExpand: () -> Unit,
     exoPlayer: Player?,
@@ -136,10 +135,10 @@ private fun StoryContentPreview() {
 
         StoryContent(
             item =
-                InvitationCollectionUiModel(
+                CollectionUiModel(
                     id = 3L,
                     mediaUrl = "https://picsum.photos/400/600?random=3",
-                    type = MediaType.AUDIO.toUiType(),
+                    type = UiMediaType.AUDIO,
                     content = "방명록 내용 3",
                     authorName = "사용자3",
                     authorProfileUrl = null,

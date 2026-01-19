@@ -21,11 +21,11 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.guestbook.MediaType
-import com.andlife.invitation.component.StoryContent
-import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiModel
+import com.andlife.ui.component.invitation.collection.StoryContent
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiState
 import com.andlife.model.util.toUiType
 import com.andlife.invitation.viewmodel.InvitationCollectionViewModel
+import com.andlife.model.invitation.collection.CollectionUiModel
 import com.andlife.ui.component.invitation.collection.StoryTopHeader
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Clock
@@ -120,7 +120,7 @@ private fun InvitationStoryScreenPreview() {
             InvitationCollectionUiState(
                 mediaItems =
                     persistentListOf(
-                        InvitationCollectionUiModel(
+                        CollectionUiModel(
                             id = 1L,
                             mediaUrl = "https://picsum.photos/400/600?random=1",
                             type = MediaType.IMAGE.toUiType(),
@@ -130,7 +130,7 @@ private fun InvitationStoryScreenPreview() {
                             createdAt = now,
                             durationSeconds = null,
                         ),
-                        InvitationCollectionUiModel(
+                        CollectionUiModel(
                             id = 2L,
                             mediaUrl = "https://picsum.photos/400/600?random=2",
                             type = MediaType.VIDEO.toUiType(),
@@ -140,7 +140,7 @@ private fun InvitationStoryScreenPreview() {
                             createdAt = now,
                             durationSeconds = 120,
                         ),
-                        InvitationCollectionUiModel(
+                        CollectionUiModel(
                             id = 3L,
                             mediaUrl = "https://picsum.photos/400/600?random=3",
                             type = MediaType.AUDIO.toUiType(),

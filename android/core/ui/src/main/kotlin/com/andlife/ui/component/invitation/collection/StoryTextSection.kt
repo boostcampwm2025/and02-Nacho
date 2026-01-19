@@ -1,4 +1,4 @@
-package com.andlife.invitation.component
+package com.andlife.ui.component.invitation.collection
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
