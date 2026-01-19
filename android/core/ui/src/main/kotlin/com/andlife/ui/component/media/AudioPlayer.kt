@@ -45,6 +45,17 @@ fun AudioPlayer(
                     duration = exoPlayer.duration.coerceAtLeast(0L)
                 }
             }
+
+            override fun onPositionDiscontinuity(
+                oldPosition: Player.PositionInfo,
+                newPosition: Player.PositionInfo,
+                reason: Int
+            ) {
+                if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+                    currentPosition = newPosition.positionMs
+                    isDragging = false
+                }
+            }
         }
         exoPlayer.addListener(listener)
         onDispose { exoPlayer.removeListener(listener) }
@@ -138,7 +149,6 @@ fun AudioPlayer(
             onValueChangeFinished = {
                 val seekTo = (sliderPosition * duration).toLong()
                 exoPlayer.seekTo(seekTo)
-                isDragging = false
             },
             modifier = Modifier
                 .fillMaxWidth()
