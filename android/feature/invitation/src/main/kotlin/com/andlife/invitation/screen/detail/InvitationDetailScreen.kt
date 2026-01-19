@@ -24,6 +24,7 @@ import com.andlife.invitation.R
 import com.andlife.invitation.model.detail.InvitationDetailSideEffect
 import com.andlife.invitation.model.detail.InvitationDetailUiEvent
 import com.andlife.invitation.model.detail.InvitationDetailUiState
+import com.andlife.invitation.screen.InvitationGuestBookRoute
 import com.andlife.invitation.screen.guestbook.InvitationCollectionRoute
 import com.andlife.invitation.viewmodel.InvitationDetailViewModel
 import com.andlife.ui.component.GenericTabRow
@@ -91,7 +92,7 @@ private fun InvitationDetailScreen(
                     ) {
                         when (index) {
                             0 -> Text("초대장 콘텐츠")
-                            1 -> Text("방명록 화면")
+                            1 -> InvitationGuestBookRoute()
                             2 -> InvitationCollectionRoute()
                         }
                     }
