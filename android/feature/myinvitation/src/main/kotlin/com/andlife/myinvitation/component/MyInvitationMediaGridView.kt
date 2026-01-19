@@ -44,7 +44,7 @@ fun MyInvitationMediaGridView(
 
 @PreviewTheme
 @Composable
-private fun InvitationMediaGridViewPreview() {
+private fun NachoMediaGridViewPreview() {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
     val mockItems =

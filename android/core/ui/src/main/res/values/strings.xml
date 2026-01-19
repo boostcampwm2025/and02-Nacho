@@ -92,4 +92,5 @@
     <!--  PlaceGuideSection  -->
     <string name="txt_place_guide">오시는 길</string>
     <string name="txt_map_loading">지도 로딩중...</string>
+
 </resources>
