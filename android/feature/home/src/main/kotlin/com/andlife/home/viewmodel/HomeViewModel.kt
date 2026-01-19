@@ -72,9 +72,4 @@ constructor(
                 }
         }
     }
-
-    override fun onCleared() {
-        super.onCleared()
-        videoPlayerPool.releaseAllPlayers()
-    }
 }

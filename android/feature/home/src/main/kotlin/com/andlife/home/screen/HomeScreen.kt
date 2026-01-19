@@ -142,7 +142,7 @@ fun HomeScreen(
                 when (event) {
                     Lifecycle.Event.ON_RESUME -> videoPlayerPool.resumeLastPlayed()
                     Lifecycle.Event.ON_PAUSE -> videoPlayerPool.pauseAllPlayers()
-                    Lifecycle.Event.ON_DESTROY -> videoPlayerPool.releaseAllPlayers()
+                    Lifecycle.Event.ON_DESTROY -> videoPlayerPool.resetPool()
                     else -> {}
                 }
             }
