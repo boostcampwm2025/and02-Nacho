@@ -8,7 +8,8 @@ import kotlinx.datetime.LocalDateTime
 data class InvitationCollectionUiModel(
     val id: Long,
     val type: UiMediaType,
-    val url: String,
+    val mediaUrl: String,
+    val thumbnailUrl: String? = null,
     val content: String,
     val authorName: String,
     val authorProfileUrl: String?,
@@ -20,7 +21,8 @@ fun GalleryMedia.toUiModel(): InvitationCollectionUiModel =
     InvitationCollectionUiModel(
         id = id,
         type = type.toUiType(),
-        url = url,
+        mediaUrl = mediaUrl,
+        thumbnailUrl = thumbnailUrl,
         content = content,
         authorName = authorName,
         authorProfileUrl = authorProfileUrl,

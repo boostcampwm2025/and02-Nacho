@@ -1,33 +1,60 @@
 package com.andlife.invitation.viewmodel
 
+import android.content.Context
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.navigation.toRoute
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
+import com.andlife.invitation.InvitationDetail
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionSideEffect
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiEvent
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiState
 import com.andlife.invitation.model.guestbook.collection.toUiModel
 import com.andlife.ui.base.BaseViewModel
+import com.andlife.ui.model.UiMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.properties.Delegates
 
 @HiltViewModel
 class InvitationCollectionViewModel
     @Inject
     constructor(
         private val guestBookRepository: GuestBookRepository,
+        @param:ApplicationContext private val context: Context,
+        savedStateHandle: SavedStateHandle
     ) : BaseViewModel<InvitationCollectionUiState, InvitationCollectionUiEvent, InvitationCollectionSideEffect>(
             initialState = InvitationCollectionUiState(),
         ) {
-        private var invitationId: Long by Delegates.notNull<Long>()
 
-        override val uiState: StateFlow<InvitationCollectionUiState> = mutableUiState
+        private val invitationId: Long = savedStateHandle.toRoute<InvitationDetail>().id
+
+        override val uiState: StateFlow<InvitationCollectionUiState> =
+            mutableUiState
+                .onStart {
+                    loadMediaCollection()
+                }.stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(5_000),
+                    initialValue = InvitationCollectionUiState(),
+                )
+
+        val exoPlayer: ExoPlayer = ExoPlayer.Builder(context).build().apply {
+            repeatMode = Player.REPEAT_MODE_ONE
+            playWhenReady = true
+        }
 
         override fun onEvent(event: InvitationCollectionUiEvent) {
             when (event) {
@@ -38,11 +65,9 @@ class InvitationCollectionViewModel
             }
         }
 
-        fun initInvitationId(id: Long) {
-            runCatching { invitationId }.onSuccess { if (it == id) return }
-
-            invitationId = id
-            loadMediaCollection()
+        override fun onCleared() {
+            super.onCleared()
+            exoPlayer.release()
         }
 
         private fun loadMediaCollection() {
@@ -74,7 +99,11 @@ class InvitationCollectionViewModel
                     selectedIndex = index,
                 )
             }
-            Log.d("ViewModel", "선택된 인덱스: $index")
+            val selectedMedia = uiState.value.mediaItems.getOrNull(index)
+
+            if (selectedMedia?.type == UiMediaType.VIDEO || selectedMedia?.type == UiMediaType.AUDIO) {
+                prepareMedia(selectedMedia.mediaUrl)
+            }
         }
 
         private fun closeStory() {
@@ -84,15 +113,47 @@ class InvitationCollectionViewModel
                     selectedIndex = -1,
                 )
             }
+            exoPlayer.pause()
         }
 
         private fun pageChanged(index: Int) {
             updateState {
                 copy(
                     selectedIndex = index,
+                    isTextExpanded = false
                 )
             }
-            Log.d("ViewModel", "바뀐 인덱스: $index")
+
+            val selectedMedia = uiState.value.mediaItems.getOrNull(index)
+
+            when (selectedMedia?.type) {
+                UiMediaType.VIDEO, UiMediaType.AUDIO -> {
+                    prepareMedia(selectedMedia.mediaUrl)
+                }
+                else -> {
+                    exoPlayer.pause()
+                }
+            }
+        }
+
+        private fun prepareMedia(url: String) {
+            if (url.isEmpty()) return
+
+            val currentUri = exoPlayer.currentMediaItem?.localConfiguration?.uri?.toString()
+
+            if (currentUri == url) {
+                exoPlayer.seekTo(0)
+                exoPlayer.play()
+                return
+            }
+
+            exoPlayer.stop()
+            exoPlayer.clearMediaItems()
+
+            val mediaItem = MediaItem.fromUri(url)
+            exoPlayer.setMediaItem(mediaItem)
+            exoPlayer.prepare()
+            exoPlayer.play()
         }
 
         private fun toggleExpand() {
