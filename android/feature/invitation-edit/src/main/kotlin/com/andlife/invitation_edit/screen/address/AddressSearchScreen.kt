@@ -38,7 +38,6 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
-import com.andlife.designsystem.R as designR
 import com.andlife.invitation_edit.R
 import com.andlife.invitation_edit.model.AddressSearchSideEffect
 import com.andlife.invitation_edit.model.AddressSearchUiEvent
@@ -48,6 +47,7 @@ import com.andlife.invitation_edit.viewmodel.AddressSearchViewModel
 import com.andlife.ui.component.paging.PagingStateContent
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.coroutines.flow.flowOf
+import com.andlife.designsystem.R as designR
 
 @Composable
 fun AddressSearchRoute(

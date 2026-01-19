@@ -2,8 +2,8 @@ package com.andlife.nacho.di
 
 import com.andlife.deeplink.di.AppsFlyerDevKey
 import com.andlife.deeplink.di.KakaoNativeKey
-import com.andlife.network.di.KakaoApiKey
 import com.andlife.nacho.BuildConfig
+import com.andlife.network.di.KakaoApiKey
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

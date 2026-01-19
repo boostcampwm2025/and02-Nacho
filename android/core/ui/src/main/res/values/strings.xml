@@ -40,4 +40,31 @@
     <string name="desc_remove_media">미디어 제거</string>
     <string name="txt_please_leave_a_message">메시지를 남겨주세요.</string>
 
+
+    <!--  ImageSection  -->
+    <string name="desc_invitation_image">초대장 상세 이미지</string>
+    <!--  AuthorSection  -->
+    <string name="desc_profile_image">프로필 이미지</string>
+    <string name="txt_host">주최자</string>
+    <!--  DateSection  -->
+    <string name="txt_year">년</string>
+    <string name="txt_month">월</string>
+    <string name="txt_day">일</string>
+    <string name="txt_hour">시</string>
+    <string name="txt_min">분</string>
+    <string-array name="array_am_pm">
+        <item>오전</item>
+        <item>오후</item>
+    </string-array>
+    <!--  InvitationCardSection  -->
+    <string name="txt_card_create">초대카드 생성</string>
+    <string name="txt_card_edit">초대카드 편집</string>
+    <string name="txt_invitation_card_title">초대 카드</string>
+    <string name="txt_card_empty_guide">초대카드를 꾸며보세요</string>
+    <string name="txt_card_empty_description">현재 해당 영역은 초대장에서 보여지지 않습니다.</string>
+    <!--  AnnouncementSection  -->
+    <string name="txt_announcement">공지 사항</string>
+    <!--  PlaceGuideSection  -->
+    <string name="txt_place_guide">오시는 길</string>
+    <string name="txt_map_loading">지도 로딩중...</string>
 </resources>
