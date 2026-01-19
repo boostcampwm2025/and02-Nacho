@@ -4,6 +4,7 @@ data class NachoUiCard(
     val id: String? = null,
     val content: RichTextUiContent,
     val backgroundColor: Long = DEFAULT_BACKGROUND_COLOR,
+    val backgroundImageUrl: String? = null,
 ) {
     companion object {
         private const val DEFAULT_BACKGROUND_COLOR = 0xFFFFFFFF

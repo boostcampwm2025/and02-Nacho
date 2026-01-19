@@ -12,7 +12,7 @@ fun NachoUiCard.toDomain(): NachoCard {
         id = id,
         content = content.toDomain(),
         backgroundColor = backgroundColor,
-        backgroundImageUrl = null,
+        backgroundImageUrl = backgroundImageUrl,
     )
 }
 
@@ -62,6 +62,7 @@ fun NachoCard.toUiModel(): NachoUiCard {
         id = id,
         content = content.toUiModel(),
         backgroundColor = backgroundColor,
+        backgroundImageUrl = backgroundImageUrl,
     )
 }
 

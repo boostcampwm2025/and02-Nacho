@@ -52,7 +52,5 @@ fun InvitationCard.toUiModel(): InvitationCardUiModel {
         id = id,
         invitationId = invitationId,
         card = card.toUiModel(),
-        backgroundColor = card.backgroundColor,
-        backgroundImageUrl = card.backgroundImageUrl,
     )
 }
