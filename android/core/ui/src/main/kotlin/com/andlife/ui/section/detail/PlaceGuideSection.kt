@@ -41,6 +41,7 @@ import com.naver.maps.map.util.MarkerIcons
 fun PlaceGuideSection(
     location: LocationInfo,
     onMapError: () -> Unit,
+    isMapVisible: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -60,10 +61,12 @@ fun PlaceGuideSection(
         Column(
             verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
         ) {
-            PlaceMapCard(
-                location = location,
-                onMapError = onMapError,
-            )
+            if (isMapVisible) {
+                PlaceMapCard(
+                    location = location,
+                    onMapError = onMapError,
+                )
+            }
 
             location.guide?.takeIf {it.isNotBlank() }?.let { guide ->
                 Text(

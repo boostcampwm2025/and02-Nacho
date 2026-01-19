@@ -25,6 +25,7 @@ fun MyInvitationContentsScreen(
     onClickImage: (Int) -> Unit,
     onClickEditCard: () -> Unit,
     onMapError: () -> Unit,
+    isMapVisible: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val model = uiState.invitationContentsUiModel
@@ -73,6 +74,7 @@ fun MyInvitationContentsScreen(
         PlaceGuideSection(
             location = model.location,
             onMapError = onMapError,
+            isMapVisible = isMapVisible,
         )
     }
 }
@@ -89,6 +91,7 @@ private fun MyInvitationContentsScreenPreview() {
             onClickImage = {},
             onClickEditCard = {},
             onMapError = {},
+            isMapVisible = true,
         )
     }
 }

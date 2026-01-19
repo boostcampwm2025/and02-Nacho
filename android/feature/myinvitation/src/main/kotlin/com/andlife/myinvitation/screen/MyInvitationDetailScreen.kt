@@ -1,5 +1,6 @@
 package com.andlife.myinvitation.screen
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -106,6 +107,13 @@ private fun MyInvitationDetailScreen(
 ) {
     val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()
 
+    var isMapVisible by remember { mutableStateOf(true) }
+
+    BackHandler {
+        isMapVisible = false
+        onEvent(MyInvitationDetailUiEvent.ClickBack)
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = {
@@ -116,7 +124,10 @@ private fun MyInvitationDetailScreen(
                 title = uiState.invitationContentsUiModel.title,
                 hasThanksCard = uiState.hasThanksCard,
                 showActions = !uiState.isLoading && !uiState.isError,
-                onBack = { onEvent(MyInvitationDetailUiEvent.ClickBack) },
+                onBack = {
+                    isMapVisible = false
+                    onEvent(MyInvitationDetailUiEvent.ClickBack)
+                },
                 onClickThanksCard = { onEvent(MyInvitationDetailUiEvent.ClickThanksCard) },
                 onShare = { onEvent(MyInvitationDetailUiEvent.ClickShare) },
                 onEdit = { onEvent(MyInvitationDetailUiEvent.ClickEdit) },
@@ -170,6 +181,7 @@ private fun MyInvitationDetailScreen(
                                         },
                                     onClickEditCard = { onEvent(MyInvitationDetailUiEvent.ClickEditCard) },
                                     onMapError = { onEvent(MyInvitationDetailUiEvent.MapError) },
+                                    isMapVisible = isMapVisible,
                                     modifier = Modifier.fillMaxSize(),
                                 )
                             }
