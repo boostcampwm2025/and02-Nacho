@@ -126,7 +126,7 @@ fun InvitationCardSection(
                         horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
                     ) {
                         Text(
-                            text = invitationCardUiModel.contentJson,
+                            text = "test",
                         )
                     }
                 }
@@ -177,18 +177,18 @@ private fun InvitationCardSectionPreview() {
                 modifier = Modifier.padding(NachoSpacing.medium),
             ) {
                 InvitationCardSection(
-                    invitationCardUiModel = InvitationCardUiModel(contentJson = "초대카드가 있는 경우에 해당 영역을 꾸미게 됩니다."),
+                    invitationCardUiModel = InvitationCardUiModel(),
                     onEditClick = {},
                 )
 
                 InvitationCardSection(
-                    invitationCardUiModel = InvitationCardUiModel(contentJson = ""),
+                    invitationCardUiModel = InvitationCardUiModel(),
                     isEditable = true,
                     onEditClick = {},
                 )
 
                 InvitationCardSection(
-                    invitationCardUiModel = InvitationCardUiModel(contentJson = "초대카드가 있는 경우에 해당 영역을 꾸미게 됩니다."),
+                    invitationCardUiModel = InvitationCardUiModel(),
                     isEditable = true,
                     onEditClick = {},
                 )
