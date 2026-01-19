@@ -29,18 +29,20 @@ fun NavController.navigateToAddressSearch(navOptions: NavOptions) {
 fun NavGraphBuilder.myInvitationCreateNavGraph(
     onNavigateToAddressSearch: () -> Unit,
     onNavigateBack: () -> Unit,
+    onNavigateCreateCard: () -> Unit,
 ) {
     composable<MyInvitationCreate> { backStackEntry ->
         val selectedAddressUiModel by
-            backStackEntry.savedStateHandle
-                .getStateFlow<AddressUiModel?>("selected_address", null)
-                .collectAsStateWithLifecycle()
+        backStackEntry.savedStateHandle
+            .getStateFlow<AddressUiModel?>("selected_address", null)
+            .collectAsStateWithLifecycle()
 
         MyInvitationCreateRoute(
             onNavigateToAddressSearch = onNavigateToAddressSearch,
             onNavigateBack = onNavigateBack,
             modifier = Modifier,
             address = selectedAddressUiModel,
+            onNavigateCreateCard = onNavigateCreateCard
         )
     }
 }
