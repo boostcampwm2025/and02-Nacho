@@ -3,42 +3,41 @@
 package com.andlife.network.api.invitation
 
 import kotlinx.serialization.InternalSerializationApi
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class InvitationResponse(
-    @SerialName("id") val id: Long,
-    @SerialName("host_id") val hostId: Long,
-    @SerialName("title") val title: String,
-    @SerialName("display_host_name") val displayHostName: String,
-    @SerialName("thumbnail_urls") val thumbnailUrls: List<String>,
-    @SerialName("invitation_date") val invitationDate: String,
-    @SerialName("start_time") val startTime: String,
-    @SerialName("end_time") val endTime: String?,
-    @SerialName("placename") val placename: String,
-    @SerialName("address") val address: String,
-    @SerialName("lat") val lat: Double,
-    @SerialName("lng") val lng: Double,
-    @SerialName("location_guide") val locationGuide: String?,
-    @SerialName("host_profile_url") val hostProfileUrl: String?,
-    @SerialName("invitation_card") val invitationCard: InvitationCardResponse?,
-    @SerialName("announcements") val announcements: List<AnnouncementResponse>,
+    val id: Long,
+    val hostId: Long,
+    val title: String,
+    val displayHostName: String,
+    val thumbnailUrls: List<String>,
+    val invitationDate: String,
+    val startTime: String,
+    val endTime: String?,
+    val placename: String,
+    val address: String,
+    val lat: Double,
+    val lng: Double,
+    val locationGuide: String?,
+    val hostProfileUrl: String?,
+    val invitationCard: InvitationCardResponse?,
+    val announcements: List<AnnouncementResponse>,
 )
 
 @Serializable
 data class InvitationCardResponse(
-    @SerialName("id") val id: Long,
-    @SerialName("invitation_id") val invitationId: Long,
-    @SerialName("content_json") val contentJson: String,
-    @SerialName("background_image_url") val backgroundImageUrl: String?,
+    val id: Long,
+    val invitationId: Long,
+    val contentJson: String,
+    val backgroundImageUrl: String?,
 )
 
 @Serializable
 data class AnnouncementResponse(
-    @SerialName("id") val id: Long,
-    @SerialName("invitation_id") val invitationId: Long,
-    @SerialName("title") val title: String,
-    @SerialName("content") val content: String,
-    @SerialName("display_order") val displayOrder: Int,
+    val id: Long,
+    val invitationId: Long,
+    val title: String,
+    val content: String,
+    val displayOrder: Int,
 )
