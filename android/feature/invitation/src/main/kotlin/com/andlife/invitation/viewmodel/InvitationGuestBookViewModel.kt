@@ -290,20 +290,18 @@ constructor(
         val existingMedias = (guestBook.visualMedias + guestBook.audioMedias)
             .sortedBy { it.displayOrder }
             .map { media ->
-            SelectedMedia(
-                id = media.id,
-                uri = when (media.type) {
-                    MediaUiType.VIDEO -> media.thumbnailUrl ?: media.url
-                    MediaUiType.IMAGE, MediaUiType.AUDIO -> media.url
-                },
-                type = when (media.type) {
-                    MediaUiType.IMAGE -> UiMediaType.IMAGE
-                    MediaUiType.VIDEO -> UiMediaType.VIDEO
-                    MediaUiType.AUDIO -> UiMediaType.AUDIO
-                },
-                duration = media.durationSeconds
-            )
-        }
+                SelectedMedia(
+                    id = media.id,
+                    uri = media.url, // 서버 원본 URL
+                    type = when (media.type) {
+                        MediaUiType.IMAGE -> UiMediaType.IMAGE
+                        MediaUiType.VIDEO -> UiMediaType.VIDEO
+                        MediaUiType.AUDIO -> UiMediaType.AUDIO
+                    },
+                    duration = media.durationSeconds,
+                    thumbnailUrl = media.thumbnailUrl
+                )
+            }
         updateState {
             copy(
                 editingGuestBookId = guestBook.id,

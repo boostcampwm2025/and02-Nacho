@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -67,14 +68,22 @@ fun SelectedMediaItem(
 
             UiMediaType.VIDEO -> {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    AsyncImage(
-                        model = media.uri, // TODO: 영상 썸네일 이미지로 변경
-                        contentDescription = stringResource(R.string.desc_media_video),
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                        placeholder = painterResource(R.drawable.ic_image_24),
-                        error = painterResource(R.drawable.ic_error_image_24),
-                    )
+                    if (media.thumbnailUrl != null) {
+                        AsyncImage(
+                            model = media.thumbnailUrl,
+                            contentDescription = stringResource(R.string.desc_media_video),
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop,
+                            placeholder = painterResource(R.drawable.ic_image_24),
+                            error = painterResource(R.drawable.ic_error_image_24),
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black),
+                        )
+                    }
                     Icon(
                         painter = painterResource(id = R.drawable.ic_play_circle_24),
                         contentDescription = stringResource(R.string.desc_ic_play),
