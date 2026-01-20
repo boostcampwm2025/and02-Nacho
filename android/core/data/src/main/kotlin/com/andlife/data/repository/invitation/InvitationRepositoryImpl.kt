@@ -15,4 +15,8 @@ internal class InvitationRepositoryImpl @Inject constructor(
         invitationRemoteDataSource.getInvitation(invitationId).map { response ->
             response.toDomain()
         }
+    override suspend fun getUpcomingSchedules(userId: Long): Result<List<Invitation>, DataError> =
+        invitationRemoteDataSource.getUpcomingSchedules(userId).map { response ->
+            response.map { it.toDomain() }
+        }
 }
