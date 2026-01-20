@@ -66,7 +66,8 @@
     <string name="txt_add_media">미디어 추가</string>
     <string name="desc_remove_media">미디어 제거</string>
     <string name="txt_please_leave_a_message">메시지를 남겨주세요.</string>
-
+    <string name="txt_label_edit">수정</string>
+    <string name="txt_label_delete">삭제</string>ㄱ
 
     <!--  ImageSection  -->
     <string name="desc_invitation_image">초대장 상세 이미지</string>

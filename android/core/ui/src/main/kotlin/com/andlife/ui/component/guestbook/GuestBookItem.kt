@@ -15,10 +15,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -79,9 +81,11 @@ fun GuestBookItem(
     videoPlayerPool: AutoVideoPlayerPool,
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
-    onMenuClick: () -> Unit,
     modifier: Modifier = Modifier,
     shouldPlayVideo: Boolean = false,
+    onMenuClick: () -> Unit = {},
+    onEditClick: (Long) -> Unit = {},
+    onDeleteClick: (Long) -> Unit = {},
     onInvitationTitleClick: (Long) -> Unit? = {},
 ) {
     Column(
@@ -93,6 +97,8 @@ fun GuestBookItem(
             createdAt = guestBook.createdAt,
             isOwner = guestBook.isOwner,
             onMenuClick = onMenuClick,
+            onEditClick = { onEditClick(guestBook.id) },
+            onDeleteClick = { onDeleteClick(guestBook.id) },
         )
         GuestBookItemTextSection(
             invitation = guestBook.invitation,
@@ -135,9 +141,13 @@ private fun GuestBookItemHeader(
     author: AuthorUiModel,
     createdAt: LocalDateTime,
     isOwner: Boolean,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
     onMenuClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var isMenuExpanded by remember { mutableStateOf(false) }
+
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
@@ -170,12 +180,48 @@ private fun GuestBookItemHeader(
             )
         }
         if (isOwner) {
-            IconButton(onClick = onMenuClick) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_more_vert_24),
-                    contentDescription = stringResource(R.string.desc_edit_guest_book),
-                    tint = NachoTheme.colorScheme.textPrimary,
-                )
+            Box {
+                IconButton(onClick = { isMenuExpanded = true }) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_more_vert_24),
+                        contentDescription = stringResource(R.string.desc_edit_guest_book),
+                        tint = NachoTheme.colorScheme.textPrimary,
+                    )
+                }
+                DropdownMenu(
+                    expanded = isMenuExpanded,
+                    onDismissRequest = { isMenuExpanded = false },
+                    modifier = Modifier.width(200.dp),
+                    containerColor = NachoTheme.colorScheme.backgroundPrimary,
+                    shape = NachoTheme.shapes.medium,
+                ) {
+                    Text(
+                        text = stringResource(R.string.txt_label_edit),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    isMenuExpanded = false
+                                    onEditClick()
+                                }
+                                .padding(NachoSpacing.large),
+                        style = NachoTheme.typography.bodyMediumMedium,
+                        color = NachoTheme.colorScheme.textPrimary,
+                    )
+                    Text(
+                        text = stringResource(R.string.txt_label_delete),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    isMenuExpanded = false
+                                    onDeleteClick()
+                                }
+                                .padding(NachoSpacing.large),
+                        style = NachoTheme.typography.bodyMediumMedium,
+                        color = NachoTheme.colorScheme.textPrimary,
+                    )
+                }
             }
         }
     }
@@ -406,6 +452,7 @@ private fun VideoPlayerContainer(
                     override fun onRenderedFirstFrame() {
                         isVideoReady = true
                     }
+
                     override fun onPlaybackStateChanged(state: Int) {
                         if (state == Player.STATE_READY && currentPlayer.exoPlayer.playWhenReady) {
                             isVideoReady = true
@@ -646,6 +693,8 @@ private fun GuestBookItemPreview() {
                     onVisualMediaClick = {},
                     onAudioMediaClick = {},
                     onMenuClick = {},
+                    onEditClick = {},
+                    onDeleteClick = {},
                 )
             }
         }
