@@ -1,19 +1,14 @@
 plugins {
     id("invitation.android.feature")
-    id("kotlin-parcelize")
 }
 
 android {
-    namespace = "com.andlife.invitation_edit"
+    namespace = "com.andlife.editor"
 }
 
 dependencies {
-    implementation(projects.feature.editor)
     implementation(libs.androidx.compose.material.icons.extended)
-    // paging
-    implementation(libs.androidx.paging.compose)
-    implementation(libs.kotlinx.datetime)
-
+    implementation(libs.androidx.exifinterface)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

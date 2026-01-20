@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.graphics.Paint
+import android.graphics.Rect
 import androidx.exifinterface.media.ExifInterface
 import android.net.Uri
 import com.andlife.domain.error.DataError
@@ -132,14 +133,14 @@ class ImageLoaderImpl @Inject constructor() : ImageLoader {
         val srcLeft = (source.width - scaledSrcWidth) / 2f
         val srcTop = (source.height - scaledSrcHeight) / 2f
 
-        val srcRect = android.graphics.Rect(
+        val srcRect = Rect(
             srcLeft.toInt(),
             srcTop.toInt(),
             (srcLeft + scaledSrcWidth).toInt(),
             (srcTop + scaledSrcHeight).toInt()
         )
 
-        val dstRect = android.graphics.Rect(0, 0, targetWidth, targetHeight)
+        val dstRect = Rect(0, 0, targetWidth, targetHeight)
 
         val output = createBitmap(targetWidth, targetHeight)
         val canvas = Canvas(output)
