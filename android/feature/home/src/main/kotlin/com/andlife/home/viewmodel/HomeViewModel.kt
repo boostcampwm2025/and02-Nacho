@@ -81,19 +81,19 @@ class HomeViewModel @Inject constructor(
     }
 
     private suspend fun loadUpcomingInvitations() {
-        updateState { copy(isLoading = true, isError = false) }
+        updateState { copy(isUpcomingLoading = true, isUpcomingError = false) }
 
         invitationRepository.getUpcomingInvitations()
             .onSuccess { invitations ->
                 updateState {
                     copy(
-                        isLoading = false,
+                        isUpcomingLoading = false,
                         upcomingInvitations = invitations.map { it.toUpcomingInvitationUiModel() }
                     )
                 }
             }.onFailure { error ->
                 updateState {
-                    copy(isLoading = false, isError = true)
+                    copy(isUpcomingLoading = false, isUpcomingError = true)
                 }
                 Log.e("HomeViewModel", "다가오는 초대 불러오기 실패: $error")
             }
@@ -105,7 +105,7 @@ class HomeViewModel @Inject constructor(
             is HomeUiEvent.ClickVisualMedia -> {}
             is HomeUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
             is HomeUiEvent.ClickSetting -> navigateToSetting()
-            is HomeUiEvent.RetryLoad -> retryLoad()
+            is HomeUiEvent.RetryLoad -> retryUpcomingLoad()
             is HomeUiEvent.ClickUpcomingInvitation -> navigateToDetail(event.invitationId)
         }
     }
@@ -135,7 +135,7 @@ class HomeViewModel @Inject constructor(
         sendEffect(HomeSideEffect.ShowMessage("$type 미디어 클릭됨: $url"))
     }
 
-    private fun retryLoad() {
+    private fun retryUpcomingLoad() {
         viewModelScope.launch {
             loadUpcomingInvitations()
         }

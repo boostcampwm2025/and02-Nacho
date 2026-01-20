@@ -1,18 +1,25 @@
 package com.andlife.home.screen
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,7 +42,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -46,6 +55,7 @@ import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.component.NachoDivider
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
@@ -72,6 +82,11 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
+
+private const val GUESTBOOK_KEY_PREFIX = "guestbook_"
+private const val GUESTBOOK_EMPTY_HEIGHT_RATIO = 0.3f
+private const val GUESTBOOK_LOADING_HEIGHT_RATIO = 0.5f
+private const val UPCOMING_CARD_WIDTH_RATIO = 0.85f
 
 @Composable
 fun HomeRoute(
@@ -235,22 +250,6 @@ fun HomeScreen(
         },
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
     ) { paddingValues ->
-        if (uiState.isLoading) {
-            InvitationLoadingIndicator(
-                text = stringResource(R.string.txt_loading_home),
-                modifier = Modifier.fillMaxSize(),
-            )
-            return@Scaffold
-        }
-
-        if (uiState.isError) {
-            InvitationLoadingError(
-                onRetry = { onEvent(HomeUiEvent.RetryLoad) },
-                modifier = Modifier.fillMaxSize(),
-            )
-            return@Scaffold
-        }
-
         LazyColumn(
             state = lazyListState,
             modifier = Modifier.fillMaxSize(),
@@ -263,88 +262,23 @@ fun HomeScreen(
             ),
         ) {
             item {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(NachoSpacing.large)
-                ) {
-                    Text(
-                        text = stringResource(R.string.txt_title_upcoming_schedule),
-                        style = NachoTheme.typography.headingSmallSemiBold,
-                        modifier = Modifier.padding(top = NachoSpacing.large),
-                    )
-
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
-                    ) {
-                        items(
-                            items = uiState.upcomingInvitations,
-                            key = { it.id },
-                        ) { invitation ->
-                            val dDayText = remember(invitation.startTime.date) {
-                                invitation.startTime.date.toDDayText()
-                            }
-                            InvitationScheduleListItem(
-                                modifier = Modifier.fillParentMaxWidth(0.8f),
-                                imageUrl = invitation.thumbnailUrl,
-                                title = invitation.title,
-                                startTime = invitation.startTime.toDateTimeSingleLine(),
-                                hostName = invitation.hostInfo.name,
-                                dDayText = dDayText,
-                                onClick = { onEvent(HomeUiEvent.ClickUpcomingInvitation(invitation.id)) },
-                            )
-                        }
-                    }
-                }
-            }
-
-            item {
-                Text(
-                    text = stringResource(R.string.txt_title_new_post),
-                    style = NachoTheme.typography.headingSmallSemiBold,
-                    modifier = Modifier.padding(top = NachoSpacing.medium),
+                HomeUpcomingSection(
+                    uiState = uiState,
+                    onInvitationClick = { id -> onEvent(HomeUiEvent.ClickUpcomingInvitation(id)) },
+                    onRetryClick = { onEvent(HomeUiEvent.RetryLoad) },
+                    onCreateClick = { /* TODO: 초대장 생성 화면 이동 */ }
                 )
             }
 
-            items(
-                count = guestBooks.itemCount,
-                key = { index ->
-                    val id = guestBooks.itemKey { it.id }.invoke(index)
-                    "guestbook_$id"
-                },
-            ) { index ->
-                guestBooks[index]?.let { guestBook ->
-                    GuestBookItem(
-                        modifier = Modifier.animateItem(),
-                        guestBook = guestBook,
-                        videoPlayerPool = videoPlayerPool,
-                        shouldPlayVideo = (index == playVideoIndex),
-                        isAudioPlaying = uiState.isAudioPlaying &&
-                            guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
-                        onInvitationTitleClick = {
-                            onEvent(
-                                HomeUiEvent.ClickInvitationTitle(guestBook.invitation?.id ?: -1L),
-                            )
-                        },
-                        playingAudioUrl = uiState.playingAudioUrl,
-                        onVisualMediaClick = { onEvent(HomeUiEvent.ClickVisualMedia(it.url)) },
-                        onAudioMediaClick = { onEvent(HomeUiEvent.ClickAudioMedia(it.url)) },
-                        onMenuClick = { },
-                    )
-                }
-            }
-
-            if (guestBooks.loadState.append is LoadState.Loading) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = NachoSpacing.medium),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-            }
+            homeGuestBookSection(
+                guestBooks = guestBooks,
+                uiState = uiState,
+                playVideoIndex = playVideoIndex,
+                videoPlayerPool = videoPlayerPool,
+                onInvitationTitleClick = { id -> onEvent(HomeUiEvent.ClickInvitationTitle(id)) },
+                onVisualMediaClick = { url -> onEvent(HomeUiEvent.ClickVisualMedia(url)) },
+                onAudioMediaClick = { url -> onEvent(HomeUiEvent.ClickAudioMedia(url)) },
+            )
         }
     }
 }
@@ -394,6 +328,235 @@ private fun HomeTopBar(
     }
 }
 
+@Composable
+fun HomeUpcomingSection(
+    uiState: HomeUiState,
+    onInvitationClick: (Long) -> Unit,
+    onRetryClick: () -> Unit,
+    onCreateClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(NachoSpacing.large)
+    ) {
+        Text(
+            text = stringResource(R.string.txt_title_upcoming_schedule),
+            style = NachoTheme.typography.headingSmallSemiBold,
+            modifier = Modifier.padding(top = NachoSpacing.large),
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultMinSize(minHeight = 240.dp)
+                .wrapContentHeight(),
+            contentAlignment = Alignment.Center
+        ) {
+            when {
+                uiState.isUpcomingLoading -> {
+                    InvitationLoadingIndicator(
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
+                uiState.isUpcomingError -> {
+                    InvitationLoadingError(
+                        modifier = Modifier.fillMaxSize(),
+                        onRetry = onRetryClick
+                    )
+                }
+
+                uiState.upcomingInvitations.isEmpty() -> {
+                    EmptyUpcomingCard(
+                        onWriteClick = onCreateClick,
+                        modifier = Modifier.padding(vertical = NachoSpacing.large),
+                    )
+                }
+
+                else -> {
+                    LazyRow(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
+                        contentPadding = PaddingValues(bottom = NachoSpacing.small)
+                    ) {
+                        items(
+                            items = uiState.upcomingInvitations,
+                            key = { it.id },
+                        ) { invitation ->
+                            val dDayText = remember(invitation.startTime.date) {
+                                invitation.startTime.date.toDDayText()
+                            }
+                            InvitationScheduleListItem(
+                                modifier = Modifier.fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO),
+                                imageUrl = invitation.thumbnailUrl,
+                                title = invitation.title,
+                                startTime = invitation.startTime.toDateTimeSingleLine(),
+                                hostName = invitation.hostInfo.name,
+                                dDayText = dDayText,
+                                onClick = { onInvitationClick(invitation.id) },
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun EmptyUpcomingCard(
+    onWriteClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = NachoTheme.colorScheme.backgroundSecondary.copy(alpha = 0.5f)
+        ),
+        shape = NachoTheme.shapes.medium,
+        border = BorderStroke(1.dp, NachoTheme.colorScheme.backgroundBorder)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = NachoSpacing.threeXLarge, horizontal = NachoSpacing.large),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.twoXLarge)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
+            ) {
+                Text(
+                    text = stringResource(R.string.txt_empty_upcoming_title),
+                    style = NachoTheme.typography.headingSmallSemiBold,
+                    color = NachoTheme.colorScheme.textPrimary,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = stringResource(R.string.txt_empty_upcoming_desc),
+                    style = NachoTheme.typography.bodyLargeRegular,
+                    color = NachoTheme.colorScheme.textSecondary,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            NachoButton(
+                onClick = onWriteClick,
+                containerColor = NachoTheme.colorScheme.brandOnPrimary,
+                contentColor = NachoTheme.colorScheme.brandPrimary,
+                modifier = Modifier.padding(top = NachoSpacing.medium)
+            ) {
+                Icon(
+                    painter = painterResource(com.andlife.ui.R.drawable.ic_add_24),
+                    contentDescription = null,
+                )
+                Spacer(Modifier.width(NachoSpacing.small))
+                Text(
+                    text = stringResource(R.string.txt_action_create_invitation),
+                    style = NachoTheme.typography.bodyLargeSemiBold,
+                    modifier = Modifier.padding(vertical = NachoSpacing.small)
+                )
+            }
+        }
+    }
+}
+fun LazyListScope.homeGuestBookSection(
+    guestBooks: LazyPagingItems<GuestBookUiModel>,
+    uiState: HomeUiState,
+    playVideoIndex: Int,
+    videoPlayerPool: AutoVideoPlayerPool,
+    onInvitationTitleClick: (Long) -> Unit,
+    onVisualMediaClick: (String) -> Unit,
+    onAudioMediaClick: (String) -> Unit,
+) {
+    item {
+        Text(
+            text = stringResource(R.string.txt_title_new_post),
+            style = NachoTheme.typography.headingSmallSemiBold,
+            modifier = Modifier.padding(top = NachoSpacing.medium),
+        )
+    }
+
+    val refreshState = guestBooks.loadState.refresh
+    when (refreshState) {
+        is LoadState.Loading -> {
+            item {
+                InvitationLoadingIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillParentMaxHeight(GUESTBOOK_LOADING_HEIGHT_RATIO),
+                )
+            }
+        }
+
+        is LoadState.Error -> {
+            item {
+                InvitationLoadingError(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(NachoSpacing.large),
+                    onRetry = { guestBooks.retry() },
+                )
+            }
+        }
+
+        is LoadState.NotLoading if guestBooks.itemCount == 0 -> {
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillParentMaxHeight(GUESTBOOK_EMPTY_HEIGHT_RATIO),             horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Text(
+                        text = stringResource(R.string.txt_empty_new_post_desc),
+                        style = NachoTheme.typography.bodyLargeRegular,
+                        color = NachoTheme.colorScheme.textSecondary,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
+        }
+
+        else -> {
+            items(
+                count = guestBooks.itemCount,
+                key = { index ->
+                    val id = guestBooks.itemKey { it.id }.invoke(index)
+                    "$GUESTBOOK_KEY_PREFIX$id"
+                },
+            ) { index ->
+                guestBooks[index]?.let { guestBook ->
+                    GuestBookItem(
+                        modifier = Modifier.animateItem(),
+                        guestBook = guestBook,
+                        videoPlayerPool = videoPlayerPool,
+                        shouldPlayVideo = (index == playVideoIndex),
+                        isAudioPlaying = uiState.isAudioPlaying &&
+                            guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
+                        onInvitationTitleClick = { onInvitationTitleClick(guestBook.invitation?.id ?: -1L) },
+                        playingAudioUrl = uiState.playingAudioUrl,
+                        onVisualMediaClick = { onVisualMediaClick(it.url) },
+                        onAudioMediaClick = { onAudioMediaClick(it.url) },
+                        onMenuClick = { },
+                    )
+                }
+            }
+        }
+    }
+
+    if (guestBooks.loadState.append is LoadState.Loading) {
+        item {
+            InvitationLoadingIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = NachoSpacing.large),
+            )
+        }
+    }
+}
 @PreviewTheme
 @Composable
 private fun HomeScreenPreview() {
@@ -403,7 +566,6 @@ private fun HomeScreenPreview() {
             override fun getPlayer(url: String): AutoVideoPlayer {
                 throw UnsupportedOperationException("Preview 전용")
             }
-
             override fun playPlayer(url: String, itemId: Long) {}
             override fun pausePlayer(url: String) {}
             override fun pauseAllPlayers() {}
