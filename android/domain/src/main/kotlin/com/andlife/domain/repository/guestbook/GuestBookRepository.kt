@@ -19,4 +19,13 @@ interface GuestBookRepository {
         textContent: String,
         medias: List<GuestBookMedia>,
     ): Result<GuestBook, DataError>
+
+    suspend fun updateGuestBook(
+        guestBookId: Long,
+        textContent: String,
+        existingImageIds: List<Long>,
+        existingVideoIds: List<Long>,
+        existingAudioIds: List<Long>,
+        newMedias: List<GuestBookMedia>,
+    ): Result<GuestBook, DataError>
 }
