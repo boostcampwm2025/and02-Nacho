@@ -1,10 +1,12 @@
 package com.andlife.InvitationServer.controller.invitation
 
+import com.andlife.InvitationServer.common.auth.AuthUser
 import com.andlife.InvitationServer.request.invitation.guestbook.GuestBookRequest
 import com.andlife.InvitationServer.response.BaseResponse
 import com.andlife.InvitationServer.response.CommonResponseCode
 import com.andlife.InvitationServer.response.PagingResponse
 import com.andlife.InvitationServer.response.invitation.InvitationResponse
+import com.andlife.InvitationServer.response.invitation.UpcomingInvitationResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.CollectionResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookResponse
 import com.andlife.InvitationServer.service.invitation.InvitationService
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -68,5 +71,14 @@ class InvitationController(
                 responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR,
             )
         }
+    }
+
+    @GetMapping("/upcoming")
+    fun getUpcomingInvitations(
+        @AuthUser userId: Long,
+        @RequestParam(defaultValue = "30") days: Long,
+    ): BaseResponse<List<UpcomingInvitationResponse>> {
+        val result = invitationService.getUpcomingInvitations(userId, days)
+        return BaseResponse.success(result)
     }
 }

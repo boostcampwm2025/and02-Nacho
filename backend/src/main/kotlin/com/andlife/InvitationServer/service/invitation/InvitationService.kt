@@ -6,8 +6,10 @@ import com.andlife.InvitationServer.repository.invitation.InvitationRepository
 import com.andlife.InvitationServer.response.invitation.AnnouncementResponse
 import com.andlife.InvitationServer.response.invitation.InvitationCardResponse
 import com.andlife.InvitationServer.response.invitation.InvitationResponse
+import com.andlife.InvitationServer.response.invitation.UpcomingInvitationResponse
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Service
 @Transactional(readOnly = true)
@@ -57,5 +59,26 @@ class InvitationService(
                 )
             },
         )
+    }
+
+    fun getUpcomingInvitations(userId: Long, days: Long): List<UpcomingInvitationResponse> {
+        val today = LocalDate.now()
+        val limitDate = today.plusDays(days)
+
+        return invitationRepository.findUpcomingInvitationsWithinDays(
+            userId = userId,
+            today = today,
+            limitDate = limitDate
+        ).map { invitation ->
+            UpcomingInvitationResponse(
+                id = invitation.id,
+                title = invitation.title,
+                thumbnailUrl = invitation.thumbnailUrls.firstOrNull(),
+                invitationDate = invitation.invitationDate.toString(),
+                startTime = invitation.startTime.toString(),
+                displayHostName = invitation.displayHostName,
+                hostProfileUrl = invitation.host.profileImageUrl,
+            )
+        }
     }
 }
