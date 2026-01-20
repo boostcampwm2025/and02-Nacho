@@ -9,6 +9,7 @@ import com.andlife.InvitationServer.repository.invitation.InvitationRepository
 import com.andlife.InvitationServer.repository.invitation.guestbook.GuestBookRepository
 import com.andlife.InvitationServer.repository.user.UserRepository
 import com.andlife.InvitationServer.request.invitation.guestbook.GuestBookRequest
+import com.andlife.InvitationServer.request.invitation.guestbook.GuestBookUpdateRequest
 import com.andlife.InvitationServer.response.AuthorResponse
 import com.andlife.InvitationServer.response.PagingMetaResponse
 import com.andlife.InvitationServer.response.PagingResponse
@@ -207,5 +208,33 @@ class GuestBookService(
 
         val savedGuestBook = guestBookRepository.save(guestBook)
         return savedGuestBook.toGuestBookResponse()
+    }
+
+    @Transactional
+    fun updateGuestBook(guestBookId: Long, request: GuestBookUpdateRequest): GuestBookResponse {
+        val guestBook = guestBookRepository.findById(guestBookId)
+            .orElseThrow { IllegalArgumentException("방명록을 찾을 수 없습니다. id: $guestBookId") }
+
+        guestBook.textContent = request.textContent
+
+        guestBook.images.removeIf { !request.existingImageIds.contains(it.id) }
+        guestBook.audios.removeIf { !request.existingAudioIds.contains(it.id) }
+        guestBook.videos.removeIf { !request.existingVideoIds.contains(it.id) }
+
+        request.newMedias.forEach { mediaReq ->
+            when (mediaReq.mediaType) {
+                "IMAGE" -> guestBook.images.add(
+                    GuestBookImage(guestBook = guestBook, imageUrl = mediaReq.mediaUrl, displayOrder = mediaReq.displayOrder)
+                )
+                "AUDIO" -> guestBook.audios.add(
+                    GuestBookAudio(guestBook = guestBook, audioUrl = mediaReq.mediaUrl, durationSeconds = mediaReq.durationSeconds ?: 0, displayOrder = mediaReq.displayOrder)
+                )
+                "VIDEO" -> guestBook.videos.add(
+                    GuestBookVideo(guestBook = guestBook, videoUrl = mediaReq.mediaUrl, thumbnailUrl = mediaReq.thumbnailUrl ?: "", durationSeconds = mediaReq.durationSeconds ?: 0, displayOrder = mediaReq.displayOrder)
+                )
+            }
+        }
+
+        return guestBook.toGuestBookResponse()
     }
 }

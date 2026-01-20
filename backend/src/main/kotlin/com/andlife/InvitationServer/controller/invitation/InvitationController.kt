@@ -2,6 +2,7 @@ package com.andlife.InvitationServer.controller.invitation
 
 import com.andlife.InvitationServer.request.invitation.CreateInvitationRequest
 import com.andlife.InvitationServer.request.invitation.guestbook.GuestBookRequest
+import com.andlife.InvitationServer.request.invitation.guestbook.GuestBookUpdateRequest
 import com.andlife.InvitationServer.response.BaseResponse
 import com.andlife.InvitationServer.response.CommonResponseCode
 import com.andlife.InvitationServer.response.PagingResponse
@@ -16,6 +17,7 @@ import org.springframework.data.web.PageableDefault
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -94,5 +96,15 @@ class InvitationController(
             println(e.message)
             BaseResponse.error(responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
         }
+    }
+
+    @PutMapping("/{invitationId}/guestbooks/{guestBookId}")
+    fun updateGuestBook(
+        @PathVariable invitationId: Long,
+        @PathVariable guestBookId: Long,
+        @RequestBody request: GuestBookUpdateRequest
+    ): BaseResponse<GuestBookResponse> {
+        val result = guestBookService.updateGuestBook(guestBookId, request)
+        return BaseResponse.success(result)
     }
 }
