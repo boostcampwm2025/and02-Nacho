@@ -59,12 +59,13 @@ fun MyInvitationCreateRoute(
     onNavigateToAddressSearch: () -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateCreateCard: () -> Unit,
+    onNavigateToInvitationDetail: (Long) -> Unit,
     modifier: Modifier = Modifier,
     address: AddressUiModel? = null,
     viewModel: CreateInvitationViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalResources.current
+    val res = LocalResources.current
     val snackbarHost = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var isShowDatePicker by remember { mutableStateOf(false) }
@@ -77,11 +78,19 @@ fun MyInvitationCreateRoute(
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             CreateInvitationSideEffect.FullImage -> {
-                snackbarHost.showSnackbar(message = context.getString(R.string.snack_full_image))
+                snackbarHost.showSnackbar(message = res.getString(R.string.snack_full_image))
             }
 
             CreateInvitationSideEffect.OnBack -> {
                 onNavigateBack()
+            }
+
+            CreateInvitationSideEffect.FailCreate -> {
+                snackbarHost.showSnackbar(message = res.getString(R.string.snack_full_image))
+            }
+
+            is CreateInvitationSideEffect.SuccessCreate -> {
+                onNavigateToInvitationDetail(effect.id)
             }
         }
     }
@@ -93,7 +102,7 @@ fun MyInvitationCreateRoute(
                 viewModel.onEvent(CreateInvitationUiEvent.UpdateImageList(imageList))
             } else {
                 scope.launch {
-                    snackbarHost.showSnackbar(message = context.getString(R.string.snack_load_error_image))
+                    snackbarHost.showSnackbar(message = res.getString(R.string.snack_load_error_image))
                 }
             }
         }
