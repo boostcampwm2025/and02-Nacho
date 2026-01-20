@@ -216,7 +216,8 @@ class CreateInvitationViewModel @Inject constructor(
     fun getCardEditorResult() {
         val editable = createCardSession.editable ?: return
         val backgroundColor = createCardSession.backgroundColor
-        val card = CardUiModel(editable, backgroundColor.toArgb())
+        val backgroundImageUrl = createCardSession.backgroundImageUrl
+        val card = CardUiModel(editable, backgroundColor.toArgb(), backgroundImageUrl)
         updateState {
             copy(createInvitationUiModel = createInvitationUiModel.copy(card = card))
         }
@@ -242,11 +243,13 @@ class CreateInvitationViewModel @Inject constructor(
             val thumbnails = uiState.value.createInvitationUiModel.imageList.map { it.url }
             val uploadedThumbnailsResult = uploadImages(thumbnails)
             if (uploadedThumbnailsResult !is Result.Success) {
+                sendEffect(CreateInvitationSideEffect.FailCreate)
                 return@launch
             }
 
             val cardResult = processCardAndUploadImages(uiModel.card)
             if (cardResult !is Result.Success) {
+                sendEffect(CreateInvitationSideEffect.FailCreate)
                 return@launch
             }
 
@@ -261,13 +264,13 @@ class CreateInvitationViewModel @Inject constructor(
             )
 
             invitationRepository.createInvitation(params = createParam)
-                .onSuccess {
+                .onSuccess { id ->
                     updateState { copy(isLoading = false) }
-                    Log.d("CreateInvitationViewModel", "createInvitation Success: $it")
+                    sendEffect(CreateInvitationSideEffect.SuccessCreate(id))
                 }
                 .onFailure {
                     updateState { copy(isLoading = false) }
-                    Log.d("CreateInvitationViewModel", "createInvitation Fail: $it")
+                    sendEffect(CreateInvitationSideEffect.FailCreate)
                 }
         }
     }
@@ -315,7 +318,8 @@ class CreateInvitationViewModel @Inject constructor(
         return Result.Success(
             NachoUiCard(
                 content = newRichTextContent,
-                backgroundColor = cardUiModel.backgroundColor.toLong()
+                backgroundColor = cardUiModel.backgroundColor.toLong(),
+                backgroundImageUrl = cardUiModel.backgroundImageUrl
             )
         )
     }
