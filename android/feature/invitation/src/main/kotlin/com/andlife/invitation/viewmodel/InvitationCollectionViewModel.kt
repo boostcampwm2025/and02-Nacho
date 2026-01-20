@@ -15,9 +15,9 @@ import com.andlife.invitation.InvitationDetail
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionSideEffect
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiEvent
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiState
-import com.andlife.invitation.model.guestbook.collection.toUiModel
 import com.andlife.ui.base.BaseViewModel
-import com.andlife.ui.model.UiMediaType
+import com.andlife.model.guestbook.UiMediaType
+import com.andlife.model.invitation.collection.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.toImmutableList
@@ -29,17 +29,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class InvitationCollectionViewModel
-    @Inject
-    constructor(
-        private val guestBookRepository: GuestBookRepository,
-        @param:ApplicationContext private val context: Context,
-        savedStateHandle: SavedStateHandle
-    ) : BaseViewModel<InvitationCollectionUiState, InvitationCollectionUiEvent, InvitationCollectionSideEffect>(
-            initialState = InvitationCollectionUiState(),
-        ) {
+class InvitationCollectionViewModel @Inject constructor(
+    private val guestBookRepository: GuestBookRepository,
+    @param:ApplicationContext private val context: Context,
+    savedStateHandle: SavedStateHandle
+) : BaseViewModel<InvitationCollectionUiState, InvitationCollectionUiEvent, InvitationCollectionSideEffect>(
+    initialState = InvitationCollectionUiState(),
+) {
 
-        private val invitationId: Long = savedStateHandle.toRoute<InvitationDetail>().id
+    private val invitationId: Long = savedStateHandle.toRoute<InvitationDetail>().id
 
         override val uiState: StateFlow<InvitationCollectionUiState> =
             mutableUiState
@@ -56,14 +54,14 @@ class InvitationCollectionViewModel
             playWhenReady = true
         }
 
-        override fun onEvent(event: InvitationCollectionUiEvent) {
-            when (event) {
-                is InvitationCollectionUiEvent.OpenStory -> openStory(event.index)
-                is InvitationCollectionUiEvent.CloseStory -> closeStory()
-                is InvitationCollectionUiEvent.PageChanged -> pageChanged(event.index)
-                is InvitationCollectionUiEvent.ToggleExpand -> toggleExpand()
-            }
+    override fun onEvent(event: InvitationCollectionUiEvent) {
+        when (event) {
+            is InvitationCollectionUiEvent.OpenStory -> openStory(event.index)
+            is InvitationCollectionUiEvent.CloseStory -> closeStory()
+            is InvitationCollectionUiEvent.PageChanged -> pageChanged(event.index)
+            is InvitationCollectionUiEvent.ToggleExpand -> toggleExpand()
         }
+    }
 
         override fun onCleared() {
             super.onCleared()
@@ -75,22 +73,22 @@ class InvitationCollectionViewModel
                 Log.d("ViewModel", "id:$invitationId")
                 updateState { copy(isLoading = true) }
 
-                guestBookRepository
-                    .getMediaCollection(invitationId)
-                    .onSuccess { mediaList ->
-                        updateState {
-                            copy(
-                                isLoading = false,
-                                mediaItems = mediaList.map { it.toUiModel() }.toImmutableList(),
-                            )
-                        }
-                        Log.d("ViewModel", "미디어 리스트: $mediaList")
-                    }.onFailure {
-                        updateState { copy(isLoading = false) }
-                        Log.e("ViewModel", "에러 발생: $it")
+            guestBookRepository
+                .getMediaCollection(invitationId)
+                .onSuccess { mediaList ->
+                    updateState {
+                        copy(
+                            isLoading = false,
+                            mediaItems = mediaList.map { it.toUiModel() }.toImmutableList(),
+                        )
                     }
-            }
+                    Log.d("ViewModel", "미디어 리스트: $mediaList")
+                }.onFailure {
+                    updateState { copy(isLoading = false) }
+                    Log.e("ViewModel", "에러 발생: $it")
+                }
         }
+    }
 
         private fun openStory(index: Int) {
             updateState {
@@ -156,11 +154,11 @@ class InvitationCollectionViewModel
             exoPlayer.play()
         }
 
-        private fun toggleExpand() {
-            updateState {
-                copy(
-                    isTextExpanded = !isTextExpanded,
-                )
-            }
+    private fun toggleExpand() {
+        updateState {
+            copy(
+                isTextExpanded = !isTextExpanded,
+            )
         }
     }
+}

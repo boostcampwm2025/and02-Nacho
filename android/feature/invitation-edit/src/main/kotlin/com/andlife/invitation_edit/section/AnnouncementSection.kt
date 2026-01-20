@@ -50,8 +50,7 @@ fun LazyListScope.announcementSection(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = NachoSpacing.large)
-                        .padding(top = NachoSpacing.large),
+                        .padding(horizontal = NachoSpacing.large),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {

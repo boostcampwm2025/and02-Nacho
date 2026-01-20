@@ -1,5 +1,6 @@
 package com.andlife.invitation.screen.guestbook
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,6 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -65,6 +67,7 @@ import kotlin.math.min
 
 @Composable
 fun InvitationGuestBookRoute(
+    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: InvitationGuestBookViewModel = hiltViewModel(),
 ) {
@@ -121,6 +124,7 @@ fun InvitationGuestBookRoute(
         uiState = uiState,
         guestBooks = guestBooks,
         onEvent = viewModel::onEvent,
+        onNavigateBack = onNavigateBack,
         snackbarHostState = snackbarHostState,
         videoPlayerPool = viewModel.videoPlayerPool,
         modifier = modifier,
@@ -134,14 +138,35 @@ private fun InvitationGuestBookScreen(
     onEvent: (InvitationGuestBookUiEvent) -> Unit,
     snackbarHostState: SnackbarHostState,
     videoPlayerPool: AutoVideoPlayerPool,
+    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val lazyListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
     var playVideoIndex by remember { mutableStateOf(-1) }
 
-    LaunchedEffect(lazyListState, guestBooks.itemCount) {
+    var isMediaActive by remember { mutableStateOf(true) }
+
+    val navigateBackWithCleanup: () -> Unit = {
+        isMediaActive = false
+        coroutineScope.launch {
+            videoPlayerPool.pauseAllPlayers()
+            onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(""))
+
+            delay(50L)
+            onNavigateBack()
+        }
+    }
+
+    BackHandler(onBack = navigateBackWithCleanup)
+
+    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive) {
         var pendingIndex = -1
         var lastChangedTime = 0L
+        if (!isMediaActive) {
+            playVideoIndex = -1
+            return@LaunchedEffect
+        }
 
         snapshotFlow { lazyListState.layoutInfo }
             .collect { layoutInfo ->
@@ -212,8 +237,7 @@ private fun InvitationGuestBookScreen(
     }
 
     Scaffold(
-        modifier = modifier
-            .fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
         bottomBar = {
             Surface(
@@ -223,8 +247,6 @@ private fun InvitationGuestBookScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(NachoSpacing.large)
                         .navigationBarsPadding()
                         .imePadding()
                 ) {
@@ -233,49 +255,52 @@ private fun InvitationGuestBookScreen(
             }
         }
     ) { innerPadding ->
-        PagingStateContent(
-            loadState = guestBooks.loadState.refresh,
-            itemCount = guestBooks.itemCount,
-            onRetry = { guestBooks.retry() },
-        ) {
-            LazyColumn(
-                state = lazyListState,
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
-                contentPadding = PaddingValues(
-                    top = NachoSpacing.large,
-                    bottom = innerPadding.calculateBottomPadding()
-                )
+        if (isMediaActive) {
+            PagingStateContent(
+                loadState = guestBooks.loadState.refresh,
+                itemCount = guestBooks.itemCount,
+                onRetry = { guestBooks.retry() },
+                modifier = Modifier.padding(horizontal = NachoSpacing.large)
             ) {
-                items(
-                    count = guestBooks.itemCount,
-                    key = guestBooks.itemKey { it.id }
-                ) { index ->
-                    guestBooks[index]?.let { guestBook ->
-                        GuestBookItem(
-                            modifier = Modifier.animateItem(),
-                            guestBook = guestBook,
-                            videoPlayerPool = videoPlayerPool,
-                            shouldPlayVideo = index == playVideoIndex,
-                            isAudioPlaying = uiState.isAudioPlaying &&
-                                guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
-                            playingAudioUrl = uiState.playingAudioUrl,
-                            onVisualMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
-                            onAudioMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
-                            onMenuClick = { onEvent(InvitationGuestBookUiEvent.ClickGuestBookMenu(guestBook.id)) },
-                        )
+                LazyColumn(
+                    state = lazyListState,
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
+                    contentPadding = PaddingValues(
+                        top = NachoSpacing.large,
+                        bottom = innerPadding.calculateBottomPadding()
+                    )
+                ) {
+                    items(
+                        count = guestBooks.itemCount,
+                        key = guestBooks.itemKey { it.id }
+                    ) { index ->
+                        guestBooks[index]?.let { guestBook ->
+                            GuestBookItem(
+                                modifier = Modifier.animateItem(),
+                                guestBook = guestBook,
+                                videoPlayerPool = videoPlayerPool,
+                                shouldPlayVideo = isMediaActive && (index == playVideoIndex),
+                                isAudioPlaying = uiState.isAudioPlaying &&
+                                    guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
+                                playingAudioUrl = uiState.playingAudioUrl,
+                                onVisualMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
+                                onAudioMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
+                                onMenuClick = { onEvent(InvitationGuestBookUiEvent.ClickGuestBookMenu(guestBook.id)) },
+                            )
+                        }
                     }
-                }
 
-                if (guestBooks.loadState.append is LoadState.Loading) {
-                    item {
-                        Box(
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(NachoSpacing.medium),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
+                    if (guestBooks.loadState.append is LoadState.Loading) {
+                        item {
+                            Box(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(NachoSpacing.medium),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
                         }
                     }
                 }
@@ -290,6 +315,12 @@ private fun GuestBookFormSection(
     onEvent: (InvitationGuestBookUiEvent) -> Unit,
 ) {
     InvitationGuestBookForm(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                horizontal = NachoSpacing.large,
+                vertical = NachoSpacing.xSmall,
+            ),
         selectedMedias = uiState.selectedMedias,
         textContent = uiState.textContent,
         isUploading = uiState.isUploading,
@@ -317,6 +348,7 @@ private fun InvitationGuestBookEmptyPreview() {
             uiState = InvitationGuestBookUiState(isLoadingGuestBooks = false),
             guestBooks = emptyGuestBooks,
             onEvent = {},
+            onNavigateBack = {},
             videoPlayerPool = FakeVideoPlayerPool(),
             snackbarHostState = SnackbarHostState(),
         )

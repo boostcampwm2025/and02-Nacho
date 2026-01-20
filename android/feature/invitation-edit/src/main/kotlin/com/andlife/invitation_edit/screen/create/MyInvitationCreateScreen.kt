@@ -37,6 +37,7 @@ import com.andlife.invitation_edit.model.create.CreateInvitationUiState
 import com.andlife.invitation_edit.section.AddressSection
 import com.andlife.invitation_edit.section.AuthorSection
 import com.andlife.invitation_edit.section.BottomBarSection
+import com.andlife.invitation_edit.section.CardSection
 import com.andlife.invitation_edit.section.DateSection
 import com.andlife.invitation_edit.section.ImageSection
 import com.andlife.invitation_edit.section.TimeSection
@@ -54,6 +55,7 @@ import kotlinx.coroutines.launch
 fun MyInvitationCreateRoute(
     onNavigateToAddressSearch: () -> Unit,
     onNavigateBack: () -> Unit,
+    onNavigateCreateCard: () -> Unit,
     modifier: Modifier = Modifier,
     address: AddressUiModel? = null,
     viewModel: CreateInvitationViewModel = hiltViewModel(),
@@ -73,6 +75,10 @@ fun MyInvitationCreateRoute(
         when (event) {
             CreateInvitationSideEffect.FullImage -> {
                 snackbarHost.showSnackbar(message = context.getString(R.string.snack_full_image))
+            }
+
+            CreateInvitationSideEffect.OnBack -> {
+                onNavigateBack()
             }
         }
     }
@@ -95,12 +101,15 @@ fun MyInvitationCreateRoute(
         }
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.getCardEditorResult()
+    }
+
     MyInvitationCreateScreen(
         uiState = uiState,
         snackbarHostState = snackbarHost,
         onEvent = viewModel::onEvent,
         onNavigateToAddressSearch = onNavigateToAddressSearch,
-        onNavigateBack = onNavigateBack,
         onAddImageClick = {
             pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         },
@@ -119,6 +128,9 @@ fun MyInvitationCreateRoute(
         onRemoveAnnouncementClick = {
             selectedAnnouncement = it
             isShowDeleteAnnouncement = true
+        },
+        onClickCreateCard = {
+            onNavigateCreateCard()
         },
         modifier = modifier,
     )
@@ -171,7 +183,7 @@ fun MyInvitationCreateRoute(
                     }
                     isShowDeleteAnnouncement = false
                 },
-                onDismiss = { isShowDeleteAnnouncement = false },
+                onDismiss = { isShowDeleteAnnouncement = false }
             )
         }
     }
@@ -182,13 +194,13 @@ private fun MyInvitationCreateScreen(
     uiState: CreateInvitationUiState,
     snackbarHostState: SnackbarHostState,
     onEvent: (CreateInvitationUiEvent) -> Unit,
-    onNavigateBack: () -> Unit,
     onAddImageClick: () -> Unit,
     onDateClick: () -> Unit,
     onStartTimeClick: () -> Unit,
     onEndTimeClick: () -> Unit,
     onNavigateToAddressSearch: () -> Unit,
     onAddAnnouncementClick: () -> Unit,
+    onClickCreateCard: () -> Unit,
     onRemoveAnnouncementClick: (AnnouncementUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -202,7 +214,7 @@ private fun MyInvitationCreateScreen(
         topBar = {
             TopBarSection(
                 title = stringResource(R.string.txt_create),
-                onBackClick = onNavigateBack,
+                onBackClick = { onEvent(CreateInvitationUiEvent.OnClickBack) },
                 onPreviewClick = {},
             )
         },
@@ -274,6 +286,14 @@ private fun MyInvitationCreateScreen(
                     onChangePlaceAddress = { onEvent(CreateInvitationUiEvent.UpdatePlaceAddress(it)) },
                     onChangeAddressGuide = { onEvent(CreateInvitationUiEvent.UpdateAddressGuide(it)) },
                     onNavigateToAddressSearch = onNavigateToAddressSearch,
+                    modifier = Modifier.padding(top = NachoSpacing.medium),
+                )
+            }
+
+            item {
+                CardSection(
+                    cardUiModel = uiState.createInvitationUiModel.card,
+                    onClickCreatedCard = onClickCreateCard,
                     modifier = Modifier.padding(top = NachoSpacing.medium),
                 )
             }
