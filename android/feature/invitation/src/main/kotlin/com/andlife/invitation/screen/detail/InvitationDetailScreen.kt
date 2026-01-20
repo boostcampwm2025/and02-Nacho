@@ -53,6 +53,7 @@ fun InvitationDetailRoute(
     InvitationDetailScreen(
         uiState = uiState,
         onEvent = viewModel::onEvent,
+        onNavigateBack = onNavigateBack,
         modifier = modifier,
     )
 }
@@ -61,6 +62,7 @@ fun InvitationDetailRoute(
 private fun InvitationDetailScreen(
     uiState: InvitationDetailUiState,
     onEvent: (InvitationDetailUiEvent) -> Unit,
+    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()
@@ -92,7 +94,7 @@ private fun InvitationDetailScreen(
                     ) {
                         when (index) {
                             0 -> Text("초대장 콘텐츠")
-                            1 -> InvitationGuestBookRoute()
+                            1 -> InvitationGuestBookRoute(onNavigateBack = onNavigateBack)
                             2 -> InvitationCollectionRoute()
                         }
                     }
