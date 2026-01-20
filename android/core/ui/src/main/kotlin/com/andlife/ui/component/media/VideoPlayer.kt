@@ -54,8 +54,10 @@ fun VideoPlayer(
     LaunchedEffect(exoPlayer, isDragging) {
         if (!isDragging) {
             while (true) {
-                currentPosition = exoPlayer.currentPosition
-                duration = exoPlayer.duration.coerceAtLeast(1L)
+                if (exoPlayer.isPlaying) {
+                    currentPosition = exoPlayer.currentPosition
+                    duration = exoPlayer.duration.coerceAtLeast(1L)
+                }
                 delay(100)
             }
         }
@@ -78,11 +80,10 @@ fun VideoPlayer(
             modifier = Modifier.fillMaxSize()
         )
 
-        // 프로그레스 바 영역
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(NachoSpacing.twoXLarge) // 터치 영역 확보
+                .height(NachoSpacing.twoXLarge)
                 .align(Alignment.BottomCenter),
             contentAlignment = Alignment.BottomCenter
         ) {
@@ -112,7 +113,6 @@ fun VideoPlayer(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.BottomStart)
-                        .offset(y = -NachoSpacing.large)
                 ) {
                     Box(
                         modifier = Modifier
@@ -123,6 +123,7 @@ fun VideoPlayer(
                                     placeable.placeRelative(-(placeable.width / 2), 0)
                                 }
                             }
+                            .padding(bottom = NachoSpacing.large)
                             .background(
                                 color = NachoTheme.colorScheme.iconSecondary.copy(alpha = 0.8f),
                                 shape = RoundedCornerShape(NachoSpacing.xSmall)
