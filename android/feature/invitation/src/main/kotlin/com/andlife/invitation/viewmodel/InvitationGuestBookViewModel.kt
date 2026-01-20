@@ -1,5 +1,6 @@
 package com.andlife.invitation.viewmodel
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -20,6 +21,7 @@ import com.andlife.invitation.model.guestbook.InvitationGuestBookUiState
 import com.andlife.media.audio.AudioPlayerManager
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.model.guestbook.GuestBookUiModel
+import com.andlife.model.guestbook.MediaUiType
 import com.andlife.model.guestbook.toUiModel
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
@@ -42,6 +44,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import okhttp3.internal.toImmutableList
 import javax.inject.Inject
 
 @HiltViewModel
@@ -115,6 +118,9 @@ constructor(
             is InvitationGuestBookUiEvent.ClickVisualMedia -> sendEffect(
                 InvitationGuestBookSideEffect.ShowSnackbar("비주얼 미디어 클릭됨: ${event.url}"),
             )
+
+            is InvitationGuestBookUiEvent.ClickEditMenu -> startEditing(event.guestBook)
+            is InvitationGuestBookUiEvent.CancelEdit -> {}
         }
     }
 
@@ -277,6 +283,33 @@ constructor(
         } catch (e: Exception) {
             updateState { copy(isUploading = false) }
             sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("방명록 생성 중 오류 발생: ${e.message}"))
+        }
+    }
+
+    private fun startEditing(guestBook: GuestBookUiModel) {
+        val existingMedias = (guestBook.visualMedias + guestBook.audioMedias)
+            .sortedBy { it.displayOrder }
+            .map { media ->
+            SelectedMedia(
+                id = media.id,
+                uri = when (media.type) {
+                    MediaUiType.VIDEO -> media.thumbnailUrl ?: media.url
+                    MediaUiType.IMAGE, MediaUiType.AUDIO -> media.url
+                },
+                type = when (media.type) {
+                    MediaUiType.IMAGE -> UiMediaType.IMAGE
+                    MediaUiType.VIDEO -> UiMediaType.VIDEO
+                    MediaUiType.AUDIO -> UiMediaType.AUDIO
+                },
+                duration = media.durationSeconds
+            )
+        }
+        updateState {
+            copy(
+                editingGuestBookId = guestBook.id,
+                textContent = guestBook.textContent,
+                selectedMedias = existingMedias.toPersistentList()
+            )
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.andlife.invitation.model.guestbook
 
+import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.ui.base.BaseUiEvent
 import com.andlife.ui.component.invitation.SelectedMedia
 
@@ -35,4 +36,10 @@ sealed interface InvitationGuestBookUiEvent : BaseUiEvent {
     data class ClickAudioMedia(
         val url: String,
     ) : InvitationGuestBookUiEvent
+
+    data class ClickEditMenu(
+        val guestBook: GuestBookUiModel,
+    ) : InvitationGuestBookUiEvent
+
+    data object CancelEdit : InvitationGuestBookUiEvent
 }

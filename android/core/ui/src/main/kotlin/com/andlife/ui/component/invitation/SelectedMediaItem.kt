@@ -106,9 +106,9 @@ private fun EditModeVideoItemPreview() {
     NachoTheme {
         SelectedMediaItem(
             SelectedMedia(
-                "https://picsum.photos/400/600?random=3",
-                UiMediaType.VIDEO,
-                828,
+                uri = "https://picsum.photos/400/600?random=3",
+                type = UiMediaType.VIDEO,
+                duration = 828,
             ),
         )
     }
@@ -120,6 +120,7 @@ private fun EditModeAudioItemPreview() {
     NachoTheme {
         SelectedMediaItem(
             SelectedMedia(
+                1L,
                 "https://picsum.photos/400/600?random=3",
                 UiMediaType.AUDIO,
                 314,

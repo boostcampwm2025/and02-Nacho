@@ -13,6 +13,7 @@ data class InvitationGuestBookUiState(
     val errorMessage: String? = null,
     val playingAudioUrl: String? = null,
     val isAudioPlaying: Boolean = false,
+    val editingGuestBookId: Long? = null,
     val isLoadingGuestBooks: Boolean = false,
     val guestBooksErrorMessage: String? = null,
 ) : BaseUiState

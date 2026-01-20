@@ -139,7 +139,7 @@ class GuestBookService(
                 visualMedias = visualMedias,
                 audioMedias = audioMedias,
                 totalVisualCount = visualMedias.size,
-                isOwner = false,
+                isOwner = true,
                 createdAt = guestBook.createdAt,
                 updatedAt = guestBook.updatedAt
             )

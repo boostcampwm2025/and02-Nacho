@@ -83,13 +83,25 @@ fun GuestBookItem(
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
     modifier: Modifier = Modifier,
     shouldPlayVideo: Boolean = false,
+    isEditing: Boolean = false,
     onMenuClick: () -> Unit = {},
-    onEditClick: (Long) -> Unit = {},
-    onDeleteClick: (Long) -> Unit = {},
+    onEditClick: (GuestBookUiModel) -> Unit = {},
+    onDeleteClick: (GuestBookUiModel) -> Unit = {},
     onInvitationTitleClick: (Long) -> Unit? = {},
 ) {
+    val backgroundColor = if (isEditing) {
+        NachoTheme.colorScheme.backgroundBorder
+    } else {
+        NachoTheme.colorScheme.backgroundPrimary
+    }
+
     Column(
-        modifier = modifier,
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color = backgroundColor,
+                shape = NachoTheme.shapes.medium,
+            ),
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
         GuestBookItemHeader(
@@ -97,8 +109,8 @@ fun GuestBookItem(
             createdAt = guestBook.createdAt,
             isOwner = guestBook.isOwner,
             onMenuClick = onMenuClick,
-            onEditClick = { onEditClick(guestBook.id) },
-            onDeleteClick = { onDeleteClick(guestBook.id) },
+            onEditClick = { onEditClick(guestBook) },
+            onDeleteClick = { onDeleteClick(guestBook) },
         )
         GuestBookItemTextSection(
             invitation = guestBook.invitation,

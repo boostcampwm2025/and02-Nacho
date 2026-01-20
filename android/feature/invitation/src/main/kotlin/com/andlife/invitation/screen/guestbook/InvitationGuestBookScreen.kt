@@ -287,6 +287,8 @@ private fun InvitationGuestBookScreen(
                                 isAudioPlaying = uiState.isAudioPlaying &&
                                     guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
                                 playingAudioUrl = uiState.playingAudioUrl,
+                                isEditing = uiState.editingGuestBookId == guestBook.id,
+                                onEditClick = { onEvent(InvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
                                 onVisualMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
                                 onAudioMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
                                 onMenuClick = { onEvent(InvitationGuestBookUiEvent.ClickGuestBookMenu(guestBook.id)) },
