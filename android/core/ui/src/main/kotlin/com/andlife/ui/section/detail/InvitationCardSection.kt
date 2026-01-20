@@ -39,12 +39,12 @@ fun InvitationCardSection(
     isEditable: Boolean = false,
     onEditClick: () -> Unit = {},
 ) {
-    if (invitationCardUiModel == null) return
 
-    val isCardEmpty = invitationCardUiModel.contentJson.isEmpty()
-    val iconRes = if (isCardEmpty) R.drawable.ic_add_24 else R.drawable.ic_edit_24
+    if (invitationCardUiModel == null && !isEditable) return
+
+    val iconRes = if (invitationCardUiModel == null) R.drawable.ic_add_24 else R.drawable.ic_edit_24
     val buttonText =
-        if (isCardEmpty) {
+        if (invitationCardUiModel == null) {
             stringResource(R.string.txt_card_create)
         } else {
             stringResource(R.string.txt_card_edit)
@@ -100,7 +100,7 @@ fun InvitationCardSection(
                     containerColor = NachoTheme.colorScheme.backgroundSecondary,
                 ),
         ) {
-            if (isCardEmpty) {
+            if (invitationCardUiModel == null) {
                 EmptyCardGuide()
             } else {
                 Box(
