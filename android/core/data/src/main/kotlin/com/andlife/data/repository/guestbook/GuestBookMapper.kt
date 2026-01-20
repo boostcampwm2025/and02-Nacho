@@ -67,6 +67,6 @@ fun GuestBookMedia.toRequest(): GuestBookMediaRequest =
         mediaType = type.toString(),
         mediaUrl = url,
         durationSeconds = durationSeconds,
-        thumbnailUrl = null, // TODO: 썸네일 url 추가
+        thumbnailUrl = thumbnailUrl,
         displayOrder = displayOrder,
     )
