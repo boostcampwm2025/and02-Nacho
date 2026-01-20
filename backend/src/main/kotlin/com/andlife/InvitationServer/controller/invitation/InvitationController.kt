@@ -73,6 +73,16 @@ class InvitationController(
         }
     }
 
+    @GetMapping("/guestbooks/all")
+    fun getAllRelatedGuestBooks(
+        @AuthUser userId: Long,
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
+    ): BaseResponse<PagingResponse<GuestBookResponse>> {
+        val result = guestBookService.getAllRelatedGuestBooks(userId, pageable)
+        return BaseResponse.success(result)
+    }
+
+
     @GetMapping("/upcoming")
     fun getUpcomingInvitations(
         @AuthUser userId: Long,

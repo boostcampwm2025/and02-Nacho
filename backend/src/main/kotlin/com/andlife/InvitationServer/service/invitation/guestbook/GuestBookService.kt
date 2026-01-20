@@ -92,56 +92,7 @@ class GuestBookService(
         val guestBooksPage = guestBookRepository.findAllByInvitationId(invitationId, pageable)
 
         val responsePage = guestBooksPage.map { guestBook ->
-            val allMedia = mutableListOf<GuestBookMediaResponse>()
-
-            guestBook.images.forEach {
-                allMedia.add(GuestBookMediaResponse(it.id, MediaType.IMAGE, it.imageUrl, null, null, it.displayOrder))
-            }
-            guestBook.videos.forEach {
-                allMedia.add(
-                    GuestBookMediaResponse(
-                        it.id,
-                        MediaType.VIDEO,
-                        it.videoUrl,
-                        it.thumbnailUrl,
-                        it.durationSeconds,
-                        it.displayOrder
-                    )
-                )
-            }
-            guestBook.audios.forEach {
-                allMedia.add(
-                    GuestBookMediaResponse(
-                        it.id,
-                        MediaType.AUDIO,
-                        it.audioUrl,
-                        null,
-                        it.durationSeconds,
-                        it.displayOrder
-                    )
-                )
-            }
-
-            val sortedList = allMedia.sortedBy { it.displayOrder }
-            val visualMedias = sortedList.filter { it.type != MediaType.AUDIO }
-            val audioMedias = sortedList.filter { it.type == MediaType.AUDIO }
-
-            GuestBookResponse(
-                id = guestBook.id,
-                author = AuthorResponse(
-                    id = guestBook.user.id,
-                    name = guestBook.user.name,
-                    profileImageUrl = guestBook.user.profileImageUrl
-                ),
-                invitation = null,
-                textContent = guestBook.textContent,
-                visualMedias = visualMedias,
-                audioMedias = audioMedias,
-                totalVisualCount = visualMedias.size,
-                isOwner = false,
-                createdAt = guestBook.createdAt,
-                updatedAt = guestBook.updatedAt
-            )
+            convertToGuestBookResponse(guestBook, invitationId, includeInvitation = false)
         }
 
         return PagingResponse(
@@ -207,5 +158,67 @@ class GuestBookService(
 
         val savedGuestBook = guestBookRepository.save(guestBook)
         return savedGuestBook.toGuestBookResponse()
+    }
+
+    fun getAllRelatedGuestBooks(userId: Long, pageable: Pageable): PagingResponse<GuestBookResponse> {
+        val guestBooksPage = guestBookRepository.findAllByMyRelatedInvitations(userId, pageable)
+
+        val responsePage = guestBooksPage.map { guestBook ->
+            convertToGuestBookResponse(guestBook, userId, includeInvitation = true)
+        }
+
+        return PagingResponse(
+            meta = PagingMetaResponse(
+                isEnd = !responsePage.hasNext(),
+                pageableCount = responsePage.numberOfElements,
+                totalCount = responsePage.totalElements,
+                currentPage = responsePage.number + 1
+            ),
+            content = responsePage.content
+        )
+    }
+
+    private fun convertToGuestBookResponse(
+        guestBook: GuestBook,
+        currentUserId: Long,
+        includeInvitation: Boolean
+    ): GuestBookResponse {
+        val allMedia = mutableListOf<GuestBookMediaResponse>()
+
+        guestBook.images.forEach {
+            allMedia.add(GuestBookMediaResponse(it.id, MediaType.IMAGE, it.imageUrl, null, null, it.displayOrder))
+        }
+        guestBook.videos.forEach {
+            allMedia.add(GuestBookMediaResponse(it.id, MediaType.VIDEO, it.videoUrl, it.thumbnailUrl, it.durationSeconds, it.displayOrder))
+        }
+        guestBook.audios.forEach {
+            allMedia.add(GuestBookMediaResponse(it.id, MediaType.AUDIO, it.audioUrl, null, it.durationSeconds, it.displayOrder))
+        }
+
+        val sortedList = allMedia.sortedBy { it.displayOrder }
+        val visualMedias = sortedList.filter { it.type != MediaType.AUDIO }
+        val audioMedias = sortedList.filter { it.type == MediaType.AUDIO }
+
+        return GuestBookResponse(
+            id = guestBook.id,
+            author = AuthorResponse(
+                id = guestBook.user.id,
+                name = guestBook.user.name,
+                profileImageUrl = guestBook.user.profileImageUrl
+            ),
+            invitation = if (includeInvitation) {
+                GuestBookInvitationResponse(
+                    id = guestBook.invitation.id,
+                    title = guestBook.invitation.title
+                )
+            } else null,
+            textContent = guestBook.textContent,
+            visualMedias = visualMedias,
+            audioMedias = audioMedias,
+            totalVisualCount = visualMedias.size,
+            isOwner = guestBook.user.id == currentUserId,
+            createdAt = guestBook.createdAt,
+            updatedAt = guestBook.updatedAt
+        )
     }
 }
