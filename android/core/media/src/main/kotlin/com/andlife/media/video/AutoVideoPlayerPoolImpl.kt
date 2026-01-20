@@ -1,14 +1,16 @@
 package com.andlife.media.video
 
 import android.content.Context
+import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-class AutoVideoPlayerPoolImpl @Inject constructor(
+class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val cacheDataSourceFactory: CacheDataSource.Factory,
 ) : AutoVideoPlayerPool {
@@ -35,11 +37,17 @@ class AutoVideoPlayerPoolImpl @Inject constructor(
         }
     }
 
+    @OptIn(UnstableApi::class)
     override fun getPlayer(url: String): AutoVideoPlayer {
         if (playerInstances.isEmpty()) {
             preparePlayers()
         }
-        activePlayers[url]?.let { return it }
+        activePlayers[url]?.let { existingPlayer ->
+            if (existingPlayer.exoPlayer.currentMediaItem?.localConfiguration?.uri.toString() == url) {
+                return existingPlayer
+            }
+            return existingPlayer
+        }
         if (playerInstances.isEmpty()) {
             preparePlayers()
         }
@@ -121,6 +129,7 @@ class AutoVideoPlayerPoolImpl @Inject constructor(
         activePlayers.values.forEach { it.release() }
         activePlayers.clear()
         lastPlayedUrlByGuestBookId.clear()
+        currentPlayingUrl = null
     }
 
     companion object {

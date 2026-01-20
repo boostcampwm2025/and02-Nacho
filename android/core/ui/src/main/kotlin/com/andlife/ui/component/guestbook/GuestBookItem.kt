@@ -75,12 +75,12 @@ import com.andlife.designsystem.R as designR
 fun GuestBookItem(
     guestBook: GuestBookUiModel,
     videoPlayerPool: AutoVideoPlayerPool,
-    onInvitationTitleClick: (Long) -> Unit,
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
     onMenuClick: () -> Unit,
     modifier: Modifier = Modifier,
     shouldPlayVideo: Boolean = false,
+    onInvitationTitleClick: (Long) -> Unit? = {},
 ) {
     Column(
         modifier = modifier,
@@ -182,7 +182,7 @@ private fun GuestBookItemHeader(
 private fun GuestBookItemTextSection(
     invitation: GuestBookInvitationUiModel?,
     textContent: String,
-    onInvitationTitleClick: (Long) -> Unit,
+    onInvitationTitleClick: (Long) -> Unit?,
     modifier: Modifier = Modifier,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
@@ -375,14 +375,14 @@ private fun VideoPlayerContainer(
     videoPlayerPool: AutoVideoPlayerPool,
     modifier: Modifier = Modifier,
 ) {
-    var isVideoReady by remember(videoUrl, shouldPlay) { mutableStateOf(false) }
+    var isVideoReady by remember(videoUrl) { mutableStateOf(false) }
 
     val thumbnailAlpha by animateFloatAsState(
-        targetValue = if (isVideoReady) 0f else 1f,
+        targetValue = if (shouldPlay && isVideoReady) 0f else 1f,
         animationSpec = tween(durationMillis = 200),
     )
 
-    LaunchedEffect(shouldPlay) {
+    LaunchedEffect(shouldPlay, videoUrl) {
         if (shouldPlay) {
             videoPlayerPool.playPlayer(videoUrl, guestBookId)
         } else {
@@ -396,25 +396,40 @@ private fun VideoPlayerContainer(
             .background(Color.Black)
     ) {
         if (shouldPlay) {
-            val currentPlayer = videoPlayerPool.getPlayer(videoUrl)
+            val currentPlayer = remember(videoUrl) { videoPlayerPool.getPlayer(videoUrl) }
 
-            DisposableEffect(currentPlayer) {
+            DisposableEffect(currentPlayer, videoUrl) {
                 val listener = object : Player.Listener {
                     override fun onRenderedFirstFrame() {
                         isVideoReady = true
                     }
+                    override fun onPlaybackStateChanged(state: Int) {
+                        if (state == Player.STATE_READY && currentPlayer.exoPlayer.playWhenReady) {
+                            isVideoReady = true
+                        }
+                    }
                 }
+
                 currentPlayer.exoPlayer.addListener(listener)
-                onDispose { currentPlayer.exoPlayer.removeListener(listener) }
+
+                if (currentPlayer.exoPlayer.playbackState == Player.STATE_READY) {
+                    isVideoReady = true
+                }
+
+                onDispose {
+                    currentPlayer.exoPlayer.removeListener(listener)
+                }
             }
+
             VideoPlayerView(
                 player = currentPlayer.exoPlayer,
                 modifier = Modifier.fillMaxSize(),
             )
         }
-        thumbnailUrl?.let {
+
+        if (thumbnailUrl != null && thumbnailAlpha > 0f) {
             ThumbnailWrapper(
-                thumbnailUrl = it,
+                thumbnailUrl = thumbnailUrl,
                 modifier = Modifier
                     .fillMaxSize()
                     .alpha(thumbnailAlpha),
@@ -423,6 +438,7 @@ private fun VideoPlayerContainer(
     }
 }
 
+@OptIn(UnstableApi::class)
 @Composable
 private fun VideoPlayerView(
     player: ExoPlayer,

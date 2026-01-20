@@ -1,4 +1,4 @@
-package com.andlife.invitation_card.editor.screen
+package com.andlife.editor.screen
 
 import android.text.Layout
 import android.view.ViewGroup
@@ -78,38 +78,37 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.PopupProperties
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
-import com.andlife.invitation_card.R
-import com.andlife.invitation_card.editor.model.ColorPaletteMode
-import com.andlife.invitation_card.editor.model.EditorDefaults
-import com.andlife.invitation_card.editor.util.contrastColor
-import com.andlife.invitation_card.editor.state.EditorState
+import com.andlife.editor.R
+import com.andlife.editor.model.ColorPaletteMode
+import com.andlife.editor.model.EditorDefaults
+import com.andlife.editor.util.contrastColor
+import com.andlife.editor.state.EditorState
+import com.andlife.invitation_card.editor.utils.ImageLoaderImpl
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 
 @Composable
 fun EditorScreen(
+    state: EditorState,
     titleText: String,
     onBackClick: () -> Unit,
     onSaveChangesClick: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: EditorViewModel = hiltViewModel(),
 ) {
-    val state = viewModel.editorState
     var colorPaletteMode by remember { mutableStateOf<ColorPaletteMode?>(null) }
     val scope = rememberCoroutineScope()
     val pickMedia =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
             if (uri != null) {
-               scope.launch {
-                   state.insertImage(uri)
-               }
+                scope.launch {
+                    state.insertImage(uri)
+                }
             }
         }
 
@@ -123,8 +122,15 @@ fun EditorScreen(
         topBar = {
             EditTopBar(
                 titleText = titleText,
-                onBackClick = onBackClick,
-                onSaveChangesClick = onSaveChangesClick,
+                onBackClick = {
+                    state.clearFocusAndHideKeyboard()
+                    onBackClick()
+                },
+                onSaveChangesClick = {
+                    state.restartInput()
+                    state.clearFocusAndHideKeyboard()
+                    onSaveChangesClick()
+                },
             )
         },
         bottomBar = {
@@ -151,8 +157,7 @@ fun EditorScreen(
     ) { innerPadding ->
         Column(
             modifier =
-                Modifier
-                    .background(NachoTheme.colorScheme.backgroundTertiary)
+                Modifier.background(NachoTheme.colorScheme.backgroundTertiary)
                     .padding(innerPadding)
                     .fillMaxSize(),
         ) {
@@ -232,7 +237,7 @@ private fun EditTopBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = NachoTheme.colorScheme.backgroundPrimary,
         ),
-        modifier = modifier,
+        modifier = modifier.padding(end = NachoSpacing.medium),
     )
 }
 
@@ -630,9 +635,11 @@ private fun TextSizeBox(
 private fun EditorScreenPreview() {
     NachoTheme {
         EditorScreen(
+            state = EditorState(ImageLoaderImpl()),
             titleText = "초대카드 생성",
             onBackClick = {},
             onSaveChangesClick = {},
         )
     }
 }
+

@@ -1,4 +1,4 @@
-package com.andlife.invitation_card.editor.di
+package com.andlife.editor.di
 
 import com.andlife.invitation_card.editor.utils.ImageLoader
 import com.andlife.invitation_card.editor.utils.ImageLoaderImpl
