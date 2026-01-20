@@ -11,7 +11,11 @@ import com.andlife.invitation.model.InvitationUiEvent
 import com.andlife.invitation.model.InvitationUiState
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,26 +26,29 @@ class InvitationViewModel @Inject constructor(
 ) : BaseViewModel<InvitationUiState, InvitationUiEvent, InvitationSideEffect>(
     initialState = InvitationUiState()
 ) {
-    override val uiState: StateFlow<InvitationUiState>
-        get() = TODO("Not yet implemented")
+    override val uiState: StateFlow<InvitationUiState> =
+        mutableUiState
+            .onStart {
+                loadInvitations()
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = InvitationUiState()
+            )
 
     override fun onEvent(event: InvitationUiEvent) {
         TODO("Not yet implemented")
     }
 
-    init {
-        // 테스트를 위해 실행 시 바로 호출
-        loadInvitations()
-    }
-
     private fun loadInvitations() {
         viewModelScope.launch {
             // 로그인
-            // userRepository.saveUserId(1L)
+            userRepository.saveUserId(1L)
 
             invitationRepository.getParticipantInvitations()
                 .onSuccess { ids ->
-                    updateState { copy(invitationIds = ids) }
+                    updateState { copy(invitationIds = ids.toPersistentList()) }
                 }
                 .onFailure { error ->
                     Log.e("InvitationViewModel", "Error loading invitations: $error")

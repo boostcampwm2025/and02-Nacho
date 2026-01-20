@@ -3,22 +3,32 @@ package com.andlife.invitation.screen
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.component.NachoButton
+import com.andlife.invitation.model.InvitationUiState
+import com.andlife.invitation.viewmodel.InvitationViewModel
 
 @Composable
 fun InvitationRoute(
     onNavigateToDetail: (Long) -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: InvitationViewModel = hiltViewModel(),
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     InvitationScreen(
         onNavigateToDetail = onNavigateToDetail,
+        uiState = uiState,
         modifier = modifier,
     )
 }
 
 @Composable
 private fun InvitationScreen(
+    uiState: InvitationUiState,
     modifier: Modifier = Modifier,
     onNavigateToDetail: (Long) -> Unit,
 ) {
@@ -36,5 +46,7 @@ private fun InvitationScreen(
         ) {
             Text("초대장으로 이동")
         }
+
+        Text("전달 받은 초대장 리스트 : ${uiState.invitationIds}")
     }
 }
