@@ -105,14 +105,17 @@ fun InvitationGuestBookRoute(
                 Lifecycle.Event.ON_RESUME -> {
                     viewModel.videoPlayerPool.resumeLastPlayed()
                 }
+
                 Lifecycle.Event.ON_PAUSE -> {
                     viewModel.videoPlayerPool.pauseAllPlayers()
                     viewModel.audioPlayerManager.pause()
                 }
+
                 Lifecycle.Event.ON_DESTROY -> {
                     viewModel.videoPlayerPool.resetPool()
                     viewModel.audioPlayerManager.stopAll()
                 }
+
                 else -> {}
             }
         }
@@ -160,10 +163,10 @@ private fun InvitationGuestBookScreen(
 
     BackHandler(onBack = navigateBackWithCleanup)
 
-    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive) {
+    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.isAudioPlaying) {
         var pendingIndex = -1
         var lastChangedTime = 0L
-        if (!isMediaActive) {
+        if (!isMediaActive || uiState.isAudioPlaying) {
             playVideoIndex = -1
             return@LaunchedEffect
         }
@@ -229,7 +232,7 @@ private fun InvitationGuestBookScreen(
 
     LaunchedEffect(guestBooks.loadState.refresh) {
         if (guestBooks.loadState.refresh is LoadState.NotLoading) {
-            if (guestBooks.itemCount >0) {
+            if (guestBooks.itemCount > 0) {
                 lazyListState.animateScrollToItem(0)
             }
             playVideoIndex = -1

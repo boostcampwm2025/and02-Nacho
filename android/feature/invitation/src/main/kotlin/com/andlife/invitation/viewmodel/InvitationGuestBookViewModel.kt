@@ -33,10 +33,12 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -82,6 +84,15 @@ constructor(
                 }
             }
             .launchIn(viewModelScope)
+
+        uiState.map { it.isAudioPlaying }
+            .distinctUntilChanged()
+            .onEach { isAudioPlaying ->
+                if (!isAudioPlaying) {
+                    videoPlayerPool.resumeLastPlayed()
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     override fun onEvent(event: InvitationGuestBookUiEvent) {
@@ -91,10 +102,7 @@ constructor(
             is InvitationGuestBookUiEvent.RemoveMedia -> removeMedia(event.media)
             is InvitationGuestBookUiEvent.UploadMedias -> uploadMedias()
             is InvitationGuestBookUiEvent.ClearError -> clearError()
-            is InvitationGuestBookUiEvent.ClickAudioMedia -> {
-                videoPlayerPool.pauseAllPlayers()
-                audioPlayerManager.togglePlay(event.url)
-            }
+            is InvitationGuestBookUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
 
             is InvitationGuestBookUiEvent.ClickGuestBookMenu -> sendEffect(
                 InvitationGuestBookSideEffect.ShowSnackbar("방명록 메뉴 클릭됨: ${event.guestBookId}"),
@@ -107,6 +115,19 @@ constructor(
             is InvitationGuestBookUiEvent.ClickVisualMedia -> sendEffect(
                 InvitationGuestBookSideEffect.ShowSnackbar("비주얼 미디어 클릭됨: ${event.url}"),
             )
+        }
+    }
+
+    private fun clickAudioMedia(url: String) {
+        val isCurrentlyPlaying = uiState.value.isAudioPlaying
+        val currentUrl = uiState.value.playingAudioUrl
+
+        if (currentUrl == url && isCurrentlyPlaying) {
+            audioPlayerManager.togglePlay(url)
+            videoPlayerPool.resumeLastPlayed()
+        } else {
+            videoPlayerPool.pauseAllPlayers()
+            audioPlayerManager.togglePlay(url)
         }
     }
 
