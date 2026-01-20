@@ -48,6 +48,7 @@ data class AnnouncementUiModel(
 data class CardUiModel(
     val editable: Editable,
     val backgroundColor: Int,
+    val backgroundImageUrl: String? = null
 )
 
 fun InvitationTimeUiModel.toLocalTime(): LocalTime {

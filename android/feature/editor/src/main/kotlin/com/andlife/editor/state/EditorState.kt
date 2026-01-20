@@ -44,6 +44,9 @@ class EditorState @Inject constructor(
     var currentTextStyle by mutableStateOf(EditTextStyle())
         private set
 
+    var currentBackgroundImageUrl by mutableStateOf("")
+        private set
+
     private val textWatcher = object : TextWatcher {
 
         override fun afterTextChanged(s: Editable?) {
