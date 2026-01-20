@@ -7,6 +7,6 @@ import com.andlife.domain.util.Result
 
 interface InvitationRepository {
     suspend fun getInvitation(invitationId: Long): Result<Invitation, DataError>
-    suspend fun getUpcomingInvitations(): Result<List<UpcomingInvitation>, DataError>
+    suspend fun getUpcomingInvitations(days: Long = 30): Result<List<UpcomingInvitation>, DataError>
 }
 

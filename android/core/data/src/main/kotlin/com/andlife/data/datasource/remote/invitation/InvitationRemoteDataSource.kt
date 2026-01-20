@@ -7,5 +7,5 @@ import com.andlife.network.api.invitation.UpcomingInvitationResponse
 
 interface InvitationRemoteDataSource {
     suspend fun getInvitation(invitationId: Long): Result<InvitationResponse, DataError>
-    suspend fun getUpcomingInvitations(): Result<List<UpcomingInvitationResponse>, DataError>
+    suspend fun getUpcomingInvitations(days: Long): Result<List<UpcomingInvitationResponse>, DataError>
 }

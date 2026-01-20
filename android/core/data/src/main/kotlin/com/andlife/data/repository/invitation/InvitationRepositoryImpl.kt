@@ -17,8 +17,8 @@ internal class InvitationRepositoryImpl @Inject constructor(
             response.toDomain()
         }
 
-    override suspend fun getUpcomingInvitations(): Result<List<UpcomingInvitation>, DataError> =
-        invitationRemoteDataSource.getUpcomingInvitations().map { response ->
+    override suspend fun getUpcomingInvitations(days: Long): Result<List<UpcomingInvitation>, DataError> =
+        invitationRemoteDataSource.getUpcomingInvitations(days).map { response ->
             response.map { it.toDomain() }
         }
 }

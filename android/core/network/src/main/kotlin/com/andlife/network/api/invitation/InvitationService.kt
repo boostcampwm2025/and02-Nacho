@@ -3,6 +3,7 @@ package com.andlife.network.api.invitation
 import com.andlife.network.model.BaseResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface InvitationService {
 
@@ -12,5 +13,7 @@ interface InvitationService {
     ): BaseResponse<InvitationResponse>
 
     @GET("/api/invitations/upcoming")
-    suspend fun getUpcomingInvitations(): BaseResponse<List<UpcomingInvitationResponse>>
+    suspend fun getUpcomingInvitations(
+        @Query("days") days: Long,
+    ): BaseResponse<List<UpcomingInvitationResponse>>
 }
