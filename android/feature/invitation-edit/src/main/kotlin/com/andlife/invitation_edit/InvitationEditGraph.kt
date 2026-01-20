@@ -30,6 +30,7 @@ fun NavGraphBuilder.myInvitationCreateNavGraph(
     onNavigateToAddressSearch: () -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateCreateCard: () -> Unit,
+    onNavigateToInvitationDetail: (Long) -> Unit,
 ) {
     composable<MyInvitationCreate> { backStackEntry ->
         val selectedAddressUiModel by
@@ -42,7 +43,8 @@ fun NavGraphBuilder.myInvitationCreateNavGraph(
             onNavigateBack = onNavigateBack,
             modifier = Modifier,
             address = selectedAddressUiModel,
-            onNavigateCreateCard = onNavigateCreateCard
+            onNavigateCreateCard = onNavigateCreateCard,
+            onNavigateToInvitationDetail = onNavigateToInvitationDetail
         )
     }
 }
