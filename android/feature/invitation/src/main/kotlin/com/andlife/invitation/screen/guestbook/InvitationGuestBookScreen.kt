@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -132,10 +133,8 @@ private fun InvitationGuestBookScreen(
     val coroutineScope = rememberCoroutineScope()
     var playVideoIndex by remember { mutableStateOf(-1) }
 
-    // 뒤로가기 시 미디어 정리를 위한 상태 플래그
     var isMediaActive by remember { mutableStateOf(true) }
 
-    // 뒤로가기 로직: 상태를 먼저 끄고 지연 후 실제 이동
     val navigateBackWithCleanup: () -> Unit = {
         isMediaActive = false
         coroutineScope.launch {
@@ -164,7 +163,11 @@ private fun InvitationGuestBookScreen(
                     val dataIndex = itemInfo.index
                     if (dataIndex < 0 || dataIndex >= guestBooks.itemCount) return@mapNotNull null
 
-                    val guestBook = try { guestBooks.peek(dataIndex) } catch (e: Exception) { null }
+                    val guestBook = try {
+                        guestBooks.peek(dataIndex)
+                    } catch (e: Exception) {
+                        null
+                    }
                     val hasVideo = guestBook?.visualMedias?.any { it.type == MediaUiType.VIDEO } == true
                     if (!hasVideo) return@mapNotNull null
 
@@ -204,9 +207,14 @@ private fun InvitationGuestBookScreen(
         bottomBar = {
             Surface(
                 tonalElevation = NachoElevation.medium,
+                shadowElevation = NachoElevation.medium,
                 color = NachoTheme.colorScheme.backgroundPrimary
             ) {
-                Box(modifier = Modifier.navigationBarsPadding().imePadding()) {
+                Box(
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .imePadding()
+                ) {
                     GuestBookFormSection(uiState = uiState, onEvent = onEvent)
                 }
             }
@@ -217,6 +225,7 @@ private fun InvitationGuestBookScreen(
                 loadState = guestBooks.loadState.refresh,
                 itemCount = guestBooks.itemCount,
                 onRetry = { guestBooks.retry() },
+                modifier = Modifier.padding(horizontal = NachoSpacing.large)
             ) {
                 LazyColumn(
                     state = lazyListState,
@@ -255,6 +264,12 @@ private fun GuestBookFormSection(
     onEvent: (InvitationGuestBookUiEvent) -> Unit,
 ) {
     InvitationGuestBookForm(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                horizontal = NachoSpacing.large,
+                vertical = NachoSpacing.xSmall,
+            ),
         selectedMedias = uiState.selectedMedias,
         textContent = uiState.textContent,
         isUploading = uiState.isUploading,
