@@ -16,4 +16,8 @@ data class InvitationGuestBookUiState(
     val editingGuestBookId: Long? = null,
     val isLoadingGuestBooks: Boolean = false,
     val guestBooksErrorMessage: String? = null,
-) : BaseUiState
+) : BaseUiState {
+
+    val isSubmittable: Boolean
+        get() = textContent.isNotBlank() || selectedMedias.isNotEmpty()
+}
