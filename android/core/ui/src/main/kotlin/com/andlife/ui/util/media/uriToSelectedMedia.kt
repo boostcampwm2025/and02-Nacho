@@ -4,7 +4,7 @@ import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import com.andlife.ui.component.invitation.SelectedMedia
-import com.andlife.ui.model.UiMediaType
+import com.andlife.model.guestbook.UiMediaType
 
 // URI 문자열을 SelectedMedia 객체로 변환하는 유틸 함수
 fun uriToSelectedMedia(

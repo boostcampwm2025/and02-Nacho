@@ -1,5 +1,6 @@
 package com.andlife.invitation_edit.model.create
 
+import android.text.Editable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.LocalDate
@@ -18,6 +19,7 @@ data class CreateInvitationUiModel(
     val lat: Double = 0.0,
     val lng: Double = 0.0,
     val announcement: ImmutableList<AnnouncementUiModel> = persistentListOf(),
+    val card: CardUiModel? = null,
 )
 
 data class ThumbnailImageUiModel(
@@ -35,3 +37,9 @@ data class AnnouncementUiModel(
     val title: String,
     val content: String,
 )
+
+data class CardUiModel(
+    val editable: Editable,
+    val backgroundColor: Int,
+)
+

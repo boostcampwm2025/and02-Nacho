@@ -47,6 +47,7 @@ import com.andlife.myinvitation.R
 import com.andlife.myinvitation.model.detail.MyInvitationDetailSideEffect
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiEvent
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiState
+import com.andlife.myinvitation.screen.guestbook.collection.MyInvitationCollectionRoute
 import com.andlife.myinvitation.viewmodel.MyInvitationDetailViewModel
 import com.andlife.ui.component.GenericTabRow
 import com.andlife.ui.component.loading.InvitationLoadingError
@@ -190,7 +191,7 @@ private fun MyInvitationDetailScreen(
                             }
 
                             1 -> {} // TODO: 방명록 조회 및 작성
-                            2 -> {} // TODO: 미디어 모아보기
+                            2 -> MyInvitationCollectionRoute()
                         }
                     },
             )

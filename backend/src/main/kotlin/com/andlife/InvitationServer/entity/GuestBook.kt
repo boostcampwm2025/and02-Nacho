@@ -11,12 +11,12 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
+import org.hibernate.annotations.BatchSize
 
 @Entity
 @Table(name = "guestbooks")
 class GuestBook(
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -30,13 +30,16 @@ class GuestBook(
     @Column(name = "text_content", columnDefinition = "TEXT", nullable = false)
     var textContent: String,
 
-    @OneToMany(mappedBy = "guestBook", cascade = [CascadeType.ALL])
+    @BatchSize(size = 100)
+    @OneToMany(mappedBy = "guestBook", cascade = [CascadeType.ALL], orphanRemoval = true)
     val images: MutableList<GuestBookImage> = mutableListOf(),
 
-    @OneToMany(mappedBy = "guestBook", cascade = [CascadeType.ALL])
+    @BatchSize(size = 100)
+    @OneToMany(mappedBy = "guestBook", cascade = [CascadeType.ALL], orphanRemoval = true)
     val audios: MutableList<GuestBookAudio> = mutableListOf(),
 
-    @OneToMany(mappedBy = "guestBook", cascade = [CascadeType.ALL])
+    @BatchSize(size = 100)
+    @OneToMany(mappedBy = "guestBook", cascade = [CascadeType.ALL], orphanRemoval = true)
     val videos: MutableList<GuestBookVideo> = mutableListOf()
 ) : BaseTimeEntity()
 

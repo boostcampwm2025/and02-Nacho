@@ -15,6 +15,7 @@ import com.andlife.home.navigateToHome
 import com.andlife.home.navigateToSetting
 import com.andlife.invitation.navigateToInvitation
 import com.andlife.invitation.navigateToInvitationDetail
+import com.andlife.invitation_card.navigateToCardEditor
 import com.andlife.invitation_edit.navigateToAddressSearch
 import com.andlife.invitation_edit.navigateToMyInvitationCreate
 import com.andlife.myinvitation.navigateToMyInvitation
@@ -94,6 +95,10 @@ class NachoNavigator(
 
     fun navigateToAddressSearch() {
         navController.navigateToAddressSearch(navOptions = navOptions { launchSingleTop = true })
+    }
+
+    fun navigateToCreateCard() {
+        navController.navigateToCardEditor()
     }
 
     fun navigatePopBackStack() {

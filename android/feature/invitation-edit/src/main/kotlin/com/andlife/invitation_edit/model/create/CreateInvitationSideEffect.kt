@@ -4,4 +4,5 @@ import com.andlife.ui.base.BaseSideEffect
 
 sealed interface CreateInvitationSideEffect : BaseSideEffect {
     data object FullImage : CreateInvitationSideEffect
+    data object OnBack : CreateInvitationSideEffect
 }

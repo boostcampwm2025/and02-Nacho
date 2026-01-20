@@ -1,26 +1,36 @@
 package com.andlife.invitation.viewmodel
 
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.map
 import com.andlife.domain.model.guestbook.GuestBookMedia
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
 import com.andlife.domain.util.Result
+import com.andlife.invitation.InvitationDetail
 import com.andlife.invitation.model.guestbook.InvitationGuestBookSideEffect
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiEvent
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiState
+import com.andlife.media.video.AutoVideoPlayerPool
+import com.andlife.model.guestbook.GuestBookUiModel
+import com.andlife.model.guestbook.toUiModel
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
-import com.andlife.ui.model.UiMediaType
+import com.andlife.model.guestbook.UiMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -31,21 +41,22 @@ constructor(
     private val mediaUploader: MediaUploader,
     private val mediaFileProvider: MediaFileProvider,
     private val guestBookRepository: GuestBookRepository,
+    val videoPlayerPool: AutoVideoPlayerPool,
+    savedStateHandle: SavedStateHandle,
 ) : BaseViewModel<InvitationGuestBookUiState, InvitationGuestBookUiEvent, InvitationGuestBookSideEffect>(
     InvitationGuestBookUiState(),
 ) {
-    override val uiState: StateFlow<InvitationGuestBookUiState> =
-        mutableUiState
-            .onStart { loadData() }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = InvitationGuestBookUiState(),
-            )
+    private val invitationId: Long = savedStateHandle.toRoute<InvitationDetail>().id
 
-    private fun loadData() {
-        // 초기 데이터 로드 필요한 경우 추가
-    }
+    override val uiState: StateFlow<InvitationGuestBookUiState> = mutableUiState.asStateFlow()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val guestBooksPagingFlow: Flow<PagingData<GuestBookUiModel>> =
+        guestBookRepository.getGuestBooksByInvitationId(invitationId)
+            .map { pagingData ->
+                pagingData.map { it.toUiModel() }
+            }
+            .cachedIn(viewModelScope)
 
     override fun onEvent(event: InvitationGuestBookUiEvent) {
         when (event) {
@@ -54,6 +65,18 @@ constructor(
             is InvitationGuestBookUiEvent.RemoveMedia -> removeMedia(event.media)
             is InvitationGuestBookUiEvent.UploadMedias -> uploadMedias()
             is InvitationGuestBookUiEvent.ClearError -> clearError()
+            is InvitationGuestBookUiEvent.ClickAudioMedia -> sendEffect(
+                InvitationGuestBookSideEffect.ShowSnackbar("초대장 제목 클릭됨: ${event.url}"),
+            )
+            is InvitationGuestBookUiEvent.ClickGuestBookMenu -> sendEffect(
+                InvitationGuestBookSideEffect.ShowSnackbar("방명록 메뉴 클릭됨: ${event.guestBookId}"),
+            )
+            is InvitationGuestBookUiEvent.ClickInvitationTitle -> sendEffect(
+                InvitationGuestBookSideEffect.ShowSnackbar("초대장 제목 클릭됨: ${event.invitationId}"),
+            )
+            is InvitationGuestBookUiEvent.ClickVisualMedia -> sendEffect(
+                InvitationGuestBookSideEffect.ShowSnackbar("비주얼 미디어 클릭됨: ${event.url}"),
+            )
         }
     }
 
@@ -191,7 +214,7 @@ constructor(
                             errorMessage = null,
                         )
                     }
-                    sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("방명록이 성공적으로 등록되었습니다"))
+                    sendEffect(InvitationGuestBookSideEffect.CreateGuestBookSuccess)
                 }
 
                 is Result.Error -> {

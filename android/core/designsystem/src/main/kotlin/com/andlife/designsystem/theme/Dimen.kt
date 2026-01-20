@@ -20,13 +20,15 @@ object NachoIconSize {
     val medium = 24.dp
     val large = 32.dp
     val xLarge = 48.dp
-    val textBox = 120.dp
+    val twoXLarge = 64.dp
+    val huge = 120.dp
 }
 
 object NachoStroke {
     val none = 0.dp
     val small = 1.dp
     val medium = 2.dp
+    val large = 4.dp
 }
 
 object NachoElevation {
