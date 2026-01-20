@@ -28,11 +28,13 @@ fun NavController.navigateToSetting(navOptions: NavOptions) {
 
 fun NavGraphBuilder.homeNavGraph(
     paddingValues: PaddingValues,
+    onNavigateToCreate: () -> Unit,
     onNavigateToInvitationDetail: (Long) -> Unit,
     onNavigateToSetting: () -> Unit,
 ) {
     composable<Home> {
         HomeRoute(
+            onNavigateToCreate = onNavigateToCreate,
             onNavigateToInvitationDetail = onNavigateToInvitationDetail,
             onNavigateToSetting = onNavigateToSetting,
             modifier = Modifier.padding(paddingValues),
