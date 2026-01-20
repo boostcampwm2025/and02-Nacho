@@ -27,7 +27,7 @@ internal abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindInvitationDetailRepository(invitationDetailRepositoryImpl: InvitationRepositoryImpl): InvitationRepository
+    abstract fun bindInvitationRepository(invitationRepositoryImpl: InvitationRepositoryImpl): InvitationRepository
 
     @Binds
     @Singleton
