@@ -1,13 +1,13 @@
 package com.andlife.model.invitation
 
-import com.andlife.domain.model.invitation.Invitation
+import com.andlife.domain.model.invitation.UpcomingInvitation
 
-fun Invitation.toUpcomingScheduleUiModel(): UpcomingScheduleUiModel {
-    return UpcomingScheduleUiModel(
+fun UpcomingInvitation.toUpcomingInvitationUiModel(): UpcomingInvitationUiModel {
+    return UpcomingInvitationUiModel(
         id = id,
-        thumbnailUrl = thumbnailUrls.firstOrNull() ?: "",
+        thumbnailUrl = thumbnailUrl ?: "",
         title = title,
-        dateTime = DateTimeInfo(
+        startTime = DateTimeInfo(
             date = invitationDate,
             startTime = TimeUiModel(
                 hour = startTime.hour,
@@ -16,7 +16,7 @@ fun Invitation.toUpcomingScheduleUiModel(): UpcomingScheduleUiModel {
         ),
         hostInfo = HostInfo(
             name = displayHostName,
-            profileUrl = hostProfileUrl,
+            profileUrl = null,
         ),
     )
 }

@@ -1,9 +1,9 @@
 package com.andlife.model.invitation
 
-data class UpcomingScheduleUiModel(
+data class UpcomingInvitationUiModel(
     val id: Long,
     val thumbnailUrl: String,
     val title: String,
-    val dateTime: DateTimeInfo = DateTimeInfo(),
+    val startTime: DateTimeInfo = DateTimeInfo(),
     val hostInfo: HostInfo = HostInfo(),
 )

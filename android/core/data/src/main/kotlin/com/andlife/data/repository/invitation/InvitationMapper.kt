@@ -3,9 +3,11 @@ package com.andlife.data.repository.invitation
 import com.andlife.domain.model.invitation.Announcement
 import com.andlife.domain.model.invitation.InvitationCard
 import com.andlife.domain.model.invitation.Invitation
+import com.andlife.domain.model.invitation.UpcomingInvitation
 import com.andlife.network.api.invitation.AnnouncementResponse
 import com.andlife.network.api.invitation.InvitationCardResponse
 import com.andlife.network.api.invitation.InvitationResponse
+import com.andlife.network.api.invitation.UpcomingInvitationResponse
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
@@ -51,4 +53,15 @@ fun AnnouncementResponse.toDomain(): Announcement {
 
 private fun parseTime(timeString: String): LocalTime {
     return LocalTime.parse(timeString)
+}
+
+fun UpcomingInvitationResponse.toDomain(): UpcomingInvitation {
+    return UpcomingInvitation(
+        id = id,
+        title = title,
+        thumbnailUrl = thumbnailUrl,
+        invitationDate = LocalDate.parse(invitationDate),
+        startTime = LocalTime.parse(startTime),
+        displayHostName = displayHostName,
+    )
 }

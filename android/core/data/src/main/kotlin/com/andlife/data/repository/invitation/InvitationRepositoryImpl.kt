@@ -3,6 +3,7 @@ package com.andlife.data.repository.invitation
 import com.andlife.data.datasource.remote.invitation.InvitationRemoteDataSource
 import com.andlife.domain.error.DataError
 import com.andlife.domain.model.invitation.Invitation
+import com.andlife.domain.model.invitation.UpcomingInvitation
 import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.map
@@ -15,8 +16,9 @@ internal class InvitationRepositoryImpl @Inject constructor(
         invitationRemoteDataSource.getInvitation(invitationId).map { response ->
             response.toDomain()
         }
-    override suspend fun getUpcomingSchedules(userId: Long): Result<List<Invitation>, DataError> =
-        invitationRemoteDataSource.getUpcomingSchedules(userId).map { response ->
+
+    override suspend fun getUpcomingInvitations(): Result<List<UpcomingInvitation>, DataError> =
+        invitationRemoteDataSource.getUpcomingInvitations().map { response ->
             response.map { it.toDomain() }
         }
 }
