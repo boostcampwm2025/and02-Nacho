@@ -6,6 +6,7 @@ import com.andlife.network.model.invitation.guestbook.CollectionResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -26,5 +27,11 @@ interface GuestBookService {
     suspend fun createGuestBook(
         @Path("invitationId") invitationId: Long,
         @Body request: GuestBookRequest,
+    ): BaseResponse<GuestBookResponse>
+
+    @PUT("/api/guestbooks/{guestBookId}")
+    suspend fun updateGuestBook(
+        @Path("guestBookId") guestBookId: Long,
+        @Body request: UpdateGuestBookRequest,
     ): BaseResponse<GuestBookResponse>
 }
