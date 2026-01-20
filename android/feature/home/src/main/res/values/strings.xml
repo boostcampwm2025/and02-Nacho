@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="txt_title_home">홈</string>
-    <string name="txt_loading_home">홈화면을 불러오는 중...</string>
+    <string name="txt_loading_home">데이터를 불러오는 중입니다.</string>
     <string name="desc_top_bar_setting">설정 화면으로 이동하는 아이콘 버튼</string>
 
     <string name="txt_title_upcoming_schedule">다가오는 초대</string>
