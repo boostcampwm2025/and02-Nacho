@@ -18,4 +18,12 @@ sealed interface HomeUiEvent : BaseUiEvent {
     data class ClickAudioMedia(
         val url: String,
     ) : HomeUiEvent
+
+    data object ClickSetting : HomeUiEvent
+
+    data object RetryLoad : HomeUiEvent
+
+    data class ClickUpcomingSchedule(
+        val invitationId: Long,
+    ) : HomeUiEvent
 }
