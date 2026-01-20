@@ -21,7 +21,8 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object InvitationNetworkModule {
-    private const val SERVER_BASE_URL = BuildConfig.SERVER_URL
+//    private const val SERVER_BASE_URL = BuildConfig.SERVER_URL
+    private const val SERVER_BASE_URL = "http://10.0.2.2:8080"
 
     @Provides
     @Singleton

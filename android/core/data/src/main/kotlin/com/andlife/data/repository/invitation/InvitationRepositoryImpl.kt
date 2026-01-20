@@ -27,4 +27,7 @@ internal class InvitationRepositoryImpl @Inject constructor(
         invitationRemoteDataSource.getInvitation(invitationId).map { response ->
             response.toDomain(json)
         }
+
+    override suspend fun getParticipantInvitations(): Result<List<Long>, DataError> =
+        invitationRemoteDataSource.getParticipantInvitations()
 }
