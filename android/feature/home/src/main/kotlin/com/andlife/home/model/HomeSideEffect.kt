@@ -12,4 +12,8 @@ sealed interface HomeSideEffect : BaseSideEffect {
     ) : HomeSideEffect
 
     data object NavigateToSetting : HomeSideEffect
+
+    data object NavigateToCreate : HomeSideEffect
+
+    data object RefreshGuestBook : HomeSideEffect
 }

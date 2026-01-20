@@ -105,7 +105,10 @@ class HomeViewModel @Inject constructor(
             is HomeUiEvent.ClickVisualMedia -> {}
             is HomeUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
             is HomeUiEvent.ClickSetting -> navigateToSetting()
-            is HomeUiEvent.RetryLoad -> retryUpcomingLoad()
+            is HomeUiEvent.ClickCreate -> navigateToCreate()
+            is HomeUiEvent.RetryUpcomingLoad -> retryUpcomingLoad()
+            is HomeUiEvent.RetryGuestBookLoad -> retryUpGuestBookLoad()
+            is HomeUiEvent.Refresh -> refresh()
             is HomeUiEvent.ClickUpcomingInvitation -> navigateToDetail(event.invitationId)
         }
     }
@@ -131,6 +134,10 @@ class HomeViewModel @Inject constructor(
         sendEffect(HomeSideEffect.NavigateToSetting)
     }
 
+    private fun navigateToCreate() {
+        sendEffect(HomeSideEffect.NavigateToCreate)
+    }
+
     private fun showMediaMessage(type: String, url: String) {
         sendEffect(HomeSideEffect.ShowMessage("$type 미디어 클릭됨: $url"))
     }
@@ -138,6 +145,20 @@ class HomeViewModel @Inject constructor(
     private fun retryUpcomingLoad() {
         viewModelScope.launch {
             loadUpcomingInvitations()
+        }
+    }
+    private fun retryUpGuestBookLoad() {
+        sendEffect(HomeSideEffect.RefreshGuestBook)
+    }
+
+    private fun refresh() {
+        viewModelScope.launch {
+            updateState { copy(isRefreshing = true) }
+
+            loadUpcomingInvitations()
+            sendEffect(HomeSideEffect.RefreshGuestBook)
+
+            updateState { copy(isRefreshing = false) }
         }
     }
 }

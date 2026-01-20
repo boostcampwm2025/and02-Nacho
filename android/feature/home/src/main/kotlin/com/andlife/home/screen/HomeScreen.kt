@@ -29,6 +29,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -90,6 +91,7 @@ private const val UPCOMING_CARD_WIDTH_RATIO = 0.85f
 
 @Composable
 fun HomeRoute(
+    onNavigateToCreate: () -> Unit,
     onNavigateToInvitationDetail: (Long) -> Unit,
     onNavigateToSetting: () -> Unit,
     modifier: Modifier = Modifier,
@@ -105,6 +107,8 @@ fun HomeRoute(
             is HomeSideEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
             is HomeSideEffect.NavigateToInvitationDetail -> onNavigateToInvitationDetail(effect.invitationId)
             is HomeSideEffect.NavigateToSetting -> onNavigateToSetting()
+            is HomeSideEffect.NavigateToCreate -> onNavigateToCreate()
+            is HomeSideEffect.RefreshGuestBook -> guestBooks.refresh()
         }
     }
 
@@ -150,6 +154,7 @@ fun HomeRoute(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     uiState: HomeUiState,
@@ -250,35 +255,44 @@ fun HomeScreen(
         },
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
     ) { paddingValues ->
-        LazyColumn(
-            state = lazyListState,
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
-            contentPadding = PaddingValues(
-                top = paddingValues.calculateTopPadding(),
-                bottom = paddingValues.calculateBottomPadding(),
-                start = NachoSpacing.large,
-                end = NachoSpacing.large,
-            ),
+
+        PullToRefreshBox(
+            isRefreshing = uiState.isRefreshing,
+            onRefresh = { onEvent(HomeUiEvent.Refresh) },
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = paddingValues.calculateTopPadding()),
         ) {
-            item {
-                HomeUpcomingSection(
+            LazyColumn(
+                state = lazyListState,
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
+                contentPadding = PaddingValues(
+                    bottom = paddingValues.calculateBottomPadding(),
+                    start = NachoSpacing.large,
+                    end = NachoSpacing.large,
+                ),
+            ) {
+                item {
+                    HomeUpcomingSection(
+                        uiState = uiState,
+                        onInvitationClick = { id -> onEvent(HomeUiEvent.ClickUpcomingInvitation(id)) },
+                        onRetryClick = { onEvent(HomeUiEvent.RetryUpcomingLoad) },
+                        onNavigateToCreate = { onEvent(HomeUiEvent.ClickCreate) },
+                    )
+                }
+
+                homeGuestBookSection(
+                    guestBooks = guestBooks,
                     uiState = uiState,
-                    onInvitationClick = { id -> onEvent(HomeUiEvent.ClickUpcomingInvitation(id)) },
-                    onRetryClick = { onEvent(HomeUiEvent.RetryLoad) },
-                    onCreateClick = { /* TODO: 초대장 생성 화면 이동 */ }
+                    playVideoIndex = playVideoIndex,
+                    videoPlayerPool = videoPlayerPool,
+                    onRetryClick = { onEvent(HomeUiEvent.RetryGuestBookLoad) },
+                    onInvitationTitleClick = { id -> onEvent(HomeUiEvent.ClickInvitationTitle(id)) },
+                    onVisualMediaClick = { url -> onEvent(HomeUiEvent.ClickVisualMedia(url)) },
+                    onAudioMediaClick = { url -> onEvent(HomeUiEvent.ClickAudioMedia(url)) },
                 )
             }
-
-            homeGuestBookSection(
-                guestBooks = guestBooks,
-                uiState = uiState,
-                playVideoIndex = playVideoIndex,
-                videoPlayerPool = videoPlayerPool,
-                onInvitationTitleClick = { id -> onEvent(HomeUiEvent.ClickInvitationTitle(id)) },
-                onVisualMediaClick = { url -> onEvent(HomeUiEvent.ClickVisualMedia(url)) },
-                onAudioMediaClick = { url -> onEvent(HomeUiEvent.ClickAudioMedia(url)) },
-            )
         }
     }
 }
@@ -333,7 +347,7 @@ fun HomeUpcomingSection(
     uiState: HomeUiState,
     onInvitationClick: (Long) -> Unit,
     onRetryClick: () -> Unit,
-    onCreateClick: () -> Unit,
+    onNavigateToCreate: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -369,7 +383,7 @@ fun HomeUpcomingSection(
 
                 uiState.upcomingInvitations.isEmpty() -> {
                     EmptyUpcomingCard(
-                        onWriteClick = onCreateClick,
+                        onNavigateToCreate = onNavigateToCreate,
                         modifier = Modifier.padding(vertical = NachoSpacing.large),
                     )
                 }
@@ -406,7 +420,7 @@ fun HomeUpcomingSection(
 
 @Composable
 fun EmptyUpcomingCard(
-    onWriteClick: () -> Unit,
+    onNavigateToCreate: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -443,7 +457,7 @@ fun EmptyUpcomingCard(
             }
 
             NachoButton(
-                onClick = onWriteClick,
+                onClick = onNavigateToCreate,
                 containerColor = NachoTheme.colorScheme.brandOnPrimary,
                 contentColor = NachoTheme.colorScheme.brandPrimary,
                 modifier = Modifier.padding(top = NachoSpacing.medium)
@@ -467,6 +481,7 @@ fun LazyListScope.homeGuestBookSection(
     uiState: HomeUiState,
     playVideoIndex: Int,
     videoPlayerPool: AutoVideoPlayerPool,
+    onRetryClick: () -> Unit,
     onInvitationTitleClick: (Long) -> Unit,
     onVisualMediaClick: (String) -> Unit,
     onAudioMediaClick: (String) -> Unit,
@@ -497,7 +512,7 @@ fun LazyListScope.homeGuestBookSection(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(NachoSpacing.large),
-                    onRetry = { guestBooks.retry() },
+                    onRetry = onRetryClick,
                 )
             }
         }
@@ -507,7 +522,8 @@ fun LazyListScope.homeGuestBookSection(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .fillParentMaxHeight(GUESTBOOK_EMPTY_HEIGHT_RATIO),             horizontalAlignment = Alignment.CenterHorizontally,
+                        .fillParentMaxHeight(GUESTBOOK_EMPTY_HEIGHT_RATIO),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
                     Text(

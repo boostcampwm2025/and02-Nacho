@@ -17,7 +17,13 @@ sealed interface HomeUiEvent : BaseUiEvent {
 
     data object ClickSetting : HomeUiEvent
 
-    data object RetryLoad : HomeUiEvent
+    data object ClickCreate : HomeUiEvent
+
+    data object RetryUpcomingLoad : HomeUiEvent
+
+    data object RetryGuestBookLoad : HomeUiEvent
+
+    data object Refresh : HomeUiEvent
 
     data class ClickUpcomingInvitation(
         val invitationId: Long,
