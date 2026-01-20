@@ -9,12 +9,11 @@ import com.andlife.InvitationServer.repository.invitation.InvitationRepository
 import com.andlife.InvitationServer.repository.invitation.guestbook.GuestBookRepository
 import com.andlife.InvitationServer.repository.user.UserRepository
 import com.andlife.InvitationServer.request.invitation.guestbook.GuestBookRequest
-import com.andlife.InvitationServer.request.invitation.guestbook.GuestBookUpdateRequest
+import com.andlife.InvitationServer.request.invitation.guestbook.UpdateGuestBookRequest
 import com.andlife.InvitationServer.response.AuthorResponse
 import com.andlife.InvitationServer.response.PagingMetaResponse
 import com.andlife.InvitationServer.response.PagingResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.CollectionResponse
-import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookInvitationResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookMediaResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.toGuestBookResponse
@@ -211,7 +210,7 @@ class GuestBookService(
     }
 
     @Transactional
-    fun updateGuestBook(guestBookId: Long, request: GuestBookUpdateRequest): GuestBookResponse {
+    fun updateGuestBook(guestBookId: Long, request: UpdateGuestBookRequest): GuestBookResponse {
         val guestBook = guestBookRepository.findById(guestBookId)
             .orElseThrow { IllegalArgumentException("방명록을 찾을 수 없습니다. id: $guestBookId") }
 

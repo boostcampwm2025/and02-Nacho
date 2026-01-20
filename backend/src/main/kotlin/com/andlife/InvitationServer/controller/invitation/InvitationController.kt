@@ -97,14 +97,4 @@ class InvitationController(
             BaseResponse.error(responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
         }
     }
-
-    @PutMapping("/{invitationId}/guestbooks/{guestBookId}")
-    fun updateGuestBook(
-        @PathVariable invitationId: Long,
-        @PathVariable guestBookId: Long,
-        @RequestBody request: GuestBookUpdateRequest
-    ): BaseResponse<GuestBookResponse> {
-        val result = guestBookService.updateGuestBook(guestBookId, request)
-        return BaseResponse.success(result)
-    }
 }
