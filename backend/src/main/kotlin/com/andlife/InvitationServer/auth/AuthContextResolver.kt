@@ -10,10 +10,10 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
 
 @Component
-class AuthUserIdResolver : HandlerMethodArgumentResolver {
+class AuthContextResolver : HandlerMethodArgumentResolver {
 
     override fun supportsParameter(parameter: MethodParameter): Boolean {
-        return parameter.hasParameterAnnotation(AuthUserId::class.java)
+        return parameter.parameterType == AuthContext::class.java
     }
 
     override fun resolveArgument(
@@ -21,19 +21,20 @@ class AuthUserIdResolver : HandlerMethodArgumentResolver {
         mavContainer: ModelAndViewContainer?,
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?
-    ): Any? {
-        val userIdHeader = webRequest.getHeader("X-AndLife-User-Id")
+    ): AuthContext {
+        val userIdHeader = webRequest.getHeader("Nacho-User-Id")
 
-        // 파라미터가 null을 허용하는지 확인
-        val isNullable = parameter.isOptional
-
-        if (userIdHeader.isNullOrBlank()) {
-            if (isNullable) return null
-            throw BusinessException(CommonResponseCode.UNAUTHORIZED)
+        if (!userIdHeader.isNullOrBlank()) {
+            val userId = userIdHeader.toLongOrNull()
+                ?: throw BusinessException(CommonResponseCode.BAD_REQUEST)
+            return AuthContext.Member(userId)
         }
 
-        // 헤더가 있지만 숫자가 아닌 경우
-        return userIdHeader.toLongOrNull()
-            ?: if (isNullable) null else throw BusinessException(CommonResponseCode.BAD_REQUEST)
+        val invitationIdsHeader = webRequest.getHeader("Nacho-Guest-Invitation-Ids")
+        val invitationIds = invitationIdsHeader?.split(",")
+            ?.mapNotNull { it.trim().toLongOrNull() }
+            ?: emptyList()
+
+        return AuthContext.Guest(invitationIds)
     }
 }
