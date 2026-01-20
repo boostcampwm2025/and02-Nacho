@@ -28,4 +28,10 @@ internal class GuestBookRemoteDataSourceImpl @Inject constructor(
         request: GuestBookRequest
     ): Result<GuestBookResponse, DataError> =
         apiCall { guestBookService.createGuestBook(invitationId, request) }
+
+    override suspend fun getAllRelatedGuestBooks(
+        page: Int,
+        size: Int
+    ): Result<PagingResponse<GuestBookResponse>, DataError> =
+        apiCall { guestBookService.getAllRelatedGuestBooks(page, size) }
 }

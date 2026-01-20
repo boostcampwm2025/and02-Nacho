@@ -3,6 +3,7 @@ package com.andlife.data.repository.guestbook
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.andlife.data.datasource.remote.invitation.guestbook.AllGuestBookPagingSource
 import com.andlife.data.datasource.remote.invitation.guestbook.GuestBookPagingSource
 import com.andlife.data.datasource.remote.invitation.guestbook.GuestBookRemoteDataSource
 import com.andlife.domain.error.DataError
@@ -57,6 +58,19 @@ internal class GuestBookRepositoryImpl @Inject constructor(
         val result = guestBookRemoteDataSource.createGuestBook(invitationId, request)
         return result.map { it.toDomain() }
     }
+
+
+    override fun getAllRelatedGuestBooks(): Flow<PagingData<GuestBook>>  =
+        Pager(
+            config = PagingConfig(
+                pageSize = PAGE_SIZE,
+                enablePlaceholders = false,
+                initialLoadSize = PAGE_SIZE
+            ),
+            pagingSourceFactory = {
+                AllGuestBookPagingSource(guestBookRemoteDataSource)
+            }
+        ).flow
 
     companion object {
         private const val PAGE_SIZE = 10

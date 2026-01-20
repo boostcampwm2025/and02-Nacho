@@ -47,9 +47,8 @@ class HomeViewModel @Inject constructor(
         initialValue = HomeUiState(),
     )
 
-    // TODO: 사용자의 모든 초대장 방명록을 가져오는 API로 변경
     val guestBooksPagingFlow: Flow<PagingData<GuestBookUiModel>> =
-        guestBookRepository.getGuestBooksByInvitationId(TEST_INVITATION_ID)
+        guestBookRepository.getAllRelatedGuestBooks()
             .map { pagingData ->
                 pagingData.map { it.toUiModel() }
             }
@@ -140,9 +139,5 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             loadUpcomingInvitations()
         }
-    }
-
-    companion object {
-        private const val TEST_INVITATION_ID = 1L
     }
 }

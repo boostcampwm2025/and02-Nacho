@@ -27,4 +27,10 @@ interface GuestBookService {
         @Path("invitationId") invitationId: Long,
         @Body request: GuestBookRequest,
     ): BaseResponse<GuestBookResponse>
+
+    @GET("/api/invitations/guestbooks/all")
+    suspend fun getAllRelatedGuestBooks(
+        @Query("page") page: Int,
+        @Query("size") size: Int
+    ): BaseResponse<PagingResponse<GuestBookResponse>>
 }

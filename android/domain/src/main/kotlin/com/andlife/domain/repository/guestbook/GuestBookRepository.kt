@@ -19,4 +19,6 @@ interface GuestBookRepository {
         textContent: String,
         medias: List<GuestBookMedia>,
     ): Result<GuestBook, DataError>
+
+    fun getAllRelatedGuestBooks(): Flow<PagingData<GuestBook>>
 }
