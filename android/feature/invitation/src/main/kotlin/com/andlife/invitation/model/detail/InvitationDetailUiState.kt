@@ -1,8 +1,11 @@
 package com.andlife.invitation.model.detail
 
+import com.andlife.model.invitation.InvitationContentsUiModel
 import com.andlife.ui.base.BaseUiState
 
 data class InvitationDetailUiState(
-    val id: Long = 0L,
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
+    val isError: Boolean = false,
+    val hasThanksCard: Boolean = false,
+    val invitationContentsUiModel: InvitationContentsUiModel = InvitationContentsUiModel(),
 ) : BaseUiState
