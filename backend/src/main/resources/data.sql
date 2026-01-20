@@ -10,7 +10,8 @@ INSERT INTO users (id, email, name, profile_image_url, created_at, updated_at) V
 -- 2. 초대장 데이터
 INSERT INTO invitations (id, host_id, title, display_host_name, thumbnail_urls, invitation_date, start_time, end_time, place_name, address, lat, lng, location_guide, created_at, updated_at) VALUES
 (1, 1, '2026 부스트캠프 송년 파티', '최동현', 'https://picsum.photos/800/400?random=1,https://picsum.photos/800/400?random=2', '2026-12-31', '18:00:00', '23:00:00', '강남역 어느 카페', '서울특별시 강남구 테헤란로', 37.4979, 127.0276, '강남역 10번 출구에서 직진하세요!', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(2, 6, '2026년 안드라이프 신년회', '안드라이프', 'https://picsum.photos/800/600?random=3', '2026-01-31', '13:30:00', NULL, '코드스쿼드', '서울특별시 강남구 강남대로62길 23, 4층 역삼빌딩', 37.4936874, 127.0302304, '양재역 3번 출구에서 801m', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+(2, 1, '2026 부스트캠프 파티', '미오', 'https://picsum.photos/800/400?random=1,https://picsum.photos/800/400?random=2', '2026-01-31', '18:30:00', '23:00:00', '강남역 어느 카페', '서울특별시 강남구 테헤란로', 37.4979, 127.0276, '강남역 10번 출구에서 직진하세요!', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(3, 6, '2026년 안드라이프 신년회', '안드라이프', 'https://picsum.photos/800/600?random=3', '2026-01-29', '13:30:00', NULL, '코드스쿼드', '서울특별시 강남구 강남대로62길 23, 4층 역삼빌딩', 37.4936874, 127.0302304, '양재역 3번 출구에서 801m', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- 3. 방명록 게시글
 INSERT INTO guestbooks (id, invitation_id, user_id, text_content, created_at, updated_at) VALUES
@@ -52,3 +53,19 @@ INSERT INTO announcement_sections (invitation_id, title, content, display_order,
 (1, '준비물', '만원 이하의 소소한 선물을 준비해 주세요. 랜덤 선물 교환식이 있습니다!', 2, CURRENT_TIMESTAMP),
 (2, '준비물', ' - 건강한 마음 \n - 건강한 정신', 1, CURRENT_TIMESTAMP),
 (2, '이벤트 안내', ' - 소정의 행사가 있습니다. \n - 입구에서 참여해보세요~', 2, CURRENT_TIMESTAMP);
+
+-- 9. 초대장 참여자 데이터 (invitation_participants)
+INSERT INTO invitation_participants (invitation_id, user_id, joined_at) VALUES
+-- '2026 부스트캠프 송년 파티' (1번 초대장) 참여자들
+(1, 2, NOW()), -- 미오 참여
+(1, 3, NOW()), -- 동경 참여
+(1, 4, NOW()), -- 정우 참여
+(1, 5, NOW()), -- 지민 참여
+(1, 6, NOW()), -- 안드라이프 참여
+-- '2026 부스트캠프 파티' (2번 초대장) 참여자들
+(2, 3, NOW()), -- 동경 참여
+(2, 4, NOW()), -- 정우 참여
+-- '2026년 안드라이프 신년회' (3번 초대장) 참여자들
+(3, 1, NOW()), -- 동현 참여
+(3, 2, NOW()), -- 미오 참여
+(3, 5, NOW()); -- 지민 참여
