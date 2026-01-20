@@ -438,6 +438,7 @@ private fun VideoPlayerContainer(
     }
 }
 
+@OptIn(UnstableApi::class)
 @Composable
 private fun VideoPlayerView(
     player: ExoPlayer,

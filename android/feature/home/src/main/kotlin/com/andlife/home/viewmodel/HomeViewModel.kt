@@ -1,22 +1,17 @@
 package com.andlife.home.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.andlife.domain.repository.guestbook.GuestBookRepository
-import com.andlife.domain.util.onFailure
-import com.andlife.domain.util.onSuccess
 import com.andlife.home.model.HomeSideEffect
 import com.andlife.home.model.HomeUiEvent
 import com.andlife.home.model.HomeUiState
 import com.andlife.media.video.AutoVideoPlayerPool
-import com.andlife.model.guestbook.toUiModel
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel

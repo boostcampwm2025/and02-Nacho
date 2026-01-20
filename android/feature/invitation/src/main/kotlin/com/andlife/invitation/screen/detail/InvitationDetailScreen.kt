@@ -38,7 +38,7 @@ import com.andlife.invitation.R
 import com.andlife.invitation.model.detail.InvitationDetailSideEffect
 import com.andlife.invitation.model.detail.InvitationDetailUiEvent
 import com.andlife.invitation.model.detail.InvitationDetailUiState
-import com.andlife.invitation.screen.guestbook.InvitationCollectionRoute
+import com.andlife.invitation.screen.guestbook.collection.InvitationCollectionRoute
 import com.andlife.invitation.screen.guestbook.InvitationGuestBookRoute
 import com.andlife.invitation.viewmodel.InvitationDetailViewModel
 import com.andlife.ui.component.GenericTabRow

@@ -1,4 +1,4 @@
-package com.andlife.ui.model
+package com.andlife.model.guestbook
 
 enum class UiMediaType {
     IMAGE,
@@ -12,7 +12,7 @@ enum class UiMediaType {
             default: UiMediaType = IMAGE,
         ): UiMediaType =
             try {
-                UiMediaType.valueOf(type)
+                valueOf(type)
             } catch (e: IllegalArgumentException) {
                 default
             }

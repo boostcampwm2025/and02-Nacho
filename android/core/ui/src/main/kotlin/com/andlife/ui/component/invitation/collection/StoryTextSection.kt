@@ -1,4 +1,4 @@
-package com.andlife.invitation.component
+package com.andlife.ui.component.invitation.collection
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -47,7 +47,7 @@ fun StoryTextSection(
                         Modifier.heightIn(min = NachoIconSize.huge)
                     },
                 ).background(NachoTheme.colorScheme.backgroundOverlay)
-                .clickable { if (isTextOverflowing || isExpanded) onToggleExpand() },
+                .padding(bottom = NachoSpacing.twoXLarge) // 비디오 플레이어 바텀 슬라이더 영역 확보를 위해 패딩 추가
     ) {
         Column(
             modifier =
