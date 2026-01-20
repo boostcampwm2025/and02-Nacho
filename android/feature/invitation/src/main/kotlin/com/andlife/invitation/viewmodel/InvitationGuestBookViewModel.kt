@@ -170,7 +170,9 @@ constructor(
             copy(
                 editingGuestBookId = guestBook.id,
                 textContent = guestBook.textContent,
-                selectedMedias = existingMedias.toPersistentList()
+                selectedMedias = existingMedias.toPersistentList(),
+                originalTextContent = guestBook.textContent,
+                originalMediaIds = existingMedias.mapNotNull { it.id }.toSet(),
             )
         }
     }

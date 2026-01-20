@@ -25,7 +25,6 @@ import com.andlife.designsystem.component.NachoTextField
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 import com.andlife.ui.util.media.uriToSelectedMedia
@@ -41,6 +40,7 @@ fun InvitationGuestBookForm(
     selectedMedias: ImmutableList<SelectedMedia>,
     textContent: String,
     isUploading: Boolean,
+    isSubmittable: Boolean,
     onMediasSelected: (ImmutableList<SelectedMedia>) -> Unit,
     onMediaRemove: (SelectedMedia) -> Unit,
     onTextContentChange: (String) -> Unit,
@@ -171,17 +171,28 @@ fun InvitationGuestBookForm(
             // 업로드 버튼
             NachoButton(
                 onClick = onUploadClick,
-                enabled = (selectedMedias.isNotEmpty() || textContent.isNotEmpty()) && !isUploading,
+                enabled = isSubmittable,
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(R.string.txt_submit),
-                        color = if (isUploading) Color.Transparent else Color.Unspecified
-                    )
+//                    Text(
+//                        text = stringResource(R.string.txt_submit),
+//                        color = if (isUploading) Color.Transparent else Color.Unspecified
+//                    )
+//                    if (isUploading) {
+//                        CircularProgressIndicator(
+//                            modifier = Modifier.size(NachoIconSize.small),
+//                            color = NachoTheme.colorScheme.textDisabled,
+//                        )
+//                    }
                     if (isUploading) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(NachoIconSize.small),
-                            color = NachoTheme.colorScheme.textDisabled,
+                            color = NachoTheme.colorScheme.textOnPrimary,
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(R.string.txt_submit),
+                            color = NachoTheme.colorScheme.textOnPrimary,
                         )
                     }
                 }
@@ -198,6 +209,7 @@ private fun InvitationGuestBookFormPreview() {
             selectedMedias = persistentListOf(),
             textContent = "",
             isUploading = false,
+            isSubmittable = false,
             onMediasSelected = {},
             onMediaRemove = {},
             onTextContentChange = {},
