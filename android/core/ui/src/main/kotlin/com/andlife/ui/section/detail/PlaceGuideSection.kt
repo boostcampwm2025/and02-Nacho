@@ -151,8 +151,8 @@ private fun PlaceMapCard(
             }
             if (!isMapReady) {
                 InvitationLoadingIndicator(
-                    modifier = Modifier.background(NachoTheme.colorScheme.backgroundSecondary),
                     text = stringResource(R.string.txt_map_loading),
+                    modifier = Modifier.background(NachoTheme.colorScheme.backgroundSecondary),
                 )
             }
         }
