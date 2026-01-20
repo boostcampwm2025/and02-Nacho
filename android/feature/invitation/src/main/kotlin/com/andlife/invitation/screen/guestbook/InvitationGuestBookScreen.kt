@@ -107,7 +107,7 @@ fun InvitationGuestBookRoute(
                     viewModel.audioPlayerManager.pause()
                 }
                 Lifecycle.Event.ON_DESTROY -> {
-                    viewModel.videoPlayerPool.releaseAllPlayers()
+                    viewModel.videoPlayerPool.resetPool()
                     viewModel.audioPlayerManager.stopAll()
                 }
                 else -> {}
