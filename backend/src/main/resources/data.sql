@@ -52,3 +52,7 @@ INSERT INTO announcement_sections (invitation_id, title, content, display_order,
 (1, '준비물', '만원 이하의 소소한 선물을 준비해 주세요. 랜덤 선물 교환식이 있습니다!', 2, CURRENT_TIMESTAMP),
 (2, '준비물', ' - 건강한 마음 \n - 건강한 정신', 1, CURRENT_TIMESTAMP),
 (2, '이벤트 안내', ' - 소정의 행사가 있습니다. \n - 입구에서 참여해보세요~', 2, CURRENT_TIMESTAMP);
+
+INSERT INTO invitation_participants (invitation_id, user_id, joined_at) VALUES
+(1, 1, NOW()),
+(2, 1, NOW());
