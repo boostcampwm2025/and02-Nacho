@@ -33,6 +33,12 @@ class UserStorage @Inject constructor(
         context.dataStore.edit { it[USER_ID] = userId }
     }
 
+    suspend fun clearUserSession() {
+        context.dataStore.edit { prefs ->
+            prefs.remove(USER_ID)
+        }
+    }
+
     suspend fun addInvitationId(invitationId: Long) {
         context.dataStore.edit { prefs ->
             val currentIds = prefs[GUEST_INVITATION_IDS] ?: emptySet()
@@ -40,14 +46,16 @@ class UserStorage @Inject constructor(
         }
     }
 
-    suspend fun clearAll() {
-        context.dataStore.edit { it.clear() }
-    }
-
     suspend fun deleteInvitationId(invitationId: Long) {
         context.dataStore.edit { prefs ->
             val currentIds = prefs[GUEST_INVITATION_IDS] ?: emptySet()
             prefs[GUEST_INVITATION_IDS] = currentIds - invitationId.toString()
+        }
+    }
+
+    suspend fun clearGuestData() {
+        context.dataStore.edit { prefs ->
+            prefs.remove(GUEST_INVITATION_IDS)
         }
     }
 }
