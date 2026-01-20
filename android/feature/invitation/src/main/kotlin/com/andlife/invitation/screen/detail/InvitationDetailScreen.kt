@@ -39,6 +39,7 @@ import com.andlife.invitation.model.detail.InvitationDetailSideEffect
 import com.andlife.invitation.model.detail.InvitationDetailUiEvent
 import com.andlife.invitation.model.detail.InvitationDetailUiState
 import com.andlife.invitation.screen.guestbook.InvitationCollectionRoute
+import com.andlife.invitation.screen.guestbook.InvitationGuestBookRoute
 import com.andlife.invitation.viewmodel.InvitationDetailViewModel
 import com.andlife.ui.component.GenericTabRow
 import com.andlife.ui.component.loading.InvitationLoadingError
@@ -80,6 +81,7 @@ fun InvitationDetailRoute(
         uiState = uiState,
         snackbarHostState = snackbarHostState,
         onEvent = viewModel::onEvent,
+        onNavigateBack = onNavigateBack,
         modifier = modifier,
     )
 }
@@ -89,6 +91,7 @@ private fun InvitationDetailScreen(
     uiState: InvitationDetailUiState,
     snackbarHostState: SnackbarHostState,
     onEvent: (InvitationDetailUiEvent) -> Unit,
+    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()
@@ -166,7 +169,7 @@ private fun InvitationDetailScreen(
                             )
                         }
 
-                        1 -> Text("방명록 화면")
+                        1 -> InvitationGuestBookRoute(onNavigateBack = onNavigateBack)
                         2 -> InvitationCollectionRoute()
                     }
                 },

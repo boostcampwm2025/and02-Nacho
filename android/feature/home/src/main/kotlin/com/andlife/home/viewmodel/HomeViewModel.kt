@@ -29,7 +29,7 @@ constructor(
     override val uiState: StateFlow<HomeUiState> =
         mutableUiState
             .onStart {
-                fetchGuestBooks()
+                //fetchGuestBooks()
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000L),
@@ -53,23 +53,23 @@ constructor(
         }
     }
 
-    private fun fetchGuestBooks() {
-        viewModelScope.launch {
-            updateState { copy(isLoading = true) }
-
-            guestBookRepository
-                .getGuestBooksByInvitationId(1L)
-                .onSuccess { guestBooks ->
-                    updateState {
-                        copy(
-                            isLoading = false,
-                            guestBooks = guestBooks.map { it.toUiModel() },
-                        )
-                    }
-                }.onFailure { error ->
-                    updateState { copy(isLoading = false) }
-                    Log.e("HomeViewModel", "방명록 불러오기 실패: $error")
-                }
-        }
-    }
+//    private fun fetchGuestBooks() {
+//        viewModelScope.launch {
+//            updateState { copy(isLoading = true) }
+//
+//            guestBookRepository
+//                .getGuestBooksByInvitationId(1L)
+//                .onSuccess { guestBooks ->
+//                    updateState {
+//                        copy(
+//                            isLoading = false,
+//                            guestBooks = guestBooks.map { it.toUiModel() },
+//                        )
+//                    }
+//                }.onFailure { error ->
+//                    updateState { copy(isLoading = false) }
+//                    Log.e("HomeViewModel", "방명록 불러오기 실패: $error")
+//                }
+//        }
+//    }
 }
