@@ -301,5 +301,4 @@ constructor(
             is Result.Error -> sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("실패: ${result.message}"))
         }
     }
-
 }

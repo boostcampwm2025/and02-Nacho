@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -24,6 +25,7 @@ import com.andlife.designsystem.component.NachoTextField
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
 import com.andlife.ui.util.media.uriToSelectedMedia
@@ -171,13 +173,17 @@ fun InvitationGuestBookForm(
                 onClick = onUploadClick,
                 enabled = (selectedMedias.isNotEmpty() || textContent.isNotEmpty()) && !isUploading,
             ) {
-                if (isUploading) {
-                    CircularProgressIndicator(
-                        modifier = modifier.size(NachoIconSize.small),
-                        color = NachoTheme.colorScheme.brandOnPrimary,
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = stringResource(R.string.txt_submit),
+                        color = if (isUploading) Color.Transparent else Color.Unspecified
                     )
-                } else {
-                    Text(text = stringResource(R.string.txt_submit))
+                    if (isUploading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(NachoIconSize.small),
+                            color = NachoTheme.colorScheme.textDisabled,
+                        )
+                    }
                 }
             }
         }
