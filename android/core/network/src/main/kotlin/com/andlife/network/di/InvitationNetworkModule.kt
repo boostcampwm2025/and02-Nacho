@@ -10,7 +10,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -21,6 +23,8 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object InvitationNetworkModule {
     private const val SERVER_BASE_URL = BuildConfig.SERVER_URL
+    private const val HEADER_USER_ID = "Nacho-User-Id"
+    private const val USER_ID = BuildConfig.USER_ID
 
     @Provides
     @Singleton
@@ -29,6 +33,7 @@ object InvitationNetworkModule {
         OkHttpClient
             .Builder()
             .addInterceptor(loggingInterceptor)
+            .addInterceptor(UserIdInterceptor())
             .build()
 
     @Provides
@@ -88,4 +93,17 @@ object InvitationNetworkModule {
     fun provideInvitationService(
         @Invitation retrofit: Retrofit,
     ): InvitationService = retrofit.create(InvitationService::class.java)
+
+    /**
+     * 임시 로그인 인터셉터 - 모든 요청에 Nacho-User-Id 헤더 추가
+     * TODO: 로그인 기능 추가 시 JWT 토큰을 Authorization 헤더에 추가하는 방식으로, 토큰 갱신 로직 추가 후 해당 인터셉터 제거
+    **/
+    private class UserIdInterceptor : Interceptor {
+        override fun intercept(chain: Interceptor.Chain): Response {
+            val request = chain.request().newBuilder()
+                .addHeader(HEADER_USER_ID, USER_ID)
+                .build()
+            return chain.proceed(request)
+        }
+    }
 }
