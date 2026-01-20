@@ -81,6 +81,10 @@ fun InvitationGuestBookRoute(
                     duration = SnackbarDuration.Short,
                 )
             }
+
+            is InvitationGuestBookSideEffect.CreateGuestBookSuccess -> {
+                guestBooks.refresh()
+            }
         }
     }
 
@@ -189,6 +193,15 @@ private fun InvitationGuestBookScreen(
             }
     }
 
+    LaunchedEffect(guestBooks.loadState.refresh) {
+        if (guestBooks.loadState.refresh is LoadState.NotLoading) {
+            if (guestBooks.itemCount >0) {
+                lazyListState.animateScrollToItem(0)
+            }
+            playVideoIndex = -1
+        }
+    }
+
     Scaffold(
         modifier = modifier
             .fillMaxSize(),
@@ -231,6 +244,7 @@ private fun InvitationGuestBookScreen(
                 ) { index ->
                     guestBooks[index]?.let { guestBook ->
                         GuestBookItem(
+                            modifier = Modifier.animateItem(),
                             guestBook = guestBook,
                             videoPlayerPool = videoPlayerPool,
                             shouldPlayVideo = index == playVideoIndex,

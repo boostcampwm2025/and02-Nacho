@@ -27,7 +27,7 @@ internal class GuestBookRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getGuestBooksByInvitationId(invitationId: Long): Flow<PagingData<GuestBook>> =
+    override fun getGuestBooksByInvitationId(invitationId: Long): Flow<PagingData<GuestBook>> =
         Pager(
             config = PagingConfig(
                 pageSize = PAGE_SIZE,

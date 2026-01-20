@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 interface GuestBookRepository {
     suspend fun getMediaCollection(invitationId: Long): Result<List<GalleryMedia>, DataError>
 
-    suspend fun getGuestBooksByInvitationId(invitationId: Long): Flow<PagingData<GuestBook>>
+    fun getGuestBooksByInvitationId(invitationId: Long): Flow<PagingData<GuestBook>>
 
     suspend fun createGuestBook(
         invitationId: Long,
