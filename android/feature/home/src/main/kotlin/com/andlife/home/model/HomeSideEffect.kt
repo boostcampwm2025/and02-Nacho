@@ -10,4 +10,6 @@ sealed interface HomeSideEffect : BaseSideEffect {
     data class NavigateToInvitationDetail(
         val invitationId: Long,
     ) : HomeSideEffect
+
+    data object NavigateToSetting : HomeSideEffect
 }
