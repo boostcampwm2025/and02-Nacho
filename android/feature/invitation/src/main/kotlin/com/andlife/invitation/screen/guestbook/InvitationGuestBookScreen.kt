@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -24,12 +25,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -92,15 +95,27 @@ fun InvitationGuestBookRoute(
         viewModel.videoPlayerPool.preparePlayers()
         onDispose {
             viewModel.videoPlayerPool.releaseAllPlayers()
+            viewModel.audioPlayerManager.release()
         }
     }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
-                Lifecycle.Event.ON_RESUME -> viewModel.videoPlayerPool.resumeLastPlayed()
-                Lifecycle.Event.ON_PAUSE -> viewModel.videoPlayerPool.pauseAllPlayers()
-                Lifecycle.Event.ON_DESTROY -> viewModel.videoPlayerPool.resetPool()
+                Lifecycle.Event.ON_RESUME -> {
+                    viewModel.videoPlayerPool.resumeLastPlayed()
+                }
+
+                Lifecycle.Event.ON_PAUSE -> {
+                    viewModel.videoPlayerPool.pauseAllPlayers()
+                    viewModel.audioPlayerManager.pause()
+                }
+
+                Lifecycle.Event.ON_DESTROY -> {
+                    viewModel.videoPlayerPool.resetPool()
+                    viewModel.audioPlayerManager.stopAll()
+                }
+
                 else -> {}
             }
         }
@@ -123,9 +138,9 @@ fun InvitationGuestBookRoute(
 private fun InvitationGuestBookScreen(
     uiState: InvitationGuestBookUiState,
     guestBooks: LazyPagingItems<GuestBookUiModel>,
+    onEvent: (InvitationGuestBookUiEvent) -> Unit,
     snackbarHostState: SnackbarHostState,
     videoPlayerPool: AutoVideoPlayerPool,
-    onEvent: (InvitationGuestBookUiEvent) -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -148,8 +163,10 @@ private fun InvitationGuestBookScreen(
 
     BackHandler(onBack = navigateBackWithCleanup)
 
-    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive) {
-        if (!isMediaActive) {
+    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.isAudioPlaying) {
+        var pendingIndex = -1
+        var lastChangedTime = 0L
+        if (!isMediaActive || uiState.isAudioPlaying) {
             playVideoIndex = -1
             return@LaunchedEffect
         }
@@ -161,6 +178,7 @@ private fun InvitationGuestBookScreen(
 
                 val videoCandidates = visibleItems.mapNotNull { itemInfo ->
                     val dataIndex = itemInfo.index
+
                     if (dataIndex < 0 || dataIndex >= guestBooks.itemCount) return@mapNotNull null
 
                     val guestBook = try {
@@ -168,6 +186,7 @@ private fun InvitationGuestBookScreen(
                     } catch (e: Exception) {
                         null
                     }
+
                     val hasVideo = guestBook?.visualMedias?.any { it.type == MediaUiType.VIDEO } == true
                     if (!hasVideo) return@mapNotNull null
 
@@ -194,11 +213,30 @@ private fun InvitationGuestBookScreen(
                     else -> playVideoIndex
                 }
 
-                if (shouldChangeTo != playVideoIndex) {
-                    delay(200L)
-                    playVideoIndex = shouldChangeTo
+                if (shouldChangeTo == -1 && playVideoIndex != -1) {
+                    playVideoIndex = -1
+                    pendingIndex = -1
+                } else if (shouldChangeTo != playVideoIndex && shouldChangeTo != pendingIndex) {
+                    pendingIndex = shouldChangeTo
+                    lastChangedTime = System.currentTimeMillis()
+                    launch {
+                        delay(200L)
+                        if (pendingIndex == shouldChangeTo && System.currentTimeMillis() - lastChangedTime >= 200L) {
+                            playVideoIndex = shouldChangeTo
+                            pendingIndex = -1
+                        }
+                    }
                 }
             }
+    }
+
+    LaunchedEffect(guestBooks.loadState.refresh) {
+        if (guestBooks.loadState.refresh is LoadState.NotLoading) {
+            if (guestBooks.itemCount > 0) {
+                lazyListState.animateScrollToItem(0)
+            }
+            playVideoIndex = -1
+        }
     }
 
     Scaffold(
@@ -207,7 +245,7 @@ private fun InvitationGuestBookScreen(
         bottomBar = {
             Surface(
                 tonalElevation = NachoElevation.medium,
-                shadowElevation = NachoElevation.medium,
+                shadowElevation = NachoElevation.large,
                 color = NachoTheme.colorScheme.backgroundPrimary
             ) {
                 Box(
@@ -246,10 +284,26 @@ private fun InvitationGuestBookScreen(
                                 guestBook = guestBook,
                                 videoPlayerPool = videoPlayerPool,
                                 shouldPlayVideo = isMediaActive && (index == playVideoIndex),
+                                isAudioPlaying = uiState.isAudioPlaying &&
+                                    guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
+                                playingAudioUrl = uiState.playingAudioUrl,
                                 onVisualMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
                                 onAudioMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
                                 onMenuClick = { onEvent(InvitationGuestBookUiEvent.ClickGuestBookMenu(guestBook.id)) },
                             )
+                        }
+                    }
+
+                    if (guestBooks.loadState.append is LoadState.Loading) {
+                        item {
+                            Box(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(NachoSpacing.medium),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
                         }
                     }
                 }
@@ -353,6 +407,8 @@ private fun InvitationGuestBookResultPreview() {
                     guestBook = fakeGuestBooks[index],
                     videoPlayerPool = FakeVideoPlayerPool(),
                     shouldPlayVideo = false,
+                    isAudioPlaying = false,
+                    playingAudioUrl = null,
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},
                     onAudioMediaClick = {},

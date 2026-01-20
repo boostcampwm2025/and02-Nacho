@@ -177,6 +177,8 @@ fun HomeScreen(
                             HomeUiEvent.ClickInvitationTitle(guestBook.invitation?.id ?: -1L),
                         )
                     },
+                    isAudioPlaying = false, // TODO: 추후 수정
+                    playingAudioUrl = null,
                     onVisualMediaClick = { onEvent(HomeUiEvent.ClickVisualMedia(it.url)) },
                     onAudioMediaClick = { onEvent(HomeUiEvent.ClickAudioMedia(it.url)) },
                     onMenuClick = { onEvent(HomeUiEvent.ClickGuestBookMenu(guestBook.id)) },

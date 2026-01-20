@@ -74,6 +74,8 @@ import com.andlife.designsystem.R as designR
 @Composable
 fun GuestBookItem(
     guestBook: GuestBookUiModel,
+    isAudioPlaying: Boolean,
+    playingAudioUrl: String?,
     videoPlayerPool: AutoVideoPlayerPool,
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
@@ -115,6 +117,7 @@ fun GuestBookItem(
                 guestBook.audioMedias.forEach { audio ->
                     GuestBookAudioItem(
                         audio = audio,
+                        isAudioPlaying = isAudioPlaying && (audio.url == playingAudioUrl),
                         onAudioMediaClick = onAudioMediaClick,
                     )
                 }
@@ -493,9 +496,17 @@ private fun ThumbnailWrapper(
 @Composable
 private fun GuestBookAudioItem(
     audio: GuestBookMediaUiModel,
+    isAudioPlaying: Boolean,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val playIconResId =
+        if (isAudioPlaying) {
+            R.drawable.ic_pause_24
+        } else {
+            R.drawable.ic_play_arrow_24
+        }
+
     Row(
         modifier =
             modifier
@@ -556,7 +567,7 @@ private fun GuestBookAudioItem(
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_play_arrow_24),
+                    painter = painterResource(playIconResId),
                     contentDescription = stringResource(R.string.desc_play_audio),
                     tint = NachoTheme.colorScheme.textSecondary,
                 )
@@ -629,6 +640,8 @@ private fun GuestBookItemPreview() {
                         ),
                     videoPlayerPool = AutoVideoPlayerPoolImpl(LocalContext.current, CacheDataSource.Factory()),
                     shouldPlayVideo = false,
+                    isAudioPlaying = false,
+                    playingAudioUrl = null,
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},
                     onAudioMediaClick = {},
