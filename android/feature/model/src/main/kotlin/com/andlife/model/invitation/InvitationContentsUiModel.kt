@@ -1,5 +1,6 @@
 package com.andlife.model.invitation
 
+import com.andlife.model.editor.NachoUiCard
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.LocalDate
@@ -50,6 +51,7 @@ data class AnnouncementUiModel(
 data class InvitationCardUiModel(
     val id: Long = 0L,
     val invitationId: Long = 0L,
-    val contentJson: String = "",
+    val card: NachoUiCard = NachoUiCard.empty(),
+    val backgroundColor: Long = 0L,
     val backgroundImageUrl: String? = null,
 )

@@ -141,9 +141,11 @@ fun EditorScreen(
                         ColorPaletteMode.Text -> {
                             state.updateTextColor(newColor)
                         }
+
                         ColorPaletteMode.Background -> {
                             state.updateBackgroundColor(newColor)
                         }
+
                         null -> {}
                     }
                 },
@@ -157,7 +159,8 @@ fun EditorScreen(
     ) { innerPadding ->
         Column(
             modifier =
-                Modifier.background(NachoTheme.colorScheme.backgroundTertiary)
+                Modifier
+                    .background(NachoTheme.colorScheme.backgroundTertiary)
                     .padding(innerPadding)
                     .fillMaxSize(),
         ) {

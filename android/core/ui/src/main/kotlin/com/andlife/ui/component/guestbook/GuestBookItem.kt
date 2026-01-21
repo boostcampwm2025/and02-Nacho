@@ -502,7 +502,7 @@ private fun GuestBookAudioItem(
 ) {
     val playIconResId =
         if (isAudioPlaying) {
-            R.drawable.ic_pause_24
+            R.drawable.ic_pause_filled_24
         } else {
             R.drawable.ic_play_arrow_24
         }
@@ -640,7 +640,7 @@ private fun GuestBookItemPreview() {
                         ),
                     videoPlayerPool = AutoVideoPlayerPoolImpl(LocalContext.current, CacheDataSource.Factory()),
                     shouldPlayVideo = false,
-                    isAudioPlaying = false,
+                    isAudioPlaying = true,
                     playingAudioUrl = null,
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},

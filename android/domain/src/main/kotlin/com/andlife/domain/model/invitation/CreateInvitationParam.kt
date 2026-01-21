@@ -4,12 +4,9 @@ import com.andlife.domain.model.card.NachoCard
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
-data class Invitation(
-    val id: Long,
-    val hostId: Long,
+data class CreateInvitationParam(
     val title: String,
     val displayHostName: String,
-    val hostProfileUrl: String?,
     val thumbnailUrls: List<String>,
     val invitationDate: LocalDate,
     val startTime: LocalTime,
@@ -19,19 +16,11 @@ data class Invitation(
     val latitude: Double,
     val longitude: Double,
     val locationGuide: String?,
-    val invitationCard: InvitationCard?,
-    val announcements: List<Announcement>,
+    val invitationCard: NachoCard?,
+    val announcements: List<CreateAnnouncementParam>,
 )
 
-data class InvitationCard(
-    val id: Long,
-    val invitationId: Long,
-    val card: NachoCard,
-)
-
-data class Announcement(
-    val id: Long,
-    val invitationId: Long,
+data class CreateAnnouncementParam(
     val title: String,
     val content: String,
     val displayOrder: Int,

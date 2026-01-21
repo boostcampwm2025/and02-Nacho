@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,6 +28,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
@@ -37,6 +40,7 @@ fun CardSection(
     cardUiModel: CardUiModel?,
     onClickCreatedCard: () -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false
 ) {
     val defaultColor = NachoTheme.colorScheme.textPrimary
     Box(modifier = modifier.background(NachoTheme.colorScheme.backgroundPrimary)) {
@@ -53,7 +57,10 @@ fun CardSection(
                     color = NachoTheme.colorScheme.textPrimary,
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                TextButton(onClickCreatedCard) {
+                TextButton(
+                    onClick = onClickCreatedCard,
+                    enabled = !isLoading
+                ) {
                     Icon(
                         imageVector = if (cardUiModel == null) Icons.Default.Add else Icons.Default.Edit,
                         contentDescription = if (cardUiModel == null) stringResource(R.string.desc_create_card)
@@ -70,13 +77,17 @@ fun CardSection(
             }
             val card = cardUiModel
             if (card != null) {
-                Surface(
+                Card(
                     modifier = modifier
                         .padding(horizontal = NachoSpacing.large)
                         .padding(bottom = NachoSpacing.large),
                     shape = NachoTheme.shapes.medium,
-                    color = Color(card.backgroundColor),
-                    tonalElevation = 2.dp,
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(card.backgroundColor)
+                    ),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = NachoElevation.medium
+                    ),
                     border = BorderStroke(NachoStroke.small, NachoTheme.colorScheme.backgroundBorder),
                 ) {
                     AndroidView(

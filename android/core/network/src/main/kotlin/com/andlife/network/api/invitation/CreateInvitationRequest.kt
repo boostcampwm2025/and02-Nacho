@@ -1,14 +1,11 @@
 @file:OptIn(InternalSerializationApi::class)
-
 package com.andlife.network.api.invitation
 
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class InvitationResponse(
-    val id: Long,
-    val hostId: Long,
+data class CreateInvitationRequest(
     val title: String,
     val displayHostName: String,
     val thumbnailUrls: List<String>,
@@ -17,27 +14,22 @@ data class InvitationResponse(
     val endTime: String?,
     val placename: String,
     val address: String,
-    val lat: Double,
-    val lng: Double,
+    val latitude: Double,
+    val longitude: Double,
     val locationGuide: String?,
-    val hostProfileUrl: String?,
-    val invitationCard: InvitationCardResponse?,
-    val announcements: List<AnnouncementResponse>,
+    val invitationCard: InvitationCardRequest?,
+    val announcements: List<AnnouncementRequest>,
 )
 
 @Serializable
-data class InvitationCardResponse(
-    val id: Long,
-    val invitationId: Long,
+data class InvitationCardRequest(
     val contentJson: String,
     val backgroundColor: Long,
     val backgroundImageUrl: String?,
 )
 
 @Serializable
-data class AnnouncementResponse(
-    val id: Long,
-    val invitationId: Long,
+data class AnnouncementRequest(
     val title: String,
     val content: String,
     val displayOrder: Int,

@@ -4,11 +4,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -19,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
@@ -56,12 +59,13 @@ fun MyInvitationCreateRoute(
     onNavigateToAddressSearch: () -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateCreateCard: () -> Unit,
+    onNavigateToInvitationDetail: (Long) -> Unit,
     modifier: Modifier = Modifier,
     address: AddressUiModel? = null,
     viewModel: CreateInvitationViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalResources.current
+    val res = LocalResources.current
     val snackbarHost = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var isShowDatePicker by remember { mutableStateOf(false) }
@@ -71,14 +75,22 @@ fun MyInvitationCreateRoute(
     var isShowDeleteAnnouncement by remember { mutableStateOf(false) }
     var selectedAnnouncement by remember { mutableStateOf<AnnouncementUiModel?>(null) }
 
-    viewModel.effectFlow.collectWithLifecycle { event ->
-        when (event) {
+    viewModel.effectFlow.collectWithLifecycle { effect ->
+        when (effect) {
             CreateInvitationSideEffect.FullImage -> {
-                snackbarHost.showSnackbar(message = context.getString(R.string.snack_full_image))
+                snackbarHost.showSnackbar(message = res.getString(R.string.snack_full_image))
             }
 
             CreateInvitationSideEffect.OnBack -> {
                 onNavigateBack()
+            }
+
+            CreateInvitationSideEffect.FailCreate -> {
+                snackbarHost.showSnackbar(message = res.getString(R.string.snack_full_image))
+            }
+
+            is CreateInvitationSideEffect.SuccessCreate -> {
+                onNavigateToInvitationDetail(effect.id)
             }
         }
     }
@@ -90,7 +102,7 @@ fun MyInvitationCreateRoute(
                 viewModel.onEvent(CreateInvitationUiEvent.UpdateImageList(imageList))
             } else {
                 scope.launch {
-                    snackbarHost.showSnackbar(message = context.getString(R.string.snack_load_error_image))
+                    snackbarHost.showSnackbar(message = res.getString(R.string.snack_load_error_image))
                 }
             }
         }
@@ -216,94 +228,112 @@ private fun MyInvitationCreateScreen(
                 title = stringResource(R.string.txt_create),
                 onBackClick = { onEvent(CreateInvitationUiEvent.OnClickBack) },
                 onPreviewClick = {},
+                isLoading = uiState.isLoading
             )
         },
         bottomBar = {
             BottomBarSection(
                 title = stringResource(R.string.txt_create_button),
-                onClick = {},
+                enabled = uiState.isValid && !uiState.isLoading,
+                onClick = { onEvent(CreateInvitationUiEvent.OnClickCreate) },
             )
         },
     ) { padding ->
-        LazyColumn(
-            state = listState,
-            modifier =
-                Modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .background(NachoTheme.colorScheme.backgroundTertiary),
-        ) {
-            item {
-                TitleSection(
-                    title = uiState.createInvitationUiModel.title,
-                    onTitleChange = { onEvent(CreateInvitationUiEvent.UpdateTitle(it)) },
-                )
-            }
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)) {
+            LazyColumn(
+                state = listState,
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(NachoTheme.colorScheme.backgroundTertiary),
+            ) {
+                item {
+                    TitleSection(
+                        title = uiState.createInvitationUiModel.title,
+                        onTitleChange = { onEvent(CreateInvitationUiEvent.UpdateTitle(it)) },
+                        isLoading = uiState.isLoading
+                    )
+                }
 
-            item {
-                AuthorSection(
-                    authorName = uiState.createInvitationUiModel.author,
-                    onAuthorNameChange = { onEvent(CreateInvitationUiEvent.UpdateAuthor(it)) },
+                item {
+                    AuthorSection(
+                        authorName = uiState.createInvitationUiModel.author,
+                        onAuthorNameChange = { onEvent(CreateInvitationUiEvent.UpdateAuthor(it)) },
+                        modifier = Modifier.padding(top = NachoSpacing.medium),
+                        isLoading = uiState.isLoading
+                    )
+                }
+
+                item {
+                    ImageSection(
+                        imageList = uiState.createInvitationUiModel.imageList,
+                        onAddImageClick = onAddImageClick,
+                        onRemoveClick = { onEvent(CreateInvitationUiEvent.RemoveImage(it)) },
+                        isLoading = uiState.isLoading,
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(top = NachoSpacing.medium),
+                    )
+                }
+
+                item {
+                    DateSection(
+                        date = uiState.createInvitationUiModel.date,
+                        onDateClick = onDateClick,
+                        isLoading = uiState.isLoading,
+                        modifier = Modifier.padding(top = NachoSpacing.medium),
+                    )
+                }
+
+                item {
+                    TimeSection(
+                        startTime = uiState.createInvitationUiModel.startTime,
+                        endTime = uiState.createInvitationUiModel.endTime,
+                        onStartTimeClick = onStartTimeClick,
+                        onEndTimeClick = onEndTimeClick,
+                        isLoading = uiState.isLoading,
+                        modifier = Modifier.padding(top = NachoSpacing.medium),
+                    )
+                }
+
+                item {
+                    AddressSection(
+                        placeName = uiState.createInvitationUiModel.placeName,
+                        placeAddress = uiState.createInvitationUiModel.placeAddress,
+                        addressGuide = uiState.createInvitationUiModel.placeGuide,
+                        onChangePlaceAddress = { onEvent(CreateInvitationUiEvent.UpdatePlaceAddress(it)) },
+                        onChangeAddressGuide = { onEvent(CreateInvitationUiEvent.UpdateAddressGuide(it)) },
+                        onNavigateToAddressSearch = onNavigateToAddressSearch,
+                        isLoading = uiState.isLoading,
+                        modifier = Modifier.padding(top = NachoSpacing.medium),
+                    )
+                }
+
+                item {
+                    CardSection(
+                        cardUiModel = uiState.createInvitationUiModel.card,
+                        onClickCreatedCard = onClickCreateCard,
+                        isLoading = uiState.isLoading,
+                        modifier = Modifier.padding(top = NachoSpacing.medium),
+                    )
+                }
+
+                announcementSection(
+                    announcementList = uiState.createInvitationUiModel.announcement,
+                    onAddAnnouncementClick = onAddAnnouncementClick,
+                    onRemoveAnnouncementClick = onRemoveAnnouncementClick,
+                    isLoading = uiState.isLoading,
                     modifier = Modifier.padding(top = NachoSpacing.medium),
                 )
             }
-
-            item {
-                ImageSection(
-                    imageList = uiState.createInvitationUiModel.imageList,
-                    onAddImageClick = onAddImageClick,
-                    onRemoveClick = { onEvent(CreateInvitationUiEvent.RemoveImage(it)) },
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(top = NachoSpacing.medium),
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
                 )
             }
-
-            item {
-                DateSection(
-                    date = uiState.createInvitationUiModel.date,
-                    onDateClick = onDateClick,
-                    modifier = Modifier.padding(top = NachoSpacing.medium),
-                )
-            }
-
-            item {
-                TimeSection(
-                    startTime = uiState.createInvitationUiModel.startTime,
-                    endTime = uiState.createInvitationUiModel.endTime,
-                    onStartTimeClick = onStartTimeClick,
-                    onEndTimeClick = onEndTimeClick,
-                    modifier = Modifier.padding(top = NachoSpacing.medium),
-                )
-            }
-
-            item {
-                AddressSection(
-                    placeName = uiState.createInvitationUiModel.placeName,
-                    placeAddress = uiState.createInvitationUiModel.placeAddress,
-                    addressGuide = uiState.createInvitationUiModel.placeGuide,
-                    onChangePlaceAddress = { onEvent(CreateInvitationUiEvent.UpdatePlaceAddress(it)) },
-                    onChangeAddressGuide = { onEvent(CreateInvitationUiEvent.UpdateAddressGuide(it)) },
-                    onNavigateToAddressSearch = onNavigateToAddressSearch,
-                    modifier = Modifier.padding(top = NachoSpacing.medium),
-                )
-            }
-
-            item {
-                CardSection(
-                    cardUiModel = uiState.createInvitationUiModel.card,
-                    onClickCreatedCard = onClickCreateCard,
-                    modifier = Modifier.padding(top = NachoSpacing.medium),
-                )
-            }
-
-            announcementSection(
-                announcementList = uiState.createInvitationUiModel.announcement,
-                onAddAnnouncementClick = onAddAnnouncementClick,
-                onRemoveAnnouncementClick = onRemoveAnnouncementClick,
-                modifier = Modifier.padding(top = NachoSpacing.medium),
-            )
         }
     }
 }
