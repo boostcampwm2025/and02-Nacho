@@ -28,4 +28,6 @@ interface GuestBookRepository {
         existingAudioIds: List<Long>,
         newMedias: List<GuestBookMedia>,
     ): Result<GuestBook, DataError>
+
+    suspend fun deleteGuestBook(guestBookId: Long): Result<Long, DataError>
 }

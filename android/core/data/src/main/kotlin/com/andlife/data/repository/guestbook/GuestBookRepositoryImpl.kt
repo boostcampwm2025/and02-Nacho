@@ -79,6 +79,9 @@ internal class GuestBookRepositoryImpl @Inject constructor(
         return result.map { it.toDomain() }
     }
 
+    override suspend fun deleteGuestBook(guestBookId: Long): Result<Long, DataError> =
+        guestBookRemoteDataSource.deleteGuestBook(guestBookId)
+
     companion object {
         private const val PAGE_SIZE = 10
     }
