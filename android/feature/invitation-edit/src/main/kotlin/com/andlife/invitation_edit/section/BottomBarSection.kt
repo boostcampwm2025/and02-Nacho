@@ -1,5 +1,6 @@
 package com.andlife.invitation_edit.section
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomAppBar
@@ -23,10 +24,10 @@ internal fun BottomBarSection(
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
     ) {
         NachoButton(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(NachoSpacing.large),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = NachoSpacing.large),
+            contentPadding = PaddingValues(NachoSpacing.large),
             onClick = onClick,
             enabled = enabled
         ) {
