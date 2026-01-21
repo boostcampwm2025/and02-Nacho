@@ -14,8 +14,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -45,9 +49,11 @@ fun InvitationGuestBookForm(
     onMediaRemove: (SelectedMedia) -> Unit,
     onTextContentChange: (String) -> Unit,
     onUploadClick: () -> Unit,
+    onFocusChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val focusRequester = remember { FocusRequester() }
 
     val launcher =
         rememberLauncherForActivityResult(
@@ -86,7 +92,12 @@ fun InvitationGuestBookForm(
                     }
                 },
                 placeholder = stringResource(R.string.txt_please_leave_a_message),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester)
+                    .onFocusChanged { focusState ->
+                        onFocusChanged(focusState.isFocused)
+                    },
                 singleLine = false,
                 minLines = 3,
             )
@@ -201,6 +212,7 @@ private fun InvitationGuestBookFormPreview() {
             onMediaRemove = {},
             onTextContentChange = {},
             onUploadClick = {},
+            onFocusChanged = {},
         )
     }
 }

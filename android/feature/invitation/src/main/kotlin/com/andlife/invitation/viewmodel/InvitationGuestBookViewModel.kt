@@ -34,7 +34,6 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -123,7 +122,7 @@ constructor(
             )
 
             is InvitationGuestBookUiEvent.ClickEditMenu -> startEditing(event.guestBook)
-            is InvitationGuestBookUiEvent.CancelEdit -> {}
+            is InvitationGuestBookUiEvent.CancelEdit -> cancelEdit()
 
             is InvitationGuestBookUiEvent.ClickDeleteMenu -> deleteGuestBook(event.guestBookId)
         }
@@ -342,5 +341,17 @@ constructor(
     fun invalidateGuestBooks() {
         Log.d("qqqqq", "방명록 목록 무효화")
         refreshFlow.value += 1
+    }
+
+    private fun cancelEdit() {
+        updateState {
+            copy(
+                editingGuestBookId = null,
+                selectedMedias = persistentListOf(),
+                textContent = "",
+                originalTextContent = "",
+                originalMediaIds = emptySet(),
+            )
+        }
     }
 }
