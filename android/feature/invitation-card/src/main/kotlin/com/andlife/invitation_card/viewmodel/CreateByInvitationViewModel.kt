@@ -1,6 +1,7 @@
 package com.andlife.invitation_card.viewmodel
 
 import android.util.Log
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
@@ -97,7 +98,7 @@ class CreateByInvitationViewModel @Inject constructor(
             return Result.Success(
                 NachoUiCard(
                     content = card,
-                    backgroundColor = backgroundColor.value.toLong(),
+                    backgroundColor = backgroundColor.toArgb().toLong(),
                     backgroundImageUrl = backgroundImageUrl
                 )
             )
@@ -127,7 +128,7 @@ class CreateByInvitationViewModel @Inject constructor(
         return Result.Success(
             NachoUiCard(
                 content = newRichTextContent,
-                backgroundColor = backgroundColor.value.toLong(),
+                backgroundColor = backgroundColor.toArgb().toLong(),
                 backgroundImageUrl = backgroundImageUrl
             )
         )
