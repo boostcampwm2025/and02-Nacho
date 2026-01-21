@@ -4,8 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,6 +30,8 @@ fun AudioPlayer(
     var isPlaying by remember { mutableStateOf(exoPlayer.isPlaying) }
     var currentPosition by remember { mutableLongStateOf(0L) }
     var duration by remember { mutableLongStateOf(exoPlayer.duration.coerceAtLeast(0L)) }
+    var isDragging by remember { mutableStateOf(false) }
+    var sliderPosition by remember { mutableFloatStateOf(0f) }
 
     // ExoPlayer 이벤트 리스너 (재생/일시정지 상태 감지)
     DisposableEffect(exoPlayer) {
@@ -42,16 +45,29 @@ fun AudioPlayer(
                     duration = exoPlayer.duration.coerceAtLeast(0L)
                 }
             }
+
+            override fun onPositionDiscontinuity(
+                oldPosition: Player.PositionInfo,
+                newPosition: Player.PositionInfo,
+                reason: Int
+            ) {
+                if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+                    currentPosition = newPosition.positionMs
+                    isDragging = false
+                }
+            }
         }
         exoPlayer.addListener(listener)
         onDispose { exoPlayer.removeListener(listener) }
     }
 
     // 재생 바 업데이트를 위한 루프
-    LaunchedEffect(isPlaying) {
-        while (isPlaying) {
-            currentPosition = exoPlayer.currentPosition
-            delay(100)
+    LaunchedEffect(isPlaying, isDragging) {
+        if (!isDragging) {
+            while (isPlaying) {
+                currentPosition = exoPlayer.currentPosition
+                delay(100)
+            }
         }
     }
 
@@ -81,8 +97,14 @@ fun AudioPlayer(
 
         Spacer(modifier = Modifier.height(NachoSpacing.threeXLarge))
 
+        val displayTime = if (isDragging) {
+            (sliderPosition * duration).toLong() // 드래그 중일 때는 슬라이더 위치 기반 시간으로 표시
+        } else {
+            currentPosition
+        }
+
         Text(
-            text = currentPosition.toDurationFormat(),
+            text = displayTime.toDurationFormat(),
             style = NachoTheme.typography.headingMedium.copy(
                 color = NachoTheme.colorScheme.textOnPrimary
             )
@@ -116,33 +138,26 @@ fun AudioPlayer(
 
         Spacer(modifier = Modifier.height(NachoSpacing.threeXLarge))
 
-        val progress = if (duration > 0) currentPosition.toFloat() / duration.toFloat() else 0f
-
-        AudioProgressBar(
-            progress = progress,
+        Slider(
+            value = if (isDragging) sliderPosition else {
+                if (duration > 0) currentPosition.toFloat() / duration.toFloat() else 0f
+            },
+            onValueChange = {
+                isDragging = true
+                sliderPosition = it
+            },
+            onValueChangeFinished = {
+                val seekTo = (sliderPosition * duration).toLong()
+                exoPlayer.seekTo(seekTo)
+            },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(NachoIconSize.xSmall)
-        )
-    }
-}
-
-@Composable
-fun AudioProgressBar(
-    progress: Float,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(50))
-            .background(NachoTheme.colorScheme.backgroundPrimary.copy(alpha = 0.5f))
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(fraction = progress)
-                .clip(RoundedCornerShape(50))
-                .background(NachoTheme.colorScheme.backgroundPrimary)
+                .padding(horizontal = NachoSpacing.medium),
+            colors = SliderDefaults.colors(
+                thumbColor = NachoTheme.colorScheme.iconPrimary,
+                activeTrackColor = NachoTheme.colorScheme.iconPrimary,
+                inactiveTrackColor = NachoTheme.colorScheme.backgroundPrimary.copy(alpha = 0.5f)
+            )
         )
     }
 }

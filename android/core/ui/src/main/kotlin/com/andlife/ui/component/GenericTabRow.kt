@@ -70,6 +70,7 @@ fun GenericTabRow(
             state = pagerState,
             modifier = Modifier.weight(1f),
             verticalAlignment = Alignment.Top,
+            userScrollEnabled = false,
         ) { pageIndex ->
             content(pageIndex)
         }

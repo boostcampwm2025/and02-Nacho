@@ -17,20 +17,30 @@ import com.andlife.invitation.InvitationDetail
 import com.andlife.invitation.model.guestbook.InvitationGuestBookSideEffect
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiEvent
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiState
+import com.andlife.media.audio.AudioPlayerManager
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.toUiModel
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
-import com.andlife.ui.model.UiMediaType
+import com.andlife.model.guestbook.UiMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -41,6 +51,7 @@ constructor(
     private val mediaUploader: MediaUploader,
     private val mediaFileProvider: MediaFileProvider,
     private val guestBookRepository: GuestBookRepository,
+    val audioPlayerManager: AudioPlayerManager,
     val videoPlayerPool: AutoVideoPlayerPool,
     savedStateHandle: SavedStateHandle,
 ) : BaseViewModel<InvitationGuestBookUiState, InvitationGuestBookUiEvent, InvitationGuestBookSideEffect>(
@@ -58,6 +69,32 @@ constructor(
             }
             .cachedIn(viewModelScope)
 
+    init {
+        observeAudioPlayerState()
+    }
+
+    private fun observeAudioPlayerState() {
+        audioPlayerManager.currentAudioUrl
+            .combine(audioPlayerManager.isPlaying) { url, isPlaying ->
+                updateState {
+                    copy(
+                        playingAudioUrl = url,
+                        isAudioPlaying = isPlaying,
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
+
+        uiState.map { it.isAudioPlaying }
+            .distinctUntilChanged()
+            .onEach { isAudioPlaying ->
+                if (!isAudioPlaying) {
+                    videoPlayerPool.resumeLastPlayed()
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
     override fun onEvent(event: InvitationGuestBookUiEvent) {
         when (event) {
             is InvitationGuestBookUiEvent.UpdateSelectedMedias -> updateSelectedMedias(event.medias)
@@ -65,18 +102,32 @@ constructor(
             is InvitationGuestBookUiEvent.RemoveMedia -> removeMedia(event.media)
             is InvitationGuestBookUiEvent.UploadMedias -> uploadMedias()
             is InvitationGuestBookUiEvent.ClearError -> clearError()
-            is InvitationGuestBookUiEvent.ClickAudioMedia -> sendEffect(
-                InvitationGuestBookSideEffect.ShowSnackbar("초대장 제목 클릭됨: ${event.url}"),
-            )
+            is InvitationGuestBookUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
+
             is InvitationGuestBookUiEvent.ClickGuestBookMenu -> sendEffect(
                 InvitationGuestBookSideEffect.ShowSnackbar("방명록 메뉴 클릭됨: ${event.guestBookId}"),
             )
+
             is InvitationGuestBookUiEvent.ClickInvitationTitle -> sendEffect(
                 InvitationGuestBookSideEffect.ShowSnackbar("초대장 제목 클릭됨: ${event.invitationId}"),
             )
+
             is InvitationGuestBookUiEvent.ClickVisualMedia -> sendEffect(
                 InvitationGuestBookSideEffect.ShowSnackbar("비주얼 미디어 클릭됨: ${event.url}"),
             )
+        }
+    }
+
+    private fun clickAudioMedia(url: String) {
+        val isCurrentlyPlaying = uiState.value.isAudioPlaying
+        val currentUrl = uiState.value.playingAudioUrl
+
+        if (currentUrl == url && isCurrentlyPlaying) {
+            audioPlayerManager.togglePlay(url)
+            videoPlayerPool.resumeLastPlayed()
+        } else {
+            videoPlayerPool.pauseAllPlayers()
+            audioPlayerManager.togglePlay(url)
         }
     }
 

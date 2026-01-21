@@ -3,6 +3,9 @@ package com.andlife.ui.util
 import com.andlife.model.invitation.DateTimeInfo
 import com.andlife.model.invitation.TimeUiModel
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.format
+import kotlinx.datetime.format.char
 
 object DateTimeConstants {
     const val YEAR = "년"
@@ -33,3 +36,26 @@ fun TimeUiModel.toDisplayTimeString(): String {
 fun DateTimeInfo.toDateTimeSingleLine(): String {
     return "${date.toDisplayDateString()} ${startTime.toDisplayTimeString()}"
 }
+
+private val dateTimeFormat =
+    LocalDateTime.Format {
+        year()
+        char('.')
+        monthNumber()
+        char('.')
+        dayOfMonth()
+        char(' ')
+        hour()
+        char(':')
+        minute()
+    }
+
+fun String.toDateTime(): String =
+    try {
+        val dateTime = LocalDateTime.parse(this)
+        dateTime.format(dateTimeFormat)
+    } catch (e: Exception) {
+        this
+    }
+
+fun LocalDateTime.toDateTimeFormat(): String = this.format(dateTimeFormat)

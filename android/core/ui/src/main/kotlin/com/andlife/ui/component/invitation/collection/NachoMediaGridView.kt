@@ -1,43 +1,54 @@
-package com.andlife.myinvitation.component
+package com.andlife.ui.component.invitation.collection
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
-import com.andlife.domain.model.guestbook.MediaType
-import com.andlife.myinvitation.model.guestbook.MyInvitationCollectionUiModel
-import com.andlife.myinvitation.util.toUiType
+import com.andlife.model.guestbook.UiMediaType
+import com.andlife.model.invitation.collection.CollectionUiModel
 import com.andlife.ui.component.media.MediaItem
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 @Composable
-fun MyInvitationMediaGridView(
-    items: List<MyInvitationCollectionUiModel>,
+fun NachoMediaGridView(
+    items: ImmutableList<CollectionUiModel>,
     onItemClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
+    Surface(
         modifier = modifier,
-        contentPadding = PaddingValues(NachoSpacing.small),
-        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
-        verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
+        color = NachoTheme.colorScheme.backgroundPrimary,
     ) {
-        itemsIndexed(items = items) { index, item ->
-            MediaItem(
-                mediaUrl = item.url,
-                mediaType = item.type,
-                duration = item.durationSeconds,
-                onClick = { onItemClick(index) },
-            )
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            modifier = modifier,
+            contentPadding = PaddingValues(NachoSpacing.small),
+            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
+        ) {
+            itemsIndexed(
+                items = items,
+                key = { index, item -> "${item.type}_${item.id}" },
+            ) { index, item ->
+                MediaItem(
+                    mediaUrl = item.mediaUrl,
+                    thumbnailUrl = item.thumbnailUrl,
+                    mediaType = item.type,
+                    duration = item.durationSeconds,
+                    onClick = { onItemClick(index) },
+                )
+            }
         }
     }
 }
@@ -48,31 +59,31 @@ private fun NachoMediaGridViewPreview() {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
     val mockItems =
-        listOf(
-            MyInvitationCollectionUiModel(
+        persistentListOf(
+            CollectionUiModel(
                 id = 1L,
-                url = "https://picsum.photos/400/600?random=1",
-                type = MediaType.IMAGE.toUiType(),
+                mediaUrl = "https://picsum.photos/400/600?random=1",
+                type = UiMediaType.IMAGE,
                 content = "방명록 내용 1",
                 authorName = "사용자1",
                 authorProfileUrl = null,
                 createdAt = now,
                 durationSeconds = null,
             ),
-            MyInvitationCollectionUiModel(
+            CollectionUiModel(
                 id = 2L,
-                url = "https://picsum.photos/400/600?random=2",
-                type = MediaType.VIDEO.toUiType(),
+                mediaUrl = "https://picsum.photos/400/600?random=2",
+                type = UiMediaType.VIDEO,
                 content = "방명록 내용 2",
                 authorName = "사용자2",
                 authorProfileUrl = null,
                 createdAt = now,
                 durationSeconds = 120,
             ),
-            MyInvitationCollectionUiModel(
+            CollectionUiModel(
                 id = 3L,
-                url = "https://picsum.photos/400/600?random=3",
-                type = MediaType.AUDIO.toUiType(),
+                mediaUrl = "https://picsum.photos/400/600?random=3",
+                type = UiMediaType.AUDIO,
                 content = "방명록 내용 3",
                 authorName = "사용자3",
                 authorProfileUrl = null,
@@ -82,7 +93,7 @@ private fun NachoMediaGridViewPreview() {
         )
 
     NachoTheme {
-        MyInvitationMediaGridView(
+        NachoMediaGridView(
             items = mockItems,
             onItemClick = {},
         )
