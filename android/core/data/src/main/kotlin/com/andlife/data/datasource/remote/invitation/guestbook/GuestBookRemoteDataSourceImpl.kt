@@ -35,4 +35,8 @@ internal class GuestBookRemoteDataSourceImpl @Inject constructor(
         request: UpdateGuestBookRequest
     ): Result<GuestBookResponse, DataError> =
         apiCall { guestBookService.updateGuestBook(guestBookId, request) }
+
+    override suspend fun deleteGuestBook(guestBookId: Long): Result<Long, DataError> =
+        apiCall { guestBookService.deleteGuestBook(guestBookId) }
+
 }

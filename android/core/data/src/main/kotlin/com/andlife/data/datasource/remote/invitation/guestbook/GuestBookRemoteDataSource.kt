@@ -23,4 +23,6 @@ interface GuestBookRemoteDataSource {
         guestBookId: Long,
         request: UpdateGuestBookRequest
     ): Result<GuestBookResponse, DataError>
+
+    suspend fun deleteGuestBook(guestBookId: Long): Result<Long, DataError>
 }
