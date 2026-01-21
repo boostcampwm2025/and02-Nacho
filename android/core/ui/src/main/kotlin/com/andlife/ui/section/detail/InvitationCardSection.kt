@@ -136,7 +136,7 @@ fun InvitationCardSection(
 }
 
 @Composable
-private fun EmptyCardGuide(
+fun EmptyCardGuide(
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -192,6 +192,8 @@ private fun InvitationCardSectionPreview() {
                     isEditable = true,
                     onEditClick = {},
                 )
+
+                EmptyCardGuide()
             }
         }
     }
