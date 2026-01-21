@@ -17,4 +17,7 @@ interface InvitationService {
     suspend fun createInvitation(
         @Body request: CreateInvitationRequest,
     ): BaseResponse<InvitationResponse>
+
+    @GET("api/invitations/me")
+    suspend fun getParticipantInvitations(): BaseResponse<List<Long>>
 }
