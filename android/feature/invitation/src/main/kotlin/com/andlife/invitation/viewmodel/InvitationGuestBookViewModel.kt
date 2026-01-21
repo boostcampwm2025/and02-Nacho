@@ -23,7 +23,6 @@ import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.toUiModel
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
-import com.andlife.ui.model.UiMediaType
 import com.andlife.domain.util.ThumbnailGenerator
 import com.andlife.model.guestbook.UiMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
