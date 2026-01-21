@@ -19,9 +19,11 @@ android {
         val localProps = project.rootProject.file("local.properties")
         properties.load(localProps.inputStream())
         val serverUrl = properties.getProperty("SERVER_URL") ?: ""
+        val headerUserId = properties.getProperty("HEADER_USER_ID") ?: ""
         val userId = properties.getProperty("USER_ID") ?: ""
 
         buildConfigField("String", "SERVER_URL", "\"$serverUrl\"")
+        buildConfigField("String", "HEADER_USER_ID", "\"$headerUserId\"")
         buildConfigField("String", "USER_ID", "\"$userId\"")
     }
 }

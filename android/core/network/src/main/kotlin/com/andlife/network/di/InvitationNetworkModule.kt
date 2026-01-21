@@ -23,7 +23,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object InvitationNetworkModule {
     private const val SERVER_BASE_URL = BuildConfig.SERVER_URL
-    private const val HEADER_USER_ID = "Nacho-User-Id"
+    private const val HEADER_USER_ID = BuildConfig.HEADER_USER_ID
     private const val USER_ID = BuildConfig.USER_ID
 
     @Provides
