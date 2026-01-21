@@ -15,6 +15,7 @@ import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
 import com.andlife.domain.util.Result
+import com.andlife.domain.util.ThumbnailGenerator
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.invitation.InvitationDetail
@@ -52,6 +53,7 @@ class InvitationGuestBookViewModel
 constructor(
     private val mediaUploader: MediaUploader,
     private val mediaFileProvider: MediaFileProvider,
+    private val thumbnailGenerator: ThumbnailGenerator,
     private val guestBookRepository: GuestBookRepository,
     val audioPlayerManager: AudioPlayerManager,
     val videoPlayerPool: AutoVideoPlayerPool,
@@ -123,7 +125,6 @@ constructor(
 
             is InvitationGuestBookUiEvent.ClickEditMenu -> startEditing(event.guestBook)
             is InvitationGuestBookUiEvent.CancelEdit -> cancelEdit()
-
             is InvitationGuestBookUiEvent.ClickDeleteMenu -> deleteGuestBook(event.guestBookId)
         }
     }
@@ -196,10 +197,13 @@ constructor(
             val newMedias = state.selectedMedias.filter { it.id == null }
 
             try {
-                val uploadedUrls = if (newMedias.isNotEmpty()) {
+                val (uploadedUrls, thumbnailUrls) = if (newMedias.isNotEmpty()) {
                     val mediaFiles = mediaFileProvider.createFromUris(newMedias.map { it.uri })
                     when (val uploadResult = mediaUploader.uploadMedias(mediaFiles)) {
-                        is Result.Success -> uploadResult.data
+                        is Result.Success -> {
+                            val thumbnails = generateAndUploadThumbnails(newMedias)
+                            uploadResult.data to thumbnails
+                        }
                         is Result.Error -> {
                             updateState { copy(isUploading = false) }
                             sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("업로드 실패: ${uploadResult.message}"))
@@ -207,15 +211,15 @@ constructor(
                         }
                     }
                 } else {
-                    emptyList()
+                    emptyList<String?>() to emptyList<String?>()
                 }
 
                 if (state.editingGuestBookId == null) {
                     Log.d("qqqqq", "방명록 생성")
-                    createGuestBook(uploadedUrls, newMedias)
+                    createGuestBook(uploadedUrls, thumbnailUrls, newMedias)
                 } else {
                     Log.d("qqqqq", "방명록 수정: ${state.editingGuestBookId}")
-                    updateGuestBook(state.editingGuestBookId, uploadedUrls, state.selectedMedias)
+                    updateGuestBook(state.editingGuestBookId, uploadedUrls, thumbnailUrls, state.selectedMedias)
                 }
             } catch (e: Exception) {
                 updateState { copy(isUploading = false) }
@@ -225,11 +229,49 @@ constructor(
         }
     }
 
-    private suspend fun createGuestBook(uploadedUrls: List<String?>, newSelectedMedias: List<SelectedMedia>) {
+    private suspend fun generateAndUploadThumbnails(
+        medias: List<SelectedMedia>
+    ): List<String?> {
+        return medias.map { media ->
+            if (media.type != UiMediaType.VIDEO) return@map null
+
+            try {
+                val thumbnailFile = thumbnailGenerator.generateVideoThumbnail(media.uri)
+
+                if (thumbnailFile == null) {
+                    Log.e("ThumbnailProcess", "썸네일 파일 생성 실패")
+                    return@map null
+                }
+
+                Log.d("ThumbnailProcess", "썸네일 파일 생성: ${thumbnailFile.absolutePath}")
+
+                val thumbnailMediaFile = mediaFileProvider.createFromFile(thumbnailFile)
+
+                Log.d("ThumbnailProcess", "썸네일 MediaFile 생성: $thumbnailMediaFile")
+                when (val result = mediaUploader.uploadMedias(listOf(thumbnailMediaFile))) {
+                    is Result.Success -> result.data.firstOrNull()
+                    is Result.Error -> {
+                        Log.e("ThumbnailUpload", "썸네일 업로드 실패: ${result.message}")
+                        null
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("ThumbnailProcess", "썸네일 처리 실패", e)
+                null
+            }
+        }
+    }
+
+    private suspend fun createGuestBook(
+        uploadedUrls: List<String?>,
+        thumbnailUrls: List<String?>,
+        newSelectedMedias: List<SelectedMedia>
+    ) {
         val guestBookMedias = uploadedUrls
             .mapIndexedNotNull { index, url ->
                 val urlValue = url ?: return@mapIndexedNotNull null
                 val selectedMedia = newSelectedMedias.getOrNull(index) ?: return@mapIndexedNotNull null
+                val thumbnailUrl = thumbnailUrls.getOrNull(index)
 
                 GuestBookMedia(
                     id = 0L,
@@ -239,7 +281,7 @@ constructor(
                         UiMediaType.AUDIO -> MediaType.AUDIO
                     },
                     url = urlValue,
-                    thumbnailUrl = null,
+                    thumbnailUrl = thumbnailUrl,
                     durationSeconds = selectedMedia.duration,
                     displayOrder = index,
                 )
@@ -257,6 +299,7 @@ constructor(
     private suspend fun updateGuestBook(
         guestBookId: Long,
         uploadedUrls: List<String?>,
+        thumbnailUrls: List<String?>,
         allSelectedMedias: List<SelectedMedia>
     ) {
         val existingImageIds = allSelectedMedias.filter { it.id != null && it.type == UiMediaType.IMAGE }.mapNotNull { it.id }
@@ -269,6 +312,7 @@ constructor(
             .mapIndexedNotNull { index, url ->
                 val urlValue = url ?: return@mapIndexedNotNull null
                 val selectedMedia = onlyNewMedias.getOrNull(index) ?: return@mapIndexedNotNull null
+                val thumbnailUrl = thumbnailUrls.getOrNull(index)
 
                 GuestBookMedia(
                     id = 0L,
@@ -278,7 +322,7 @@ constructor(
                         UiMediaType.AUDIO -> MediaType.AUDIO
                     },
                     url = urlValue,
-                    thumbnailUrl = null,
+                    thumbnailUrl = thumbnailUrl,
                     durationSeconds = selectedMedia.duration,
                     displayOrder = allSelectedMedias.indexOf(selectedMedia)
                 )

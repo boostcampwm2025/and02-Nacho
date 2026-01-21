@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -68,22 +67,14 @@ fun SelectedMediaItem(
 
             UiMediaType.VIDEO -> {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    if (media.thumbnailUrl != null) {
-                        AsyncImage(
-                            model = media.thumbnailUrl,
-                            contentDescription = stringResource(R.string.desc_media_video),
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop,
-                            placeholder = painterResource(R.drawable.ic_image_24),
-                            error = painterResource(R.drawable.ic_error_image_24),
-                        )
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Black),
-                        )
-                    }
+                    AsyncImage(
+                        model = media.thumbnailUrl ?: media.uri,
+                        contentDescription = stringResource(R.string.desc_media_video),
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                        placeholder = painterResource(R.drawable.ic_image_24),
+                        error = painterResource(R.drawable.ic_error_image_24),
+                    )
                     Icon(
                         painter = painterResource(id = R.drawable.ic_play_circle_24),
                         contentDescription = stringResource(R.string.desc_ic_play),
@@ -115,9 +106,10 @@ private fun EditModeVideoItemPreview() {
     NachoTheme {
         SelectedMediaItem(
             SelectedMedia(
-                uri = "https://picsum.photos/400/600?random=3",
-                type = UiMediaType.VIDEO,
-                duration = 828,
+                1L,
+                "https://picsum.photos/400/600?random=3",
+                UiMediaType.VIDEO,
+                828,
             ),
         )
     }
