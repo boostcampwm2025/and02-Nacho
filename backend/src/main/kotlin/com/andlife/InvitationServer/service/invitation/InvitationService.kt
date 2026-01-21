@@ -34,21 +34,23 @@ class InvitationService(
         pageable: Pageable
     ): PagingResponse<InvitationSummaryResponse> {
         val now = LocalDateTime.now()
+        val nowDate = now.toLocalDate()
+        val nowTime = now.toLocalTime()
         val upperStatus = status.uppercase()
 
-        val adjustedPageable = if (upperStatus == "PAST") {
-            PageRequest.of(
-                pageable.pageNumber,
-                pageable.pageSize,
-                Sort.by("invitation.startTime").descending()
-            )
+        val sort = if (upperStatus == "PAST") {
+            Sort.by("invitation.invitationDate").descending()
+                .and(Sort.by("invitation.startTime").descending())
         } else {
-            pageable
+            Sort.by("invitation.invitationDate").ascending()
+                .and(Sort.by("invitation.startTime").ascending())
         }
 
+        val adjustedPageable = PageRequest.of(pageable.pageNumber, pageable.pageSize, sort)
+
         val participantPage: Page<InvitationParticipant> = when (upperStatus) {
-            "UPCOMING" -> participantRepository.findUpcomingInvitations(userId, now, adjustedPageable)
-            "PAST" -> participantRepository.findPastInvitations(userId, now, adjustedPageable)
+            "UPCOMING" -> participantRepository.findUpcomingInvitations(userId, nowDate, nowTime, adjustedPageable)
+            "PAST" -> participantRepository.findPastInvitations(userId, nowDate, nowTime, adjustedPageable)
             else -> participantRepository.findAllByUserIdWithInvitation(userId, adjustedPageable)
         }
 
@@ -60,6 +62,7 @@ class InvitationService(
                 thumbnailUrls = invitation.thumbnailUrls,
                 displayHostName = invitation.displayHostName,
                 address = invitation.address,
+                invitationDate = invitation.invitationDate.toString(),
                 startTime = invitation.startTime.toString()
             )
         }
