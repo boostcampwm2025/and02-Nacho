@@ -1,12 +1,17 @@
 package com.andlife.domain.repository.invitation
 
+import androidx.paging.PagingData
 import com.andlife.domain.error.DataError
 import com.andlife.domain.model.invitation.Invitation
+import com.andlife.domain.model.invitation.InvitationSummary
 import com.andlife.domain.util.Result
+import kotlinx.coroutines.flow.Flow
 
 interface InvitationRepository {
     suspend fun getInvitation(invitationId: Long): Result<Invitation, DataError>
-    // Todo: 임시로 아이디만 받기 Invitation으로 수정 예정
-    suspend fun getParticipantInvitations(): Result<List<Long>, DataError>
+    fun getParticipantInvitations(
+        status: String,
+        size: Int = 10
+    ): Flow<PagingData<InvitationSummary>>
 }
 
