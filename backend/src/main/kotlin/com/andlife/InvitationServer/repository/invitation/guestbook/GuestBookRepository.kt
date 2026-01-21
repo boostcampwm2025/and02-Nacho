@@ -22,7 +22,8 @@ interface GuestBookRepository : JpaRepository<GuestBook, Long> {
     """)
     fun findAllByInvitationId(invitationId: Long, pageable: Pageable): Page<GuestBook>
 
-    @Query("""
+    @Query(
+        value = """
         SELECT DISTINCT gb FROM GuestBook gb
         JOIN FETCH gb.user u
         JOIN FETCH gb.invitation i
@@ -30,7 +31,13 @@ interface GuestBookRepository : JpaRepository<GuestBook, Long> {
         LEFT JOIN InvitationParticipant ip ON i.id = ip.invitation.id
         WHERE (i.host.id = :userId OR ip.user.id = :userId)
         ORDER BY gb.createdAt DESC
-    """)
+    """,
+        countQuery = """
+        SELECT COUNT(DISTINCT gb) FROM GuestBook gb
+        LEFT JOIN InvitationParticipant ip ON gb.invitation.id = ip.invitation.id
+        WHERE (gb.invitation.host.id = :userId OR ip.user.id = :userId)
+    """
+    )
     fun findAllByMyRelatedInvitations(
         @Param("userId") userId: Long,
         pageable: Pageable

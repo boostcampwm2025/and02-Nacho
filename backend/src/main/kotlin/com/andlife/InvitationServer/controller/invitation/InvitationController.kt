@@ -112,8 +112,9 @@ class InvitationController(
     fun getUpcomingInvitations(
         @AuthUser userId: Long,
         @RequestParam(defaultValue = "30") days: Long,
-    ): BaseResponse<List<UpcomingInvitationResponse>> {
-        val result = invitationService.getUpcomingInvitations(userId, days)
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
+    ): BaseResponse<PagingResponse<UpcomingInvitationResponse>> {
+        val result = invitationService.getUpcomingInvitations(userId, days, pageable)
         return BaseResponse.success(result)
     }
 }

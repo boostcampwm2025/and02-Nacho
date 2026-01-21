@@ -1,6 +1,8 @@
 package com.andlife.InvitationServer.repository.invitation
 
 import com.andlife.InvitationServer.entity.Invitation
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
@@ -14,17 +16,25 @@ interface InvitationRepository : JpaRepository<Invitation, Long> {
     """)
     fun findByInvitationIdWithHost(@Param("invitationId") invitationId: Long): Invitation?
 
-    @Query("""
+    @Query(
+        value = """
         SELECT DISTINCT i FROM Invitation i
-        LEFT JOIN InvitationParticipant ip ON i.id = ip.invitation.id
         JOIN FETCH i.host
+        LEFT JOIN InvitationParticipant ip ON i.id = ip.invitation.id
         WHERE (i.host.id = :userId OR ip.user.id = :userId)
         AND i.invitationDate BETWEEN :today AND :limitDate
-        ORDER BY i.invitationDate ASC, i.startTime ASC
-    """)
-        fun findUpcomingInvitationsWithinDays(
-            @Param("userId") userId: Long,
-            @Param("today") today: LocalDate,
-            @Param("limitDate") limitDate: LocalDate
-        ): List<Invitation>
+    """,
+        countQuery = """
+        SELECT COUNT(DISTINCT i) FROM Invitation i
+        LEFT JOIN InvitationParticipant ip ON i.id = ip.invitation.id
+        WHERE (i.host.id = :userId OR ip.user.id = :userId)
+        AND i.invitationDate BETWEEN :today AND :limitDate
+    """
+    )
+    fun findUpcomingInvitationsWithinDays(
+        @Param("userId") userId: Long,
+        @Param("today") today: LocalDate,
+        @Param("limitDate") limitDate: LocalDate,
+        pageable: Pageable
+    ): Page<Invitation>
 }

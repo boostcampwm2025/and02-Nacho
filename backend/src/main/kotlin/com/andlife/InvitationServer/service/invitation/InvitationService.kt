@@ -8,10 +8,13 @@ import com.andlife.InvitationServer.repository.invitation.AnnouncementRepository
 import com.andlife.InvitationServer.repository.invitation.InvitationCardRepository
 import com.andlife.InvitationServer.repository.invitation.InvitationRepository
 import com.andlife.InvitationServer.request.invitation.CreateInvitationRequest
+import com.andlife.InvitationServer.response.PagingMetaResponse
+import com.andlife.InvitationServer.response.PagingResponse
 import com.andlife.InvitationServer.response.invitation.AnnouncementResponse
 import com.andlife.InvitationServer.response.invitation.InvitationCardResponse
 import com.andlife.InvitationServer.response.invitation.InvitationResponse
 import com.andlife.InvitationServer.response.invitation.UpcomingInvitationResponse
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -162,15 +165,18 @@ class InvitationService(
         )
     }
 
-    fun getUpcomingInvitations(userId: Long, days: Long): List<UpcomingInvitationResponse> {
+    fun getUpcomingInvitations(userId: Long, days: Long, pageable: Pageable): PagingResponse<UpcomingInvitationResponse> {
         val today = LocalDate.now()
         val limitDate = today.plusDays(days)
 
-        return invitationRepository.findUpcomingInvitationsWithinDays(
+        val upcomingInvitationsPage = invitationRepository.findUpcomingInvitationsWithinDays(
             userId = userId,
             today = today,
-            limitDate = limitDate
-        ).map { invitation ->
+            limitDate = limitDate,
+            pageable = pageable
+        )
+
+        val responsePage = upcomingInvitationsPage.map { invitation ->
             UpcomingInvitationResponse(
                 id = invitation.id,
                 title = invitation.title,
@@ -181,5 +187,15 @@ class InvitationService(
                 hostProfileUrl = invitation.host.profileImageUrl,
             )
         }
+
+        return PagingResponse(
+            meta = PagingMetaResponse(
+                isEnd = !responsePage.hasNext(),
+                pageableCount = responsePage.numberOfElements,
+                totalCount = responsePage.totalElements,
+                currentPage = responsePage.number + 1
+            ),
+            content = responsePage.content
+        )
     }
 }
