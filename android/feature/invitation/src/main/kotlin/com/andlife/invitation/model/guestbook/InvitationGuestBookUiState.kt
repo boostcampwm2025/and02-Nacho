@@ -1,11 +1,9 @@
 package com.andlife.invitation.model.guestbook
 
-import com.andlife.domain.model.guestbook.GuestBook
 import com.andlife.ui.base.BaseUiState
 import com.andlife.ui.component.invitation.SelectedMedia
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import kotlin.collections.sorted
 
 data class InvitationGuestBookUiState(
     val selectedMedias: ImmutableList<SelectedMedia> = persistentListOf(),
