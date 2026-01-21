@@ -337,11 +337,14 @@ private fun InvitationGuestBookScreen(
         if (isMediaActive) {
             val isInitialLoading = guestBooks.loadState.refresh is LoadState.Loading && guestBooks.itemCount == 0
 
-            if (isInitialLoading) {
+            if (isInitialLoading || guestBooks.itemCount == 0) {
                 PagingStateContent(
                     loadState = guestBooks.loadState.refresh,
                     itemCount = guestBooks.itemCount,
-                    onRetry = { guestBooks.retry() },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = innerPadding.calculateBottomPadding()),
+                    onRetry = { guestBooks.retry() }
                 ) {}
             } else {
                 LazyColumn(
