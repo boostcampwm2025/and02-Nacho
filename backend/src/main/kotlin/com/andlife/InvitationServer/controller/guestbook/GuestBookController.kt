@@ -1,5 +1,6 @@
 package com.andlife.InvitationServer.controller.guestbook
 
+import com.andlife.InvitationServer.auth.AuthContext
 import com.andlife.InvitationServer.request.invitation.guestbook.UpdateGuestBookRequest
 import com.andlife.InvitationServer.response.BaseResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookResponse
@@ -19,17 +20,19 @@ class GuestBookController(
     @PutMapping("/{guestBookId}")
     fun updateGuestBook(
         @PathVariable guestBookId: Long,
+        authContext: AuthContext,
         @RequestBody request: UpdateGuestBookRequest
     ): BaseResponse<GuestBookResponse> {
-        val result = guestBookService.updateGuestBook(guestBookId, request)
+        val result = guestBookService.updateGuestBook(guestBookId, request, authContext)
         return BaseResponse.success(result)
     }
 
     @DeleteMapping("/{guestBookId}")
     fun deleteGuestBook(
-        @PathVariable guestBookId: Long
+        @PathVariable guestBookId: Long,
+        authContext: AuthContext,
     ): BaseResponse<Long> {
-        guestBookService.deleteGuestBook(guestBookId)
+        guestBookService.deleteGuestBook(guestBookId, authContext)
         return BaseResponse.success(guestBookId)
     }
 }

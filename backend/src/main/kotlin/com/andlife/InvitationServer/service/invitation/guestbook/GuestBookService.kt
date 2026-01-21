@@ -2,17 +2,15 @@ package com.andlife.InvitationServer.service.invitation.guestbook
 
 import com.andlife.InvitationServer.auth.AuthContext
 import com.andlife.InvitationServer.constant.MediaType
-import com.andlife.InvitationServer.entity.GuestBook
-import com.andlife.InvitationServer.entity.GuestBookAudio
-import com.andlife.InvitationServer.entity.GuestBookImage
-import com.andlife.InvitationServer.entity.GuestBookVideo
-import com.andlife.InvitationServer.entity.VideoPreviewThumbnail
+import com.andlife.InvitationServer.entity.*
+import com.andlife.InvitationServer.error.BusinessException
 import com.andlife.InvitationServer.repository.invitation.InvitationRepository
 import com.andlife.InvitationServer.repository.invitation.guestbook.GuestBookRepository
 import com.andlife.InvitationServer.repository.user.UserRepository
 import com.andlife.InvitationServer.request.invitation.guestbook.GuestBookRequest
 import com.andlife.InvitationServer.request.invitation.guestbook.UpdateGuestBookRequest
 import com.andlife.InvitationServer.response.AuthorResponse
+import com.andlife.InvitationServer.response.CommonResponseCode
 import com.andlife.InvitationServer.response.PagingMetaResponse
 import com.andlife.InvitationServer.response.PagingResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.CollectionResponse
@@ -234,9 +232,15 @@ class GuestBookService(
     }
 
     @Transactional
-    fun updateGuestBook(guestBookId: Long, request: UpdateGuestBookRequest): GuestBookResponse {
+    fun updateGuestBook(
+        guestBookId: Long,
+        request: UpdateGuestBookRequest,
+        authContext: AuthContext
+    ): GuestBookResponse {
         val guestBook = guestBookRepository.findById(guestBookId)
             .orElseThrow { IllegalArgumentException("방명록을 찾을 수 없습니다. id: $guestBookId") }
+
+        validateOwner(guestBook.user.id, authContext)
 
         guestBook.textContent = request.textContent
 
@@ -279,12 +283,25 @@ class GuestBookService(
     }
 
     @Transactional
-    fun deleteGuestBook(guestBookId: Long) {
+    fun deleteGuestBook(guestBookId: Long, authContext: AuthContext) {
         val guestBook = guestBookRepository.findByIdOrNull(guestBookId)
             ?: throw EntityNotFoundException("방명록을 찾을 수 없습니다. id: $guestBookId")
 
-        // TODO: 추후 권한 체크 로직 추가해야 하나?
+        validateOwner(guestBook.user.id, authContext)
 
         guestBookRepository.delete(guestBook)
+    }
+
+    private fun validateOwner(guestBookUserId: Long, authContext: AuthContext) {
+        when (authContext) {
+            is AuthContext.Member -> {
+                if (guestBookUserId != authContext.userId) {
+                    throw BusinessException(CommonResponseCode.FORBIDDEN)
+                }
+            }
+            is AuthContext.Guest -> {
+                throw BusinessException(CommonResponseCode.FORBIDDEN)
+            }
+        }
     }
 }
