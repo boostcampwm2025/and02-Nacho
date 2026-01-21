@@ -1,6 +1,7 @@
 package com.andlife.InvitationServer.controller.invitation
 
 import com.andlife.InvitationServer.request.invitation.CreateInvitationRequest
+import com.andlife.InvitationServer.request.invitation.InvitationCardRequest
 import com.andlife.InvitationServer.request.invitation.guestbook.GuestBookRequest
 import com.andlife.InvitationServer.response.BaseResponse
 import com.andlife.InvitationServer.response.CommonResponseCode
@@ -68,6 +69,29 @@ class InvitationController(
             BaseResponse.error(
                 responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR,
             )
+        }
+    }
+
+    @PostMapping("/{invitationId}/cards")
+    fun createInvitationCard(
+        @PathVariable invitationId: Long,
+        @RequestBody request: InvitationCardRequest
+    ): BaseResponse<Long> {
+        return try {
+            val cardId = invitationService.createInvitationCard(invitationId, request)
+            BaseResponse.success(cardId)
+        } catch (e: NoSuchElementException) {
+            BaseResponse.error(
+                responseCode = CommonResponseCode.NOT_FOUND,
+                customMessage = e.message
+            )
+        } catch (e: IllegalStateException) {
+            BaseResponse.error(
+                responseCode = CommonResponseCode.BAD_REQUEST,
+                customMessage = e.message
+            )
+        } catch (e: Exception) {
+            BaseResponse.error(responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
         }
     }
 

@@ -8,6 +8,7 @@ import com.andlife.InvitationServer.repository.invitation.AnnouncementRepository
 import com.andlife.InvitationServer.repository.invitation.InvitationCardRepository
 import com.andlife.InvitationServer.repository.invitation.InvitationRepository
 import com.andlife.InvitationServer.request.invitation.CreateInvitationRequest
+import com.andlife.InvitationServer.request.invitation.InvitationCardRequest
 import com.andlife.InvitationServer.response.invitation.AnnouncementResponse
 import com.andlife.InvitationServer.response.invitation.InvitationCardResponse
 import com.andlife.InvitationServer.response.invitation.InvitationResponse
@@ -24,6 +25,26 @@ class InvitationService(
     private val invitationCardRepository: InvitationCardRepository,
     private val announcementRepository: AnnouncementRepository,
 ) {
+
+    @Transactional
+    fun createInvitationCard(invitationId: Long, request: InvitationCardRequest): Long {
+        val invitation = invitationRepository.findById(invitationId)
+            .orElseThrow { NoSuchElementException("Invitation not found: $invitationId") }
+
+        val existingCard = invitationCardRepository.findByInvitationIdWithDetails(invitationId)
+        if (existingCard != null) {
+            throw IllegalStateException("Invitation card already exists for invitation: $invitationId")
+        }
+
+        val card = InvitationCard(
+            invitation = invitation,
+            contentJson = request.contentJson,
+            backgroundColor = request.backgroundColor,
+            backgroundImageUrl = request.backgroundImageUrl,
+        )
+
+        return invitationCardRepository.save(card).id
+    }
 
     fun getInvitation(invitationId: Long): InvitationResponse {
         val invitation = invitationRepository.findByInvitationIdWithHost(invitationId)
