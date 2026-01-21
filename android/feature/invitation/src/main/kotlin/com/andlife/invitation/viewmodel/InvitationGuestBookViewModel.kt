@@ -23,6 +23,8 @@ import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.toUiModel
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
+import com.andlife.ui.model.UiMediaType
+import com.andlife.domain.util.ThumbnailGenerator
 import com.andlife.model.guestbook.UiMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
@@ -50,6 +52,7 @@ class InvitationGuestBookViewModel
 constructor(
     private val mediaUploader: MediaUploader,
     private val mediaFileProvider: MediaFileProvider,
+    private val thumbnailGenerator: ThumbnailGenerator,
     private val guestBookRepository: GuestBookRepository,
     val audioPlayerManager: AudioPlayerManager,
     val videoPlayerPool: AutoVideoPlayerPool,
@@ -160,7 +163,7 @@ constructor(
                 medias.isEmpty() -> {
                     // 텍스트만 있는 경우
                     updateState { copy(isUploading = true) }
-                    createGuestBook(emptyList(), emptyList())
+                    createGuestBook(emptyList(), emptyList(), emptyList())
                 }
 
                 else -> {
@@ -186,8 +189,11 @@ constructor(
                             else -> {
                                 when (val result = mediaUploader.uploadMedias(mediaFiles)) {
                                     is Result.Success -> {
+                                        // 업로드된 비디오 썸네일 URL 리스트: 비디오가 아니거나 업로드 실패한 경우 null 가능
+                                        val thumbnailUrls = generateAndUploadThumbnails(medias)
+
                                         // 업로드된 미디어 URL 리스트: 업로드 실패한 미디어는 null 가능
-                                        createGuestBook(result.data, medias)
+                                        createGuestBook(result.data, thumbnailUrls, medias)
                                     }
 
                                     is Result.Error -> {
@@ -219,8 +225,46 @@ constructor(
         updateState { copy(errorMessage = null) }
     }
 
+    private suspend fun generateAndUploadThumbnails(
+        medias: List<SelectedMedia>
+    ): List<String?> {
+        return medias.map { media ->
+            if (media.type != UiMediaType.VIDEO) return@map null
+
+            try {
+                val thumbnailFile =
+                    thumbnailGenerator.generateVideoThumbnail(media.uri)
+
+                if (thumbnailFile == null) {
+                    Log.e("ThumbnailProcess", "썸네일 파일 생성 실패")
+                    return@map null
+                }
+
+                Log.d("ThumbnailProcess", "썸네일 파일 생성: ${thumbnailFile.absolutePath}")
+
+                val thumbnailMediaFile =
+                    mediaFileProvider.createFromFile(thumbnailFile)
+
+                Log.d("ThumbnailProcess", "썸네일 MediaFile 생성: $thumbnailMediaFile")
+                when (val result =
+                    mediaUploader.uploadMedias(listOf(thumbnailMediaFile))) {
+
+                    is Result.Success -> result.data.firstOrNull()
+                    is Result.Error -> {
+                        Log.e("ThumbnailUpload", "썸네일 업로드 실패: ${result.message}")
+                        null
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("ThumbnailProcess", "썸네일 처리 실패", e)
+                null
+            }
+        }
+    }
+
     private suspend fun createGuestBook(
         uploadedUrls: List<String?>,
+        thumbnailUrls: List<String?> = emptyList(),
         selectedMedias: List<SelectedMedia>,
     ) {
         try {
@@ -229,8 +273,7 @@ constructor(
                     .mapIndexed { index, url ->
                         if (url == null) return@mapIndexed null // 업로드 실패한 미디어는 건너뜀
                         val selectedMedia = selectedMedias.getOrNull(index)
-                        val thumbnailUrl =
-                            if (selectedMedia?.type == UiMediaType.VIDEO) "https://thumbnailurl.com" else null // TODO: 썸네일 URL 처리
+                        val thumbnailUrl = thumbnailUrls.getOrNull(index)
                         GuestBookMedia(
                             id = 0L,
                             type =
