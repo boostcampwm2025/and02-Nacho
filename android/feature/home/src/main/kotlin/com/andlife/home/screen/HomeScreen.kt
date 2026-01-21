@@ -34,6 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -101,6 +102,7 @@ fun HomeRoute(
     val upcomingInvitations = viewModel.upcomingInvitationsPagingFlow.collectAsLazyPagingItems()
     val guestBooks = viewModel.guestBooksPagingFlow.collectAsLazyPagingItems()
 
+    val scope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
     val lazyListState = rememberLazyListState()
 
@@ -109,18 +111,20 @@ fun HomeRoute(
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
-            is HomeSideEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
+            is HomeSideEffect.ShowMessage -> {
+                scope.launch { snackbarHostState.showSnackbar(effect.message) }
+            }
             is HomeSideEffect.NavigateToInvitationDetail -> onNavigateToInvitationDetail(effect.invitationId)
             is HomeSideEffect.NavigateToSetting -> onNavigateToSetting()
             is HomeSideEffect.NavigateToCreate -> onNavigateToCreate()
             is HomeSideEffect.ScrollToTop -> {
-                lazyListState.animateScrollToItem(0)
+                scope.launch { lazyListState.animateScrollToItem(0) }
             }
             is HomeSideEffect.RefreshSuccess -> {
-                snackbarHostState.showSnackbar(context.getString(R.string.snack_refresh_success))
+                scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.snack_refresh_success)) }
             }
             is HomeSideEffect.RefreshFailure -> {
-                snackbarHostState.showSnackbar(context.getString(R.string.snack_refresh_failure))
+                scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.snack_refresh_failure)) }
             }
         }
     }
