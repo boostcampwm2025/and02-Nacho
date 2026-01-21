@@ -4,6 +4,7 @@ import com.andlife.InvitationServer.request.invitation.guestbook.UpdateGuestBook
 import com.andlife.InvitationServer.response.BaseResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookResponse
 import com.andlife.InvitationServer.service.invitation.guestbook.GuestBookService
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -22,5 +23,13 @@ class GuestBookController(
     ): BaseResponse<GuestBookResponse> {
         val result = guestBookService.updateGuestBook(guestBookId, request)
         return BaseResponse.success(result)
+    }
+
+    @DeleteMapping("/{guestBookId}")
+    fun deleteGuestBook(
+        @PathVariable guestBookId: Long
+    ): BaseResponse<Long> {
+        guestBookService.deleteGuestBook(guestBookId)
+        return BaseResponse.success(guestBookId)
     }
 }

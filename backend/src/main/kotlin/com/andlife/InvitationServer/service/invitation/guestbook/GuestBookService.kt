@@ -17,7 +17,9 @@ import com.andlife.InvitationServer.response.invitation.guestbook.CollectionResp
 import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookMediaResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.toGuestBookResponse
+import jakarta.persistence.EntityNotFoundException
 import org.springframework.data.domain.Pageable
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -235,5 +237,15 @@ class GuestBookService(
         }
 
         return guestBook.toGuestBookResponse()
+    }
+
+    @Transactional
+    fun deleteGuestBook(guestBookId: Long) {
+        val guestBook = guestBookRepository.findByIdOrNull(guestBookId)
+            ?: throw EntityNotFoundException("방명록을 찾을 수 없습니다. id: $guestBookId")
+
+        // TODO: 추후 권한 체크 로직 추가해야 하나?
+
+        guestBookRepository.delete(guestBook)
     }
 }
