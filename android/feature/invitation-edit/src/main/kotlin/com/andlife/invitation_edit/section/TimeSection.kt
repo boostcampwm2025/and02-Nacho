@@ -35,6 +35,7 @@ internal fun TimeSection(
     onStartTimeClick: () -> Unit,
     onEndTimeClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     val res = LocalResources.current
     val startTimeString =
@@ -77,10 +78,12 @@ internal fun TimeSection(
                             contentDescription = stringResource(R.string.desc_start_time),
                         )
                     },
-                    modifier =
-                        Modifier
-                            .weight(1f)
-                            .clickable { onStartTimeClick() },
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable(
+                            enabled = !isLoading,
+                            onClick = onStartTimeClick
+                        )
                 )
                 Text(
                     text = "~",
@@ -99,10 +102,12 @@ internal fun TimeSection(
                             contentDescription = stringResource(R.string.desc_end_time),
                         )
                     },
-                    modifier =
-                        Modifier
-                            .weight(1f)
-                            .clickable { onEndTimeClick() },
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable(
+                            enabled = !isLoading,
+                            onClick = onEndTimeClick
+                        ),
                 )
             }
         }

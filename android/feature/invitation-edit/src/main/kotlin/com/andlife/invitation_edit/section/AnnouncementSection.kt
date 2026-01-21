@@ -43,6 +43,7 @@ fun LazyListScope.announcementSection(
     onRemoveAnnouncementClick: (AnnouncementUiModel) -> Unit,
     onAddAnnouncementClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     item {
         Box(modifier = modifier.background(NachoTheme.colorScheme.backgroundPrimary)) {
@@ -59,7 +60,10 @@ fun LazyListScope.announcementSection(
                     style = NachoTheme.typography.bodyMediumSemiBold,
                     color = NachoTheme.colorScheme.textPrimary,
                 )
-                TextButton(onAddAnnouncementClick) {
+                TextButton(
+                    onClick = onAddAnnouncementClick,
+                    enabled = !isLoading
+                ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = stringResource(R.string.desc_add_announcement),

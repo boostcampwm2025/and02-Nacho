@@ -43,9 +43,7 @@ INSERT INTO video_preview_thumbnails (guestbook_video_id, thumbnail_url, time_se
 (1, 'https://picsum.photos/200/300?random=5', 5.0);
 
 -- 8. 초대장 카드 및 공지사항
-INSERT INTO invitation_cards (invitation_id, content_json, background_image_url) VALUES
-(1, '{"text": "부스트캠프 멤버들, 한 해 동안 고생 많으셨습니다!"}', NULL),
-(2, '{"message": "안드라이프 한해 잘 보내봅시다~"}', NULL);
+
 
 INSERT INTO announcement_sections (invitation_id, title, content, display_order, created_at) VALUES
 (1, '주차 안내', '건물 지하 주차장을 이용해 주세요. 3시간 무료 주차가 가능합니다.', 1, CURRENT_TIMESTAMP),

@@ -1,15 +1,17 @@
-package com.andlife.data.repository.invitation
+package com.andlife.data.repository.invitation.mapper
 
 import com.andlife.domain.model.invitation.Announcement
-import com.andlife.domain.model.invitation.InvitationCard
 import com.andlife.domain.model.invitation.Invitation
+import com.andlife.domain.model.invitation.InvitationCard
 import com.andlife.network.api.invitation.AnnouncementResponse
 import com.andlife.network.api.invitation.InvitationCardResponse
 import com.andlife.network.api.invitation.InvitationResponse
+import com.andlife.network.model.card.NachoCardDto
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
+import kotlinx.serialization.json.Json
 
-fun InvitationResponse.toDomain(): Invitation {
+fun InvitationResponse.toDomain(json: Json): Invitation {
     return Invitation(
         id = id,
         hostId = hostId,
@@ -25,17 +27,19 @@ fun InvitationResponse.toDomain(): Invitation {
         latitude = lat,
         longitude = lng,
         locationGuide = locationGuide,
-        invitationCard = invitationCard?.toDomain(),
+        invitationCard = invitationCard?.toDomain(json),
         announcements = announcements.map { it.toDomain() },
     )
 }
 
-fun InvitationCardResponse.toDomain(): InvitationCard {
+fun InvitationCardResponse.toDomain(json: Json): InvitationCard {
+    val nachoCardDto = json.decodeFromString<NachoCardDto>(contentJson)
+    val nachoCard = nachoCardDto.toDomain()
+
     return InvitationCard(
         id = id,
         invitationId = invitationId,
-        contentJson = contentJson,
-        backgroundImageUrl = backgroundImageUrl,
+        card = nachoCard,
     )
 }
 

@@ -16,6 +16,7 @@ internal fun BottomBarSection(
     title: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     BottomAppBar(
         modifier = modifier,
@@ -27,6 +28,7 @@ internal fun BottomBarSection(
                     .fillMaxWidth()
                     .padding(NachoSpacing.large),
             onClick = onClick,
+            enabled = enabled
         ) {
             Text(
                 text = title,

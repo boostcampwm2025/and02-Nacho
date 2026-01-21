@@ -27,6 +27,7 @@ internal fun DateSection(
     date: LocalDate?,
     onDateClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     val dateString =
         remember(date) {
@@ -57,7 +58,10 @@ internal fun DateSection(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .clickable { onDateClick() },
+                        .clickable(
+                            enabled = !isLoading,
+                            onClick = onDateClick
+                        ),
             )
         }
     }

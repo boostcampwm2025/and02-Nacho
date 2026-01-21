@@ -8,7 +8,8 @@ import androidx.core.graphics.withSave
 
 class CenteredImageSpan(
     private val drawable: Drawable,
-    private val containerWidth: Int
+    private val containerWidth: Int,
+    val imageSource: String,
 ) : ImageSpan(drawable) {
 
     override fun getSize(

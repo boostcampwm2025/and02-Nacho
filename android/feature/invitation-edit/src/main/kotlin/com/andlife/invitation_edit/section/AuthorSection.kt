@@ -24,6 +24,7 @@ internal fun AuthorSection(
     authorName: String,
     onAuthorNameChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     val focusManager = LocalFocusManager.current
     Box(modifier = modifier.background(NachoTheme.colorScheme.backgroundPrimary)) {
@@ -42,6 +43,7 @@ internal fun AuthorSection(
                     KeyboardActions(
                         onDone = { focusManager.clearFocus() },
                     ),
+                enabled = !isLoading,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
