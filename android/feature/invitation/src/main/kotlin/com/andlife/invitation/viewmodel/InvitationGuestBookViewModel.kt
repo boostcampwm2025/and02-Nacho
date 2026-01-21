@@ -34,10 +34,13 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -61,13 +64,16 @@ constructor(
 
     override val uiState: StateFlow<InvitationGuestBookUiState> = mutableUiState.asStateFlow()
 
+    private val refreshFlow = MutableStateFlow(0)
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val guestBooksPagingFlow: Flow<PagingData<GuestBookUiModel>> =
-        guestBookRepository.getGuestBooksByInvitationId(invitationId)
-            .map { pagingData ->
-                pagingData.map { it.toUiModel() }
-            }
-            .cachedIn(viewModelScope)
+        refreshFlow.flatMapLatest {
+            guestBookRepository.getGuestBooksByInvitationId(invitationId)
+                .map { pagingData ->
+                    pagingData.map { it.toUiModel() }
+                }
+        }.cachedIn(viewModelScope)
 
     init {
         observeAudioPlayerState()
@@ -249,11 +255,11 @@ constructor(
         handleResult(result)
     }
 
-    private fun updateGuestBook(
+    private suspend fun updateGuestBook(
         guestBookId: Long,
         uploadedUrls: List<String?>,
         allSelectedMedias: List<SelectedMedia>
-    ) = viewModelScope.launch {
+    ) {
         val existingImageIds = allSelectedMedias.filter { it.id != null && it.type == UiMediaType.IMAGE }.mapNotNull { it.id }
         val existingAudioIds = allSelectedMedias.filter { it.id != null && it.type == UiMediaType.AUDIO }.mapNotNull { it.id }
         val existingVideoIds = allSelectedMedias.filter { it.id != null && it.type == UiMediaType.VIDEO }.mapNotNull { it.id }
@@ -287,10 +293,10 @@ constructor(
             existingAudioIds = existingAudioIds,
             newMedias = newMedias
         )
-        handleResult(result)
+        handleResult(result, true)
     }
 
-    private fun handleResult(result: Result<GuestBook, DataError>) {
+    private fun handleResult(result: Result<GuestBook, DataError>, isUpdate: Boolean = false) = viewModelScope.launch {
         updateState { copy(isUploading = false) }
         when (result) {
             is Result.Success -> {
@@ -301,20 +307,31 @@ constructor(
                         textContent = ""
                     )
                 }
-                sendEffect(InvitationGuestBookSideEffect.CreateGuestBookSuccess)
+                if (isUpdate) {
+                    sendEffect(InvitationGuestBookSideEffect.UpdateGuestBookSuccess)
+                } else {
+                    sendEffect(InvitationGuestBookSideEffect.CreateGuestBookSuccess)
+                }
             }
 
             is Result.Error -> sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("실패: ${result.message}"))
         }
     }
 
-    private fun deleteGuestBook(guestBookId: Long) = viewModelScope.launch {
-        guestBookRepository.deleteGuestBook(guestBookId)
-            .onSuccess { deletedId ->
-                sendEffect(InvitationGuestBookSideEffect.DeleteGuestBookSuccess)
-            }
-            .onFailure {
-                sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("방명록 삭제를 실패하였습니다."))
-            }
+    private fun deleteGuestBook(guestBookId: Long) {
+        viewModelScope.launch {
+            guestBookRepository.deleteGuestBook(guestBookId)
+                .onSuccess { deletedId ->
+                    sendEffect(InvitationGuestBookSideEffect.DeleteGuestBookSuccess)
+                }
+                .onFailure {
+                    sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("방명록 삭제를 실패하였습니다."))
+                }
+        }
+    }
+
+    fun invalidateGuestBooks() {
+        Log.d("qqqqq", "방명록 목록 무효화")
+        refreshFlow.value += 1
     }
 }

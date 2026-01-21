@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
@@ -83,9 +84,11 @@ fun InvitationGuestBookRoute(
     val guestBooks = viewModel.guestBooksPagingFlow.collectAsLazyPagingItems()
 
     val lifecycleOwner = LocalLifecycleOwner.current
+    val lazyListState = rememberLazyListState()
 
     val snackbarHostState = remember { SnackbarHostState() }
     var showDeleteDialog by remember { mutableStateOf<Long?>(null) }
+    var scrollToTop by remember { mutableStateOf(false) }
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
@@ -97,16 +100,26 @@ fun InvitationGuestBookRoute(
             }
 
             is InvitationGuestBookSideEffect.CreateGuestBookSuccess -> {
-                guestBooks.refresh()
+                scrollToTop = true
+                viewModel.invalidateGuestBooks()
             }
 
             is InvitationGuestBookSideEffect.UpdateGuestBookSuccess -> {
-                guestBooks.refresh() // TODO: 이거 부분만 업데이트하도록 변경하기. 지금은 전체 새로고침
+                viewModel.invalidateGuestBooks()
             }
 
             is InvitationGuestBookSideEffect.DeleteGuestBookSuccess -> {
-                guestBooks.refresh() // TODO: 이거 부분만 업데이트하도록 변경하기. 지금은 전체 새로고침
+                viewModel.invalidateGuestBooks()
             }
+        }
+    }
+
+    LaunchedEffect(guestBooks.loadState.refresh, scrollToTop) {
+        if (scrollToTop && guestBooks.loadState.refresh is LoadState.NotLoading) {
+            if (guestBooks.itemCount > 0) {
+                lazyListState.animateScrollToItem(0)
+            }
+            scrollToTop = false
         }
     }
 
@@ -199,6 +212,7 @@ fun InvitationGuestBookRoute(
         onEvent = viewModel::onEvent,
         onNavigateBack = onNavigateBack,
         snackbarHostState = snackbarHostState,
+        lazyListState = lazyListState,
         videoPlayerPool = viewModel.videoPlayerPool,
         onDeleteMenuClick = { guestBookId -> showDeleteDialog = guestBookId },
         modifier = modifier,
@@ -211,15 +225,14 @@ private fun InvitationGuestBookScreen(
     guestBooks: LazyPagingItems<GuestBookUiModel>,
     onEvent: (InvitationGuestBookUiEvent) -> Unit,
     snackbarHostState: SnackbarHostState,
+    lazyListState: LazyListState,
     videoPlayerPool: AutoVideoPlayerPool,
     onNavigateBack: () -> Unit,
     onDeleteMenuClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     var playVideoIndex by remember { mutableStateOf(-1) }
-
     var isMediaActive by remember { mutableStateOf(true) }
 
     val navigateBackWithCleanup: () -> Unit = {
@@ -300,15 +313,6 @@ private fun InvitationGuestBookScreen(
                     }
                 }
             }
-    }
-
-    LaunchedEffect(guestBooks.loadState.refresh) {
-        if (guestBooks.loadState.refresh is LoadState.NotLoading) {
-            if (guestBooks.itemCount > 0) {
-                lazyListState.animateScrollToItem(0)
-            }
-            playVideoIndex = -1
-        }
     }
 
     Scaffold(
@@ -430,6 +434,7 @@ private fun InvitationGuestBookEmptyPreview() {
             onNavigateBack = {},
             videoPlayerPool = FakeVideoPlayerPool(),
             snackbarHostState = SnackbarHostState(),
+            lazyListState = rememberLazyListState(),
             onDeleteMenuClick = {},
         )
     }
