@@ -54,6 +54,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -101,6 +103,8 @@ fun EditorScreen(
     onBackClick: () -> Unit,
     onSaveChangesClick: () -> Unit,
     modifier: Modifier = Modifier,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    isLoading: Boolean = false,
 ) {
     var colorPaletteMode by remember { mutableStateOf<ColorPaletteMode?>(null) }
     val scope = rememberCoroutineScope()
@@ -132,6 +136,7 @@ fun EditorScreen(
                     state.clearFocusAndHideKeyboard()
                     onSaveChangesClick()
                 },
+                enabled = !state.isTextEmpty && !isLoading
             )
         },
         bottomBar = {
@@ -155,6 +160,9 @@ fun EditorScreen(
                 colorPaletteMode = colorPaletteMode,
                 modifier = Modifier.fillMaxWidth(),
             )
+        },
+        snackbarHost = {
+            SnackbarHost(snackbarHostState)
         },
         modifier = modifier,
     ) { innerPadding ->
@@ -210,6 +218,7 @@ private fun EditTopBar(
     onBackClick: () -> Unit,
     onSaveChangesClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     TopAppBar(
         title = {
@@ -230,6 +239,7 @@ private fun EditTopBar(
         actions = {
             NachoButton(
                 onClick = onSaveChangesClick,
+                enabled = enabled,
             ) {
                 Text(
                     text = stringResource(R.string.btn_save),
@@ -647,6 +657,7 @@ private fun EditorScreenPreview() {
     NachoTheme {
         EditorScreen(
             state = EditorState(ImageLoaderImpl()),
+            snackbarHostState = SnackbarHostState(),
             titleText = "초대카드 생성",
             onBackClick = {},
             onSaveChangesClick = {},
