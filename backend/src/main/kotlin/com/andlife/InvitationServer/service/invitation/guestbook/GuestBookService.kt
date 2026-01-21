@@ -1,5 +1,6 @@
 package com.andlife.InvitationServer.service.invitation.guestbook
 
+import com.andlife.InvitationServer.auth.AuthContext
 import com.andlife.InvitationServer.constant.MediaType
 import com.andlife.InvitationServer.entity.GuestBook
 import com.andlife.InvitationServer.entity.GuestBookAudio
@@ -91,10 +92,19 @@ class GuestBookService(
         return collection.sortedByDescending { it.createdAt }
     }
 
-    fun getGuestBooks(invitationId: Long, pageable: Pageable): PagingResponse<GuestBookResponse> {
+    fun getGuestBooks(
+        invitationId: Long,
+        pageable: Pageable,
+        authContext: AuthContext
+    ): PagingResponse<GuestBookResponse> {
         val guestBooksPage = guestBookRepository.findAllByInvitationId(invitationId, pageable)
 
         val responsePage = guestBooksPage.map { guestBook ->
+            val isOwner = when (authContext) {
+                is AuthContext.Member -> authContext.userId == guestBook.user.id
+                is AuthContext.Guest -> false
+            }
+
             val allMedia = mutableListOf<GuestBookMediaResponse>()
 
             guestBook.images.forEach {
@@ -141,7 +151,7 @@ class GuestBookService(
                 visualMedias = visualMedias,
                 audioMedias = audioMedias,
                 totalVisualCount = visualMedias.size,
-                isOwner = true,
+                isOwner = isOwner,
                 createdAt = guestBook.createdAt,
                 updatedAt = guestBook.updatedAt
             )
@@ -201,7 +211,7 @@ class GuestBookService(
                         durationSeconds = mediaReq.durationSeconds ?: 0,
                         displayOrder = mediaReq.displayOrder
                     )
-                    
+
                     // 썸네일이 있는 경우 VideoPreviewThumbnail에도 추가
                     if (!mediaReq.thumbnailUrl.isNullOrEmpty()) {
                         val previewThumbnail = VideoPreviewThumbnail(
@@ -211,7 +221,7 @@ class GuestBookService(
                         )
                         video.previewThumbnails.add(previewThumbnail)
                     }
-                    
+
                     guestBook.videos.add(video)
                 }
 
@@ -237,13 +247,30 @@ class GuestBookService(
         request.newMedias.forEach { mediaReq ->
             when (mediaReq.mediaType) {
                 "IMAGE" -> guestBook.images.add(
-                    GuestBookImage(guestBook = guestBook, imageUrl = mediaReq.mediaUrl, displayOrder = mediaReq.displayOrder)
+                    GuestBookImage(
+                        guestBook = guestBook,
+                        imageUrl = mediaReq.mediaUrl,
+                        displayOrder = mediaReq.displayOrder
+                    )
                 )
+
                 "AUDIO" -> guestBook.audios.add(
-                    GuestBookAudio(guestBook = guestBook, audioUrl = mediaReq.mediaUrl, durationSeconds = mediaReq.durationSeconds ?: 0, displayOrder = mediaReq.displayOrder)
+                    GuestBookAudio(
+                        guestBook = guestBook,
+                        audioUrl = mediaReq.mediaUrl,
+                        durationSeconds = mediaReq.durationSeconds ?: 0,
+                        displayOrder = mediaReq.displayOrder
+                    )
                 )
+
                 "VIDEO" -> guestBook.videos.add(
-                    GuestBookVideo(guestBook = guestBook, videoUrl = mediaReq.mediaUrl, thumbnailUrl = mediaReq.thumbnailUrl ?: "", durationSeconds = mediaReq.durationSeconds ?: 0, displayOrder = mediaReq.displayOrder)
+                    GuestBookVideo(
+                        guestBook = guestBook,
+                        videoUrl = mediaReq.mediaUrl,
+                        thumbnailUrl = mediaReq.thumbnailUrl ?: "",
+                        durationSeconds = mediaReq.durationSeconds ?: 0,
+                        displayOrder = mediaReq.displayOrder
+                    )
                 )
             }
         }
