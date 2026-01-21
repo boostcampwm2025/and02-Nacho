@@ -322,6 +322,15 @@ constructor(
         viewModelScope.launch {
             guestBookRepository.deleteGuestBook(guestBookId)
                 .onSuccess { deletedId ->
+                    updateState {
+                        copy(
+                            editingGuestBookId = if (editingGuestBookId == deletedId) null else editingGuestBookId,
+                            selectedMedias = if (editingGuestBookId == deletedId) persistentListOf() else selectedMedias,
+                            textContent = if (editingGuestBookId == deletedId) "" else textContent,
+                            originalTextContent = if (editingGuestBookId == deletedId) "" else originalTextContent,
+                            originalMediaIds = if (editingGuestBookId == deletedId) setOf() else originalMediaIds,
+                        )
+                    }
                     sendEffect(InvitationGuestBookSideEffect.DeleteGuestBookSuccess)
                 }
                 .onFailure {
