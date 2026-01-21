@@ -335,12 +335,15 @@ private fun InvitationGuestBookScreen(
         }
     ) { innerPadding ->
         if (isMediaActive) {
-            PagingStateContent(
-                loadState = guestBooks.loadState.refresh,
-                itemCount = guestBooks.itemCount,
-                onRetry = { guestBooks.retry() },
-                modifier = Modifier.padding(horizontal = NachoSpacing.large)
-            ) {
+            val isInitialLoading = guestBooks.loadState.refresh is LoadState.Loading && guestBooks.itemCount == 0
+
+            if (isInitialLoading) {
+                PagingStateContent(
+                    loadState = guestBooks.loadState.refresh,
+                    itemCount = guestBooks.itemCount,
+                    onRetry = { guestBooks.retry() },
+                ) {}
+            } else {
                 LazyColumn(
                     state = lazyListState,
                     modifier = Modifier.fillMaxSize(),
@@ -356,7 +359,9 @@ private fun InvitationGuestBookScreen(
                     ) { index ->
                         guestBooks[index]?.let { guestBook ->
                             GuestBookItem(
-                                modifier = Modifier.animateItem(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .animateItem(),
                                 guestBook = guestBook,
                                 videoPlayerPool = videoPlayerPool,
                                 shouldPlayVideo = isMediaActive && (index == playVideoIndex),
