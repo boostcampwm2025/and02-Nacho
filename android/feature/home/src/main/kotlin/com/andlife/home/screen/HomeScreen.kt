@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -70,6 +69,7 @@ import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.model.common.VideoCandidate
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
+import com.andlife.model.invitation.UpcomingInvitationUiModel
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItemSkeleton
@@ -96,6 +96,7 @@ fun HomeRoute(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val upcomingInvitations = viewModel.upcomingInvitationsPagingFlow.collectAsLazyPagingItems()
     val guestBooks = viewModel.guestBooksPagingFlow.collectAsLazyPagingItems()
     val snackbarHostState = remember { SnackbarHostState() }
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -107,6 +108,7 @@ fun HomeRoute(
             is HomeSideEffect.NavigateToSetting -> onNavigateToSetting()
             is HomeSideEffect.NavigateToCreate -> onNavigateToCreate()
             is HomeSideEffect.RefreshGuestBook -> guestBooks.refresh()
+            is HomeSideEffect.RefreshUpcomingInvitation -> upcomingInvitations.refresh()
         }
     }
 
@@ -144,6 +146,7 @@ fun HomeRoute(
 
     HomeScreen(
         uiState = uiState,
+        upcomingInvitations = upcomingInvitations,
         guestBooks = guestBooks,
         onEvent = viewModel::onEvent,
         snackbarHostState = snackbarHostState,
@@ -156,6 +159,7 @@ fun HomeRoute(
 @Composable
 fun HomeScreen(
     uiState: HomeUiState,
+    upcomingInvitations: LazyPagingItems<UpcomingInvitationUiModel>,
     guestBooks: LazyPagingItems<GuestBookUiModel>,
     onEvent: (HomeUiEvent) -> Unit,
     snackbarHostState: SnackbarHostState,
@@ -271,14 +275,12 @@ fun HomeScreen(
                     end = NachoSpacing.large,
                 ),
             ) {
-                item {
-                    HomeUpcomingSection(
-                        uiState = uiState,
-                        onInvitationClick = { id -> onEvent(HomeUiEvent.ClickUpcomingInvitation(id)) },
-                        onRetryClick = { onEvent(HomeUiEvent.RetryUpcomingLoad) },
-                        onNavigateToCreate = { onEvent(HomeUiEvent.ClickCreate) },
-                    )
-                }
+                homeUpcomingSection(
+                    upcomingInvitations = upcomingInvitations,
+                    onInvitationClick = { id -> onEvent(HomeUiEvent.ClickUpcomingInvitation(id)) },
+                    onRetryClick = { onEvent(HomeUiEvent.RetryUpcomingLoad) },
+                    onNavigateToCreate = { onEvent(HomeUiEvent.ClickCreate) },
+                )
 
                 homeGuestBookSection(
                     guestBooks = guestBooks,
@@ -340,29 +342,29 @@ private fun HomeTopBar(
     }
 }
 
-@Composable
-fun HomeUpcomingSection(
-    uiState: HomeUiState,
+fun LazyListScope.homeUpcomingSection(
+    upcomingInvitations: LazyPagingItems<UpcomingInvitationUiModel>,
     onInvitationClick: (Long) -> Unit,
     onRetryClick: () -> Unit,
     onNavigateToCreate: () -> Unit,
-    modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(NachoSpacing.large)
-    ) {
+    item {
         Text(
             text = stringResource(R.string.txt_title_upcoming_schedule),
             style = NachoTheme.typography.headingSmallSemiBold,
-            modifier = Modifier.padding(top = NachoSpacing.large),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = NachoSpacing.large),
         )
+    }
+    val refreshState = upcomingInvitations.loadState.refresh
 
-        when {
-            uiState.isUpcomingLoading -> {
+    item {
+        when(refreshState) {
+            is LoadState.Loading -> {
                 UpcomingStatusCard(isLoading = true)
             }
-            uiState.isUpcomingError -> {
+            is LoadState.Error -> {
                 UpcomingStatusCard(
                     title = stringResource(R.string.txt_error_upcoming_title),
                     description = stringResource(R.string.txt_error_upcoming_desc),
@@ -370,36 +372,40 @@ fun HomeUpcomingSection(
                     onButtonClick = onRetryClick,
                 )
             }
-            uiState.upcomingInvitations.isEmpty() -> {
-                UpcomingStatusCard(
-                    title = stringResource(R.string.txt_empty_upcoming_title),
-                    description = stringResource(R.string.txt_empty_upcoming_desc),
-                    buttonText = stringResource(R.string.txt_action_create_invitation),
-                    onButtonClick = onNavigateToCreate,
-                    buttonIconRes = com.andlife.ui.R.drawable.ic_add_24
-                )
-            }
-            else -> {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
-                    contentPadding = PaddingValues(bottom = NachoSpacing.small)
-                ) {
-                    items(
-                        items = uiState.upcomingInvitations,
-                        key = { it.id },
-                    ) { invitation ->
-                        val dDayText = remember(invitation.startTime.date) {
-                            invitation.startTime.date.toDDayText()
+            is LoadState.NotLoading -> {
+                if (upcomingInvitations.itemCount == 0) {
+                    UpcomingStatusCard(
+                        title = stringResource(R.string.txt_empty_upcoming_title),
+                        description = stringResource(R.string.txt_empty_upcoming_desc),
+                        buttonText = stringResource(R.string.txt_action_create_invitation),
+                        onButtonClick = onNavigateToCreate,
+                        buttonIconRes = com.andlife.ui.R.drawable.ic_add_24
+                    )
+                } else {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
+                        contentPadding = PaddingValues(bottom = NachoSpacing.small)
+                    ) {
+                        items(
+                            count = upcomingInvitations.itemCount,
+                            key = upcomingInvitations.itemKey { it.id }
+                        ) { index ->
+                            upcomingInvitations[index]?.let { invitation ->
+                                val dDayText = remember(invitation.startTime.date) {
+                                    invitation.startTime.date.toDDayText()
+                                }
+                                InvitationScheduleListItem(
+                                    modifier = Modifier.fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO),
+                                    imageUrl = invitation.thumbnailUrl,
+                                    title = invitation.title,
+                                    startTime = invitation.startTime.toDateTimeSingleLine(),
+                                    hostName = invitation.hostInfo.name,
+                                    dDayText = dDayText,
+                                    onClick = { onInvitationClick(invitation.id) },
+                                )
+                            }
                         }
-                        InvitationScheduleListItem(
-                            modifier = Modifier.fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO),
-                            imageUrl = invitation.thumbnailUrl,
-                            title = invitation.title,
-                            startTime = invitation.startTime.toDateTimeSingleLine(),
-                            hostName = invitation.hostInfo.name,
-                            dDayText = dDayText,
-                            onClick = { onInvitationClick(invitation.id) },
-                        )
                     }
                 }
             }
@@ -636,11 +642,14 @@ private fun HomeScreenPreview() {
             override fun releaseAllPlayers() {}
         }
     }
+    val emptyUpcomingInvitations = flowOf(PagingData.empty<UpcomingInvitationUiModel>()).collectAsLazyPagingItems()
     val emptyGuestBooks = flowOf(PagingData.empty<GuestBookUiModel>()).collectAsLazyPagingItems()
+
 
     NachoTheme {
         HomeScreen(
             uiState = HomeUiState(),
+            upcomingInvitations = emptyUpcomingInvitations,
             guestBooks = emptyGuestBooks,
             onEvent = {},
             snackbarHostState = SnackbarHostState(),

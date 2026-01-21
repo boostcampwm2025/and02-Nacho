@@ -1,14 +1,11 @@
 package com.andlife.home.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.repository.invitation.InvitationRepository
-import com.andlife.domain.util.onFailure
-import com.andlife.domain.util.onSuccess
 import com.andlife.home.model.HomeSideEffect
 import com.andlife.home.model.HomeUiEvent
 import com.andlife.home.model.HomeUiState
@@ -16,19 +13,18 @@ import com.andlife.media.audio.AudioPlayerManager
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.toUiModel
+import com.andlife.model.invitation.UpcomingInvitationUiModel
 import com.andlife.model.invitation.toUpcomingInvitationUiModel
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,13 +35,13 @@ class HomeViewModel @Inject constructor(
     val audioPlayerManager: AudioPlayerManager,
     val videoPlayerPool: AutoVideoPlayerPool,
 ) : BaseViewModel<HomeUiState, HomeUiEvent, HomeSideEffect>(initialState = HomeUiState()) {
-    override val uiState: StateFlow<HomeUiState> = mutableUiState.onStart {
-        loadUpcomingInvitations()
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000L),
-        initialValue = HomeUiState(),
-    )
+
+    val upcomingInvitationsPagingFlow: Flow<PagingData<UpcomingInvitationUiModel>> =
+        invitationRepository.getUpcomingInvitations()
+            .map { pagingData ->
+                pagingData.map { it.toUpcomingInvitationUiModel() }
+            }
+            .cachedIn(viewModelScope)
 
     val guestBooksPagingFlow: Flow<PagingData<GuestBookUiModel>> =
         guestBookRepository.getAllRelatedGuestBooks()
@@ -53,6 +49,8 @@ class HomeViewModel @Inject constructor(
                 pagingData.map { it.toUiModel() }
             }
             .cachedIn(viewModelScope)
+
+    override val uiState: StateFlow<HomeUiState> = mutableUiState.asStateFlow()
 
     init {
         observeAudioPlayerState()
@@ -78,25 +76,6 @@ class HomeViewModel @Inject constructor(
                 }
             }
             .launchIn(viewModelScope)
-    }
-
-    private suspend fun loadUpcomingInvitations() {
-        updateState { copy(isUpcomingLoading = true, isUpcomingError = false) }
-
-        invitationRepository.getUpcomingInvitations()
-            .onSuccess { invitations ->
-                updateState {
-                    copy(
-                        isUpcomingLoading = false,
-                        upcomingInvitations = invitations.map { it.toUpcomingInvitationUiModel() }
-                    )
-                }
-            }.onFailure { error ->
-                updateState {
-                    copy(isUpcomingLoading = false, isUpcomingError = true)
-                }
-                Log.e("HomeViewModel", "다가오는 초대 불러오기 실패: $error")
-            }
     }
 
     override fun onEvent(event: HomeUiEvent) {
@@ -143,9 +122,8 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun retryUpcomingLoad() {
-        viewModelScope.launch {
-            loadUpcomingInvitations()
-        }
+        sendEffect(HomeSideEffect.RefreshUpcomingInvitation)
+
     }
     private fun retryUpGuestBookLoad() {
         sendEffect(HomeSideEffect.RefreshGuestBook)
@@ -155,7 +133,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             updateState { copy(isRefreshing = true) }
 
-            loadUpcomingInvitations()
+            sendEffect(HomeSideEffect.RefreshUpcomingInvitation)
             sendEffect(HomeSideEffect.RefreshGuestBook)
 
             updateState { copy(isRefreshing = false) }
