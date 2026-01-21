@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -240,7 +241,7 @@ private fun InvitationGuestBookScreen(
     val focusManager = LocalFocusManager.current
     val isImVisible = WindowInsets.isImeVisible
 
-    var playVideoIndex by remember { mutableStateOf(-1) }
+    var playVideoIndex by remember { mutableIntStateOf(-1) }
     var isMediaActive by remember { mutableStateOf(true) }
     var isTextFieldFocused by remember { mutableStateOf(false) }
 
