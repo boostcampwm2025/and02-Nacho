@@ -16,9 +16,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.preview.PreviewTheme
+import com.andlife.designsystem.theme.NachoCardSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.model.invitation.LatLngUiModel
@@ -109,7 +109,7 @@ private fun PlaceMapCard(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(230.dp),
+                .height(NachoCardSize.place),
             contentAlignment = Alignment.Center,
         ) {
             NaverMap(
