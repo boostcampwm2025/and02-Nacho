@@ -75,6 +75,7 @@ class MyInvitationDetailViewModel @Inject constructor(
             is MyInvitationDetailUiEvent.ClickImage -> navigateToFullScreenImage(event.imageList, event.index)
             is MyInvitationDetailUiEvent.MapError -> showMapErrorSnackbar()
             is MyInvitationDetailUiEvent.RetryLoad -> retryLoad()
+            MyInvitationDetailUiEvent.ClickCreateCard -> navigateToCreateCard()
         }
     }
 
@@ -105,6 +106,10 @@ class MyInvitationDetailViewModel @Inject constructor(
 
     private fun navigateToEditCard() { // TODO: 초대카드 편집 이동
         sendEffect(MyInvitationDetailSideEffect.NavigateToEditCard(myInvitationId))
+    }
+
+    private fun navigateToCreateCard() {
+        sendEffect(MyInvitationDetailSideEffect.NavigateToCreateCard(myInvitationId))
     }
 
     private fun navigateToFullScreenImage(imageList: ImmutableList<String>, index: Int) { /* TODO: 이미지 풀스크린*/ }
