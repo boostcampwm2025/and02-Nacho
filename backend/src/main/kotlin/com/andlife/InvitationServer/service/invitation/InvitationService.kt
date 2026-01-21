@@ -1,5 +1,6 @@
 package com.andlife.InvitationServer.service.invitation
 
+import com.andlife.InvitationServer.entity.InvitationParticipant
 import com.andlife.InvitationServer.repository.invitation.AnnouncementRepository
 import com.andlife.InvitationServer.repository.invitation.InvitationCardRepository
 import com.andlife.InvitationServer.repository.invitation.InvitationRepository
@@ -10,9 +11,13 @@ import com.andlife.InvitationServer.response.invitation.AnnouncementResponse
 import com.andlife.InvitationServer.response.invitation.InvitationCardResponse
 import com.andlife.InvitationServer.response.invitation.InvitationResponse
 import com.andlife.InvitationServer.response.invitation.InvitationSummaryResponse
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 @Service
 @Transactional(readOnly = true)
@@ -23,8 +28,29 @@ class InvitationService(
     private val participantRepository: InvitationParticipantRepository
 ) {
     @Transactional(readOnly = true)
-    fun getParticipantInvitations(userId: Long, pageable: Pageable): PagingResponse<InvitationSummaryResponse> {
-        val participantPage = participantRepository.findAllByUserIdWithInvitation(userId, pageable)
+    fun getParticipantInvitations(
+        userId: Long,
+        status: String,
+        pageable: Pageable
+    ): PagingResponse<InvitationSummaryResponse> {
+        val now = LocalDateTime.now()
+        val upperStatus = status.uppercase()
+
+        val adjustedPageable = if (upperStatus == "PAST") {
+            PageRequest.of(
+                pageable.pageNumber,
+                pageable.pageSize,
+                Sort.by("invitation.startTime").descending()
+            )
+        } else {
+            pageable
+        }
+
+        val participantPage: Page<InvitationParticipant> = when (upperStatus) {
+            "UPCOMING" -> participantRepository.findUpcomingInvitations(userId, now, adjustedPageable)
+            "PAST" -> participantRepository.findPastInvitations(userId, now, adjustedPageable)
+            else -> participantRepository.findAllByUserIdWithInvitation(userId, adjustedPageable)
+        }
 
         val contents = participantPage.content.map { participant ->
             val invitation = participant.invitation
