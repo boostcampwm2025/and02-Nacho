@@ -7,6 +7,7 @@ android {
 }
 
 dependencies {
+    implementation(projects.feature.editor)
     implementation(projects.core.media)
 
     implementation(libs.androidx.core.ktx)
