@@ -7,6 +7,7 @@ import com.andlife.InvitationServer.repository.invitation.participant.Invitation
 import com.andlife.InvitationServer.response.invitation.AnnouncementResponse
 import com.andlife.InvitationServer.response.invitation.InvitationCardResponse
 import com.andlife.InvitationServer.response.invitation.InvitationResponse
+import com.andlife.InvitationServer.response.invitation.InvitationSummaryResponse
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -19,10 +20,19 @@ class InvitationService(
     private val participantRepository: InvitationParticipantRepository
 ) {
     @Transactional(readOnly = true)
-    fun getParticipantInvitations(userId: Long) : List<Long> {
+    fun getParticipantInvitations(userId: Long) : List<InvitationSummaryResponse> {
         val participants = participantRepository.findAllByUserIdWithInvitation(userId)
-        // 임시로 아이디들만 반환하게 구현
-        return participants.map { it.invitation.id }
+        return participants.map { participant ->
+            val invitation = participant.invitation
+            InvitationSummaryResponse(
+                id = invitation.id,
+                title = invitation.title,
+                thumbnailUrls = invitation.thumbnailUrls,
+                displayHostName = invitation.displayHostName,
+                address = invitation.address,
+                startTime = invitation.startTime.toString()
+            )
+        }
     }
 
     fun getInvitation(invitationId: Long): InvitationResponse {
