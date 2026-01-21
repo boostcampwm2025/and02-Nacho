@@ -1,5 +1,6 @@
 package com.andlife.InvitationServer.util
 
+import com.andlife.InvitationServer.error.BusinessException
 import com.andlife.InvitationServer.response.BaseResponse
 import com.andlife.InvitationServer.response.CommonResponseCode
 import jakarta.persistence.EntityNotFoundException
@@ -22,6 +23,14 @@ class GlobalExceptionHandler {
         return BaseResponse.error(
             responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR,
             customMessage = "서버 내부 오류가 발생했습니다."
+        )
+    }
+
+    @ExceptionHandler(BusinessException::class)
+    fun handleBusinessException(e: BusinessException): BaseResponse<Nothing> {
+        return BaseResponse.error(
+            responseCode = e.responseCode,
+            customMessage = e.message
         )
     }
 }
