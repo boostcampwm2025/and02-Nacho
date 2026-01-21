@@ -4,10 +4,13 @@ import com.andlife.InvitationServer.repository.invitation.AnnouncementRepository
 import com.andlife.InvitationServer.repository.invitation.InvitationCardRepository
 import com.andlife.InvitationServer.repository.invitation.InvitationRepository
 import com.andlife.InvitationServer.repository.invitation.participant.InvitationParticipantRepository
+import com.andlife.InvitationServer.response.PagingMetaResponse
+import com.andlife.InvitationServer.response.PagingResponse
 import com.andlife.InvitationServer.response.invitation.AnnouncementResponse
 import com.andlife.InvitationServer.response.invitation.InvitationCardResponse
 import com.andlife.InvitationServer.response.invitation.InvitationResponse
 import com.andlife.InvitationServer.response.invitation.InvitationSummaryResponse
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -20,9 +23,10 @@ class InvitationService(
     private val participantRepository: InvitationParticipantRepository
 ) {
     @Transactional(readOnly = true)
-    fun getParticipantInvitations(userId: Long) : List<InvitationSummaryResponse> {
-        val participants = participantRepository.findAllByUserIdWithInvitation(userId)
-        return participants.map { participant ->
+    fun getParticipantInvitations(userId: Long, pageable: Pageable): PagingResponse<InvitationSummaryResponse> {
+        val participantPage = participantRepository.findAllByUserIdWithInvitation(userId, pageable)
+
+        val contents = participantPage.content.map { participant ->
             val invitation = participant.invitation
             InvitationSummaryResponse(
                 id = invitation.id,
@@ -33,6 +37,16 @@ class InvitationService(
                 startTime = invitation.startTime.toString()
             )
         }
+
+        return PagingResponse(
+            meta = PagingMetaResponse(
+                isEnd = participantPage.isLast,
+                pageableCount = participantPage.numberOfElements,
+                totalCount = participantPage.totalElements,
+                currentPage = participantPage.number
+            ),
+            content = contents
+        )
     }
 
     fun getInvitation(invitationId: Long): InvitationResponse {
