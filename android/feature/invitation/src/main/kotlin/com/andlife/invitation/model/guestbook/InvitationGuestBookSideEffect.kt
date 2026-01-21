@@ -6,4 +6,6 @@ sealed interface InvitationGuestBookSideEffect : BaseSideEffect {
     data class ShowSnackbar(
         val message: String,
     ) : InvitationGuestBookSideEffect
+
+    data object CreateGuestBookSuccess : InvitationGuestBookSideEffect
 }

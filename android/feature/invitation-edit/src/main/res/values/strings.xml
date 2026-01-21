@@ -23,6 +23,10 @@
     <string name="txt_remove_announcement">해당 공지사항을 삭제하시겠습니까?</string>
     <string name="txt_remove">삭제하기</string>
     <string name="txt_cancel">취소하기</string>
+    <string name="txt_card">초대카드</string>
+    <string name="txt_create_card">초대카드 생성</string>
+    <string name="txt_update_card">초대카드 편집</string>
+    <string name="txt_create_card_explain">초대카드를 꾸며보세요</string>
 
     <string name="msg_search_guide">찾으시는 장소나 주소를 입력해 주세요. </string>
 
@@ -39,8 +43,11 @@
     <string name="desc_invitation_date">날짜를 입력해 주세요.</string>
     <string name="desc_address">주소를 검색해주세요.</string>
     <string name="desc_add_announcement">공지사항을 추가해 보세요.</string>
+    <string name="desc_create_card">초대카드 생성</string>
+    <string name="desc_update_card">초대카드 편집</string>
 
     <string name="snack_full_image">이미지는 최대 10개까지 가능합니다.</string>
+    <string name="snack_fail_create">초대 생성에 실패했습니다 다시 시도해 주세요</string>
     <string name="snack_load_error_image">사진을 불러오는 데 실패했습니다.</string>
 
 </resources>

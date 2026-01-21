@@ -21,6 +21,7 @@ import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.home.homeNavGraph
 import com.andlife.invitation.invitationDetailNavGraph
 import com.andlife.invitation.invitationNavGraph
+import com.andlife.invitation_card.createCardNavGraph
 import com.andlife.invitation_edit.addressSearchNavGraph
 import com.andlife.invitation_edit.myInvitationCreateNavGraph
 import com.andlife.myinvitation.myInvitationDetailNavGraph
@@ -73,16 +74,23 @@ fun NachoNavHost(
 
             myInvitationDetailNavGraph(
                 onNavigateBack = navigator::navigatePopBackStack,
+                onNavigateToEditCard = { /* TODO: 초대카드 편집 */ },
             )
 
             myInvitationCreateNavGraph(
                 onNavigateToAddressSearch = navigator::navigateToAddressSearch,
                 onNavigateBack = navigator::navigatePopBackStack,
+                onNavigateCreateCard = navigator::navigateToCreateCard,
+                onNavigateToInvitationDetail = navigator::navigateToMyInvitationDetailByCreate
             )
 
             addressSearchNavGraph(
                 navController = navigator.navController,
                 onNavigateBack = navigator::navigatePopBackStack,
+            )
+
+            createCardNavGraph(
+                onBackClick = navigator::navigatePopBackStack
             )
         }
     }

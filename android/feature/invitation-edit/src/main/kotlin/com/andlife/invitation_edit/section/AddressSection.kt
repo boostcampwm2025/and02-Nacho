@@ -28,6 +28,7 @@ internal fun AddressSection(
     onChangeAddressGuide: (String) -> Unit,
     onNavigateToAddressSearch: () -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     Box(modifier = modifier.background(NachoTheme.colorScheme.backgroundPrimary)) {
         Column(
@@ -48,17 +49,22 @@ internal fun AddressSection(
                         tint = NachoTheme.colorScheme.brandPrimary,
                     )
                 },
-                modifier = Modifier.clickable { onNavigateToAddressSearch() },
+                modifier = Modifier.clickable(
+                    enabled = !isLoading,
+                    onClick = onNavigateToAddressSearch
+                ),
             )
             NachoTextField(
                 value = placeAddress,
                 onValueChange = onChangePlaceAddress,
+                enabled = !isLoading,
                 placeholder = stringResource(R.string.txt_address_detail),
             )
             NachoTextField(
                 value = addressGuide,
                 onValueChange = onChangeAddressGuide,
                 placeholder = stringResource(R.string.txt_guide_address),
+                enabled = !isLoading,
                 singleLine = false,
             )
         }

@@ -7,12 +7,20 @@ android {
 }
 
 dependencies {
+    implementation(projects.core.media)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
 
-    // kotlinx datatime
+    // kotlinx datetime
     implementation(libs.kotlinx.datetime)
+
+    // ExoPlayer
+    implementation(libs.bundles.media3)
+
+    // Paging
+    implementation(libs.androidx.paging.compose)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

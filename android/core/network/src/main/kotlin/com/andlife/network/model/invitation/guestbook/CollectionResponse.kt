@@ -10,8 +10,9 @@ data class CollectionResponse(
     val id: Long,
     val mediaType: String,
     val mediaUrl: String,
+    val thumbnailUrl: String? = null,
     val author: AuthorResponse,
     val content: String,
     val createdAt: LocalDateTime,
-    val durationSeconds: Int? = null,
+    val durationSeconds: Int? = null
 )

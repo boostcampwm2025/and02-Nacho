@@ -23,8 +23,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun GenericTabRow(
     tabs: ImmutableList<String>,
-    content: @Composable (Int) -> Unit,
     modifier: Modifier = Modifier,
+    content: @Composable (Int) -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val coroutineScope = rememberCoroutineScope()
@@ -43,9 +43,9 @@ fun GenericTabRow(
             indicator = {
                 TabRowDefaults.SecondaryIndicator(
                     modifier = Modifier.tabIndicatorOffset(pagerState.currentPage),
-                    color = NachoTheme.colorScheme.brandPrimary
+                    color = NachoTheme.colorScheme.brandPrimary,
                 )
-            }
+            },
         ) {
             tabs.forEachIndexed { index, title ->
                 val isSelected = pagerState.currentPage == index
@@ -70,6 +70,7 @@ fun GenericTabRow(
             state = pagerState,
             modifier = Modifier.weight(1f),
             verticalAlignment = Alignment.Top,
+            userScrollEnabled = false,
         ) { pageIndex ->
             content(pageIndex)
         }

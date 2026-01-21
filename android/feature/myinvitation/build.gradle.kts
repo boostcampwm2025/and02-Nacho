@@ -7,6 +7,9 @@ android {
 }
 
 dependencies {
+    // feature modules 공통 UI 모델
+    implementation(projects.feature.model)
+
     // kakao 공유
     implementation(libs.kakao.sdk.share)
 
@@ -18,6 +21,9 @@ dependencies {
 
     // kotlinx datetime
     implementation(libs.kotlinx.datetime)
+
+    // ExoPlayer
+    implementation(libs.bundles.media3)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

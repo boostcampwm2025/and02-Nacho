@@ -11,7 +11,8 @@ data class InvitationGuestBookUiState(
     val textContent: String = "",
     val isUploading: Boolean = false,
     val errorMessage: String? = null,
-    val guestBooks: ImmutableList<GuestBook> = persistentListOf(),
+    val playingAudioUrl: String? = null,
+    val isAudioPlaying: Boolean = false,
     val isLoadingGuestBooks: Boolean = false,
     val guestBooksErrorMessage: String? = null,
 ) : BaseUiState

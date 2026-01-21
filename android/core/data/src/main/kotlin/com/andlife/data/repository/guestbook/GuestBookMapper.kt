@@ -17,7 +17,8 @@ fun CollectionResponse.toDomain(): GalleryMedia =
     GalleryMedia(
         id = id,
         type = MediaType.fromString(mediaType),
-        url = mediaUrl,
+        mediaUrl = mediaUrl,
+        thumbnailUrl = thumbnailUrl,
         content = content,
         authorName = author.name,
         authorProfileUrl = author.profileImageUrl,
@@ -29,7 +30,7 @@ fun GuestBookResponse.toDomain(): GuestBook =
     GuestBook(
         id = id,
         author = author.toDomain(),
-        invitation = invitation.toDomain(),
+        invitation = invitation?.toDomain(),
         textContent = textContent,
         visualMedias = visualMedias.map { it.toDomain() },
         audioMedias = audioMedias.map { it.toDomain() },

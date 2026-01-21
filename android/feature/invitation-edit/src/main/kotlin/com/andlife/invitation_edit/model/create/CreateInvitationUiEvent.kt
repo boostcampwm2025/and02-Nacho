@@ -55,4 +55,8 @@ sealed interface CreateInvitationUiEvent : BaseUiEvent {
     data class RemoveAnnouncement(
         val announcement: AnnouncementUiModel,
     ) : CreateInvitationUiEvent
+
+    data object OnClickBack : CreateInvitationUiEvent
+
+    data object OnClickCreate : CreateInvitationUiEvent
 }
