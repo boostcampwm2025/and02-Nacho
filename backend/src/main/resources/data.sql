@@ -44,8 +44,6 @@ INSERT INTO video_preview_thumbnails (guestbook_video_id, thumbnail_url, time_se
 (1, 'https://picsum.photos/200/300?random=5', 5.0);
 
 -- 8. 초대장 카드 및 공지사항
-
-
 INSERT INTO announcement_sections (invitation_id, title, content, display_order, created_at) VALUES
 (1, '주차 안내', '건물 지하 주차장을 이용해 주세요. 3시간 무료 주차가 가능합니다.', 1, CURRENT_TIMESTAMP),
 (1, '준비물', '만원 이하의 소소한 선물을 준비해 주세요. 랜덤 선물 교환식이 있습니다!', 2, CURRENT_TIMESTAMP),

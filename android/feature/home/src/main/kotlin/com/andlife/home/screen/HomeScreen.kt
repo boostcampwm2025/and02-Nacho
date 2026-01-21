@@ -528,30 +528,29 @@ fun LazyListScope.homeGuestBookSection(
                         title = stringResource(R.string.txt_empty_new_post_desc),
                     )
                 }
-            }
-        }
-        else -> {
-            items(
-                count = guestBooks.itemCount,
-                key = { index ->
-                    val id = guestBooks.itemKey { it.id }.invoke(index)
-                    "$GUESTBOOK_KEY_PREFIX$id"
-                },
-            ) { index ->
-                guestBooks[index]?.let { guestBook ->
-                    GuestBookItem(
-                        modifier = Modifier.animateItem(),
-                        guestBook = guestBook,
-                        videoPlayerPool = videoPlayerPool,
-                        shouldPlayVideo = (index == playVideoIndex),
-                        isAudioPlaying = uiState.isAudioPlaying &&
-                            guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
-                        onInvitationTitleClick = { onInvitationTitleClick(guestBook.invitation?.id ?: -1L) },
-                        playingAudioUrl = uiState.playingAudioUrl,
-                        onVisualMediaClick = { onVisualMediaClick(it.url) },
-                        onAudioMediaClick = { onAudioMediaClick(it.url) },
-                        onMenuClick = { },
-                    )
+            } else {
+                items(
+                    count = guestBooks.itemCount,
+                    key = { index ->
+                        val id = guestBooks.itemKey { it.id }.invoke(index)
+                        "$GUESTBOOK_KEY_PREFIX$id"
+                    },
+                ) { index ->
+                    guestBooks[index]?.let { guestBook ->
+                        GuestBookItem(
+                            modifier = Modifier.animateItem(),
+                            guestBook = guestBook,
+                            videoPlayerPool = videoPlayerPool,
+                            shouldPlayVideo = (index == playVideoIndex),
+                            isAudioPlaying = uiState.isAudioPlaying &&
+                                guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
+                            onInvitationTitleClick = { onInvitationTitleClick(guestBook.invitation?.id ?: -1L) },
+                            playingAudioUrl = uiState.playingAudioUrl,
+                            onVisualMediaClick = { onVisualMediaClick(it.url) },
+                            onAudioMediaClick = { onAudioMediaClick(it.url) },
+                            onMenuClick = { },
+                        )
+                    }
                 }
             }
         }
