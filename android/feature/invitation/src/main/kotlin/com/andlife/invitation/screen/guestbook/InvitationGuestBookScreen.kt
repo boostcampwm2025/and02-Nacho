@@ -3,7 +3,10 @@ package com.andlife.invitation.screen.guestbook
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -16,6 +19,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -27,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -37,10 +43,12 @@ import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.andlife.designsystem.component.dialog.NachoDialog
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.invitation.R
 import com.andlife.invitation.model.guestbook.InvitationGuestBookSideEffect
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiEvent
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiState
@@ -73,8 +81,11 @@ fun InvitationGuestBookRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val guestBooks = viewModel.guestBooksPagingFlow.collectAsLazyPagingItems()
-    val snackbarHostState = remember { SnackbarHostState() }
+
     val lifecycleOwner = LocalLifecycleOwner.current
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    var showDeleteDialog by remember { mutableStateOf<Long?>(null) }
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
@@ -87,6 +98,14 @@ fun InvitationGuestBookRoute(
 
             is InvitationGuestBookSideEffect.CreateGuestBookSuccess -> {
                 guestBooks.refresh()
+            }
+
+            is InvitationGuestBookSideEffect.UpdateGuestBookSuccess -> {
+                guestBooks.refresh() // TODO: 이거 부분만 업데이트하도록 변경하기. 지금은 전체 새로고침
+            }
+
+            is InvitationGuestBookSideEffect.DeleteGuestBookSuccess -> {
+                guestBooks.refresh() // TODO: 이거 부분만 업데이트하도록 변경하기. 지금은 전체 새로고침
             }
         }
     }
@@ -123,6 +142,57 @@ fun InvitationGuestBookRoute(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
+    if (showDeleteDialog != null) {
+        NachoDialog(
+            onDismiss = { showDeleteDialog = null }
+        ) {
+            Column(
+                modifier = Modifier.padding(NachoSpacing.xLarge),
+                verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
+            ) {
+                Text(
+                    text = stringResource(R.string.txt_delete_dialog_title),
+                    color = NachoTheme.colorScheme.textPrimary,
+                    style = NachoTheme.typography.headingSmallSemiBold,
+                )
+                Spacer(modifier = Modifier.padding(NachoSpacing.xSmall))
+                Text(
+                    text = stringResource(R.string.txt_delete_dialog_message),
+                    color = NachoTheme.colorScheme.textSecondary,
+                    style = NachoTheme.typography.bodyMediumRegular,
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    TextButton(
+                        onClick = { showDeleteDialog = null }
+                    ) {
+                        Text(
+                            text = stringResource(R.string.btn_label_cancel),
+                            color = NachoTheme.colorScheme.textPrimary,
+                            style = NachoTheme.typography.bodyMediumSemiBold,
+                        )
+                    }
+                    TextButton(
+                        onClick = {
+                            showDeleteDialog?.let { guestBookId ->
+                                viewModel.onEvent(InvitationGuestBookUiEvent.ClickDeleteMenu(guestBookId))
+                            }
+                            showDeleteDialog = null
+                        }
+                    ) {
+                        Text(
+                            text = stringResource(R.string.btn_label_delete),
+                            color = NachoTheme.colorScheme.brandDark,
+                            style = NachoTheme.typography.bodyMediumSemiBold,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     InvitationGuestBookScreen(
         uiState = uiState,
         guestBooks = guestBooks,
@@ -130,6 +200,7 @@ fun InvitationGuestBookRoute(
         onNavigateBack = onNavigateBack,
         snackbarHostState = snackbarHostState,
         videoPlayerPool = viewModel.videoPlayerPool,
+        onDeleteMenuClick = { guestBookId -> showDeleteDialog = guestBookId },
         modifier = modifier,
     )
 }
@@ -142,6 +213,7 @@ private fun InvitationGuestBookScreen(
     snackbarHostState: SnackbarHostState,
     videoPlayerPool: AutoVideoPlayerPool,
     onNavigateBack: () -> Unit,
+    onDeleteMenuClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val lazyListState = rememberLazyListState()
@@ -289,6 +361,7 @@ private fun InvitationGuestBookScreen(
                                 playingAudioUrl = uiState.playingAudioUrl,
                                 isEditing = uiState.editingGuestBookId == guestBook.id,
                                 onEditClick = { onEvent(InvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
+                                onDeleteClick = { onDeleteMenuClick(guestBook.id) },
                                 onVisualMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
                                 onAudioMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
                                 onMenuClick = { onEvent(InvitationGuestBookUiEvent.ClickGuestBookMenu(guestBook.id)) },
@@ -357,6 +430,7 @@ private fun InvitationGuestBookEmptyPreview() {
             onNavigateBack = {},
             videoPlayerPool = FakeVideoPlayerPool(),
             snackbarHostState = SnackbarHostState(),
+            onDeleteMenuClick = {},
         )
     }
 }

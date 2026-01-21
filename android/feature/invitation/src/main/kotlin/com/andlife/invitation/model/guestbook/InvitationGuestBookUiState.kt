@@ -18,6 +18,7 @@ data class InvitationGuestBookUiState(
     val isAudioPlaying: Boolean = false,
     val editingGuestBookId: Long? = null,
     val isLoadingGuestBooks: Boolean = false,
+    val deleteTargetId: Long? = null,
     val guestBooksErrorMessage: String? = null,
 ) : BaseUiState {
 

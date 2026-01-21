@@ -42,4 +42,8 @@ sealed interface InvitationGuestBookUiEvent : BaseUiEvent {
     ) : InvitationGuestBookUiEvent
 
     data object CancelEdit : InvitationGuestBookUiEvent
+
+    data class ClickDeleteMenu(
+        val guestBookId: Long,
+    ) : InvitationGuestBookUiEvent
 }

@@ -15,6 +15,8 @@ import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
 import com.andlife.domain.util.Result
+import com.andlife.domain.util.onFailure
+import com.andlife.domain.util.onSuccess
 import com.andlife.invitation.InvitationDetail
 import com.andlife.invitation.model.guestbook.InvitationGuestBookSideEffect
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiEvent
@@ -116,6 +118,8 @@ constructor(
 
             is InvitationGuestBookUiEvent.ClickEditMenu -> startEditing(event.guestBook)
             is InvitationGuestBookUiEvent.CancelEdit -> {}
+
+            is InvitationGuestBookUiEvent.ClickDeleteMenu -> deleteGuestBook(event.guestBookId)
         }
     }
 
@@ -302,5 +306,15 @@ constructor(
 
             is Result.Error -> sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("실패: ${result.message}"))
         }
+    }
+
+    private fun deleteGuestBook(guestBookId: Long) = viewModelScope.launch {
+        guestBookRepository.deleteGuestBook(guestBookId)
+            .onSuccess { deletedId ->
+                sendEffect(InvitationGuestBookSideEffect.DeleteGuestBookSuccess)
+            }
+            .onFailure {
+                sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("방명록 삭제를 실패하였습니다."))
+            }
     }
 }
