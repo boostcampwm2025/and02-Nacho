@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -98,8 +100,12 @@ fun HomeRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val upcomingInvitations = viewModel.upcomingInvitationsPagingFlow.collectAsLazyPagingItems()
     val guestBooks = viewModel.guestBooksPagingFlow.collectAsLazyPagingItems()
-    val snackbarHostState = remember { SnackbarHostState() }
+
     val lifecycleOwner = LocalLifecycleOwner.current
+    val lazyListState = rememberLazyListState()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
@@ -107,8 +113,26 @@ fun HomeRoute(
             is HomeSideEffect.NavigateToInvitationDetail -> onNavigateToInvitationDetail(effect.invitationId)
             is HomeSideEffect.NavigateToSetting -> onNavigateToSetting()
             is HomeSideEffect.NavigateToCreate -> onNavigateToCreate()
-            is HomeSideEffect.RefreshGuestBook -> guestBooks.refresh()
-            is HomeSideEffect.RefreshUpcomingInvitation -> upcomingInvitations.refresh()
+            is HomeSideEffect.ScrollToTop -> {
+                lazyListState.animateScrollToItem(0)
+            }
+            is HomeSideEffect.RefreshSuccess -> {
+                snackbarHostState.showSnackbar(context.getString(R.string.snack_refresh_success))
+            }
+            is HomeSideEffect.RefreshFailure -> {
+                snackbarHostState.showSnackbar(context.getString(R.string.snack_refresh_failure))
+            }
+        }
+    }
+
+    LaunchedEffect(upcomingInvitations.loadState.refresh, guestBooks.loadState.refresh) {
+        val upcomingState = upcomingInvitations.loadState.refresh
+        val guestBookState = guestBooks.loadState.refresh
+
+        if (upcomingState !is LoadState.Loading && guestBookState !is LoadState.Loading) {
+            viewModel.onRefreshFinished(
+                hasError = upcomingState is LoadState.Error || guestBookState is LoadState.Error
+            )
         }
     }
 
@@ -150,6 +174,7 @@ fun HomeRoute(
         guestBooks = guestBooks,
         onEvent = viewModel::onEvent,
         snackbarHostState = snackbarHostState,
+        lazyListState = lazyListState,
         videoPlayerPool = viewModel.videoPlayerPool,
         modifier = modifier,
     )
@@ -163,10 +188,10 @@ fun HomeScreen(
     guestBooks: LazyPagingItems<GuestBookUiModel>,
     onEvent: (HomeUiEvent) -> Unit,
     snackbarHostState: SnackbarHostState,
+    lazyListState: LazyListState,
     videoPlayerPool: AutoVideoPlayerPool,
     modifier: Modifier = Modifier,
 ) {
-    val lazyListState = rememberLazyListState()
     var playVideoIndex by remember { mutableStateOf(-1) }
 
     LaunchedEffect(lazyListState, guestBooks.itemCount, uiState.isAudioPlaying) {
@@ -184,14 +209,20 @@ fun HomeScreen(
 
                 val videoCandidates = visibleItems.mapNotNull { itemInfo ->
                     val itemKey = itemInfo.key.toString()
-                    if (!itemKey.startsWith("guestbook_")) return@mapNotNull null
-                    val guestBookId = itemKey.removePrefix("guestbook_").toLongOrNull() ?: return@mapNotNull null
+                    if (!itemKey.startsWith(GUESTBOOK_KEY_PREFIX)) return@mapNotNull null
+                    val guestBookId =
+                        itemKey.removePrefix(GUESTBOOK_KEY_PREFIX).toLongOrNull() ?: return@mapNotNull null
 
                     val guestBookIndex = (0 until guestBooks.itemCount).find {
                         guestBooks.peek(it)?.id == guestBookId
                     } ?: return@mapNotNull null
 
-                    val guestBook = guestBooks.peek(guestBookIndex)
+                    val guestBook = try {
+                        guestBooks.peek(guestBookIndex)
+                    } catch (e: Exception) {
+                        null
+                    }
+
                     val hasVideo = guestBook?.visualMedias?.any { it.type == MediaUiType.VIDEO } == true
                     if (!hasVideo) return@mapNotNull null
 
@@ -235,15 +266,6 @@ fun HomeScreen(
             }
     }
 
-    LaunchedEffect(guestBooks.loadState.refresh) {
-        if (guestBooks.loadState.refresh is LoadState.NotLoading) {
-            if (guestBooks.itemCount > 0) {
-                lazyListState.animateScrollToItem(0)
-            }
-            playVideoIndex = -1
-        }
-    }
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = {
@@ -260,7 +282,11 @@ fun HomeScreen(
 
         PullToRefreshBox(
             isRefreshing = uiState.isRefreshing,
-            onRefresh = { onEvent(HomeUiEvent.Refresh) },
+            onRefresh = {
+                upcomingInvitations.refresh()
+                guestBooks.refresh()
+                onEvent(HomeUiEvent.Refresh)
+            },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = paddingValues.calculateTopPadding()),
@@ -278,7 +304,10 @@ fun HomeScreen(
                 homeUpcomingSection(
                     upcomingInvitations = upcomingInvitations,
                     onInvitationClick = { id -> onEvent(HomeUiEvent.ClickUpcomingInvitation(id)) },
-                    onRetryClick = { onEvent(HomeUiEvent.RetryUpcomingLoad) },
+                    onRetryClick = {
+                        upcomingInvitations.retry()
+                        onEvent(HomeUiEvent.Retry)
+                    },
                     onNavigateToCreate = { onEvent(HomeUiEvent.ClickCreate) },
                 )
 
@@ -287,7 +316,10 @@ fun HomeScreen(
                     uiState = uiState,
                     playVideoIndex = playVideoIndex,
                     videoPlayerPool = videoPlayerPool,
-                    onRetryClick = { onEvent(HomeUiEvent.RetryGuestBookLoad) },
+                    onRetryClick = {
+                        guestBooks.retry()
+                        onEvent(HomeUiEvent.Retry)
+                    },
                     onInvitationTitleClick = { id -> onEvent(HomeUiEvent.ClickInvitationTitle(id)) },
                     onVisualMediaClick = { url -> onEvent(HomeUiEvent.ClickVisualMedia(url)) },
                     onAudioMediaClick = { url -> onEvent(HomeUiEvent.ClickAudioMedia(url)) },
@@ -348,6 +380,12 @@ fun LazyListScope.homeUpcomingSection(
     onRetryClick: () -> Unit,
     onNavigateToCreate: () -> Unit,
 ) {
+    val refreshState = upcomingInvitations.loadState.refresh
+
+    val isInitialLoading = refreshState is LoadState.Loading && upcomingInvitations.itemCount == 0
+    val isInitialError = refreshState is LoadState.Error && upcomingInvitations.itemCount == 0
+    val isEmpty = refreshState is LoadState.NotLoading && upcomingInvitations.itemCount == 0
+
     item {
         Text(
             text = stringResource(R.string.txt_title_upcoming_schedule),
@@ -357,14 +395,14 @@ fun LazyListScope.homeUpcomingSection(
                 .padding(top = NachoSpacing.large),
         )
     }
-    val refreshState = upcomingInvitations.loadState.refresh
 
     item {
-        when(refreshState) {
-            is LoadState.Loading -> {
+        when {
+            isInitialLoading -> {
                 UpcomingStatusCard(isLoading = true)
             }
-            is LoadState.Error -> {
+
+            isInitialError -> {
                 UpcomingStatusCard(
                     title = stringResource(R.string.txt_error_upcoming_title),
                     description = stringResource(R.string.txt_error_upcoming_desc),
@@ -372,39 +410,40 @@ fun LazyListScope.homeUpcomingSection(
                     onButtonClick = onRetryClick,
                 )
             }
-            is LoadState.NotLoading -> {
-                if (upcomingInvitations.itemCount == 0) {
-                    UpcomingStatusCard(
-                        title = stringResource(R.string.txt_empty_upcoming_title),
-                        description = stringResource(R.string.txt_empty_upcoming_desc),
-                        buttonText = stringResource(R.string.txt_action_create_invitation),
-                        onButtonClick = onNavigateToCreate,
-                        buttonIconRes = com.andlife.ui.R.drawable.ic_add_24
-                    )
-                } else {
-                    LazyRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
-                        contentPadding = PaddingValues(bottom = NachoSpacing.small)
-                    ) {
-                        items(
-                            count = upcomingInvitations.itemCount,
-                            key = upcomingInvitations.itemKey { it.id }
-                        ) { index ->
-                            upcomingInvitations[index]?.let { invitation ->
-                                val dDayText = remember(invitation.startTime.date) {
-                                    invitation.startTime.date.toDDayText()
-                                }
-                                InvitationScheduleListItem(
-                                    modifier = Modifier.fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO),
-                                    imageUrl = invitation.thumbnailUrl,
-                                    title = invitation.title,
-                                    startTime = invitation.startTime.toDateTimeSingleLine(),
-                                    hostName = invitation.hostInfo.name,
-                                    dDayText = dDayText,
-                                    onClick = { onInvitationClick(invitation.id) },
-                                )
+
+            isEmpty -> {
+                UpcomingStatusCard(
+                    title = stringResource(R.string.txt_empty_upcoming_title),
+                    description = stringResource(R.string.txt_empty_upcoming_desc),
+                    buttonText = stringResource(R.string.txt_action_create_invitation),
+                    onButtonClick = onNavigateToCreate,
+                    buttonIconRes = com.andlife.ui.R.drawable.ic_add_24
+                )
+            }
+
+            else -> {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
+                    contentPadding = PaddingValues(bottom = NachoSpacing.small)
+                ) {
+                    items(
+                        count = upcomingInvitations.itemCount,
+                        key = upcomingInvitations.itemKey { it.id }
+                    ) { index ->
+                        upcomingInvitations[index]?.let { invitation ->
+                            val dDayText = remember(invitation.startTime.date) {
+                                invitation.startTime.date.toDDayText()
                             }
+                            InvitationScheduleListItem(
+                                modifier = Modifier.fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO),
+                                imageUrl = invitation.thumbnailUrl,
+                                title = invitation.title,
+                                startTime = invitation.startTime.toDateTimeSingleLine(),
+                                hostName = invitation.hostInfo.name,
+                                dDayText = dDayText,
+                                onClick = { onInvitationClick(invitation.id) },
+                            )
                         }
                     }
                 }
@@ -512,13 +551,19 @@ fun LazyListScope.homeGuestBookSection(
     }
 
     val refreshState = guestBooks.loadState.refresh
-    when (refreshState) {
-        is LoadState.Loading -> {
+
+    val isInitialLoading = refreshState is LoadState.Loading && guestBooks.itemCount == 0
+    val isInitialError = refreshState is LoadState.Error && guestBooks.itemCount == 0
+    val isEmpty = refreshState is LoadState.NotLoading && guestBooks.itemCount == 0
+
+    when {
+        isInitialLoading -> {
             item {
                 GuestBookStatusCard(isLoading = true)
             }
         }
-        is LoadState.Error -> {
+
+        isInitialError -> {
             item {
                 GuestBookStatusCard(
                     title = stringResource(R.string.error_msg_failed_load_post),
@@ -527,41 +572,41 @@ fun LazyListScope.homeGuestBookSection(
                 )
             }
         }
-        is LoadState.NotLoading -> {
-            if (guestBooks.itemCount == 0) {
-                item {
-                    GuestBookStatusCard(
-                        title = stringResource(R.string.txt_empty_new_post_desc),
+
+        isEmpty -> {
+            item {
+                GuestBookStatusCard(
+                    title = stringResource(R.string.txt_empty_new_post_desc),
+                )
+            }
+        }
+
+        else -> {
+            items(
+                count = guestBooks.itemCount,
+                key = { index ->
+                    val id = guestBooks.itemKey { it.id }.invoke(index)
+                    "$GUESTBOOK_KEY_PREFIX$id"
+                },
+            ) { index ->
+                guestBooks[index]?.let { guestBook ->
+                    GuestBookItem(
+                        modifier = Modifier.animateItem(),
+                        guestBook = guestBook,
+                        videoPlayerPool = videoPlayerPool,
+                        shouldPlayVideo = (index == playVideoIndex),
+                        isAudioPlaying = uiState.isAudioPlaying &&
+                            guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
+                        onInvitationTitleClick = { onInvitationTitleClick(guestBook.invitation?.id ?: -1L) },
+                        playingAudioUrl = uiState.playingAudioUrl,
+                        onVisualMediaClick = { onVisualMediaClick(it.url) },
+                        onAudioMediaClick = { onAudioMediaClick(it.url) },
+                        onMenuClick = { },
                     )
-                }
-            } else {
-                items(
-                    count = guestBooks.itemCount,
-                    key = { index ->
-                        val id = guestBooks.itemKey { it.id }.invoke(index)
-                        "$GUESTBOOK_KEY_PREFIX$id"
-                    },
-                ) { index ->
-                    guestBooks[index]?.let { guestBook ->
-                        GuestBookItem(
-                            modifier = Modifier.animateItem(),
-                            guestBook = guestBook,
-                            videoPlayerPool = videoPlayerPool,
-                            shouldPlayVideo = (index == playVideoIndex),
-                            isAudioPlaying = uiState.isAudioPlaying &&
-                                guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
-                            onInvitationTitleClick = { onInvitationTitleClick(guestBook.invitation?.id ?: -1L) },
-                            playingAudioUrl = uiState.playingAudioUrl,
-                            onVisualMediaClick = { onVisualMediaClick(it.url) },
-                            onAudioMediaClick = { onAudioMediaClick(it.url) },
-                            onMenuClick = { },
-                        )
-                    }
                 }
             }
         }
     }
-
     if (guestBooks.loadState.append is LoadState.Loading) {
         item {
             Box(
@@ -634,6 +679,7 @@ private fun HomeScreenPreview() {
             override fun getPlayer(url: String): AutoVideoPlayer {
                 throw UnsupportedOperationException("Preview 전용")
             }
+
             override fun playPlayer(url: String, itemId: Long) {}
             override fun pausePlayer(url: String) {}
             override fun pauseAllPlayers() {}
@@ -644,7 +690,7 @@ private fun HomeScreenPreview() {
     }
     val emptyUpcomingInvitations = flowOf(PagingData.empty<UpcomingInvitationUiModel>()).collectAsLazyPagingItems()
     val emptyGuestBooks = flowOf(PagingData.empty<GuestBookUiModel>()).collectAsLazyPagingItems()
-
+    val lazyListState = rememberLazyListState()
 
     NachoTheme {
         HomeScreen(
@@ -654,6 +700,7 @@ private fun HomeScreenPreview() {
             onEvent = {},
             snackbarHostState = SnackbarHostState(),
             videoPlayerPool = fakeVideoPlayerPool,
+            lazyListState = lazyListState,
         )
     }
 }

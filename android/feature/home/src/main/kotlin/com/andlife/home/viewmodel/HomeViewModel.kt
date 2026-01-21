@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -85,10 +84,9 @@ class HomeViewModel @Inject constructor(
             is HomeUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
             is HomeUiEvent.ClickSetting -> navigateToSetting()
             is HomeUiEvent.ClickCreate -> navigateToCreate()
-            is HomeUiEvent.RetryUpcomingLoad -> retryUpcomingLoad()
-            is HomeUiEvent.RetryGuestBookLoad -> retryUpGuestBookLoad()
-            is HomeUiEvent.Refresh -> refresh()
             is HomeUiEvent.ClickUpcomingInvitation -> navigateToDetail(event.invitationId)
+            is HomeUiEvent.Refresh -> refresh()
+            is HomeUiEvent.Retry -> retry()
         }
     }
 
@@ -121,22 +119,25 @@ class HomeViewModel @Inject constructor(
         sendEffect(HomeSideEffect.ShowMessage("$type 미디어 클릭됨: $url"))
     }
 
-    private fun retryUpcomingLoad() {
-        sendEffect(HomeSideEffect.RefreshUpcomingInvitation)
-
-    }
-    private fun retryUpGuestBookLoad() {
-        sendEffect(HomeSideEffect.RefreshGuestBook)
-    }
-
     private fun refresh() {
-        viewModelScope.launch {
-            updateState { copy(isRefreshing = true) }
+        updateState { copy(isRefreshing = true) }
+    }
 
-            sendEffect(HomeSideEffect.RefreshUpcomingInvitation)
-            sendEffect(HomeSideEffect.RefreshGuestBook)
+    private fun retry() {
+        updateState { copy(isRetry = true) }
+    }
 
-            updateState { copy(isRefreshing = false) }
+    fun onRefreshFinished(hasError: Boolean) {
+        val wasUserTriggered = uiState.value.isRefreshing || uiState.value.isRetry
+        updateState { copy(isRefreshing = false, isRetry = false) }
+
+        if (hasError) {
+            sendEffect(HomeSideEffect.RefreshFailure)
+        } else {
+            if (wasUserTriggered) {
+                sendEffect(HomeSideEffect.RefreshSuccess)
+                sendEffect(HomeSideEffect.ScrollToTop)
+            }
         }
     }
 }

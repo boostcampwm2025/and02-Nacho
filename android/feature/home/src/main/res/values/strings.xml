@@ -18,4 +18,7 @@
 
     <string name="txt_title_setting">설정</string>
     <string name="desc_top_bar_back">설정 뒤로가기 아이콘 버튼</string>
+
+    <string name="snack_refresh_success">새로운 소식을 불러왔어요</string>
+    <string name="snack_refresh_failure">잠시 후 다시 시도해 주세요</string>
 </resources>
