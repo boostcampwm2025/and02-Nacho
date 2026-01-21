@@ -4,6 +4,7 @@ import com.andlife.data.datasource.remote.invitation.InvitationRemoteDataSource
 import com.andlife.data.repository.invitation.mapper.toDomain
 import com.andlife.data.repository.invitation.mapper.toRequest
 import com.andlife.domain.error.DataError
+import com.andlife.domain.model.card.NachoCard
 import com.andlife.domain.model.invitation.CreateInvitationParam
 import com.andlife.domain.model.invitation.Invitation
 import com.andlife.domain.repository.invitation.InvitationRepository
@@ -27,4 +28,12 @@ internal class InvitationRepositoryImpl @Inject constructor(
         invitationRemoteDataSource.getInvitation(invitationId).map { response ->
             response.toDomain(json)
         }
+
+    override suspend fun createInvitationCard(
+        invitationId: Long,
+        card: NachoCard
+    ): Result<Long, DataError> {
+        val cardRequest = card.toRequest(json)
+        return invitationRemoteDataSource.createInvitationCard(invitationId, cardRequest)
+    }
 }
