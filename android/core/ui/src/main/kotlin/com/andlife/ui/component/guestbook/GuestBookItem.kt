@@ -39,7 +39,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
@@ -57,8 +55,8 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.media.video.AutoVideoPlayer
 import com.andlife.media.video.AutoVideoPlayerPool
-import com.andlife.media.video.AutoVideoPlayerPoolImpl
 import com.andlife.model.common.AuthorUiModel
 import com.andlife.model.guestbook.GuestBookInvitationUiModel
 import com.andlife.model.guestbook.GuestBookMediaUiModel
@@ -90,7 +88,7 @@ fun GuestBookItem(
     onInvitationTitleClick: (Long) -> Unit? = {},
 ) {
     val backgroundColor = if (isEditing) {
-        NachoTheme.colorScheme.backgroundBorder
+        NachoTheme.colorScheme.brandLight
     } else {
         NachoTheme.colorScheme.backgroundPrimary
     }
@@ -98,10 +96,8 @@ fun GuestBookItem(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(
-                color = backgroundColor,
-                shape = NachoTheme.shapes.medium,
-            ),
+            .background(backgroundColor)
+            .padding(horizontal = NachoSpacing.large),
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
         GuestBookItemHeader(
@@ -161,7 +157,9 @@ private fun GuestBookItemHeader(
     var isMenuExpanded by remember { mutableStateOf(false) }
 
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = NachoSpacing.large),
         horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -571,7 +569,7 @@ private fun GuestBookAudioItem(
             modifier
                 .fillMaxWidth()
                 .background(
-                    color = NachoTheme.colorScheme.brandLight,
+                    color = NachoTheme.colorScheme.backgroundSurface,
                     shape = NachoTheme.shapes.small,
                 )
                 .padding(NachoSpacing.large),
@@ -640,9 +638,7 @@ private fun GuestBookAudioItem(
 private fun GuestBookItemPreview() {
     NachoTheme {
         LazyColumn(
-            modifier =
-                Modifier
-                    .padding(NachoSpacing.large),
+            modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
         ) {
             item {
@@ -697,10 +693,74 @@ private fun GuestBookItemPreview() {
                             createdAt = LocalDateTime(2025, 6, 1, 12, 0),
                             updatedAt = LocalDateTime(2025, 6, 1, 12, 0),
                         ),
-                    videoPlayerPool = AutoVideoPlayerPoolImpl(LocalContext.current, CacheDataSource.Factory()),
+                    videoPlayerPool = FakeAutoVideoPlayerPool(),
                     shouldPlayVideo = false,
                     isAudioPlaying = true,
                     playingAudioUrl = null,
+                    isEditing = true,
+                    onInvitationTitleClick = {},
+                    onVisualMediaClick = {},
+                    onAudioMediaClick = {},
+                    onMenuClick = {},
+                    onEditClick = {},
+                    onDeleteClick = {},
+                )
+                GuestBookItem(
+                    guestBook =
+                        GuestBookUiModel(
+                            id = 1L,
+                            invitation =
+                                GuestBookInvitationUiModel(
+                                    id = 1001L,
+                                    title = "우리 결혼해요!",
+                                ),
+                            author =
+                                AuthorUiModel(
+                                    id = 5001L,
+                                    name = "홍길동",
+                                    profileImageUrl = null,
+                                ),
+                            textContent = "축하합니다!\n 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하합니다! 행복하세요!축하",
+                            visualMedias =
+                                listOf(
+                                    GuestBookMediaUiModel(
+                                        id = 1L,
+                                        type = MediaUiType.IMAGE,
+                                        url = "",
+                                        thumbnailUrl = "",
+                                        durationSeconds = 34,
+                                        displayOrder = 0,
+                                    ),
+                                    GuestBookMediaUiModel(
+                                        id = 2L,
+                                        type = MediaUiType.VIDEO,
+                                        url = "",
+                                        thumbnailUrl = "",
+                                        durationSeconds = 30,
+                                        displayOrder = 1,
+                                    ),
+                                ).toImmutableList(),
+                            audioMedias =
+                                listOf(
+                                    GuestBookMediaUiModel(
+                                        id = 3L,
+                                        type = MediaUiType.AUDIO,
+                                        url = "",
+                                        thumbnailUrl = "",
+                                        durationSeconds = 45,
+                                        displayOrder = 0,
+                                    ),
+                                ).toImmutableList(),
+                            totalVisualCount = 2,
+                            isOwner = true,
+                            createdAt = LocalDateTime(2025, 6, 1, 12, 0),
+                            updatedAt = LocalDateTime(2025, 6, 1, 12, 0),
+                        ),
+                    videoPlayerPool = FakeAutoVideoPlayerPool(),
+                    shouldPlayVideo = false,
+                    isAudioPlaying = false,
+                    playingAudioUrl = null,
+                    isEditing = false,
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},
                     onAudioMediaClick = {},
@@ -711,4 +771,18 @@ private fun GuestBookItemPreview() {
             }
         }
     }
+}
+
+class FakeAutoVideoPlayerPool : AutoVideoPlayerPool {
+    override fun preparePlayers() {}
+    override fun getPlayer(url: String): AutoVideoPlayer {
+        throw NotImplementedError("Not yet implemented")
+    }
+
+    override fun playPlayer(url: String, itemId: Long) {}
+    override fun pausePlayer(url: String) {}
+    override fun pauseAllPlayers() {}
+    override fun resumeLastPlayed() {}
+    override fun resetPool() {}
+    override fun releaseAllPlayers() {}
 }

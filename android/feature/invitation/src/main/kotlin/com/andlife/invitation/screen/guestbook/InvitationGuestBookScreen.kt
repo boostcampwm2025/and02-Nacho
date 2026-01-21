@@ -347,9 +347,7 @@ private fun InvitationGuestBookScreen(
                 LazyColumn(
                     state = lazyListState,
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
                     contentPadding = PaddingValues(
-                        top = NachoSpacing.large,
                         bottom = innerPadding.calculateBottomPadding()
                     )
                 ) {
@@ -360,7 +358,6 @@ private fun InvitationGuestBookScreen(
                         guestBooks[index]?.let { guestBook ->
                             GuestBookItem(
                                 modifier = Modifier
-                                    .fillMaxWidth()
                                     .animateItem(),
                                 guestBook = guestBook,
                                 videoPlayerPool = videoPlayerPool,
