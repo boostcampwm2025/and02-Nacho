@@ -16,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -174,16 +173,6 @@ fun InvitationGuestBookForm(
                 enabled = isSubmittable,
             ) {
                 Box(contentAlignment = Alignment.Center) {
-//                    Text(
-//                        text = stringResource(R.string.txt_submit),
-//                        color = if (isUploading) Color.Transparent else Color.Unspecified
-//                    )
-//                    if (isUploading) {
-//                        CircularProgressIndicator(
-//                            modifier = Modifier.size(NachoIconSize.small),
-//                            color = NachoTheme.colorScheme.textDisabled,
-//                        )
-//                    }
                     if (isUploading) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(NachoIconSize.small),
