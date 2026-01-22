@@ -46,6 +46,18 @@ class InvitationService(
         return invitationCardRepository.save(card).id
     }
 
+    @Transactional
+    fun updateInvitationCard(cardId: Long, request: InvitationCardRequest): Long {
+        val card = invitationCardRepository.findById(cardId)
+            .orElseThrow { NoSuchElementException("Invitation card not found: $cardId") }
+
+        card.contentJson = request.contentJson
+        card.backgroundColor = request.backgroundColor
+        card.backgroundImageUrl = request.backgroundImageUrl
+
+        return invitationCardRepository.save(card).id
+    }
+
     fun getInvitation(invitationId: Long): InvitationResponse {
         val invitation = invitationRepository.findByInvitationIdWithHost(invitationId)
             ?: throw NoSuchElementException("Invitation not found: $invitationId")

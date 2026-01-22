@@ -17,6 +17,7 @@ import org.springframework.data.web.PageableDefault
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -88,6 +89,24 @@ class InvitationController(
         } catch (e: IllegalStateException) {
             BaseResponse.error(
                 responseCode = CommonResponseCode.BAD_REQUEST,
+                customMessage = e.message
+            )
+        } catch (e: Exception) {
+            BaseResponse.error(responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    @PutMapping("/cards/{cardId}")
+    fun updateInvitationCard(
+        @PathVariable cardId: Long,
+        @RequestBody request: InvitationCardRequest
+    ): BaseResponse<Long> {
+        return try {
+            val updatedCardId = invitationService.updateInvitationCard(cardId, request)
+            BaseResponse.success(updatedCardId)
+        } catch (e: NoSuchElementException) {
+            BaseResponse.error(
+                responseCode = CommonResponseCode.NOT_FOUND,
                 customMessage = e.message
             )
         } catch (e: Exception) {
