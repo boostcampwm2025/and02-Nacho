@@ -93,6 +93,12 @@ fun GuestBookItem(
         NachoTheme.colorScheme.backgroundPrimary
     }
 
+    val maxTextLines = when {
+        guestBook.visualMedias.isNotEmpty() -> 2
+        guestBook.audioMedias.isNotEmpty() -> 4
+        else -> 6
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -111,6 +117,7 @@ fun GuestBookItem(
         GuestBookItemTextSection(
             invitation = guestBook.invitation,
             textContent = guestBook.textContent,
+            maxLines = maxTextLines,
             onInvitationTitleClick = onInvitationTitleClick,
         )
         GuestBookItemVisualMediaSection(
@@ -231,6 +238,7 @@ private fun GuestBookItemHeader(
 private fun GuestBookItemTextSection(
     invitation: GuestBookInvitationUiModel?,
     textContent: String,
+    maxLines: Int,
     onInvitationTitleClick: (Long) -> Unit?,
     modifier: Modifier = Modifier,
 ) {
@@ -281,7 +289,7 @@ private fun GuestBookItemTextSection(
                 text = textContent,
                 style = NachoTheme.typography.bodyMediumRegular,
                 color = NachoTheme.colorScheme.textPrimary,
-                maxLines = if (isExpanded) Int.MAX_VALUE else 2,
+                maxLines = if (isExpanded) Int.MAX_VALUE else maxLines,
                 overflow = TextOverflow.Ellipsis,
                 onTextLayout = { textLayoutResult ->
                     if (!isExpanded) {
