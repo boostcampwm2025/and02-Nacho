@@ -19,18 +19,14 @@ interface InvitationRepository : JpaRepository<Invitation, Long> {
     fun findByInvitationIdWithHost(@Param("invitationId") invitationId: Long): Invitation?
 
     @Query(
-        value = """
+        """
             SELECT DISTINCT i FROM Invitation i
             JOIN FETCH i.host
             LEFT JOIN InvitationParticipant ip ON i.id = ip.invitation.id
-            WHERE (i.host.id = :userId OR (ip IS NOT NULL AND ip.user.id = :userId))
-            AND i.invitationDate BETWEEN :today AND :limitDate
-        """,
-        countQuery = """
-            SELECT COUNT(DISTINCT i) FROM Invitation i
-            LEFT JOIN InvitationParticipant ip ON i.id = ip.invitation.id
-            WHERE (i.host.id = :userId OR (ip IS NOT NULL AND ip.user.id = :userId))
-            AND i.invitationDate BETWEEN :today AND :limitDate
+            WHERE (i.host.id = :userId OR ip.user.id = :userId)
+            AND i.invitationDate >= :today 
+            AND i.invitationDate <= :limitDate
+            ORDER BY i.invitationDate ASC, i.startTime ASC
         """
     )
     fun findUpcomingInvitationsWithinDays(
