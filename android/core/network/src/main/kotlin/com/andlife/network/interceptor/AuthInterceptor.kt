@@ -13,7 +13,8 @@ class AuthInterceptor @Inject constructor(
         val originalRequest = chain.request()
         val builder = originalRequest.newBuilder()
 
-        val userId = tokenProvider.getUserId()
+//        val userId = tokenProvider.getUserId()
+        val userId = 1L
         val invitationIds = tokenProvider.getInvitationIds()
 
         if (userId != null) {

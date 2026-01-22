@@ -2,6 +2,8 @@ package com.andlife.invitation.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import com.andlife.domain.model.invitation.InvitationSummary
 import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.domain.repository.user.UserRepository
 import com.andlife.domain.util.onFailure
@@ -12,6 +14,7 @@ import com.andlife.invitation.model.InvitationUiState
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onStart
@@ -26,6 +29,11 @@ class InvitationViewModel @Inject constructor(
 ) : BaseViewModel<InvitationUiState, InvitationUiEvent, InvitationSideEffect>(
     initialState = InvitationUiState()
 ) {
+    val upcomingInvitationPagingFlow: Flow<PagingData<InvitationSummary>> = TODO()
+
+    val pastInvitationPagingFlow: Flow<PagingData<InvitationSummary>> = TODO()
+
+
     override val uiState: StateFlow<InvitationUiState> =
         mutableUiState
             .onStart {
@@ -41,10 +49,11 @@ class InvitationViewModel @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    private fun loadInvitations() {
+    private fun loadInvitations(status: String) {
         viewModelScope.launch {
             // 로그인
-            userRepository.saveUserId(1L)
+//            userRepository.saveUserId(1L)
+//            userRepository.clearUserSession()
 
             invitationRepository.getParticipantInvitations()
                 .onSuccess { ids ->
