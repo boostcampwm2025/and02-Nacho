@@ -81,7 +81,7 @@ class CreateByInvitationViewModel @Inject constructor(
                     Log.d("CreateByInvitationViewModel", "createCard: success")
                     sendEffect(CreateByInvitationSideEffect.SuccessCreateCard)
                 }
-                .onFailure {
+                .onFailure { error, msg ->
                     Log.d("CreateByInvitationViewModel", "Fail: success")
                     sendEffect(CreateByInvitationSideEffect.FailCreateCard)
                 }
