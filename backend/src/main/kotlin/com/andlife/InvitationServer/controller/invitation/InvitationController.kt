@@ -1,6 +1,5 @@
 package com.andlife.InvitationServer.controller.invitation
 
-import com.andlife.InvitationServer.auth.AuthContext
 import com.andlife.InvitationServer.request.invitation.CreateInvitationRequest
 import com.andlife.InvitationServer.auth.AuthContext
 import com.andlife.InvitationServer.request.invitation.guestbook.GuestBookRequest
@@ -62,9 +61,10 @@ class InvitationController(
     @GetMapping("/{invitationId}/guestbooks")
     fun getGuestBooks(
         @PathVariable invitationId: Long,
+        authContext: AuthContext,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): BaseResponse<PagingResponse<GuestBookResponse>> {
-        val result = guestBookService.getGuestBooks(invitationId, pageable)
+        val result = guestBookService.getGuestBooks(invitationId, pageable, authContext)
         return BaseResponse.success(result)
     }
 
