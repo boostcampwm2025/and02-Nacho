@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 data class UpcomingInvitationResponse(
     val id: Long,
     val hostId: Long,
+    val isOwner: Boolean,
     val title: String,
     val thumbnailUrl: String?,
     val invitationDate: String,

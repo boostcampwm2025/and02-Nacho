@@ -186,9 +186,10 @@ class InvitationService(
         val today = LocalDate.now()
         val limitDate = today.plusDays(days)
 
+        val currentUserId = (authContext as? AuthContext.Member)?.userId
+
         val upcomingInvitationsPage = when (authContext) {
             is AuthContext.Member -> {
-                println("DEBUG: today=$today, limitDate=$limitDate, userId=${authContext.userId}")
                 invitationRepository.findUpcomingInvitationsWithinDays(
                     userId = authContext.userId,
                     today = today,
@@ -206,6 +207,7 @@ class InvitationService(
                 UpcomingInvitationResponse(
                     id = invitation.id,
                     hostId = invitation.host.id,
+                    isOwner = invitation.host.id == currentUserId,
                     title = invitation.title,
                     thumbnailUrl = invitation.thumbnailUrls.firstOrNull(),
                     invitationDate = invitation.invitationDate.toString(),

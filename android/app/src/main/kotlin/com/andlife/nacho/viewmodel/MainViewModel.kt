@@ -3,7 +3,6 @@ package com.andlife.nacho.viewmodel
 import android.content.Intent
 import androidx.lifecycle.viewModelScope
 import com.andlife.deeplink.DeepLinkManager
-import com.andlife.domain.repository.user.UserRepository
 import com.andlife.nacho.model.MainSideEffect
 import com.andlife.nacho.model.MainUiEvent
 import com.andlife.nacho.model.MainUiState
@@ -15,26 +14,17 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
     val deepLinkManager: DeepLinkManager,
-    private val userRepository: UserRepository,
 ) : BaseViewModel<MainUiState, MainUiEvent, MainSideEffect>(
     initialState = MainUiState,
 ) {
     private var lastProcessedId: String? = null
 
     override val uiState: StateFlow<MainUiState> = mutableUiState.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            // TODO: 테스트 사용자 1L
-            userRepository.saveUserId(1L)
-        }
-    }
 
     override fun onEvent(event: MainUiEvent) {
         // No events yet

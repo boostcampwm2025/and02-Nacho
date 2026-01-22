@@ -6,12 +6,12 @@ sealed interface HomeUiEvent : BaseUiEvent {
 
     data class ClickUpcomingInvitation(
         val invitationId: Long,
-        val hostId: Long,
+        val isOwner: Boolean,
     ) : HomeUiEvent
 
     data class ClickInvitationTitle(
         val invitationId: Long,
-        val hostId: Long,
+        val isOwner: Boolean,
     ) : HomeUiEvent
 
     data class ClickVisualMedia(

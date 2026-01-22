@@ -6,7 +6,6 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.repository.invitation.InvitationRepository
-import com.andlife.domain.repository.user.UserRepository
 import com.andlife.home.model.HomeSideEffect
 import com.andlife.home.model.HomeUiEvent
 import com.andlife.home.model.HomeUiState
@@ -32,14 +31,9 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val guestBookRepository: GuestBookRepository,
     private val invitationRepository: InvitationRepository,
-    private val userRepository: UserRepository,
     val audioPlayerManager: AudioPlayerManager,
     val videoPlayerPool: AutoVideoPlayerPool,
 ) : BaseViewModel<HomeUiState, HomeUiEvent, HomeSideEffect>(initialState = HomeUiState()) {
-
-    private val currentUserId: Long?
-        get() = userRepository.getUserId()
-
     val upcomingInvitationsPagingFlow: Flow<PagingData<UpcomingInvitationUiModel>> =
         invitationRepository.getUpcomingInvitations()
             .map { pagingData ->
@@ -84,8 +78,8 @@ class HomeViewModel @Inject constructor(
 
     override fun onEvent(event: HomeUiEvent) {
         when (event) {
-            is HomeUiEvent.ClickUpcomingInvitation -> navigateToDetail(event.invitationId, event.hostId)
-            is HomeUiEvent.ClickInvitationTitle -> navigateToDetail(event.invitationId, event.hostId)
+            is HomeUiEvent.ClickUpcomingInvitation -> navigateToDetail(event.invitationId, event.isOwner)
+            is HomeUiEvent.ClickInvitationTitle -> navigateToDetail(event.invitationId, event.isOwner)
             is HomeUiEvent.ClickVisualMedia -> {}
             is HomeUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
             is HomeUiEvent.ClickSetting -> navigateToSetting()
@@ -108,9 +102,8 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun navigateToDetail(invitationId: Long, hostId: Long) {
-        val isMyInvitation = currentUserId == hostId
-        if (isMyInvitation) {
+    private fun navigateToDetail(invitationId: Long, isOwner: Boolean) {
+        if (isOwner) {
             sendEffect(HomeSideEffect.NavigateToMyInvitationDetail(invitationId))
         } else {
             sendEffect(HomeSideEffect.NavigateToInvitationDetail(invitationId))

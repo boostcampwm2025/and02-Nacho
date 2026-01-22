@@ -6,6 +6,7 @@ import kotlinx.datetime.LocalTime
 data class UpcomingInvitation(
     val id: Long,
     val hostId: Long,
+    val isOwner: Boolean,
     val title: String,
     val thumbnailUrl: String?,
     val invitationDate: LocalDate,

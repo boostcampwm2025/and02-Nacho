@@ -6,6 +6,7 @@ fun UpcomingInvitation.toUpcomingInvitationUiModel(): UpcomingInvitationUiModel 
     return UpcomingInvitationUiModel(
         id = id,
         hostId = hostId,
+        isOwner = isOwner,
         thumbnailUrl = thumbnailUrl ?: "",
         title = title,
         startTime = DateTimeInfo(

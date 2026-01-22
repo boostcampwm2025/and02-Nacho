@@ -63,6 +63,7 @@ fun UpcomingInvitationResponse.toDomain(): UpcomingInvitation {
     return UpcomingInvitation(
         id = id,
         hostId = hostId,
+        isOwner = isOwner,
         title = title,
         thumbnailUrl = thumbnailUrl,
         invitationDate = LocalDate.parse(invitationDate),

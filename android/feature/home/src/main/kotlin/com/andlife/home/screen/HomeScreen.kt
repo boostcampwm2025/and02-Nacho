@@ -329,8 +329,8 @@ fun HomeScreen(
                 if (isMediaActive) {
                     homeUpcomingSection(
                         upcomingInvitations = upcomingInvitations,
-                        onInvitationClick = { id, hostId ->
-                            onEvent(HomeUiEvent.ClickUpcomingInvitation(id, hostId))
+                        onInvitationClick = { id, isOwner ->
+                            onEvent(HomeUiEvent.ClickUpcomingInvitation(id, isOwner))
                         },
                         onRetryClick = {
                             upcomingInvitations.retry()
@@ -349,8 +349,8 @@ fun HomeScreen(
                             guestBooks.retry()
                             onEvent(HomeUiEvent.Retry)
                         },
-                        onInvitationTitleClick = { id, hostId ->
-                            onEvent(HomeUiEvent.ClickInvitationTitle(id, hostId))
+                        onInvitationTitleClick = { id, isOwner ->
+                            onEvent(HomeUiEvent.ClickInvitationTitle(id, isOwner))
                         },
                         onVisualMediaClick = { url -> onEvent(HomeUiEvent.ClickVisualMedia(url)) },
                         onAudioMediaClick = { url -> onEvent(HomeUiEvent.ClickAudioMedia(url)) },
@@ -408,7 +408,7 @@ private fun HomeTopBar(
 
 private fun LazyListScope.homeUpcomingSection(
     upcomingInvitations: LazyPagingItems<UpcomingInvitationUiModel>,
-    onInvitationClick: (invitationId: Long, hostId: Long) -> Unit,
+    onInvitationClick: (invitationId: Long, isOwner: Boolean) -> Unit,
     onRetryClick: () -> Unit,
     onNavigateToCreate: () -> Unit,
 ) {
@@ -496,7 +496,7 @@ private fun LazyListScope.homeUpcomingSection(
                                     startTime = invitation.startTime.toDateTimeSingleLine(),
                                     hostName = invitation.hostInfo.name,
                                     dDayText = dDayText,
-                                    onClick = { onInvitationClick(invitation.id, invitation.hostId) },
+                                    onClick = { onInvitationClick(invitation.id, invitation.isOwner) },
                                 )
                             }
                         }
@@ -562,7 +562,7 @@ private fun LazyListScope.homeGuestBookSection(
     playVideoIndex: Int,
     videoPlayerPool: AutoVideoPlayerPool,
     onRetryClick: () -> Unit,
-    onInvitationTitleClick: (invitationId: Long, hostId: Long) -> Unit,
+    onInvitationTitleClick: (invitationId: Long, isOwner: Boolean) -> Unit,
     onVisualMediaClick: (String) -> Unit,
     onAudioMediaClick: (String) -> Unit,
 ) {
@@ -615,7 +615,7 @@ private fun LazyListScope.homeGuestBookSection(
                     onInvitationTitleClick = {
                         onInvitationTitleClick(
                             guestBook.invitation?.id ?: -1L,
-                            guestBook.invitation?.hostId ?: -1L,
+                            guestBook.isOwner,
                         )
                     },
                     playingAudioUrl = uiState.playingAudioUrl,
