@@ -55,7 +55,7 @@ class InvitationDetailViewModel @Inject constructor(
                         invitationContentsUiModel = invitation.toContentsUiModel(),
                     )
                 }
-            }.onFailure {
+            }.onFailure { it, msg ->
                 updateState { copy(isLoading = false, isError = true) }
                 Log.e("InvitationDetailViewModel", "에러 발생: $it")
             }
