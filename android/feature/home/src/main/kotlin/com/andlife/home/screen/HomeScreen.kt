@@ -97,6 +97,7 @@ fun HomeRoute(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var isMediaActive by remember { mutableStateOf(true) }
     val upcomingInvitations = viewModel.upcomingInvitationsPagingFlow.collectAsLazyPagingItems()
     val guestBooks = viewModel.guestBooksPagingFlow.collectAsLazyPagingItems()
 
@@ -113,9 +114,21 @@ fun HomeRoute(
                 scope.launch { snackbarHostState.showSnackbar(effect.message) }
             }
 
-            is HomeSideEffect.NavigateToInvitationDetail -> onNavigateToInvitationDetail(effect.invitationId)
-            is HomeSideEffect.NavigateToSetting -> onNavigateToSetting()
-            is HomeSideEffect.NavigateToCreate -> onNavigateToCreate()
+            is HomeSideEffect.NavigateToInvitationDetail -> {
+                isMediaActive = false
+                onNavigateToInvitationDetail(effect.invitationId)
+            }
+
+            is HomeSideEffect.NavigateToSetting -> {
+                isMediaActive = false
+                onNavigateToSetting()
+            }
+
+            is HomeSideEffect.NavigateToCreate -> {
+                isMediaActive = false
+                onNavigateToCreate()
+            }
+
             is HomeSideEffect.ScrollToTop -> {
                 scope.launch { lazyListState.animateScrollToItem(0) }
             }
@@ -154,6 +167,7 @@ fun HomeRoute(
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
                     viewModel.videoPlayerPool.resumeLastPlayed()
+                    isMediaActive = true
                 }
 
                 Lifecycle.Event.ON_PAUSE -> {
@@ -175,6 +189,7 @@ fun HomeRoute(
 
     HomeScreen(
         uiState = uiState,
+        isMediaActive = isMediaActive,
         upcomingInvitations = upcomingInvitations,
         guestBooks = guestBooks,
         onEvent = viewModel::onEvent,
@@ -189,6 +204,7 @@ fun HomeRoute(
 @Composable
 fun HomeScreen(
     uiState: HomeUiState,
+    isMediaActive: Boolean,
     upcomingInvitations: LazyPagingItems<UpcomingInvitationUiModel>,
     guestBooks: LazyPagingItems<GuestBookUiModel>,
     onEvent: (HomeUiEvent) -> Unit,
@@ -199,10 +215,10 @@ fun HomeScreen(
 ) {
     var playVideoIndex by remember { mutableStateOf(-1) }
 
-    LaunchedEffect(lazyListState, guestBooks.itemCount, uiState.isAudioPlaying) {
+    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.isAudioPlaying) {
         var pendingIndex = -1
         var lastChangedTime = 0L
-        if (uiState.isAudioPlaying) {
+        if (!isMediaActive || uiState.isAudioPlaying) {
             playVideoIndex = -1
             return@LaunchedEffect
         }
@@ -315,6 +331,7 @@ fun HomeScreen(
                 )
 
                 homeGuestBookSection(
+                    isMediaActive = isMediaActive,
                     guestBooks = guestBooks,
                     uiState = uiState,
                     playVideoIndex = playVideoIndex,
@@ -527,6 +544,7 @@ private fun UpcomingStatusContent(
 }
 
 private fun LazyListScope.homeGuestBookSection(
+    isMediaActive: Boolean,
     guestBooks: LazyPagingItems<GuestBookUiModel>,
     uiState: HomeUiState,
     playVideoIndex: Int,
@@ -546,60 +564,62 @@ private fun LazyListScope.homeGuestBookSection(
         )
     }
 
-    val refreshState = guestBooks.loadState.refresh
-    val isInitialLoading = refreshState is LoadState.Loading && guestBooks.itemCount == 0
-    val isInitialError = refreshState is LoadState.Error && guestBooks.itemCount == 0
-    val isEmpty = refreshState is LoadState.NotLoading && guestBooks.itemCount == 0
+    if (isMediaActive) {
+        val refreshState = guestBooks.loadState.refresh
+        val isInitialLoading = refreshState is LoadState.Loading && guestBooks.itemCount == 0
+        val isInitialError = refreshState is LoadState.Error && guestBooks.itemCount == 0
+        val isEmpty = refreshState is LoadState.NotLoading && guestBooks.itemCount == 0
 
-    if (isInitialLoading || isInitialError || isEmpty) {
-        item {
-            GuestBookStatusContent(
-                modifier = Modifier.padding(horizontal = NachoSpacing.large),
-                isLoading = isInitialLoading,
-                title = when {
-                    isInitialError -> stringResource(R.string.error_msg_failed_load_post)
-                    isEmpty -> stringResource(R.string.txt_empty_new_post_desc)
-                    else -> null
-                },
-                buttonText = if (isInitialError) stringResource(R.string.txt_action_retry) else null,
-                onButtonClick = if (isInitialError) onRetryClick else null
-            )
-        }
-    } else {
-        items(
-            count = guestBooks.itemCount,
-            key = { index ->
-                val id = guestBooks.itemKey { it.id }.invoke(index)
-                "$GUESTBOOK_KEY_PREFIX$id"
-            },
-        ) { index ->
-            guestBooks[index]?.let { guestBook ->
-                GuestBookItem(
-                    modifier = Modifier.animateItem(),
-                    guestBook = guestBook,
-                    videoPlayerPool = videoPlayerPool,
-                    shouldPlayVideo = (index == playVideoIndex),
-                    isAudioPlaying = uiState.isAudioPlaying &&
-                        guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
-                    onInvitationTitleClick = { onInvitationTitleClick(guestBook.invitation?.id ?: -1L) },
-                    playingAudioUrl = uiState.playingAudioUrl,
-                    onVisualMediaClick = { onVisualMediaClick(it.url) },
-                    onAudioMediaClick = { onAudioMediaClick(it.url) },
-                    onMenuClick = { },
+        if (isInitialLoading || isInitialError || isEmpty) {
+            item {
+                GuestBookStatusContent(
+                    modifier = Modifier.padding(horizontal = NachoSpacing.large),
+                    isLoading = isInitialLoading,
+                    title = when {
+                        isInitialError -> stringResource(R.string.error_msg_failed_load_post)
+                        isEmpty -> stringResource(R.string.txt_empty_new_post_desc)
+                        else -> null
+                    },
+                    buttonText = if (isInitialError) stringResource(R.string.txt_action_retry) else null,
+                    onButtonClick = if (isInitialError) onRetryClick else null
                 )
             }
+        } else {
+            items(
+                count = guestBooks.itemCount,
+                key = { index ->
+                    val id = guestBooks.itemKey { it.id }.invoke(index)
+                    "$GUESTBOOK_KEY_PREFIX$id"
+                },
+            ) { index ->
+                guestBooks[index]?.let { guestBook ->
+                    GuestBookItem(
+                        modifier = Modifier.animateItem(),
+                        guestBook = guestBook,
+                        videoPlayerPool = videoPlayerPool,
+                        shouldPlayVideo = isMediaActive && (index == playVideoIndex),
+                        isAudioPlaying = uiState.isAudioPlaying &&
+                            guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
+                        onInvitationTitleClick = { onInvitationTitleClick(guestBook.invitation?.id ?: -1L) },
+                        playingAudioUrl = uiState.playingAudioUrl,
+                        onVisualMediaClick = { onVisualMediaClick(it.url) },
+                        onAudioMediaClick = { onAudioMediaClick(it.url) },
+                        onMenuClick = { },
+                    )
+                }
+            }
         }
-    }
 
-    if (guestBooks.loadState.append is LoadState.Loading) {
-        item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(NachoSpacing.large),
-                contentAlignment = Alignment.Center
-            ) {
-                InvitationLoadingIndicator()
+        if (guestBooks.loadState.append is LoadState.Loading) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(NachoSpacing.large),
+                    contentAlignment = Alignment.Center
+                ) {
+                    InvitationLoadingIndicator()
+                }
             }
         }
     }
@@ -679,6 +699,7 @@ private fun HomeScreenPreview() {
     NachoTheme {
         HomeScreen(
             uiState = HomeUiState(),
+            isMediaActive = false,
             upcomingInvitations = emptyUpcomingInvitations,
             guestBooks = emptyGuestBooks,
             onEvent = {},
