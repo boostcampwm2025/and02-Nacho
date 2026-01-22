@@ -15,5 +15,9 @@
     </string-array>
 
     <string name="snack_load_error_map">설치된 지도 앱이 없습니다.</string>
+    <string name="txt_delete_dialog_title">정말로 이 방명록을\n삭제하시겠습니까?</string>
+    <string name="txt_delete_dialog_message">삭제된 방명록은 복구할 수 없습니다.</string>
+    <string name="btn_label_cancel">취소</string>
+    <string name="btn_label_delete">삭제</string>
 </resources>
 

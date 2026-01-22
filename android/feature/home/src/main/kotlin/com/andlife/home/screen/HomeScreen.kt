@@ -1,5 +1,6 @@
 package com.andlife.home.screen
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -301,8 +302,6 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
                 contentPadding = PaddingValues(
                     bottom = paddingValues.calculateBottomPadding(),
-                    start = NachoSpacing.large,
-                    end = NachoSpacing.large,
                 ),
             ) {
                 homeUpcomingSection(
@@ -395,8 +394,8 @@ fun LazyListScope.homeUpcomingSection(
             text = stringResource(R.string.txt_title_upcoming_schedule),
             style = NachoTheme.typography.headingSmallSemiBold,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = NachoSpacing.large),
+                .padding(top = NachoSpacing.medium)
+                .padding(horizontal = NachoSpacing.large),
         )
     }
 
@@ -427,9 +426,11 @@ fun LazyListScope.homeUpcomingSection(
 
             else -> {
                 LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
-                    contentPadding = PaddingValues(bottom = NachoSpacing.small)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = NachoSpacing.large),
+                    horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
+                    //contentPadding = PaddingValues(NachoSpacing.large)
                 ) {
                     items(
                         count = upcomingInvitations.itemCount,
@@ -469,14 +470,15 @@ fun UpcomingStatusCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .wrapContentHeight(),
+            .wrapContentHeight()
+            .padding(horizontal = NachoSpacing.large),
         contentAlignment = Alignment.Center
     ) {
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
             userScrollEnabled = false,
-            contentPadding = PaddingValues(bottom = NachoSpacing.small)
+            //contentPadding = PaddingValues(bottom = NachoSpacing.small)
         ) {
             items(SKELETON_ITEM_COUNT) {
                 InvitationScheduleListItemSkeleton(
@@ -491,7 +493,7 @@ fun UpcomingStatusCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = NachoSpacing.twoXLarge),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
         ) {
             if (isLoading) {
@@ -550,7 +552,9 @@ fun LazyListScope.homeGuestBookSection(
         Text(
             text = stringResource(R.string.txt_title_new_post),
             style = NachoTheme.typography.headingSmallSemiBold,
-            modifier = Modifier.padding(top = NachoSpacing.medium),
+            modifier = Modifier
+                .padding(top = NachoSpacing.small)
+                .padding(horizontal = NachoSpacing.large),
         )
     }
 
@@ -563,13 +567,17 @@ fun LazyListScope.homeGuestBookSection(
     when {
         isInitialLoading -> {
             item {
-                GuestBookStatusCard(isLoading = true)
+                GuestBookStatusCard(
+                    modifier = Modifier.padding(horizontal = NachoSpacing.large),
+                    isLoading = true
+                )
             }
         }
 
         isInitialError -> {
             item {
                 GuestBookStatusCard(
+                    modifier = Modifier.padding(horizontal = NachoSpacing.large),
                     title = stringResource(R.string.error_msg_failed_load_post),
                     buttonText = stringResource(R.string.txt_action_retry),
                     onButtonClick = onRetryClick
@@ -580,6 +588,7 @@ fun LazyListScope.homeGuestBookSection(
         isEmpty -> {
             item {
                 GuestBookStatusCard(
+                    modifier = Modifier.padding(horizontal = NachoSpacing.large),
                     title = stringResource(R.string.txt_empty_new_post_desc),
                 )
             }
@@ -637,8 +646,8 @@ fun GuestBookStatusCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 200.dp)
-            .padding(NachoSpacing.xLarge),
+            .heightIn(min = 200.dp),
+            //.padding(NachoSpacing.xLarge),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {

@@ -34,6 +34,9 @@ internal class InvitationRepositoryImpl @Inject constructor(
             response.toDomain(json)
         }
 
+    override suspend fun getParticipantInvitations(): Result<List<Long>, DataError> =
+        invitationRemoteDataSource.getParticipantInvitations()
+
     override fun getUpcomingInvitations(): Flow<PagingData<UpcomingInvitation>> =
         Pager(
             config = PagingConfig(

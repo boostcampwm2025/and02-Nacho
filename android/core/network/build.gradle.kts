@@ -20,11 +20,11 @@ android {
         properties.load(localProps.inputStream())
         val serverUrl = properties.getProperty("SERVER_URL") ?: ""
         val headerUserId = properties.getProperty("HEADER_USER_ID") ?: ""
-        val userId = properties.getProperty("USER_ID") ?: ""
+        val headerGuestIds = properties.getProperty("HEADER_GUEST_IDS") ?: ""
 
         buildConfigField("String", "SERVER_URL", "\"$serverUrl\"")
         buildConfigField("String", "HEADER_USER_ID", "\"$headerUserId\"")
-        buildConfigField("String", "USER_ID", "\"$userId\"")
+        buildConfigField("String", "HEADER_GUEST_IDS", "\"$headerGuestIds\"")
     }
 }
 

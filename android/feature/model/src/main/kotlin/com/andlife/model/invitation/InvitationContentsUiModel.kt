@@ -52,6 +52,4 @@ data class InvitationCardUiModel(
     val id: Long = 0L,
     val invitationId: Long = 0L,
     val card: NachoUiCard = NachoUiCard.empty(),
-    val backgroundColor: Long = 0L,
-    val backgroundImageUrl: String? = null,
 )

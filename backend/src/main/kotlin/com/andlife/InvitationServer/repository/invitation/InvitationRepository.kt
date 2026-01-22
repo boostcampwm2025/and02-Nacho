@@ -9,27 +9,29 @@ import org.springframework.data.repository.query.Param
 import java.time.LocalDate
 
 interface InvitationRepository : JpaRepository<Invitation, Long> {
-    @Query("""
+    @Query(
+        """
         SELECT i FROM Invitation i
         JOIN FETCH i.host
         WHERE i.id = :invitationId
-    """)
+    """
+    )
     fun findByInvitationIdWithHost(@Param("invitationId") invitationId: Long): Invitation?
 
     @Query(
         value = """
-        SELECT DISTINCT i FROM Invitation i
-        JOIN FETCH i.host
-        LEFT JOIN InvitationParticipant ip ON i.id = ip.invitation.id
-        WHERE (i.host.id = :userId OR ip.user.id = :userId)
-        AND i.invitationDate BETWEEN :today AND :limitDate
-    """,
+            SELECT DISTINCT i FROM Invitation i
+            JOIN FETCH i.host
+            LEFT JOIN InvitationParticipant ip ON i.id = ip.invitation.id
+            WHERE (i.host.id = :userId OR (ip IS NOT NULL AND ip.user.id = :userId))
+            AND i.invitationDate BETWEEN :today AND :limitDate
+        """,
         countQuery = """
-        SELECT COUNT(DISTINCT i) FROM Invitation i
-        LEFT JOIN InvitationParticipant ip ON i.id = ip.invitation.id
-        WHERE (i.host.id = :userId OR ip.user.id = :userId)
-        AND i.invitationDate BETWEEN :today AND :limitDate
-    """
+            SELECT COUNT(DISTINCT i) FROM Invitation i
+            LEFT JOIN InvitationParticipant ip ON i.id = ip.invitation.id
+            WHERE (i.host.id = :userId OR (ip IS NOT NULL AND ip.user.id = :userId))
+            AND i.invitationDate BETWEEN :today AND :limitDate
+        """
     )
     fun findUpcomingInvitationsWithinDays(
         @Param("userId") userId: Long,

@@ -10,6 +10,8 @@ import com.andlife.network.model.PagingResponse
 interface InvitationRemoteDataSource {
     suspend fun createInvitation(request: CreateInvitationRequest): Result<InvitationResponse, DataError>
     suspend fun getInvitation(invitationId: Long): Result<InvitationResponse, DataError>
+    // Todo : 임시로 아이디만 받기 Invitation으로 수정 예정
+    suspend fun getParticipantInvitations(): Result<List<Long>, DataError>
     suspend fun getUpcomingInvitations(
         days: Long,
         page: Int,

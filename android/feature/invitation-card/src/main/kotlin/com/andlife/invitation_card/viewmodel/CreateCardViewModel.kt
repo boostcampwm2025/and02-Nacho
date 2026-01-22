@@ -28,7 +28,7 @@ class CreateCardViewModel @Inject constructor(
 
     fun saveCard() {
         createCardSession.save(
-            state.editText.text,
+            state.editText?.text,
             state.currentTextStyle.backgroundColor,
             state.currentBackgroundImageUrl
         )

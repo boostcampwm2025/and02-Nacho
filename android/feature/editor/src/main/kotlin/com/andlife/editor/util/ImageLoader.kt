@@ -9,6 +9,7 @@ import android.graphics.Paint
 import android.graphics.Rect
 import androidx.exifinterface.media.ExifInterface
 import android.net.Uri
+import android.util.Log
 import com.andlife.domain.error.DataError
 import com.andlife.domain.util.Result
 import kotlinx.coroutines.Dispatchers
@@ -17,9 +18,16 @@ import java.io.FileNotFoundException
 import javax.inject.Inject
 import kotlin.math.max
 import androidx.core.graphics.createBitmap
+import coil3.imageLoader
+import coil3.request.ErrorResult
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
+import coil3.request.allowHardware
+import coil3.toBitmap
 
 interface ImageLoader {
     suspend fun loadBitmap(context: Context, uri: Uri, maxWidth: Int, maxHeight: Int): Result<Bitmap, DataError.LocalImage>
+    suspend fun loadFromUrl(context: Context, url: String, maxWidth: Int, maxHeight: Int): Result<Bitmap, DataError.Network>
 }
 
 class ImageLoaderImpl @Inject constructor() : ImageLoader {
@@ -45,6 +53,34 @@ class ImageLoaderImpl @Inject constructor() : ImageLoader {
             Result.Error(DataError.LocalImage.NotFound, e.message)
         } catch (e: Exception) {
             Result.Error(DataError.LocalImage.DecodeFailed, e.message)
+        }
+    }
+
+    override suspend fun loadFromUrl(
+        context: Context,
+        url: String,
+        maxWidth: Int,
+        maxHeight: Int
+    ): Result<Bitmap, DataError.Network> = withContext(Dispatchers.IO) {
+        try {
+            val request = ImageRequest.Builder(context)
+                .data(url)
+                .size(maxWidth, maxHeight)
+                .allowHardware(false)
+                .build()
+            val result = context.imageLoader.execute(request)
+            when (result) {
+                is ErrorResult -> {
+                    Result.Error(DataError.Network.UNKNOWN, result.throwable.message)
+                }
+                is SuccessResult -> {
+                    val originalBitmap = result.image.toBitmap()
+                    val croppedBitmap = cropCenter(originalBitmap, maxWidth - IMAGE_HORIZONTAL_PADDING, maxHeight)
+                    Result.Success(croppedBitmap)
+                }
+            }
+        } catch (e: Exception) {
+            Result.Error(DataError.Network.UNKNOWN, e.message)
         }
     }
 

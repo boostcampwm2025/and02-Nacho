@@ -62,6 +62,7 @@ private fun parseTime(timeString: String): LocalTime {
 fun UpcomingInvitationResponse.toDomain(): UpcomingInvitation {
     return UpcomingInvitation(
         id = id,
+        hostId = hostId,
         title = title,
         thumbnailUrl = thumbnailUrl,
         invitationDate = LocalDate.parse(invitationDate),

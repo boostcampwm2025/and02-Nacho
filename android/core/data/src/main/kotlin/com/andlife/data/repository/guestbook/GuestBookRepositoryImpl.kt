@@ -14,6 +14,7 @@ import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.map
 import com.andlife.network.api.guestbook.GuestBookRequest
+import com.andlife.network.api.guestbook.UpdateGuestBookRequest
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -58,6 +59,29 @@ internal class GuestBookRepositoryImpl @Inject constructor(
         val result = guestBookRemoteDataSource.createGuestBook(invitationId, request)
         return result.map { it.toDomain() }
     }
+
+    override suspend fun updateGuestBook(
+        guestBookId: Long,
+        textContent: String,
+        existingImageIds: List<Long>,
+        existingVideoIds: List<Long>,
+        existingAudioIds: List<Long>,
+        newMedias: List<GuestBookMedia>
+    ): Result<GuestBook, DataError> {
+        val request =
+            UpdateGuestBookRequest(
+                textContent = textContent,
+                existingImageIds = existingImageIds,
+                existingVideoIds = existingVideoIds,
+                existingAudioIds = existingAudioIds,
+                newMedias = newMedias.map { it.toRequest() },
+            )
+        val result = guestBookRemoteDataSource.updateGuestBook(guestBookId, request)
+        return result.map { it.toDomain() }
+    }
+
+    override suspend fun deleteGuestBook(guestBookId: Long): Result<Long, DataError> =
+        guestBookRemoteDataSource.deleteGuestBook(guestBookId)
 
 
     override fun getAllRelatedGuestBooks(): Flow<PagingData<GuestBook>>  =

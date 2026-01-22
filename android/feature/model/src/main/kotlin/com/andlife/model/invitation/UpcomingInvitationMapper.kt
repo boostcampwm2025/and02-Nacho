@@ -5,6 +5,7 @@ import com.andlife.domain.model.invitation.UpcomingInvitation
 fun UpcomingInvitation.toUpcomingInvitationUiModel(): UpcomingInvitationUiModel {
     return UpcomingInvitationUiModel(
         id = id,
+        hostId = hostId,
         thumbnailUrl = thumbnailUrl ?: "",
         title = title,
         startTime = DateTimeInfo(
