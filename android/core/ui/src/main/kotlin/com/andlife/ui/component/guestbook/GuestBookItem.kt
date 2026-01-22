@@ -113,30 +113,20 @@ fun GuestBookItem(
             textContent = guestBook.textContent,
             onInvitationTitleClick = onInvitationTitleClick,
         )
-        if (guestBook.visualMedias.isNotEmpty()) {
-            GuestBookItemVisualMediaSection(
-                guestBookId = guestBook.id,
-                visualMediaUrls = guestBook.visualMedias,
-                totalVisualCount = guestBook.totalVisualCount,
-                shouldPlayVideo = shouldPlayVideo,
-                videoPlayerPool = videoPlayerPool,
-                onVisualMediaClick = onVisualMediaClick,
-            )
-        }
-        if (guestBook.audioMedias.isNotEmpty()) {
-            Column(
-                modifier = Modifier,
-                verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
-            ) {
-                guestBook.audioMedias.forEach { audio ->
-                    GuestBookAudioItem(
-                        audio = audio,
-                        isAudioPlaying = isAudioPlaying && (audio.url == playingAudioUrl),
-                        onAudioMediaClick = onAudioMediaClick,
-                    )
-                }
-            }
-        }
+        GuestBookItemVisualMediaSection(
+            guestBookId = guestBook.id,
+            visualMediaUrls = guestBook.visualMedias,
+            totalVisualCount = guestBook.totalVisualCount,
+            shouldPlayVideo = shouldPlayVideo,
+            videoPlayerPool = videoPlayerPool,
+            onVisualMediaClick = onVisualMediaClick,
+        )
+        GuestBookItemAudioSection(
+            audioMedias = guestBook.audioMedias,
+            isAudioPlaying = isAudioPlaying,
+            playingAudioUrl = playingAudioUrl,
+            onAudioMediaClick = onAudioMediaClick,
+        )
         HorizontalDivider(
             modifier = Modifier.padding(top = NachoSpacing.xSmall),
             color = NachoTheme.colorScheme.backgroundBorder,
@@ -244,6 +234,8 @@ private fun GuestBookItemTextSection(
     onInvitationTitleClick: (Long) -> Unit?,
     modifier: Modifier = Modifier,
 ) {
+    if (textContent.isBlank()) return
+
     var isExpanded by remember { mutableStateOf(false) }
     var isOverflowed by remember { mutableStateOf(false) }
 
@@ -323,6 +315,8 @@ private fun GuestBookItemVisualMediaSection(
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (visualMediaUrls.isEmpty()) return
+
     val pagerState = rememberPagerState(pageCount = { visualMediaUrls.size })
     var beyondViewportPageCount by remember { mutableStateOf(0) }
 
@@ -545,6 +539,30 @@ private fun ThumbnailWrapper(
                 contentDescription = stringResource(R.string.desc_play_video),
                 tint = NachoTheme.colorScheme.iconTertiary,
                 modifier = Modifier.size(24.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun GuestBookItemAudioSection(
+    audioMedias: ImmutableList<GuestBookMediaUiModel>,
+    isAudioPlaying: Boolean,
+    playingAudioUrl: String?,
+    onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (audioMedias.isEmpty()) return
+
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
+    ) {
+        audioMedias.forEach { audio ->
+            GuestBookAudioItem(
+                audio = audio,
+                isAudioPlaying = isAudioPlaying && (audio.url == playingAudioUrl),
+                onAudioMediaClick = onAudioMediaClick,
             )
         }
     }
