@@ -9,7 +9,6 @@ import com.andlife.InvitationServer.repository.invitation.InvitationCardReposito
 import com.andlife.InvitationServer.repository.invitation.InvitationRepository
 import com.andlife.InvitationServer.repository.invitation.participant.InvitationParticipantRepository
 import com.andlife.InvitationServer.request.invitation.CreateInvitationRequest
-import com.andlife.InvitationServer.repository.invitation.participant.InvitationParticipantRepository
 import com.andlife.InvitationServer.response.invitation.AnnouncementResponse
 import com.andlife.InvitationServer.response.invitation.InvitationCardResponse
 import com.andlife.InvitationServer.response.invitation.InvitationResponse
