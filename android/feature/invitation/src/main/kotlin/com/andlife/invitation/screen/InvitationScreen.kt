@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -27,9 +28,10 @@ import com.andlife.invitation.viewmodel.InvitationViewModel
 import com.andlife.model.invitation.InvitationSummaryUiModel
 import com.andlife.ui.R
 import com.andlife.ui.component.GenericTabRow
+import com.andlife.ui.component.invitation.InvitationTopBar
 import com.andlife.ui.component.listitem.InvitationListItem
 import com.andlife.ui.util.collectWithLifecycle
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 fun InvitationRoute(
@@ -77,11 +79,15 @@ private fun InvitationScreen(
     modifier: Modifier = Modifier,
     onEvent: (InvitationUiEvent) -> Unit
 ) {
-    val tabs = persistentListOf("다가오는 초대", "지난 초대")
+    val tabs = stringArrayResource(R.array.arr_invitation_tabs).toImmutableList()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        topBar = {},
+        topBar = {
+            InvitationTopBar(
+                stringResource(R.string.txt_invitation)
+            )
+        },
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
     ) { paddingValues ->
         GenericTabRow(

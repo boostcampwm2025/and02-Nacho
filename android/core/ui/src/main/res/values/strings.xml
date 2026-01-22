@@ -13,6 +13,14 @@
     <string name="desc_invitation_icon">초대장 시간 장소 아이콘</string>
 
     <!--  Invitation  -->
+    <string name="txt_invitation">초대장</string>
+    <string name="txt_my_invitation">나의 초대</string>
+    <string name="txt_upcoming_invitation">다가오는 초대</string>
+    <string name="txt_past_invitation">지난 초대</string>
+    <string-array name="arr_invitation_tabs">
+        <item>@string/txt_upcoming_invitation</item>
+        <item>@string/txt_past_invitation</item>
+    </string-array>
     <string name="format_invitation_d_day">D-%1$d</string>
     <string name="format_invitation_d_day_today">D-Day</string>
 
