@@ -75,4 +75,5 @@ class InvitationViewModel @Inject constructor(
         updateState { copy(isRefreshing = false) }
         if (hasError) sendEffect(InvitationSideEffect.RefreshFailure)
     }
+
 }

@@ -12,6 +12,10 @@
     <string name="desc_invitation_more_btn">초대장 리스트 카드의 더보기 아이콘 버튼</string>
     <string name="desc_invitation_icon">초대장 시간 장소 아이콘</string>
 
+    <!--  Invitation  -->
+    <string name="format_invitation_d_day">D-%1$d</string>
+    <string name="format_invitation_d_day_today">D-Day</string>
+
     <!--  모아보기 Media  -->
     <string name="desc_media_image">방명록의 이미지</string>
     <string name="desc_media_audio">방명록의 오디오</string>

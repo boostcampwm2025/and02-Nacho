@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
@@ -24,6 +25,7 @@ import com.andlife.invitation.model.InvitationUiEvent
 import com.andlife.invitation.model.InvitationUiState
 import com.andlife.invitation.viewmodel.InvitationViewModel
 import com.andlife.model.invitation.InvitationSummaryUiModel
+import com.andlife.ui.R
 import com.andlife.ui.component.GenericTabRow
 import com.andlife.ui.component.listitem.InvitationListItem
 import com.andlife.ui.util.collectWithLifecycle
@@ -111,13 +113,20 @@ private fun InvitationScreen(
 
                         ) { index ->
                             currentItems[index]?.let { invitation ->
+
+                                val dDayLabel = when (val count = invitation.dDayCount) {
+                                    null -> null
+                                    0 -> stringResource(R.string.format_invitation_d_day_today)
+                                    else -> stringResource(R.string.format_invitation_d_day, count)
+                                }
+
                                 InvitationListItem(
                                     imageUrl = invitation.thumbnailUrls.first(),
                                     title = invitation.title,
                                     startTime = invitation.invitationDateTime,
                                     hostName = invitation.displayHostName,
                                     address = invitation.address,
-                                    dDayText = invitation.dDayCount.toString(),
+                                    dDayText = dDayLabel,
                                     onClick = { onEvent(InvitationUiEvent.ClickInvitation(invitation.id)) }
                                 )
                             }
