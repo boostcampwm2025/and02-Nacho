@@ -102,8 +102,7 @@ fun GuestBookItem(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(backgroundColor)
-            .padding(horizontal = NachoSpacing.large),
+            .background(backgroundColor),
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
         GuestBookItemHeader(
@@ -135,7 +134,9 @@ fun GuestBookItem(
             onAudioMediaClick = onAudioMediaClick,
         )
         HorizontalDivider(
-            modifier = Modifier.padding(top = NachoSpacing.xSmall),
+            modifier = Modifier
+                .padding(horizontal = NachoSpacing.large)
+                .padding(top = NachoSpacing.xSmall),
             color = NachoTheme.colorScheme.backgroundBorder,
         )
     }
@@ -156,7 +157,11 @@ private fun GuestBookItemHeader(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = NachoSpacing.large),
+            .padding(
+                top = NachoSpacing.large,
+                start = NachoSpacing.large,
+                end = NachoSpacing.xSmall
+            ),
         horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -248,7 +253,9 @@ private fun GuestBookItemTextSection(
     var isOverflowed by remember { mutableStateOf(false) }
 
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = NachoSpacing.large),
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
         invitation?.let {
@@ -344,6 +351,7 @@ private fun GuestBookItemVisualMediaSection(
         modifier =
             modifier
                 .fillMaxWidth()
+                .padding(horizontal = NachoSpacing.large)
                 .aspectRatio(1f) // TODO: 추후 미디어 비율에 맞게 조정 필요, 일단 정사각형으로 고정
                 .clip(NachoTheme.shapes.small),
     ) {
@@ -565,7 +573,9 @@ private fun GuestBookItemAudioSection(
     if (audioMedias.isEmpty()) return
 
     Column(
-        modifier = modifier,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = NachoSpacing.large),
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
     ) {
         audioMedias.forEach { audio ->
