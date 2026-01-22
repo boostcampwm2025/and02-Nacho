@@ -6,6 +6,7 @@ import com.andlife.domain.util.Result
 import com.andlife.network.api.guestbook.GuestBookRequest
 import com.andlife.network.api.guestbook.GuestBookResponse
 import com.andlife.network.api.guestbook.GuestBookService
+import com.andlife.network.api.guestbook.UpdateGuestBookRequest
 import com.andlife.network.model.PagingResponse
 import com.andlife.network.model.invitation.guestbook.CollectionResponse
 import javax.inject.Inject
@@ -28,4 +29,14 @@ internal class GuestBookRemoteDataSourceImpl @Inject constructor(
         request: GuestBookRequest
     ): Result<GuestBookResponse, DataError> =
         apiCall { guestBookService.createGuestBook(invitationId, request) }
+
+    override suspend fun updateGuestBook(
+        guestBookId: Long,
+        request: UpdateGuestBookRequest
+    ): Result<GuestBookResponse, DataError> =
+        apiCall { guestBookService.updateGuestBook(guestBookId, request) }
+
+    override suspend fun deleteGuestBook(guestBookId: Long): Result<Long, DataError> =
+        apiCall { guestBookService.deleteGuestBook(guestBookId) }
+
 }

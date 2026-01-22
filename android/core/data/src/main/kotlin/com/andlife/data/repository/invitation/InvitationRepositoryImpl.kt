@@ -36,4 +36,6 @@ internal class InvitationRepositoryImpl @Inject constructor(
         val cardRequest = card.toRequest(json)
         return invitationRemoteDataSource.createInvitationCard(invitationId, cardRequest)
     }
+    override suspend fun getParticipantInvitations(): Result<List<Long>, DataError> =
+        invitationRemoteDataSource.getParticipantInvitations()
 }

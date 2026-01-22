@@ -68,7 +68,7 @@ fun SelectedMediaItem(
             UiMediaType.VIDEO -> {
                 Box(modifier = Modifier.fillMaxSize()) {
                     AsyncImage(
-                        model = media.uri, // TODO: 영상 썸네일 이미지로 변경
+                        model = media.thumbnailUrl ?: media.uri,
                         contentDescription = stringResource(R.string.desc_media_video),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,
@@ -106,6 +106,7 @@ private fun EditModeVideoItemPreview() {
     NachoTheme {
         SelectedMediaItem(
             SelectedMedia(
+                1L,
                 "https://picsum.photos/400/600?random=3",
                 UiMediaType.VIDEO,
                 828,
@@ -120,6 +121,7 @@ private fun EditModeAudioItemPreview() {
     NachoTheme {
         SelectedMediaItem(
             SelectedMedia(
+                1L,
                 "https://picsum.photos/400/600?random=3",
                 UiMediaType.AUDIO,
                 314,

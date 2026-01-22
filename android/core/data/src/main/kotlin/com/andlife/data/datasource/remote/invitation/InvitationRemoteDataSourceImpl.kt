@@ -24,4 +24,6 @@ internal class InvitationRemoteDataSourceImpl @Inject constructor(
     ): Result<Long, DataError> =
         apiCall { invitationService.createInvitationCard(invitationId, request) }
 
+    override suspend fun getParticipantInvitations(): Result<List<Long>, DataError> =
+        apiCall { invitationService.getParticipantInvitations() }
 }

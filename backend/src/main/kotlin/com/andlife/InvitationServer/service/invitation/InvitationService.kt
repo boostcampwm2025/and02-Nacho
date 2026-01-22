@@ -7,6 +7,7 @@ import com.andlife.InvitationServer.entity.User
 import com.andlife.InvitationServer.repository.invitation.AnnouncementRepository
 import com.andlife.InvitationServer.repository.invitation.InvitationCardRepository
 import com.andlife.InvitationServer.repository.invitation.InvitationRepository
+import com.andlife.InvitationServer.repository.invitation.participant.InvitationParticipantRepository
 import com.andlife.InvitationServer.request.invitation.CreateInvitationRequest
 import com.andlife.InvitationServer.request.invitation.InvitationCardRequest
 import com.andlife.InvitationServer.response.invitation.AnnouncementResponse
@@ -24,7 +25,14 @@ class InvitationService(
     private val invitationRepository: InvitationRepository,
     private val invitationCardRepository: InvitationCardRepository,
     private val announcementRepository: AnnouncementRepository,
+    private val participantRepository: InvitationParticipantRepository
 ) {
+    @Transactional(readOnly = true)
+    fun getParticipantInvitations(userId: Long) : List<Long> {
+        val participants = participantRepository.findAllByUserIdWithInvitation(userId)
+        // 임시로 아이디들만 반환하게 구현
+        return participants.map { it.invitation.id }
+    }
 
     @Transactional
     fun createInvitationCard(invitationId: Long, request: InvitationCardRequest): Long {
