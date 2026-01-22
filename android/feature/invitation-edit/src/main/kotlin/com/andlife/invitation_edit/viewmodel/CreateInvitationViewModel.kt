@@ -266,6 +266,7 @@ class CreateInvitationViewModel @Inject constructor(
             invitationRepository.createInvitation(params = createParam)
                 .onSuccess { id ->
                     updateState { copy(isLoading = false) }
+                    createCardSession.clear()
                     sendEffect(CreateInvitationSideEffect.SuccessCreate(id))
                 }
                 .onFailure {
