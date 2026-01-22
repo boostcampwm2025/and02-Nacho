@@ -1,7 +1,12 @@
 package com.andlife.invitation.screen
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -9,12 +14,20 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.andlife.designsystem.component.NachoButton
+import androidx.paging.compose.itemKey
+import com.andlife.designsystem.theme.NachoSpacing
+import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation.model.InvitationSideEffect
+import com.andlife.invitation.model.InvitationUiEvent
 import com.andlife.invitation.model.InvitationUiState
 import com.andlife.invitation.viewmodel.InvitationViewModel
+import com.andlife.model.invitation.InvitationSummaryUiModel
+import com.andlife.ui.component.GenericTabRow
+import com.andlife.ui.component.listitem.InvitationListItem
 import com.andlife.ui.util.collectWithLifecycle
+import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun InvitationRoute(
@@ -46,33 +59,72 @@ fun InvitationRoute(
     }
 
     InvitationScreen(
-        onNavigateToDetail = onNavigateToDetail,
         uiState = uiState,
+        upcomingItems = upcomingItems,
+        pastItems = pastItems,
         modifier = modifier,
+        onEvent = viewModel::onEvent,
     )
 }
 
 @Composable
 private fun InvitationScreen(
     uiState: InvitationUiState,
+    upcomingItems: LazyPagingItems<InvitationSummaryUiModel>,
+    pastItems: LazyPagingItems<InvitationSummaryUiModel>,
     modifier: Modifier = Modifier,
-    onNavigateToDetail: (Long) -> Unit,
+    onEvent: (InvitationUiEvent) -> Unit
 ) {
-    // TODO: 초대장 리스트 화면
-    // - 로딩 상태 처리 필요 (uiState.isLoading)
-    // - 에러 상태 처리 필요
-    // - 빈 상태 처리 필요 (초대장이 없을 때)
-    // - Scaffold, TopAppBar 등 추가 필요
-    Column(
-        modifier = modifier,
-    ) {
-        NachoButton(
-            // 임시로 ID 1번 전달
-            onClick = { onNavigateToDetail(1L) },
-        ) {
-            Text("초대장으로 이동")
-        }
+    val tabs = persistentListOf("다가오는 초대", "지난 초대")
 
-        Text("전달 받은 초대장 리스트 : ${uiState.toString()}")
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        topBar = {},
+        containerColor = NachoTheme.colorScheme.backgroundPrimary,
+    ) { paddingValues ->
+        GenericTabRow(
+            tabs = tabs,
+            modifier = Modifier.padding(paddingValues),
+            content = { pageIndex ->
+                LaunchedEffect(pageIndex) {
+                    onEvent(InvitationUiEvent.SelectTab(pageIndex))
+                }
+
+                val currentItems = if (pageIndex == 0) upcomingItems else pastItems
+
+                PullToRefreshBox(
+                    isRefreshing = uiState.isRefreshing,
+                    onRefresh = {
+                        currentItems.refresh()
+                        onEvent(InvitationUiEvent.Refresh)
+                    },
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(NachoSpacing.large),
+                        verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
+                    ) {
+                        items(
+                            count = currentItems.itemCount,
+                            key = currentItems.itemKey { it.id }
+
+                        ) { index ->
+                            currentItems[index]?.let { invitation ->
+                                InvitationListItem(
+                                    imageUrl = invitation.thumbnailUrls.first(),
+                                    title = invitation.title,
+                                    startTime = invitation.invitationDateTime,
+                                    hostName = invitation.displayHostName,
+                                    address = invitation.address,
+                                    dDayText = invitation.dDayCount.toString(),
+                                    onClick = { onEvent(InvitationUiEvent.ClickInvitation(invitation.id)) }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        )
     }
 }
