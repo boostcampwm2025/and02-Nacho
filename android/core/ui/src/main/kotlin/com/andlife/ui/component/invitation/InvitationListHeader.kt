@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.theme.NachoIconSize
@@ -81,10 +82,10 @@ fun InvitationListHeader(
             DropdownMenu(
                 expanded = isMenuExpanded,
                 onDismissRequest = { isMenuExpanded = false },
-                modifier = Modifier.background(
-                    color = NachoTheme.colorScheme.backgroundPrimary,
-                    shape = NachoTheme.shapes.medium
-                )
+                shape = NachoTheme.shapes.medium,
+                containerColor = NachoTheme.colorScheme.backgroundPrimary,
+                modifier = Modifier
+                    .background(Color.Transparent)
             ) {
                 sortOptions.forEachIndexed { index, option ->
                     DropdownMenuItem(
