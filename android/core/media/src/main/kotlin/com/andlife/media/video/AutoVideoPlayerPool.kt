@@ -16,6 +16,8 @@ interface AutoVideoPlayerPool {
 
     fun resumeLastPlayed()
 
+    fun clearCacheById(itemId: Long?)
+
     fun resetPool()
 
     fun releaseAllPlayers()
@@ -31,6 +33,7 @@ class FakeVideoPlayerPool : AutoVideoPlayerPool {
     override fun pausePlayer(url: String) {}
     override fun pauseAllPlayers() {}
     override fun resumeLastPlayed() {}
+    override fun clearCacheById(itemId: Long?) {}
     override fun resetPool() {}
     override fun releaseAllPlayers() {}
 }

@@ -114,6 +114,7 @@ fun MyInvitationGuestBookRoute(
             }
 
             is MyInvitationGuestBookSideEffect.DeleteGuestBookSuccess -> {
+                viewModel.videoPlayerPool.clearCacheById(uiState.editingGuestBookId)
                 viewModel.invalidateGuestBooks()
             }
         }

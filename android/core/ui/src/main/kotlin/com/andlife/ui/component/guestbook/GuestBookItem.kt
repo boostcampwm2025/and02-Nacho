@@ -525,6 +525,11 @@ private fun VideoPlayerView(
                 this.player = player
             }
         },
+        update = { playerView ->
+            if (playerView.player != player) {
+                playerView.player = player
+            }
+        },
         modifier = modifier,
     )
 }
@@ -806,6 +811,7 @@ class FakeAutoVideoPlayerPool : AutoVideoPlayerPool {
     override fun pausePlayer(url: String) {}
     override fun pauseAllPlayers() {}
     override fun resumeLastPlayed() {}
+    override fun clearCacheById(itemId: Long?) {}
     override fun resetPool() {}
     override fun releaseAllPlayers() {}
 }
