@@ -1,6 +1,8 @@
 package com.andlife.InvitationServer.controller.invitation
 
+import com.andlife.InvitationServer.auth.AuthContext
 import com.andlife.InvitationServer.request.invitation.CreateInvitationRequest
+import com.andlife.InvitationServer.auth.AuthContext
 import com.andlife.InvitationServer.request.invitation.guestbook.GuestBookRequest
 import com.andlife.InvitationServer.response.BaseResponse
 import com.andlife.InvitationServer.response.CommonResponseCode
@@ -26,6 +28,20 @@ class InvitationController(
     private val invitationService: InvitationService,
     private val guestBookService: GuestBookService,
 ) {
+    @GetMapping("/me")
+    fun getMyInvitationIds(
+        authContext: AuthContext
+    ): BaseResponse<List<Long>> {
+        return when (authContext) {
+            is AuthContext.Member -> {
+                val ids = invitationService.getParticipantInvitations(authContext.userId)
+                BaseResponse.success(ids)
+            }
+            is AuthContext.Guest -> {
+                BaseResponse.success(null)
+            }
+        }
+    }
 
     @GetMapping("/{invitationId}")
     fun getInvitation(
