@@ -4,7 +4,6 @@ import com.andlife.InvitationServer.auth.AuthContext
 import com.andlife.InvitationServer.request.invitation.guestbook.GuestBookRequest
 import com.andlife.InvitationServer.response.BaseResponse
 import com.andlife.InvitationServer.response.CommonResponseCode
-import com.andlife.InvitationServer.response.PagingMetaResponse
 import com.andlife.InvitationServer.response.PagingResponse
 import com.andlife.InvitationServer.response.invitation.InvitationResponse
 import com.andlife.InvitationServer.response.invitation.InvitationSummaryResponse
@@ -30,7 +29,7 @@ class InvitationController(
     private val guestBookService: GuestBookService,
 ) {
     @GetMapping("/me")
-    fun getMyInvitations(
+    fun getParticipantInvitations(
         authContext: AuthContext,
         @RequestParam(required = false, defaultValue = "UPCOMING") status: String,
         @PageableDefault(
