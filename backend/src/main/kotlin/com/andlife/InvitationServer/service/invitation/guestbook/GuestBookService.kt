@@ -364,6 +364,7 @@ class GuestBookService(
                 ),
                 invitation = GuestBookInvitationResponse(
                     id = guestBook.invitation.id,
+                    hostId = guestBook.invitation.host.id,
                     title = guestBook.invitation.title
                 ),
                 textContent = guestBook.textContent,
