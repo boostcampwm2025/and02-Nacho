@@ -27,6 +27,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
@@ -201,8 +202,10 @@ private fun InvitationDetailTopBar(
     showActions: Boolean = true,
     hasThanksCard: Boolean = false,
 ) {
+    val alpha = 1f - scrollBehavior.state.collapsedFraction
+
     TopAppBar(
-        modifier = modifier,
+        modifier = modifier.graphicsLayer { this.alpha = alpha },
         title = {
             Text(
                 text = title,
