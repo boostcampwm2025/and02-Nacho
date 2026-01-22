@@ -24,6 +24,7 @@ data class GuestBookResponse(
 @Serializable
 data class GuestBookInvitationResponse(
     val id: Long,
+    val hostId: Long,
     val title: String,
 )
 

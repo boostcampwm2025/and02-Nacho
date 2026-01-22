@@ -37,11 +37,13 @@ fun GuestBook.toUiModel(): GuestBookUiModel = GuestBookUiModel(
 
 data class GuestBookInvitationUiModel(
     val id: Long,
+    val hostId: Long,
     val title: String,
 )
 
 fun GuestBookInvitation.toUiModel(): GuestBookInvitationUiModel = GuestBookInvitationUiModel(
     id = id,
+    hostId = hostId,
     title = title,
 )
 

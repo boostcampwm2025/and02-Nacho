@@ -483,7 +483,7 @@ private fun InvitationGuestBookResultPreview() {
     val fakeGuestBooks = listOf(
         GuestBookUiModel(
             id = 1L,
-            invitation = GuestBookInvitationUiModel(id = 222L, title = "우리 결혼해요!"),
+            invitation = GuestBookInvitationUiModel(id = 222L, hostId = 1L, title = "우리 결혼해요!"),
             author = AuthorUiModel(id = 111L, name = "홍길동", profileImageUrl = null),
             textContent = "결혼 축하드려요! 행복하게 잘 사세요~!",
             visualMedias = emptyList<GuestBookMediaUiModel>().toImmutableList(),
