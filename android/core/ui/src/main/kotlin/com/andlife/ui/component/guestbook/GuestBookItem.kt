@@ -268,11 +268,13 @@ private fun GuestBookItemTextSection(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .clickable {
+                    .then(
                         if (isOverflowed) {
-                            isExpanded = !isExpanded
+                            Modifier.clickable { isExpanded = !isExpanded }
+                        } else {
+                            Modifier
                         }
-                    },
+                    ),
             verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
         ) {
             Text(
