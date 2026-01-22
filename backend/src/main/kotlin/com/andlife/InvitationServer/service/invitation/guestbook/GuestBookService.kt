@@ -17,6 +17,7 @@ import com.andlife.InvitationServer.response.invitation.guestbook.CollectionResp
 import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookMediaResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.toGuestBookResponse
+import com.andlife.InvitationServer.service.media.MediaService
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
@@ -28,7 +29,8 @@ import org.springframework.transaction.annotation.Transactional
 class GuestBookService(
     private val guestBookRepository: GuestBookRepository,
     private val userRepository: UserRepository,
-    private val invitationRepository: InvitationRepository
+    private val invitationRepository: InvitationRepository,
+    private val mediaService: MediaService
 ) {
 
     fun getCollectionByInvitation(invitationId: Long): List<CollectionResponse> {
@@ -242,6 +244,19 @@ class GuestBookService(
 
         validateOwner(guestBook.user.id, authContext)
 
+        val mediaKeysToDelete = mutableListOf<String>()
+
+        guestBook.images.filter { it.id !in request.existingImageIds }
+            .forEach { mediaKeysToDelete.add(mediaService.extractKey(it.imageUrl)) }
+        guestBook.audios.filter { it.id !in request.existingAudioIds }
+            .forEach { mediaKeysToDelete.add(mediaService.extractKey(it.audioUrl)) }
+        guestBook.videos.filter { it.id !in request.existingVideoIds }
+            .forEach {
+                mediaKeysToDelete.add(mediaService.extractKey(it.videoUrl))
+                mediaKeysToDelete.add(mediaService.extractKey(it.thumbnailUrl))
+            }
+
+
         guestBook.textContent = request.textContent
 
         guestBook.images.removeIf { !request.existingImageIds.contains(it.id) }
@@ -279,6 +294,10 @@ class GuestBookService(
             }
         }
 
+        mediaKeysToDelete.forEach { mediaKey ->
+            mediaService.deleteMedia(mediaKey)
+        }
+
         return guestBook.toGuestBookResponse()
     }
 
@@ -289,7 +308,12 @@ class GuestBookService(
 
         validateOwner(guestBook.user.id, authContext)
 
+        val mediaKeys = getAllMediaKeys(guestBook)
         guestBookRepository.delete(guestBook)
+
+        mediaKeys.forEach { mediaKey ->
+            mediaService.deleteMedia(mediaKey)
+        }
     }
 
     private fun validateOwner(guestBookUserId: Long, authContext: AuthContext) {
@@ -299,9 +323,21 @@ class GuestBookService(
                     throw BusinessException(CommonResponseCode.FORBIDDEN)
                 }
             }
+
             is AuthContext.Guest -> {
                 throw BusinessException(CommonResponseCode.FORBIDDEN)
             }
         }
+    }
+
+    private fun getAllMediaKeys(guestBook: GuestBook): List<String> {
+        val keys = mutableListOf<String>()
+        guestBook.images.forEach { keys.add(mediaService.extractKey(it.imageUrl)) }
+        guestBook.audios.forEach { keys.add(mediaService.extractKey(it.audioUrl)) }
+        guestBook.videos.forEach {
+            keys.add(mediaService.extractKey(it.videoUrl))
+            keys.add(mediaService.extractKey(it.thumbnailUrl))
+        }
+        return keys
     }
 }
