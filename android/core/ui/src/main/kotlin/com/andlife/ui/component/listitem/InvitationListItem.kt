@@ -1,12 +1,14 @@
 package com.andlife.ui.component.listitem
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,7 +25,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
+import coil3.compose.SubcomposeAsyncImageContent
 import com.andlife.designsystem.component.NachoDdayChip
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoIconSize
@@ -31,6 +34,7 @@ import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
+import com.andlife.ui.component.loading.InvitationLoadingIndicator
 
 @Composable
 fun InvitationListItem(
@@ -41,6 +45,7 @@ fun InvitationListItem(
     address: String,
     dDayText: String,
     onClick: () -> Unit,
+    onMoreClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -59,32 +64,53 @@ fun InvitationListItem(
     ) {
         Column {
             Box {
-                AsyncImage(
-                    model = imageUrl,
-                    contentDescription = stringResource(R.string.desc_invitation_list_image),
-                    contentScale = ContentScale.Crop,
-                    placeholder = painterResource(R.drawable.ic_placeholder_default_24),
-                    error = painterResource(R.drawable.ic_error_outline_24),
-                    modifier =
-                        Modifier
+                if (imageUrl.isBlank()) {
+                    Image(
+                        painter = painterResource(R.drawable.bg_thumbnail),
+                        contentDescription = stringResource(R.string.desc_invitation_list_image),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(16f / 9f),
-                )
+                    )
+                } else {
+                    SubcomposeAsyncImage(
+                        model = imageUrl,
+                        contentDescription = stringResource(R.string.desc_invitation_list_image),
+                        contentScale = ContentScale.Crop,
+                        loading = { InvitationLoadingIndicator() },
+                        success = {
+                            SubcomposeAsyncImageContent()
+                        },
+                        error = {
+                            Image(
+                                painter = painterResource(R.drawable.bg_thumbnail),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(16f / 9f),
+                    )
+                }
 
                 IconButton(
-                    onClick = { },
-                    modifier =
-                        Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(NachoSpacing.large)
-                            .background(
-                                color = NachoTheme.colorScheme.backgroundPrimary,
-                                shape = NachoTheme.shapes.extraLarge,
-                            ).size(NachoIconSize.large),
+                    onClick = onMoreClick,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(NachoSpacing.medium)
+                        .background(
+                            color = NachoTheme.colorScheme.backgroundPrimary,
+                            shape = NachoTheme.shapes.extraLarge,
+                        )
+                        .size(NachoIconSize.large),
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_more_vert_24),
                         contentDescription = stringResource(R.string.desc_invitation_more_btn),
+                        modifier = Modifier.size(NachoIconSize.small)
                     )
                 }
             }
@@ -174,6 +200,7 @@ private fun InvitationListItemPreview() {
                 address = "강남대로62길 23 4층 코드스쿼드",
                 dDayText = "D-3",
                 onClick = {},
+                onMoreClick = {},
             )
 
             InvitationListItem(
@@ -184,6 +211,7 @@ private fun InvitationListItemPreview() {
                 address = "강남대로62길 23 4층 코드스쿼드",
                 dDayText = "D-3",
                 onClick = {},
+                onMoreClick = {},
             )
         }
     }

@@ -143,9 +143,8 @@ private fun MyInvitationDetailScreen(
     ) { paddingValues ->
         if (uiState.isLoading) {
             InvitationLoadingIndicator(
-                modifier = Modifier
-                    .padding(paddingValues),
                 text = stringResource(R.string.txt_loading_invitation),
+                modifier = Modifier.fillMaxSize(),
             )
             return@Scaffold
         }
@@ -153,9 +152,7 @@ private fun MyInvitationDetailScreen(
         if (uiState.isError) {
             InvitationLoadingError(
                 onRetry = { onEvent(MyInvitationDetailUiEvent.RetryLoad) },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
+                modifier = Modifier.fillMaxSize(),
             )
             return@Scaffold
         }

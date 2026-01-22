@@ -3,10 +3,12 @@ package com.andlife.data.repository.invitation.mapper
 import com.andlife.domain.model.invitation.Announcement
 import com.andlife.domain.model.invitation.Invitation
 import com.andlife.domain.model.invitation.InvitationCard
+import com.andlife.domain.model.invitation.UpcomingInvitation
 import com.andlife.network.api.invitation.AnnouncementResponse
 import com.andlife.network.api.invitation.InvitationCardResponse
 import com.andlife.network.api.invitation.InvitationResponse
 import com.andlife.network.model.card.NachoCardDto
+import com.andlife.network.api.invitation.UpcomingInvitationResponse
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.serialization.json.Json
@@ -55,4 +57,17 @@ fun AnnouncementResponse.toDomain(): Announcement {
 
 private fun parseTime(timeString: String): LocalTime {
     return LocalTime.parse(timeString)
+}
+
+fun UpcomingInvitationResponse.toDomain(): UpcomingInvitation {
+    return UpcomingInvitation(
+        id = id,
+        hostId = hostId,
+        isOwner = isOwner,
+        title = title,
+        thumbnailUrl = thumbnailUrl,
+        invitationDate = LocalDate.parse(invitationDate),
+        startTime = LocalTime.parse(startTime),
+        displayHostName = displayHostName,
+    )
 }

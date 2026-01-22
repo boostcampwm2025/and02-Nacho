@@ -25,4 +25,9 @@ interface GuestBookRemoteDataSource {
     ): Result<GuestBookResponse, DataError>
 
     suspend fun deleteGuestBook(guestBookId: Long): Result<Long, DataError>
+
+    suspend fun getAllRelatedGuestBooks(
+        page: Int,
+        size: Int,
+    ): Result<PagingResponse<GuestBookResponse>, DataError>
 }

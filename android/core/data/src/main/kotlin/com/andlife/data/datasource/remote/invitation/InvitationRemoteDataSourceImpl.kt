@@ -6,6 +6,8 @@ import com.andlife.domain.util.Result
 import com.andlife.network.api.invitation.CreateInvitationRequest
 import com.andlife.network.api.invitation.InvitationResponse
 import com.andlife.network.api.invitation.InvitationService
+import com.andlife.network.api.invitation.UpcomingInvitationResponse
+import com.andlife.network.model.PagingResponse
 import javax.inject.Inject
 
 internal class InvitationRemoteDataSourceImpl @Inject constructor(
@@ -19,4 +21,11 @@ internal class InvitationRemoteDataSourceImpl @Inject constructor(
 
     override suspend fun getParticipantInvitations(): Result<List<Long>, DataError> =
         apiCall { invitationService.getParticipantInvitations() }
+
+    override suspend fun getUpcomingInvitations(
+        days: Long,
+        page: Int,
+        size: Int,
+    ): Result<PagingResponse<UpcomingInvitationResponse>, DataError> =
+        apiCall { invitationService.getUpcomingInvitations(days, page, size) }
 }
