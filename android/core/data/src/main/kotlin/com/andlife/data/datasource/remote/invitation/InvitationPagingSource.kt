@@ -2,7 +2,7 @@ package com.andlife.data.datasource.remote.invitation
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.andlife.data.repository.invitation.toDomain
+import com.andlife.data.repository.invitation.mapper.toDomain
 import com.andlife.domain.model.invitation.InvitationSummary
 import com.andlife.domain.util.Result
 
