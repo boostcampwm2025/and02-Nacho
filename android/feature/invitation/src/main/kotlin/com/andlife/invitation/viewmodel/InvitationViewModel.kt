@@ -58,7 +58,21 @@ class InvitationViewModel @Inject constructor(
             )
 
     override fun onEvent(event: InvitationUiEvent) {
-        TODO()
+        when (event) {
+            is InvitationUiEvent.Refresh -> {
+                updateState { copy(isRefreshing = true) }
+            }
+            is InvitationUiEvent.SelectTab -> {
+                updateState { copy(selectedTab = event.index) }
+            }
+            is InvitationUiEvent.ClickInvitation -> {
+                sendEffect(InvitationSideEffect.NavigateToDetail(event.id))
+            }
+        }
     }
 
+    fun onRefreshFinished(hasError: Boolean) {
+        updateState { copy(isRefreshing = false) }
+        if (hasError) sendEffect(InvitationSideEffect.RefreshFailure)
+    }
 }
