@@ -1,5 +1,6 @@
 package com.andlife.domain.model.invitation
 
+import com.andlife.domain.model.card.NachoCard
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
@@ -25,8 +26,7 @@ data class Invitation(
 data class InvitationCard(
     val id: Long,
     val invitationId: Long,
-    val contentJson: String,
-    val backgroundImageUrl: String?,
+    val card: NachoCard,
 )
 
 data class Announcement(

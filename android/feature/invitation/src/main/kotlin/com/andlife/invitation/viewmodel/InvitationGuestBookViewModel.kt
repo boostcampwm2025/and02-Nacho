@@ -17,20 +17,31 @@ import com.andlife.invitation.InvitationDetail
 import com.andlife.invitation.model.guestbook.InvitationGuestBookSideEffect
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiEvent
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiState
+import com.andlife.media.audio.AudioPlayerManager
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.toUiModel
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
+import com.andlife.domain.util.ThumbnailGenerator
 import com.andlife.model.guestbook.UiMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -40,7 +51,9 @@ class InvitationGuestBookViewModel
 constructor(
     private val mediaUploader: MediaUploader,
     private val mediaFileProvider: MediaFileProvider,
+    private val thumbnailGenerator: ThumbnailGenerator,
     private val guestBookRepository: GuestBookRepository,
+    val audioPlayerManager: AudioPlayerManager,
     val videoPlayerPool: AutoVideoPlayerPool,
     savedStateHandle: SavedStateHandle,
 ) : BaseViewModel<InvitationGuestBookUiState, InvitationGuestBookUiEvent, InvitationGuestBookSideEffect>(
@@ -58,6 +71,32 @@ constructor(
             }
             .cachedIn(viewModelScope)
 
+    init {
+        observeAudioPlayerState()
+    }
+
+    private fun observeAudioPlayerState() {
+        audioPlayerManager.currentAudioUrl
+            .combine(audioPlayerManager.isPlaying) { url, isPlaying ->
+                updateState {
+                    copy(
+                        playingAudioUrl = url,
+                        isAudioPlaying = isPlaying,
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
+
+        uiState.map { it.isAudioPlaying }
+            .distinctUntilChanged()
+            .onEach { isAudioPlaying ->
+                if (!isAudioPlaying) {
+                    videoPlayerPool.resumeLastPlayed()
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
     override fun onEvent(event: InvitationGuestBookUiEvent) {
         when (event) {
             is InvitationGuestBookUiEvent.UpdateSelectedMedias -> updateSelectedMedias(event.medias)
@@ -65,18 +104,32 @@ constructor(
             is InvitationGuestBookUiEvent.RemoveMedia -> removeMedia(event.media)
             is InvitationGuestBookUiEvent.UploadMedias -> uploadMedias()
             is InvitationGuestBookUiEvent.ClearError -> clearError()
-            is InvitationGuestBookUiEvent.ClickAudioMedia -> sendEffect(
-                InvitationGuestBookSideEffect.ShowSnackbar("초대장 제목 클릭됨: ${event.url}"),
-            )
+            is InvitationGuestBookUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
+
             is InvitationGuestBookUiEvent.ClickGuestBookMenu -> sendEffect(
                 InvitationGuestBookSideEffect.ShowSnackbar("방명록 메뉴 클릭됨: ${event.guestBookId}"),
             )
+
             is InvitationGuestBookUiEvent.ClickInvitationTitle -> sendEffect(
                 InvitationGuestBookSideEffect.ShowSnackbar("초대장 제목 클릭됨: ${event.invitationId}"),
             )
+
             is InvitationGuestBookUiEvent.ClickVisualMedia -> sendEffect(
                 InvitationGuestBookSideEffect.ShowSnackbar("비주얼 미디어 클릭됨: ${event.url}"),
             )
+        }
+    }
+
+    private fun clickAudioMedia(url: String) {
+        val isCurrentlyPlaying = uiState.value.isAudioPlaying
+        val currentUrl = uiState.value.playingAudioUrl
+
+        if (currentUrl == url && isCurrentlyPlaying) {
+            audioPlayerManager.togglePlay(url)
+            videoPlayerPool.resumeLastPlayed()
+        } else {
+            videoPlayerPool.pauseAllPlayers()
+            audioPlayerManager.togglePlay(url)
         }
     }
 
@@ -109,7 +162,7 @@ constructor(
                 medias.isEmpty() -> {
                     // 텍스트만 있는 경우
                     updateState { copy(isUploading = true) }
-                    createGuestBook(emptyList(), emptyList())
+                    createGuestBook(emptyList(), emptyList(), emptyList())
                 }
 
                 else -> {
@@ -135,8 +188,11 @@ constructor(
                             else -> {
                                 when (val result = mediaUploader.uploadMedias(mediaFiles)) {
                                     is Result.Success -> {
+                                        // 업로드된 비디오 썸네일 URL 리스트: 비디오가 아니거나 업로드 실패한 경우 null 가능
+                                        val thumbnailUrls = generateAndUploadThumbnails(medias)
+
                                         // 업로드된 미디어 URL 리스트: 업로드 실패한 미디어는 null 가능
-                                        createGuestBook(result.data, medias)
+                                        createGuestBook(result.data, thumbnailUrls, medias)
                                     }
 
                                     is Result.Error -> {
@@ -168,8 +224,46 @@ constructor(
         updateState { copy(errorMessage = null) }
     }
 
+    private suspend fun generateAndUploadThumbnails(
+        medias: List<SelectedMedia>
+    ): List<String?> {
+        return medias.map { media ->
+            if (media.type != UiMediaType.VIDEO) return@map null
+
+            try {
+                val thumbnailFile =
+                    thumbnailGenerator.generateVideoThumbnail(media.uri)
+
+                if (thumbnailFile == null) {
+                    Log.e("ThumbnailProcess", "썸네일 파일 생성 실패")
+                    return@map null
+                }
+
+                Log.d("ThumbnailProcess", "썸네일 파일 생성: ${thumbnailFile.absolutePath}")
+
+                val thumbnailMediaFile =
+                    mediaFileProvider.createFromFile(thumbnailFile)
+
+                Log.d("ThumbnailProcess", "썸네일 MediaFile 생성: $thumbnailMediaFile")
+                when (val result =
+                    mediaUploader.uploadMedias(listOf(thumbnailMediaFile))) {
+
+                    is Result.Success -> result.data.firstOrNull()
+                    is Result.Error -> {
+                        Log.e("ThumbnailUpload", "썸네일 업로드 실패: ${result.message}")
+                        null
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("ThumbnailProcess", "썸네일 처리 실패", e)
+                null
+            }
+        }
+    }
+
     private suspend fun createGuestBook(
         uploadedUrls: List<String?>,
+        thumbnailUrls: List<String?> = emptyList(),
         selectedMedias: List<SelectedMedia>,
     ) {
         try {
@@ -178,8 +272,7 @@ constructor(
                     .mapIndexed { index, url ->
                         if (url == null) return@mapIndexed null // 업로드 실패한 미디어는 건너뜀
                         val selectedMedia = selectedMedias.getOrNull(index)
-                        val thumbnailUrl =
-                            if (selectedMedia?.type == UiMediaType.VIDEO) "https://thumbnailurl.com" else null // TODO: 썸네일 URL 처리
+                        val thumbnailUrl = thumbnailUrls.getOrNull(index)
                         GuestBookMedia(
                             id = 0L,
                             type =

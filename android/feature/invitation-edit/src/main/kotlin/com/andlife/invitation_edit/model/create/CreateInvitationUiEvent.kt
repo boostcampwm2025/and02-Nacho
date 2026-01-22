@@ -57,4 +57,6 @@ sealed interface CreateInvitationUiEvent : BaseUiEvent {
     ) : CreateInvitationUiEvent
 
     data object OnClickBack : CreateInvitationUiEvent
+
+    data object OnClickCreate : CreateInvitationUiEvent
 }

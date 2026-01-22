@@ -5,6 +5,7 @@ import com.andlife.InvitationServer.entity.GuestBook
 import com.andlife.InvitationServer.entity.GuestBookAudio
 import com.andlife.InvitationServer.entity.GuestBookImage
 import com.andlife.InvitationServer.entity.GuestBookVideo
+import com.andlife.InvitationServer.entity.VideoPreviewThumbnail
 import com.andlife.InvitationServer.repository.invitation.InvitationRepository
 import com.andlife.InvitationServer.repository.invitation.guestbook.GuestBookRepository
 import com.andlife.InvitationServer.repository.user.UserRepository
@@ -198,6 +199,17 @@ class GuestBookService(
                         durationSeconds = mediaReq.durationSeconds ?: 0,
                         displayOrder = mediaReq.displayOrder
                     )
+                    
+                    // 썸네일이 있는 경우 VideoPreviewThumbnail에도 추가
+                    if (!mediaReq.thumbnailUrl.isNullOrEmpty()) {
+                        val previewThumbnail = VideoPreviewThumbnail(
+                            video = video,
+                            thumbnailUrl = mediaReq.thumbnailUrl,
+                            timeSeconds = 1.0 // 1초 지점의 썸네일: 이후 규칙이 변경되면 해당 부분도 수정 필요
+                        )
+                        video.previewThumbnails.add(previewThumbnail)
+                    }
+                    
                     guestBook.videos.add(video)
                 }
 

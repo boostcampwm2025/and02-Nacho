@@ -23,6 +23,7 @@ internal fun TitleSection(
     title: String,
     onTitleChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     Box(modifier = modifier.background(NachoTheme.colorScheme.backgroundPrimary)) {
         Column(
@@ -38,6 +39,7 @@ internal fun TitleSection(
                     KeyboardOptions.Default.copy(
                         imeAction = ImeAction.Next,
                     ),
+                enabled = !isLoading,
                 modifier = Modifier.fillMaxWidth(),
             )
         }

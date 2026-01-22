@@ -381,9 +381,7 @@ private fun MyInvitationDetailScreenPreview() {
                                         ),
                                 ),
                             invitationCard =
-                                InvitationCardUiModel(
-                                    contentJson = "안녕하세요! 2026년 새해를 맞아 개발자분들과 함께 지식을 나누는 자리를 마련했습니다.",
-                                ),
+                                InvitationCardUiModel(),
                         ),
                 ),
             snackbarHostState = remember { SnackbarHostState() },

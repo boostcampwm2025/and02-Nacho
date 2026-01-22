@@ -1,6 +1,5 @@
 package com.andlife.invitation_card.viewmodel
 
-import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import com.andlife.editor.state.EditorState
 import com.andlife.editor.util.CreateCardSession
@@ -23,10 +22,15 @@ class CreateCardViewModel @Inject constructor(
         if (isLoaded) return
         val editable = createCardSession.editable ?: return
         state.setEditable(editable)
+        state.setBackground(createCardSession.backgroundColor)
         isLoaded = true
     }
 
     fun saveCard() {
-        createCardSession.save(state.editText.text, state.currentTextStyle.backgroundColor.toArgb())
+        createCardSession.save(
+            state.editText.text,
+            state.currentTextStyle.backgroundColor,
+            state.currentBackgroundImageUrl
+        )
     }
 }

@@ -1,6 +1,7 @@
 package com.andlife.InvitationServer.controller.invitation
 
 import com.andlife.InvitationServer.auth.AuthContext
+import com.andlife.InvitationServer.request.invitation.CreateInvitationRequest
 import com.andlife.InvitationServer.request.invitation.guestbook.GuestBookRequest
 import com.andlife.InvitationServer.response.BaseResponse
 import com.andlife.InvitationServer.response.CommonResponseCode
@@ -96,6 +97,31 @@ class InvitationController(
             BaseResponse.error(
                 responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR,
             )
+        }
+    }
+
+    @PostMapping
+    fun createInvitation(
+        @RequestBody request: CreateInvitationRequest
+    ): BaseResponse<InvitationResponse> {
+        return try {
+            val response = invitationService.createInvitation(request)
+            BaseResponse.success(response)
+        } catch (e: IllegalArgumentException) {
+            println(e.message)
+            BaseResponse.error(
+                responseCode = CommonResponseCode.BAD_REQUEST,
+                customMessage = e.message
+            )
+        } catch (e: NoSuchElementException) {
+            println(e.message)
+            BaseResponse.error(
+                responseCode = CommonResponseCode.NOT_FOUND,
+                customMessage = e.message
+            )
+        } catch (e: Exception) {
+            println(e.message)
+            BaseResponse.error(responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
         }
     }
 }
