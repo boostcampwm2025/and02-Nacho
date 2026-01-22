@@ -47,6 +47,7 @@ import com.andlife.myinvitation.R
 import com.andlife.myinvitation.model.detail.MyInvitationDetailSideEffect
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiEvent
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiState
+import com.andlife.myinvitation.screen.guestbook.MyInvitationGuestBookRoute
 import com.andlife.myinvitation.screen.guestbook.collection.MyInvitationCollectionRoute
 import com.andlife.myinvitation.viewmodel.MyInvitationDetailViewModel
 import com.andlife.ui.component.GenericTabRow
@@ -96,6 +97,7 @@ fun MyInvitationDetailRoute(
         uiState = uiState,
         snackbarHostState = snackbarHostState,
         onEvent = viewModel::onEvent,
+        onNavigateBack = onNavigateBack,
         modifier = modifier,
     )
 }
@@ -105,6 +107,7 @@ private fun MyInvitationDetailScreen(
     uiState: MyInvitationDetailUiState,
     snackbarHostState: SnackbarHostState,
     onEvent: (MyInvitationDetailUiEvent) -> Unit,
+    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()
@@ -190,7 +193,7 @@ private fun MyInvitationDetailScreen(
                                 )
                             }
 
-                            1 -> {} // TODO: 방명록 조회 및 작성
+                            1 -> MyInvitationGuestBookRoute(onNavigateBack = onNavigateBack)
                             2 -> MyInvitationCollectionRoute()
                         }
                     },
@@ -386,6 +389,7 @@ private fun MyInvitationDetailScreenPreview() {
                 ),
             snackbarHostState = remember { SnackbarHostState() },
             onEvent = {},
+            onNavigateBack = {},
         )
     }
 }
