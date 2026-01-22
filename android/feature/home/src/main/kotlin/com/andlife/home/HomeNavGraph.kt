@@ -30,12 +30,14 @@ fun NavGraphBuilder.homeNavGraph(
     paddingValues: PaddingValues,
     onNavigateToCreate: () -> Unit,
     onNavigateToInvitationDetail: (Long) -> Unit,
+    onNavigateToMyInvitationDetail: (Long) -> Unit,
     onNavigateToSetting: () -> Unit,
 ) {
     composable<Home> {
         HomeRoute(
             onNavigateToCreate = onNavigateToCreate,
             onNavigateToInvitationDetail = onNavigateToInvitationDetail,
+            onNavigateToMyInvitationDetail = onNavigateToMyInvitationDetail,
             onNavigateToSetting = onNavigateToSetting,
             modifier = Modifier.padding(paddingValues),
         )

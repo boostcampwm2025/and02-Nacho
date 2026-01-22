@@ -3,8 +3,15 @@ package com.andlife.home.model
 import com.andlife.ui.base.BaseUiEvent
 
 sealed interface HomeUiEvent : BaseUiEvent {
+
+    data class ClickUpcomingInvitation(
+        val invitationId: Long,
+        val hostId: Long,
+    ) : HomeUiEvent
+
     data class ClickInvitationTitle(
         val invitationId: Long,
+        val hostId: Long,
     ) : HomeUiEvent
 
     data class ClickVisualMedia(
@@ -19,12 +26,7 @@ sealed interface HomeUiEvent : BaseUiEvent {
 
     data object ClickCreate : HomeUiEvent
 
-    data class ClickUpcomingInvitation(
-        val invitationId: Long,
-    ) : HomeUiEvent
-
     data object Refresh : HomeUiEvent
 
     data object Retry : HomeUiEvent
-
 }

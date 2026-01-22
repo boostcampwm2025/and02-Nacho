@@ -59,6 +59,7 @@ fun NachoNavHost(
                 paddingValues = innerPadding,
                 onNavigateToCreate = navigator::navigateToMyInvitationCreate,
                 onNavigateToInvitationDetail = navigator::navigateToInvitationDetail,
+                onNavigateToMyInvitationDetail = navigator::navigateToMyInvitationDetail,
                 onNavigateToSetting = navigator::navigateToSetting,
             )
 

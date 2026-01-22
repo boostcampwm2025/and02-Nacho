@@ -92,6 +92,7 @@ private const val SKELETON_ITEM_COUNT = 2
 fun HomeRoute(
     onNavigateToCreate: () -> Unit,
     onNavigateToInvitationDetail: (Long) -> Unit,
+    onNavigateToMyInvitationDetail: (Long) -> Unit,
     onNavigateToSetting: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
@@ -117,6 +118,11 @@ fun HomeRoute(
             is HomeSideEffect.NavigateToInvitationDetail -> {
                 isMediaActive = false
                 onNavigateToInvitationDetail(effect.invitationId)
+            }
+
+            is HomeSideEffect.NavigateToMyInvitationDetail -> {
+                isMediaActive = false
+                onNavigateToMyInvitationDetail(effect.invitationId)
             }
 
             is HomeSideEffect.NavigateToSetting -> {
@@ -322,7 +328,9 @@ fun HomeScreen(
             ) {
                 homeUpcomingSection(
                     upcomingInvitations = upcomingInvitations,
-                    onInvitationClick = { id -> onEvent(HomeUiEvent.ClickUpcomingInvitation(id)) },
+                    onInvitationClick = { id, hostId ->
+                        onEvent(HomeUiEvent.ClickUpcomingInvitation(id, hostId))
+                    },
                     onRetryClick = {
                         upcomingInvitations.retry()
                         onEvent(HomeUiEvent.Retry)
@@ -340,7 +348,9 @@ fun HomeScreen(
                         guestBooks.retry()
                         onEvent(HomeUiEvent.Retry)
                     },
-                    onInvitationTitleClick = { id -> onEvent(HomeUiEvent.ClickInvitationTitle(id)) },
+                    onInvitationTitleClick = { id, hostId ->
+                        onEvent(HomeUiEvent.ClickInvitationTitle(id, hostId))
+                    },
                     onVisualMediaClick = { url -> onEvent(HomeUiEvent.ClickVisualMedia(url)) },
                     onAudioMediaClick = { url -> onEvent(HomeUiEvent.ClickAudioMedia(url)) },
                 )
@@ -396,7 +406,7 @@ private fun HomeTopBar(
 
 private fun LazyListScope.homeUpcomingSection(
     upcomingInvitations: LazyPagingItems<UpcomingInvitationUiModel>,
-    onInvitationClick: (Long) -> Unit,
+    onInvitationClick: (invitationId: Long, hostId: Long) -> Unit,
     onRetryClick: () -> Unit,
     onNavigateToCreate: () -> Unit,
 ) {
@@ -484,7 +494,7 @@ private fun LazyListScope.homeUpcomingSection(
                                     startTime = invitation.startTime.toDateTimeSingleLine(),
                                     hostName = invitation.hostInfo.name,
                                     dDayText = dDayText,
-                                    onClick = { onInvitationClick(invitation.id) },
+                                    onClick = { onInvitationClick(invitation.id, invitation.hostId) },
                                 )
                             }
                         }
@@ -550,7 +560,7 @@ private fun LazyListScope.homeGuestBookSection(
     playVideoIndex: Int,
     videoPlayerPool: AutoVideoPlayerPool,
     onRetryClick: () -> Unit,
-    onInvitationTitleClick: (Long) -> Unit,
+    onInvitationTitleClick: (invitationId: Long, hostId: Long) -> Unit,
     onVisualMediaClick: (String) -> Unit,
     onAudioMediaClick: (String) -> Unit,
 ) {
@@ -600,7 +610,12 @@ private fun LazyListScope.homeGuestBookSection(
                         shouldPlayVideo = isMediaActive && (index == playVideoIndex),
                         isAudioPlaying = uiState.isAudioPlaying &&
                             guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
-                        onInvitationTitleClick = { onInvitationTitleClick(guestBook.invitation?.id ?: -1L) },
+                        onInvitationTitleClick = {
+                            onInvitationTitleClick(
+                                guestBook.invitation?.id ?: -1L,
+                                guestBook.invitation?.hostId ?: -1L,
+                            )
+                        },
                         playingAudioUrl = uiState.playingAudioUrl,
                         onVisualMediaClick = { onVisualMediaClick(it.url) },
                         onAudioMediaClick = { onAudioMediaClick(it.url) },
