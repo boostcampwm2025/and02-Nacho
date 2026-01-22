@@ -46,7 +46,6 @@ fun MediaItem(
         modifier =
             modifier
                 .aspectRatio(1f)
-                .clip(RoundedCornerShape(NachoSpacing.small))
                 .clickable { onClick() },
     ) {
         when (mediaType) {
