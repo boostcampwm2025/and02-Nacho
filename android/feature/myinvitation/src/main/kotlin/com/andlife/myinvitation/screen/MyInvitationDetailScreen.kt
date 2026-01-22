@@ -129,88 +129,81 @@ private fun MyInvitationDetailScreen(
     }
 
     BackHandler(onBack = navigateBackWithMapCleanup)
-    PullToRefreshBox(
-        isRefreshing = uiState.isLoading,
-        onRefresh = { onEvent(MyInvitationDetailUiEvent.RetryLoad) },
-    ) {
-        Scaffold(
-            modifier = modifier.fillMaxSize(),
-            snackbarHost = {
-                SnackbarHost(snackbarHostState)
-            },
-            topBar = {
-                MyInvitationDetailTopBar(
-                    title = uiState.invitationContentsUiModel.title,
-                    hasThanksCard = uiState.hasThanksCard,
-                    showActions = !uiState.isLoading && !uiState.isError,
-                    onBack = navigateBackWithMapCleanup,
-                    onClickThanksCard = { onEvent(MyInvitationDetailUiEvent.ClickThanksCard) },
-                    onShare = { onEvent(MyInvitationDetailUiEvent.ClickShare) },
-                    onEdit = { onEvent(MyInvitationDetailUiEvent.ClickEdit) },
-                    onDelete = { onEvent(MyInvitationDetailUiEvent.ClickDelete) },
-                    onCreateThanksCard = { onEvent(MyInvitationDetailUiEvent.CreateThanksCard) },
-                )
-            },
-            containerColor = NachoTheme.colorScheme.backgroundPrimary,
-        ) { paddingValues ->
-            if (uiState.isLoading) {
-                InvitationLoadingIndicator(
-                    modifier = Modifier
-                        .padding(paddingValues),
-                    text = stringResource(R.string.txt_loading_invitation),
-                )
-                return@Scaffold
-            }
 
-            if (uiState.isError) {
-                InvitationLoadingError(
-                    onRetry = { onEvent(MyInvitationDetailUiEvent.RetryLoad) },
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                )
-                return@Scaffold
-            }
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        snackbarHost = {
+            SnackbarHost(snackbarHostState)
+        },
+        topBar = {
+            MyInvitationDetailTopBar(
+                title = uiState.invitationContentsUiModel.title,
+                hasThanksCard = uiState.hasThanksCard,
+                showActions = !uiState.isLoading && !uiState.isError,
+                onBack = navigateBackWithMapCleanup,
+                onClickThanksCard = { onEvent(MyInvitationDetailUiEvent.ClickThanksCard) },
+                onShare = { onEvent(MyInvitationDetailUiEvent.ClickShare) },
+                onEdit = { onEvent(MyInvitationDetailUiEvent.ClickEdit) },
+                onDelete = { onEvent(MyInvitationDetailUiEvent.ClickDelete) },
+                onCreateThanksCard = { onEvent(MyInvitationDetailUiEvent.CreateThanksCard) },
+            )
+        },
+        containerColor = NachoTheme.colorScheme.backgroundPrimary,
+    ) { paddingValues ->
+        if (uiState.isLoading) {
+            InvitationLoadingIndicator(
+                text = stringResource(R.string.txt_loading_invitation),
+                modifier = Modifier.fillMaxSize(),
+            )
+            return@Scaffold
+        }
 
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-            ) {
-                GenericTabRow(
-                    tabs = tabTitles,
-                    content =
-                        { index ->
-                            when (index) {
-                                0 -> {
-                                    MyInvitationContentsScreen(
-                                        uiState = uiState,
-                                        onClickImage =
-                                            { idx ->
-                                                onEvent(
-                                                    MyInvitationDetailUiEvent.ClickImage(
-                                                        uiState.invitationContentsUiModel.imageList,
-                                                        idx,
-                                                    ),
-                                                )
-                                            },
-                                        onClickEditCard = { onEvent(MyInvitationDetailUiEvent.ClickEditCard) },
-                                        onClickCreateCard = { onEvent(MyInvitationDetailUiEvent.ClickCreateCard) },
-                                        onMapError = { onEvent(MyInvitationDetailUiEvent.MapError) },
-                                        onSaveEditableCache = onSaveEditableCache,
-                                        isMapVisible = isMapVisible,
-                                        editCardEnabled = uiState.editCardEnabled,
-                                        modifier = Modifier.fillMaxSize(),
-                                    )
-                                }
+        if (uiState.isError) {
+            InvitationLoadingError(
+                onRetry = { onEvent(MyInvitationDetailUiEvent.RetryLoad) },
+                modifier = Modifier.fillMaxSize(),
+            )
+            return@Scaffold
+        }
 
-                                1 -> {} // TODO: 방명록 조회 및 작성
-                                2 -> MyInvitationCollectionRoute()
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+        ) {
+            GenericTabRow(
+                tabs = tabTitles,
+                content =
+                    { index ->
+                        when (index) {
+                            0 -> {
+                                MyInvitationContentsScreen(
+                                    uiState = uiState,
+                                    onClickImage =
+                                        { idx ->
+                                            onEvent(
+                                                MyInvitationDetailUiEvent.ClickImage(
+                                                    uiState.invitationContentsUiModel.imageList,
+                                                    idx,
+                                                ),
+                                            )
+                                        },
+                                    onClickEditCard = { onEvent(MyInvitationDetailUiEvent.ClickEditCard) },
+                                    onClickCreateCard = { onEvent(MyInvitationDetailUiEvent.ClickCreateCard) },
+                                    onMapError = { onEvent(MyInvitationDetailUiEvent.MapError) },
+                                    onSaveEditableCache = onSaveEditableCache,
+                                    isMapVisible = isMapVisible,
+                                    editCardEnabled = uiState.editCardEnabled,
+                                    modifier = Modifier.fillMaxSize(),
+                                )
                             }
-                        },
-                )
-            }
+
+                            1 -> {} // TODO: 방명록 조회 및 작성
+                            2 -> MyInvitationCollectionRoute()
+                        }
+                    },
+            )
         }
     }
 }

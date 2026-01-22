@@ -8,4 +8,8 @@ sealed interface InvitationGuestBookSideEffect : BaseSideEffect {
     ) : InvitationGuestBookSideEffect
 
     data object CreateGuestBookSuccess : InvitationGuestBookSideEffect
+
+    data object UpdateGuestBookSuccess : InvitationGuestBookSideEffect
+
+    data object DeleteGuestBookSuccess : InvitationGuestBookSideEffect
 }

@@ -1,17 +1,26 @@
 package com.andlife.InvitationServer.service.invitation
 
+import com.andlife.InvitationServer.auth.AuthContext
 import com.andlife.InvitationServer.entity.AnnouncementSection
 import com.andlife.InvitationServer.entity.Invitation
 import com.andlife.InvitationServer.entity.InvitationCard
 import com.andlife.InvitationServer.entity.User
+import com.andlife.InvitationServer.error.BusinessException
 import com.andlife.InvitationServer.repository.invitation.AnnouncementRepository
 import com.andlife.InvitationServer.repository.invitation.InvitationCardRepository
 import com.andlife.InvitationServer.repository.invitation.InvitationRepository
+import com.andlife.InvitationServer.repository.invitation.participant.InvitationParticipantRepository
 import com.andlife.InvitationServer.request.invitation.CreateInvitationRequest
+import com.andlife.InvitationServer.response.CommonResponseCode
+import com.andlife.InvitationServer.response.PagingMetaResponse
+import com.andlife.InvitationServer.response.PagingResponse
 import com.andlife.InvitationServer.request.invitation.InvitationCardRequest
 import com.andlife.InvitationServer.response.invitation.AnnouncementResponse
 import com.andlife.InvitationServer.response.invitation.InvitationCardResponse
 import com.andlife.InvitationServer.response.invitation.InvitationResponse
+import com.andlife.InvitationServer.response.invitation.UpcomingInvitationResponse
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -24,7 +33,14 @@ class InvitationService(
     private val invitationRepository: InvitationRepository,
     private val invitationCardRepository: InvitationCardRepository,
     private val announcementRepository: AnnouncementRepository,
+    private val participantRepository: InvitationParticipantRepository
 ) {
+    @Transactional(readOnly = true)
+    fun getParticipantInvitations(userId: Long) : List<Long> {
+        val participants = participantRepository.findAllByUserIdWithInvitation(userId)
+        // 임시로 아이디들만 반환하게 구현
+        return participants.map { it.invitation.id }
+    }
 
     @Transactional
     fun createInvitationCard(invitationId: Long, request: InvitationCardRequest): Long {
@@ -191,6 +207,61 @@ class InvitationService(
                     displayOrder = announcement.displayOrder,
                 )
             },
+        )
+    }
+
+    fun getUpcomingInvitations(
+        authContext: AuthContext,
+        days: Long,
+        pageable: Pageable
+    ): PagingResponse<UpcomingInvitationResponse> {
+
+        val today = LocalDate.now()
+        val limitDate = today.plusDays(days)
+
+        val currentUserId = (authContext as? AuthContext.Member)?.userId
+
+        val upcomingInvitationsPage = when (authContext) {
+            is AuthContext.Member -> {
+                invitationRepository.findUpcomingInvitationsWithinDays(
+                    userId = authContext.userId,
+                    today = today,
+                    limitDate = limitDate,
+                    pageable = pageable
+                )
+            }
+            is AuthContext.Guest -> {
+                Page.empty(pageable) //TODO: 비로그인 유저 임시 빈값 조회
+            }
+        }
+
+        val responsePage = upcomingInvitationsPage.map { invitation ->
+            try {
+                UpcomingInvitationResponse(
+                    id = invitation.id,
+                    hostId = invitation.host.id,
+                    isOwner = invitation.host.id == currentUserId,
+                    title = invitation.title,
+                    thumbnailUrl = invitation.thumbnailUrls.firstOrNull(),
+                    invitationDate = invitation.invitationDate.toString(),
+                    startTime = invitation.startTime.toString(),
+                    displayHostName = invitation.displayHostName,
+                    hostProfileUrl = invitation.host.profileImageUrl,
+                )
+            } catch (e: Exception) {
+                println("ERROR: Mapping failed for Invitation ID ${invitation.id}: ${e.message}")
+                throw e
+            }
+        }
+
+        return PagingResponse(
+            meta = PagingMetaResponse(
+                isEnd = !responsePage.hasNext(),
+                pageableCount = responsePage.numberOfElements,
+                totalCount = responsePage.totalElements,
+                currentPage = responsePage.number + 1
+            ),
+            content = responsePage.content
         )
     }
 }

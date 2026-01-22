@@ -4,6 +4,7 @@ import com.andlife.network.BuildConfig
 import com.andlife.network.api.guestbook.GuestBookService
 import com.andlife.network.api.invitation.InvitationService
 import com.andlife.network.api.media.MediaService
+import com.andlife.network.interceptor.AuthInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,10 +26,14 @@ object InvitationNetworkModule {
     @Provides
     @Singleton
     @Invitation
-    fun provideInvitationOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient =
+    fun provideInvitationOkHttpClient(
+        loggingInterceptor: HttpLoggingInterceptor,
+        authInterceptor: AuthInterceptor
+    ): OkHttpClient =
         OkHttpClient
             .Builder()
             .addInterceptor(loggingInterceptor)
+            .addInterceptor(authInterceptor)
             .build()
 
     @Provides
@@ -48,10 +53,14 @@ object InvitationNetworkModule {
     @Provides
     @Singleton
     @InvitationMedia
-    fun provideMediaOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient =
+    fun provideMediaOkHttpClient(
+        loggingInterceptor: HttpLoggingInterceptor,
+        authInterceptor: AuthInterceptor
+    ): OkHttpClient =
         OkHttpClient
             .Builder()
             .addInterceptor(loggingInterceptor)
+            .addInterceptor(authInterceptor)
             .connectTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)

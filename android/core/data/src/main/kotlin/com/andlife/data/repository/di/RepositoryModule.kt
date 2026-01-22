@@ -3,9 +3,11 @@ package com.andlife.data.repository.di
 import com.andlife.data.repository.address.AddressRepositoryImpl
 import com.andlife.data.repository.guestbook.GuestBookRepositoryImpl
 import com.andlife.data.repository.invitation.InvitationRepositoryImpl
+import com.andlife.data.repository.user.UserRepositoryImpl
 import com.andlife.domain.repository.address.AddressRepository
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.repository.invitation.InvitationRepository
+import com.andlife.domain.repository.user.UserRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -25,5 +27,9 @@ internal abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindInvitationDetailRepository(invitationDetailRepositoryImpl: InvitationRepositoryImpl): InvitationRepository
+    abstract fun bindInvitationRepository(invitationRepositoryImpl: InvitationRepositoryImpl): InvitationRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindUserRepository(userRepositoryImpl: UserRepositoryImpl): UserRepository
 }

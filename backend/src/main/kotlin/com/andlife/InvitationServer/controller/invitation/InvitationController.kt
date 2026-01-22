@@ -1,12 +1,14 @@
 package com.andlife.InvitationServer.controller.invitation
 
 import com.andlife.InvitationServer.request.invitation.CreateInvitationRequest
+import com.andlife.InvitationServer.auth.AuthContext
 import com.andlife.InvitationServer.request.invitation.InvitationCardRequest
 import com.andlife.InvitationServer.request.invitation.guestbook.GuestBookRequest
 import com.andlife.InvitationServer.response.BaseResponse
 import com.andlife.InvitationServer.response.CommonResponseCode
 import com.andlife.InvitationServer.response.PagingResponse
 import com.andlife.InvitationServer.response.invitation.InvitationResponse
+import com.andlife.InvitationServer.response.invitation.UpcomingInvitationResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.CollectionResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookResponse
 import com.andlife.InvitationServer.service.invitation.InvitationService
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -28,6 +31,20 @@ class InvitationController(
     private val invitationService: InvitationService,
     private val guestBookService: GuestBookService,
 ) {
+    @GetMapping("/me")
+    fun getMyInvitationIds(
+        authContext: AuthContext
+    ): BaseResponse<List<Long>> {
+        return when (authContext) {
+            is AuthContext.Member -> {
+                val ids = invitationService.getParticipantInvitations(authContext.userId)
+                BaseResponse.success(ids)
+            }
+            is AuthContext.Guest -> {
+                BaseResponse.success(null)
+            }
+        }
+    }
 
     @GetMapping("/{invitationId}")
     fun getInvitation(
@@ -48,9 +65,10 @@ class InvitationController(
     @GetMapping("/{invitationId}/guestbooks")
     fun getGuestBooks(
         @PathVariable invitationId: Long,
+        authContext: AuthContext,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): BaseResponse<PagingResponse<GuestBookResponse>> {
-        val result = guestBookService.getGuestBooks(invitationId, pageable)
+        val result = guestBookService.getGuestBooks(invitationId, pageable, authContext)
         return BaseResponse.success(result)
     }
 
@@ -71,6 +89,15 @@ class InvitationController(
                 responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR,
             )
         }
+    }
+
+    @GetMapping("/guestbooks/all")
+    fun getAllRelatedGuestBooks(
+        authContext: AuthContext,
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
+    ): BaseResponse<PagingResponse<GuestBookResponse>> {
+        val result = guestBookService.getAllRelatedGuestBooks(authContext, pageable)
+        return BaseResponse.success(result)
     }
 
     @PostMapping("/{invitationId}/cards")
@@ -137,5 +164,15 @@ class InvitationController(
             println(e.message)
             BaseResponse.error(responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
         }
+    }
+
+    @GetMapping("/upcoming")
+    fun getUpcomingInvitations(
+        authContext: AuthContext,
+        @RequestParam(defaultValue = "30") days: Long,
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
+    ): BaseResponse<PagingResponse<UpcomingInvitationResponse>> {
+        val result = invitationService.getUpcomingInvitations(authContext, days, pageable)
+        return BaseResponse.success(result)
     }
 }
