@@ -19,11 +19,14 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.component.loading.InvitationLoadingError
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.isUnspecified
+import com.andlife.designsystem.preview.PreviewTheme
 
 @Composable
 fun InvitationScheduleListItemSkeleton(
@@ -34,6 +37,17 @@ fun InvitationScheduleListItemSkeleton(
     val skeletonColor = NachoTheme.colorScheme.backgroundSecondary
     val cardColor = NachoTheme.colorScheme.backgroundPrimary
     val defaultShape = RoundedCornerShape(NachoSpacing.xSmall)
+
+    val density = LocalDensity.current
+
+    val titleHeight = with(density) {
+        val lineHeight = NachoTheme.typography.bodyLargeSemiBold.lineHeight
+        if (lineHeight.isUnspecified) 24.sp.toDp() else lineHeight.toDp()
+    }
+    val bodyHeight = with(density) {
+        val lineHeight = NachoTheme.typography.bodyMediumRegular.lineHeight
+        if (lineHeight.isUnspecified) 20.sp.toDp() else lineHeight.toDp()
+    }
 
     Card(
         shape = NachoTheme.shapes.medium,
@@ -66,7 +80,7 @@ fun InvitationScheduleListItemSkeleton(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(NachoSpacing.twoXLarge)
+                            .height(titleHeight)
                             .background(skeletonColor, defaultShape)
                     )
 
@@ -74,8 +88,8 @@ fun InvitationScheduleListItemSkeleton(
 
                     Box(
                         modifier = Modifier
-                            .width(NachoIconSize.xLarge)
-                            .height(NachoSpacing.twoXLarge)
+                            .width(NachoSpacing.threeXLarge)
+                            .height(titleHeight)
                             .background(skeletonColor, RoundedCornerShape(NachoSpacing.twoXLarge))
                     )
                 }
@@ -83,16 +97,24 @@ fun InvitationScheduleListItemSkeleton(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.6f)
-                        .height(NachoSpacing.xLarge)
+                        .height(bodyHeight)
                         .background(skeletonColor, defaultShape)
                 )
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.4f)
-                        .height(NachoSpacing.xLarge)
+                        .height(bodyHeight)
                         .background(skeletonColor, defaultShape)
                 )
             }
         }
+    }
+}
+
+@PreviewTheme
+@Composable
+private fun InvitationScheduleListItemSkeletonPreview() {
+    NachoTheme {
+        InvitationScheduleListItemSkeleton()
     }
 }
