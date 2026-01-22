@@ -63,6 +63,7 @@ import com.andlife.model.guestbook.GuestBookMediaUiModel
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.ui.R
+import com.andlife.ui.component.icon.PlayerThumbnailIcon
 import com.andlife.ui.component.media.MediaOverlay
 import com.andlife.ui.util.toFormatDuration
 import com.andlife.ui.util.toRelativeTimeString
@@ -542,23 +543,7 @@ private fun ThumbnailWrapper(
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Fit,
         )
-        Box(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .size(48.dp)
-                .background(
-                    color = NachoTheme.colorScheme.iconSecondary.copy(alpha = 0.6f),
-                    shape = CircleShape,
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_play_arrow_24),
-                contentDescription = stringResource(R.string.desc_play_video),
-                tint = NachoTheme.colorScheme.iconTertiary,
-                modifier = Modifier.size(24.dp),
-            )
-        }
+        PlayerThumbnailIcon(modifier = Modifier.align(Alignment.Center))
     }
 }
 
