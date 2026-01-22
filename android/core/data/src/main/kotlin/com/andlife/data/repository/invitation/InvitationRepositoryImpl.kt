@@ -36,4 +36,12 @@ internal class InvitationRepositoryImpl @Inject constructor(
         val cardRequest = card.toRequest(json)
         return invitationRemoteDataSource.createInvitationCard(invitationId, cardRequest)
     }
+
+    override suspend fun updateCard(
+        cardId: Long,
+        card: NachoCard
+    ): Result<Long, DataError> {
+        val cardRequest = card.toRequest(json)
+        return invitationRemoteDataSource.updateInvitationCard(cardId, cardRequest)
+    }
 }

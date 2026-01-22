@@ -10,4 +10,5 @@ interface InvitationRemoteDataSource {
     suspend fun createInvitation(request: CreateInvitationRequest): Result<InvitationResponse, DataError>
     suspend fun getInvitation(invitationId: Long): Result<InvitationResponse, DataError>
     suspend fun createInvitationCard(invitationId: Long, request: InvitationCardRequest): Result<Long, DataError>
+    suspend fun updateInvitationCard(cardId: Long, request: InvitationCardRequest): Result<Long, DataError>
 }
