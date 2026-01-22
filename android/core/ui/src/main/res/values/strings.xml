@@ -23,6 +23,15 @@
     </string-array>
     <string name="format_invitation_d_day">D-%1$d</string>
     <string name="format_invitation_d_day_today">D-Day</string>
+    <string name="format_total_invitation_count">총 %d개의 초대</string>
+
+    <string name="label_sort_imminent">빠른 일정순</string>
+    <string name="label_sort_distant">늦은 일정순</string>
+
+    <string-array name="arr_invitation_sort_options">
+        <item>@string/label_sort_imminent</item>
+        <item>@string/label_sort_distant</item>
+    </string-array>
 
     <!--  모아보기 Media  -->
     <string name="desc_media_image">방명록의 이미지</string>
