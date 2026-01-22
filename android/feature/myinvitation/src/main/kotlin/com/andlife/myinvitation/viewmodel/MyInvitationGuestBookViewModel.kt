@@ -331,13 +331,7 @@ constructor(
         updateState { copy(isUploading = false) }
         when (result) {
             is Result.Success -> {
-                updateState {
-                    copy(
-                        editingGuestBookId = null,
-                        selectedMedias = persistentListOf(),
-                        textContent = ""
-                    )
-                }
+                clearFormInput()
                 if (isUpdate) {
                     sendEffect(MyInvitationGuestBookSideEffect.UpdateGuestBookSuccess)
                 } else {
@@ -374,12 +368,14 @@ constructor(
         refreshFlow.value += 1
     }
 
-    private fun cancelEdit() {
+    private fun cancelEdit() = clearFormInput()
+
+    private fun clearFormInput() {
         updateState {
             copy(
-                editingGuestBookId = null,
-                selectedMedias = persistentListOf(),
                 textContent = "",
+                selectedMedias = persistentListOf(),
+                editingGuestBookId = null,
                 originalTextContent = "",
                 originalMediaIds = emptySet(),
             )

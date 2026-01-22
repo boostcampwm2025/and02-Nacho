@@ -256,14 +256,18 @@ private fun InvitationGuestBookScreen(
         }
     }
 
-    BackHandler(enabled = !isImVisible) {
+    LaunchedEffect(isImVisible) {
+        if (!isImVisible) focusManager.clearFocus()
+    }
+
+    BackHandler(enabled = true) {
         when {
+            isImVisible -> {
+                focusManager.clearFocus()
+            }
             uiState.editingGuestBookId != null -> {
                 focusManager.clearFocus()
                 onEvent(MyInvitationGuestBookUiEvent.CancelEdit)
-            }
-            isTextFieldFocused -> {
-                focusManager.clearFocus()
             }
             else -> {
                 navigateBackWithCleanup()
