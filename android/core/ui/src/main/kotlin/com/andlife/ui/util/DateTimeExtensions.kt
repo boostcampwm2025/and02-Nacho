@@ -6,6 +6,11 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format
 import kotlinx.datetime.format.char
+import kotlinx.datetime.toJavaLocalDate
+import kotlinx.datetime.toJavaLocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.Locale
 
 object DateTimeConstants {
     const val YEAR = "년"
@@ -59,3 +64,9 @@ fun String.toDateTime(): String =
     }
 
 fun LocalDateTime.toDateTimeFormat(): String = this.format(dateTimeFormat)
+
+fun LocalDateTime.toFullDisplayString(locale: Locale = Locale.getDefault()): String {
+    val pattern = "yyyy년 M월 d일 (E) a h시"
+    val formatter = DateTimeFormatter.ofPattern(pattern, locale)
+    return this.toJavaLocalDateTime().format(formatter)
+}
