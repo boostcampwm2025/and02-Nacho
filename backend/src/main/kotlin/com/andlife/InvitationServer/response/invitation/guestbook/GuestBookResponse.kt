@@ -20,7 +20,6 @@ data class GuestBookResponse(
 
 data class GuestBookInvitationResponse(
     val id: Long,
-    val hostId: Long,
     val title: String,
 )
 
@@ -78,7 +77,6 @@ fun GuestBook.toGuestBookResponse(): GuestBookResponse {
         author = author,
         invitation = GuestBookInvitationResponse(
             id = this.invitation.id,
-            hostId = this.invitation.host.id,
             title = this.invitation.title
         ),
         textContent = this.textContent,
