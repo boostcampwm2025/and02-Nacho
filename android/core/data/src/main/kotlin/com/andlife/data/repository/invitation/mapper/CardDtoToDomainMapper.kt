@@ -11,7 +11,7 @@ import com.andlife.network.model.card.SpanStyleDto
 import com.andlife.network.model.card.StyledSpanDto
 import com.andlife.network.model.card.TextAlignmentDto
 
-fun NachoCardDto.toDomain(): NachoCard {
+fun NachoCardDto.toDomain(id :Long): NachoCard {
     return NachoCard(
         id = id,
         content = content.toDomain(),
