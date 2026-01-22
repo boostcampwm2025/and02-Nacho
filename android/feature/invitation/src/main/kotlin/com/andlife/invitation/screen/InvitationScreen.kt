@@ -30,6 +30,8 @@ import com.andlife.ui.R
 import com.andlife.ui.component.GenericTabRow
 import com.andlife.ui.component.invitation.InvitationTopBar
 import com.andlife.ui.component.listitem.InvitationListItem
+import com.andlife.ui.component.loading.InvitationLoadingIndicator
+import com.andlife.ui.component.paging.PagingStateContent
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.collections.immutable.toImmutableList
 
@@ -108,33 +110,43 @@ private fun InvitationScreen(
                     },
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(NachoSpacing.large),
-                        verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
+                    PagingStateContent(
+                        loadState = currentItems.loadState.refresh,
+                        itemCount = currentItems.itemCount,
+                        onRetry = { currentItems.retry() }
                     ) {
-                        items(
-                            count = currentItems.itemCount,
-                            key = currentItems.itemKey { it.id }
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(NachoSpacing.large),
+                            verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
+                        ) {
+                            items(
+                                count = currentItems.itemCount,
+                                key = currentItems.itemKey { it.id }
+                            ) { index ->
+                                currentItems[index]?.let { invitation ->
+                                    val dDayLabel = when (val count = invitation.dDayCount) {
+                                        null -> null
+                                        0 -> stringResource(R.string.format_invitation_d_day_today)
+                                        else -> stringResource(R.string.format_invitation_d_day, count)
+                                    }
 
-                        ) { index ->
-                            currentItems[index]?.let { invitation ->
-
-                                val dDayLabel = when (val count = invitation.dDayCount) {
-                                    null -> null
-                                    0 -> stringResource(R.string.format_invitation_d_day_today)
-                                    else -> stringResource(R.string.format_invitation_d_day, count)
+                                    InvitationListItem(
+                                        imageUrl = invitation.thumbnailUrls.firstOrNull() ?: "",
+                                        title = invitation.title,
+                                        startTime = invitation.invitationDateTime,
+                                        hostName = invitation.displayHostName,
+                                        address = invitation.address,
+                                        dDayText = dDayLabel,
+                                        onClick = { onEvent(InvitationUiEvent.ClickInvitation(invitation.id)) }
+                                    )
                                 }
+                            }
 
-                                InvitationListItem(
-                                    imageUrl = invitation.thumbnailUrls.first(),
-                                    title = invitation.title,
-                                    startTime = invitation.invitationDateTime,
-                                    hostName = invitation.displayHostName,
-                                    address = invitation.address,
-                                    dDayText = dDayLabel,
-                                    onClick = { onEvent(InvitationUiEvent.ClickInvitation(invitation.id)) }
-                                )
+                            if (currentItems.loadState.append is LoadState.Loading) {
+                                item {
+                                    InvitationLoadingIndicator(modifier = Modifier.padding(NachoSpacing.medium))
+                                }
                             }
                         }
                     }
