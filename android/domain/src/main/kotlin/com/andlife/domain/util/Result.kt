@@ -27,10 +27,10 @@ inline fun <D, E : InvitationError> Result<D, E>.onSuccess(action: (data: D) -> 
     return this
 }
 
-inline fun <D, E : InvitationError> Result<D, E>.onFailure(action: (error: E) -> Unit
+inline fun <D, E : InvitationError> Result<D, E>.onFailure(action: (error: E, msg: String?) -> Unit
 ): Result<D, E> {
     if (this is Result.Error) {
-        action(error)
+        action(error, message)
     }
     return this
 }
