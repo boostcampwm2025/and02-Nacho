@@ -50,7 +50,6 @@ fun AuthorResponse.toDomain(): Author =
 fun GuestBookInvitationResponse.toDomain(): GuestBookInvitation =
     GuestBookInvitation(
         id = id,
-        hostId = hostId,
         title = title,
     )
 

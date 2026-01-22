@@ -649,7 +649,6 @@ private fun GuestBookItemPreview() {
                             invitation =
                                 GuestBookInvitationUiModel(
                                     id = 1001L,
-                                    hostId = 1L,
                                     title = "우리 결혼해요!",
                                 ),
                             author =
@@ -713,7 +712,6 @@ private fun GuestBookItemPreview() {
                             invitation =
                                 GuestBookInvitationUiModel(
                                     id = 1001L,
-                                    hostId = 1L,
                                     title = "우리 결혼해요!",
                                 ),
                             author =
