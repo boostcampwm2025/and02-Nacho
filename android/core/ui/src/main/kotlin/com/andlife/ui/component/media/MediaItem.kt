@@ -26,8 +26,9 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
-import com.andlife.ui.R
 import com.andlife.model.guestbook.UiMediaType
+import com.andlife.ui.R
+import com.andlife.ui.component.icon.PlayerThumbnailIcon
 import com.andlife.ui.util.toFormatDuration
 
 @Composable
@@ -78,9 +79,12 @@ fun MediaItem(
                     }
                 )
             }
+
             UiMediaType.AUDIO -> {
                 Box(
-                    modifier = Modifier.fillMaxSize().background(NachoTheme.colorScheme.backgroundSecondary),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(NachoTheme.colorScheme.backgroundSecondary),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
@@ -91,6 +95,7 @@ fun MediaItem(
                     )
                 }
             }
+
             UiMediaType.VIDEO -> {
                 Box(modifier = Modifier.fillMaxSize()) {
                     SubcomposeAsyncImage(
@@ -120,11 +125,9 @@ fun MediaItem(
                             )
                         }
                     )
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_play_circle_24),
-                        contentDescription = stringResource(R.string.desc_ic_play),
-                        modifier = Modifier.align(Alignment.Center).size(NachoIconSize.xLarge),
-                        tint = NachoTheme.colorScheme.iconTertiary.copy(alpha = 0.8f),
+                    PlayerThumbnailIcon(
+                        modifier = Modifier.align(Alignment.Center),
+                        boxSize = NachoIconSize.large
                     )
                 }
             }
@@ -133,7 +136,9 @@ fun MediaItem(
         if (duration != null && duration > 0) {
             MediaOverlay(
                 text = duration.toFormatDuration(),
-                modifier = Modifier.align(Alignment.BottomEnd).padding(NachoSpacing.small),
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(NachoSpacing.small),
             )
         }
 
@@ -144,7 +149,8 @@ fun MediaItem(
                     Modifier
                         .align(
                             Alignment.TopEnd,
-                        ).size(NachoIconSize.medium)
+                        )
+                        .size(NachoIconSize.medium)
                         .padding(NachoSpacing.xSmall),
             ) {
                 Icon(
