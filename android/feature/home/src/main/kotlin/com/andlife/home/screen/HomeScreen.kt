@@ -326,34 +326,36 @@ fun HomeScreen(
                     bottom = paddingValues.calculateBottomPadding(),
                 ),
             ) {
-                homeUpcomingSection(
-                    upcomingInvitations = upcomingInvitations,
-                    onInvitationClick = { id, hostId ->
-                        onEvent(HomeUiEvent.ClickUpcomingInvitation(id, hostId))
-                    },
-                    onRetryClick = {
-                        upcomingInvitations.retry()
-                        onEvent(HomeUiEvent.Retry)
-                    },
-                    onNavigateToCreate = { onEvent(HomeUiEvent.ClickCreate) },
-                )
+                if (isMediaActive) {
+                    homeUpcomingSection(
+                        upcomingInvitations = upcomingInvitations,
+                        onInvitationClick = { id, hostId ->
+                            onEvent(HomeUiEvent.ClickUpcomingInvitation(id, hostId))
+                        },
+                        onRetryClick = {
+                            upcomingInvitations.retry()
+                            onEvent(HomeUiEvent.Retry)
+                        },
+                        onNavigateToCreate = { onEvent(HomeUiEvent.ClickCreate) },
+                    )
 
-                homeGuestBookSection(
-                    isMediaActive = isMediaActive,
-                    guestBooks = guestBooks,
-                    uiState = uiState,
-                    playVideoIndex = playVideoIndex,
-                    videoPlayerPool = videoPlayerPool,
-                    onRetryClick = {
-                        guestBooks.retry()
-                        onEvent(HomeUiEvent.Retry)
-                    },
-                    onInvitationTitleClick = { id, hostId ->
-                        onEvent(HomeUiEvent.ClickInvitationTitle(id, hostId))
-                    },
-                    onVisualMediaClick = { url -> onEvent(HomeUiEvent.ClickVisualMedia(url)) },
-                    onAudioMediaClick = { url -> onEvent(HomeUiEvent.ClickAudioMedia(url)) },
-                )
+                    homeGuestBookSection(
+                        isMediaActive = isMediaActive,
+                        guestBooks = guestBooks,
+                        uiState = uiState,
+                        playVideoIndex = playVideoIndex,
+                        videoPlayerPool = videoPlayerPool,
+                        onRetryClick = {
+                            guestBooks.retry()
+                            onEvent(HomeUiEvent.Retry)
+                        },
+                        onInvitationTitleClick = { id, hostId ->
+                            onEvent(HomeUiEvent.ClickInvitationTitle(id, hostId))
+                        },
+                        onVisualMediaClick = { url -> onEvent(HomeUiEvent.ClickVisualMedia(url)) },
+                        onAudioMediaClick = { url -> onEvent(HomeUiEvent.ClickAudioMedia(url)) },
+                    )
+                }
             }
         }
     }
@@ -574,67 +576,66 @@ private fun LazyListScope.homeGuestBookSection(
         )
     }
 
-    if (isMediaActive) {
-        val refreshState = guestBooks.loadState.refresh
-        val isInitialLoading = refreshState is LoadState.Loading && guestBooks.itemCount == 0
-        val isInitialError = refreshState is LoadState.Error && guestBooks.itemCount == 0
-        val isEmpty = refreshState is LoadState.NotLoading && guestBooks.itemCount == 0
 
-        if (isInitialLoading || isInitialError || isEmpty) {
-            item {
-                GuestBookStatusContent(
-                    modifier = Modifier.padding(horizontal = NachoSpacing.large),
-                    isLoading = isInitialLoading,
-                    title = when {
-                        isInitialError -> stringResource(R.string.error_msg_failed_load_post)
-                        isEmpty -> stringResource(R.string.txt_empty_new_post_desc)
-                        else -> null
+    val refreshState = guestBooks.loadState.refresh
+    val isInitialLoading = refreshState is LoadState.Loading && guestBooks.itemCount == 0
+    val isInitialError = refreshState is LoadState.Error && guestBooks.itemCount == 0
+    val isEmpty = refreshState is LoadState.NotLoading && guestBooks.itemCount == 0
+
+    if (isInitialLoading || isInitialError || isEmpty) {
+        item {
+            GuestBookStatusContent(
+                modifier = Modifier.padding(horizontal = NachoSpacing.large),
+                isLoading = isInitialLoading,
+                title = when {
+                    isInitialError -> stringResource(R.string.error_msg_failed_load_post)
+                    isEmpty -> stringResource(R.string.txt_empty_new_post_desc)
+                    else -> null
+                },
+                buttonText = if (isInitialError) stringResource(R.string.txt_action_retry) else null,
+                onButtonClick = if (isInitialError) onRetryClick else null
+            )
+        }
+    } else {
+        items(
+            count = guestBooks.itemCount,
+            key = { index ->
+                val id = guestBooks.itemKey { it.id }.invoke(index)
+                "$GUESTBOOK_KEY_PREFIX$id"
+            },
+        ) { index ->
+            guestBooks[index]?.let { guestBook ->
+                GuestBookItem(
+                    modifier = Modifier.animateItem(),
+                    guestBook = guestBook,
+                    videoPlayerPool = videoPlayerPool,
+                    shouldPlayVideo = isMediaActive && (index == playVideoIndex),
+                    isAudioPlaying = uiState.isAudioPlaying &&
+                        guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
+                    onInvitationTitleClick = {
+                        onInvitationTitleClick(
+                            guestBook.invitation?.id ?: -1L,
+                            guestBook.invitation?.hostId ?: -1L,
+                        )
                     },
-                    buttonText = if (isInitialError) stringResource(R.string.txt_action_retry) else null,
-                    onButtonClick = if (isInitialError) onRetryClick else null
+                    playingAudioUrl = uiState.playingAudioUrl,
+                    onVisualMediaClick = { onVisualMediaClick(it.url) },
+                    onAudioMediaClick = { onAudioMediaClick(it.url) },
+                    onMenuClick = { },
                 )
             }
-        } else {
-            items(
-                count = guestBooks.itemCount,
-                key = { index ->
-                    val id = guestBooks.itemKey { it.id }.invoke(index)
-                    "$GUESTBOOK_KEY_PREFIX$id"
-                },
-            ) { index ->
-                guestBooks[index]?.let { guestBook ->
-                    GuestBookItem(
-                        modifier = Modifier.animateItem(),
-                        guestBook = guestBook,
-                        videoPlayerPool = videoPlayerPool,
-                        shouldPlayVideo = isMediaActive && (index == playVideoIndex),
-                        isAudioPlaying = uiState.isAudioPlaying &&
-                            guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
-                        onInvitationTitleClick = {
-                            onInvitationTitleClick(
-                                guestBook.invitation?.id ?: -1L,
-                                guestBook.invitation?.hostId ?: -1L,
-                            )
-                        },
-                        playingAudioUrl = uiState.playingAudioUrl,
-                        onVisualMediaClick = { onVisualMediaClick(it.url) },
-                        onAudioMediaClick = { onAudioMediaClick(it.url) },
-                        onMenuClick = { },
-                    )
-                }
-            }
         }
+    }
 
-        if (guestBooks.loadState.append is LoadState.Loading) {
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(NachoSpacing.large),
-                    contentAlignment = Alignment.Center
-                ) {
-                    InvitationLoadingIndicator()
-                }
+    if (guestBooks.loadState.append is LoadState.Loading) {
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(NachoSpacing.large),
+                contentAlignment = Alignment.Center
+            ) {
+                InvitationLoadingIndicator()
             }
         }
     }
