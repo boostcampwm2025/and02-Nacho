@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="txt_title_home">홈</string>
+    <string name="txt_loading_home">데이터를 불러오는 중입니다.</string>
+    <string name="desc_top_bar_setting">설정 화면으로 이동하는 아이콘 버튼</string>
+
+    <string name="txt_title_upcoming_schedule">다가오는 초대</string>
+    <string name="txt_empty_upcoming_title">다가오는 일정이 없어요</string>
+    <string name="txt_empty_upcoming_desc">새로운 초대를 생성해 보세요!</string>
+    <string name="txt_action_create_invitation">초대장 작성 바로가기</string>
+    <string name="txt_error_upcoming_title">일정을 불러오지 못했어요</string>
+    <string name="txt_error_upcoming_desc">네트워크 연결을 확인해주세요</string>
+    <string name="txt_action_retry">재시도</string>
+
+    <string name="txt_title_new_post">최신 게시글</string>
+    <string name="txt_empty_new_post_desc">작성된 방명록이 없습니다.\n초대에 참여하여 첫 인사를 남겨보세요!</string>
+    <string name="error_msg_failed_load_post">최신 게시글을 불러오지 못했어요</string>
+
+    <string name="txt_title_setting">설정</string>
+    <string name="desc_top_bar_back">설정 뒤로가기 아이콘 버튼</string>
+
+    <string name="snack_refresh_success">새로운 소식을 불러왔어요</string>
+    <string name="snack_refresh_failure">잠시 후 다시 시도해 주세요</string>
+</resources>

@@ -30,4 +30,6 @@ interface GuestBookRepository {
     ): Result<GuestBook, DataError>
 
     suspend fun deleteGuestBook(guestBookId: Long): Result<Long, DataError>
+
+    fun getAllRelatedGuestBooks(): Flow<PagingData<GuestBook>>
 }

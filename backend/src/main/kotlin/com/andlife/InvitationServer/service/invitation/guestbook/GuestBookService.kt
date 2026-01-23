@@ -14,11 +14,13 @@ import com.andlife.InvitationServer.response.CommonResponseCode
 import com.andlife.InvitationServer.response.PagingMetaResponse
 import com.andlife.InvitationServer.response.PagingResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.CollectionResponse
+import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookInvitationResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookMediaResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.toGuestBookResponse
 import com.andlife.InvitationServer.service.media.MediaService
 import jakarta.persistence.EntityNotFoundException
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -327,5 +329,61 @@ class GuestBookService(
             keys.add(mediaService.extractKey(it.thumbnailUrl))
         }
         return keys
+    }
+
+    fun getAllRelatedGuestBooks(
+        authContext: AuthContext,
+        pageable: Pageable
+    ): PagingResponse<GuestBookResponse> {
+
+        val guestBooksPage = when (authContext) {
+            is AuthContext.Member -> {
+                guestBookRepository.findAllByMyRelatedInvitations(authContext.userId, pageable)
+            }
+            is AuthContext.Guest -> {
+                Page.empty(pageable) //TODO: 비로그인 유저 임시 빈값 조회
+            }
+        }
+
+        val responsePage = guestBooksPage.map { guestBook ->
+            val allMedia = mutableListOf<GuestBookMediaResponse>().apply {
+                addAll(guestBook.images.map { GuestBookMediaResponse(it.id, MediaType.IMAGE, it.imageUrl, null, null, it.displayOrder) })
+                addAll(guestBook.videos.map { GuestBookMediaResponse(it.id, MediaType.VIDEO, it.videoUrl, it.thumbnailUrl, it.durationSeconds, it.displayOrder) })
+                addAll(guestBook.audios.map { GuestBookMediaResponse(it.id, MediaType.AUDIO, it.audioUrl, null, it.durationSeconds, it.displayOrder) })
+            }.sortedBy { it.displayOrder }
+
+            val (audioMedias, visualMedias) = allMedia.partition { it.type == MediaType.AUDIO }
+            val isOwner = (authContext is AuthContext.Member && guestBook.user.id == authContext.userId)
+
+            GuestBookResponse(
+                id = guestBook.id,
+                author = AuthorResponse(
+                    id = guestBook.user.id,
+                    name = guestBook.user.name,
+                    profileImageUrl = guestBook.user.profileImageUrl
+                ),
+                invitation = GuestBookInvitationResponse(
+                    id = guestBook.invitation.id,
+                    title = guestBook.invitation.title
+                ),
+                textContent = guestBook.textContent,
+                visualMedias = visualMedias,
+                audioMedias = audioMedias,
+                totalVisualCount = visualMedias.size,
+                isOwner = isOwner,
+                createdAt = guestBook.createdAt,
+                updatedAt = guestBook.updatedAt
+            )
+        }
+
+        return PagingResponse(
+            meta = PagingMetaResponse(
+                isEnd = !guestBooksPage.hasNext(),
+                pageableCount = guestBooksPage.numberOfElements,
+                totalCount = guestBooksPage.totalElements,
+                currentPage = guestBooksPage.number + 1
+            ),
+            content = responsePage.content
+        )
     }
 }

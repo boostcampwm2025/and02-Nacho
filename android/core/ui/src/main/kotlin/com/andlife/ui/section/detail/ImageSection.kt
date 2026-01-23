@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,6 +27,7 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
+import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.component.media.MediaOverlay
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -72,19 +72,7 @@ fun ImageSection(
                             Modifier
                                 .fillMaxSize()
                                 .clickable { onImageClick(page) },
-                        loading = {
-                            Box(
-                                modifier =
-                                    Modifier
-                                        .fillMaxSize()
-                                        .background(NachoTheme.colorScheme.backgroundSecondary),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                CircularProgressIndicator(
-                                    color = NachoTheme.colorScheme.brandPrimary,
-                                )
-                            }
-                        },
+                        loading = { InvitationLoadingIndicator() },
                         success = {
                             SubcomposeAsyncImageContent()
                         },

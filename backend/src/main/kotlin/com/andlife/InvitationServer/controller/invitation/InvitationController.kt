@@ -8,6 +8,7 @@ import com.andlife.InvitationServer.response.BaseResponse
 import com.andlife.InvitationServer.response.CommonResponseCode
 import com.andlife.InvitationServer.response.PagingResponse
 import com.andlife.InvitationServer.response.invitation.InvitationResponse
+import com.andlife.InvitationServer.response.invitation.UpcomingInvitationResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.CollectionResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookResponse
 import com.andlife.InvitationServer.service.invitation.InvitationService
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -109,6 +111,13 @@ class InvitationController(
         } catch (e: Exception) {
             BaseResponse.error(responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
         }
+    @GetMapping("/guestbooks/all")
+    fun getAllRelatedGuestBooks(
+        authContext: AuthContext,
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
+    ): BaseResponse<PagingResponse<GuestBookResponse>> {
+        val result = guestBookService.getAllRelatedGuestBooks(authContext, pageable)
+        return BaseResponse.success(result)
     }
 
     @PostMapping
@@ -134,5 +143,15 @@ class InvitationController(
             println(e.message)
             BaseResponse.error(responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
         }
+    }
+
+    @GetMapping("/upcoming")
+    fun getUpcomingInvitations(
+        authContext: AuthContext,
+        @RequestParam(defaultValue = "30") days: Long,
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
+    ): BaseResponse<PagingResponse<UpcomingInvitationResponse>> {
+        val result = invitationService.getUpcomingInvitations(authContext, days, pageable)
+        return BaseResponse.success(result)
     }
 }

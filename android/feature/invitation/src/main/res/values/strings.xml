@@ -6,7 +6,7 @@
 
     <string name="txt_delete">삭제하기</string>
 
-    <string name="txt_loading_invitation">초대장을 불러오는 중...</string>
+    <string name="txt_loading_invitation">초대장을 불러오는 중입니다.</string>
 
     <string-array name="txt_tap_title">
         <item>초대장</item>
