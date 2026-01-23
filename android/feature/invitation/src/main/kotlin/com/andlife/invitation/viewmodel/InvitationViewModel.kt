@@ -50,7 +50,7 @@ class InvitationViewModel @Inject constructor(
                 .onSuccess { ids ->
                     updateState { copy(invitationIds = ids.toPersistentList()) }
                 }
-                .onFailure { error ->
+                .onFailure { error, msg ->
                     Log.e("InvitationViewModel", "Error loading invitations: $error")
                 }
         }
