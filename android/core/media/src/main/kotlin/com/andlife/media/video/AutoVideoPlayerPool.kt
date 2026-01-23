@@ -16,7 +16,24 @@ interface AutoVideoPlayerPool {
 
     fun resumeLastPlayed()
 
+    fun clearCacheById(itemId: Long?)
+
     fun resetPool()
 
     fun releaseAllPlayers()
+}
+
+class FakeVideoPlayerPool : AutoVideoPlayerPool {
+    override fun preparePlayers() {}
+    override fun getPlayer(url: String): AutoVideoPlayer {
+        throw NotImplementedError()
+    }
+
+    override fun playPlayer(url: String, itemId: Long) {}
+    override fun pausePlayer(url: String) {}
+    override fun pauseAllPlayers() {}
+    override fun resumeLastPlayed() {}
+    override fun clearCacheById(itemId: Long?) {}
+    override fun resetPool() {}
+    override fun releaseAllPlayers() {}
 }

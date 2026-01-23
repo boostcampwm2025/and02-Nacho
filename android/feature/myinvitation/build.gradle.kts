@@ -8,6 +8,8 @@ android {
 
 dependencies {
     implementation(projects.feature.editor)
+    implementation(projects.core.media)
+
     implementation(libs.androidx.compose.material.icons.extended)
 
     // kakao 공유
@@ -24,6 +26,9 @@ dependencies {
 
     // ExoPlayer
     implementation(libs.bundles.media3)
+
+    // Paging
+    implementation(libs.androidx.paging.compose)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
