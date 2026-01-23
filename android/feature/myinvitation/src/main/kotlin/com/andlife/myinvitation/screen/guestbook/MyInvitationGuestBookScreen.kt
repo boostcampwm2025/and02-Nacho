@@ -352,11 +352,7 @@ private fun InvitationGuestBookScreen(
                 shadowElevation = NachoElevation.large,
                 color = NachoTheme.colorScheme.backgroundPrimary
             ) {
-                Box(
-                    modifier = Modifier
-                        .navigationBarsPadding()
-                        .imePadding()
-                ) {
+                Box(modifier = Modifier.imePadding()) {
                     GuestBookFormSection(
                         uiState = uiState,
                         onEvent = onEvent,
