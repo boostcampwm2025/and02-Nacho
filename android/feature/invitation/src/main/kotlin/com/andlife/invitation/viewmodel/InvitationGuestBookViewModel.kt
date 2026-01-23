@@ -1,5 +1,6 @@
 package com.andlife.invitation.viewmodel
 
+import android.text.Editable
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -376,7 +377,7 @@ constructor(
                     }
                     sendEffect(InvitationGuestBookSideEffect.DeleteGuestBookSuccess)
                 }
-                .onFailure {
+                .onFailure { error, msg ->
                     sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("방명록 삭제를 실패하였습니다."))
                 }
         }
