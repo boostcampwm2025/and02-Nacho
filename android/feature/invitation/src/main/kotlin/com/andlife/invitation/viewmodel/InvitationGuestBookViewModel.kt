@@ -370,7 +370,7 @@ constructor(
                     }
                     sendEffect(InvitationGuestBookSideEffect.DeleteGuestBookSuccess)
                 }
-                .onFailure {
+                .onFailure { _, _ ->
                     sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("방명록 삭제를 실패하였습니다."))
                 }
         }

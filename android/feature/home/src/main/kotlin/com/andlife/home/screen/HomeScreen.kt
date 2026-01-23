@@ -107,7 +107,8 @@ fun HomeRoute(
     val lazyListState = rememberLazyListState()
 
     val snackbarHostState = remember { SnackbarHostState() }
-    val context = LocalContext.current
+    val refreshSuccessText = stringResource(R.string.snack_refresh_success)
+    val refreshFailureText = stringResource(R.string.snack_refresh_failure)
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
@@ -140,11 +141,11 @@ fun HomeRoute(
             }
 
             is HomeSideEffect.RefreshSuccess -> {
-                scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.snack_refresh_success)) }
+                scope.launch { snackbarHostState.showSnackbar(refreshSuccessText) }
             }
 
             is HomeSideEffect.RefreshFailure -> {
-                scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.snack_refresh_failure)) }
+                scope.launch { snackbarHostState.showSnackbar(refreshFailureText) }
             }
         }
     }
@@ -704,6 +705,10 @@ private fun HomeScreenPreview() {
             override fun pausePlayer(url: String) {}
             override fun pauseAllPlayers() {}
             override fun resumeLastPlayed() {}
+            override fun clearCacheById(itemId: Long?) {
+                TODO("Not yet implemented")
+            }
+
             override fun resetPool() {}
             override fun releaseAllPlayers() {}
         }

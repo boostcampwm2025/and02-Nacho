@@ -354,7 +354,6 @@ private fun InvitationGuestBookScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .navigationBarsPadding()
                         .imePadding()
                 ) {
                     GuestBookFormSection(
