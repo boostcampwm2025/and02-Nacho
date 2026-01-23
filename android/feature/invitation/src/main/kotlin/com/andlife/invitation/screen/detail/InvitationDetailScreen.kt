@@ -1,5 +1,6 @@
 package com.andlife.invitation.screen.detail
 
+import android.text.Editable
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -89,6 +90,7 @@ fun InvitationDetailRoute(
         scrollBehavior = scrollBehavior,
         onEvent = viewModel::onEvent,
         onNavigateBack = onNavigateBack,
+        onEditableSave = viewModel::saveEditable,
         modifier = modifier,
     )
 }
@@ -101,6 +103,7 @@ private fun InvitationDetailScreen(
     scrollBehavior: TopAppBarScrollBehavior,
     onEvent: (InvitationDetailUiEvent) -> Unit,
     onNavigateBack: () -> Unit,
+    onEditableSave: (Editable) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()
@@ -175,6 +178,7 @@ private fun InvitationDetailScreen(
                                 },
                                 onMapError = { onEvent(InvitationDetailUiEvent.MapError) },
                                 isMapVisible = isMapVisible,
+                                onEditableSave = onEditableSave,
                                 modifier = Modifier.fillMaxSize(),
                             )
                         }

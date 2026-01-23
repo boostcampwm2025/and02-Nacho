@@ -46,6 +46,7 @@ class InvitationController(
         return when (authContext) {
             is AuthContext.Member -> {
                 val result = invitationService.getParticipantInvitations(authContext.userId, status, pageable)
+                val result = invitationService
                 BaseResponse.success(result)
             }
             is AuthContext.Guest -> {

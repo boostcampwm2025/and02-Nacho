@@ -1,5 +1,6 @@
 package com.andlife.invitation.viewmodel
 
+import android.text.Editable
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -43,7 +44,7 @@ class InvitationDetailViewModel @Inject constructor(
             )
 
     private suspend fun loadInvitation() {
-        updateState { copy(isLoading = true, isError = false) }
+        updateState { copy(isLoading = true, isError = false, editableCache = null) }
 
         invitationRepository.getInvitation(invitationId)
             .onSuccess { invitation ->
@@ -84,6 +85,10 @@ class InvitationDetailViewModel @Inject constructor(
 
     private fun showMapErrorSnackbar() {
         sendEffect(InvitationDetailSideEffect.ShowMapErrorSnackbar)
+    }
+
+    fun saveEditable(editable: Editable) {
+        updateState { copy(editableCache = editable) }
     }
 
     private fun retryLoad() {
