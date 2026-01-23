@@ -6,6 +6,7 @@ import com.andlife.InvitationServer.entity.Invitation
 import com.andlife.InvitationServer.entity.InvitationCard
 import com.andlife.InvitationServer.entity.User
 import com.andlife.InvitationServer.error.BusinessException
+import com.andlife.InvitationServer.entity.InvitationParticipant
 import com.andlife.InvitationServer.repository.invitation.AnnouncementRepository
 import com.andlife.InvitationServer.repository.invitation.InvitationCardRepository
 import com.andlife.InvitationServer.repository.invitation.InvitationRepository
@@ -15,17 +16,25 @@ import com.andlife.InvitationServer.response.CommonResponseCode
 import com.andlife.InvitationServer.response.PagingMetaResponse
 import com.andlife.InvitationServer.response.PagingResponse
 import com.andlife.InvitationServer.request.invitation.InvitationCardRequest
+import com.andlife.InvitationServer.response.PagingMetaResponse
+import com.andlife.InvitationServer.response.PagingResponse
 import com.andlife.InvitationServer.response.invitation.AnnouncementResponse
 import com.andlife.InvitationServer.response.invitation.InvitationCardResponse
 import com.andlife.InvitationServer.response.invitation.InvitationResponse
 import com.andlife.InvitationServer.response.invitation.UpcomingInvitationResponse
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import com.andlife.InvitationServer.response.invitation.InvitationSummaryResponse
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.time.LocalDateTime
 
 @Service
 @Transactional(readOnly = true)
@@ -36,10 +45,54 @@ class InvitationService(
     private val participantRepository: InvitationParticipantRepository
 ) {
     @Transactional(readOnly = true)
-    fun getParticipantInvitations(userId: Long) : List<Long> {
-        val participants = participantRepository.findAllByUserIdWithInvitation(userId)
-        // 임시로 아이디들만 반환하게 구현
-        return participants.map { it.invitation.id }
+    fun getParticipantInvitations(
+        userId: Long,
+        status: String,
+        pageable: Pageable
+    ): PagingResponse<InvitationSummaryResponse> {
+        val now = LocalDateTime.now()
+        val nowDate = now.toLocalDate()
+        val nowTime = now.toLocalTime()
+        val upperStatus = status.uppercase()
+
+        val sort = if (upperStatus == "PAST") {
+            Sort.by("invitation.invitationDate").descending()
+                .and(Sort.by("invitation.startTime").descending())
+        } else {
+            Sort.by("invitation.invitationDate").ascending()
+                .and(Sort.by("invitation.startTime").ascending())
+        }
+
+        val adjustedPageable = PageRequest.of(pageable.pageNumber, pageable.pageSize, sort)
+
+        val participantPage: Page<InvitationParticipant> = when (upperStatus) {
+            "UPCOMING" -> participantRepository.findUpcomingInvitations(userId, nowDate, nowTime, adjustedPageable)
+            "PAST" -> participantRepository.findPastInvitations(userId, nowDate, nowTime, adjustedPageable)
+            else -> participantRepository.findAllByUserIdWithInvitation(userId, adjustedPageable)
+        }
+
+        val contents = participantPage.content.map { participant ->
+            val invitation = participant.invitation
+            InvitationSummaryResponse(
+                id = invitation.id,
+                title = invitation.title,
+                thumbnailUrls = invitation.thumbnailUrls,
+                displayHostName = invitation.displayHostName,
+                address = invitation.address,
+                invitationDate = invitation.invitationDate.toString(),
+                startTime = invitation.startTime.toString()
+            )
+        }
+
+        return PagingResponse(
+            meta = PagingMetaResponse(
+                isEnd = participantPage.isLast,
+                pageableCount = participantPage.numberOfElements,
+                totalCount = participantPage.totalElements,
+                currentPage = participantPage.number
+            ),
+            content = contents
+        )
     }
 
     @Transactional

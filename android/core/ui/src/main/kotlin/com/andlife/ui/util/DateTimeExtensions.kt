@@ -10,6 +10,9 @@ import kotlinx.datetime.daysUntil
 import kotlinx.datetime.format
 import kotlinx.datetime.format.char
 import kotlinx.datetime.todayIn
+import kotlinx.datetime.toJavaLocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 object DateTimeConstants {
     const val YEAR = "년"
@@ -76,4 +79,10 @@ fun LocalDate.toDDayText(): String {
         daysUntil == 0 -> DateTimeConstants.D_DAY_TODAY
         else -> "${DateTimeConstants.D_DAY_PREFIX}$daysUntil"
     }
+}
+
+fun LocalDateTime.toFullDisplayString(locale: Locale = Locale.getDefault()): String {
+    val pattern = "yyyy년 M월 d일 (E) a h시"
+    val formatter = DateTimeFormatter.ofPattern(pattern, locale)
+    return this.toJavaLocalDateTime().format(formatter)
 }
