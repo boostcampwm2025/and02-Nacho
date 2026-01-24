@@ -43,7 +43,7 @@ internal class InvitationRepositoryImpl @Inject constructor(
     ): Flow<PagingData<InvitationSummary>> {
         return Pager(
             config = PagingConfig(pageSize = size, enablePlaceholders = false),
-            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType) }
+            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType, isMyInvitation = false) }
         ).flow
     }
 
@@ -54,7 +54,7 @@ internal class InvitationRepositoryImpl @Inject constructor(
     ): Flow<PagingData<InvitationSummary>> {
         return Pager(
             config = PagingConfig(pageSize = size, enablePlaceholders = false),
-            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType) }
+            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType, isMyInvitation = true) }
         ).flow
     }
 }
