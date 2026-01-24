@@ -82,6 +82,7 @@ fun GuestBookItem(
     modifier: Modifier = Modifier,
     shouldPlayVideo: Boolean = false,
     isEditing: Boolean = false,
+    useMenuButton: Boolean= true,
     onMenuClick: () -> Unit = {},
     onEditClick: (GuestBookUiModel) -> Unit = {},
     onDeleteClick: (GuestBookUiModel) -> Unit = {},
@@ -103,7 +104,7 @@ fun GuestBookItem(
         GuestBookItemHeader(
             author = guestBook.author,
             createdAt = guestBook.createdAt,
-            isOwner = guestBook.isOwner,
+            isOwner = useMenuButton && guestBook.isOwner,
             onMenuClick = onMenuClick,
             onEditClick = { onEditClick(guestBook) },
             onDeleteClick = { onDeleteClick(guestBook) },
