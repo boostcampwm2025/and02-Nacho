@@ -27,6 +27,10 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.component.NachoDivider
 import com.andlife.designsystem.preview.PreviewTheme
+import com.andlife.designsystem.theme.BackgroundBorder
 import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
@@ -82,33 +87,38 @@ fun SettingScreen(
             verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
         ) {
 
+            var nameState by remember { mutableStateOf("안드라이프") } // TODO: 임시
+
             SettingSection {
                 ProfileContent(
-                    name = "안드라이프",
+                    name = nameState,
+                    onNameChange = { nameState = it },
                     profileUrl = "",
                     onClickImage = {},
                     onClickEdit = {},
-                    modifier = Modifier.padding(vertical = NachoSpacing.medium)
+                    modifier = Modifier.padding(vertical = NachoSpacing.medium),
                 )
             }
 
-            SettingSection(headerTitle = "알림") { modifier ->
+            var checked by remember { mutableStateOf(true) } // TODO: 임시
+
+            SettingSection(headerTitle = stringResource(R.string.txt_header_notification)) { modifier ->
                 NotificationContent(
-                    isNotificationEnabled = true,
-                    onCheckedChange = {},
-                    modifier = modifier
+                    isNotificationEnabled = checked,
+                    onCheckedChange = { checked = it },
+                    modifier = modifier,
                 )
             }
 
-            SettingSection(headerTitle = "약관 및 정책") { modifier ->
+            SettingSection(headerTitle = stringResource(R.string.txt_header_policy)) { modifier ->
                 PolicyContent(
                     onClickService = {},
                     onClickPrivacy = {},
-                    modifier = modifier
+                    modifier = modifier,
                 )
             }
 
-            SettingSection(headerTitle = "앱 정보") { modifier ->
+            SettingSection(headerTitle = stringResource(R.string.txt_header_app_info)) { modifier ->
                 AppInfoContent(
                     appVersion = "1.0.0",
                     onClickInfo = {},
@@ -117,13 +127,13 @@ fun SettingScreen(
             }
 
             SettingSection(
-                headerTitle = "계정",
+                headerTitle = stringResource(R.string.txt_header_account),
                 showDivider = false
             ) { modifier ->
                 AccountContent(
                     onClickLogout = {},
                     onClickQuit = {},
-                    modifier = modifier
+                    modifier = modifier,
                 )
             }
         }
@@ -213,6 +223,7 @@ private fun SettingSection(
 @Composable
 private fun ProfileContent(
     name: String,
+    onNameChange: (String) -> Unit,
     profileUrl: String,
     onClickImage: () -> Unit = {},
     onClickEdit: () -> Unit = {},
@@ -242,12 +253,13 @@ private fun ProfileContent(
                     .fillMaxSize(0.35f),
                 shape = CircleShape,
                 color = NachoTheme.colorScheme.backgroundPrimary,
-                border = BorderStroke(NachoStroke.small, NachoTheme.colorScheme.backgroundPrimary),
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_camera_24),
-                    contentDescription = stringResource(R.string.desc_profile_image_icon),
-                    modifier = Modifier.fillMaxSize(),
+                    contentDescription = stringResource(R.string.desc_profile_camera),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(NachoSpacing.twoXSmall),
                     tint = Color.Unspecified,
                 )
             }
@@ -263,7 +275,7 @@ private fun ProfileContent(
             ) {
                 TextField(
                     value = name,
-                    onValueChange = {},
+                    onValueChange = onNameChange,
                     enabled = true,
                     readOnly = false,
                     modifier = Modifier.weight(1f),
@@ -287,7 +299,7 @@ private fun ProfileContent(
                 ) {
                     Icon(
                         painter = painterResource(designR.drawable.ic_edit_24),
-                        contentDescription = stringResource(R.string.desc_profile_name_icon),
+                        contentDescription = stringResource(R.string.desc_profile_edit),
                         tint = Color.Unspecified,
                     )
                 }
@@ -313,7 +325,7 @@ private fun NotificationContent(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "푸시 알림",
+            text = stringResource(R.string.txt_push_notification),
             style = NachoTheme.typography.bodyLargeRegular,
             color = NachoTheme.colorScheme.textPrimary,
         )
@@ -322,7 +334,10 @@ private fun NotificationContent(
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = NachoTheme.colorScheme.brandOnPrimary,
-                checkedTrackColor = NachoTheme.colorScheme.brandPrimary
+                checkedTrackColor = NachoTheme.colorScheme.brandPrimary,
+                uncheckedThumbColor = NachoTheme.colorScheme.brandOnPrimary,
+                uncheckedTrackColor = NachoTheme.colorScheme.backgroundBorder,
+                uncheckedBorderColor = Color.Transparent,
             )
         )
     }
@@ -344,7 +359,7 @@ private fun PolicyContent(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "서비스 이용약관",
+                text = stringResource(R.string.txt_policy_service),
                 style = NachoTheme.typography.bodyLargeRegular,
                 color = NachoTheme.colorScheme.textPrimary,
             )
@@ -366,7 +381,7 @@ private fun PolicyContent(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "개인정보 처리방침",
+                text = stringResource(R.string.txt_policy_privacy),
                 style = NachoTheme.typography.bodyLargeRegular,
                 color = NachoTheme.colorScheme.textPrimary,
             )
@@ -401,7 +416,7 @@ private fun AppInfoContent(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "공지사항",
+                text = stringResource(R.string.txt_app_notice),
                 style = NachoTheme.typography.bodyLargeRegular,
                 color = NachoTheme.colorScheme.textPrimary,
             )
@@ -411,7 +426,7 @@ private fun AppInfoContent(
             ) {
                 Icon(
                     painter = painterResource(designR.drawable.ic_chevron_right_24),
-                    contentDescription = stringResource(R.string.desc_policy_service),
+                    contentDescription = stringResource(R.string.desc_app_notice),
                     tint = NachoTheme.colorScheme.iconOnSecondary,
                 )
             }
@@ -423,7 +438,7 @@ private fun AppInfoContent(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "앱 버전",
+                text = stringResource(R.string.txt_app_version),
                 style = NachoTheme.typography.bodyLargeRegular,
                 color = NachoTheme.colorScheme.textPrimary,
             )
@@ -453,7 +468,7 @@ private fun AccountContent(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "로그아웃",
+                text = stringResource(R.string.txt_logout),
                 style = NachoTheme.typography.bodyLargeRegular,
                 color = NachoTheme.colorScheme.textPrimary,
             )
@@ -463,7 +478,7 @@ private fun AccountContent(
             ) {
                 Icon(
                     painter = painterResource(designR.drawable.ic_chevron_right_24),
-                    contentDescription = stringResource(R.string.desc_policy_service),
+                    contentDescription = stringResource(R.string.desc_logout),
                     tint = NachoTheme.colorScheme.iconOnSecondary,
                 )
             }
@@ -475,7 +490,7 @@ private fun AccountContent(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "회원탈퇴",
+                text = stringResource(R.string.txt_quit),
                 style = NachoTheme.typography.bodyLargeRegular,
                 color = NachoTheme.colorScheme.textTertiary,
             )
@@ -485,7 +500,7 @@ private fun AccountContent(
             ) {
                 Icon(
                     painter = painterResource(designR.drawable.ic_chevron_right_24),
-                    contentDescription = stringResource(R.string.desc_policy_privacy),
+                    contentDescription = stringResource(R.string.desc_quit),
                     tint = NachoTheme.colorScheme.iconOnSecondary,
                 )
             }
