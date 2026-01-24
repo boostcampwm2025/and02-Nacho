@@ -18,4 +18,10 @@ interface InvitationRemoteDataSource {
         page: Int,
         size: Int
     ): Result<PagingResponse<InvitationSummaryResponse>, DataError>
+    suspend fun getMyInvitations(
+        status: InvitationStatus,
+        sortType: SortDirection,
+        page: Int,
+        size: Int
+    ): Result<PagingResponse<InvitationSummaryResponse>, DataError>
 }

@@ -28,4 +28,12 @@ internal class InvitationRemoteDataSourceImpl @Inject constructor(
         size: Int
     ): Result<PagingResponse<InvitationSummaryResponse>, DataError> =
         apiCall { invitationService.getParticipantInvitations(status.value, sortType.value, page, size) }
+
+    override suspend fun getMyInvitations(
+        status: InvitationStatus,
+        sortType: SortDirection,
+        page: Int,
+        size: Int
+    ): Result<PagingResponse<InvitationSummaryResponse>, DataError> =
+        apiCall { invitationService.getMyInvitations(status.value, sortType.value, page, size) }
 }
