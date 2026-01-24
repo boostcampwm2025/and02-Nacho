@@ -40,6 +40,7 @@
         <item>@string/label_sort_recent</item>
         <item>@string/label_sort_oldest</item>
     </string-array>
+    <string name="desc_invitation_create">초대장 생성</string>
 
     <!--  모아보기 Media  -->
     <string name="desc_media_image">방명록의 이미지</string>
