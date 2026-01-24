@@ -2,6 +2,7 @@ package com.andlife.invitation.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -101,6 +102,7 @@ private fun InvitationScreen(
                 stringResource(R.string.txt_invitation)
             )
         },
+        contentWindowInsets = WindowInsets(),
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
     ) { paddingValues ->
         GenericTabRow(
