@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.component.NachoDivider
 import com.andlife.designsystem.preview.PreviewTheme
+import com.andlife.designsystem.theme.IconOnSecondary
 import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
@@ -62,6 +63,8 @@ fun SettingScreen(
     onClickImage: () -> Unit = {},
     onClickEdit: () -> Unit = {},
     onCheckedChange: (Boolean) -> Unit = {},
+    onClickService: () -> Unit = {},
+    onClickPrivacy: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -85,28 +88,30 @@ fun SettingScreen(
             verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
         ) {
 
-            SettingSection {
+            SettingSection { modifier ->
                 ProfileContent(
                     name = "안드라이프",
                     profileUrl = "",
                     onClickImage = onClickImage,
                     onClickEdit = onClickEdit,
+                    modifier = modifier
                 )
             }
 
-            SettingSection(
-                headerTitle = "알림"
-            ) {
+            SettingSection(headerTitle = "알림") { modifier ->
                 NotificationContent(
                     isNotificationEnabled = true,
                     onCheckedChange = onCheckedChange,
+                    modifier = modifier
                 )
             }
 
-            SettingSection(
-                headerTitle = "약관 및 정책"
-            ) {
-                // TODO: PolicyContent()
+            SettingSection(headerTitle = "약관 및 정책") { modifier ->
+                PolicyContent(
+                    onClickService = onClickService,
+                    onClickPrivacy = onClickPrivacy,
+                    modifier = modifier
+                )
             }
 
             SettingSection(
@@ -172,7 +177,7 @@ private fun SettingSection(
     headerTitle: String? = null,
     showDivider: Boolean = true,
     modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
+    content: @Composable (Modifier) -> Unit,
 ) {
     Column(
         modifier = modifier.fillMaxWidth()
@@ -182,11 +187,17 @@ private fun SettingSection(
                 text = headerTitle,
                 style = NachoTheme.typography.bodyMediumMedium,
                 color = NachoTheme.colorScheme.textSecondary,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(NachoSpacing.small),
             )
         }
 
-        content()
+        val contentModifier = Modifier.padding(
+            vertical = NachoSpacing.medium,
+            horizontal = NachoSpacing.medium,
+        )
+        content(contentModifier)
 
         if (showDivider) {
             NachoDivider(
@@ -194,7 +205,7 @@ private fun SettingSection(
                 horizontalPadding = NachoSpacing.none,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = NachoSpacing.large)
+                    .padding(top = NachoSpacing.small)
             )
         }
     }
@@ -210,7 +221,6 @@ private fun ProfileContent(
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
@@ -249,9 +259,7 @@ private fun ProfileContent(
             verticalArrangement = Arrangement.Center,
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = NachoSpacing.large),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 TextField(
@@ -276,8 +284,7 @@ private fun ProfileContent(
                 )
                 IconButton(
                     onClick = onClickEdit,
-                    modifier = Modifier
-                        .size(NachoIconSize.xLarge),
+                    modifier = Modifier.size(NachoIconSize.xLarge),
                 ) {
                     Icon(
                         painter = painterResource(designR.drawable.ic_edit_24),
@@ -299,11 +306,10 @@ private fun ProfileContent(
 private fun NotificationContent(
     isNotificationEnabled: Boolean,
     onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(NachoSpacing.large),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -312,7 +318,6 @@ private fun NotificationContent(
             style = NachoTheme.typography.bodyLargeRegular,
             color = NachoTheme.colorScheme.textPrimary,
         )
-
         Switch(
             checked = isNotificationEnabled,
             onCheckedChange = onCheckedChange,
@@ -321,6 +326,60 @@ private fun NotificationContent(
                 checkedTrackColor = NachoTheme.colorScheme.brandPrimary
             )
         )
+    }
+}
+
+@Composable
+private fun PolicyContent(
+    onClickService: () -> Unit,
+    onClickPrivacy: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "서비스 이용약관",
+                style = NachoTheme.typography.bodyLargeRegular,
+                color = NachoTheme.colorScheme.textPrimary,
+            )
+            IconButton(
+                onClick = onClickService,
+                modifier = Modifier.size(NachoIconSize.medium),
+            ) {
+                Icon(
+                    painter = painterResource(designR.drawable.ic_chevron_right_24),
+                    contentDescription = stringResource(R.string.desc_policy_service),
+                    tint = NachoTheme.colorScheme.iconOnSecondary,
+                )
+            }
+        }
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "개인정보 처리방침",
+                style = NachoTheme.typography.bodyLargeRegular,
+                color = NachoTheme.colorScheme.textPrimary,
+            )
+            IconButton(
+                onClick = onClickPrivacy,
+                modifier = Modifier.size(NachoIconSize.medium),
+            ) {
+                Icon(
+                    painter = painterResource(designR.drawable.ic_chevron_right_24),
+                    contentDescription = stringResource(R.string.desc_policy_privacy),
+                    tint = NachoTheme.colorScheme.iconOnSecondary,
+                )
+            }
+        }
     }
 }
 
