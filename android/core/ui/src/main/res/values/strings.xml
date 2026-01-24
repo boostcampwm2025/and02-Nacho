@@ -25,12 +25,20 @@
     <string name="format_invitation_d_day_today">D-Day</string>
     <string name="format_total_invitation_count">총 %d개의 초대</string>
 
-    <string name="label_sort_imminent">빠른 일정순</string>
-    <string name="label_sort_distant">늦은 일정순</string>
+    <string name="label_sort_imminent">가까운 일정순</string>
+    <string name="label_sort_distant">먼 일정순</string>
+
+    <string name="label_sort_recent">최신순</string>
+    <string name="label_sort_oldest">오래된순</string>
 
     <string-array name="arr_invitation_sort_options">
         <item>@string/label_sort_imminent</item>
         <item>@string/label_sort_distant</item>
+    </string-array>
+
+    <string-array name="arr_past_invitation_sort_options">
+        <item>@string/label_sort_recent</item>
+        <item>@string/label_sort_oldest</item>
     </string-array>
 
     <!--  모아보기 Media  -->
