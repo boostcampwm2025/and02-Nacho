@@ -29,7 +29,7 @@ class InvitationController(
     private val invitationService: InvitationService,
     private val guestBookService: GuestBookService,
 ) {
-    @GetMapping("/me")
+    @GetMapping("/joined")
     fun getParticipantInvitations(
         authContext: AuthContext,
         @RequestParam(required = false, defaultValue = "UPCOMING") status: String,
