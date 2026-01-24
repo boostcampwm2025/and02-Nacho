@@ -334,10 +334,6 @@ fun HomeScreen(
                         onInvitationClick = { id, isOwner ->
                             onEvent(HomeUiEvent.ClickUpcomingInvitation(id, isOwner))
                         },
-                        onRetryClick = {
-                            upcomingInvitations.retry()
-                            onEvent(HomeUiEvent.Retry)
-                        },
                         onNavigateToCreate = { onEvent(HomeUiEvent.ClickCreate) },
                     )
 
@@ -347,10 +343,6 @@ fun HomeScreen(
                         uiState = uiState,
                         playVideoIndex = playVideoIndex,
                         videoPlayerPool = videoPlayerPool,
-                        onRetryClick = {
-                            guestBooks.retry()
-                            onEvent(HomeUiEvent.Retry)
-                        },
                         onInvitationTitleClick = { id, isOwner ->
                             onEvent(HomeUiEvent.ClickInvitationTitle(id, isOwner))
                         },
@@ -411,7 +403,6 @@ private fun HomeTopBar(
 private fun LazyListScope.homeUpcomingSection(
     upcomingInvitations: LazyPagingItems<UpcomingInvitationUiModel>,
     onInvitationClick: (invitationId: Long, isOwner: Boolean) -> Unit,
-    onRetryClick: () -> Unit,
     onNavigateToCreate: () -> Unit,
 ) {
     val refreshState = upcomingInvitations.loadState.refresh
@@ -561,7 +552,6 @@ private fun LazyListScope.homeGuestBookSection(
     uiState: HomeUiState,
     playVideoIndex: Int,
     videoPlayerPool: AutoVideoPlayerPool,
-    onRetryClick: () -> Unit,
     onInvitationTitleClick: (invitationId: Long, isOwner: Boolean) -> Unit,
     onVisualMediaClick: (String) -> Unit,
     onAudioMediaClick: (String) -> Unit,
