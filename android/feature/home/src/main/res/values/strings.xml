@@ -14,9 +14,11 @@
     <string name="txt_title_new_post">최신 게시글</string>
     <string name="txt_empty_new_post_desc">작성된 방명록이 없습니다.\n초대에 참여하여 첫 인사를 남겨보세요!</string>
     <string name="error_msg_failed_load_post">최신 게시글을 불러오지 못했어요</string>
+    <string name="snack_refresh_failure">잠시 후 다시 시도해 주세요</string>
 
     <string name="txt_title_setting">설정</string>
     <string name="desc_top_bar_back">설정 뒤로가기 아이콘 버튼</string>
-
-    <string name="snack_refresh_failure">잠시 후 다시 시도해 주세요</string>
+    <string name="desc_profile_image">프로필 이미지</string>
+    <string name="desc_profile_image_icon">프로필 이미지 사진 아이콘</string>
+    <string name="desc_profile_name_icon">수정된 닉네임을 저장하는 아이콘</string>
 </resources>
