@@ -138,7 +138,6 @@ class HomeViewModel @Inject constructor(
             sendEffect(HomeSideEffect.RefreshFailure)
         } else {
             if (wasUserTriggered) {
-                sendEffect(HomeSideEffect.RefreshSuccess)
                 sendEffect(HomeSideEffect.ScrollToTop)
             }
         }

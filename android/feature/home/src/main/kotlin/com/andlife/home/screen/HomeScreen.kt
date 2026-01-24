@@ -112,7 +112,10 @@ fun HomeRoute(
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is HomeSideEffect.ShowMessage -> {
-                scope.launch { snackbarHostState.showSnackbar(effect.message) }
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(effect.message)
+                }
             }
 
             is HomeSideEffect.NavigateToInvitationDetail -> {
@@ -139,12 +142,11 @@ fun HomeRoute(
                 scope.launch { lazyListState.animateScrollToItem(0) }
             }
 
-            is HomeSideEffect.RefreshSuccess -> {
-                scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.snack_refresh_success)) }
-            }
-
             is HomeSideEffect.RefreshFailure -> {
-                scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.snack_refresh_failure)) }
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(context.getString(R.string.snack_refresh_failure))
+                }
             }
         }
     }
@@ -585,7 +587,10 @@ private fun LazyListScope.homeGuestBookSection(
     if (isInitialLoading || isInitialError || isEmpty) {
         item {
             GuestBookStatusContent(
-                modifier = Modifier.padding(horizontal = NachoSpacing.large),
+                modifier = Modifier.padding(
+                    vertical = NachoSpacing.threeXLarge,
+                    horizontal = NachoSpacing.large
+                ),
                 isLoading = isInitialLoading,
                 title = when {
                     isInitialError -> stringResource(R.string.error_msg_failed_load_post)
