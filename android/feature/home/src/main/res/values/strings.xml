@@ -10,7 +10,6 @@
     <string name="txt_action_create_invitation">초대장 작성 바로가기</string>
     <string name="txt_error_upcoming_title">일정을 불러오지 못했어요</string>
     <string name="txt_error_upcoming_desc">네트워크 연결을 확인해주세요</string>
-    <string name="txt_action_retry">재시도</string>
 
     <string name="txt_title_new_post">최신 게시글</string>
     <string name="txt_empty_new_post_desc">작성된 방명록이 없습니다.\n초대에 참여하여 첫 인사를 남겨보세요!</string>

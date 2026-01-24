@@ -458,8 +458,6 @@ private fun LazyListScope.homeUpcomingSection(
                     UpcomingStatusContent(
                         title = stringResource(R.string.txt_error_upcoming_title),
                         description = stringResource(R.string.txt_error_upcoming_desc),
-                        buttonText = stringResource(R.string.txt_action_retry),
-                        onButtonClick = onRetryClick,
                     )
                 }
 
@@ -597,8 +595,6 @@ private fun LazyListScope.homeGuestBookSection(
                     isEmpty -> stringResource(R.string.txt_empty_new_post_desc)
                     else -> null
                 },
-                buttonText = if (isInitialError) stringResource(R.string.txt_action_retry) else null,
-                onButtonClick = if (isInitialError) onRetryClick else null
             )
         }
     } else {
