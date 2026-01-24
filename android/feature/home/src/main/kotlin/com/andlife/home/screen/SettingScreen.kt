@@ -19,6 +19,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -57,6 +59,9 @@ fun SettingRoute(
 @Composable
 fun SettingScreen(
     onBack: () -> Unit,
+    onClickImage: () -> Unit = {},
+    onClickEdit: () -> Unit = {},
+    onCheckedChange: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -76,57 +81,47 @@ fun SettingScreen(
                 .fillMaxWidth()
                 .padding(paddingValues)
                 .verticalScroll(scrollState)
-                .padding(vertical = NachoSpacing.threeXLarge, horizontal = NachoSpacing.large),
-            verticalArrangement = Arrangement.spacedBy(NachoSpacing.threeXLarge),
+                .padding(vertical = NachoSpacing.twoXLarge, horizontal = NachoSpacing.large),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
         ) {
-            ProfileSection(
-                name = "안드라이프",
-                profileUrl = ""
-            )
 
-            NachoDivider(
-                color = NachoTheme.colorScheme.backgroundSecondary,
-                horizontalPadding = NachoSpacing.none,
-                modifier = Modifier.fillMaxWidth()
-            )
+            SettingSection {
+                ProfileContent(
+                    name = "안드라이프",
+                    profileUrl = "",
+                    onClickImage = onClickImage,
+                    onClickEdit = onClickEdit,
+                )
+            }
 
-            ProfileSection(
-                name = "알림",
-                profileUrl = ""
-            )
+            SettingSection(
+                headerTitle = "알림"
+            ) {
+                NotificationContent(
+                    isNotificationEnabled = true,
+                    onCheckedChange = onCheckedChange,
+                )
+            }
 
-            NachoDivider(
-                color = NachoTheme.colorScheme.backgroundSecondary,
-                horizontalPadding = NachoSpacing.none,
-                modifier = Modifier.fillMaxWidth()
-            )
+            SettingSection(
+                headerTitle = "약관 및 정책"
+            ) {
+                // TODO: PolicyContent()
+            }
 
-            ProfileSection(
-                name = "약관 및 정책",
-                profileUrl = ""
-            )
+            SettingSection(
+                headerTitle = "앱 정보",
+                showDivider = false
+            ) {
+                // TODO: AppInfoContent()
+            }
 
-            NachoDivider(
-                color = NachoTheme.colorScheme.backgroundSecondary,
-                horizontalPadding = NachoSpacing.none,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            ProfileSection(
-                name = "앱 정보",
-                profileUrl = ""
-            )
-
-            NachoDivider(
-                color = NachoTheme.colorScheme.backgroundSecondary,
-                horizontalPadding = NachoSpacing.none,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            ProfileSection(
-                name = "계정",
-                profileUrl = ""
-            )
+            SettingSection(
+                headerTitle = "계정",
+                showDivider = false
+            ) {
+                // TODO: AccountContent()
+            }
         }
     }
 }
@@ -173,7 +168,40 @@ private fun SettingTopBar(
 }
 
 @Composable
-private fun ProfileSection(
+private fun SettingSection(
+    headerTitle: String? = null,
+    showDivider: Boolean = true,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    Column(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        headerTitle?.let {
+            Text(
+                text = headerTitle,
+                style = NachoTheme.typography.bodyMediumMedium,
+                color = NachoTheme.colorScheme.textSecondary,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        content()
+
+        if (showDivider) {
+            NachoDivider(
+                color = NachoTheme.colorScheme.backgroundSecondary,
+                horizontalPadding = NachoSpacing.none,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = NachoSpacing.large)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProfileContent(
     name: String,
     profileUrl: String,
     onClickImage: () -> Unit = {},
@@ -186,7 +214,7 @@ private fun ProfileSection(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier.size(60.dp),
+            modifier = Modifier.size(80.dp),
         ) {
             AsyncImage(
                 model = profileUrl,
@@ -264,6 +292,35 @@ private fun ProfileSection(
                 modifier = Modifier.fillMaxWidth()
             )
         }
+    }
+}
+
+@Composable
+private fun NotificationContent(
+    isNotificationEnabled: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(NachoSpacing.large),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = "푸시 알림",
+            style = NachoTheme.typography.bodyLargeRegular,
+            color = NachoTheme.colorScheme.textPrimary,
+        )
+
+        Switch(
+            checked = isNotificationEnabled,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = NachoTheme.colorScheme.brandOnPrimary,
+                checkedTrackColor = NachoTheme.colorScheme.brandPrimary
+            )
+        )
     }
 }
 
