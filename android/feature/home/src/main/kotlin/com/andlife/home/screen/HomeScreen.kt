@@ -21,7 +21,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -90,6 +89,7 @@ private const val SKELETON_ITEM_COUNT = 2
 
 @Composable
 fun HomeRoute(
+    snackbarHostState: SnackbarHostState,
     onNavigateToCreate: () -> Unit,
     onNavigateToInvitationDetail: (Long) -> Unit,
     onNavigateToMyInvitationDetail: (Long) -> Unit,
@@ -106,7 +106,6 @@ fun HomeRoute(
     val lifecycleOwner = LocalLifecycleOwner.current
     val lazyListState = rememberLazyListState()
 
-    val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
@@ -201,7 +200,6 @@ fun HomeRoute(
         upcomingInvitations = upcomingInvitations,
         guestBooks = guestBooks,
         onEvent = viewModel::onEvent,
-        snackbarHostState = snackbarHostState,
         lazyListState = lazyListState,
         videoPlayerPool = viewModel.videoPlayerPool,
         modifier = modifier,
@@ -216,7 +214,6 @@ fun HomeScreen(
     upcomingInvitations: LazyPagingItems<UpcomingInvitationUiModel>,
     guestBooks: LazyPagingItems<GuestBookUiModel>,
     onEvent: (HomeUiEvent) -> Unit,
-    snackbarHostState: SnackbarHostState,
     lazyListState: LazyListState,
     videoPlayerPool: AutoVideoPlayerPool,
     modifier: Modifier = Modifier,
@@ -297,9 +294,6 @@ fun HomeScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        snackbarHost = {
-            SnackbarHost(snackbarHostState)
-        },
         topBar = {
             HomeTopBar(
                 title = stringResource(R.string.txt_title_home),
@@ -711,7 +705,6 @@ private fun HomeScreenPreview() {
             upcomingInvitations = emptyUpcomingInvitations,
             guestBooks = emptyGuestBooks,
             onEvent = {},
-            snackbarHostState = SnackbarHostState(),
             videoPlayerPool = fakeVideoPlayerPool,
             lazyListState = lazyListState,
         )
