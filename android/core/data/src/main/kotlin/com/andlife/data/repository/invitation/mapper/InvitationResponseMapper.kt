@@ -63,7 +63,8 @@ fun InvitationSummaryResponse.toDomain(): InvitationSummary {
         thumbnailUrls = thumbnailUrls,
         invitationDate = invitationDate,
         startTime = startTime,
-        address = address
+        address = address,
+        isOwner = isOwner
     )
 }
 

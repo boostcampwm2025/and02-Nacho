@@ -7,5 +7,6 @@ data class InvitationSummary(
     val thumbnailUrls: List<String>,
     val invitationDate: String,
     val startTime: String,
-    val address: String
+    val address: String,
+    val isOwner: Boolean,
 )

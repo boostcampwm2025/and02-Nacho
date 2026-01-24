@@ -67,7 +67,8 @@ class InvitationService(
                 displayHostName = invitation.displayHostName,
                 address = invitation.address,
                 invitationDate = invitation.invitationDate.toString(),
-                startTime = invitation.startTime.toString()
+                startTime = invitation.startTime.toString(),
+                isOwner = invitation.host.id == userId
             )
         }
 
@@ -113,7 +114,8 @@ class InvitationService(
                 displayHostName = invitation.displayHostName,
                 address = invitation.address,
                 invitationDate = invitation.invitationDate.toString(),
-                startTime = invitation.startTime.toString()
+                startTime = invitation.startTime.toString(),
+                isOwner = invitation.host.id == userId
             )
         }
 
