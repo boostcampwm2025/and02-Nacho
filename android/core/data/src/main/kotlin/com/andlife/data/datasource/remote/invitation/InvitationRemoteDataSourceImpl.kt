@@ -2,6 +2,8 @@ package com.andlife.data.datasource.remote.invitation
 
 import com.andlife.data.util.apiCall
 import com.andlife.domain.error.DataError
+import com.andlife.domain.model.invitation.InvitationStatus
+import com.andlife.domain.model.invitation.SortDirection
 import com.andlife.domain.util.Result
 import com.andlife.network.api.invitation.CreateInvitationRequest
 import com.andlife.network.api.invitation.InvitationResponse
@@ -20,9 +22,10 @@ internal class InvitationRemoteDataSourceImpl @Inject constructor(
         apiCall { invitationService.getInvitation(invitationId) }
 
     override suspend fun getParticipantInvitations(
-        status: String,
+        status: InvitationStatus,
+        sortType: SortDirection,
         page: Int,
         size: Int
     ): Result<PagingResponse<InvitationSummaryResponse>, DataError> =
-        apiCall { invitationService.getParticipantInvitations(status, page, size) }
+        apiCall { invitationService.getParticipantInvitations(status.value, sortType.value, page, size) }
 }

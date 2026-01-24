@@ -10,7 +10,9 @@ import com.andlife.data.repository.invitation.mapper.toRequest
 import com.andlife.domain.error.DataError
 import com.andlife.domain.model.invitation.CreateInvitationParam
 import com.andlife.domain.model.invitation.Invitation
+import com.andlife.domain.model.invitation.InvitationStatus
 import com.andlife.domain.model.invitation.InvitationSummary
+import com.andlife.domain.model.invitation.SortDirection
 import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.map
@@ -35,12 +37,13 @@ internal class InvitationRepositoryImpl @Inject constructor(
         }
 
     override fun getParticipantInvitations(
-        status: String,
+        status: InvitationStatus,
+        sortType: SortDirection,
         size: Int
     ): Flow<PagingData<InvitationSummary>> {
         return Pager(
             config = PagingConfig(pageSize = size, enablePlaceholders = false),
-            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status) }
+            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType) }
         ).flow
     }
 }

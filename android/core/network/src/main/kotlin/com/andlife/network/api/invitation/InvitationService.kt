@@ -19,6 +19,7 @@ interface InvitationService {
     @GET("/api/invitations/me")
     suspend fun getParticipantInvitations(
         @Query("status") status: String,
+        @Query("sortType") sortType: String,
         @Query("page") page: Int,
         @Query("size") size: Int = 10
     ): BaseResponse<PagingResponse<InvitationSummaryResponse>>
