@@ -46,4 +46,15 @@ internal class InvitationRepositoryImpl @Inject constructor(
             pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType) }
         ).flow
     }
+
+    override fun getMyInvitations(
+        status: InvitationStatus,
+        sortType: SortDirection,
+        size: Int
+    ): Flow<PagingData<InvitationSummary>> {
+        return Pager(
+            config = PagingConfig(pageSize = size, enablePlaceholders = false),
+            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType) }
+        ).flow
+    }
 }

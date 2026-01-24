@@ -18,5 +18,10 @@ interface InvitationRepository {
         sortType: SortDirection,
         size: Int = 10
     ): Flow<PagingData<InvitationSummary>>
+    fun getMyInvitations(
+        status: InvitationStatus,
+        sortType: SortDirection,
+        size: Int = 10
+        ): Flow<PagingData<InvitationSummary>>
 }
 
