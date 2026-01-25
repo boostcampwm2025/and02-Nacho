@@ -45,10 +45,6 @@ class InvitationController(
             }
             is AuthContext.Guest -> {
                 val result = invitationService.getParticipantInvitations(2L, status, sortType, pageable)
-//                BaseResponse.success(PagingResponse(
-//                    meta = PagingMetaResponse(isEnd = true, pageableCount = 0, totalCount = 0, currentPage = 0),
-//                    content = emptyList()
-//                ))
                 BaseResponse.success(result)
             }
         }
