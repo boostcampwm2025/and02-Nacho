@@ -1,5 +1,6 @@
 package com.andlife.invitation.screen.detail
 
+import android.text.Editable
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,6 +28,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -50,6 +54,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.andlife.designsystem.R as designR
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InvitationDetailRoute(
     onNavigateBack: () -> Unit,
@@ -59,6 +64,8 @@ fun InvitationDetailRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
     val mapErrorMessage = stringResource(R.string.snack_load_error_map)
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
@@ -80,18 +87,23 @@ fun InvitationDetailRoute(
     InvitationDetailScreen(
         uiState = uiState,
         snackbarHostState = snackbarHostState,
+        scrollBehavior = scrollBehavior,
         onEvent = viewModel::onEvent,
         onNavigateBack = onNavigateBack,
+        onEditableSave = viewModel::saveEditable,
         modifier = modifier,
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun InvitationDetailScreen(
     uiState: InvitationDetailUiState,
     snackbarHostState: SnackbarHostState,
+    scrollBehavior: TopAppBarScrollBehavior,
     onEvent: (InvitationDetailUiEvent) -> Unit,
     onNavigateBack: () -> Unit,
+    onEditableSave: (Editable) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()
@@ -109,12 +121,15 @@ private fun InvitationDetailScreen(
     BackHandler(onBack = navigateBackWithMapCleanup)
 
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         snackbarHost = {
             SnackbarHost(snackbarHostState)
         },
         topBar = {
             InvitationDetailTopBar(
+                scrollBehavior = scrollBehavior,
                 title = uiState.invitationContentsUiModel.title,
                 hasThanksCard = uiState.hasThanksCard,
                 showActions = !uiState.isLoading && !uiState.isError,
@@ -127,8 +142,8 @@ private fun InvitationDetailScreen(
     ) { paddingValues ->
         if (uiState.isLoading) {
             InvitationLoadingIndicator(
-                modifier = Modifier.padding(paddingValues),
                 text = stringResource(R.string.txt_loading_invitation),
+                modifier = Modifier.fillMaxSize(),
             )
             return@Scaffold
         }
@@ -136,9 +151,7 @@ private fun InvitationDetailScreen(
         if (uiState.isError) {
             InvitationLoadingError(
                 onRetry = { onEvent(InvitationDetailUiEvent.RetryLoad) },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
+                modifier = Modifier.fillMaxSize(),
             )
             return@Scaffold
         }
@@ -165,6 +178,7 @@ private fun InvitationDetailScreen(
                                 },
                                 onMapError = { onEvent(InvitationDetailUiEvent.MapError) },
                                 isMapVisible = isMapVisible,
+                                onEditableSave = onEditableSave,
                                 modifier = Modifier.fillMaxSize(),
                             )
                         }
@@ -181,6 +195,7 @@ private fun InvitationDetailScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun InvitationDetailTopBar(
+    scrollBehavior: TopAppBarScrollBehavior,
     title: String,
     onBack: () -> Unit,
     onClickThanksCard: () -> Unit,
@@ -189,8 +204,10 @@ private fun InvitationDetailTopBar(
     showActions: Boolean = true,
     hasThanksCard: Boolean = false,
 ) {
+    val alpha = 1f - scrollBehavior.state.collapsedFraction
+
     TopAppBar(
-        modifier = modifier,
+        modifier = modifier.graphicsLayer { this.alpha = alpha },
         title = {
             Text(
                 text = title,
@@ -227,7 +244,9 @@ private fun InvitationDetailTopBar(
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = NachoTheme.colorScheme.backgroundPrimary,
+            scrolledContainerColor = NachoTheme.colorScheme.backgroundPrimary,
         ),
+        scrollBehavior = scrollBehavior,
     )
 }
 

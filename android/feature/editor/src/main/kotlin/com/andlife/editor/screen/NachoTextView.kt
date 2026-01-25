@@ -5,9 +5,10 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
-import android.text.SpannableStringBuilder
+import android.text.Editable
 import android.text.Spanned
 import android.util.AttributeSet
+import android.util.Log
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.view.doOnLayout
 import androidx.lifecycle.findViewTreeLifecycleOwner
@@ -24,7 +25,9 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.core.graphics.drawable.toDrawable
+import com.andlife.domain.util.onFailure
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.cancel
 
 @AndroidEntryPoint
 class NachoTextView @JvmOverloads constructor(
@@ -38,8 +41,14 @@ class NachoTextView @JvmOverloads constructor(
 
     private var loadJob: Job? = null
     private var lastBoundCard: NachoUiCard? = null
-    private var currentSpannable: SpannableStringBuilder? = null
+    private var currentSpannable: Editable? = null
+    var onEditableReady: ((Editable) -> Unit)? = null
 
+    fun bindWithCachedEditable(editable: Editable) {
+        loadJob?.cancel()
+        currentSpannable = editable
+        text = editable
+    }
     fun bind(card: NachoUiCard?) {
         if (lastBoundCard == card) return
         lastBoundCard = card
@@ -50,7 +59,7 @@ class NachoTextView @JvmOverloads constructor(
             text = ""
             return
         }
-
+        Log.d("NachoTextView", "bind: $card")
         setInitialContent(card)
 
         doOnLayout { view ->
@@ -114,6 +123,8 @@ class NachoTextView @JvmOverloads constructor(
 
         text = spannable
         requestLayout()
+        invalidate()
+        Log.d("NachoTextView", "images: ${content.images}")
 
         val loadedImages = coroutineScope {
             positions.mapIndexedNotNull { index, position ->
@@ -124,13 +135,18 @@ class NachoTextView @JvmOverloads constructor(
                             url = image.source,
                             maxWidth = targetWidth,
                             maxHeight = targetHeight
-                        ).getOrNull()?.let { bitmap ->
+                        )
+                            .onFailure { error, msg ->
+                                Log.e("NachoTextView", "FailLoadImage: $msg")
+                            }
+                            .getOrNull()?.let { bitmap ->
                             LoadedImage(position, bitmap, image.source)
                         }
                     }
                 }
             }.awaitAll().filterNotNull()
         }
+        Log.d("NachoTextView", "loadedImages: $loadedImages")
 
         loadedImages.forEach { loadedImage ->
             val existingSpans = spannable.getSpans(
@@ -155,6 +171,7 @@ class NachoTextView @JvmOverloads constructor(
         text = spannable
         requestLayout()
         invalidate()
+        onEditableReady?.invoke(spannable)
     }
 
     private fun createPlaceholderDrawable(width: Int, height: Int): Drawable {

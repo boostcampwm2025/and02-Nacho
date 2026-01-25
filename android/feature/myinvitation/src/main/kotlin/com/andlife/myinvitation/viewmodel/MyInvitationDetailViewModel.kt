@@ -1,12 +1,15 @@
 package com.andlife.myinvitation.viewmodel
 
+import android.text.Editable
 import android.util.Log
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
+import com.andlife.editor.util.CreateCardSession
 import com.andlife.model.invitation.toContentsUiModel
 import com.andlife.myinvitation.MyInvitationDetail
 import com.andlife.myinvitation.manager.KakaoShareManager
@@ -29,9 +32,11 @@ class MyInvitationDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val kakaoShareManager: KakaoShareManager,
     private val invitationRepository: InvitationRepository,
+    private val createCardSession: CreateCardSession,
 ) : BaseViewModel<MyInvitationDetailUiState, MyInvitationDetailUiEvent, MyInvitationDetailSideEffect>(
     initialState = MyInvitationDetailUiState(),
 ) {
+
     private val myInvitationId: Long = savedStateHandle.toRoute<MyInvitationDetail>().id
 
     override val uiState: StateFlow<MyInvitationDetailUiState> =
@@ -40,7 +45,7 @@ class MyInvitationDetailViewModel @Inject constructor(
                 loadInvitation()
             }.stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
+                started = SharingStarted.Lazily,
                 initialValue = MyInvitationDetailUiState(),
             )
 
@@ -57,7 +62,7 @@ class MyInvitationDetailViewModel @Inject constructor(
                         invitationContentsUiModel = invitation.toContentsUiModel(),
                     )
                 }
-            }.onFailure {
+            }.onFailure { it, msg ->
                 updateState { copy(isLoading = false, isError = true) }
                 Log.e("MyInvitationDetailViewModel", "에러 발생: $it")
             }
@@ -75,6 +80,7 @@ class MyInvitationDetailViewModel @Inject constructor(
             is MyInvitationDetailUiEvent.ClickImage -> navigateToFullScreenImage(event.imageList, event.index)
             is MyInvitationDetailUiEvent.MapError -> showMapErrorSnackbar()
             is MyInvitationDetailUiEvent.RetryLoad -> retryLoad()
+            MyInvitationDetailUiEvent.ClickCreateCard -> navigateToCreateCard()
         }
     }
 
@@ -98,13 +104,34 @@ class MyInvitationDetailViewModel @Inject constructor(
         )
     }
 
-    private fun deleteInvitation() { /* TODO: 초대장 삭제 로직 */ }
-    private fun navigateToEditInvitation() { /* TODO: 초대장 편집 이동 */ }
-    private fun showThanksCardOnboarding() { /* TODO: 감사카드 온보딩 */ }
-    private fun navigateToCreateThanksCard() { /* TODO: 감사카드 작성 이동 */ }
+    private fun deleteInvitation() { /* TODO: 초대장 삭제 로직 */
+    }
+
+    private fun navigateToEditInvitation() { /* TODO: 초대장 편집 이동 */
+    }
+
+    private fun showThanksCardOnboarding() { /* TODO: 감사카드 온보딩 */
+    }
+
+    private fun navigateToCreateThanksCard() { /* TODO: 감사카드 작성 이동 */
+    }
 
     private fun navigateToEditCard() { // TODO: 초대카드 편집 이동
-        sendEffect(MyInvitationDetailSideEffect.NavigateToEditCard(myInvitationId))
+        val card = uiState.value.invitationContentsUiModel.invitationCard
+        if (card == null) return
+        val cardId = card.card.id ?: return
+        sendEffect(MyInvitationDetailSideEffect.NavigateToEditCard(cardId))
+    }
+
+    private fun navigateToCreateCard() {
+        sendEffect(MyInvitationDetailSideEffect.NavigateToCreateCard(myInvitationId))
+    }
+
+    fun saveEditableCache(editable: Editable) {
+        val cardUiModel = uiState.value.invitationContentsUiModel.invitationCard
+        if (cardUiModel == null) return
+        createCardSession.save(editable, Color(cardUiModel.card.backgroundColor), cardUiModel.card.backgroundImageUrl)
+        updateState { copy(editCardEnabled = true, cachedCardEditable = editable) }
     }
 
     private fun navigateToFullScreenImage(imageList: ImmutableList<String>, index: Int) { /* TODO: 이미지 풀스크린*/ }
@@ -116,6 +143,12 @@ class MyInvitationDetailViewModel @Inject constructor(
     private fun retryLoad() {
         viewModelScope.launch {
             loadInvitation()
+            updateState { copy(editCardEnabled = false, cachedCardEditable = null) }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        createCardSession.clear()
     }
 }

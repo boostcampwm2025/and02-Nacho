@@ -70,8 +70,8 @@ import com.andlife.invitation.model.guestbook.InvitationGuestBookSideEffect
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiEvent
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiState
 import com.andlife.invitation.viewmodel.InvitationGuestBookViewModel
-import com.andlife.media.video.AutoVideoPlayer
 import com.andlife.media.video.AutoVideoPlayerPool
+import com.andlife.media.video.FakeVideoPlayerPool
 import com.andlife.model.common.AuthorUiModel
 import com.andlife.model.common.VideoCandidate
 import com.andlife.model.guestbook.GuestBookInvitationUiModel
@@ -166,6 +166,7 @@ fun InvitationGuestBookRoute(
             }
 
             is InvitationGuestBookSideEffect.UpdateGuestBookSuccess -> {
+                viewModel.videoPlayerPool.clearCacheById(uiState.editingGuestBookId)
                 viewModel.invalidateGuestBooks()
             }
 
@@ -370,15 +371,18 @@ private fun InvitationGuestBookScreen(
         }
     }
 
-    BackHandler(enabled = !isImVisible) {
+    LaunchedEffect(isImVisible) {
+        if (!isImVisible) focusManager.clearFocus()
+    }
+
+    BackHandler(enabled = true) {
         when {
+            isImVisible -> {
+                focusManager.clearFocus()
+            }
             uiState.editingGuestBookId != null -> {
                 focusManager.clearFocus()
                 onEvent(InvitationGuestBookUiEvent.CancelEdit)
-            }
-
-            isTextFieldFocused -> {
-                focusManager.clearFocus()
             }
 
             else -> {
@@ -463,11 +467,7 @@ private fun InvitationGuestBookScreen(
                 shadowElevation = NachoElevation.large,
                 color = NachoTheme.colorScheme.backgroundPrimary
             ) {
-                Box(
-                    modifier = Modifier
-                        .navigationBarsPadding()
-                        .imePadding()
-                ) {
+                Box(modifier = Modifier.imePadding()) {
                     GuestBookFormSection(
                         uiState = uiState,
                         onEvent = onEvent,
@@ -696,18 +696,4 @@ private fun InvitationGuestBookResultPreview() {
             }
         }
     }
-}
-
-class FakeVideoPlayerPool : AutoVideoPlayerPool {
-    override fun preparePlayers() {}
-    override fun getPlayer(url: String): AutoVideoPlayer {
-        throw NotImplementedError()
-    }
-
-    override fun playPlayer(url: String, itemId: Long) {}
-    override fun pausePlayer(url: String) {}
-    override fun pauseAllPlayers() {}
-    override fun resumeLastPlayed() {}
-    override fun resetPool() {}
-    override fun releaseAllPlayers() {}
 }

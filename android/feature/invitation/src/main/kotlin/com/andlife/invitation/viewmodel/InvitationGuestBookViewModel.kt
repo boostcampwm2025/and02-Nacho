@@ -1,5 +1,6 @@
 package com.andlife.invitation.viewmodel
 
+import android.text.Editable
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -356,13 +357,7 @@ constructor(
         updateState { copy(isUploading = false) }
         when (result) {
             is Result.Success -> {
-                updateState {
-                    copy(
-                        editingGuestBookId = null,
-                        selectedMedias = persistentListOf(),
-                        textContent = ""
-                    )
-                }
+                clearFormInput()
                 if (isUpdate) {
                     sendEffect(InvitationGuestBookSideEffect.UpdateGuestBookSuccess)
                 } else {
@@ -389,7 +384,7 @@ constructor(
                     }
                     sendEffect(InvitationGuestBookSideEffect.DeleteGuestBookSuccess)
                 }
-                .onFailure {
+                .onFailure { error, msg ->
                     sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("방명록 삭제를 실패하였습니다."))
                 }
         }
@@ -400,12 +395,14 @@ constructor(
         refreshFlow.value += 1
     }
 
-    private fun cancelEdit() {
+    private fun cancelEdit() = clearFormInput()
+
+    private fun clearFormInput() {
         updateState {
             copy(
-                editingGuestBookId = null,
-                selectedMedias = persistentListOf(),
                 textContent = "",
+                selectedMedias = persistentListOf(),
+                editingGuestBookId = null,
                 originalTextContent = "",
                 originalMediaIds = emptySet(),
             )

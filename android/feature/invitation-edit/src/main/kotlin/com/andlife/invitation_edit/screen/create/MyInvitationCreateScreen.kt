@@ -1,5 +1,6 @@
 package com.andlife.invitation_edit.screen.create
 
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -93,6 +94,10 @@ fun MyInvitationCreateRoute(
                 onNavigateToInvitationDetail(effect.id)
             }
         }
+    }
+
+    BackHandler {
+        viewModel.onEvent(CreateInvitationUiEvent.OnClickBack)
     }
 
     val pickMedia =

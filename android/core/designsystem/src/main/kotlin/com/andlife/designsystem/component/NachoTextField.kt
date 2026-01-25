@@ -29,6 +29,7 @@ fun NachoTextField(
     isError: Boolean = false,
     singleLine: Boolean = true,
     minLines: Int = 1,
+    maxLines: Int = Int.MAX_VALUE,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     leadingIcon: @Composable (() -> Unit)? = null,
@@ -50,6 +51,7 @@ fun NachoTextField(
         readOnly = readOnly,
         singleLine = singleLine,
         minLines = if (singleLine) 1 else minLines,
+        maxLines = if (singleLine) 1 else maxLines,
         textStyle = NachoTheme.typography.bodyMediumSemiBold,
         shape = NachoTheme.shapes.extraSmall,
         colors =

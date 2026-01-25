@@ -7,6 +7,10 @@ sealed interface MyInvitationDetailSideEffect : BaseSideEffect {
     data object NavigateBack : MyInvitationDetailSideEffect
 
     data class NavigateToEditCard(
+        val cardId: Long,
+    ) : MyInvitationDetailSideEffect
+
+    data class NavigateToCreateCard(
         val myInvitationId: Long,
     ) : MyInvitationDetailSideEffect
 

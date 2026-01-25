@@ -1,14 +1,23 @@
 package com.andlife.myinvitation
 
+import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import com.andlife.model.util.NavigationKeyConstant.CREATE_CARD_BY_INVITATION_ID
+import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
+import com.andlife.myinvitation.model.detail.MyInvitationDetailUiEvent
 import com.andlife.myinvitation.screen.MyInvitationDetailRoute
 import com.andlife.myinvitation.screen.MyInvitationRoute
+import com.andlife.myinvitation.viewmodel.MyInvitationDetailViewModel
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -47,12 +56,35 @@ fun NavGraphBuilder.myInvitationNavGraph(
 fun NavGraphBuilder.myInvitationDetailNavGraph(
     onNavigateBack: () -> Unit,
     onNavigateToEditCard: (Long) -> Unit,
+    onNavigateToCreateCard: (Long) -> Unit,
 ) {
-    composable<MyInvitationDetail> {
+    composable<MyInvitationDetail> { backStackEntry ->
+        val viewModel: MyInvitationDetailViewModel = hiltViewModel()
+        val cardCreated by backStackEntry.savedStateHandle.getStateFlow<Boolean>(
+            CREATE_CARD_BY_INVITATION_ID, false
+        ).collectAsStateWithLifecycle()
+
+        val cardUpdated by backStackEntry.savedStateHandle.getStateFlow<Boolean>(
+            UPDATE_CARD, false
+        ).collectAsStateWithLifecycle()
+
+        LaunchedEffect(cardCreated, cardUpdated) {
+            if (cardCreated) {
+                viewModel.onEvent(MyInvitationDetailUiEvent.RetryLoad)
+                backStackEntry.savedStateHandle.remove<Boolean>(CREATE_CARD_BY_INVITATION_ID)
+            }
+            if (cardUpdated) {
+                viewModel.onEvent(MyInvitationDetailUiEvent.RetryLoad)
+                backStackEntry.savedStateHandle.remove<Boolean>(UPDATE_CARD)
+            }
+        }
+
         MyInvitationDetailRoute(
             onNavigateBack = onNavigateBack,
             onNavigateToEditCard = onNavigateToEditCard,
+            onNavigateToCreateCard = onNavigateToCreateCard,
             modifier = Modifier.padding(),
+            viewModel = viewModel
         )
     }
 }

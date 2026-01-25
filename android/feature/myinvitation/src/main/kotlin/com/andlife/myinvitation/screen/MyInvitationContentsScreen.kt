@@ -1,5 +1,6 @@
 package com.andlife.myinvitation.screen
 
+import android.text.Editable
 import android.view.ViewGroup
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -15,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -49,10 +51,13 @@ import com.andlife.ui.section.detail.TitleSection
 fun MyInvitationContentsScreen(
     uiState: MyInvitationDetailUiState,
     onClickImage: (Int) -> Unit,
+    onClickCreateCard: () -> Unit,
     onClickEditCard: () -> Unit,
     onMapError: () -> Unit,
     isMapVisible: Boolean,
+    onSaveEditableCache: (Editable) -> Unit,
     modifier: Modifier = Modifier,
+    editCardEnabled: Boolean = false,
 ) {
     val model = uiState.invitationContentsUiModel
     val scrollState = rememberScrollState()
@@ -89,8 +94,11 @@ fun MyInvitationContentsScreen(
 
         MyInvitationCardSection(
             invitationCardModel = model.invitationCard,
-            onCreateCard = {},
-            onEditCard = {},
+            cachedCardEditable = uiState.cachedCardEditable,
+            onCreateCard = onClickCreateCard,
+            onEditCard = onClickEditCard,
+            onSaveEditableCache = onSaveEditableCache,
+            editCardEnabled = editCardEnabled,
             modifier = Modifier
         )
 
@@ -109,15 +117,13 @@ fun MyInvitationContentsScreen(
 @Composable
 private fun MyInvitationCardSection(
     invitationCardModel: InvitationCardUiModel?,
+    cachedCardEditable: Editable?,
     onCreateCard: () -> Unit,
     onEditCard: () -> Unit,
+    onSaveEditableCache: (Editable) -> Unit,
     modifier: Modifier = Modifier,
+    editCardEnabled: Boolean = false,
 ) {
-    val onClick = if (invitationCardModel == null) onCreateCard else onEditCard
-    val cardString =
-        if (invitationCardModel == null) stringResource(R.string.txt_card_create) else stringResource(R.string.txt_card_edit)
-    val icon = if (invitationCardModel == null) Icons.Default.Add else Icons.Default.Edit
-
     Column(
         modifier =
             modifier
@@ -126,32 +132,31 @@ private fun MyInvitationCardSection(
                 .padding(vertical = NachoSpacing.xLarge, horizontal = NachoSpacing.medium),
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(R.string.txt_invitation_card_title),
-                style = NachoTheme.typography.headingSmallSemiBold,
-                color = NachoTheme.colorScheme.textPrimary,
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            TextButton(onClick = onClick) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = NachoTheme.colorScheme.brandPrimary,
-                )
-                Text(
-                    text = cardString,
-                    color = NachoTheme.colorScheme.brandPrimary,
-                    style = NachoTheme.typography.bodyMediumRegular,
-                )
-            }
-        }
-
         if (invitationCardModel == null) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(R.string.txt_invitation_card_title),
+                    style = NachoTheme.typography.headingSmallSemiBold,
+                    color = NachoTheme.colorScheme.textPrimary,
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                TextButton(onClick = onCreateCard) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        tint = NachoTheme.colorScheme.brandPrimary,
+                    )
+                    Text(
+                        text = stringResource(R.string.txt_card_create),
+                        color = NachoTheme.colorScheme.brandPrimary,
+                        style = NachoTheme.typography.bodyMediumRegular,
+                    )
+                }
+            }
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = NachoTheme.shapes.small,
@@ -163,6 +168,35 @@ private fun MyInvitationCardSection(
                 EmptyCardGuide()
             }
         } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(R.string.txt_invitation_card_title),
+                    style = NachoTheme.typography.headingSmallSemiBold,
+                    color = NachoTheme.colorScheme.textPrimary,
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                TextButton(
+                    onClick = onEditCard,
+                    enabled = editCardEnabled,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = NachoTheme.colorScheme.brandPrimary,
+                        disabledContentColor = NachoTheme.colorScheme.textTertiary
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = null,
+                    )
+                    Text(
+                        text = stringResource(R.string.txt_card_edit),
+                        style = NachoTheme.typography.bodyMediumRegular,
+                    )
+                }
+            }
             val textPrimary = NachoTheme.colorScheme.textPrimary
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -186,10 +220,17 @@ private fun MyInvitationCardSection(
                                 ViewGroup.LayoutParams.WRAP_CONTENT
                             )
                             setTextColor(textPrimary.toArgb())
+                            onEditableReady = { editable ->
+                                onSaveEditableCache(editable)
+                            }
                         }
                     },
                     update = { view ->
-                        view.bind(invitationCardModel.card)
+                        if (cachedCardEditable != null) {
+                            view.bindWithCachedEditable(cachedCardEditable)
+                        } else {
+                            view.bind(invitationCardModel.card)
+                        }
                     }
                 )
             }
@@ -208,8 +249,10 @@ private fun MyInvitationContentsScreenPreview() {
                 ),
             onClickImage = {},
             onClickEditCard = {},
+            onClickCreateCard = {},
             onMapError = {},
             isMapVisible = true,
+            onSaveEditableCache = {},
         )
     }
 }

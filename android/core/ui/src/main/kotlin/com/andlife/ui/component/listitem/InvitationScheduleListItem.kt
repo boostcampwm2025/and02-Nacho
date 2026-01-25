@@ -1,10 +1,14 @@
 package com.andlife.ui.component.listitem
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
@@ -17,7 +21,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
+import coil3.compose.SubcomposeAsyncImageContent
 import com.andlife.designsystem.component.NachoDdayChip
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
@@ -50,17 +55,43 @@ fun InvitationScheduleListItem(
         modifier = modifier,
     ) {
         Column {
-            AsyncImage(
-                model = imageUrl,
-                contentDescription = stringResource(R.string.desc_schedule_list_image),
-                contentScale = ContentScale.Crop,
-                placeholder = painterResource(R.drawable.ic_placeholder_default_24),
-                error = painterResource(R.drawable.ic_error_outline_24),
-                modifier =
-                    Modifier
+            if (imageUrl.isBlank()) {
+                Image(
+                    painter = painterResource(R.drawable.bg_thumbnail),
+                    contentDescription = stringResource(R.string.desc_schedule_list_image),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(16f / 9f),
-            )
+                )
+            } else {
+                SubcomposeAsyncImage(
+                    model = imageUrl,
+                    contentDescription = stringResource(R.string.desc_schedule_list_image),
+                    contentScale = ContentScale.Crop,
+                    loading = {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(NachoTheme.colorScheme.backgroundSecondary),
+                        )
+                    },
+                    success = {
+                        SubcomposeAsyncImageContent()
+                    },
+                    error = {
+                        Image(
+                            painter = painterResource(R.drawable.bg_thumbnail),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f),
+                )
+            }
 
             Column(
                 modifier = Modifier.padding(NachoSpacing.medium),

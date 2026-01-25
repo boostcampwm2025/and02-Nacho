@@ -63,6 +63,7 @@ import com.andlife.model.guestbook.GuestBookMediaUiModel
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.ui.R
+import com.andlife.ui.component.icon.PlayerThumbnailIcon
 import com.andlife.ui.component.media.MediaOverlay
 import com.andlife.ui.util.toFormatDuration
 import com.andlife.ui.util.toRelativeTimeString
@@ -82,6 +83,7 @@ fun GuestBookItem(
     modifier: Modifier = Modifier,
     shouldPlayVideo: Boolean = false,
     isEditing: Boolean = false,
+    useMenuButton: Boolean = true,
     onMenuClick: () -> Unit = {},
     onEditClick: (GuestBookUiModel) -> Unit = {},
     onDeleteClick: (GuestBookUiModel) -> Unit = {},
@@ -93,17 +95,22 @@ fun GuestBookItem(
         NachoTheme.colorScheme.backgroundPrimary
     }
 
+    val maxTextLines = when {
+        guestBook.visualMedias.isNotEmpty() -> 2
+        guestBook.audioMedias.isNotEmpty() -> 4
+        else -> 6
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(backgroundColor)
-            .padding(horizontal = NachoSpacing.large),
+            .background(backgroundColor),
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
         GuestBookItemHeader(
             author = guestBook.author,
             createdAt = guestBook.createdAt,
-            isOwner = guestBook.isOwner,
+            isOwner = useMenuButton && guestBook.isOwner,
             onMenuClick = onMenuClick,
             onEditClick = { onEditClick(guestBook) },
             onDeleteClick = { onDeleteClick(guestBook) },
@@ -111,34 +118,27 @@ fun GuestBookItem(
         GuestBookItemTextSection(
             invitation = guestBook.invitation,
             textContent = guestBook.textContent,
+            maxLines = maxTextLines,
             onInvitationTitleClick = onInvitationTitleClick,
         )
-        if (guestBook.visualMedias.isNotEmpty()) {
-            GuestBookItemVisualMediaSection(
-                guestBookId = guestBook.id,
-                visualMediaUrls = guestBook.visualMedias,
-                totalVisualCount = guestBook.totalVisualCount,
-                shouldPlayVideo = shouldPlayVideo,
-                videoPlayerPool = videoPlayerPool,
-                onVisualMediaClick = onVisualMediaClick,
-            )
-        }
-        if (guestBook.audioMedias.isNotEmpty()) {
-            Column(
-                modifier = Modifier,
-                verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
-            ) {
-                guestBook.audioMedias.forEach { audio ->
-                    GuestBookAudioItem(
-                        audio = audio,
-                        isAudioPlaying = isAudioPlaying && (audio.url == playingAudioUrl),
-                        onAudioMediaClick = onAudioMediaClick,
-                    )
-                }
-            }
-        }
+        GuestBookItemVisualMediaSection(
+            guestBookId = guestBook.id,
+            visualMediaUrls = guestBook.visualMedias,
+            totalVisualCount = guestBook.totalVisualCount,
+            shouldPlayVideo = shouldPlayVideo,
+            videoPlayerPool = videoPlayerPool,
+            onVisualMediaClick = onVisualMediaClick,
+        )
+        GuestBookItemAudioSection(
+            audioMedias = guestBook.audioMedias,
+            isAudioPlaying = isAudioPlaying,
+            playingAudioUrl = playingAudioUrl,
+            onAudioMediaClick = onAudioMediaClick,
+        )
         HorizontalDivider(
-            modifier = Modifier.padding(top = NachoSpacing.xSmall),
+            modifier = Modifier
+                .padding(horizontal = NachoSpacing.large)
+                .padding(top = NachoSpacing.xSmall),
             color = NachoTheme.colorScheme.backgroundBorder,
         )
     }
@@ -159,7 +159,11 @@ private fun GuestBookItemHeader(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = NachoSpacing.large),
+            .padding(
+                top = NachoSpacing.large,
+                start = NachoSpacing.large,
+                end = NachoSpacing.xSmall
+            ),
         horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -241,14 +245,19 @@ private fun GuestBookItemHeader(
 private fun GuestBookItemTextSection(
     invitation: GuestBookInvitationUiModel?,
     textContent: String,
+    maxLines: Int,
     onInvitationTitleClick: (Long) -> Unit?,
     modifier: Modifier = Modifier,
 ) {
+    if (textContent.isBlank()) return
+
     var isExpanded by remember { mutableStateOf(false) }
     var isOverflowed by remember { mutableStateOf(false) }
 
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = NachoSpacing.large),
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
         invitation?.let {
@@ -276,18 +285,20 @@ private fun GuestBookItemTextSection(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .clickable {
+                    .then(
                         if (isOverflowed) {
-                            isExpanded = !isExpanded
+                            Modifier.clickable { isExpanded = !isExpanded }
+                        } else {
+                            Modifier
                         }
-                    },
+                    ),
             verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
         ) {
             Text(
                 text = textContent,
                 style = NachoTheme.typography.bodyMediumRegular,
                 color = NachoTheme.colorScheme.textPrimary,
-                maxLines = if (isExpanded) Int.MAX_VALUE else 2,
+                maxLines = if (isExpanded) Int.MAX_VALUE else maxLines,
                 overflow = TextOverflow.Ellipsis,
                 onTextLayout = { textLayoutResult ->
                     if (!isExpanded) {
@@ -323,6 +334,8 @@ private fun GuestBookItemVisualMediaSection(
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (visualMediaUrls.isEmpty()) return
+
     val pagerState = rememberPagerState(pageCount = { visualMediaUrls.size })
     var beyondViewportPageCount by remember { mutableStateOf(0) }
 
@@ -340,6 +353,7 @@ private fun GuestBookItemVisualMediaSection(
         modifier =
             modifier
                 .fillMaxWidth()
+                .padding(horizontal = NachoSpacing.large)
                 .aspectRatio(1f) // TODO: 추후 미디어 비율에 맞게 조정 필요, 일단 정사각형으로 고정
                 .clip(NachoTheme.shapes.small),
     ) {
@@ -512,6 +526,11 @@ private fun VideoPlayerView(
                 this.player = player
             }
         },
+        update = { playerView ->
+            if (playerView.player != player) {
+                playerView.player = player
+            }
+        },
         modifier = modifier,
     )
 }
@@ -530,21 +549,31 @@ private fun ThumbnailWrapper(
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Fit,
         )
-        Box(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .size(48.dp)
-                .background(
-                    color = NachoTheme.colorScheme.iconSecondary.copy(alpha = 0.6f),
-                    shape = CircleShape,
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_play_arrow_24),
-                contentDescription = stringResource(R.string.desc_play_video),
-                tint = NachoTheme.colorScheme.iconTertiary,
-                modifier = Modifier.size(24.dp),
+        PlayerThumbnailIcon(modifier = Modifier.align(Alignment.Center))
+    }
+}
+
+@Composable
+private fun GuestBookItemAudioSection(
+    audioMedias: ImmutableList<GuestBookMediaUiModel>,
+    isAudioPlaying: Boolean,
+    playingAudioUrl: String?,
+    onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (audioMedias.isEmpty()) return
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = NachoSpacing.large),
+        verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
+    ) {
+        audioMedias.forEach { audio ->
+            GuestBookAudioItem(
+                audio = audio,
+                isAudioPlaying = isAudioPlaying && (audio.url == playingAudioUrl),
+                onAudioMediaClick = onAudioMediaClick,
             )
         }
     }
@@ -783,6 +812,7 @@ class FakeAutoVideoPlayerPool : AutoVideoPlayerPool {
     override fun pausePlayer(url: String) {}
     override fun pauseAllPlayers() {}
     override fun resumeLastPlayed() {}
+    override fun clearCacheById(itemId: Long?) {}
     override fun resetPool() {}
     override fun releaseAllPlayers() {}
 }

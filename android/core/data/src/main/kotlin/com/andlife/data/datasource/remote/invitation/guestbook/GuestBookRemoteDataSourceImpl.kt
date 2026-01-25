@@ -39,4 +39,10 @@ internal class GuestBookRemoteDataSourceImpl @Inject constructor(
     override suspend fun deleteGuestBook(guestBookId: Long): Result<Long, DataError> =
         apiCall { guestBookService.deleteGuestBook(guestBookId) }
 
+
+    override suspend fun getAllRelatedGuestBooks(
+        page: Int,
+        size: Int
+    ): Result<PagingResponse<GuestBookResponse>, DataError> =
+        apiCall { guestBookService.getAllRelatedGuestBooks(page, size) }
 }

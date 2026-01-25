@@ -6,8 +6,11 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -19,11 +22,16 @@ import com.andlife.deeplink.DeepLinkManager
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.home.homeNavGraph
+import com.andlife.home.settingNavGraph
 import com.andlife.invitation.invitationDetailNavGraph
 import com.andlife.invitation.invitationNavGraph
+import com.andlife.invitation_card.createCardByInvitationNavGraph
 import com.andlife.invitation_card.createCardNavGraph
+import com.andlife.invitation_card.updateCardNavGraph
 import com.andlife.invitation_edit.addressSearchNavGraph
 import com.andlife.invitation_edit.myInvitationCreateNavGraph
+import com.andlife.model.util.NavigationKeyConstant.CREATE_CARD_BY_INVITATION_ID
+import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
 import com.andlife.myinvitation.myInvitationDetailNavGraph
 import com.andlife.myinvitation.myInvitationNavGraph
 import kotlinx.collections.immutable.ImmutableList
@@ -35,8 +43,13 @@ fun NachoNavHost(
     deepLinkManager: DeepLinkManager,
     modifier: Modifier = Modifier,
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+
     Scaffold(
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
+        snackbarHost = {
+            SnackbarHost(snackbarHostState)
+        },
         bottomBar = {
             AnimatedVisibility(navigator.shouldShowBottomBar()) {
                 InvitationBottomBar(
@@ -54,7 +67,18 @@ fun NachoNavHost(
             navController = navigator.navController,
             startDestination = navigator.startDestination,
         ) {
-            homeNavGraph(innerPadding)
+            homeNavGraph(
+                paddingValues = innerPadding,
+                snackbarHostState = snackbarHostState,
+                onNavigateToCreate = navigator::navigateToMyInvitationCreate,
+                onNavigateToInvitationDetail = navigator::navigateToInvitationDetail,
+                onNavigateToMyInvitationDetail = navigator::navigateToMyInvitationDetail,
+                onNavigateToSetting = navigator::navigateToSetting,
+            )
+
+            settingNavGraph(
+                onNavigateBack = navigator::navigatePopBackStack,
+            )
 
             invitationNavGraph(
                 paddingValues = innerPadding,
@@ -74,7 +98,8 @@ fun NachoNavHost(
 
             myInvitationDetailNavGraph(
                 onNavigateBack = navigator::navigatePopBackStack,
-                onNavigateToEditCard = { /* TODO: 초대카드 편집 */ },
+                onNavigateToEditCard = navigator::navigateToUpdateCard,
+                onNavigateToCreateCard = navigator::navigateToCreateCardByInvitation
             )
 
             myInvitationCreateNavGraph(
@@ -91,6 +116,22 @@ fun NachoNavHost(
 
             createCardNavGraph(
                 onBackClick = navigator::navigatePopBackStack
+            )
+
+            createCardByInvitationNavGraph(
+                onBackClick = navigator::navigatePopBackStack,
+                onSuccessCreateCard = {
+                    navigator.navController.previousBackStackEntry?.savedStateHandle[CREATE_CARD_BY_INVITATION_ID] = true
+                    navigator.navigatePopBackStack()
+                }
+            )
+
+            updateCardNavGraph(
+                onBackClick = navigator::navigatePopBackStack,
+                onSuccessCreateCard = {
+                    navigator.navController.previousBackStackEntry?.savedStateHandle[UPDATE_CARD] = true
+                    navigator.navigatePopBackStack()
+                }
             )
         }
     }

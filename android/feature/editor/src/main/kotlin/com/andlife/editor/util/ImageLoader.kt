@@ -9,7 +9,6 @@ import android.graphics.Paint
 import android.graphics.Rect
 import androidx.exifinterface.media.ExifInterface
 import android.net.Uri
-import android.util.Log
 import com.andlife.domain.error.DataError
 import com.andlife.domain.util.Result
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +18,7 @@ import javax.inject.Inject
 import kotlin.math.max
 import androidx.core.graphics.createBitmap
 import coil3.imageLoader
+import coil3.request.CachePolicy
 import coil3.request.ErrorResult
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
@@ -65,6 +65,7 @@ class ImageLoaderImpl @Inject constructor() : ImageLoader {
         try {
             val request = ImageRequest.Builder(context)
                 .data(url)
+                .memoryCachePolicy(CachePolicy.DISABLED)
                 .size(maxWidth, maxHeight)
                 .allowHardware(false)
                 .build()

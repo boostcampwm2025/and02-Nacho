@@ -40,4 +40,10 @@ interface GuestBookService {
     suspend fun deleteGuestBook(
         @Path("guestBookId") guestBookId: Long,
     ): BaseResponse<Long>
+
+    @GET("/api/invitations/guestbooks/all")
+    suspend fun getAllRelatedGuestBooks(
+        @Query("page") page: Int,
+        @Query("size") size: Int
+    ): BaseResponse<PagingResponse<GuestBookResponse>>
 }

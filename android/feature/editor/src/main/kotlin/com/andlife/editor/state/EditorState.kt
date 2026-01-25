@@ -42,6 +42,12 @@ class EditorState @Inject constructor(
     var editText: EditText? = null
         private set
 
+    var currentText by mutableStateOf("")
+        private set
+
+    val isTextEmpty: Boolean
+        get() = currentText.isBlank()
+
     var currentTextStyle by mutableStateOf(EditTextStyle())
         private set
 
@@ -55,6 +61,7 @@ class EditorState @Inject constructor(
             val editText = editText ?: return
             val editable = s
             if (editable == null) return
+            currentText = editable.toString()
             val cursor = editText.selectionStart
             val isEnterPressed = cursor > 0 && editable.isNotEmpty() && editable[cursor - 1] == '\n'
             if (isEnterPressed) {
@@ -387,7 +394,7 @@ class EditorState @Inject constructor(
             .onSuccess { bitmap ->
                 editText.insertImageSpan(bitmap, uri.toString())
             }
-            .onFailure { error ->
+            .onFailure { error, _ ->
                 Log.e("EditorState", "insertImage: $error")
             }
     }
@@ -577,6 +584,7 @@ class EditorState @Inject constructor(
 
     fun attach(view: EditText) {
         editText = view
+        currentText = view.text.toString()
         val editText = editText ?: return
         val cursorListener = View.OnClickListener {
             updateToolbarState()
@@ -615,6 +623,9 @@ class EditorState @Inject constructor(
         editText.setOnKeyListener(null)
         editText.text = null
         this.editText = null
+        currentText = ""
+        currentTextStyle = EditTextStyle()
+        currentBackgroundImageUrl = ""
     }
 
     companion object {
