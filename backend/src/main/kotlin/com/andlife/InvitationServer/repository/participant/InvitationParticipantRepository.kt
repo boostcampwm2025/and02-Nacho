@@ -1,4 +1,4 @@
-package com.andlife.InvitationServer.repository.invitation.participant
+package com.andlife.InvitationServer.repository.participant
 
 import com.andlife.InvitationServer.entity.InvitationParticipant
 import org.springframework.data.domain.Page
@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
+import java.time.LocalDate
+import java.time.LocalTime
 
 interface InvitationParticipantRepository : JpaRepository<InvitationParticipant, Long> {
 
@@ -34,8 +36,8 @@ interface InvitationParticipantRepository : JpaRepository<InvitationParticipant,
     )
     fun findUpcomingInvitations(
         @Param("userId") userId: Long,
-        @Param("nowDate") nowDate: java.time.LocalDate,
-        @Param("nowTime") nowTime: java.time.LocalTime,
+        @Param("nowDate") nowDate: LocalDate,
+        @Param("nowTime") nowTime: LocalTime,
         pageable: Pageable
     ): Page<InvitationParticipant>
 
@@ -57,8 +59,8 @@ interface InvitationParticipantRepository : JpaRepository<InvitationParticipant,
     )
     fun findPastInvitations(
         @Param("userId") userId: Long,
-        @Param("nowDate") nowDate: java.time.LocalDate,
-        @Param("nowTime") nowTime: java.time.LocalTime,
+        @Param("nowDate") nowDate: LocalDate,
+        @Param("nowTime") nowTime: LocalTime,
         pageable: Pageable
     ): Page<InvitationParticipant>
 }

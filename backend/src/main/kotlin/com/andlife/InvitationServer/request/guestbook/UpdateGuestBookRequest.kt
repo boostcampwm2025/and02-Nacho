@@ -1,4 +1,4 @@
-package com.andlife.InvitationServer.request.invitation.guestbook
+package com.andlife.InvitationServer.request.guestbook
 
 data class UpdateGuestBookRequest(
     val textContent: String,

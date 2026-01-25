@@ -1,10 +1,10 @@
 package com.andlife.InvitationServer.controller.guestbook
 
 import com.andlife.InvitationServer.auth.AuthContext
-import com.andlife.InvitationServer.request.invitation.guestbook.UpdateGuestBookRequest
+import com.andlife.InvitationServer.request.guestbook.UpdateGuestBookRequest
 import com.andlife.InvitationServer.response.BaseResponse
-import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookResponse
-import com.andlife.InvitationServer.service.invitation.guestbook.GuestBookService
+import com.andlife.InvitationServer.response.guestbook.GuestBookResponse
+import com.andlife.InvitationServer.service.guestbook.GuestBookService
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping

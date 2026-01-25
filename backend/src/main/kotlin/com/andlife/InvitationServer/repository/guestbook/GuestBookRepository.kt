@@ -1,4 +1,4 @@
-package com.andlife.InvitationServer.repository.invitation.guestbook
+package com.andlife.InvitationServer.repository.guestbook
 
 import com.andlife.InvitationServer.entity.GuestBook
 import org.springframework.data.domain.Page
