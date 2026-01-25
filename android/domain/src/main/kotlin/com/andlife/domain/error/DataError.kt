@@ -18,6 +18,7 @@ sealed interface DataError : InvitationError {
         DecodeFailed,
         NotFound,
         OutOfMemory,
+        CompressFailed,
     }
 }
 
