@@ -92,6 +92,9 @@ import kotlinx.datetime.LocalDateTime
 import kotlin.math.max
 import kotlin.math.min
 
+private const val CAMERA_IMAGES_DIR = "camera_images"
+private const val AUDIO_RECORDINGS_DIR = "audio_recordings"
+
 @Composable
 fun InvitationGuestBookRoute(
     onNavigateBack: () -> Unit,
@@ -128,7 +131,6 @@ fun InvitationGuestBookRoute(
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
-        val dir = File(context.cacheDir, "camera_images")
         if (success && cameraImageUri != null) {
             val currentMedias = uiState.selectedMedias
             if (currentMedias.size < 5) {
@@ -172,8 +174,8 @@ fun InvitationGuestBookRoute(
             }
 
             is InvitationGuestBookSideEffect.LaunchCamera -> {
-                // 임시 파일 생성 (camera_images 디렉토리 사용)
-                val cameraImagesDir = File(context.cacheDir, "camera_images")
+                // 임시 파일 생성
+                val cameraImagesDir = File(context.cacheDir, CAMERA_IMAGES_DIR)
                 if (!cameraImagesDir.exists()) {
                     cameraImagesDir.mkdirs()
                 }
@@ -191,7 +193,7 @@ fun InvitationGuestBookRoute(
 
             is InvitationGuestBookSideEffect.StartAudioRecording -> {
                 // 오디오 녹음 시작
-                val audioRecordingsDir = File(context.cacheDir, "audio_recordings")
+                val audioRecordingsDir = File(context.cacheDir, AUDIO_RECORDINGS_DIR)
                 if (!audioRecordingsDir.exists()) {
                     audioRecordingsDir.mkdirs()
                 }
