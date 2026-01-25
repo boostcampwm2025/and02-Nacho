@@ -69,13 +69,13 @@ class R2Config {
 
 enum class MediaType(val folder: String, val contentType: String) {
     VIDEO("videos", "video/mp4"),
-    IMAGE("images", "image/jpeg"),
+    IMAGE("images", "image/webp"),
     AUDIO("audios", "audio/mpeg");
 
     fun getExtension(): String {
         return when (this) {
             VIDEO -> ".mp4"
-            IMAGE -> ".jpg"
+            IMAGE -> ".webp"
             AUDIO -> ".mp3"
         }
     }
