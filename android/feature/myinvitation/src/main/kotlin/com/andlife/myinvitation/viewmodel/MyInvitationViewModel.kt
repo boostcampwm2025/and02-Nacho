@@ -39,7 +39,8 @@ class MyInvitationViewModel @Inject constructor(
         _upcomingSort.flatMapLatest { sort ->
             invitationRepository.getMyInvitations(
                 status = InvitationStatus.UPCOMING,
-                sortType = sort
+                sortType = sort,
+                isMyInvitation = true
             ).map { pagingData ->
                 pagingData.map { summary ->
                     summary.toUiModel { date, time ->
@@ -54,7 +55,8 @@ class MyInvitationViewModel @Inject constructor(
         _pastSort.flatMapLatest { sort ->
             invitationRepository.getMyInvitations(
                 status = InvitationStatus.PAST,
-                sortType = sort
+                sortType = sort,
+                isMyInvitation = true
             ).map { pagingData ->
                 pagingData.map { summary ->
                     summary.toUiModel { date, time ->

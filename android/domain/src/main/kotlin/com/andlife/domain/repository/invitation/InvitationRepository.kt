@@ -18,12 +18,12 @@ interface InvitationRepository {
     fun getParticipantInvitations(
         status: InvitationStatus,
         sortType: SortDirection,
-        size: Int = 10
+        isMyInvitation: Boolean
     ): Flow<PagingData<InvitationSummary>>
     fun getMyInvitations(
         status: InvitationStatus,
         sortType: SortDirection,
-        size: Int = 10
+        isMyInvitation: Boolean
     ): Flow<PagingData<InvitationSummary>>
     fun getUpcomingInvitations(): Flow<PagingData<UpcomingInvitation>>
     suspend fun createInvitationCard(invitationId: Long, card: NachoCard): Result<Long, DataError>

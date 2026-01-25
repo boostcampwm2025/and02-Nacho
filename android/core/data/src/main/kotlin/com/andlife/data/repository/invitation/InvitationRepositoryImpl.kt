@@ -42,7 +42,7 @@ internal class InvitationRepositoryImpl @Inject constructor(
     override fun getParticipantInvitations(
         status: InvitationStatus,
         sortType: SortDirection,
-        size: Int
+        isMyInvitation: Boolean
     ): Flow<PagingData<InvitationSummary>> {
         return Pager(
             config = PagingConfig(
@@ -50,14 +50,14 @@ internal class InvitationRepositoryImpl @Inject constructor(
                 enablePlaceholders = false,
                 initialLoadSize = PAGE_SIZE
             ),
-            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType, isMyInvitation = false) }
+            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType, isMyInvitation) }
         ).flow
     }
 
     override fun getMyInvitations(
         status: InvitationStatus,
         sortType: SortDirection,
-        size: Int
+        isMyInvitation: Boolean
     ): Flow<PagingData<InvitationSummary>> {
         return Pager(
             config = PagingConfig(
@@ -65,7 +65,7 @@ internal class InvitationRepositoryImpl @Inject constructor(
                 enablePlaceholders = false,
                 initialLoadSize = PAGE_SIZE
             ),
-            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType, isMyInvitation = true) }
+            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType, isMyInvitation) }
         ).flow
     }
 
