@@ -23,6 +23,11 @@ interface InvitationService {
         @Body request: CreateInvitationRequest,
     ): BaseResponse<InvitationResponse>
 
+    @POST("api/invitations/{invitationId}/cards")
+    suspend fun createInvitationCard(
+        @Path("invitationId") invitationId: Long,
+        @Body request: InvitationCardRequest,
+    ): BaseResponse<Long>
     @GET("/api/invitations/upcoming")
     suspend fun getUpcomingInvitations(
         @Query("days") days: Long,

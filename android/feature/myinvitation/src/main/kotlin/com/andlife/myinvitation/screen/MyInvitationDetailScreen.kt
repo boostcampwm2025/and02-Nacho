@@ -64,6 +64,7 @@ import com.andlife.designsystem.R as designR
 fun MyInvitationDetailRoute(
     onNavigateBack: () -> Unit,
     onNavigateToEditCard: (Long) -> Unit,
+    onNavigateToCreateCard: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MyInvitationDetailViewModel = hiltViewModel(),
 ) {
@@ -88,6 +89,10 @@ fun MyInvitationDetailRoute(
                         message = mapErrorMessage
                     )
                 }
+            }
+
+            is MyInvitationDetailSideEffect.NavigateToCreateCard -> {
+                onNavigateToCreateCard(effect.myInvitationId)
             }
         }
     }
@@ -181,6 +186,7 @@ private fun MyInvitationDetailScreen(
                                             )
                                         },
                                     onClickEditCard = { onEvent(MyInvitationDetailUiEvent.ClickEditCard) },
+                                    onClickCreateCard = { onEvent(MyInvitationDetailUiEvent.ClickCreateCard) },
                                     onMapError = { onEvent(MyInvitationDetailUiEvent.MapError) },
                                     isMapVisible = isMapVisible,
                                     modifier = Modifier.fillMaxSize(),

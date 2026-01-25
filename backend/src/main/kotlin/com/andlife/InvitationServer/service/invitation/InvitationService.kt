@@ -11,6 +11,7 @@ import com.andlife.InvitationServer.repository.invitation.InvitationCardReposito
 import com.andlife.InvitationServer.repository.invitation.InvitationRepository
 import com.andlife.InvitationServer.repository.invitation.participant.InvitationParticipantRepository
 import com.andlife.InvitationServer.request.invitation.CreateInvitationRequest
+import com.andlife.InvitationServer.request.invitation.InvitationCardRequest
 import com.andlife.InvitationServer.response.CommonResponseCode
 import com.andlife.InvitationServer.response.PagingMetaResponse
 import com.andlife.InvitationServer.response.PagingResponse
@@ -39,6 +40,26 @@ class InvitationService(
         val participants = participantRepository.findAllByUserIdWithInvitation(userId)
         // 임시로 아이디들만 반환하게 구현
         return participants.map { it.invitation.id }
+    }
+
+    @Transactional
+    fun createInvitationCard(invitationId: Long, request: InvitationCardRequest): Long {
+        val invitation = invitationRepository.findById(invitationId)
+            .orElseThrow { NoSuchElementException("Invitation not found: $invitationId") }
+
+        val existingCard = invitationCardRepository.findByInvitationIdWithDetails(invitationId)
+        if (existingCard != null) {
+            throw IllegalStateException("Invitation card already exists for invitation: $invitationId")
+        }
+
+        val card = InvitationCard(
+            invitation = invitation,
+            contentJson = request.contentJson,
+            backgroundColor = request.backgroundColor,
+            backgroundImageUrl = request.backgroundImageUrl,
+        )
+
+        return invitationCardRepository.save(card).id
     }
 
     fun getInvitation(invitationId: Long): InvitationResponse {

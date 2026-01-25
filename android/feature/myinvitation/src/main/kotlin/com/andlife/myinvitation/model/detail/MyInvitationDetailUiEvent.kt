@@ -18,6 +18,8 @@ sealed interface MyInvitationDetailUiEvent : BaseUiEvent {
 
     data object ClickEditCard : MyInvitationDetailUiEvent
 
+    data object ClickCreateCard : MyInvitationDetailUiEvent
+
     data class ClickImage(
         val imageList: ImmutableList<String>,
         val index: Int,
