@@ -5,5 +5,5 @@ import com.andlife.ui.base.BaseUiState
 
 data class UpdateCardUiState(
     val editorState: EditorState,
-    val isLoading: Boolean
+    val isLoading: Boolean = false
 ) : BaseUiState

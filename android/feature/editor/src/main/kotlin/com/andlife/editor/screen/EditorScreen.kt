@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -47,6 +48,7 @@ import androidx.compose.material.icons.filled.FormatStrikethrough
 import androidx.compose.material.icons.filled.FormatUnderlined
 import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -58,6 +60,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
@@ -155,9 +158,11 @@ fun EditorScreen(
                         null -> {}
                     }
                 },
-                onRedoClick = { },
-                onUndoClick = { },
+                onRedoClick = state::redo,
+                onUndoClick = state::undo,
                 colorPaletteMode = colorPaletteMode,
+                undoEnabled = state.canUndo,
+                redoEnabled = state.canRedo,
                 modifier = Modifier.fillMaxWidth(),
             )
         },
@@ -263,6 +268,8 @@ private fun EditorBottomBar(
     onRedoClick: () -> Unit,
     modifier: Modifier = Modifier,
     colorPaletteMode: ColorPaletteMode? = null,
+    undoEnabled: Boolean = true,
+    redoEnabled: Boolean = true,
 ) {
     Column(
         modifier =
@@ -286,32 +293,45 @@ private fun EditorBottomBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(NachoSpacing.large),
+                .padding(horizontal = NachoSpacing.large, vertical = NachoSpacing.medium),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                modifier = Modifier.clickable { onUndoClick() },
-                horizontalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
-                verticalAlignment = Alignment.CenterVertically,
+            TextButton(
+                onClick = onUndoClick,
+                enabled = undoEnabled,
+                contentPadding = PaddingValues(
+                    horizontal = NachoSpacing.small,
+                    vertical = NachoSpacing.xSmall
+                ),
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = NachoTheme.colorScheme.textPrimary
+                )
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_undo),
-                    contentDescription = stringResource(R.string.btn_undo),
-                    tint = NachoTheme.colorScheme.textSecondary
+                    contentDescription = null,
                 )
+                Spacer(modifier = Modifier.width(NachoSpacing.xSmall))
                 Text(text = stringResource(R.string.btn_undo))
             }
+
             Spacer(modifier = Modifier.weight(1f))
-            Row(
-                modifier = Modifier.clickable { onRedoClick() },
-                horizontalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
-                verticalAlignment = Alignment.CenterVertically,
+            TextButton(
+                onClick = onRedoClick,
+                enabled = redoEnabled,
+                contentPadding = PaddingValues(
+                    horizontal = NachoSpacing.small,
+                    vertical = NachoSpacing.xSmall
+                ),
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = NachoTheme.colorScheme.textPrimary
+                )
             ) {
                 Text(text = stringResource(R.string.btn_redo))
+                Spacer(modifier = Modifier.width(NachoSpacing.xSmall))
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_redo),
-                    contentDescription = stringResource(R.string.btn_redo),
-                    tint = NachoTheme.colorScheme.textSecondary
+                    contentDescription = null,
                 )
             }
         }
