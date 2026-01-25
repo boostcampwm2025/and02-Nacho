@@ -17,11 +17,20 @@ interface InvitationService {
         @Path("invitationId") invitationId: Long,
     ): BaseResponse<InvitationResponse>
 
-    @GET("/api/invitations/me")
+    @GET("/api/invitations/joined")
     suspend fun getParticipantInvitations(
         @Query("status") status: String,
+        @Query("sortType") sortType: String,
         @Query("page") page: Int,
-        @Query("size") size: Int = 10
+        @Query("size") size: Int
+    ): BaseResponse<PagingResponse<InvitationSummaryResponse>>
+
+    @GET("/api/invitations/mine")
+    suspend fun getMyInvitations(
+        @Query("status") status: String,
+        @Query("sortType") sortType: String,
+        @Query("page") page: Int,
+        @Query("size") size: Int
     ): BaseResponse<PagingResponse<InvitationSummaryResponse>>
 
     @POST("/api/invitations")

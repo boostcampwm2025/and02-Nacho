@@ -32,29 +32,39 @@ class InvitationController(
     private val invitationService: InvitationService,
     private val guestBookService: GuestBookService,
 ) {
-    @GetMapping("/me")
+    @GetMapping("/joined")
     fun getParticipantInvitations(
         authContext: AuthContext,
         @RequestParam(required = false, defaultValue = "UPCOMING") status: String,
-        @PageableDefault(
-            size = 10,
-            sort = ["invitation.invitationDate", "invitation.startTime"],
-            direction = Sort.Direction.ASC
-        )
-        pageable: Pageable
+        @RequestParam(required = false, defaultValue = "ASC") sortType: String,
+        @PageableDefault(size = 10) pageable: Pageable
     ): BaseResponse<PagingResponse<InvitationSummaryResponse>> {
         return when (authContext) {
             is AuthContext.Member -> {
-                val result = invitationService.getParticipantInvitations(authContext.userId, status, pageable)
+                val result = invitationService.getParticipantInvitations(authContext.userId, status, sortType, pageable)
                 BaseResponse.success(result)
             }
             is AuthContext.Guest -> {
-                val result = invitationService.getParticipantInvitations(2L, status, pageable)
-//                BaseResponse.success(PagingResponse(
-//                    meta = PagingMetaResponse(isEnd = true, pageableCount = 0, totalCount = 0, currentPage = 0),
-//                    content = emptyList()
-//                ))
+                val result = invitationService.getParticipantInvitations(2L, status, sortType, pageable)
                 BaseResponse.success(result)
+            }
+        }
+    }
+
+    @GetMapping("/mine")
+    fun getMyInvitations(
+        authContext: AuthContext,
+        @RequestParam(required = false, defaultValue = "UPCOMING") status: String,
+        @RequestParam(required = false, defaultValue = "ASC") sortType: String,
+        @PageableDefault(size = 10) pageable: Pageable
+    ): BaseResponse<PagingResponse<InvitationSummaryResponse>> {
+        return when (authContext) {
+            is AuthContext.Member -> {
+                val result = invitationService.getMyInvitations(authContext.userId, status, sortType, pageable)
+                BaseResponse.success(result)
+            }
+            is AuthContext.Guest -> {
+                BaseResponse.error(CommonResponseCode.UNAUTHORIZED)
             }
         }
     }

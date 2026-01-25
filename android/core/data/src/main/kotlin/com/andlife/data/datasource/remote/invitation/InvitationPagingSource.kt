@@ -3,22 +3,36 @@ package com.andlife.data.datasource.remote.invitation
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.andlife.data.repository.invitation.mapper.toDomain
+import com.andlife.domain.model.invitation.InvitationStatus
 import com.andlife.domain.model.invitation.InvitationSummary
+import com.andlife.domain.model.invitation.SortDirection
 import com.andlife.domain.util.Result
 
 class InvitationPagingSource(
     private val remoteDataSource: InvitationRemoteDataSource,
-    private val status: String
+    private val status: InvitationStatus,
+    private val sortType: SortDirection,
+    private val isMyInvitation: Boolean = false
 ) : PagingSource<Int, InvitationSummary>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, InvitationSummary> {
         val page = params.key ?: 0
 
-        val result = remoteDataSource.getParticipantInvitations(
-            status = status,
-            page = page,
-            size = params.loadSize
-        )
+        val result = if (isMyInvitation) {
+            remoteDataSource.getMyInvitations(
+                status = status,
+                page = page,
+                sortType = sortType,
+                size = params.loadSize
+            )
+        } else {
+            remoteDataSource.getParticipantInvitations(
+                status = status,
+                page = page,
+                sortType = sortType,
+                size = params.loadSize
+            )
+        }
 
         return when (result) {
             is Result.Success -> {

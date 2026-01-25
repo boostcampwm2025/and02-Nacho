@@ -2,6 +2,7 @@ package com.andlife.network.api.invitation
 
 import kotlinx.serialization.Serializable
 
+@OptIn(kotlinx.serialization.InternalSerializationApi::class)
 @Serializable
 data class UpcomingInvitationResponse(
     val id: Long,

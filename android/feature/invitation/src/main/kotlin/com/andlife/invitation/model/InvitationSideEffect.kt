@@ -4,5 +4,5 @@ import com.andlife.ui.base.BaseSideEffect
 
 sealed interface InvitationSideEffect : BaseSideEffect {
     data class NavigateToDetail(val id: Long) : InvitationSideEffect
-    object RefreshFailure : InvitationSideEffect
+    data object RefreshFailure : InvitationSideEffect
 }

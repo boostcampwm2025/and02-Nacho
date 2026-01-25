@@ -1,4 +1,4 @@
-package com.andlife.invitation.viewmodel
+package com.andlife.myinvitation.viewmodel
 
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -7,11 +7,11 @@ import androidx.paging.map
 import com.andlife.domain.model.invitation.InvitationStatus
 import com.andlife.domain.model.invitation.SortDirection
 import com.andlife.domain.repository.invitation.InvitationRepository
-import com.andlife.invitation.model.InvitationSideEffect
-import com.andlife.invitation.model.InvitationUiEvent
-import com.andlife.invitation.model.InvitationUiState
 import com.andlife.model.invitation.InvitationSummaryUiModel
 import com.andlife.model.invitation.toUiModel
+import com.andlife.myinvitation.model.MyInvitationSideEffect
+import com.andlife.myinvitation.model.MyInvitationUiEvent
+import com.andlife.myinvitation.model.MyInvitationUiState
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.util.toFullDisplayString
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,21 +26,21 @@ import kotlinx.datetime.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
-class InvitationViewModel @Inject constructor(
+class MyInvitationViewModel @Inject constructor(
     private val invitationRepository: InvitationRepository
-) : BaseViewModel<InvitationUiState, InvitationUiEvent, InvitationSideEffect>(
-    initialState = InvitationUiState()
+) : BaseViewModel<MyInvitationUiState, MyInvitationUiEvent, MyInvitationSideEffect>(
+    initialState = MyInvitationUiState()
 ) {
     private val _upcomingSort = MutableStateFlow(SortDirection.ASC)
     private val _pastSort = MutableStateFlow(SortDirection.DESC)
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-    val upcomingInvitationPagingFlow: Flow<PagingData<InvitationSummaryUiModel>> =
+    val upcomingMyInvitationPagingFlow: Flow<PagingData<InvitationSummaryUiModel>> =
         _upcomingSort.flatMapLatest { sort ->
-            invitationRepository.getParticipantInvitations(
+            invitationRepository.getMyInvitations(
                 status = InvitationStatus.UPCOMING,
                 sortType = sort,
-                isMyInvitation = false
+                isMyInvitation = true
             ).map { pagingData ->
                 pagingData.map { summary ->
                     summary.toUiModel { date, time ->
@@ -51,12 +51,12 @@ class InvitationViewModel @Inject constructor(
         }.cachedIn(viewModelScope)
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-    val pastInvitationPagingFlow: Flow<PagingData<InvitationSummaryUiModel>> =
+    val pastMyInvitationPagingFlow: Flow<PagingData<InvitationSummaryUiModel>> =
         _pastSort.flatMapLatest { sort ->
-            invitationRepository.getParticipantInvitations(
+            invitationRepository.getMyInvitations(
                 status = InvitationStatus.PAST,
                 sortType = sort,
-                isMyInvitation = false
+                isMyInvitation = true
             ).map { pagingData ->
                 pagingData.map { summary ->
                     summary.toUiModel { date, time ->
@@ -66,40 +66,41 @@ class InvitationViewModel @Inject constructor(
             }
         }.cachedIn(viewModelScope)
 
-    override val uiState: StateFlow<InvitationUiState> =
+    override val uiState: StateFlow<MyInvitationUiState> =
         mutableUiState
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = InvitationUiState()
+                initialValue = MyInvitationUiState()
             )
 
-    override fun onEvent(event: InvitationUiEvent) {
+    override fun onEvent(event: MyInvitationUiEvent) {
         when (event) {
-            is InvitationUiEvent.Refresh -> {
+            is MyInvitationUiEvent.Refresh -> {
                 updateState { copy(isRefreshing = true) }
             }
-
-            is InvitationUiEvent.SelectTab -> {
+            is MyInvitationUiEvent.SelectTab -> {
                 updateState { copy(selectedTab = event.index) }
             }
-
-            is InvitationUiEvent.ClickInvitation -> {
-                sendEffect(InvitationSideEffect.NavigateToDetail(event.id))
+            is MyInvitationUiEvent.ClickInvitation -> {
+                sendEffect(MyInvitationSideEffect.NavigateToDetail(event.id))
             }
-            is InvitationUiEvent.ChangeSort -> {
+            is MyInvitationUiEvent.ChangeSort -> {
                 if (event.isUpcoming) {
                     _upcomingSort.value = event.newSort
                 } else {
                     _pastSort.value = event.newSort
                 }
             }
+            is MyInvitationUiEvent.ClickCreate -> {
+                sendEffect(MyInvitationSideEffect.NavigateToCreate)
+            }
         }
     }
 
     fun onRefreshFinished(hasError: Boolean) {
         updateState { copy(isRefreshing = false) }
-        if (hasError) sendEffect(InvitationSideEffect.RefreshFailure)
+        if (hasError) sendEffect(MyInvitationSideEffect.RefreshFailure)
     }
 
 }

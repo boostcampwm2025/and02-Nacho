@@ -63,6 +63,7 @@ import com.andlife.home.model.HomeSideEffect
 import com.andlife.home.model.HomeUiEvent
 import com.andlife.home.model.HomeUiState
 import com.andlife.home.viewmodel.HomeViewModel
+import com.andlife.media.video.AutoVideoPlayer
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.model.common.VideoCandidate
 import com.andlife.model.guestbook.GuestBookUiModel
@@ -677,6 +678,22 @@ private fun GuestBookStatusContent(
 @PreviewTheme
 @Composable
 private fun HomeScreenPreview() {
+    val fakeVideoPlayerPool = remember {
+        object : AutoVideoPlayerPool {
+            override fun preparePlayers() {}
+            override fun getPlayer(url: String): AutoVideoPlayer {
+                throw UnsupportedOperationException("Preview 전용")
+            }
+
+            override fun playPlayer(url: String, itemId: Long) {}
+            override fun pausePlayer(url: String) {}
+            override fun pauseAllPlayers() {}
+            override fun resumeLastPlayed() {}
+            override fun clearCacheById(itemId: Long?) {}
+            override fun resetPool() {}
+            override fun releaseAllPlayers() {}
+        }
+    }
     val emptyUpcomingInvitations = flowOf(PagingData.empty<UpcomingInvitationUiModel>()).collectAsLazyPagingItems()
     val emptyGuestBooks = flowOf(PagingData.empty<GuestBookUiModel>()).collectAsLazyPagingItems()
     val lazyListState = rememberLazyListState()
