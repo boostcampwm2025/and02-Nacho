@@ -21,7 +21,7 @@ interface InvitationService {
         @Query("status") status: String,
         @Query("sortType") sortType: String,
         @Query("page") page: Int,
-        @Query("size") size: Int = 10
+        @Query("size") size: Int
     ): BaseResponse<PagingResponse<InvitationSummaryResponse>>
 
     @GET("/api/invitations/mine")
@@ -29,7 +29,7 @@ interface InvitationService {
         @Query("status") status: String,
         @Query("sortType") sortType: String,
         @Query("page") page: Int,
-        @Query("size") size: Int = 10
+        @Query("size") size: Int
     ): BaseResponse<PagingResponse<InvitationSummaryResponse>>
 
     @POST("/api/invitations")
