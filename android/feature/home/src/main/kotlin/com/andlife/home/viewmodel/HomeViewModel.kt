@@ -85,7 +85,6 @@ class HomeViewModel @Inject constructor(
             is HomeUiEvent.ClickSetting -> navigateToSetting()
             is HomeUiEvent.ClickCreate -> navigateToCreate()
             is HomeUiEvent.Refresh -> refresh()
-            is HomeUiEvent.Retry -> retry()
         }
     }
 
@@ -126,19 +125,14 @@ class HomeViewModel @Inject constructor(
         updateState { copy(isRefreshing = true) }
     }
 
-    private fun retry() {
-        updateState { copy(isRetry = true) }
-    }
-
     fun onRefreshFinished(hasError: Boolean) {
-        val wasUserTriggered = uiState.value.isRefreshing || uiState.value.isRetry
-        updateState { copy(isRefreshing = false, isRetry = false) }
+        val wasUserTriggered = uiState.value.isRefreshing
+        updateState { copy(isRefreshing = false) }
 
         if (hasError) {
             sendEffect(HomeSideEffect.RefreshFailure)
         } else {
             if (wasUserTriggered) {
-                sendEffect(HomeSideEffect.RefreshSuccess)
                 sendEffect(HomeSideEffect.ScrollToTop)
             }
         }

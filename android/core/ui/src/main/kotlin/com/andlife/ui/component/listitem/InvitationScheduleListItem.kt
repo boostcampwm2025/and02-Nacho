@@ -2,7 +2,9 @@ package com.andlife.ui.component.listitem
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -27,7 +29,6 @@ import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
-import com.andlife.ui.component.loading.InvitationLoadingIndicator
 
 @Composable
 fun InvitationScheduleListItem(
@@ -68,7 +69,13 @@ fun InvitationScheduleListItem(
                     model = imageUrl,
                     contentDescription = stringResource(R.string.desc_schedule_list_image),
                     contentScale = ContentScale.Crop,
-                    loading = { InvitationLoadingIndicator() },
+                    loading = {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(NachoTheme.colorScheme.backgroundSecondary),
+                        )
+                    },
                     success = {
                         SubcomposeAsyncImageContent()
                     },

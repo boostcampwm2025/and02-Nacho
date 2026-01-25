@@ -78,7 +78,13 @@ fun InvitationListItem(
                         model = imageUrl,
                         contentDescription = stringResource(R.string.desc_invitation_list_image),
                         contentScale = ContentScale.Crop,
-                        loading = { InvitationLoadingIndicator() },
+                        loading = {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(NachoTheme.colorScheme.backgroundSecondary),
+                            )
+                        },
                         success = {
                             SubcomposeAsyncImageContent()
                         },
