@@ -1,8 +1,8 @@
 package com.andlife.InvitationServer.controller.invitation
 
+import com.andlife.InvitationServer.auth.AuthContext
 import com.andlife.InvitationServer.request.invitation.CreateInvitationRequest
 import com.andlife.InvitationServer.request.invitation.InvitationCardRequest
-import com.andlife.InvitationServer.auth.AuthContext
 import com.andlife.InvitationServer.request.invitation.guestbook.GuestBookRequest
 import com.andlife.InvitationServer.response.BaseResponse
 import com.andlife.InvitationServer.response.CommonResponseCode
@@ -16,13 +16,7 @@ import com.andlife.InvitationServer.service.invitation.guestbook.GuestBookServic
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/invitations")
@@ -39,6 +33,7 @@ class InvitationController(
                 val ids = invitationService.getParticipantInvitations(authContext.userId)
                 BaseResponse.success(ids)
             }
+
             is AuthContext.Guest -> {
                 BaseResponse.success(null)
             }
@@ -111,47 +106,48 @@ class InvitationController(
         } catch (e: Exception) {
             BaseResponse.error(responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
         }
-    @GetMapping("/guestbooks/all")
-    fun getAllRelatedGuestBooks(
-        authContext: AuthContext,
-        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
-    ): BaseResponse<PagingResponse<GuestBookResponse>> {
-        val result = guestBookService.getAllRelatedGuestBooks(authContext, pageable)
-        return BaseResponse.success(result)
-    }
-
-    @PostMapping
-    fun createInvitation(
-        @RequestBody request: CreateInvitationRequest
-    ): BaseResponse<InvitationResponse> {
-        return try {
-            val response = invitationService.createInvitation(request)
-            BaseResponse.success(response)
-        } catch (e: IllegalArgumentException) {
-            println(e.message)
-            BaseResponse.error(
-                responseCode = CommonResponseCode.BAD_REQUEST,
-                customMessage = e.message
-            )
-        } catch (e: NoSuchElementException) {
-            println(e.message)
-            BaseResponse.error(
-                responseCode = CommonResponseCode.NOT_FOUND,
-                customMessage = e.message
-            )
-        } catch (e: Exception) {
-            println(e.message)
-            BaseResponse.error(responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
+        @GetMapping("/guestbooks/all")
+        fun getAllRelatedGuestBooks(
+            authContext: AuthContext,
+            @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
+        ): BaseResponse<PagingResponse<GuestBookResponse>> {
+            val result = guestBookService.getAllRelatedGuestBooks(authContext, pageable)
+            return BaseResponse.success(result)
         }
-    }
 
-    @GetMapping("/upcoming")
-    fun getUpcomingInvitations(
-        authContext: AuthContext,
-        @RequestParam(defaultValue = "30") days: Long,
-        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
-    ): BaseResponse<PagingResponse<UpcomingInvitationResponse>> {
-        val result = invitationService.getUpcomingInvitations(authContext, days, pageable)
-        return BaseResponse.success(result)
+        @PostMapping
+        fun createInvitation(
+            @RequestBody request: CreateInvitationRequest
+        ): BaseResponse<InvitationResponse> {
+            return try {
+                val response = invitationService.createInvitation(request)
+                BaseResponse.success(response)
+            } catch (e: IllegalArgumentException) {
+                println(e.message)
+                BaseResponse.error(
+                    responseCode = CommonResponseCode.BAD_REQUEST,
+                    customMessage = e.message
+                )
+            } catch (e: NoSuchElementException) {
+                println(e.message)
+                BaseResponse.error(
+                    responseCode = CommonResponseCode.NOT_FOUND,
+                    customMessage = e.message
+                )
+            } catch (e: Exception) {
+                println(e.message)
+                BaseResponse.error(responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
+            }
+        }
+
+        @GetMapping("/upcoming")
+        fun getUpcomingInvitations(
+            authContext: AuthContext,
+            @RequestParam(defaultValue = "30") days: Long,
+            @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
+        ): BaseResponse<PagingResponse<UpcomingInvitationResponse>> {
+            val result = invitationService.getUpcomingInvitations(authContext, days, pageable)
+            return BaseResponse.success(result)
+        }
     }
 }

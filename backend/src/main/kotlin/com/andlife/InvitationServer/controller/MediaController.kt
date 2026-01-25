@@ -167,12 +167,12 @@ class MediaController(
                 val timestamp = System.currentTimeMillis()
                 val key = "${mediaType.folder}/${timestamp}-${UUID.randomUUID()}$extension"
 
-                if (fileInfo.fileSize <= SIZE_THRESHOLD_BYTES) {
-                    // 100MB 이하 → 단순 업로드
-                    createSimpleUploadInfo(key, mediaType, fileInfo.fileName)
-                } else {
-                    // 100MB 초과 → 멀티파트 업로드
+                val isLargeVideo = mediaType == MediaType.VIDEO && fileInfo.fileSize > SIZE_THRESHOLD_BYTES
+
+                if (isLargeVideo) {
                     createMultipartUploadInfo(key, mediaType, fileInfo.fileName, fileInfo.fileSize)
+                } else {
+                    createSimpleUploadInfo(key, mediaType, fileInfo.fileName)
                 }
             }
 

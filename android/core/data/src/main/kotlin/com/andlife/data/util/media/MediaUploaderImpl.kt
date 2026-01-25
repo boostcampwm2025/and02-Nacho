@@ -46,7 +46,7 @@ constructor(
 ) : MediaUploader {
     override suspend fun uploadMedias(files: List<MediaFile>): Result<List<String?>, DataError> =
         withContext(Dispatchers.IO) {
-            val compressedData = files.map { file ->
+            val compressedDataList = files.map { file ->
                 if (file.mediaType == MediaType.IMAGE) {
                     imageCompressor.compressImage(uri = file.uriString.toUri())
                 } else {
@@ -56,7 +56,7 @@ constructor(
 
             val startRequest = BatchUploadMediaRequest(
                 files = files.mapIndexed { index, mediaFile ->
-                    val compressed = compressedData[index]
+                    val compressed = compressedDataList[index]
                     FileUploadInfoRequest(
                         fileName = if (compressed != null) {
                             mediaFile.fileName.replaceAfterLast('.', "webp")
@@ -74,55 +74,58 @@ constructor(
 
             val uploadInfos = (startResult as Result.Success).data.files
 
-            val uploadResults = uploadInfos
-                .zip(files.zip(compressedData))
-                .map { (info, pair) ->
-                    val (mediaFile, compressed) = pair
-                    async {
-                        try {
-                            if (info.isMultipart) {
-                                val parts = uploadMultipart(
-                                    data = compressed,
-                                    uri = if (compressed == null) mediaFile.uriString.toUri() else null,
-                                    uploadId = info.uploadId!!,
-                                    chunkUrls = info.chunkUrls!!,
-                                    chunkSize = info.chunkSize!!,
-                                    totalSize = compressed?.size?.toLong() ?: mediaFile.fileSize,
-                                )
+            val uploadResults = uploadInfos.mapIndexed { index, response ->
+                val file = files[index]
+                val data = compressedDataList[index]
 
-                                if (parts == null) return@async null
+                async {
+                    try {
+                        val currentSize = data?.size?.toLong() ?: file.fileSize
+                        val uri = if (data == null) file.uriString.toUri() else null
 
+                        if (response.isMultipart) {
+                            val parts = uploadMultipart(
+                                data = data,
+                                uri = uri,
+                                uploadId = response.uploadId!!,
+                                chunkUrls = response.chunkUrls!!,
+                                chunkSize = response.chunkSize!!,
+                                totalSize = currentSize,
+                            )
+
+                            if (parts == null) return@async null
+
+                            CompleteFileInfoRequest(
+                                mediaKey = response.mediaKey,
+                                fileName = response.fileName,
+                                uploadId = response.uploadId,
+                                parts = parts,
+                            )
+                        } else {
+                            val uploadResult = uploadSimple(
+                                uploadUrl = response.uploadUrl!!,
+                                data = data,
+                                uri = uri,
+                                mediaType = file.mediaType,
+                                fileSize = currentSize,
+                            )
+
+                            if (uploadResult is Result.Success) {
                                 CompleteFileInfoRequest(
-                                    mediaKey = info.mediaKey,
-                                    fileName = info.fileName,
-                                    uploadId = info.uploadId,
-                                    parts = parts,
+                                    mediaKey = response.mediaKey,
+                                    fileName = response.fileName,
                                 )
                             } else {
-                                val uploadResult = uploadSimple(
-                                    uploadUrl = info.uploadUrl!!,
-                                    data = compressed,
-                                    uri = if (compressed == null) mediaFile.uriString.toUri() else null,
-                                    mediaType = mediaFile.mediaType,
-                                    fileSize = compressed?.size?.toLong() ?: mediaFile.fileSize,
-                                )
-
-                                if (uploadResult is Result.Success) {
-                                    CompleteFileInfoRequest(
-                                        mediaKey = info.mediaKey,
-                                        fileName = info.fileName,
-                                    )
-                                } else {
-                                    Log.e("MediaUploaderImpl", "uploadSimple 실패: $uploadResult")
-                                    null
-                                }
+                                Log.e("MediaUploaderImpl", "uploadSimple 실패: $uploadResult")
+                                null
                             }
-                        } catch (e: Exception) {
-                            Log.e("MediaUploaderImpl", "미디어 업로드 중 예외 발생", e)
-                            null
                         }
+                    } catch (e: Exception) {
+                        Log.e("MediaUploaderImpl", "업로드 중 오류: ${file.fileName}", e)
+                        null
                     }
-                }.awaitAll()
+                }
+            }.awaitAll()
 
             val successfulFiles = uploadResults.filterNotNull()
 
