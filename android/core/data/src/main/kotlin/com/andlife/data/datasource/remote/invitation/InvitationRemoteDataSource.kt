@@ -5,6 +5,7 @@ import com.andlife.domain.model.invitation.InvitationStatus
 import com.andlife.domain.model.invitation.SortDirection
 import com.andlife.domain.util.Result
 import com.andlife.network.api.invitation.CreateInvitationRequest
+import com.andlife.network.api.invitation.InvitationCardRequest
 import com.andlife.network.api.invitation.InvitationResponse
 import com.andlife.network.model.PagingResponse
 import com.andlife.network.model.invitation.InvitationSummaryResponse
@@ -25,6 +26,7 @@ interface InvitationRemoteDataSource {
         page: Int,
         size: Int
     ): Result<PagingResponse<InvitationSummaryResponse>, DataError>
+    suspend fun createInvitationCard(invitationId: Long, request: InvitationCardRequest): Result<Long, DataError>
     suspend fun getUpcomingInvitations(
         days: Long,
         page: Int,

@@ -6,5 +6,8 @@
     <string name="btn_redo">다시실행</string>
     <string name="desc_selected_color">선택된 색상</string>
     <string name="desc_edit_text_hint">내용을 입력하세요</string>
+    <string name="txt_create_card">초대카드 생성</string>
+    <string name="snackbar_fail_create_card">초대카드 생성에 실패했습니다 다시 시도해 주세요</string>
+
 </resources>
 

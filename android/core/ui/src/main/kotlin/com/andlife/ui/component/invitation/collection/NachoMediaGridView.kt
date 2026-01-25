@@ -34,8 +34,8 @@ fun NachoMediaGridView(
             columns = GridCells.Fixed(3),
             modifier = modifier,
             contentPadding = PaddingValues(NachoSpacing.small),
-            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
-            verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
+            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.twoXSmall),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.twoXSmall),
         ) {
             itemsIndexed(
                 items = items,

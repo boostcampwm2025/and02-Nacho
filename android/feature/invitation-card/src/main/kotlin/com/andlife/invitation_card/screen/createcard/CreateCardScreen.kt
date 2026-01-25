@@ -4,9 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.andlife.editor.screen.EditorScreen
 import com.andlife.editor.state.EditorState
+import com.andlife.invitation_card.R
 import com.andlife.invitation_card.viewmodel.CreateCardViewModel
 
 @Composable
@@ -43,7 +45,7 @@ private fun CreateCardScreen(
 ) {
     EditorScreen(
         state = state,
-        titleText = "",
+        titleText = stringResource(R.string.txt_create_card),
         onBackClick = onBackClick,
         onSaveChangesClick = onSaveComplete,
         modifier = modifier,

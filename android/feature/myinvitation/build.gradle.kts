@@ -8,6 +8,8 @@ android {
 
 dependencies {
     implementation(projects.feature.editor)
+    implementation(projects.core.media)
+
     implementation(libs.androidx.compose.material.icons.extended)
 
     // kakao 공유

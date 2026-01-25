@@ -1,4 +1,4 @@
-package com.andlife.invitation.screen.guestbook
+package com.andlife.myinvitation.screen.guestbook
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
@@ -54,11 +54,6 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
-import com.andlife.invitation.R
-import com.andlife.invitation.model.guestbook.InvitationGuestBookSideEffect
-import com.andlife.invitation.model.guestbook.InvitationGuestBookUiEvent
-import com.andlife.invitation.model.guestbook.InvitationGuestBookUiState
-import com.andlife.invitation.viewmodel.InvitationGuestBookViewModel
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.media.video.FakeVideoPlayerPool
 import com.andlife.model.common.AuthorUiModel
@@ -67,6 +62,11 @@ import com.andlife.model.guestbook.GuestBookInvitationUiModel
 import com.andlife.model.guestbook.GuestBookMediaUiModel
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
+import com.andlife.myinvitation.R
+import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookSideEffect
+import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookUiEvent
+import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookUiState
+import com.andlife.myinvitation.viewmodel.MyInvitationGuestBookViewModel
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.invitation.InvitationGuestBookForm
 import com.andlife.ui.component.paging.PagingStateContent
@@ -80,10 +80,10 @@ import kotlin.math.max
 import kotlin.math.min
 
 @Composable
-fun InvitationGuestBookRoute(
+fun MyInvitationGuestBookRoute(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: InvitationGuestBookViewModel = hiltViewModel(),
+    viewModel: MyInvitationGuestBookViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val guestBooks = viewModel.guestBooksPagingFlow.collectAsLazyPagingItems()
@@ -97,24 +97,24 @@ fun InvitationGuestBookRoute(
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
-            is InvitationGuestBookSideEffect.ShowSnackbar -> {
+            is MyInvitationGuestBookSideEffect.ShowSnackbar -> {
                 snackbarHostState.showSnackbar(
                     message = effect.message,
                     duration = SnackbarDuration.Short,
                 )
             }
 
-            is InvitationGuestBookSideEffect.CreateGuestBookSuccess -> {
+            is MyInvitationGuestBookSideEffect.CreateGuestBookSuccess -> {
                 scrollToTop = true
                 viewModel.invalidateGuestBooks()
             }
 
-            is InvitationGuestBookSideEffect.UpdateGuestBookSuccess -> {
-                viewModel.videoPlayerPool.clearCacheById(uiState.editingGuestBookId)
+            is MyInvitationGuestBookSideEffect.UpdateGuestBookSuccess -> {
                 viewModel.invalidateGuestBooks()
             }
 
-            is InvitationGuestBookSideEffect.DeleteGuestBookSuccess -> {
+            is MyInvitationGuestBookSideEffect.DeleteGuestBookSuccess -> {
+                viewModel.videoPlayerPool.clearCacheById(uiState.editingGuestBookId)
                 viewModel.invalidateGuestBooks()
             }
         }
@@ -196,7 +196,7 @@ fun InvitationGuestBookRoute(
                     TextButton(
                         onClick = {
                             showDeleteDialog?.let { guestBookId ->
-                                viewModel.onEvent(InvitationGuestBookUiEvent.ClickDeleteMenu(guestBookId))
+                                viewModel.onEvent(MyInvitationGuestBookUiEvent.ClickDeleteMenu(guestBookId))
                             }
                             showDeleteDialog = null
                         }
@@ -228,9 +228,9 @@ fun InvitationGuestBookRoute(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun InvitationGuestBookScreen(
-    uiState: InvitationGuestBookUiState,
+    uiState: MyInvitationGuestBookUiState,
     guestBooks: LazyPagingItems<GuestBookUiModel>,
-    onEvent: (InvitationGuestBookUiEvent) -> Unit,
+    onEvent: (MyInvitationGuestBookUiEvent) -> Unit,
     snackbarHostState: SnackbarHostState,
     lazyListState: LazyListState,
     videoPlayerPool: AutoVideoPlayerPool,
@@ -250,7 +250,7 @@ private fun InvitationGuestBookScreen(
         isMediaActive = false
         coroutineScope.launch {
             videoPlayerPool.pauseAllPlayers()
-            onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(""))
+            onEvent(MyInvitationGuestBookUiEvent.ClickAudioMedia(""))
 
             delay(50L)
             onNavigateBack()
@@ -268,7 +268,7 @@ private fun InvitationGuestBookScreen(
             }
             uiState.editingGuestBookId != null -> {
                 focusManager.clearFocus()
-                onEvent(InvitationGuestBookUiEvent.CancelEdit)
+                onEvent(MyInvitationGuestBookUiEvent.CancelEdit)
             }
             else -> {
                 navigateBackWithCleanup()
@@ -399,11 +399,11 @@ private fun InvitationGuestBookScreen(
                                     guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
                                 playingAudioUrl = uiState.playingAudioUrl,
                                 isEditing = uiState.editingGuestBookId == guestBook.id,
-                                onEditClick = { onEvent(InvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
+                                onEditClick = { onEvent(MyInvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
                                 onDeleteClick = { onDeleteMenuClick(guestBook.id) },
-                                onVisualMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
-                                onAudioMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
-                                onMenuClick = { onEvent(InvitationGuestBookUiEvent.ClickGuestBookMenu(guestBook.id)) },
+                                onVisualMediaClick = { onEvent(MyInvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
+                                onAudioMediaClick = { onEvent(MyInvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
+                                onMenuClick = { onEvent(MyInvitationGuestBookUiEvent.ClickGuestBookMenu(guestBook.id)) },
                             )
                         }
                     }
@@ -428,8 +428,8 @@ private fun InvitationGuestBookScreen(
 
 @Composable
 private fun GuestBookFormSection(
-    uiState: InvitationGuestBookUiState,
-    onEvent: (InvitationGuestBookUiEvent) -> Unit,
+    uiState: MyInvitationGuestBookUiState,
+    onEvent: (MyInvitationGuestBookUiEvent) -> Unit,
     onFocusChanged: (Boolean) -> Unit,
 ) {
     InvitationGuestBookForm(
@@ -445,16 +445,16 @@ private fun GuestBookFormSection(
         isSubmittable = uiState.isSubmittable,
         editingGuestBookId = uiState.editingGuestBookId,
         onMediasSelected = { medias ->
-            onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(medias))
+            onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(medias))
         },
         onMediaRemove = { media ->
-            onEvent(InvitationGuestBookUiEvent.RemoveMedia(media))
+            onEvent(MyInvitationGuestBookUiEvent.RemoveMedia(media))
         },
         onTextContentChange = { text ->
-            onEvent(InvitationGuestBookUiEvent.UpdateTextContent(text))
+            onEvent(MyInvitationGuestBookUiEvent.UpdateTextContent(text))
         },
         onUploadClick = {
-            onEvent(InvitationGuestBookUiEvent.UploadMedias)
+            onEvent(MyInvitationGuestBookUiEvent.UploadMedias)
         },
         onFocusChanged = onFocusChanged,
     )
@@ -466,7 +466,7 @@ private fun InvitationGuestBookEmptyPreview() {
     val emptyGuestBooks = flowOf(PagingData.empty<GuestBookUiModel>()).collectAsLazyPagingItems()
     NachoTheme {
         InvitationGuestBookScreen(
-            uiState = InvitationGuestBookUiState(isLoadingGuestBooks = false),
+            uiState = MyInvitationGuestBookUiState(isLoadingGuestBooks = false),
             guestBooks = emptyGuestBooks,
             onEvent = {},
             onNavigateBack = {},
