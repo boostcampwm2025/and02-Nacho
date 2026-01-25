@@ -104,7 +104,7 @@ private fun MyInvitationScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             InvitationTopBar(
-                stringResource(R.string.txt_invitation)
+                stringResource(R.string.txt_my_invitation)
             )
         },
         floatingActionButton = {
