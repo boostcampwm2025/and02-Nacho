@@ -83,7 +83,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
 
-private const val GUESTBOOK_KEY_PREFIX = "guestbook_"
+private const val GUESTBOOK_KEY_OFFSET = 2
 private const val UPCOMING_CARD_WIDTH_RATIO = 0.85f
 private const val SKELETON_ITEM_COUNT = 2
 
@@ -233,14 +233,9 @@ fun HomeScreen(
                 if (visibleItems.isEmpty()) return@collect
 
                 val videoCandidates = visibleItems.mapNotNull { itemInfo ->
-                    val itemKey = itemInfo.key.toString()
-                    if (!itemKey.startsWith(GUESTBOOK_KEY_PREFIX)) return@mapNotNull null
-                    val guestBookId =
-                        itemKey.removePrefix(GUESTBOOK_KEY_PREFIX).toLongOrNull() ?: return@mapNotNull null
-
-                    val guestBookIndex = (0 until guestBooks.itemCount).find {
-                        guestBooks.peek(it)?.id == guestBookId
-                    } ?: return@mapNotNull null
+                    val keyIndex = (itemInfo.key as? Int) ?: return@mapNotNull null
+                    val guestBookIndex = keyIndex - GUESTBOOK_KEY_OFFSET
+                    if (guestBookIndex < 0 || guestBookIndex >= guestBooks.itemCount) return@mapNotNull null
 
                     val guestBook = try {
                         guestBooks.peek(guestBookIndex)
@@ -583,10 +578,7 @@ private fun LazyListScope.homeGuestBookSection(
     } else {
         items(
             count = guestBooks.itemCount,
-            key = { index ->
-                val id = guestBooks.itemKey { it.id }.invoke(index)
-                "$GUESTBOOK_KEY_PREFIX$id"
-            },
+            key = { index -> index + GUESTBOOK_KEY_OFFSET },
         ) { index ->
             guestBooks[index]?.let { guestBook ->
                 GuestBookItem(
