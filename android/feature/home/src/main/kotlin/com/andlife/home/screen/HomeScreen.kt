@@ -39,7 +39,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -64,12 +63,12 @@ import com.andlife.home.model.HomeSideEffect
 import com.andlife.home.model.HomeUiEvent
 import com.andlife.home.model.HomeUiState
 import com.andlife.home.viewmodel.HomeViewModel
-import com.andlife.media.video.AutoVideoPlayer
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.model.common.VideoCandidate
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.model.invitation.UpcomingInvitationUiModel
+import com.andlife.ui.component.guestbook.FakeAutoVideoPlayerPool
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItemSkeleton
@@ -678,21 +677,6 @@ private fun GuestBookStatusContent(
 @PreviewTheme
 @Composable
 private fun HomeScreenPreview() {
-    val fakeVideoPlayerPool = remember {
-        object : AutoVideoPlayerPool {
-            override fun preparePlayers() {}
-            override fun getPlayer(url: String): AutoVideoPlayer {
-                throw UnsupportedOperationException("Preview 전용")
-            }
-
-            override fun playPlayer(url: String, itemId: Long) {}
-            override fun pausePlayer(url: String) {}
-            override fun pauseAllPlayers() {}
-            override fun resumeLastPlayed() {}
-            override fun resetPool() {}
-            override fun releaseAllPlayers() {}
-        }
-    }
     val emptyUpcomingInvitations = flowOf(PagingData.empty<UpcomingInvitationUiModel>()).collectAsLazyPagingItems()
     val emptyGuestBooks = flowOf(PagingData.empty<GuestBookUiModel>()).collectAsLazyPagingItems()
     val lazyListState = rememberLazyListState()
@@ -704,7 +688,7 @@ private fun HomeScreenPreview() {
             upcomingInvitations = emptyUpcomingInvitations,
             guestBooks = emptyGuestBooks,
             onEvent = {},
-            videoPlayerPool = fakeVideoPlayerPool,
+            videoPlayerPool = FakeAutoVideoPlayerPool(),
             lazyListState = lazyListState,
         )
     }
