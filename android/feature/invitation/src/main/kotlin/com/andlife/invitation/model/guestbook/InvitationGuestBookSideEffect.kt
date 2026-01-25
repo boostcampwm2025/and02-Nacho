@@ -14,4 +14,8 @@ sealed interface InvitationGuestBookSideEffect : BaseSideEffect {
     data object DeleteGuestBookSuccess : InvitationGuestBookSideEffect
 
     data object LaunchCamera : InvitationGuestBookSideEffect
+
+    data object StartAudioRecording : InvitationGuestBookSideEffect
+
+    data object StopAudioRecording : InvitationGuestBookSideEffect
 }
