@@ -254,29 +254,6 @@ class MediaController(
         }
     }
 
-    @DeleteMapping("/{mediaKey}")
-    fun deleteMedia(
-        @PathVariable mediaKey: String
-    ): BaseResponse<DeleteMediaResponse> {
-        return try {
-            r2Client.deleteObject { builder ->
-                builder.bucket(bucketName)
-                    .key(mediaKey)
-            }
-
-            BaseResponse.success(DeleteMediaResponse(success = true))
-
-        } catch (e: Exception) {
-            BaseResponse.success(
-                DeleteMediaResponse(
-                    success = false,
-                    message = "Media deletion failed: ${e.message}"
-                ),
-                responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR
-            )
-        }
-    }
-
     private fun createSimpleUploadInfo(
         key: String,
         mediaType: MediaType,

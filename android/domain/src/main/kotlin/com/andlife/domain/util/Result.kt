@@ -34,3 +34,10 @@ inline fun <D, E : InvitationError> Result<D, E>.onFailure(action: (error: E) ->
     }
     return this
 }
+
+fun <D, E : InvitationError> Result<D, E>.getOrNull(): D? {
+    return when {
+        this is Result.Success -> data
+        else -> null
+    }
+}

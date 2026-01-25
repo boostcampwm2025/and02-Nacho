@@ -14,8 +14,14 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -39,13 +45,23 @@ fun InvitationGuestBookForm(
     selectedMedias: ImmutableList<SelectedMedia>,
     textContent: String,
     isUploading: Boolean,
+    isSubmittable: Boolean,
     onMediasSelected: (ImmutableList<SelectedMedia>) -> Unit,
     onMediaRemove: (SelectedMedia) -> Unit,
     onTextContentChange: (String) -> Unit,
     onUploadClick: () -> Unit,
+    onFocusChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    editingGuestBookId: Long? = null,
 ) {
     val context = LocalContext.current
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(editingGuestBookId) {
+        if (editingGuestBookId != null) {
+            focusRequester.requestFocus()
+        }
+    }
 
     val launcher =
         rememberLauncherForActivityResult(
@@ -84,7 +100,12 @@ fun InvitationGuestBookForm(
                     }
                 },
                 placeholder = stringResource(R.string.txt_please_leave_a_message),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester)
+                    .onFocusChanged { focusState ->
+                        onFocusChanged(focusState.isFocused)
+                    },
                 singleLine = false,
                 minLines = 3,
             )
@@ -165,19 +186,21 @@ fun InvitationGuestBookForm(
                             },
                 )
             }
-
-            // 업로드 버튼
             NachoButton(
                 onClick = onUploadClick,
-                enabled = (selectedMedias.isNotEmpty() || textContent.isNotEmpty()) && !isUploading,
+                enabled = isSubmittable,
             ) {
-                if (isUploading) {
-                    CircularProgressIndicator(
-                        modifier = modifier.size(NachoIconSize.small),
-                        color = NachoTheme.colorScheme.brandOnPrimary,
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = stringResource(R.string.txt_submit),
+                        color = if (isUploading) Color.Transparent else Color.Unspecified
                     )
-                } else {
-                    Text(text = stringResource(R.string.txt_submit))
+                    if (isUploading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(NachoIconSize.small),
+                            color = NachoTheme.colorScheme.brandOnPrimary,
+                        )
+                    }
                 }
             }
         }
@@ -192,10 +215,12 @@ private fun InvitationGuestBookFormPreview() {
             selectedMedias = persistentListOf(),
             textContent = "",
             isUploading = false,
+            isSubmittable = false,
             onMediasSelected = {},
             onMediaRemove = {},
             onTextContentChange = {},
             onUploadClick = {},
+            onFocusChanged = {},
         )
     }
 }

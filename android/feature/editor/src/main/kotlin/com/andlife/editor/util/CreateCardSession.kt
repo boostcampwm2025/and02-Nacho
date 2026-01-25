@@ -17,7 +17,7 @@ class CreateCardSession @Inject constructor() {
     var backgroundImageUrl: String? = null
         private set
 
-    fun save(editable: Editable, backgroundColor: Color, backgroundImageUrl: String?) {
+    fun save(editable: Editable?, backgroundColor: Color, backgroundImageUrl: String?) {
         this.editable = editable
         this.backgroundColor = backgroundColor
         this.backgroundImageUrl = backgroundImageUrl

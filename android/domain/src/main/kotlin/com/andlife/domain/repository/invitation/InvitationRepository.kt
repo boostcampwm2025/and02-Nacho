@@ -5,6 +5,7 @@ import com.andlife.domain.error.DataError
 import com.andlife.domain.model.invitation.CreateInvitationParam
 import com.andlife.domain.model.invitation.Invitation
 import com.andlife.domain.model.invitation.InvitationSummary
+import com.andlife.domain.model.invitation.UpcomingInvitation
 import com.andlife.domain.util.Result
 import kotlinx.coroutines.flow.Flow
 
@@ -15,5 +16,6 @@ interface InvitationRepository {
         status: String,
         size: Int = 10
     ): Flow<PagingData<InvitationSummary>>
+    fun getUpcomingInvitations(): Flow<PagingData<UpcomingInvitation>>
 }
 

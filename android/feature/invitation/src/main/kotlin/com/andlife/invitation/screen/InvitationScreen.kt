@@ -174,7 +174,8 @@ private fun InvitationScreen(
                                         hostName = invitation.displayHostName,
                                         address = invitation.address,
                                         dDayText = dDayLabel,
-                                        onClick = { onEvent(InvitationUiEvent.ClickInvitation(invitation.id)) }
+                                        onClick = { onEvent(InvitationUiEvent.ClickInvitation(invitation.id)) },
+                                        onMoreClick = {}
                                     )
                                 }
                             }
