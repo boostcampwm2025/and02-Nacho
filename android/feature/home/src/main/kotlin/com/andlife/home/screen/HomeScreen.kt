@@ -704,6 +704,7 @@ private fun HomeScreenPreview() {
             override fun pausePlayer(url: String) {}
             override fun pauseAllPlayers() {}
             override fun resumeLastPlayed() {}
+            override fun clearCacheById(itemId: Long?) {}
             override fun resetPool() {}
             override fun releaseAllPlayers() {}
         }
