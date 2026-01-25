@@ -84,7 +84,7 @@ class MyInvitationCollectionViewModel
                         )
                     }
                     Log.d("ViewModel", "미디어 리스트: $mediaList")
-                }.onFailure {
+                }.onFailure { it, msg ->
                     updateState { copy(isLoading = false) }
                     Log.e("ViewModel", "에러 발생: $it")
                 }

@@ -43,7 +43,7 @@ fun InvitationListItem(
     startTime: String,
     hostName: String?,
     address: String,
-    dDayText: String,
+    dDayText: String?,
     onClick: () -> Unit,
     onMoreClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -78,7 +78,13 @@ fun InvitationListItem(
                         model = imageUrl,
                         contentDescription = stringResource(R.string.desc_invitation_list_image),
                         contentScale = ContentScale.Crop,
-                        loading = { InvitationLoadingIndicator() },
+                        loading = {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(NachoTheme.colorScheme.backgroundSecondary),
+                            )
+                        },
                         success = {
                             SubcomposeAsyncImageContent()
                         },
@@ -131,9 +137,11 @@ fun InvitationListItem(
                         overflow = TextOverflow.Ellipsis,
                     )
 
-                    NachoDdayChip(
-                        label = dDayText,
-                    )
+                    dDayText?.let {
+                        NachoDdayChip(
+                            label = it
+                        )
+                    }
                 }
 
                 hostName?.let {

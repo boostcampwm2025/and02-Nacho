@@ -83,7 +83,7 @@ class InvitationCollectionViewModel @Inject constructor(
                         )
                     }
                     Log.d("ViewModel", "미디어 리스트: $mediaList")
-                }.onFailure {
+                }.onFailure { it, _ ->
                     updateState { copy(isLoading = false) }
                     Log.e("ViewModel", "에러 발생: $it")
                 }

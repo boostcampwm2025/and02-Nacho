@@ -2,6 +2,7 @@ package com.andlife.home
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -28,6 +29,7 @@ fun NavController.navigateToSetting(navOptions: NavOptions) {
 
 fun NavGraphBuilder.homeNavGraph(
     paddingValues: PaddingValues,
+    snackbarHostState: SnackbarHostState,
     onNavigateToCreate: () -> Unit,
     onNavigateToInvitationDetail: (Long) -> Unit,
     onNavigateToMyInvitationDetail: (Long) -> Unit,
@@ -35,6 +37,7 @@ fun NavGraphBuilder.homeNavGraph(
 ) {
     composable<Home> {
         HomeRoute(
+            snackbarHostState = snackbarHostState,
             onNavigateToCreate = onNavigateToCreate,
             onNavigateToInvitationDetail = onNavigateToInvitationDetail,
             onNavigateToMyInvitationDetail = onNavigateToMyInvitationDetail,

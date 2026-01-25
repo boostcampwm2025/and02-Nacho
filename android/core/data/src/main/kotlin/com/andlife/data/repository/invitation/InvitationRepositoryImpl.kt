@@ -3,6 +3,7 @@ package com.andlife.data.repository.invitation
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.andlife.data.datasource.remote.invitation.InvitationPagingSource
 import com.andlife.data.datasource.remote.invitation.InvitationRemoteDataSource
 import com.andlife.data.datasource.remote.invitation.UpcomingInvitationPagingSource
 import com.andlife.data.repository.invitation.mapper.toDomain
@@ -11,6 +12,7 @@ import com.andlife.domain.error.DataError
 import com.andlife.domain.model.card.NachoCard
 import com.andlife.domain.model.invitation.CreateInvitationParam
 import com.andlife.domain.model.invitation.Invitation
+import com.andlife.domain.model.invitation.InvitationSummary
 import com.andlife.domain.model.invitation.UpcomingInvitation
 import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.domain.util.Result
@@ -35,15 +37,15 @@ internal class InvitationRepositoryImpl @Inject constructor(
             response.toDomain(json)
         }
 
-    override suspend fun createInvitationCard(
-        invitationId: Long,
-        card: NachoCard
-    ): Result<Long, DataError> {
-        val cardRequest = card.toRequest(json)
-        return invitationRemoteDataSource.createInvitationCard(invitationId, cardRequest)
+    override fun getParticipantInvitations(
+        status: String,
+        size: Int
+    ): Flow<PagingData<InvitationSummary>> {
+        return Pager(
+            config = PagingConfig(pageSize = size, enablePlaceholders = false),
+            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status) }
+        ).flow
     }
-    override suspend fun getParticipantInvitations(): Result<List<Long>, DataError> =
-        invitationRemoteDataSource.getParticipantInvitations()
 
     override fun getUpcomingInvitations(): Flow<PagingData<UpcomingInvitation>> =
         Pager(
@@ -63,5 +65,21 @@ internal class InvitationRepositoryImpl @Inject constructor(
     companion object {
         private const val PAGE_SIZE = 10
         private const val UPCOMING_DAYS_THRESHOLD = 30L
+    }
+
+    override suspend fun createInvitationCard(
+        invitationId: Long,
+        card: NachoCard
+    ): Result<Long, DataError> {
+        val cardRequest = card.toRequest(json)
+        return invitationRemoteDataSource.createInvitationCard(invitationId, cardRequest)
+    }
+
+    override suspend fun updateCard(
+        cardId: Long,
+        card: NachoCard
+    ): Result<Long, DataError> {
+        val cardRequest = card.toRequest(json)
+        return invitationRemoteDataSource.updateInvitationCard(cardId, cardRequest)
     }
 }

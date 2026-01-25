@@ -394,7 +394,7 @@ class EditorState @Inject constructor(
             .onSuccess { bitmap ->
                 editText.insertImageSpan(bitmap, uri.toString())
             }
-            .onFailure { error ->
+            .onFailure { error, _ ->
                 Log.e("EditorState", "insertImage: $error")
             }
     }
@@ -624,6 +624,8 @@ class EditorState @Inject constructor(
         editText.text = null
         this.editText = null
         currentText = ""
+        currentTextStyle = EditTextStyle()
+        currentBackgroundImageUrl = ""
     }
 
     companion object {

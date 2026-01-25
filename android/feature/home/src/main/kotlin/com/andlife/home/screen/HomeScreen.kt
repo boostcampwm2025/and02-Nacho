@@ -21,7 +21,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -90,6 +89,7 @@ private const val SKELETON_ITEM_COUNT = 2
 
 @Composable
 fun HomeRoute(
+    snackbarHostState: SnackbarHostState,
     onNavigateToCreate: () -> Unit,
     onNavigateToInvitationDetail: (Long) -> Unit,
     onNavigateToMyInvitationDetail: (Long) -> Unit,
@@ -106,13 +106,15 @@ fun HomeRoute(
     val lifecycleOwner = LocalLifecycleOwner.current
     val lazyListState = rememberLazyListState()
 
-    val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is HomeSideEffect.ShowMessage -> {
-                scope.launch { snackbarHostState.showSnackbar(effect.message) }
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(effect.message)
+                }
             }
 
             is HomeSideEffect.NavigateToInvitationDetail -> {
@@ -139,12 +141,11 @@ fun HomeRoute(
                 scope.launch { lazyListState.animateScrollToItem(0) }
             }
 
-            is HomeSideEffect.RefreshSuccess -> {
-                scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.snack_refresh_success)) }
-            }
-
             is HomeSideEffect.RefreshFailure -> {
-                scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.snack_refresh_failure)) }
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(context.getString(R.string.snack_refresh_failure))
+                }
             }
         }
     }
@@ -199,7 +200,6 @@ fun HomeRoute(
         upcomingInvitations = upcomingInvitations,
         guestBooks = guestBooks,
         onEvent = viewModel::onEvent,
-        snackbarHostState = snackbarHostState,
         lazyListState = lazyListState,
         videoPlayerPool = viewModel.videoPlayerPool,
         modifier = modifier,
@@ -214,7 +214,6 @@ fun HomeScreen(
     upcomingInvitations: LazyPagingItems<UpcomingInvitationUiModel>,
     guestBooks: LazyPagingItems<GuestBookUiModel>,
     onEvent: (HomeUiEvent) -> Unit,
-    snackbarHostState: SnackbarHostState,
     lazyListState: LazyListState,
     videoPlayerPool: AutoVideoPlayerPool,
     modifier: Modifier = Modifier,
@@ -295,9 +294,6 @@ fun HomeScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        snackbarHost = {
-            SnackbarHost(snackbarHostState)
-        },
         topBar = {
             HomeTopBar(
                 title = stringResource(R.string.txt_title_home),
@@ -332,10 +328,6 @@ fun HomeScreen(
                         onInvitationClick = { id, isOwner ->
                             onEvent(HomeUiEvent.ClickUpcomingInvitation(id, isOwner))
                         },
-                        onRetryClick = {
-                            upcomingInvitations.retry()
-                            onEvent(HomeUiEvent.Retry)
-                        },
                         onNavigateToCreate = { onEvent(HomeUiEvent.ClickCreate) },
                     )
 
@@ -345,10 +337,6 @@ fun HomeScreen(
                         uiState = uiState,
                         playVideoIndex = playVideoIndex,
                         videoPlayerPool = videoPlayerPool,
-                        onRetryClick = {
-                            guestBooks.retry()
-                            onEvent(HomeUiEvent.Retry)
-                        },
                         onInvitationTitleClick = { id, isOwner ->
                             onEvent(HomeUiEvent.ClickInvitationTitle(id, isOwner))
                         },
@@ -409,7 +397,6 @@ private fun HomeTopBar(
 private fun LazyListScope.homeUpcomingSection(
     upcomingInvitations: LazyPagingItems<UpcomingInvitationUiModel>,
     onInvitationClick: (invitationId: Long, isOwner: Boolean) -> Unit,
-    onRetryClick: () -> Unit,
     onNavigateToCreate: () -> Unit,
 ) {
     val refreshState = upcomingInvitations.loadState.refresh
@@ -456,8 +443,6 @@ private fun LazyListScope.homeUpcomingSection(
                     UpcomingStatusContent(
                         title = stringResource(R.string.txt_error_upcoming_title),
                         description = stringResource(R.string.txt_error_upcoming_desc),
-                        buttonText = stringResource(R.string.txt_action_retry),
-                        onButtonClick = onRetryClick,
                     )
                 }
 
@@ -561,7 +546,6 @@ private fun LazyListScope.homeGuestBookSection(
     uiState: HomeUiState,
     playVideoIndex: Int,
     videoPlayerPool: AutoVideoPlayerPool,
-    onRetryClick: () -> Unit,
     onInvitationTitleClick: (invitationId: Long, isOwner: Boolean) -> Unit,
     onVisualMediaClick: (String) -> Unit,
     onAudioMediaClick: (String) -> Unit,
@@ -585,15 +569,16 @@ private fun LazyListScope.homeGuestBookSection(
     if (isInitialLoading || isInitialError || isEmpty) {
         item {
             GuestBookStatusContent(
-                modifier = Modifier.padding(horizontal = NachoSpacing.large),
+                modifier = Modifier.padding(
+                    vertical = NachoSpacing.threeXLarge,
+                    horizontal = NachoSpacing.large
+                ),
                 isLoading = isInitialLoading,
                 title = when {
                     isInitialError -> stringResource(R.string.error_msg_failed_load_post)
                     isEmpty -> stringResource(R.string.txt_empty_new_post_desc)
                     else -> null
                 },
-                buttonText = if (isInitialError) stringResource(R.string.txt_action_retry) else null,
-                onButtonClick = if (isInitialError) onRetryClick else null
             )
         }
     } else {
@@ -608,6 +593,7 @@ private fun LazyListScope.homeGuestBookSection(
                 GuestBookItem(
                     modifier = Modifier.animateItem(),
                     guestBook = guestBook,
+                    useMenuButton = false,
                     videoPlayerPool = videoPlayerPool,
                     shouldPlayVideo = isMediaActive && (index == playVideoIndex),
                     isAudioPlaying = uiState.isAudioPlaying &&
@@ -720,7 +706,6 @@ private fun HomeScreenPreview() {
             upcomingInvitations = emptyUpcomingInvitations,
             guestBooks = emptyGuestBooks,
             onEvent = {},
-            snackbarHostState = SnackbarHostState(),
             videoPlayerPool = fakeVideoPlayerPool,
             lazyListState = lazyListState,
         )

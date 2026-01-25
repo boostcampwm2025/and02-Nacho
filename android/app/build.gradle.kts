@@ -102,6 +102,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.immutable)
     implementation(projects.core.deeplink)
+    implementation(projects.feature.model)
 
     // Hilt
     implementation(libs.hilt.android)
