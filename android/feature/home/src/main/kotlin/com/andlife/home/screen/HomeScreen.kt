@@ -69,6 +69,7 @@ import com.andlife.model.common.VideoCandidate
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.model.invitation.UpcomingInvitationUiModel
+import com.andlife.ui.component.guestbook.FakeAutoVideoPlayerPool
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItemSkeleton
@@ -704,7 +705,7 @@ private fun HomeScreenPreview() {
             upcomingInvitations = emptyUpcomingInvitations,
             guestBooks = emptyGuestBooks,
             onEvent = {},
-            videoPlayerPool = fakeVideoPlayerPool,
+            videoPlayerPool = FakeAutoVideoPlayerPool(),
             lazyListState = lazyListState,
         )
     }
