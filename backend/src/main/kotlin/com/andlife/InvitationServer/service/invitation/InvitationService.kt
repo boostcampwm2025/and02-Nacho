@@ -12,7 +12,6 @@ import com.andlife.InvitationServer.repository.invitation.InvitationRepository
 import com.andlife.InvitationServer.repository.invitation.participant.InvitationParticipantRepository
 import com.andlife.InvitationServer.request.invitation.CreateInvitationRequest
 import com.andlife.InvitationServer.request.invitation.InvitationCardRequest
-import com.andlife.InvitationServer.response.CommonResponseCode
 import com.andlife.InvitationServer.response.PagingMetaResponse
 import com.andlife.InvitationServer.response.PagingResponse
 import com.andlife.InvitationServer.response.invitation.AnnouncementResponse
@@ -150,6 +149,18 @@ class InvitationService(
             backgroundColor = request.backgroundColor,
             backgroundImageUrl = request.backgroundImageUrl,
         )
+
+        return invitationCardRepository.save(card).id
+    }
+
+    @Transactional
+    fun updateInvitationCard(cardId: Long, request: InvitationCardRequest): Long {
+        val card = invitationCardRepository.findById(cardId)
+            .orElseThrow { NoSuchElementException("Invitation card not found: $cardId") }
+
+        card.contentJson = request.contentJson
+        card.backgroundColor = request.backgroundColor
+        card.backgroundImageUrl = request.backgroundImageUrl
 
         return invitationCardRepository.save(card).id
     }

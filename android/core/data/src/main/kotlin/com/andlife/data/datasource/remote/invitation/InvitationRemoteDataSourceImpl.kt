@@ -39,16 +39,23 @@ internal class InvitationRemoteDataSourceImpl @Inject constructor(
     ): Result<PagingResponse<InvitationSummaryResponse>, DataError> =
         apiCall { invitationService.getMyInvitations(status.value, sortType.value, page, size) }
 
-    override suspend fun createInvitationCard(
-        invitationId: Long,
-        request: InvitationCardRequest
-    ): Result<Long, DataError> =
-        apiCall { invitationService.createInvitationCard(invitationId, request) }
-
     override suspend fun getUpcomingInvitations(
         days: Long,
         page: Int,
         size: Int,
     ): Result<PagingResponse<UpcomingInvitationResponse>, DataError> =
         apiCall { invitationService.getUpcomingInvitations(days, page, size) }
+
+    override suspend fun createInvitationCard(
+        invitationId: Long,
+        request: InvitationCardRequest
+    ): Result<Long, DataError> =
+        apiCall { invitationService.createInvitationCard(invitationId, request) }
+
+    override suspend fun updateInvitationCard(
+        cardId: Long,
+        request: InvitationCardRequest
+    ): Result<Long, DataError> =
+        apiCall { invitationService.updateInvitationCard(cardId, request) }
 }
+

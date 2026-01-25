@@ -1,7 +1,7 @@
 package com.andlife.domain.model.card
 
 data class NachoCard(
-    val id: String? = null,
+    val id: Long? = null,
     val content: RichTextContent,
     val backgroundColor: Long,
     val backgroundImageUrl: String?,

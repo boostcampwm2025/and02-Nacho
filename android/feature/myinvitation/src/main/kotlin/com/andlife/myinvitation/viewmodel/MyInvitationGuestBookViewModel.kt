@@ -358,7 +358,7 @@ constructor(
                     }
                     sendEffect(MyInvitationGuestBookSideEffect.DeleteGuestBookSuccess)
                 }
-                .onFailure {
+                .onFailure { error, msg ->
                     sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("방명록 삭제를 실패하였습니다."))
                 }
         }

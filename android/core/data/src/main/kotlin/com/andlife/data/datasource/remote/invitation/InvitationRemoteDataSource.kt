@@ -26,10 +26,11 @@ interface InvitationRemoteDataSource {
         page: Int,
         size: Int
     ): Result<PagingResponse<InvitationSummaryResponse>, DataError>
-    suspend fun createInvitationCard(invitationId: Long, request: InvitationCardRequest): Result<Long, DataError>
     suspend fun getUpcomingInvitations(
         days: Long,
         page: Int,
         size: Int,
     ): Result<PagingResponse<UpcomingInvitationResponse>, DataError>
+    suspend fun createInvitationCard(invitationId: Long, request: InvitationCardRequest): Result<Long, DataError>
+    suspend fun updateInvitationCard(cardId: Long, request: InvitationCardRequest): Result<Long, DataError>
 }

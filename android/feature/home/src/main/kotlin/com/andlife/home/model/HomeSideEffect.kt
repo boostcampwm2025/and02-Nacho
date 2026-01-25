@@ -21,7 +21,5 @@ sealed interface HomeSideEffect : BaseSideEffect {
 
     data object ScrollToTop : HomeSideEffect
 
-    data object RefreshSuccess : HomeSideEffect
-
     data object RefreshFailure : HomeSideEffect
 }

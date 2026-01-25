@@ -77,9 +77,11 @@ class InvitationViewModel @Inject constructor(
             is InvitationUiEvent.Refresh -> {
                 updateState { copy(isRefreshing = true) }
             }
+
             is InvitationUiEvent.SelectTab -> {
                 updateState { copy(selectedTab = event.index) }
             }
+
             is InvitationUiEvent.ClickInvitation -> {
                 sendEffect(InvitationSideEffect.NavigateToDetail(event.id))
             }
