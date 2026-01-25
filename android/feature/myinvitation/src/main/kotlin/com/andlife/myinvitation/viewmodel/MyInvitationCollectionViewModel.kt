@@ -12,7 +12,7 @@ import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.model.guestbook.UiMediaType
-import com.andlife.model.invitation.collection.toUiModel
+import com.andlife.model.collection.toUiModel
 import com.andlife.myinvitation.MyInvitationDetail
 import com.andlife.myinvitation.model.collection.MyInvitationCollectionSideEffect
 import com.andlife.myinvitation.model.collection.MyInvitationCollectionUiEvent

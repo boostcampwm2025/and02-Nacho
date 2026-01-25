@@ -1,4 +1,4 @@
-package com.andlife.model.invitation.collection
+package com.andlife.model.collection
 
 import com.andlife.domain.model.guestbook.GalleryMedia
 import com.andlife.model.guestbook.UiMediaType

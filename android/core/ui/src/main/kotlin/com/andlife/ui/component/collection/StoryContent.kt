@@ -27,7 +27,7 @@ import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.component.media.AudioPlayer
 import com.andlife.ui.component.media.VideoPlayer
 import com.andlife.model.guestbook.UiMediaType
-import com.andlife.model.invitation.collection.CollectionUiModel
+import com.andlife.model.collection.CollectionUiModel
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime

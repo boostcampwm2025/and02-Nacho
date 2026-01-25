@@ -1,6 +1,6 @@
 package com.andlife.myinvitation.model.collection
 
-import com.andlife.model.invitation.collection.CollectionUiModel
+import com.andlife.model.collection.CollectionUiModel
 import com.andlife.ui.base.BaseUiState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf

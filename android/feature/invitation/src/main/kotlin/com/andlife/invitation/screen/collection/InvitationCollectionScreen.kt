@@ -15,7 +15,7 @@ import com.andlife.invitation.model.collection.InvitationCollectionUiEvent
 import com.andlife.invitation.model.collection.InvitationCollectionUiState
 import com.andlife.model.util.toUiType
 import com.andlife.invitation.viewmodel.InvitationCollectionViewModel
-import com.andlife.model.invitation.collection.CollectionUiModel
+import com.andlife.model.collection.CollectionUiModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
