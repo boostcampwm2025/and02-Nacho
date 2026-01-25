@@ -1,4 +1,4 @@
-package com.andlife.myinvitation.screen.guestbook.collection
+package com.andlife.myinvitation.screen.collection
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -23,7 +23,7 @@ import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.model.invitation.collection.CollectionUiModel
 import com.andlife.model.util.toUiType
-import com.andlife.myinvitation.model.guestbook.collection.MyInvitationCollectionUiState
+import com.andlife.myinvitation.model.collection.MyInvitationCollectionUiState
 import com.andlife.myinvitation.viewmodel.MyInvitationCollectionViewModel
 import com.andlife.ui.component.collection.StoryContent
 import com.andlife.ui.component.collection.StoryTopHeader

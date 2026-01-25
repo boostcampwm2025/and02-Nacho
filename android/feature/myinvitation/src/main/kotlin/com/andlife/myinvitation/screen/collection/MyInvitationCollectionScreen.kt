@@ -1,4 +1,4 @@
-package com.andlife.myinvitation.screen.guestbook.collection
+package com.andlife.myinvitation.screen.collection
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -12,8 +12,8 @@ import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.model.invitation.collection.CollectionUiModel
 import com.andlife.model.util.toUiType
-import com.andlife.myinvitation.model.guestbook.collection.MyInvitationCollectionUiEvent
-import com.andlife.myinvitation.model.guestbook.collection.MyInvitationCollectionUiState
+import com.andlife.myinvitation.model.collection.MyInvitationCollectionUiEvent
+import com.andlife.myinvitation.model.collection.MyInvitationCollectionUiState
 import com.andlife.myinvitation.viewmodel.MyInvitationCollectionViewModel
 import com.andlife.ui.component.collection.NachoMediaGridView
 import kotlinx.collections.immutable.persistentListOf
