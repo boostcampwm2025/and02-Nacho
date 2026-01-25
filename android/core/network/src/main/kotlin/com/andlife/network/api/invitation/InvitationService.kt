@@ -3,6 +3,7 @@ package com.andlife.network.api.invitation
 import com.andlife.network.model.BaseResponse
 import com.andlife.network.model.PagingResponse
 import retrofit2.http.Body
+import com.andlife.network.model.invitation.InvitationSummaryResponse
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -16,8 +17,12 @@ interface InvitationService {
         @Path("invitationId") invitationId: Long,
     ): BaseResponse<InvitationResponse>
 
-    @GET("api/invitations/me")
-    suspend fun getParticipantInvitations(): BaseResponse<List<Long>>
+    @GET("/api/invitations/me")
+    suspend fun getParticipantInvitations(
+        @Query("status") status: String,
+        @Query("page") page: Int,
+        @Query("size") size: Int = 10
+    ): BaseResponse<PagingResponse<InvitationSummaryResponse>>
 
     @POST("/api/invitations")
     suspend fun createInvitation(

@@ -43,7 +43,7 @@ fun InvitationListItem(
     startTime: String,
     hostName: String?,
     address: String,
-    dDayText: String,
+    dDayText: String?,
     onClick: () -> Unit,
     onMoreClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -131,9 +131,11 @@ fun InvitationListItem(
                         overflow = TextOverflow.Ellipsis,
                     )
 
-                    NachoDdayChip(
-                        label = dDayText,
-                    )
+                    dDayText?.let {
+                        NachoDdayChip(
+                            label = it
+                        )
+                    }
                 }
 
                 hostName?.let {
