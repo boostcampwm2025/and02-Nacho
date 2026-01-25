@@ -4,6 +4,7 @@ import com.andlife.data.util.apiCall
 import com.andlife.domain.error.DataError
 import com.andlife.domain.util.Result
 import com.andlife.network.api.invitation.CreateInvitationRequest
+import com.andlife.network.api.invitation.InvitationCardRequest
 import com.andlife.network.api.invitation.InvitationResponse
 import com.andlife.network.api.invitation.InvitationService
 import com.andlife.network.model.PagingResponse
@@ -26,6 +27,12 @@ internal class InvitationRemoteDataSourceImpl @Inject constructor(
         size: Int
     ): Result<PagingResponse<InvitationSummaryResponse>, DataError> =
         apiCall { invitationService.getParticipantInvitations(status, page, size) }
+
+    override suspend fun createInvitationCard(
+        invitationId: Long,
+        request: InvitationCardRequest
+    ): Result<Long, DataError> =
+        apiCall { invitationService.createInvitationCard(invitationId, request) }
 
     override suspend fun getUpcomingInvitations(
         days: Long,

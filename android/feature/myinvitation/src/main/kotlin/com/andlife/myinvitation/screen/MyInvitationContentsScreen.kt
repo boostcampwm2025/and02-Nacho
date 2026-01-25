@@ -49,6 +49,7 @@ import com.andlife.ui.section.detail.TitleSection
 fun MyInvitationContentsScreen(
     uiState: MyInvitationDetailUiState,
     onClickImage: (Int) -> Unit,
+    onClickCreateCard: () -> Unit,
     onClickEditCard: () -> Unit,
     onMapError: () -> Unit,
     isMapVisible: Boolean,
@@ -89,7 +90,7 @@ fun MyInvitationContentsScreen(
 
         MyInvitationCardSection(
             invitationCardModel = model.invitationCard,
-            onCreateCard = {},
+            onCreateCard = onClickCreateCard,
             onEditCard = {},
             modifier = Modifier
         )
@@ -208,6 +209,7 @@ private fun MyInvitationContentsScreenPreview() {
                 ),
             onClickImage = {},
             onClickEditCard = {},
+            onClickCreateCard = {},
             onMapError = {},
             isMapVisible = true,
         )

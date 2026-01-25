@@ -116,6 +116,18 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
         currentPlayingUrl?.let { activePlayers[it]?.play() }
     }
 
+    override fun clearCacheById(itemId: Long?) {
+        if (itemId == null) return
+        val oldUrl = lastPlayedUrlByGuestBookId[itemId]
+        if (oldUrl != null) {
+            activePlayers[oldUrl]?.stop()
+            activePlayers.remove(oldUrl)
+            if (currentPlayingUrl == oldUrl) currentPlayingUrl = null
+        }
+
+        lastPlayedUrlByGuestBookId.remove(itemId)
+    }
+
     override fun resetPool() {
         activePlayers.values.forEach { it.stop() }
         activePlayers.clear()

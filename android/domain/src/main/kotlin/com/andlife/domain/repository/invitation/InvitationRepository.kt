@@ -2,6 +2,7 @@ package com.andlife.domain.repository.invitation
 
 import androidx.paging.PagingData
 import com.andlife.domain.error.DataError
+import com.andlife.domain.model.card.NachoCard
 import com.andlife.domain.model.invitation.CreateInvitationParam
 import com.andlife.domain.model.invitation.Invitation
 import com.andlife.domain.model.invitation.InvitationSummary
@@ -16,6 +17,7 @@ interface InvitationRepository {
         status: String,
         size: Int = 10
     ): Flow<PagingData<InvitationSummary>>
+    suspend fun createInvitationCard(invitationId: Long, card: NachoCard): Result<Long, DataError>
     fun getUpcomingInvitations(): Flow<PagingData<UpcomingInvitation>>
 }
 
