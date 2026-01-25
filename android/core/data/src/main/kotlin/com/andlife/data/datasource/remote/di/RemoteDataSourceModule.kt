@@ -4,8 +4,8 @@ import com.andlife.data.datasource.remote.address.AddressRemoteDataSource
 import com.andlife.data.datasource.remote.address.AddressRemoteDataSourceImpl
 import com.andlife.data.datasource.remote.invitation.InvitationRemoteDataSource
 import com.andlife.data.datasource.remote.invitation.InvitationRemoteDataSourceImpl
-import com.andlife.data.datasource.remote.invitation.guestbook.GuestBookRemoteDataSource
-import com.andlife.data.datasource.remote.invitation.guestbook.GuestBookRemoteDataSourceImpl
+import com.andlife.data.datasource.remote.guestbook.GuestBookRemoteDataSource
+import com.andlife.data.datasource.remote.guestbook.GuestBookRemoteDataSourceImpl
 import com.andlife.data.datasource.remote.user.UserRemoteDataSource
 import com.andlife.data.datasource.remote.user.UserRemoteDataSourceImpl
 import dagger.Binds

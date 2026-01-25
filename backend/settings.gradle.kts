@@ -1,1 +1,1 @@
-rootProject.name = "InvitationServer"
+rootProject.name = "NachoServer"

@@ -3,7 +3,7 @@ package com.andlife.data.datasource.remote.address
 import com.andlife.data.util.externalApiCall
 import com.andlife.domain.error.DataError
 import com.andlife.domain.util.Result
-import com.andlife.network.api.kakao.address.KakaoAddressResponse
+import com.andlife.network.model.kakao.address.KakaoAddressResponse
 import com.andlife.network.api.kakao.address.KakaoAddressService
 import javax.inject.Inject
 

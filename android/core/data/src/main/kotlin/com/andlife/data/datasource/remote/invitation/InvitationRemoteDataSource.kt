@@ -4,12 +4,12 @@ import com.andlife.domain.error.DataError
 import com.andlife.domain.model.invitation.InvitationStatus
 import com.andlife.domain.model.invitation.SortDirection
 import com.andlife.domain.util.Result
-import com.andlife.network.api.invitation.CreateInvitationRequest
-import com.andlife.network.api.invitation.InvitationCardRequest
-import com.andlife.network.api.invitation.InvitationResponse
+import com.andlife.network.model.invitation.CreateInvitationRequest
+import com.andlife.network.model.invitation.InvitationCardRequest
+import com.andlife.network.model.invitation.InvitationResponse
 import com.andlife.network.model.PagingResponse
 import com.andlife.network.model.invitation.InvitationSummaryResponse
-import com.andlife.network.api.invitation.UpcomingInvitationResponse
+import com.andlife.network.model.invitation.UpcomingInvitationResponse
 
 interface InvitationRemoteDataSource {
     suspend fun createInvitation(request: CreateInvitationRequest): Result<InvitationResponse, DataError>

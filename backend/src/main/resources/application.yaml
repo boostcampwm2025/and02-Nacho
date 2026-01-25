@@ -1,7 +1,6 @@
 spring:
   application:
-    name: InvitationServer
-
+    name: NachoServer
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
