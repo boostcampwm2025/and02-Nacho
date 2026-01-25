@@ -1,4 +1,4 @@
-package com.andlife.invitation.model.guestbook.collection
+package com.andlife.invitation.model.collection
 
 import com.andlife.ui.base.BaseSideEffect
 
