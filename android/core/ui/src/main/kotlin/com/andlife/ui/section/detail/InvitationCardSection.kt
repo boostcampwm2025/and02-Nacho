@@ -29,6 +29,7 @@ import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.designsystem.R as designR
 import com.andlife.model.invitation.InvitationCardUiModel
 import com.andlife.ui.R
 
@@ -42,7 +43,7 @@ fun InvitationCardSection(
 
     if (invitationCardUiModel == null && !isEditable) return
 
-    val iconRes = if (invitationCardUiModel == null) R.drawable.ic_add_24 else R.drawable.ic_edit_24
+    val iconRes = if (invitationCardUiModel == null) R.drawable.ic_add_24 else designR.drawable.ic_edit_24
     val buttonText =
         if (invitationCardUiModel == null) {
             stringResource(R.string.txt_card_create)

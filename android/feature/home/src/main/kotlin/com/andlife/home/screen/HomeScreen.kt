@@ -105,8 +105,7 @@ fun HomeRoute(
     val scope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
     val lazyListState = rememberLazyListState()
-
-    val context = LocalContext.current
+    val refreshFailMessage = stringResource(R.string.snack_refresh_failure)
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
@@ -144,7 +143,7 @@ fun HomeRoute(
             is HomeSideEffect.RefreshFailure -> {
                 scope.launch {
                     snackbarHostState.currentSnackbarData?.dismiss()
-                    snackbarHostState.showSnackbar(context.getString(R.string.snack_refresh_failure))
+                    snackbarHostState.showSnackbar(refreshFailMessage)
                 }
             }
         }
