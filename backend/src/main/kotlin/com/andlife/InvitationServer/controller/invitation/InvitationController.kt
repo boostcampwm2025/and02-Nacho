@@ -8,6 +8,7 @@ import com.andlife.InvitationServer.response.BaseResponse
 import com.andlife.InvitationServer.response.CommonResponseCode
 import com.andlife.InvitationServer.response.PagingResponse
 import com.andlife.InvitationServer.response.invitation.InvitationResponse
+import com.andlife.InvitationServer.response.invitation.InvitationSummaryResponse
 import com.andlife.InvitationServer.response.invitation.UpcomingInvitationResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.CollectionResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookResponse
@@ -31,16 +32,28 @@ class InvitationController(
     private val guestBookService: GuestBookService,
 ) {
     @GetMapping("/me")
-    fun getMyInvitationIds(
-        authContext: AuthContext
-    ): BaseResponse<List<Long>> {
+    fun getParticipantInvitations(
+        authContext: AuthContext,
+        @RequestParam(required = false, defaultValue = "UPCOMING") status: String,
+        @PageableDefault(
+            size = 10,
+            sort = ["invitation.invitationDate", "invitation.startTime"],
+            direction = Sort.Direction.ASC
+        )
+        pageable: Pageable
+    ): BaseResponse<PagingResponse<InvitationSummaryResponse>> {
         return when (authContext) {
             is AuthContext.Member -> {
-                val ids = invitationService.getParticipantInvitations(authContext.userId)
-                BaseResponse.success(ids)
+                val result = invitationService.getParticipantInvitations(authContext.userId, status, pageable)
+                BaseResponse.success(result)
             }
             is AuthContext.Guest -> {
-                BaseResponse.success(null)
+                val result = invitationService.getParticipantInvitations(2L, status, pageable)
+//                BaseResponse.success(PagingResponse(
+//                    meta = PagingMetaResponse(isEnd = true, pageableCount = 0, totalCount = 0, currentPage = 0),
+//                    content = emptyList()
+//                ))
+                BaseResponse.success(result)
             }
         }
     }
@@ -111,6 +124,8 @@ class InvitationController(
         } catch (e: Exception) {
             BaseResponse.error(responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
         }
+    }
+    
     @GetMapping("/guestbooks/all")
     fun getAllRelatedGuestBooks(
         authContext: AuthContext,

@@ -12,6 +12,27 @@
     <string name="desc_invitation_more_btn">초대장 리스트 카드의 더보기 아이콘 버튼</string>
     <string name="desc_invitation_icon">초대장 시간 장소 아이콘</string>
 
+    <!--  Invitation  -->
+    <string name="txt_invitation">초대장</string>
+    <string name="txt_my_invitation">나의 초대</string>
+    <string name="txt_upcoming_invitation">다가오는 초대</string>
+    <string name="txt_past_invitation">지난 초대</string>
+    <string-array name="arr_invitation_tabs">
+        <item>@string/txt_upcoming_invitation</item>
+        <item>@string/txt_past_invitation</item>
+    </string-array>
+    <string name="format_invitation_d_day">D-%1$d</string>
+    <string name="format_invitation_d_day_today">D-Day</string>
+    <string name="format_total_invitation_count">총 %d개의 초대</string>
+
+    <string name="label_sort_imminent">빠른 일정순</string>
+    <string name="label_sort_distant">늦은 일정순</string>
+
+    <string-array name="arr_invitation_sort_options">
+        <item>@string/label_sort_imminent</item>
+        <item>@string/label_sort_distant</item>
+    </string-array>
+
     <!--  모아보기 Media  -->
     <string name="desc_media_image">방명록의 이미지</string>
     <string name="desc_media_audio">방명록의 오디오</string>

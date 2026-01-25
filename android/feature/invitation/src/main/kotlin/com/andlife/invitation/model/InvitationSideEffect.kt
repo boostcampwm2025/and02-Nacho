@@ -2,4 +2,7 @@ package com.andlife.invitation.model
 
 import com.andlife.ui.base.BaseSideEffect
 
-sealed interface InvitationSideEffect : BaseSideEffect
+sealed interface InvitationSideEffect : BaseSideEffect {
+    data class NavigateToDetail(val id: Long) : InvitationSideEffect
+    object RefreshFailure : InvitationSideEffect
+}
