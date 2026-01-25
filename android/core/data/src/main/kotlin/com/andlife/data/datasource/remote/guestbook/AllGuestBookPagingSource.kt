@@ -1,4 +1,4 @@
-package com.andlife.data.datasource.remote.invitation.guestbook
+package com.andlife.data.datasource.remote.guestbook
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState

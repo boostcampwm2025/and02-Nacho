@@ -1,6 +1,7 @@
-package com.andlife.data.datasource.remote.invitation.guestbook
+package com.andlife.data.datasource.remote.guestbook
 
 import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import com.andlife.data.repository.guestbook.toDomain
 import com.andlife.domain.model.guestbook.GuestBook
 import com.andlife.domain.util.Result
@@ -35,7 +36,7 @@ class GuestBookPagingSource(
         }
     }
 
-    override fun getRefreshKey(state: androidx.paging.PagingState<Int, GuestBook>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, GuestBook>): Int? {
         return state.anchorPosition?.let { anchorPosition ->
             state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
                 ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)

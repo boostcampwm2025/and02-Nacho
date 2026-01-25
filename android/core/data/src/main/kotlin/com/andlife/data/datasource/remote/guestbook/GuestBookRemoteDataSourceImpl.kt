@@ -1,4 +1,4 @@
-package com.andlife.data.datasource.remote.invitation.guestbook
+package com.andlife.data.datasource.remote.guestbook
 
 import com.andlife.data.util.apiCall
 import com.andlife.domain.error.DataError

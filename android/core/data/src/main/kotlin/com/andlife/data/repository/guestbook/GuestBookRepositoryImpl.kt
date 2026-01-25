@@ -3,9 +3,9 @@ package com.andlife.data.repository.guestbook
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.andlife.data.datasource.remote.invitation.guestbook.AllGuestBookPagingSource
-import com.andlife.data.datasource.remote.invitation.guestbook.GuestBookPagingSource
-import com.andlife.data.datasource.remote.invitation.guestbook.GuestBookRemoteDataSource
+import com.andlife.data.datasource.remote.guestbook.AllGuestBookPagingSource
+import com.andlife.data.datasource.remote.guestbook.GuestBookPagingSource
+import com.andlife.data.datasource.remote.guestbook.GuestBookRemoteDataSource
 import com.andlife.domain.error.DataError
 import com.andlife.domain.model.guestbook.GalleryMedia
 import com.andlife.domain.model.guestbook.GuestBook
