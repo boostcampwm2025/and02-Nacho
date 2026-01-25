@@ -19,6 +19,22 @@ constructor(
     // Uri로부터 MediaFileInfo 생성
     override fun createFromUri(uriString: String): MediaFile? {
         val uri = uriString.toUri()
+        
+        // file:// URI인 경우 직접 파일에서 정보 추출
+        if (uri.scheme == "file") {
+            val file = File(uri.path ?: return null)
+            if (!file.exists()) return null
+            
+            val mediaType = MediaType.fromExtension(file.extension)
+            return MediaFile(
+                uriString = uri.toString(),
+                fileName = file.name,
+                fileSize = file.length(),
+                mediaType = mediaType,
+            )
+        }
+        
+        // content:// URI인 경우 기존 방식 사용
         val (fileName, fileSize) = getFileInfoFromUri(uri) ?: return null
         val mediaType = getMediaTypeFromUri(uri)
 
