@@ -43,7 +43,7 @@ class UpdateCardViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val invitationRepository: InvitationRepository
 ) : BaseViewModel<UpdateCardUiState, UpdateCardUiEvent, UpdateCardSideEffect>(
-    UpdateCardUiState(textEditor, false)
+    UpdateCardUiState(editorState = textEditor)
 ) {
 
     private val cardId = savedStateHandle.toRoute<UpdateCard>().cardId
