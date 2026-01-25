@@ -25,7 +25,30 @@ fun uriToSelectedMedia(
             mimeType?.startsWith("image/") == true -> UiMediaType.IMAGE
             mimeType?.startsWith("video/") == true -> UiMediaType.VIDEO
             mimeType?.startsWith("audio/") == true -> UiMediaType.AUDIO
-            else -> UiMediaType.IMAGE
+            else -> {
+                // 파일 확장자로 판별(file uri용)
+                val path = uri.path ?: uriString.lowercase()
+                when {
+                    path.endsWith(".m4a") ||
+                        path.endsWith(".mp3") ||
+                        path.endsWith(".aac") ||
+                        path.endsWith(".wav") ||
+                        path.endsWith(".3gp") -> UiMediaType.AUDIO
+
+                    path.endsWith(".mp4") ||
+                        path.endsWith(".mov") ||
+                        path.endsWith(".avi") ||
+                        path.endsWith(".mkv") -> UiMediaType.VIDEO
+
+                    path.endsWith(".jpg") ||
+                        path.endsWith(".jpeg") ||
+                        path.endsWith(".png") ||
+                        path.endsWith(".gif") ||
+                        path.endsWith(".webp") -> UiMediaType.IMAGE
+
+                    else -> UiMediaType.IMAGE // 기본값
+                }
+            }
         }
 
     val duration =

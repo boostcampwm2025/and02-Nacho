@@ -266,10 +266,12 @@ private fun InvitationGuestBookScreen(
             isImVisible -> {
                 focusManager.clearFocus()
             }
+
             uiState.editingGuestBookId != null -> {
                 focusManager.clearFocus()
                 onEvent(MyInvitationGuestBookUiEvent.CancelEdit)
             }
+
             else -> {
                 navigateBackWithCleanup()
             }
@@ -456,6 +458,9 @@ private fun GuestBookFormSection(
         onUploadClick = {
             onEvent(MyInvitationGuestBookUiEvent.UploadMedias)
         },
+        onCameraClick = {},
+        onMicrophoneClick = {},
+
         onFocusChanged = onFocusChanged,
     )
 }
