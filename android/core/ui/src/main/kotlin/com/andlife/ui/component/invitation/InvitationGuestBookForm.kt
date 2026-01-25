@@ -159,8 +159,14 @@ fun InvitationGuestBookForm(
                     modifier =
                         Modifier
                             .size(NachoIconSize.medium)
-                            .clickable {
-                                // TODO: 카메라 촬영 기능 추가
+                            .let {
+                                if (isMediaAddEnabled) {
+                                    it.clickable {
+                                        // onCameraClick()
+                                    }
+                                } else {
+                                    it
+                                }
                             },
                 )
                 Icon(
@@ -170,8 +176,14 @@ fun InvitationGuestBookForm(
                     modifier =
                         Modifier
                             .size(NachoIconSize.medium)
-                            .clickable {
-                                launcher.launch("*/*")
+                            .let {
+                                if (isMediaAddEnabled) {
+                                    it.clickable {
+                                        launcher.launch("*/*")
+                                    }
+                                } else {
+                                    it
+                                }
                             },
                 )
                 Icon(
