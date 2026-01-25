@@ -2,8 +2,12 @@ package com.andlife.network.api.invitation
 
 import com.andlife.network.model.BaseResponse
 import com.andlife.network.model.PagingResponse
+import com.andlife.network.model.invitation.CreateInvitationRequest
+import com.andlife.network.model.invitation.InvitationCardRequest
+import com.andlife.network.model.invitation.InvitationResponse
 import retrofit2.http.Body
 import com.andlife.network.model.invitation.InvitationSummaryResponse
+import com.andlife.network.model.invitation.UpcomingInvitationResponse
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT

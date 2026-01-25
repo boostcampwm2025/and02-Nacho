@@ -1,5 +1,6 @@
 @file:OptIn(InternalSerializationApi::class)
-package com.andlife.network.api.invitation
+
+package com.andlife.network.model.invitation
 
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable

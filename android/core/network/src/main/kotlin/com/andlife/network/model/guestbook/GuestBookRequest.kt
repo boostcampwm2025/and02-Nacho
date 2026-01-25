@@ -1,6 +1,6 @@
 @file:OptIn(InternalSerializationApi::class)
 
-package com.andlife.network.api.guestbook
+package com.andlife.network.model.guestbook
 
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable

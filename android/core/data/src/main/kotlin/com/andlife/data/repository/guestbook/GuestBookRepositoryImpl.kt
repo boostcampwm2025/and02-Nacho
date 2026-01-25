@@ -13,8 +13,8 @@ import com.andlife.domain.model.guestbook.GuestBookMedia
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.map
-import com.andlife.network.api.guestbook.GuestBookRequest
-import com.andlife.network.api.guestbook.UpdateGuestBookRequest
+import com.andlife.network.model.guestbook.GuestBookRequest
+import com.andlife.network.model.guestbook.UpdateGuestBookRequest
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

@@ -1,6 +1,6 @@
 @file:OptIn(InternalSerializationApi::class)
 
-package com.andlife.network.api.guestbook
+package com.andlife.network.model.guestbook
 
 import com.andlife.network.model.AuthorResponse
 import kotlinx.datetime.LocalDateTime

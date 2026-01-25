@@ -2,11 +2,11 @@ package com.andlife.data.datasource.remote.guestbook
 
 import com.andlife.domain.error.DataError
 import com.andlife.domain.util.Result
-import com.andlife.network.api.guestbook.GuestBookRequest
-import com.andlife.network.api.guestbook.GuestBookResponse
-import com.andlife.network.api.guestbook.UpdateGuestBookRequest
+import com.andlife.network.model.guestbook.GuestBookRequest
+import com.andlife.network.model.guestbook.GuestBookResponse
+import com.andlife.network.model.guestbook.UpdateGuestBookRequest
 import com.andlife.network.model.PagingResponse
-import com.andlife.network.model.invitation.guestbook.CollectionResponse
+import com.andlife.network.model.guestbook.CollectionResponse
 
 interface GuestBookRemoteDataSource {
     suspend fun getMediaCollection(invitationId: Long): Result<List<CollectionResponse>, DataError>

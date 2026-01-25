@@ -6,12 +6,12 @@ import com.andlife.domain.model.guestbook.GuestBook
 import com.andlife.domain.model.guestbook.GuestBookInvitation
 import com.andlife.domain.model.guestbook.GuestBookMedia
 import com.andlife.domain.model.guestbook.MediaType
-import com.andlife.network.api.guestbook.GuestBookInvitationResponse
-import com.andlife.network.api.guestbook.GuestBookMediaRequest
-import com.andlife.network.api.guestbook.GuestBookMediaResponse
-import com.andlife.network.api.guestbook.GuestBookResponse
+import com.andlife.network.model.guestbook.GuestBookInvitationResponse
+import com.andlife.network.model.guestbook.GuestBookMediaRequest
+import com.andlife.network.model.guestbook.GuestBookMediaResponse
+import com.andlife.network.model.guestbook.GuestBookResponse
 import com.andlife.network.model.AuthorResponse
-import com.andlife.network.model.invitation.guestbook.CollectionResponse
+import com.andlife.network.model.guestbook.CollectionResponse
 
 fun CollectionResponse.toDomain(): GalleryMedia =
     GalleryMedia(

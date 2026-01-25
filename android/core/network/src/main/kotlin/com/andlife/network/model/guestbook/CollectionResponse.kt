@@ -1,10 +1,11 @@
-package com.andlife.network.model.invitation.guestbook
+package com.andlife.network.model.guestbook
 
 import com.andlife.network.model.AuthorResponse
 import kotlinx.datetime.LocalDateTime
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
 
-@OptIn(kotlinx.serialization.InternalSerializationApi::class)
+@OptIn(InternalSerializationApi::class)
 @Serializable
 data class CollectionResponse(
     val id: Long,

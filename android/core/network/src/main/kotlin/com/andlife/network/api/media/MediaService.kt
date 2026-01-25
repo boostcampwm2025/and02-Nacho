@@ -1,6 +1,11 @@
 package com.andlife.network.api.media
 
 import com.andlife.network.model.BaseResponse
+import com.andlife.network.model.media.BatchCompleteUploadRequest
+import com.andlife.network.model.media.BatchCompleteUploadResponse
+import com.andlife.network.model.media.BatchUploadMediaRequest
+import com.andlife.network.model.media.BatchUploadMediaResponse
+import com.andlife.network.model.media.DeleteMediaResponse
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.POST

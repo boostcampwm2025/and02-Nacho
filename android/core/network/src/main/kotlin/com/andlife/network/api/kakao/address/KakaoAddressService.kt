@@ -1,5 +1,6 @@
 package com.andlife.network.api.kakao.address
 
+import com.andlife.network.model.kakao.address.KakaoAddressResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 

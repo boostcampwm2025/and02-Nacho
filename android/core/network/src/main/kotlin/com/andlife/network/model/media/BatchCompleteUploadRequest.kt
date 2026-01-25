@@ -1,6 +1,6 @@
 @file:OptIn(InternalSerializationApi::class)
 
-package com.andlife.network.api.media
+package com.andlife.network.model.media
 
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
