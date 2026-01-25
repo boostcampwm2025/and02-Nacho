@@ -1,6 +1,6 @@
 package error
 
-import com.andlife.InvitationServer.response.ResponseCode
+import com.andlife.nachoserver.response.ResponseCode
 
 class BusinessException(
     val responseCode: ResponseCode,
