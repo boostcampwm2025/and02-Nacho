@@ -109,6 +109,9 @@ constructor(
             is InvitationGuestBookUiEvent.RemoveMedia -> removeMedia(event.media)
             is InvitationGuestBookUiEvent.UploadMedias -> handleUploadMedias()
             is InvitationGuestBookUiEvent.ClickCamera -> handleCameraClick()
+            is InvitationGuestBookUiEvent.ClickMicrophone -> handleMicrophoneClick()
+            is InvitationGuestBookUiEvent.StartAudioRecording -> handleStartAudioRecording()
+            is InvitationGuestBookUiEvent.StopAudioRecording -> handleStopAudioRecording()
             is InvitationGuestBookUiEvent.ClearError -> clearError()
             is InvitationGuestBookUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
 
@@ -407,5 +410,29 @@ constructor(
                 originalMediaIds = emptySet(),
             )
         }
+    }
+
+    private fun handleMicrophoneClick() {
+        val state = uiState.value
+
+        if (state.isAudioRecording) {
+            onEvent(InvitationGuestBookUiEvent.StopAudioRecording)
+        } else {
+            if (state.selectedMedias.size >= 5) {
+                sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("최대 5개까지 미디어를 추가할 수 있습니다."))
+                return
+            }
+            onEvent(InvitationGuestBookUiEvent.StartAudioRecording)
+        }
+    }
+
+    private fun handleStartAudioRecording() {
+        updateState { copy(isAudioRecording = true, audioRecordingDuration = 0) }
+        sendEffect(InvitationGuestBookSideEffect.StartAudioRecording)
+    }
+
+    private fun handleStopAudioRecording() {
+        updateState { copy(isAudioRecording = false, audioRecordingDuration = 0) }
+        sendEffect(InvitationGuestBookSideEffect.StopAudioRecording)
     }
 }

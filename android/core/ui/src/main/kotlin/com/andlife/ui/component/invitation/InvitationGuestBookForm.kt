@@ -50,10 +50,12 @@ fun InvitationGuestBookForm(
     onMediaRemove: (SelectedMedia) -> Unit,
     onTextContentChange: (String) -> Unit,
     onCameraClick: () -> Unit,
+    onMicrophoneClick: () -> Unit,
     onUploadClick: () -> Unit,
     onFocusChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     editingGuestBookId: Long? = null,
+    isAudioRecording: Boolean = false,
 ) {
     val context = LocalContext.current
     val focusRequester = remember { FocusRequester() }
@@ -190,12 +192,18 @@ fun InvitationGuestBookForm(
                 Icon(
                     painter = painterResource(R.drawable.ic_mic_16),
                     contentDescription = null,
-                    tint = iconColor,
+                    tint = if (isAudioRecording) Color.Green else iconColor,
                     modifier =
                         Modifier
                             .size(NachoIconSize.medium)
-                            .clickable {
-                                // TODO: 마이크 녹음 기능 추가
+                            .let {
+                                if (isMediaAddEnabled) {
+                                    it.clickable {
+                                        onMicrophoneClick()
+                                    }
+                                } else {
+                                    it
+                                }
                             },
                 )
             }
@@ -233,6 +241,7 @@ private fun InvitationGuestBookFormPreview() {
             onMediaRemove = {},
             onTextContentChange = {},
             onCameraClick = {},
+            onMicrophoneClick = {},
             onUploadClick = {},
             onFocusChanged = {},
         )

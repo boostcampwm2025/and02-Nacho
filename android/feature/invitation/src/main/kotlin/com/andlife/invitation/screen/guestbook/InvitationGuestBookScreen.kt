@@ -81,6 +81,7 @@ import com.andlife.model.guestbook.MediaUiType
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.invitation.InvitationGuestBookForm
 import com.andlife.ui.component.paging.PagingStateContent
+import com.andlife.ui.util.audio.AudioRecorder
 import com.andlife.ui.util.collectWithLifecycle
 import com.andlife.ui.util.media.uriToSelectedMedia
 import kotlinx.collections.immutable.toImmutableList
@@ -111,8 +112,11 @@ fun InvitationGuestBookRoute(
 
     val context = LocalContext.current
 
+    // 오디오 녹음 관련
+    val audioRecorder = remember { AudioRecorder(context) }
+
     // 카메라 권한 요청 launcher
-    val permissionLauncher = rememberLauncherForActivityResult(
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
@@ -133,6 +137,15 @@ fun InvitationGuestBookRoute(
                 val updatedMedias = (currentMedias + newMedia).toImmutableList()
                 viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias))
             }
+        }
+    }
+
+    // 오디오 권한 요청 launcher
+    val audioPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.onEvent(InvitationGuestBookUiEvent.ClickMicrophone)
         }
     }
 
@@ -173,9 +186,41 @@ fun InvitationGuestBookRoute(
                     "${context.packageName}.provider",
                     photoFile
                 )
-                cameraImageUri = photoUri
                 cameraLauncher.launch(photoUri)
             }
+
+            is InvitationGuestBookSideEffect.StartAudioRecording -> {
+                // 오디오 녹음 시작
+                val audioRecordingsDir = File(context.cacheDir, "audio_recordings")
+                if (!audioRecordingsDir.exists()) {
+                    audioRecordingsDir.mkdirs()
+                }
+                val audioFile = File(
+                    audioRecordingsDir,
+                    "audio_${System.currentTimeMillis()}.m4a"
+                )
+
+                audioRecorder.startRecording(audioFile) { e ->
+                    viewModel.onEvent(InvitationGuestBookUiEvent.StopAudioRecording)
+                    // exception 표시
+                }
+            }
+
+            is InvitationGuestBookSideEffect.StopAudioRecording -> {
+                // 오디오 녹음 중지
+                audioRecorder.stopRecording { recordedFile ->
+                    if (recordedFile != null) {
+                        // 녹음된 오디오 파일을 SelectedMedia로 변환
+                        val currentMedias = uiState.selectedMedias
+                        if (currentMedias.size < 5) {
+                            val audioMedia = uriToSelectedMedia(context, recordedFile.toURI().toString())
+                            val updatedMedias = (currentMedias + audioMedia).toImmutableList()
+                            viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias))
+                        }
+                    }
+                }
+            }
+
         }
     }
 
@@ -193,6 +238,7 @@ fun InvitationGuestBookRoute(
         onDispose {
             viewModel.videoPlayerPool.releaseAllPlayers()
             viewModel.audioPlayerManager.release()
+            audioRecorder.release()
         }
     }
 
@@ -281,7 +327,8 @@ fun InvitationGuestBookRoute(
         videoPlayerPool = viewModel.videoPlayerPool,
         onDeleteMenuClick = { guestBookId -> showDeleteDialog = guestBookId },
         context = context,
-        permissionLauncher = permissionLauncher,
+        cameraPermissionLauncher = cameraPermissionLauncher,
+        audioPermissionLauncher = audioPermissionLauncher,
         modifier = modifier,
     )
 }
@@ -298,7 +345,8 @@ private fun InvitationGuestBookScreen(
     onNavigateBack: () -> Unit,
     onDeleteMenuClick: (Long) -> Unit,
     context: Context,
-    permissionLauncher: ActivityResultLauncher<String>,
+    cameraPermissionLauncher: ActivityResultLauncher<String>,
+    audioPermissionLauncher: ActivityResultLauncher<String>,
     modifier: Modifier = Modifier,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -425,7 +473,8 @@ private fun InvitationGuestBookScreen(
                             isTextFieldFocused = focused
                         },
                         context = context,
-                        permissionLauncher = permissionLauncher
+                        cameraPermissionLauncher = cameraPermissionLauncher,
+                        audioPermissionLauncher = audioPermissionLauncher
                     )
                 }
             }
@@ -499,7 +548,8 @@ private fun GuestBookFormSection(
     onEvent: (InvitationGuestBookUiEvent) -> Unit,
     onFocusChanged: (Boolean) -> Unit,
     context: Context,
-    permissionLauncher: ActivityResultLauncher<String>,
+    cameraPermissionLauncher: ActivityResultLauncher<String>,
+    audioPermissionLauncher: ActivityResultLauncher<String>,
 ) {
     InvitationGuestBookForm(
         modifier = Modifier
@@ -513,6 +563,7 @@ private fun GuestBookFormSection(
         isUploading = uiState.isUploading,
         isSubmittable = uiState.isSubmittable,
         editingGuestBookId = uiState.editingGuestBookId,
+        isAudioRecording = uiState.isAudioRecording,
         onMediasSelected = { medias ->
             onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(medias))
         },
@@ -536,7 +587,24 @@ private fun GuestBookFormSection(
             if (hasPermission) {
                 onEvent(InvitationGuestBookUiEvent.ClickCamera)
             } else {
-                permissionLauncher.launch(Manifest.permission.CAMERA)
+                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+        },
+        onMicrophoneClick = {
+            // 오디오 권한 체크
+            val hasPermission = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (hasPermission) {
+                if (uiState.isAudioRecording) {
+                    onEvent(InvitationGuestBookUiEvent.StopAudioRecording)
+                } else {
+                    onEvent(InvitationGuestBookUiEvent.StartAudioRecording)
+                }
+            } else {
+                audioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
             }
         },
     )
@@ -557,10 +625,12 @@ private fun InvitationGuestBookEmptyPreview() {
             lazyListState = rememberLazyListState(),
             onDeleteMenuClick = {},
             context = LocalContext.current,
-            permissionLauncher = rememberLauncherForActivityResult(
-                contract = ActivityResultContracts.RequestPermission(),
-                onResult = {}
-            ),
+            cameraPermissionLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestPermission()
+            ) {},
+            audioPermissionLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestPermission()
+            ) {},
         )
     }
 }
