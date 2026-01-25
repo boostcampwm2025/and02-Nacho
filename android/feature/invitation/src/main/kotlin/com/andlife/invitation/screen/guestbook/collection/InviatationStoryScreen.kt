@@ -21,12 +21,12 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.guestbook.MediaType
-import com.andlife.ui.component.invitation.collection.StoryContent
+import com.andlife.ui.component.collection.StoryContent
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiState
 import com.andlife.model.util.toUiType
 import com.andlife.invitation.viewmodel.InvitationCollectionViewModel
 import com.andlife.model.invitation.collection.CollectionUiModel
-import com.andlife.ui.component.invitation.collection.StoryTopHeader
+import com.andlife.ui.component.collection.StoryTopHeader
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone

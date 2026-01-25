@@ -25,8 +25,8 @@ import com.andlife.model.invitation.collection.CollectionUiModel
 import com.andlife.model.util.toUiType
 import com.andlife.myinvitation.model.guestbook.collection.MyInvitationCollectionUiState
 import com.andlife.myinvitation.viewmodel.MyInvitationCollectionViewModel
-import com.andlife.ui.component.invitation.collection.StoryContent
-import com.andlife.ui.component.invitation.collection.StoryTopHeader
+import com.andlife.ui.component.collection.StoryContent
+import com.andlife.ui.component.collection.StoryTopHeader
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone

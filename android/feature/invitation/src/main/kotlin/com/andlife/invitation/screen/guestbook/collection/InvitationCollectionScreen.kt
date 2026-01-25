@@ -10,7 +10,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.guestbook.MediaType
-import com.andlife.ui.component.invitation.collection.NachoMediaGridView
+import com.andlife.ui.component.collection.NachoMediaGridView
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiEvent
 import com.andlife.invitation.model.guestbook.collection.InvitationCollectionUiState
 import com.andlife.model.util.toUiType

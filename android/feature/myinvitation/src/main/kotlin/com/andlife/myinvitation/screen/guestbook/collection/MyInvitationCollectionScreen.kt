@@ -15,7 +15,7 @@ import com.andlife.model.util.toUiType
 import com.andlife.myinvitation.model.guestbook.collection.MyInvitationCollectionUiEvent
 import com.andlife.myinvitation.model.guestbook.collection.MyInvitationCollectionUiState
 import com.andlife.myinvitation.viewmodel.MyInvitationCollectionViewModel
-import com.andlife.ui.component.invitation.collection.NachoMediaGridView
+import com.andlife.ui.component.collection.NachoMediaGridView
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone

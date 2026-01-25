@@ -1,4 +1,4 @@
-package com.andlife.ui.component.invitation.collection
+package com.andlife.ui.component.collection
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
