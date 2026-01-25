@@ -39,7 +39,8 @@ import javax.inject.Inject
 class EditorState @Inject constructor(
     private val imageLoader: ImageLoader
 ) {
-    lateinit var editText: EditText
+    var editText: EditText? = null
+        private set
 
     var currentTextStyle by mutableStateOf(EditTextStyle())
         private set
@@ -51,9 +52,10 @@ class EditorState @Inject constructor(
 
         override fun afterTextChanged(s: Editable?) {
             updateToolbarState()
+            val editText = editText ?: return
             val editable = s
             if (editable == null) return
-            val cursor = selectionStart
+            val cursor = editText.selectionStart
             val isEnterPressed = cursor > 0 && editable.isNotEmpty() && editable[cursor - 1] == '\n'
             if (isEnterPressed) {
                 val alignment = currentTextStyle.alignment
@@ -69,6 +71,7 @@ class EditorState @Inject constructor(
         }
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            val editText = editText ?: return
             val isBackspace = before > 0 && count == 0
             if (isBackspace) {
                 removeZeroLengthSpans(editText.text)
@@ -76,15 +79,8 @@ class EditorState @Inject constructor(
         }
     }
 
-    private val selectionStart: Int
-        get() = editText.selectionStart
-
-    private val selectionEnd: Int
-        get() = editText.selectionEnd
-
     private val hasSelection: Boolean
-        get() = editText.selectionStart != editText.selectionEnd
-
+        get() = editText?.let { it.selectionStart != it.selectionEnd } ?: false
     fun toggleBold() = applyTextStyle(
         type = StyleSpan::class.java,
         spanFactory = { StyleSpan(Typeface.BOLD) },
@@ -120,9 +116,10 @@ class EditorState @Inject constructor(
     }
 
     fun updateTextColor(color: Color) {
+        val editText = editText ?: return
         val editable = editText.text ?: return
-        val start = selectionStart
-        val end = selectionEnd
+        val start = editText.selectionStart
+        val end = editText.selectionEnd
         val newColorInt = color.toArgb()
 
         when {
@@ -201,9 +198,10 @@ class EditorState @Inject constructor(
     }
 
     fun updateFontSize(size: Float) {
+        val editText = editText ?: return
         val editable = editText.text ?: return
-        val start = selectionStart
-        val end = selectionEnd
+        val start = editText.selectionStart
+        val end = editText.selectionEnd
 
         when {
             hasSelection -> {
@@ -282,9 +280,10 @@ class EditorState @Inject constructor(
         currentState: Boolean,
         updateState: (Boolean) -> Unit,
     ) {
+        val editText = editText ?: return
         val editable = editText.text ?: return
-        val start = selectionStart
-        val end = selectionEnd
+        val start = editText.selectionStart
+        val end = editText.selectionEnd
 
         when {
             hasSelection -> {
@@ -317,9 +316,10 @@ class EditorState @Inject constructor(
         type: Class<T>,
         predicate: (T) -> Boolean,
     ): Boolean {
+        val editText = editText ?: return false
         val editable = editText.text ?: return false
-        val start = selectionStart
-        val end = selectionEnd
+        val start = editText.selectionStart
+        val end = editText.selectionEnd
 
         val spans = editable.getSpans(start, end, type)
             .filter(predicate)
@@ -344,9 +344,10 @@ class EditorState @Inject constructor(
         predicate: (T) -> Boolean,
         spanFactory: () -> T
     ) {
+        val editText = editText ?: return
         val editable = editText.text ?: return
-        val start = selectionStart
-        val end = selectionEnd
+        val start = editText.selectionStart
+        val end = editText.selectionEnd
 
         val spans = editable.getSpans(start, end, type)
             .filter(predicate)
@@ -377,6 +378,7 @@ class EditorState @Inject constructor(
     }
 
     suspend fun insertImage(uri: Uri) {
+        val editText = editText ?: return
         val targetWidth = editText.width.takeIf { it > 0 }
             ?: (editText.resources.displayMetrics.widthPixels * 0.7f).toInt()
         val targetHeight = (targetWidth * 9f / 16f).toInt()
@@ -395,9 +397,10 @@ class EditorState @Inject constructor(
     fun alignRight() = updateAlignment(Layout.Alignment.ALIGN_OPPOSITE)
 
     private fun updateAlignment(alignment: Layout.Alignment) {
+        val editText = editText ?: return
         val editable = editText.text ?: return
-        val start = selectionStart
-        val end = selectionEnd
+        val start = editText.selectionStart
+        val end = editText.selectionEnd
 
         val lineStart = findParagraphStart(editable, start)
         val lineEnd = findParagraphEnd(editable, if (hasSelection) end else start)
@@ -487,9 +490,10 @@ class EditorState @Inject constructor(
     }
 
     private fun updateToolbarState() {
+        val editText = editText ?: return
         val editable = editText.text ?: return
-        val start = selectionStart
-        val end = selectionEnd
+        val start = editText.selectionStart
+        val end = editText.selectionEnd
 
         if (start < 0 || end < 0) return
         val checkStart = if (start == end && start > 0) start else start
@@ -549,18 +553,21 @@ class EditorState @Inject constructor(
     }
 
     fun restartInput() {
+        val editText = editText ?: return
         val imm = editText.context.getSystemService(Context.INPUT_METHOD_SERVICE)
             as? InputMethodManager
         imm?.restartInput(editText)
     }
 
     fun clearFocusAndHideKeyboard() {
+        val editText = editText ?: return
         editText.clearFocus()
         val imm = editText.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(editText.windowToken, 0)
     }
 
     fun setEditable(editable: Editable) {
+        val editText = editText ?: return
         editText.text = editable
     }
 
@@ -570,7 +577,7 @@ class EditorState @Inject constructor(
 
     fun attach(view: EditText) {
         editText = view
-
+        val editText = editText ?: return
         val cursorListener = View.OnClickListener {
             updateToolbarState()
         }
@@ -582,6 +589,7 @@ class EditorState @Inject constructor(
             }
         }
         view.setOnKeyListener { _, keyCode, event ->
+
             if (keyCode == KeyEvent.KEYCODE_DEL && event.action == KeyEvent.ACTION_DOWN) {
                 val text = editText.text
                 val cursor = editText.selectionStart
@@ -597,6 +605,16 @@ class EditorState @Inject constructor(
             }
             false
         }
+    }
+
+    fun detach() {
+        val editText = editText ?: return
+        editText.removeTextChangedListener(textWatcher)
+        editText.setOnClickListener(null)
+        editText.onFocusChangeListener = null
+        editText.setOnKeyListener(null)
+        editText.text = null
+        this.editText = null
     }
 
     companion object {

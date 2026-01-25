@@ -10,11 +10,13 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 interface InvitationRepository : JpaRepository<Invitation, Long> {
-    @Query("""
+    @Query(
+        """
         SELECT i FROM Invitation i
         JOIN FETCH i.host
         WHERE i.id = :invitationId
-    """)
+    """
+    )
     fun findByInvitationIdWithHost(@Param("invitationId") invitationId: Long): Invitation?
 
     fun findAllByHostId(hostId: Long, pageable: Pageable): Page<Invitation>
@@ -36,4 +38,22 @@ interface InvitationRepository : JpaRepository<Invitation, Long> {
              OR (i.invitationDate = :nowDate AND i.startTime < :nowTime))
     """)
     fun findPastByHostId(hostId: Long, nowDate: LocalDate, nowTime: LocalTime, pageable: Pageable): Page<Invitation>
+
+    @Query(
+        """
+            SELECT DISTINCT i FROM Invitation i
+            JOIN FETCH i.host
+            LEFT JOIN InvitationParticipant ip ON i.id = ip.invitation.id
+            WHERE (i.host.id = :userId OR ip.user.id = :userId)
+            AND i.invitationDate >= :today 
+            AND i.invitationDate <= :limitDate
+            ORDER BY i.invitationDate ASC, i.startTime ASC
+        """
+    )
+    fun findUpcomingInvitationsWithinDays(
+        @Param("userId") userId: Long,
+        @Param("today") today: LocalDate,
+        @Param("limitDate") limitDate: LocalDate,
+        pageable: Pageable
+    ): Page<Invitation>
 }

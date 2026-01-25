@@ -10,6 +10,7 @@ import com.andlife.network.api.invitation.InvitationResponse
 import com.andlife.network.api.invitation.InvitationService
 import com.andlife.network.model.PagingResponse
 import com.andlife.network.model.invitation.InvitationSummaryResponse
+import com.andlife.network.api.invitation.UpcomingInvitationResponse
 import javax.inject.Inject
 
 internal class InvitationRemoteDataSourceImpl @Inject constructor(
@@ -36,4 +37,11 @@ internal class InvitationRemoteDataSourceImpl @Inject constructor(
         size: Int
     ): Result<PagingResponse<InvitationSummaryResponse>, DataError> =
         apiCall { invitationService.getMyInvitations(status.value, sortType.value, page, size) }
+
+    override suspend fun getUpcomingInvitations(
+        days: Long,
+        page: Int,
+        size: Int,
+    ): Result<PagingResponse<UpcomingInvitationResponse>, DataError> =
+        apiCall { invitationService.getUpcomingInvitations(days, page, size) }
 }

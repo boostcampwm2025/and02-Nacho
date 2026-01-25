@@ -70,7 +70,7 @@ class CardConverterImpl @Inject constructor() : CardConverter {
         editable.getSpans(0, editable.length, ForegroundColorSpan::class.java).forEach { span ->
             val start = editable.getSpanStart(span)
             val end = editable.getSpanEnd(span)
-            val color = span.foregroundColor.toColorLong()
+            val color = span.foregroundColor.toLong()
             styledSpans.add(StyledUiSpan(start, end, SpanUiStyle.TextColor(color)))
         }
 

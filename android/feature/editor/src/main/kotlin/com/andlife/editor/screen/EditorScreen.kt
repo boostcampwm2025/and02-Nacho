@@ -60,6 +60,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -428,6 +429,13 @@ private fun EditCard(
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
+
+    DisposableEffect(Unit) {
+        onDispose {
+            state.detach()
+        }
+    }
+
     Surface(
         modifier = modifier,
         shape = NachoTheme.shapes.medium,

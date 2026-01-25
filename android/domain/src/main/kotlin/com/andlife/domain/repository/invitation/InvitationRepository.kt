@@ -7,6 +7,7 @@ import com.andlife.domain.model.invitation.Invitation
 import com.andlife.domain.model.invitation.InvitationStatus
 import com.andlife.domain.model.invitation.InvitationSummary
 import com.andlife.domain.model.invitation.SortDirection
+import com.andlife.domain.model.invitation.UpcomingInvitation
 import com.andlife.domain.util.Result
 import kotlinx.coroutines.flow.Flow
 
@@ -22,6 +23,7 @@ interface InvitationRepository {
         status: InvitationStatus,
         sortType: SortDirection,
         size: Int = 10
-        ): Flow<PagingData<InvitationSummary>>
+    ): Flow<PagingData<InvitationSummary>>
+    fun getUpcomingInvitations(): Flow<PagingData<UpcomingInvitation>>
 }
 

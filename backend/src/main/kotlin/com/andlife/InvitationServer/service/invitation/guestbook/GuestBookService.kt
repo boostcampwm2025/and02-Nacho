@@ -1,16 +1,16 @@
 package com.andlife.InvitationServer.service.invitation.guestbook
 
+import com.andlife.InvitationServer.auth.AuthContext
 import com.andlife.InvitationServer.constant.MediaType
-import com.andlife.InvitationServer.entity.GuestBook
-import com.andlife.InvitationServer.entity.GuestBookAudio
-import com.andlife.InvitationServer.entity.GuestBookImage
-import com.andlife.InvitationServer.entity.GuestBookVideo
-import com.andlife.InvitationServer.entity.VideoPreviewThumbnail
+import com.andlife.InvitationServer.entity.*
+import com.andlife.InvitationServer.error.BusinessException
 import com.andlife.InvitationServer.repository.invitation.InvitationRepository
 import com.andlife.InvitationServer.repository.invitation.guestbook.GuestBookRepository
 import com.andlife.InvitationServer.repository.user.UserRepository
 import com.andlife.InvitationServer.request.invitation.guestbook.GuestBookRequest
+import com.andlife.InvitationServer.request.invitation.guestbook.UpdateGuestBookRequest
 import com.andlife.InvitationServer.response.AuthorResponse
+import com.andlife.InvitationServer.response.CommonResponseCode
 import com.andlife.InvitationServer.response.PagingMetaResponse
 import com.andlife.InvitationServer.response.PagingResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.CollectionResponse
@@ -18,7 +18,11 @@ import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookInvit
 import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookMediaResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.GuestBookResponse
 import com.andlife.InvitationServer.response.invitation.guestbook.toGuestBookResponse
+import com.andlife.InvitationServer.service.media.MediaService
+import jakarta.persistence.EntityNotFoundException
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -27,7 +31,8 @@ import org.springframework.transaction.annotation.Transactional
 class GuestBookService(
     private val guestBookRepository: GuestBookRepository,
     private val userRepository: UserRepository,
-    private val invitationRepository: InvitationRepository
+    private val invitationRepository: InvitationRepository,
+    private val mediaService: MediaService
 ) {
 
     fun getCollectionByInvitation(invitationId: Long): List<CollectionResponse> {
@@ -89,10 +94,19 @@ class GuestBookService(
         return collection.sortedByDescending { it.createdAt }
     }
 
-    fun getGuestBooks(invitationId: Long, pageable: Pageable): PagingResponse<GuestBookResponse> {
+    fun getGuestBooks(
+        invitationId: Long,
+        pageable: Pageable,
+        authContext: AuthContext
+    ): PagingResponse<GuestBookResponse> {
         val guestBooksPage = guestBookRepository.findAllByInvitationId(invitationId, pageable)
 
         val responsePage = guestBooksPage.map { guestBook ->
+            val isOwner = when (authContext) {
+                is AuthContext.Member -> authContext.userId == guestBook.user.id
+                is AuthContext.Guest -> false
+            }
+
             val allMedia = mutableListOf<GuestBookMediaResponse>()
 
             guestBook.images.forEach {
@@ -139,7 +153,7 @@ class GuestBookService(
                 visualMedias = visualMedias,
                 audioMedias = audioMedias,
                 totalVisualCount = visualMedias.size,
-                isOwner = false,
+                isOwner = isOwner,
                 createdAt = guestBook.createdAt,
                 updatedAt = guestBook.updatedAt
             )
@@ -199,7 +213,7 @@ class GuestBookService(
                         durationSeconds = mediaReq.durationSeconds ?: 0,
                         displayOrder = mediaReq.displayOrder
                     )
-                    
+
                     // 썸네일이 있는 경우 VideoPreviewThumbnail에도 추가
                     if (!mediaReq.thumbnailUrl.isNullOrEmpty()) {
                         val previewThumbnail = VideoPreviewThumbnail(
@@ -209,7 +223,7 @@ class GuestBookService(
                         )
                         video.previewThumbnails.add(previewThumbnail)
                     }
-                    
+
                     guestBook.videos.add(video)
                 }
 
@@ -219,5 +233,157 @@ class GuestBookService(
 
         val savedGuestBook = guestBookRepository.save(guestBook)
         return savedGuestBook.toGuestBookResponse()
+    }
+
+    @Transactional
+    fun updateGuestBook(
+        guestBookId: Long,
+        request: UpdateGuestBookRequest,
+        authContext: AuthContext
+    ): GuestBookResponse {
+        val guestBook = guestBookRepository.findById(guestBookId)
+            .orElseThrow { IllegalArgumentException("방명록을 찾을 수 없습니다. id: $guestBookId") }
+
+        validateOwner(guestBook.user.id, authContext)
+
+        val mediaKeysToDelete = getAllMediaKeys(guestBook).toMutableList()
+
+        guestBook.textContent = request.textContent
+        guestBook.images.removeIf { !request.existingImageIds.contains(it.id) }
+        guestBook.audios.removeIf { !request.existingAudioIds.contains(it.id) }
+        guestBook.videos.removeIf { !request.existingVideoIds.contains(it.id) }
+
+        request.newMedias.forEach { mediaReq ->
+            when (mediaReq.mediaType) {
+                "IMAGE" -> guestBook.images.add(
+                    GuestBookImage(
+                        guestBook = guestBook,
+                        imageUrl = mediaReq.mediaUrl,
+                        displayOrder = mediaReq.displayOrder
+                    )
+                )
+
+                "AUDIO" -> guestBook.audios.add(
+                    GuestBookAudio(
+                        guestBook = guestBook,
+                        audioUrl = mediaReq.mediaUrl,
+                        durationSeconds = mediaReq.durationSeconds ?: 0,
+                        displayOrder = mediaReq.displayOrder
+                    )
+                )
+
+                "VIDEO" -> guestBook.videos.add(
+                    GuestBookVideo(
+                        guestBook = guestBook,
+                        videoUrl = mediaReq.mediaUrl,
+                        thumbnailUrl = mediaReq.thumbnailUrl ?: "",
+                        durationSeconds = mediaReq.durationSeconds ?: 0,
+                        displayOrder = mediaReq.displayOrder
+                    )
+                )
+            }
+        }
+
+        mediaKeysToDelete.forEach { mediaKey ->
+            mediaService.deleteMedia(mediaKey)
+        }
+
+        return guestBook.toGuestBookResponse()
+    }
+
+    @Transactional
+    fun deleteGuestBook(guestBookId: Long, authContext: AuthContext) {
+        val guestBook = guestBookRepository.findByIdOrNull(guestBookId)
+            ?: throw EntityNotFoundException("방명록을 찾을 수 없습니다. id: $guestBookId")
+
+        validateOwner(guestBook.user.id, authContext)
+
+        val mediaKeys = getAllMediaKeys(guestBook)
+        guestBookRepository.delete(guestBook)
+
+        mediaKeys.forEach { mediaKey ->
+            mediaService.deleteMedia(mediaKey)
+        }
+    }
+
+    private fun validateOwner(guestBookUserId: Long, authContext: AuthContext) {
+        when (authContext) {
+            is AuthContext.Member -> {
+                if (guestBookUserId != authContext.userId) {
+                    throw BusinessException(CommonResponseCode.FORBIDDEN)
+                }
+            }
+
+            is AuthContext.Guest -> {
+                throw BusinessException(CommonResponseCode.FORBIDDEN)
+            }
+        }
+    }
+
+    private fun getAllMediaKeys(guestBook: GuestBook): List<String> {
+        val keys = mutableListOf<String>()
+        guestBook.images.forEach { keys.add(mediaService.extractKey(it.imageUrl)) }
+        guestBook.audios.forEach { keys.add(mediaService.extractKey(it.audioUrl)) }
+        guestBook.videos.forEach {
+            keys.add(mediaService.extractKey(it.videoUrl))
+            keys.add(mediaService.extractKey(it.thumbnailUrl))
+        }
+        return keys
+    }
+
+    fun getAllRelatedGuestBooks(
+        authContext: AuthContext,
+        pageable: Pageable
+    ): PagingResponse<GuestBookResponse> {
+
+        val guestBooksPage = when (authContext) {
+            is AuthContext.Member -> {
+                guestBookRepository.findAllByMyRelatedInvitations(authContext.userId, pageable)
+            }
+            is AuthContext.Guest -> {
+                Page.empty(pageable) //TODO: 비로그인 유저 임시 빈값 조회
+            }
+        }
+
+        val responsePage = guestBooksPage.map { guestBook ->
+            val allMedia = mutableListOf<GuestBookMediaResponse>().apply {
+                addAll(guestBook.images.map { GuestBookMediaResponse(it.id, MediaType.IMAGE, it.imageUrl, null, null, it.displayOrder) })
+                addAll(guestBook.videos.map { GuestBookMediaResponse(it.id, MediaType.VIDEO, it.videoUrl, it.thumbnailUrl, it.durationSeconds, it.displayOrder) })
+                addAll(guestBook.audios.map { GuestBookMediaResponse(it.id, MediaType.AUDIO, it.audioUrl, null, it.durationSeconds, it.displayOrder) })
+            }.sortedBy { it.displayOrder }
+
+            val (audioMedias, visualMedias) = allMedia.partition { it.type == MediaType.AUDIO }
+            val isOwner = (authContext is AuthContext.Member && guestBook.user.id == authContext.userId)
+
+            GuestBookResponse(
+                id = guestBook.id,
+                author = AuthorResponse(
+                    id = guestBook.user.id,
+                    name = guestBook.user.name,
+                    profileImageUrl = guestBook.user.profileImageUrl
+                ),
+                invitation = GuestBookInvitationResponse(
+                    id = guestBook.invitation.id,
+                    title = guestBook.invitation.title
+                ),
+                textContent = guestBook.textContent,
+                visualMedias = visualMedias,
+                audioMedias = audioMedias,
+                totalVisualCount = visualMedias.size,
+                isOwner = isOwner,
+                createdAt = guestBook.createdAt,
+                updatedAt = guestBook.updatedAt
+            )
+        }
+
+        return PagingResponse(
+            meta = PagingMetaResponse(
+                isEnd = !guestBooksPage.hasNext(),
+                pageableCount = guestBooksPage.numberOfElements,
+                totalCount = guestBooksPage.totalElements,
+                currentPage = guestBooksPage.number + 1
+            ),
+            content = responsePage.content
+        )
     }
 }
