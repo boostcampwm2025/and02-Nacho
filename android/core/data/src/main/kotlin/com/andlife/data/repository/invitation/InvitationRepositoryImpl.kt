@@ -47,14 +47,6 @@ internal class InvitationRepositoryImpl @Inject constructor(
         ).flow
     }
 
-    override suspend fun createInvitationCard(
-        invitationId: Long,
-        card: NachoCard
-    ): Result<Long, DataError> {
-        val cardRequest = card.toRequest(json)
-        return invitationRemoteDataSource.createInvitationCard(invitationId, cardRequest)
-    }
-
     override fun getUpcomingInvitations(): Flow<PagingData<UpcomingInvitation>> =
         Pager(
             config = PagingConfig(
@@ -73,5 +65,21 @@ internal class InvitationRepositoryImpl @Inject constructor(
     companion object {
         private const val PAGE_SIZE = 10
         private const val UPCOMING_DAYS_THRESHOLD = 30L
+    }
+
+    override suspend fun createInvitationCard(
+        invitationId: Long,
+        card: NachoCard
+    ): Result<Long, DataError> {
+        val cardRequest = card.toRequest(json)
+        return invitationRemoteDataSource.createInvitationCard(invitationId, cardRequest)
+    }
+
+    override suspend fun updateCard(
+        cardId: Long,
+        card: NachoCard
+    ): Result<Long, DataError> {
+        val cardRequest = card.toRequest(json)
+        return invitationRemoteDataSource.updateInvitationCard(cardId, cardRequest)
     }
 }

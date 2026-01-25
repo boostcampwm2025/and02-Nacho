@@ -269,7 +269,7 @@ class CreateInvitationViewModel @Inject constructor(
                     createCardSession.clear()
                     sendEffect(CreateInvitationSideEffect.SuccessCreate(id))
                 }
-                .onFailure {
+                .onFailure { error, msg ->
                     updateState { copy(isLoading = false) }
                     sendEffect(CreateInvitationSideEffect.FailCreate)
                 }

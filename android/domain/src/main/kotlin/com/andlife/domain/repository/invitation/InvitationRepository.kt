@@ -17,7 +17,8 @@ interface InvitationRepository {
         status: String,
         size: Int = 10
     ): Flow<PagingData<InvitationSummary>>
-    suspend fun createInvitationCard(invitationId: Long, card: NachoCard): Result<Long, DataError>
     fun getUpcomingInvitations(): Flow<PagingData<UpcomingInvitation>>
+    suspend fun createInvitationCard(invitationId: Long, card: NachoCard): Result<Long, DataError>
+    suspend fun updateCard(cardId: Long, card: NachoCard): Result<Long, DataError>
 }
 

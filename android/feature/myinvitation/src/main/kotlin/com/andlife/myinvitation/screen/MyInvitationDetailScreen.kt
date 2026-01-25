@@ -1,5 +1,6 @@
 package com.andlife.myinvitation.screen
 
+import android.text.Editable
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -87,7 +89,7 @@ fun MyInvitationDetailRoute(
             }
 
             is MyInvitationDetailSideEffect.NavigateToEditCard -> {
-                onNavigateToEditCard(effect.myInvitationId)
+                onNavigateToEditCard(effect.cardId)
             }
 
             MyInvitationDetailSideEffect.ShowMapErrorSnackbar -> {
@@ -109,6 +111,7 @@ fun MyInvitationDetailRoute(
         snackbarHostState = snackbarHostState,
         scrollBehavior = scrollBehavior,
         onEvent = viewModel::onEvent,
+        onSaveEditableCache = viewModel::saveEditableCache,
         onNavigateBack = onNavigateBack,
         modifier = modifier,
     )
@@ -121,6 +124,7 @@ private fun MyInvitationDetailScreen(
     snackbarHostState: SnackbarHostState,
     scrollBehavior: TopAppBarScrollBehavior,
     onEvent: (MyInvitationDetailUiEvent) -> Unit,
+    onSaveEditableCache: (Editable) -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -203,7 +207,9 @@ private fun MyInvitationDetailScreen(
                                     onClickEditCard = { onEvent(MyInvitationDetailUiEvent.ClickEditCard) },
                                     onClickCreateCard = { onEvent(MyInvitationDetailUiEvent.ClickCreateCard) },
                                     onMapError = { onEvent(MyInvitationDetailUiEvent.MapError) },
+                                    onSaveEditableCache = onSaveEditableCache,
                                     isMapVisible = isMapVisible,
+                                    editCardEnabled = uiState.editCardEnabled,
                                     modifier = Modifier.fillMaxSize(),
                                 )
                             }
@@ -411,6 +417,7 @@ private fun MyInvitationDetailScreenPreview() {
             scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(),
             onEvent = {},
             onNavigateBack = {},
+            onSaveEditableCache = {}
         )
     }
 }

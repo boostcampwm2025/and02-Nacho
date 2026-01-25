@@ -1,5 +1,6 @@
 package com.andlife.invitation.screen.detail
 
+import android.text.Editable
 import android.view.ViewGroup
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -47,6 +48,7 @@ fun InvitationContentsScreen(
     onClickImage: (Int) -> Unit,
     onMapError: () -> Unit,
     isMapVisible: Boolean,
+    onEditableSave: (Editable) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val model = uiState.invitationContentsUiModel
@@ -84,6 +86,8 @@ fun InvitationContentsScreen(
 
         CardSection(
             invitationCardModel = model.invitationCard,
+            editableCache = uiState.editableCache,
+            onEditableSave = onEditableSave
         )
 
         AnnouncementSection(
@@ -101,8 +105,12 @@ fun InvitationContentsScreen(
 @Composable
 private fun CardSection(
     invitationCardModel: InvitationCardUiModel?,
+    editableCache: Editable?,
+    onEditableSave: (Editable) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (invitationCardModel == null) return
+
     Column(
         modifier =
             modifier
@@ -123,49 +131,42 @@ private fun CardSection(
             )
             Spacer(modifier = Modifier.weight(1f))
         }
-
-        if (invitationCardModel == null) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = NachoTheme.shapes.small,
-                colors =
-                    CardDefaults.cardColors(
-                        containerColor = NachoTheme.colorScheme.backgroundSecondary,
-                    ),
-            ) {
-                EmptyCardGuide()
-            }
-        } else {
-            val textPrimary = NachoTheme.colorScheme.textPrimary
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = NachoTheme.shapes.small,
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(invitationCardModel.card.backgroundColor),
-                ),
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = NachoElevation.medium
-                ),
-                border = BorderStroke(NachoStroke.small, NachoTheme.colorScheme.backgroundBorder),
-            ) {
-                AndroidView(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(NachoSpacing.large),
-                    factory = { context ->
-                        NachoTextView(context).apply {
-                            layoutParams = ViewGroup.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.WRAP_CONTENT
-                            )
-                            setTextColor(textPrimary.toArgb())
+        val textPrimary = NachoTheme.colorScheme.textPrimary
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = NachoTheme.shapes.small,
+            colors = CardDefaults.cardColors(
+                containerColor = Color(invitationCardModel.card.backgroundColor),
+            ),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = NachoElevation.medium
+            ),
+            border = BorderStroke(NachoStroke.small, NachoTheme.colorScheme.backgroundBorder),
+        ) {
+            AndroidView(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(NachoSpacing.large),
+                factory = { context ->
+                    NachoTextView(context).apply {
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                        )
+                        onEditableReady = {editable ->
+                            onEditableSave(editable)
                         }
-                    },
-                    update = { view ->
+                        setTextColor(textPrimary.toArgb())
+                    }
+                },
+                update = { view ->
+                    if (editableCache != null) {
+                        view.bindWithCachedEditable(editableCache)
+                    } else {
                         view.bind(invitationCardModel.card)
                     }
-                )
-            }
+                }
+            )
         }
     }
 }
@@ -181,6 +182,7 @@ private fun InvitationContentsScreenPreview() {
                 ),
             onClickImage = {},
             onMapError = {},
+            onEditableSave = {},
             isMapVisible = true,
         )
     }

@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class NachoCardDto(
-    val id: String? = null,
+    val id: Long? = null,
     val content: RichTextContentDto,
     val backgroundColor: Long,
     val backgroundImageUrl: String? = null,

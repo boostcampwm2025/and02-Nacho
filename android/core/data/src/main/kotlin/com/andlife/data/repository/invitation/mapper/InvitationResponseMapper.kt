@@ -38,7 +38,7 @@ fun InvitationResponse.toDomain(json: Json): Invitation {
 
 fun InvitationCardResponse.toDomain(json: Json): InvitationCard {
     val nachoCardDto = json.decodeFromString<NachoCardDto>(contentJson)
-    val nachoCard = nachoCardDto.toDomain()
+    val nachoCard = nachoCardDto.toDomain(id = id)
 
     return InvitationCard(
         id = id,
