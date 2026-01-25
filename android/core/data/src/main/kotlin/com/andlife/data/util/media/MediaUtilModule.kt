@@ -1,0 +1,16 @@
+package com.andlife.data.util.media
+
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class MediaUtilModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindImageCompressor(impl: ImageCompressorImpl): ImageCompressor
+}
