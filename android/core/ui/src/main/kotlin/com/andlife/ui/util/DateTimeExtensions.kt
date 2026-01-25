@@ -9,6 +9,9 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.format
 import kotlinx.datetime.format.char
+import kotlinx.datetime.toJavaLocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlinx.datetime.todayIn
 
 object DateTimeConstants {
@@ -67,6 +70,12 @@ fun String.toDateTime(): String =
     }
 
 fun LocalDateTime.toDateTimeFormat(): String = this.format(dateTimeFormat)
+
+fun LocalDateTime.toFullDisplayString(locale: Locale = Locale.getDefault()): String {
+    val pattern = "yyyy년 M월 d일 (E) a h시"
+    val formatter = DateTimeFormatter.ofPattern(pattern, locale)
+    return this.toJavaLocalDateTime().format(formatter)
+}
 
 fun LocalDate.toDDayText(): String {
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())

@@ -1,7 +1,5 @@
-package com.andlife.invitation.viewmodel
+package com.andlife.myinvitation.viewmodel
 
-import android.text.Editable
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
@@ -19,16 +17,16 @@ import com.andlife.domain.util.Result
 import com.andlife.domain.util.ThumbnailGenerator
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
-import com.andlife.invitation.InvitationDetail
-import com.andlife.invitation.model.guestbook.InvitationGuestBookSideEffect
-import com.andlife.invitation.model.guestbook.InvitationGuestBookUiEvent
-import com.andlife.invitation.model.guestbook.InvitationGuestBookUiState
 import com.andlife.media.audio.AudioPlayerManager
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.model.guestbook.UiMediaType
 import com.andlife.model.guestbook.toUiModel
+import com.andlife.myinvitation.MyInvitationDetail
+import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookSideEffect
+import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookUiEvent
+import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookUiState
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -49,7 +47,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class InvitationGuestBookViewModel
+class MyInvitationGuestBookViewModel
 @Inject
 constructor(
     private val mediaUploader: MediaUploader,
@@ -59,12 +57,12 @@ constructor(
     val audioPlayerManager: AudioPlayerManager,
     val videoPlayerPool: AutoVideoPlayerPool,
     savedStateHandle: SavedStateHandle,
-) : BaseViewModel<InvitationGuestBookUiState, InvitationGuestBookUiEvent, InvitationGuestBookSideEffect>(
-    InvitationGuestBookUiState(),
+) : BaseViewModel<MyInvitationGuestBookUiState, MyInvitationGuestBookUiEvent, MyInvitationGuestBookSideEffect>(
+    MyInvitationGuestBookUiState(),
 ) {
-    private val invitationId: Long = savedStateHandle.toRoute<InvitationDetail>().id
+    private val invitationId: Long = savedStateHandle.toRoute<MyInvitationDetail>().id
 
-    override val uiState: StateFlow<InvitationGuestBookUiState> = mutableUiState.asStateFlow()
+    override val uiState: StateFlow<MyInvitationGuestBookUiState> = mutableUiState.asStateFlow()
 
     private val refreshFlow = MutableStateFlow(0)
 
@@ -103,30 +101,30 @@ constructor(
             .launchIn(viewModelScope)
     }
 
-    override fun onEvent(event: InvitationGuestBookUiEvent) {
+    override fun onEvent(event: MyInvitationGuestBookUiEvent) {
         when (event) {
-            is InvitationGuestBookUiEvent.UpdateSelectedMedias -> updateSelectedMedias(event.medias)
-            is InvitationGuestBookUiEvent.UpdateTextContent -> updateTextContent(event.textContent)
-            is InvitationGuestBookUiEvent.RemoveMedia -> removeMedia(event.media)
-            is InvitationGuestBookUiEvent.UploadMedias -> handleUploadMedias()
-            is InvitationGuestBookUiEvent.ClearError -> clearError()
-            is InvitationGuestBookUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
+            is MyInvitationGuestBookUiEvent.UpdateSelectedMedias -> updateSelectedMedias(event.medias)
+            is MyInvitationGuestBookUiEvent.UpdateTextContent -> updateTextContent(event.textContent)
+            is MyInvitationGuestBookUiEvent.RemoveMedia -> removeMedia(event.media)
+            is MyInvitationGuestBookUiEvent.UploadMedias -> handleUploadMedias()
+            is MyInvitationGuestBookUiEvent.ClearError -> clearError()
+            is MyInvitationGuestBookUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
 
-            is InvitationGuestBookUiEvent.ClickGuestBookMenu -> sendEffect(
-                InvitationGuestBookSideEffect.ShowSnackbar("방명록 메뉴 클릭됨: ${event.guestBookId}"),
+            is MyInvitationGuestBookUiEvent.ClickGuestBookMenu -> sendEffect(
+                MyInvitationGuestBookSideEffect.ShowSnackbar("방명록 메뉴 클릭됨: ${event.guestBookId}"),
             )
 
-            is InvitationGuestBookUiEvent.ClickInvitationTitle -> sendEffect(
-                InvitationGuestBookSideEffect.ShowSnackbar("초대장 제목 클릭됨: ${event.invitationId}"),
+            is MyInvitationGuestBookUiEvent.ClickInvitationTitle -> sendEffect(
+                MyInvitationGuestBookSideEffect.ShowSnackbar("초대장 제목 클릭됨: ${event.invitationId}"),
             )
 
-            is InvitationGuestBookUiEvent.ClickVisualMedia -> sendEffect(
-                InvitationGuestBookSideEffect.ShowSnackbar("비주얼 미디어 클릭됨: ${event.url}"),
+            is MyInvitationGuestBookUiEvent.ClickVisualMedia -> sendEffect(
+                MyInvitationGuestBookSideEffect.ShowSnackbar("비주얼 미디어 클릭됨: ${event.url}"),
             )
 
-            is InvitationGuestBookUiEvent.ClickEditMenu -> startEditing(event.guestBook)
-            is InvitationGuestBookUiEvent.CancelEdit -> cancelEdit()
-            is InvitationGuestBookUiEvent.ClickDeleteMenu -> deleteGuestBook(event.guestBookId)
+            is MyInvitationGuestBookUiEvent.ClickEditMenu -> startEditing(event.guestBook)
+            is MyInvitationGuestBookUiEvent.CancelEdit -> cancelEdit()
+            is MyInvitationGuestBookUiEvent.ClickDeleteMenu -> deleteGuestBook(event.guestBookId)
         }
     }
 
@@ -207,24 +205,22 @@ constructor(
                         }
                         is Result.Error -> {
                             updateState { copy(isUploading = false) }
-                            sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("업로드 실패: ${uploadResult.message}"))
+                            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("업로드 실패: ${uploadResult.message}"))
                             return@launch
                         }
                     }
                 } else {
-                    emptyList<String?>() to emptyList<String?>()
+                    emptyList<String?>() to emptyList()
                 }
 
                 if (state.editingGuestBookId == null) {
-                    Log.d("qqqqq", "방명록 생성")
                     createGuestBook(uploadedUrls, thumbnailUrls, newMedias)
                 } else {
-                    Log.d("qqqqq", "방명록 수정: ${state.editingGuestBookId}")
                     updateGuestBook(state.editingGuestBookId, uploadedUrls, thumbnailUrls, state.selectedMedias)
                 }
             } catch (e: Exception) {
                 updateState { copy(isUploading = false) }
-                sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("업로드 중 오류 발생: ${e.message}"))
+                sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("업로드 중 오류 발생: ${e.message}"))
                 return@launch
             }
         }
@@ -237,27 +233,18 @@ constructor(
             if (media.type != UiMediaType.VIDEO) return@map null
 
             try {
-                val thumbnailFile = thumbnailGenerator.generateVideoThumbnail(media.uri)
-
-                if (thumbnailFile == null) {
-                    Log.e("ThumbnailProcess", "썸네일 파일 생성 실패")
-                    return@map null
-                }
-
-                Log.d("ThumbnailProcess", "썸네일 파일 생성: ${thumbnailFile.absolutePath}")
+                val thumbnailFile = thumbnailGenerator.generateVideoThumbnail(media.uri) ?: return@map null
 
                 val thumbnailMediaFile = mediaFileProvider.createFromFile(thumbnailFile)
 
-                Log.d("ThumbnailProcess", "썸네일 MediaFile 생성: $thumbnailMediaFile")
                 when (val result = mediaUploader.uploadMedias(listOf(thumbnailMediaFile))) {
                     is Result.Success -> result.data.firstOrNull()
                     is Result.Error -> {
-                        Log.e("ThumbnailUpload", "썸네일 업로드 실패: ${result.message}")
                         null
                     }
                 }
             } catch (e: Exception) {
-                Log.e("ThumbnailProcess", "썸네일 처리 실패", e)
+                e.printStackTrace()
                 null
             }
         }
@@ -346,13 +333,13 @@ constructor(
             is Result.Success -> {
                 clearFormInput()
                 if (isUpdate) {
-                    sendEffect(InvitationGuestBookSideEffect.UpdateGuestBookSuccess)
+                    sendEffect(MyInvitationGuestBookSideEffect.UpdateGuestBookSuccess)
                 } else {
-                    sendEffect(InvitationGuestBookSideEffect.CreateGuestBookSuccess)
+                    sendEffect(MyInvitationGuestBookSideEffect.CreateGuestBookSuccess)
                 }
             }
 
-            is Result.Error -> sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("실패: ${result.message}"))
+            is Result.Error -> sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("실패: ${result.message}"))
         }
     }
 
@@ -369,16 +356,15 @@ constructor(
                             originalMediaIds = if (editingGuestBookId == deletedId) setOf() else originalMediaIds,
                         )
                     }
-                    sendEffect(InvitationGuestBookSideEffect.DeleteGuestBookSuccess)
+                    sendEffect(MyInvitationGuestBookSideEffect.DeleteGuestBookSuccess)
                 }
                 .onFailure { error, msg ->
-                    sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("방명록 삭제를 실패하였습니다."))
+                    sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("방명록 삭제를 실패하였습니다."))
                 }
         }
     }
 
     fun invalidateGuestBooks() {
-        Log.d("qqqqq", "방명록 목록 무효화")
         refreshFlow.value += 1
     }
 
