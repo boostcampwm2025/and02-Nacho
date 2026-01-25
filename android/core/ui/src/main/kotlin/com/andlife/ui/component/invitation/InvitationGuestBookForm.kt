@@ -49,6 +49,7 @@ fun InvitationGuestBookForm(
     onMediasSelected: (ImmutableList<SelectedMedia>) -> Unit,
     onMediaRemove: (SelectedMedia) -> Unit,
     onTextContentChange: (String) -> Unit,
+    onCameraClick: () -> Unit,
     onUploadClick: () -> Unit,
     onFocusChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
@@ -162,7 +163,7 @@ fun InvitationGuestBookForm(
                             .let {
                                 if (isMediaAddEnabled) {
                                     it.clickable {
-                                        // onCameraClick()
+                                        onCameraClick()
                                     }
                                 } else {
                                     it
@@ -231,6 +232,7 @@ private fun InvitationGuestBookFormPreview() {
             onMediasSelected = {},
             onMediaRemove = {},
             onTextContentChange = {},
+            onCameraClick = {},
             onUploadClick = {},
             onFocusChanged = {},
         )

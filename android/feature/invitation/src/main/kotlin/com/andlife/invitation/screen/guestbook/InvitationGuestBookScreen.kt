@@ -1,6 +1,15 @@
 package com.andlife.invitation.screen.guestbook
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.net.Uri
+import androidx.activity.result.ActivityResultLauncher
+import java.io.File
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,8 +46,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -71,6 +82,7 @@ import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.invitation.InvitationGuestBookForm
 import com.andlife.ui.component.paging.PagingStateContent
 import com.andlife.ui.util.collectWithLifecycle
+import com.andlife.ui.util.media.uriToSelectedMedia
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
@@ -95,6 +107,35 @@ fun InvitationGuestBookRoute(
     var showDeleteDialog by remember { mutableStateOf<Long?>(null) }
     var scrollToTop by remember { mutableStateOf(false) }
 
+    var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    val context = LocalContext.current
+
+    // 카메라 권한 요청 launcher
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.onEvent(InvitationGuestBookUiEvent.ClickCamera)
+        }
+    }
+
+    // 카메라 촬영을 위한 launcher
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        val dir = File(context.cacheDir, "camera_images")
+        if (success && cameraImageUri != null) {
+            val currentMedias = uiState.selectedMedias
+            if (currentMedias.size < 5) {
+                // 촬영한 사진을 SelectedMedia로 변환하여 추가
+                val newMedia = uriToSelectedMedia(context, cameraImageUri.toString())
+                val updatedMedias = (currentMedias + newMedia).toImmutableList()
+                viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias))
+            }
+        }
+    }
+
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is InvitationGuestBookSideEffect.ShowSnackbar -> {
@@ -115,6 +156,25 @@ fun InvitationGuestBookRoute(
 
             is InvitationGuestBookSideEffect.DeleteGuestBookSuccess -> {
                 viewModel.invalidateGuestBooks()
+            }
+
+            is InvitationGuestBookSideEffect.LaunchCamera -> {
+                // 임시 파일 생성 (camera_images 디렉토리 사용)
+                val cameraImagesDir = File(context.cacheDir, "camera_images")
+                if (!cameraImagesDir.exists()) {
+                    cameraImagesDir.mkdirs()
+                }
+                val photoFile = File(
+                    cameraImagesDir,
+                    "camera_photo_${System.currentTimeMillis()}.jpg"
+                )
+                val photoUri = FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.provider",
+                    photoFile
+                )
+                cameraImageUri = photoUri
+                cameraLauncher.launch(photoUri)
             }
         }
     }
@@ -220,6 +280,8 @@ fun InvitationGuestBookRoute(
         lazyListState = lazyListState,
         videoPlayerPool = viewModel.videoPlayerPool,
         onDeleteMenuClick = { guestBookId -> showDeleteDialog = guestBookId },
+        context = context,
+        permissionLauncher = permissionLauncher,
         modifier = modifier,
     )
 }
@@ -235,6 +297,8 @@ private fun InvitationGuestBookScreen(
     videoPlayerPool: AutoVideoPlayerPool,
     onNavigateBack: () -> Unit,
     onDeleteMenuClick: (Long) -> Unit,
+    context: Context,
+    permissionLauncher: ActivityResultLauncher<String>,
     modifier: Modifier = Modifier,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -262,9 +326,11 @@ private fun InvitationGuestBookScreen(
                 focusManager.clearFocus()
                 onEvent(InvitationGuestBookUiEvent.CancelEdit)
             }
+
             isTextFieldFocused -> {
                 focusManager.clearFocus()
             }
+
             else -> {
                 navigateBackWithCleanup()
             }
@@ -357,7 +423,9 @@ private fun InvitationGuestBookScreen(
                         onEvent = onEvent,
                         onFocusChanged = { focused ->
                             isTextFieldFocused = focused
-                        }
+                        },
+                        context = context,
+                        permissionLauncher = permissionLauncher
                     )
                 }
             }
@@ -430,6 +498,8 @@ private fun GuestBookFormSection(
     uiState: InvitationGuestBookUiState,
     onEvent: (InvitationGuestBookUiEvent) -> Unit,
     onFocusChanged: (Boolean) -> Unit,
+    context: Context,
+    permissionLauncher: ActivityResultLauncher<String>,
 ) {
     InvitationGuestBookForm(
         modifier = Modifier
@@ -456,6 +526,19 @@ private fun GuestBookFormSection(
             onEvent(InvitationGuestBookUiEvent.UploadMedias)
         },
         onFocusChanged = onFocusChanged,
+        onCameraClick = {
+            // 카메라 권한 체크
+            val hasPermission = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (hasPermission) {
+                onEvent(InvitationGuestBookUiEvent.ClickCamera)
+            } else {
+                permissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+        },
     )
 }
 
@@ -473,6 +556,11 @@ private fun InvitationGuestBookEmptyPreview() {
             snackbarHostState = SnackbarHostState(),
             lazyListState = rememberLazyListState(),
             onDeleteMenuClick = {},
+            context = LocalContext.current,
+            permissionLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestPermission(),
+                onResult = {}
+            ),
         )
     }
 }
