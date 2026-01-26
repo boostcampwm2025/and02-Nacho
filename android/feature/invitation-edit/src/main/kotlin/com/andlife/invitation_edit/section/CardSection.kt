@@ -4,6 +4,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -28,11 +30,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.theme.NachoElevation
+import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
-import com.andlife.invitation_edit.model.create.CardUiModel
+import com.andlife.invitation_edit.model.form.CardUiModel
 import com.andlife.designsystem.R as designR
 
 @Composable
@@ -43,12 +46,17 @@ fun CardSection(
     isLoading: Boolean = false
 ) {
     val defaultColor = NachoTheme.colorScheme.textPrimary
+    val iconRes = if (cardUiModel == null) designR.drawable.ic_add_24 else designR.drawable.ic_edit_24
+    val buttonDescRes = if (cardUiModel == null) R.string.desc_create_card else R.string.desc_update_card
+    val buttonText = if (cardUiModel == null) R.string.txt_create_card else R.string.txt_update_card
+
     Box(modifier = modifier.background(NachoTheme.colorScheme.backgroundPrimary)) {
         Column {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = NachoSpacing.large),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -56,11 +64,9 @@ fun CardSection(
                     style = NachoTheme.typography.bodyMediumSemiBold,
                     color = NachoTheme.colorScheme.textPrimary,
                 )
-                Spacer(modifier = Modifier.weight(1f))
                 NachoButton(
                     onClick = onClickCreatedCard,
                     enabled = !isLoading,
-                    contentPadding = PaddingValues(NachoSpacing.twoXSmall),
                     elevation =
                         ButtonDefaults.buttonElevation(
                             defaultElevation = NachoElevation.none,
@@ -68,19 +74,16 @@ fun CardSection(
                         ),
                     containerColor = NachoTheme.colorScheme.brandOnPrimary,
                     contentColor = NachoTheme.colorScheme.brandPrimary,
+                    contentPadding = PaddingValues(horizontal = NachoSpacing.small, vertical = NachoSpacing.xSmall),
                 ) {
                     Icon(
-                        painter = if (cardUiModel == null) painterResource(designR.drawable.ic_add_24)
-                        else painterResource(designR.drawable.ic_edit_24),
-                        contentDescription = if (cardUiModel == null) stringResource(R.string.desc_create_card)
-                        else stringResource(R.string.desc_update_card),
+                        painter = painterResource(iconRes),
+                        contentDescription = stringResource(buttonDescRes),
                         tint = NachoTheme.colorScheme.brandPrimary,
                     )
                     Spacer(Modifier.width(NachoSpacing.small))
                     Text(
-                        text =
-                            if (cardUiModel == null) stringResource(R.string.txt_create_card)
-                            else stringResource(R.string.txt_update_card),
+                        text = stringResource(buttonText),
                         style = NachoTheme.typography.bodyMediumMedium,
                         color = NachoTheme.colorScheme.brandPrimary,
                     )

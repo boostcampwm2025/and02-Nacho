@@ -38,7 +38,7 @@ import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
-import com.andlife.invitation_edit.model.create.AnnouncementUiModel
+import com.andlife.invitation_edit.model.form.AnnouncementUiModel
 import kotlinx.collections.immutable.ImmutableList
 import com.andlife.designsystem.R as designR
 
@@ -68,7 +68,6 @@ fun LazyListScope.announcementSection(
                 NachoButton(
                     onClick = onAddAnnouncementClick,
                     enabled = !isLoading,
-                    contentPadding = PaddingValues(NachoSpacing.twoXSmall),
                     elevation =
                         ButtonDefaults.buttonElevation(
                             defaultElevation = NachoElevation.none,
@@ -76,6 +75,7 @@ fun LazyListScope.announcementSection(
                         ),
                     containerColor = NachoTheme.colorScheme.brandOnPrimary,
                     contentColor = NachoTheme.colorScheme.brandPrimary,
+                    contentPadding = PaddingValues(horizontal = NachoSpacing.small, vertical = NachoSpacing.xSmall),
                 ) {
                     Icon(
                         painter = painterResource(id = designR.drawable.ic_add_24),
