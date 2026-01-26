@@ -10,4 +10,6 @@ data class HomeUiState(
     val upcomingInvitations: ImmutableList<UpcomingInvitationUiModel> = persistentListOf(),
     val playingAudioUrl: String? = null,
     val isAudioPlaying: Boolean = false,
+    val audioCurrentPositionMs: Long = 0L,
+    val audioDurationMs: Long = 0L,
 ) : BaseUiState

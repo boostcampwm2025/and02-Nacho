@@ -593,6 +593,8 @@ private fun LazyListScope.homeGuestBookSection(
                     shouldPlayVideo = isMediaActive && (index == playVideoIndex),
                     isAudioPlaying = uiState.isAudioPlaying &&
                         guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
+                    audioCurrentPositionMs = uiState.audioCurrentPositionMs,
+                    audioDurationMs = uiState.audioDurationMs,
                     onInvitationTitleClick = {
                         onInvitationTitleClick(
                             guestBook.invitation?.id ?: -1L,

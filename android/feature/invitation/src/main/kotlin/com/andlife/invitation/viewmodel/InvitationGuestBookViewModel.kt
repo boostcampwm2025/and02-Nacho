@@ -38,7 +38,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
@@ -81,12 +80,14 @@ constructor(
     }
 
     private fun observeAudioPlayerState() {
-        audioPlayerManager.currentAudioUrl
-            .combine(audioPlayerManager.isPlaying) { url, isPlaying ->
+        audioPlayerManager.currentTrack
+            .onEach { track ->
                 updateState {
                     copy(
-                        playingAudioUrl = url,
-                        isAudioPlaying = isPlaying,
+                        playingAudioUrl = track?.url,
+                        isAudioPlaying = track?.isPlaying ?: false,
+                        audioCurrentPositionMs = track?.currentPositionMs ?: 0L,
+                        audioDurationMs = track?.totalDurationMs ?: 0L,
                     )
                 }
             }

@@ -80,6 +80,8 @@ fun GuestBookItem(
     guestBook: GuestBookUiModel,
     isAudioPlaying: Boolean,
     playingAudioUrl: String?,
+    audioCurrentPositionMs: Long?,
+    audioDurationMs: Long?,
     videoPlayerPool: AutoVideoPlayerPool,
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
@@ -138,6 +140,8 @@ fun GuestBookItem(
             audioMedias = guestBook.audioMedias,
             isAudioPlaying = isAudioPlaying,
             playingAudioUrl = playingAudioUrl,
+            audioCurrentPositionMs = audioCurrentPositionMs,
+            audioDurationMs = audioDurationMs,
             onAudioMediaClick = onAudioMediaClick,
         )
         HorizontalDivider(
@@ -614,6 +618,8 @@ private fun GuestBookItemAudioSection(
     audioMedias: ImmutableList<GuestBookMediaUiModel>,
     isAudioPlaying: Boolean,
     playingAudioUrl: String?,
+    audioCurrentPositionMs: Long?,
+    audioDurationMs: Long?,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -629,6 +635,8 @@ private fun GuestBookItemAudioSection(
             GuestBookAudioItem(
                 audio = audio,
                 isAudioPlaying = isAudioPlaying && (audio.url == playingAudioUrl),
+                audioCurrentPositionMs = audioCurrentPositionMs,
+                audioDurationMs = audioDurationMs,
                 onAudioMediaClick = onAudioMediaClick,
             )
         }
@@ -639,6 +647,8 @@ private fun GuestBookItemAudioSection(
 private fun GuestBookAudioItem(
     audio: GuestBookMediaUiModel,
     isAudioPlaying: Boolean,
+    audioCurrentPositionMs: Long?,
+    audioDurationMs: Long?,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -687,11 +697,11 @@ private fun GuestBookAudioItem(
                 color = NachoTheme.colorScheme.textPrimary,
             )
             Text(
-                text =
-                    stringResource(
-                        R.string.format_audio_duration,
-                        audio.durationSeconds ?: 0,
-                    ),
+                text = if (isAudioPlaying && audioCurrentPositionMs != null && audioDurationMs != null) {
+                    "${(audioCurrentPositionMs / 1000).toInt().toFormatDuration()} / ${(audioDurationMs / 1000).toInt().toFormatDuration()}"
+                } else {
+                    (audio.durationSeconds ?: 0).toFormatDuration()
+                },
                 style = NachoTheme.typography.bodySmallRegular,
                 color = NachoTheme.colorScheme.textSecondary,
             )
@@ -780,6 +790,8 @@ private fun GuestBookItemPreview() {
                         ),
                     videoPlayerPool = FakeAutoVideoPlayerPool(),
                     shouldPlayVideo = false,
+                    audioCurrentPositionMs = 2000,
+                    audioDurationMs = 130000,
                     isAudioPlaying = true,
                     playingAudioUrl = null,
                     isEditing = true,
@@ -844,6 +856,8 @@ private fun GuestBookItemPreview() {
                         ),
                     videoPlayerPool = FakeAutoVideoPlayerPool(),
                     shouldPlayVideo = false,
+                    audioCurrentPositionMs = 2000,
+                    audioDurationMs = 130000,
                     isAudioPlaying = false,
                     playingAudioUrl = null,
                     isEditing = false,

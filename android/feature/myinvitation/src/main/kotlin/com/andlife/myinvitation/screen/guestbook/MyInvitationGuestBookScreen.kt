@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.isImeVisible
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -400,6 +399,8 @@ private fun InvitationGuestBookScreen(
                                 isAudioPlaying = uiState.isAudioPlaying &&
                                     guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
                                 playingAudioUrl = uiState.playingAudioUrl,
+                                audioCurrentPositionMs = uiState.audioCurrentPositionMs,
+                                audioDurationMs = uiState.audioDurationMs,
                                 isEditing = uiState.editingGuestBookId == guestBook.id,
                                 onEditClick = { onEvent(MyInvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
                                 onDeleteClick = { onDeleteMenuClick(guestBook.id) },
@@ -535,6 +536,8 @@ private fun InvitationGuestBookResultPreview() {
                     shouldPlayVideo = false,
                     isAudioPlaying = false,
                     playingAudioUrl = null,
+                    audioCurrentPositionMs = 2000,
+                    audioDurationMs = 15000,
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},
                     onAudioMediaClick = {},

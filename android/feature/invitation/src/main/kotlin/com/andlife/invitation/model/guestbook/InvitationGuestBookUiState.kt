@@ -13,6 +13,8 @@ data class InvitationGuestBookUiState(
     val originalMediaIds: Set<Long> = emptySet(),
     val errorMessage: String? = null,
     val playingAudioUrl: String? = null,
+    val audioCurrentPositionMs: Long = 0L,
+    val audioDurationMs: Long = 0L,
     val isAudioPlaying: Boolean = false,
     val editingGuestBookId: Long? = null,
     val isLoadingGuestBooks: Boolean = false,
