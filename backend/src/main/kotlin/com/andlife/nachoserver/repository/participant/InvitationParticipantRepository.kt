@@ -16,6 +16,7 @@ interface InvitationParticipantRepository : JpaRepository<InvitationParticipant,
         value = "SELECT p FROM InvitationParticipant p JOIN FETCH p.invitation WHERE p.user.id = :userId",
         countQuery = "SELECT count(p) FROM InvitationParticipant p WHERE p.user.id = :userId"
     )
+    fun existsByInvitationIdAndUserId(invitationId: Long, userId: Long): Boolean
     fun findAllByUserIdWithInvitation(@Param("userId") userId: Long, pageable: Pageable): Page<InvitationParticipant>
 
     // 다가오는 초대장
