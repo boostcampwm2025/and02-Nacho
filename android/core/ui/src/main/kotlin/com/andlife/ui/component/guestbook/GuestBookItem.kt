@@ -79,10 +79,6 @@ import com.andlife.designsystem.R as designR
 @Composable
 fun GuestBookItem(
     guestBook: GuestBookUiModel,
-//    isAudioPlaying: Boolean,
-//    playingAudioUrl: String?,
-//    audioCurrentPositionMs: Long?,
-//    audioDurationMs: Long?,
     audioPlaybackState: AudioPlaybackState,
     videoPlayerPool: AutoVideoPlayerPool,
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
@@ -140,10 +136,6 @@ fun GuestBookItem(
         )
         GuestBookItemAudioSection(
             audioMedias = guestBook.audioMedias,
-//            isAudioPlaying = isAudioPlaying,
-//            playingAudioUrl = playingAudioUrl,
-//            audioCurrentPositionMs = audioCurrentPositionMs,
-//            audioDurationMs = audioDurationMs,
             audioPlaybackState = audioPlaybackState,
             onAudioMediaClick = onAudioMediaClick,
         )
@@ -609,10 +601,6 @@ private fun VideoDurationOverlay(
 @Composable
 private fun GuestBookItemAudioSection(
     audioMedias: ImmutableList<GuestBookMediaUiModel>,
-//    isAudioPlaying: Boolean,
-//    playingAudioUrl: String?,
-//    audioCurrentPositionMs: Long?,
-//    audioDurationMs: Long?,
     audioPlaybackState: AudioPlaybackState,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
     modifier: Modifier = Modifier,

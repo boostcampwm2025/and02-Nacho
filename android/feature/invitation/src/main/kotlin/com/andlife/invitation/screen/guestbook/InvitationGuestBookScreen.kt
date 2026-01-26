@@ -513,9 +513,6 @@ private fun InvitationGuestBookScreen(
                                 guestBook = guestBook,
                                 videoPlayerPool = videoPlayerPool,
                                 shouldPlayVideo = isMediaActive && (index == playVideoIndex),
-//                                isAudioPlaying = uiState.isAudioPlaying &&
-//                                    guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
-//                                playingAudioUrl = uiState.playingAudioUrl,
                                 audioPlaybackState = uiState.audioPlaybackState,
                                 isEditing = uiState.editingGuestBookId == guestBook.id,
                                 onEditClick = { onEvent(InvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
