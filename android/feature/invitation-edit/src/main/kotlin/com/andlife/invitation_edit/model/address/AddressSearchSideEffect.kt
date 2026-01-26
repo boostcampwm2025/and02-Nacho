@@ -1,4 +1,4 @@
-package com.andlife.invitation_edit.model
+package com.andlife.invitation_edit.model.address
 
 import com.andlife.ui.base.BaseSideEffect
 

@@ -1,6 +1,6 @@
 package com.andlife.invitation_edit.model.create
 
-import com.andlife.invitation_edit.model.AddressUiModel
+import com.andlife.invitation_edit.model.address.AddressUiModel
 import com.andlife.ui.base.BaseUiEvent
 import kotlinx.datetime.LocalDate
 

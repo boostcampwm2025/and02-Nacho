@@ -7,7 +7,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import com.andlife.invitation_edit.model.AddressUiModel
+import com.andlife.invitation_edit.model.address.AddressUiModel
 import com.andlife.invitation_edit.screen.address.AddressSearchRoute
 import com.andlife.invitation_edit.screen.create.MyInvitationCreateRoute
 import com.andlife.invitation_edit.screen.edit.MyInvitationEditRoute

@@ -33,7 +33,7 @@ import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
 import com.andlife.invitation_edit.component.DeleteDialogContent
-import com.andlife.invitation_edit.model.AddressUiModel
+import com.andlife.invitation_edit.model.address.AddressUiModel
 import com.andlife.invitation_edit.model.create.AnnouncementUiModel
 import com.andlife.invitation_edit.model.create.CreateInvitationSideEffect
 import com.andlife.invitation_edit.model.create.CreateInvitationUiEvent
