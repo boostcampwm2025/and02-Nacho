@@ -83,16 +83,18 @@ constructor(
             .onEach { track ->
                 updateState {
                     copy(
-                        playingAudioUrl = track?.url,
-                        isAudioPlaying = track?.isPlaying ?: false,
-                        //audioCurrentPositionMs = track?.currentPositionMs ?: 0L,
-                        //audioDurationMs = track?.totalDurationMs ?: 0L,
+                        audioPlaybackState = audioPlaybackState.copy(
+                            playingAudioUrl = track?.url,
+                            isAudioPlaying = track?.isPlaying ?: false,
+                            audioCurrentPositionMs = track?.currentPositionMs ?: 0L,
+                            audioTotalDurationMs = track?.totalDurationMs ?: 0L,
+                        )
                     )
                 }
             }
             .launchIn(viewModelScope)
 
-        uiState.map { it.isAudioPlaying }
+        uiState.map { it.audioPlaybackState.isAudioPlaying }
             .distinctUntilChanged()
             .onEach { isAudioPlaying ->
                 if (!isAudioPlaying) {
@@ -131,8 +133,8 @@ constructor(
     }
 
     private fun clickAudioMedia(url: String) {
-        val isCurrentlyPlaying = uiState.value.isAudioPlaying
-        val currentUrl = uiState.value.playingAudioUrl
+        val isCurrentlyPlaying = uiState.value.audioPlaybackState.isAudioPlaying
+        val currentUrl = uiState.value.audioPlaybackState.playingAudioUrl
 
         if (currentUrl == url && isCurrentlyPlaying) {
             audioPlayerManager.togglePlay(url)
@@ -144,7 +146,7 @@ constructor(
     }
 
     private fun clickVideoPlayButton(url: String, itemId: Long) {
-        val isCurrentlyPlaying = uiState.value.isAudioPlaying
+        val isCurrentlyPlaying = uiState.value.audioPlaybackState.isAudioPlaying
         if (!isCurrentlyPlaying) return
         audioPlayerManager.pause()
         videoPlayerPool.playPlayer(url, itemId)

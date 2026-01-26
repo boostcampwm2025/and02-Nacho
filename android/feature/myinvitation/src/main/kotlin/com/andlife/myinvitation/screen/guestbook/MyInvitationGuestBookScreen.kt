@@ -57,6 +57,7 @@ import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.media.video.FakeVideoPlayerPool
 import com.andlife.model.common.AuthorUiModel
 import com.andlife.model.common.VideoCandidate
+import com.andlife.model.guestbook.AudioPlaybackState
 import com.andlife.model.guestbook.GuestBookInvitationUiModel
 import com.andlife.model.guestbook.GuestBookMediaUiModel
 import com.andlife.model.guestbook.GuestBookUiModel
@@ -277,10 +278,10 @@ private fun InvitationGuestBookScreen(
         }
     }
 
-    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.isAudioPlaying) {
+    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.audioPlaybackState.isAudioPlaying) {
         var pendingIndex = -1
         var lastChangedTime = 0L
-        if (!isMediaActive || uiState.isAudioPlaying) {
+        if (!isMediaActive || uiState.audioPlaybackState.isAudioPlaying) {
             playVideoIndex = -1
             return@LaunchedEffect
         }
@@ -396,11 +397,12 @@ private fun InvitationGuestBookScreen(
                                 guestBook = guestBook,
                                 videoPlayerPool = videoPlayerPool,
                                 shouldPlayVideo = isMediaActive && (index == playVideoIndex),
-                                isAudioPlaying = uiState.isAudioPlaying &&
-                                    guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
-                                playingAudioUrl = uiState.playingAudioUrl,
-                                audioCurrentPositionMs = uiState.audioCurrentPositionMs,
-                                audioDurationMs = uiState.audioDurationMs,
+//                                isAudioPlaying = uiState.isAudioPlaying &&
+//                                    guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
+//                                playingAudioUrl = uiState.playingAudioUrl,
+//                                audioCurrentPositionMs = uiState.audioCurrentPositionMs,
+//                                audioDurationMs = uiState.audioDurationMs,
+                                audioPlaybackState = uiState.audioPlaybackState,
                                 isEditing = uiState.editingGuestBookId == guestBook.id,
                                 onEditClick = { onEvent(MyInvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
                                 onDeleteClick = { onDeleteMenuClick(guestBook.id) },
@@ -534,10 +536,7 @@ private fun InvitationGuestBookResultPreview() {
                     guestBook = fakeGuestBooks[index],
                     videoPlayerPool = FakeVideoPlayerPool(),
                     shouldPlayVideo = false,
-                    isAudioPlaying = false,
-                    playingAudioUrl = null,
-                    audioCurrentPositionMs = 2000,
-                    audioDurationMs = 15000,
+                    audioPlaybackState = AudioPlaybackState(),
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},
                     onAudioMediaClick = {},

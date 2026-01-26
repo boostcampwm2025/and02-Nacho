@@ -1,15 +1,13 @@
 package com.andlife.invitation.screen.guestbook
 
-import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.FileProvider
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
-import java.io.File
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,7 +20,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.isImeVisible
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -50,6 +47,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -74,6 +72,7 @@ import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.media.video.FakeVideoPlayerPool
 import com.andlife.model.common.AuthorUiModel
 import com.andlife.model.common.VideoCandidate
+import com.andlife.model.guestbook.AudioPlaybackState
 import com.andlife.model.guestbook.GuestBookInvitationUiModel
 import com.andlife.model.guestbook.GuestBookMediaUiModel
 import com.andlife.model.guestbook.GuestBookUiModel
@@ -89,6 +88,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
+import java.io.File
 import kotlin.math.max
 import kotlin.math.min
 
@@ -391,10 +391,10 @@ private fun InvitationGuestBookScreen(
         }
     }
 
-    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.isAudioPlaying) {
+    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.audioPlaybackState.isAudioPlaying) {
         var pendingIndex = -1
         var lastChangedTime = 0L
-        if (!isMediaActive || uiState.isAudioPlaying) {
+        if (!isMediaActive || uiState.audioPlaybackState.isAudioPlaying) {
             playVideoIndex = -1
             return@LaunchedEffect
         }
@@ -513,9 +513,10 @@ private fun InvitationGuestBookScreen(
                                 guestBook = guestBook,
                                 videoPlayerPool = videoPlayerPool,
                                 shouldPlayVideo = isMediaActive && (index == playVideoIndex),
-                                isAudioPlaying = uiState.isAudioPlaying &&
-                                    guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
-                                playingAudioUrl = uiState.playingAudioUrl,
+//                                isAudioPlaying = uiState.isAudioPlaying &&
+//                                    guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
+//                                playingAudioUrl = uiState.playingAudioUrl,
+                                audioPlaybackState = uiState.audioPlaybackState,
                                 isEditing = uiState.editingGuestBookId == guestBook.id,
                                 onEditClick = { onEvent(InvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
                                 onDeleteClick = { onDeleteMenuClick(guestBook.id) },
@@ -687,8 +688,7 @@ private fun InvitationGuestBookResultPreview() {
                     guestBook = fakeGuestBooks[index],
                     videoPlayerPool = FakeVideoPlayerPool(),
                     shouldPlayVideo = false,
-                    isAudioPlaying = false,
-                    playingAudioUrl = null,
+                    audioPlaybackState = AudioPlaybackState(),
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},
                     onAudioMediaClick = {},

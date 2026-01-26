@@ -1,5 +1,6 @@
 package com.andlife.myinvitation.model.guestbook
 
+import com.andlife.model.guestbook.AudioPlaybackState
 import com.andlife.ui.base.BaseUiState
 import com.andlife.ui.component.invitation.SelectedMedia
 import kotlinx.collections.immutable.ImmutableList
@@ -12,10 +13,7 @@ data class MyInvitationGuestBookUiState(
     val originalTextContent: String = "",
     val originalMediaIds: Set<Long> = emptySet(),
     val errorMessage: String? = null,
-    val playingAudioUrl: String? = null,
-    val audioCurrentPositionMs: Long = 0L,
-    val audioDurationMs: Long = 0L,
-    val isAudioPlaying: Boolean = false,
+    val audioPlaybackState: AudioPlaybackState = AudioPlaybackState(),
     val editingGuestBookId: Long? = null,
     val isLoadingGuestBooks: Boolean = false,
     val deleteTargetId: Long? = null,

@@ -60,6 +60,7 @@ import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.media.video.AutoVideoPlayer
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.model.common.AuthorUiModel
+import com.andlife.model.guestbook.AudioPlaybackState
 import com.andlife.model.guestbook.GuestBookInvitationUiModel
 import com.andlife.model.guestbook.GuestBookMediaUiModel
 import com.andlife.model.guestbook.GuestBookUiModel
@@ -78,10 +79,11 @@ import com.andlife.designsystem.R as designR
 @Composable
 fun GuestBookItem(
     guestBook: GuestBookUiModel,
-    isAudioPlaying: Boolean,
-    playingAudioUrl: String?,
-    audioCurrentPositionMs: Long?,
-    audioDurationMs: Long?,
+//    isAudioPlaying: Boolean,
+//    playingAudioUrl: String?,
+//    audioCurrentPositionMs: Long?,
+//    audioDurationMs: Long?,
+    audioPlaybackState: AudioPlaybackState,
     videoPlayerPool: AutoVideoPlayerPool,
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
@@ -138,10 +140,11 @@ fun GuestBookItem(
         )
         GuestBookItemAudioSection(
             audioMedias = guestBook.audioMedias,
-            isAudioPlaying = isAudioPlaying,
-            playingAudioUrl = playingAudioUrl,
-            audioCurrentPositionMs = audioCurrentPositionMs,
-            audioDurationMs = audioDurationMs,
+//            isAudioPlaying = isAudioPlaying,
+//            playingAudioUrl = playingAudioUrl,
+//            audioCurrentPositionMs = audioCurrentPositionMs,
+//            audioDurationMs = audioDurationMs,
+            audioPlaybackState = audioPlaybackState,
             onAudioMediaClick = onAudioMediaClick,
         )
         HorizontalDivider(
@@ -606,10 +609,11 @@ private fun VideoDurationOverlay(
 @Composable
 private fun GuestBookItemAudioSection(
     audioMedias: ImmutableList<GuestBookMediaUiModel>,
-    isAudioPlaying: Boolean,
-    playingAudioUrl: String?,
-    audioCurrentPositionMs: Long?,
-    audioDurationMs: Long?,
+//    isAudioPlaying: Boolean,
+//    playingAudioUrl: String?,
+//    audioCurrentPositionMs: Long?,
+//    audioDurationMs: Long?,
+    audioPlaybackState: AudioPlaybackState,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -624,9 +628,10 @@ private fun GuestBookItemAudioSection(
         audioMedias.forEach { audio ->
             GuestBookAudioItem(
                 audio = audio,
-                isAudioPlaying = isAudioPlaying && (audio.url == playingAudioUrl),
-                audioCurrentPositionMs = audioCurrentPositionMs,
-                audioDurationMs = audioDurationMs,
+                isAudioPlaying = audioPlaybackState.isAudioPlayingForGuestBook(audioMedias.map { it.url })
+                    && (audio.url == audioPlaybackState.playingAudioUrl),
+                audioCurrentPositionMs = audioPlaybackState.audioCurrentPositionMs,
+                audioDurationMs = audioPlaybackState.audioTotalDurationMs,
                 onAudioMediaClick = onAudioMediaClick,
             )
         }
@@ -780,10 +785,7 @@ private fun GuestBookItemPreview() {
                         ),
                     videoPlayerPool = FakeAutoVideoPlayerPool(),
                     shouldPlayVideo = false,
-                    audioCurrentPositionMs = 2000,
-                    audioDurationMs = 130000,
-                    isAudioPlaying = true,
-                    playingAudioUrl = null,
+                    audioPlaybackState = AudioPlaybackState(),
                     isEditing = true,
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},
@@ -846,10 +848,7 @@ private fun GuestBookItemPreview() {
                         ),
                     videoPlayerPool = FakeAutoVideoPlayerPool(),
                     shouldPlayVideo = false,
-                    audioCurrentPositionMs = 2000,
-                    audioDurationMs = 130000,
-                    isAudioPlaying = false,
-                    playingAudioUrl = null,
+                    audioPlaybackState = AudioPlaybackState(),
                     isEditing = false,
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},

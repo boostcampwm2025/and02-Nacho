@@ -219,10 +219,10 @@ fun HomeScreen(
 ) {
     var playVideoIndex by remember { mutableStateOf(-1) }
 
-    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.isAudioPlaying) {
+    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.audioPlaybackState.isAudioPlaying) {
         var pendingIndex = -1
         var lastChangedTime = 0L
-        if (!isMediaActive || uiState.isAudioPlaying) {
+        if (!isMediaActive || uiState.audioPlaybackState.isAudioPlaying) {
             playVideoIndex = -1
             return@LaunchedEffect
         }
@@ -591,17 +591,17 @@ private fun LazyListScope.homeGuestBookSection(
                     useMenuButton = false,
                     videoPlayerPool = videoPlayerPool,
                     shouldPlayVideo = isMediaActive && (index == playVideoIndex),
-                    isAudioPlaying = uiState.isAudioPlaying &&
-                        guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
-                    audioCurrentPositionMs = uiState.audioCurrentPositionMs,
-                    audioDurationMs = uiState.audioDurationMs,
+//                    isAudioPlaying = uiState.audioPlaybackState.isAudioPlayingForGuestBook(guestBook.audioMedias.map { it.url }),
+//                    audioCurrentPositionMs = uiState.audioPlaybackState.audioCurrentPositionMs,
+//                    audioDurationMs = uiState.audioPlaybackState.audioDurationMs,
+//                    playingAudioUrl = uiState.audioPlaybackState.playingAudioUrl,
+                    audioPlaybackState = uiState.audioPlaybackState,
                     onInvitationTitleClick = {
                         onInvitationTitleClick(
                             guestBook.invitation?.id ?: -1L,
                             guestBook.isOwner,
                         )
                     },
-                    playingAudioUrl = uiState.playingAudioUrl,
                     onVisualMediaClick = { onVisualMediaClick(it.url) },
                     onAudioMediaClick = { onAudioMediaClick(it.url) },
                     onMenuClick = { },
