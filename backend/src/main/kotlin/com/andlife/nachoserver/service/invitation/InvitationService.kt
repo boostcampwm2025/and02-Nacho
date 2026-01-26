@@ -13,7 +13,6 @@ import com.andlife.nachoserver.repository.participant.InvitationParticipantRepos
 import com.andlife.nachoserver.repository.user.UserRepository
 import com.andlife.nachoserver.request.invitation.CreateInvitationRequest
 import com.andlife.nachoserver.request.invitation.InvitationCardRequest
-import com.andlife.nachoserver.response.BaseResponse
 import com.andlife.nachoserver.response.PagingMetaResponse
 import com.andlife.nachoserver.response.PagingResponse
 import com.andlife.nachoserver.response.invitation.AnnouncementResponse

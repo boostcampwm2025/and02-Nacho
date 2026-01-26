@@ -12,6 +12,7 @@ import com.andlife.nachoserver.response.invitation.InvitationSummaryResponse
 import com.andlife.nachoserver.response.invitation.UpcomingInvitationResponse
 import com.andlife.nachoserver.response.guestbook.CollectionResponse
 import com.andlife.nachoserver.response.guestbook.GuestBookResponse
+import com.andlife.nachoserver.response.invitation.JoinResponse
 import com.andlife.nachoserver.service.invitation.InvitationService
 import com.andlife.nachoserver.service.guestbook.GuestBookService
 import org.springframework.data.domain.Pageable
@@ -32,6 +33,30 @@ class InvitationController(
     private val invitationService: InvitationService,
     private val guestBookService: GuestBookService,
 ) {
+    @PostMapping("/{invitationId}/join")
+    fun joinInvitation(
+        @PathVariable invitationId: Long,
+        authContext: AuthContext
+    ): BaseResponse<JoinResponse> {
+        val result = when (authContext) {
+            is AuthContext.Member -> {
+                invitationService.joinInvitation(
+                    invitationId = invitationId,
+                    userId = authContext.userId,
+                    guestInvitationIds = emptyList()
+                )
+            }
+            is AuthContext.Guest -> {
+                invitationService.joinInvitation(
+                    invitationId = invitationId,
+                    userId = null,
+                    guestInvitationIds = authContext.invitationIds
+                )
+            }
+        }
+        return BaseResponse.success(result)
+    }
+
     @GetMapping("/joined")
     fun getParticipantInvitations(
         authContext: AuthContext,
