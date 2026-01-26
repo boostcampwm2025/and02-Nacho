@@ -2,8 +2,10 @@ package com.andlife.media.audio
 
 import android.content.Context
 import android.util.Log
+import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
@@ -80,6 +82,7 @@ class AudioPlayerManagerImpl @Inject constructor(
         }
     }
 
+    @OptIn(UnstableApi::class)
     override fun togglePlay(url: String) {
         preparePlayer()
         val player = exoPlayer ?: return
