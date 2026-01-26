@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,6 +26,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -54,6 +57,7 @@ import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
 import coil3.compose.SubcomposeAsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
+import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
@@ -618,6 +622,7 @@ private fun GuestBookItemAudioSection(
                 audio = audio,
                 isAudioPlaying = audioPlaybackState.isAudioPlayingForGuestBook(audioMedias.map { it.url })
                     && (audio.url == audioPlaybackState.playingAudioUrl),
+                isCurrentAudio = audio.url == audioPlaybackState.playingAudioUrl,
                 audioCurrentPositionMs = audioPlaybackState.audioCurrentPositionMs,
                 audioDurationMs = audioPlaybackState.audioTotalDurationMs,
                 onAudioMediaClick = onAudioMediaClick,
@@ -630,6 +635,7 @@ private fun GuestBookItemAudioSection(
 private fun GuestBookAudioItem(
     audio: GuestBookMediaUiModel,
     isAudioPlaying: Boolean,
+    isCurrentAudio: Boolean,
     audioCurrentPositionMs: Long?,
     audioDurationMs: Long?,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
@@ -642,12 +648,18 @@ private fun GuestBookAudioItem(
             R.drawable.ic_play_arrow_24
         }
 
-    val remainingDurationMs =
-        if (isAudioPlaying && audioCurrentPositionMs != null && audioDurationMs != null) {
-            (audioDurationMs - audioCurrentPositionMs).coerceAtLeast(0L)
-        } else {
-            (audio.durationSeconds?.times(1000))?.toLong() ?: 0L
-        }
+    val remainingDurationMs = if (isCurrentAudio && audioCurrentPositionMs != null && audioDurationMs != null) {
+        (audioDurationMs - audioCurrentPositionMs).coerceAtLeast(0L)
+    } else {
+        (audio.durationSeconds?.times(1000))?.toLong() ?: 0L
+    }
+
+    val progress = if (isCurrentAudio && audioDurationMs != null && audioDurationMs > 0) {
+        val played = audioCurrentPositionMs ?: 0L
+        (played.toFloat() / audioDurationMs.toFloat()).coerceIn(0f, 1f)
+    } else {
+        0f
+    }
 
     Row(
         modifier =
@@ -677,14 +689,18 @@ private fun GuestBookAudioItem(
                 tint = NachoTheme.colorScheme.iconTertiary,
             )
         }
-        Column(
-            modifier =
-                Modifier.weight(1f),
-        ) {
-            Text(
-                text = "오디오 제목", // TODO: 오디오 제목 필요
-                style = NachoTheme.typography.bodyMediumMedium,
-                color = NachoTheme.colorScheme.textPrimary,
+        Column(modifier = Modifier.weight(1f)) {
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(NachoTheme.shapes.small),
+                color = NachoTheme.colorScheme.brandPrimary,
+                trackColor = NachoTheme.colorScheme.backgroundBorder,
+                gapSize = 0.dp,
+                strokeCap = StrokeCap.Square,
+                drawStopIndicator = { /* No-op */ },
             )
             Text(
                 text = (remainingDurationMs / 1000).toInt().toFormatDuration(),

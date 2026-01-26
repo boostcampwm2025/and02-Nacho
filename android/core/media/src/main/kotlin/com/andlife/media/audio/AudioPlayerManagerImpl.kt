@@ -130,7 +130,7 @@ class AudioPlayerManagerImpl @Inject constructor(
                         currentPositionMs = exoPlayer?.currentPosition ?: 0L
                     )
                 }
-                delay(100L)
+                delay(10L)
             } while (_currentAudio.value?.isPlaying == true && exoPlayer?.isPlaying == true)
         }
     }
