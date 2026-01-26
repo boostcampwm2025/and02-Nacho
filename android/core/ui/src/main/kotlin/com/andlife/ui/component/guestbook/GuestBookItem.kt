@@ -389,16 +389,6 @@ private fun GuestBookItemVisualMediaSection(
                             videoPlayerPool = videoPlayerPool,
                             onPlayVideoClick = onPlayVideoClick,
                         )
-
-//                        media.durationSeconds?.let {
-//                            MediaOverlay(
-//                                modifier =
-//                                    Modifier
-//                                        .align(Alignment.BottomEnd)
-//                                        .padding(NachoSpacing.small),
-//                                text = it.toFormatDuration(), // TODO: 타이머 기능 추가해야 함.
-//                            )
-//                        }
                     }
 
                     else -> {
