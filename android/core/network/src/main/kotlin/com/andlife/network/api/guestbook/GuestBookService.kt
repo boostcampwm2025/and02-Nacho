@@ -2,7 +2,10 @@ package com.andlife.network.api.guestbook
 
 import com.andlife.network.model.BaseResponse
 import com.andlife.network.model.PagingResponse
-import com.andlife.network.model.invitation.guestbook.CollectionResponse
+import com.andlife.network.model.guestbook.CollectionResponse
+import com.andlife.network.model.guestbook.GuestBookRequest
+import com.andlife.network.model.guestbook.GuestBookResponse
+import com.andlife.network.model.guestbook.UpdateGuestBookRequest
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET

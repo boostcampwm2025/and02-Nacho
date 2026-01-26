@@ -41,7 +41,7 @@ class CreateByInvitationViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val invitationRepository: InvitationRepository
 ) : BaseViewModel<CreateByInvitationUiState, CreateByInvitationUiEvent, CreateByInvitationSideEffect>(
-    CreateByInvitationUiState(editorState)
+    CreateByInvitationUiState(editorState = editorState)
 ) {
 
     private val id = savedStateHandle.toRoute<CreateCardByInvitation>().invitationId

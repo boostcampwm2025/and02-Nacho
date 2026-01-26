@@ -39,7 +39,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -70,6 +69,7 @@ import com.andlife.model.common.VideoCandidate
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.model.invitation.UpcomingInvitationUiModel
+import com.andlife.ui.component.guestbook.FakeAutoVideoPlayerPool
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItemSkeleton
@@ -83,7 +83,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
 
-private const val GUESTBOOK_KEY_PREFIX = "guestbook_"
+private const val GUESTBOOK_KEY_OFFSET = 2
 private const val UPCOMING_CARD_WIDTH_RATIO = 0.85f
 private const val SKELETON_ITEM_COUNT = 2
 
@@ -105,8 +105,7 @@ fun HomeRoute(
     val scope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
     val lazyListState = rememberLazyListState()
-
-    val context = LocalContext.current
+    val refreshFailMessage = stringResource(R.string.snack_refresh_failure)
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
@@ -144,7 +143,7 @@ fun HomeRoute(
             is HomeSideEffect.RefreshFailure -> {
                 scope.launch {
                     snackbarHostState.currentSnackbarData?.dismiss()
-                    snackbarHostState.showSnackbar(context.getString(R.string.snack_refresh_failure))
+                    snackbarHostState.showSnackbar(refreshFailMessage)
                 }
             }
         }
@@ -234,14 +233,9 @@ fun HomeScreen(
                 if (visibleItems.isEmpty()) return@collect
 
                 val videoCandidates = visibleItems.mapNotNull { itemInfo ->
-                    val itemKey = itemInfo.key.toString()
-                    if (!itemKey.startsWith(GUESTBOOK_KEY_PREFIX)) return@mapNotNull null
-                    val guestBookId =
-                        itemKey.removePrefix(GUESTBOOK_KEY_PREFIX).toLongOrNull() ?: return@mapNotNull null
-
-                    val guestBookIndex = (0 until guestBooks.itemCount).find {
-                        guestBooks.peek(it)?.id == guestBookId
-                    } ?: return@mapNotNull null
+                    val keyIndex = (itemInfo.key as? Int) ?: return@mapNotNull null
+                    val guestBookIndex = keyIndex - GUESTBOOK_KEY_OFFSET
+                    if (guestBookIndex < 0 || guestBookIndex >= guestBooks.itemCount) return@mapNotNull null
 
                     val guestBook = try {
                         guestBooks.peek(guestBookIndex)
@@ -584,10 +578,7 @@ private fun LazyListScope.homeGuestBookSection(
     } else {
         items(
             count = guestBooks.itemCount,
-            key = { index ->
-                val id = guestBooks.itemKey { it.id }.invoke(index)
-                "$GUESTBOOK_KEY_PREFIX$id"
-            },
+            key = { index -> index + GUESTBOOK_KEY_OFFSET },
         ) { index ->
             guestBooks[index]?.let { guestBook ->
                 GuestBookItem(
@@ -706,7 +697,7 @@ private fun HomeScreenPreview() {
             upcomingInvitations = emptyUpcomingInvitations,
             guestBooks = emptyGuestBooks,
             onEvent = {},
-            videoPlayerPool = fakeVideoPlayerPool,
+            videoPlayerPool = FakeAutoVideoPlayerPool(),
             lazyListState = lazyListState,
         )
     }

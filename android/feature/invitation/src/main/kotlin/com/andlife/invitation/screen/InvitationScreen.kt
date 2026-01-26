@@ -1,24 +1,18 @@
 package com.andlife.invitation.screen
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -32,6 +26,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.domain.model.invitation.SortDirection
 import com.andlife.invitation.model.InvitationSideEffect
 import com.andlife.invitation.model.InvitationUiEvent
 import com.andlife.invitation.model.InvitationUiState
@@ -95,8 +90,10 @@ private fun InvitationScreen(
     onEvent: (InvitationUiEvent) -> Unit
 ) {
     val tabs = stringArrayResource(R.array.arr_invitation_tabs).toImmutableList()
-    val sortOptions = stringArrayResource(R.array.arr_invitation_sort_options).toImmutableList()
-    var selectedSortIndex by remember { mutableIntStateOf(0) }
+    val upcomingSortOptions = stringArrayResource(R.array.arr_invitation_sort_options).toImmutableList()
+    val pastSortOptions = stringArrayResource(R.array.arr_past_invitation_sort_options).toImmutableList()
+    var upcomingSortIndex by remember { mutableIntStateOf(0) }
+    var pastSortIndex by remember { mutableIntStateOf(0) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -105,6 +102,7 @@ private fun InvitationScreen(
                 stringResource(R.string.txt_invitation)
             )
         },
+        contentWindowInsets = WindowInsets(),
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
     ) { paddingValues ->
         GenericTabRow(
@@ -115,7 +113,10 @@ private fun InvitationScreen(
                     onEvent(InvitationUiEvent.SelectTab(pageIndex))
                 }
 
-                val currentItems = if (pageIndex == 0) upcomingItems else pastItems
+                val isUpcoming = pageIndex == 0
+                val currentItems = if (isUpcoming) upcomingItems else pastItems
+                val currentSortOptions = if (isUpcoming) upcomingSortOptions else pastSortOptions
+                val currentSortIndex = if (isUpcoming) upcomingSortIndex else pastSortIndex
 
                 PullToRefreshBox(
                     isRefreshing = uiState.isRefreshing,
@@ -139,18 +140,25 @@ private fun InvitationScreen(
                                 item {
                                     InvitationListHeader(
                                         totalCount = currentItems.itemCount,
-                                        currentSort = sortOptions[selectedSortIndex],
-                                        sortOptions = sortOptions,
+                                        currentSort = currentSortOptions[currentSortIndex],
+                                        sortOptions = currentSortOptions,
                                         onSortSelected = { index ->
-                                            selectedSortIndex = index
-                                            /**
-                                             * TODO
-                                             *  - 정렬 Event 정의
-                                             *  - ViewModel에 정렬 이벤트 전달
-                                             *  - 서버에 정렬 파라미터 추가
-                                             *  - 서버에서 정렬된 값으로 다시 반환
-                                             *  - 반환 받은 데이터로 UI 재구성
-                                             */
+                                            if (isUpcoming) {
+                                                upcomingSortIndex = index
+                                            } else {
+                                                pastSortIndex = index
+                                            }
+
+                                            val newDirection = if (isUpcoming) {
+                                                if (index == 0) SortDirection.ASC else SortDirection.DESC
+                                            } else {
+                                                if (index == 0) SortDirection.DESC else SortDirection.ASC
+                                            }
+
+                                            onEvent(InvitationUiEvent.ChangeSort(
+                                                isUpcoming = isUpcoming,
+                                                newSort = newDirection
+                                            ))
                                         }
                                     )
                                 }

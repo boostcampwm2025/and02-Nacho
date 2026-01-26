@@ -1,6 +1,8 @@
 package com.andlife.model.invitation
 
 import com.andlife.domain.model.invitation.InvitationSummary
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -12,7 +14,7 @@ data class InvitationSummaryUiModel(
     val id: Long,
     val title: String,
     val displayHostName: String,
-    val thumbnailUrls: List<String>,
+    val thumbnailUrls: ImmutableList<String>,
     val address: String,
     val invitationDateTime: String,
     val dDayCount: Int?
@@ -30,7 +32,7 @@ fun InvitationSummary.toUiModel(
         id = id,
         title = title,
         displayHostName = displayHostName,
-        thumbnailUrls = thumbnailUrls,
+        thumbnailUrls = thumbnailUrls.toPersistentList(),
         address = address,
         invitationDateTime = formatDateTime(eventDate, eventTime),
         dDayCount = if (daysDiff >= 0) daysDiff else null

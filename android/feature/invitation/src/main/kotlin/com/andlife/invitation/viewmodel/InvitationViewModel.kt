@@ -4,6 +4,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
+import com.andlife.domain.model.invitation.InvitationStatus
+import com.andlife.domain.model.invitation.SortDirection
 import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.invitation.model.InvitationSideEffect
 import com.andlife.invitation.model.InvitationUiEvent
@@ -14,8 +16,10 @@ import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.util.toFullDisplayString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.datetime.LocalDateTime
@@ -27,27 +31,40 @@ class InvitationViewModel @Inject constructor(
 ) : BaseViewModel<InvitationUiState, InvitationUiEvent, InvitationSideEffect>(
     initialState = InvitationUiState()
 ) {
-    val upcomingInvitationPagingFlow: Flow<PagingData<InvitationSummaryUiModel>> =
-        invitationRepository.getParticipantInvitations(status = "UPCOMING")
-            .map { pagingData ->
-                pagingData.map { summary ->
-                    summary.toUiModel { date, time ->
-                        LocalDateTime(date, time).toFullDisplayString()
-                    }
-                }
-            }
-            .cachedIn(viewModelScope)
+    private val _upcomingSort = MutableStateFlow(SortDirection.ASC)
+    private val _pastSort = MutableStateFlow(SortDirection.DESC)
 
-    val pastInvitationPagingFlow: Flow<PagingData<InvitationSummaryUiModel>> =
-        invitationRepository.getParticipantInvitations(status = "PAST")
-            .map { pagingData ->
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val upcomingInvitationPagingFlow: Flow<PagingData<InvitationSummaryUiModel>> =
+        _upcomingSort.flatMapLatest { sort ->
+            invitationRepository.getParticipantInvitations(
+                status = InvitationStatus.UPCOMING,
+                sortType = sort,
+                isMyInvitation = false
+            ).map { pagingData ->
                 pagingData.map { summary ->
                     summary.toUiModel { date, time ->
                         LocalDateTime(date, time).toFullDisplayString()
                     }
                 }
             }
-            .cachedIn(viewModelScope)
+        }.cachedIn(viewModelScope)
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val pastInvitationPagingFlow: Flow<PagingData<InvitationSummaryUiModel>> =
+        _pastSort.flatMapLatest { sort ->
+            invitationRepository.getParticipantInvitations(
+                status = InvitationStatus.PAST,
+                sortType = sort,
+                isMyInvitation = false
+            ).map { pagingData ->
+                pagingData.map { summary ->
+                    summary.toUiModel { date, time ->
+                        LocalDateTime(date, time).toFullDisplayString()
+                    }
+                }
+            }
+        }.cachedIn(viewModelScope)
 
     override val uiState: StateFlow<InvitationUiState> =
         mutableUiState
@@ -69,6 +86,13 @@ class InvitationViewModel @Inject constructor(
 
             is InvitationUiEvent.ClickInvitation -> {
                 sendEffect(InvitationSideEffect.NavigateToDetail(event.id))
+            }
+            is InvitationUiEvent.ChangeSort -> {
+                if (event.isUpcoming) {
+                    _upcomingSort.value = event.newSort
+                } else {
+                    _pastSort.value = event.newSort
+                }
             }
         }
     }

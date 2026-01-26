@@ -2,14 +2,16 @@ package com.andlife.data.datasource.remote.invitation
 
 import com.andlife.data.util.apiCall
 import com.andlife.domain.error.DataError
+import com.andlife.domain.model.invitation.InvitationStatus
+import com.andlife.domain.model.invitation.SortDirection
 import com.andlife.domain.util.Result
-import com.andlife.network.api.invitation.CreateInvitationRequest
-import com.andlife.network.api.invitation.InvitationCardRequest
-import com.andlife.network.api.invitation.InvitationResponse
+import com.andlife.network.model.invitation.CreateInvitationRequest
+import com.andlife.network.model.invitation.InvitationCardRequest
+import com.andlife.network.model.invitation.InvitationResponse
 import com.andlife.network.api.invitation.InvitationService
 import com.andlife.network.model.PagingResponse
 import com.andlife.network.model.invitation.InvitationSummaryResponse
-import com.andlife.network.api.invitation.UpcomingInvitationResponse
+import com.andlife.network.model.invitation.UpcomingInvitationResponse
 import javax.inject.Inject
 
 internal class InvitationRemoteDataSourceImpl @Inject constructor(
@@ -22,11 +24,20 @@ internal class InvitationRemoteDataSourceImpl @Inject constructor(
         apiCall { invitationService.getInvitation(invitationId) }
 
     override suspend fun getParticipantInvitations(
-        status: String,
+        status: InvitationStatus,
+        sortType: SortDirection,
         page: Int,
         size: Int
     ): Result<PagingResponse<InvitationSummaryResponse>, DataError> =
-        apiCall { invitationService.getParticipantInvitations(status, page, size) }
+        apiCall { invitationService.getParticipantInvitations(status.value, sortType.value, page, size) }
+
+    override suspend fun getMyInvitations(
+        status: InvitationStatus,
+        sortType: SortDirection,
+        page: Int,
+        size: Int
+    ): Result<PagingResponse<InvitationSummaryResponse>, DataError> =
+        apiCall { invitationService.getMyInvitations(status.value, sortType.value, page, size) }
 
     override suspend fun getUpcomingInvitations(
         days: Long,

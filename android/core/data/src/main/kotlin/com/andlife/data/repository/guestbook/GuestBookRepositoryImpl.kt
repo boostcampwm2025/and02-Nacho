@@ -3,9 +3,9 @@ package com.andlife.data.repository.guestbook
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.andlife.data.datasource.remote.invitation.guestbook.AllGuestBookPagingSource
-import com.andlife.data.datasource.remote.invitation.guestbook.GuestBookPagingSource
-import com.andlife.data.datasource.remote.invitation.guestbook.GuestBookRemoteDataSource
+import com.andlife.data.datasource.remote.guestbook.AllGuestBookPagingSource
+import com.andlife.data.datasource.remote.guestbook.GuestBookPagingSource
+import com.andlife.data.datasource.remote.guestbook.GuestBookRemoteDataSource
 import com.andlife.domain.error.DataError
 import com.andlife.domain.model.guestbook.GalleryMedia
 import com.andlife.domain.model.guestbook.GuestBook
@@ -13,8 +13,8 @@ import com.andlife.domain.model.guestbook.GuestBookMedia
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.map
-import com.andlife.network.api.guestbook.GuestBookRequest
-import com.andlife.network.api.guestbook.UpdateGuestBookRequest
+import com.andlife.network.model.guestbook.GuestBookRequest
+import com.andlife.network.model.guestbook.UpdateGuestBookRequest
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

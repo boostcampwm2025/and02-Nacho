@@ -12,7 +12,9 @@ import com.andlife.domain.error.DataError
 import com.andlife.domain.model.card.NachoCard
 import com.andlife.domain.model.invitation.CreateInvitationParam
 import com.andlife.domain.model.invitation.Invitation
+import com.andlife.domain.model.invitation.InvitationStatus
 import com.andlife.domain.model.invitation.InvitationSummary
+import com.andlife.domain.model.invitation.SortDirection
 import com.andlife.domain.model.invitation.UpcomingInvitation
 import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.domain.util.Result
@@ -38,12 +40,32 @@ internal class InvitationRepositoryImpl @Inject constructor(
         }
 
     override fun getParticipantInvitations(
-        status: String,
-        size: Int
+        status: InvitationStatus,
+        sortType: SortDirection,
+        isMyInvitation: Boolean
     ): Flow<PagingData<InvitationSummary>> {
         return Pager(
-            config = PagingConfig(pageSize = size, enablePlaceholders = false),
-            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status) }
+            config = PagingConfig(
+                pageSize = PAGE_SIZE,
+                enablePlaceholders = false,
+                initialLoadSize = PAGE_SIZE
+            ),
+            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType, isMyInvitation) }
+        ).flow
+    }
+
+    override fun getMyInvitations(
+        status: InvitationStatus,
+        sortType: SortDirection,
+        isMyInvitation: Boolean
+    ): Flow<PagingData<InvitationSummary>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = PAGE_SIZE,
+                enablePlaceholders = false,
+                initialLoadSize = PAGE_SIZE
+            ),
+            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType, isMyInvitation) }
         ).flow
     }
 

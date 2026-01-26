@@ -19,6 +19,14 @@ sealed interface InvitationGuestBookUiEvent : BaseUiEvent {
 
     data object UploadMedias : InvitationGuestBookUiEvent
 
+    data object ClickCamera : InvitationGuestBookUiEvent
+
+    data object ClickMicrophone : InvitationGuestBookUiEvent
+
+    data object StartAudioRecording : InvitationGuestBookUiEvent
+
+    data object StopAudioRecording : InvitationGuestBookUiEvent
+
     data object ClearError : InvitationGuestBookUiEvent
 
     data class ClickInvitationTitle(

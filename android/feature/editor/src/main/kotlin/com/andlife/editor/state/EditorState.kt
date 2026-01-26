@@ -6,6 +6,7 @@ import android.graphics.Typeface
 import android.net.Uri
 import android.text.Editable
 import android.text.Layout
+import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.TextWatcher
 import android.text.style.AbsoluteSizeSpan
@@ -33,6 +34,13 @@ import com.andlife.editor.model.EditTextStyle
 import com.andlife.editor.model.EditorDefaults
 import com.andlife.invitation_card.editor.utils.CenteredImageSpan
 import com.andlife.invitation_card.editor.utils.ImageLoader
+import com.andlife.undo.model.EditSnapshot
+import com.andlife.undo.state.EditHistory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @Stable
@@ -40,6 +48,14 @@ class EditorState @Inject constructor(
     private val imageLoader: ImageLoader
 ) {
     var editText: EditText? = null
+        private set
+
+    private val history = EditHistory(maxHistorySize = 30)
+    private var saveJob: Job? = null
+
+    var canUndo by mutableStateOf(false)
+        private set
+    var canRedo by mutableStateOf(false)
         private set
 
     var currentText by mutableStateOf("")
@@ -53,10 +69,14 @@ class EditorState @Inject constructor(
 
     var currentBackgroundImageUrl by mutableStateOf("")
         private set
+    private var isRestoring = false
+
 
     private val textWatcher = object : TextWatcher {
 
         override fun afterTextChanged(s: Editable?) {
+            if (isRestoring) return
+
             updateToolbarState()
             val editText = editText ?: return
             val editable = s
@@ -70,6 +90,8 @@ class EditorState @Inject constructor(
                     s.insert(cursor, "\u200B")
                 }
             }
+
+            scheduleSaveSnapshot()
         }
 
         override fun beforeTextChanged(
@@ -575,7 +597,20 @@ class EditorState @Inject constructor(
 
     fun setEditable(editable: Editable) {
         val editText = editText ?: return
-        editText.text = editable
+        isRestoring = true
+        saveJob?.cancel()
+        editText.text = SpannableStringBuilder(editable)
+
+        val initialSnapshot = EditSnapshot(
+            content = SpannableStringBuilder(editable),
+            cursorPosition = editable.length
+        )
+        history.initialize(initialSnapshot)
+        updateUndoRedoState()
+
+        currentText = editText.text.toString()
+        updateToolbarState()
+        isRestoring = false
     }
 
     fun setBackground(color: Color) {
@@ -613,6 +648,12 @@ class EditorState @Inject constructor(
             }
             false
         }
+        val initialSnapshot = EditSnapshot(
+            content = SpannableStringBuilder(view.text ?: ""),
+            cursorPosition = view.selectionStart.coerceAtLeast(0)
+        )
+        history.initialize(initialSnapshot)
+        updateUndoRedoState()
     }
 
     fun detach() {
@@ -626,12 +667,73 @@ class EditorState @Inject constructor(
         currentText = ""
         currentTextStyle = EditTextStyle()
         currentBackgroundImageUrl = ""
+        history.clear()
+        canUndo = false
+        canRedo = false
+        saveJob?.cancel()
     }
 
     companion object {
         private const val EMPTY_TEXT = '\u200B'
         private const val NEXT_LINE = '\n'
         private const val SPACE = ' '
+        private const val DEBOUNCE_DELAY_MS = 500L
+    }
+
+    private fun scheduleSaveSnapshot() {
+        saveJob?.cancel()
+        saveJob = CoroutineScope(Dispatchers.Main).launch {
+            delay(DEBOUNCE_DELAY_MS)
+            saveSnapshot()
+        }
+    }
+
+    private fun saveSnapshot() {
+        val editText = editText ?: return
+        val editable = editText.text ?: return
+
+        val snapshot = EditSnapshot(
+            content = SpannableStringBuilder(editable),  // 복사본 생성
+            cursorPosition = editText.selectionStart
+        )
+
+        history.saveState(snapshot)
+        updateUndoRedoState()
+    }
+
+    private fun updateUndoRedoState() {
+        canUndo = history.canUndo
+        canRedo = history.canRedo
+    }
+
+    private fun restoreSnapshot(snapshot: EditSnapshot) {
+        val editText = editText ?: return
+
+        isRestoring = true
+
+        editText.text = SpannableStringBuilder(snapshot.content)
+        editText.setSelection(
+            snapshot.cursorPosition.coerceIn(0, editText.text.length)
+        )
+
+        currentText = editText.text.toString()
+        updateToolbarState()
+
+        isRestoring = false
+        updateUndoRedoState()
+    }
+
+    fun undo() {
+        saveJob?.cancel()
+        val snapshot = history.undo() ?: return
+        restoreSnapshot(snapshot)
+    }
+
+    fun redo() {
+        saveJob?.cancel()
+
+        val snapshot = history.redo() ?: return
+        restoreSnapshot(snapshot)
     }
 }
 
