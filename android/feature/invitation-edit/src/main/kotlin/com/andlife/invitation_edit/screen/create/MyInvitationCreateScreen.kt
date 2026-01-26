@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -22,7 +21,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
@@ -52,6 +50,7 @@ import com.andlife.invitation_edit.viewmodel.CreateInvitationViewModel
 import com.andlife.ui.component.InvitationDatePickerBottomSheet
 import com.andlife.ui.component.InvitationTimePickerBottomSheet
 import com.andlife.ui.component.addannouncement.InvitationAddAnnouncementBottomSheet
+import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.coroutines.launch
 
@@ -244,9 +243,11 @@ private fun MyInvitationCreateScreen(
             )
         },
     ) { padding ->
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(padding)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
             LazyColumn(
                 state = listState,
                 modifier =
@@ -335,9 +336,7 @@ private fun MyInvitationCreateScreen(
                 )
             }
             if (uiState.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                InvitationLoadingIndicator()
             }
         }
     }
