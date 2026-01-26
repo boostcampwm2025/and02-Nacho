@@ -5,6 +5,8 @@ import com.andlife.domain.error.LoginError
 import com.andlife.domain.util.Result
 import com.andlife.login.R
 import com.kakao.sdk.auth.model.OAuthToken
+import com.kakao.sdk.common.model.ClientError
+import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
@@ -24,6 +26,9 @@ class KakaoHandler @Inject constructor() : SocialHandler {
                 }
             return Result.Success(oauthToken.accessToken)
         } catch (e: Exception) {
+            if (e is ClientError && e.reason == ClientErrorCause.Cancelled) {
+                return Result.Error(error = LoginError.Cancel, message = e.message)
+            }
             return Result.Error(error = LoginError.SocialLoginError.KAKAO, message = e.message)
         }
     }
@@ -41,7 +46,7 @@ class KakaoHandler @Inject constructor() : SocialHandler {
     }
 
     private suspend fun loginWithKakaoTalk(context: Context): OAuthToken =
-        suspendCoroutine { cont ->
+        suspendCancellableCoroutine { cont ->
             UserApiClient.instance.loginWithKakaoTalk(context) { oauthToken, error ->
                 if (error != null) {
                     cont.resumeWithException(error)
@@ -54,7 +59,7 @@ class KakaoHandler @Inject constructor() : SocialHandler {
         }
 
     private suspend fun loginWithKakaoAccount(context: Context): OAuthToken =
-        suspendCoroutine { cont ->
+        suspendCancellableCoroutine { cont ->
             UserApiClient.instance.loginWithKakaoAccount(context) { oauthToken, error ->
                 if (error != null) {
                     cont.resumeWithException(error)

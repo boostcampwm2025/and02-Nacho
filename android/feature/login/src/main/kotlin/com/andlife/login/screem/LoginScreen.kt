@@ -51,6 +51,7 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.domain.error.LoginError
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.login.LocalLoginManager
@@ -81,8 +82,10 @@ fun LoginRoute(
                         Log.d("Login", "Login success: $it")
                     }
                     .onFailure { error, msg ->
-                        snackbarHostState.currentSnackbarData?.dismiss()
-                        snackbarHostState.showSnackbar(res.getString(R.string.fail_kakao_login))
+                        if (error !is LoginError.Cancel) {
+                            snackbarHostState.currentSnackbarData?.dismiss()
+                            snackbarHostState.showSnackbar(res.getString(R.string.fail_kakao_login))
+                        }
                     }
             }
         }
