@@ -1,6 +1,5 @@
 package com.andlife.invitation.viewmodel
 
-import android.text.Editable
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -115,6 +114,7 @@ constructor(
             is InvitationGuestBookUiEvent.StopAudioRecording -> handleStopAudioRecording()
             is InvitationGuestBookUiEvent.ClearError -> clearError()
             is InvitationGuestBookUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
+            is InvitationGuestBookUiEvent.ClickVideoPlayButton -> clickVideoPlayButton(event.url, event.itemId)
 
             is InvitationGuestBookUiEvent.ClickGuestBookMenu -> sendEffect(
                 InvitationGuestBookSideEffect.ShowSnackbar("방명록 메뉴 클릭됨: ${event.guestBookId}"),
@@ -145,6 +145,13 @@ constructor(
             videoPlayerPool.pauseAllPlayers()
             audioPlayerManager.togglePlay(url)
         }
+    }
+
+    private fun clickVideoPlayButton(url: String, itemId: Long) {
+        val isCurrentlyPlaying = uiState.value.isAudioPlaying
+        if (!isCurrentlyPlaying) return
+        audioPlayerManager.pause()
+        videoPlayerPool.playPlayer(url, itemId)
     }
 
     private fun updateSelectedMedias(medias: List<SelectedMedia>) {

@@ -80,6 +80,7 @@ fun GuestBookItem(
     videoPlayerPool: AutoVideoPlayerPool,
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
+    onPlayVideoClick: (String) -> Unit = {}, // TODO: default 값 제거
     modifier: Modifier = Modifier,
     shouldPlayVideo: Boolean = false,
     isEditing: Boolean = false,
@@ -128,6 +129,7 @@ fun GuestBookItem(
             shouldPlayVideo = shouldPlayVideo,
             videoPlayerPool = videoPlayerPool,
             onVisualMediaClick = onVisualMediaClick,
+            onPlayVideoClick = onPlayVideoClick,
         )
         GuestBookItemAudioSection(
             audioMedias = guestBook.audioMedias,
@@ -332,6 +334,7 @@ private fun GuestBookItemVisualMediaSection(
     shouldPlayVideo: Boolean,
     videoPlayerPool: AutoVideoPlayerPool,
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
+    onPlayVideoClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (visualMediaUrls.isEmpty()) return
@@ -376,6 +379,7 @@ private fun GuestBookItemVisualMediaSection(
                             thumbnailUrl = media.thumbnailUrl,
                             shouldPlay = shouldPlayVideo && pagerState.currentPage == page,
                             videoPlayerPool = videoPlayerPool,
+                            onPlayVideoClick = onPlayVideoClick,
                         )
 
                         media.durationSeconds?.let {
@@ -446,6 +450,7 @@ private fun VideoPlayerContainer(
     thumbnailUrl: String?,
     shouldPlay: Boolean,
     videoPlayerPool: AutoVideoPlayerPool,
+    onPlayVideoClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var isVideoReady by remember(videoUrl) { mutableStateOf(false) }
@@ -504,6 +509,7 @@ private fun VideoPlayerContainer(
         if (thumbnailUrl != null && thumbnailAlpha > 0f) {
             ThumbnailWrapper(
                 thumbnailUrl = thumbnailUrl,
+                onPlayVideoClick = { onPlayVideoClick(videoUrl) },
                 modifier = Modifier
                     .fillMaxSize()
                     .alpha(thumbnailAlpha),
@@ -538,6 +544,7 @@ private fun VideoPlayerView(
 @Composable
 private fun ThumbnailWrapper(
     thumbnailUrl: String?,
+    onPlayVideoClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -549,7 +556,11 @@ private fun ThumbnailWrapper(
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Fit,
         )
-        PlayerThumbnailIcon(modifier = Modifier.align(Alignment.Center))
+        PlayerThumbnailIcon(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .clickable { onPlayVideoClick() }
+        )
     }
 }
 

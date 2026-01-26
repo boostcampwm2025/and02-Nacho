@@ -522,6 +522,7 @@ private fun InvitationGuestBookScreen(
                                 onVisualMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
                                 onAudioMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
                                 onMenuClick = { onEvent(InvitationGuestBookUiEvent.ClickGuestBookMenu(guestBook.id)) },
+                                onPlayVideoClick = { onEvent(InvitationGuestBookUiEvent.ClickVideoPlayButton(it, guestBook.id))}
                             )
                         }
                     }

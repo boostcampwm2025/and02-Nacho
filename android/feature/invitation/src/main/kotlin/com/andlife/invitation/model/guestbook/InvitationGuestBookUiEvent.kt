@@ -45,6 +45,11 @@ sealed interface InvitationGuestBookUiEvent : BaseUiEvent {
         val url: String,
     ) : InvitationGuestBookUiEvent
 
+    data class ClickVideoPlayButton(
+        val url: String,
+        val itemId: Long,
+    ) : InvitationGuestBookUiEvent
+
     data class ClickEditMenu(
         val guestBook: GuestBookUiModel,
     ) : InvitationGuestBookUiEvent
