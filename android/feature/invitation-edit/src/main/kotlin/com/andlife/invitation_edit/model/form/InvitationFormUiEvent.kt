@@ -1,62 +1,64 @@
-package com.andlife.invitation_edit.model.create
+package com.andlife.invitation_edit.model.form
 
 import com.andlife.invitation_edit.model.address.AddressUiModel
 import com.andlife.ui.base.BaseUiEvent
 import kotlinx.datetime.LocalDate
 
-sealed interface CreateInvitationUiEvent : BaseUiEvent {
+sealed interface InvitationFormUiEvent : BaseUiEvent {
     data class UpdateTitle(
         val title: String,
-    ) : CreateInvitationUiEvent
+    ) : InvitationFormUiEvent
 
     data class UpdateAuthor(
         val author: String,
-    ) : CreateInvitationUiEvent
+    ) : InvitationFormUiEvent
 
     data class UpdateImageList(
         val imageList: List<String>,
-    ) : CreateInvitationUiEvent
+    ) : InvitationFormUiEvent
 
     data class RemoveImage(
         val image: ThumbnailImageUiModel,
-    ) : CreateInvitationUiEvent
+    ) : InvitationFormUiEvent
 
     data class UpdateDate(
         val date: LocalDate,
-    ) : CreateInvitationUiEvent
+    ) : InvitationFormUiEvent
 
     data class UpdateStartTime(
         val hour: Int,
         val min: Int,
-    ) : CreateInvitationUiEvent
+    ) : InvitationFormUiEvent
 
     data class UpdateEndTime(
         val hour: Int,
         val min: Int,
-    ) : CreateInvitationUiEvent
+    ) : InvitationFormUiEvent
 
     data class UpdateAddress(
         val address: AddressUiModel,
-    ) : CreateInvitationUiEvent
+    ) : InvitationFormUiEvent
 
     data class UpdatePlaceAddress(
         val placeAddress: String,
-    ) : CreateInvitationUiEvent
+    ) : InvitationFormUiEvent
 
     data class UpdateAddressGuide(
         val addressGuide: String,
-    ) : CreateInvitationUiEvent
+    ) : InvitationFormUiEvent
 
     data class UpdateAnnouncement(
         val title: String,
         val content: String,
-    ) : CreateInvitationUiEvent
+    ) : InvitationFormUiEvent
 
     data class RemoveAnnouncement(
         val announcement: AnnouncementUiModel,
-    ) : CreateInvitationUiEvent
+    ) : InvitationFormUiEvent
 
-    data object OnClickBack : CreateInvitationUiEvent
+    data object OnClickBack : InvitationFormUiEvent
 
-    data object OnClickCreate : CreateInvitationUiEvent
+    data object OnClickSave : InvitationFormUiEvent
+
+    data object OnClickEditCard : InvitationFormUiEvent
 }

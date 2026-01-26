@@ -9,8 +9,8 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.andlife.invitation_edit.model.address.AddressUiModel
 import com.andlife.invitation_edit.screen.address.AddressSearchRoute
-import com.andlife.invitation_edit.screen.create.MyInvitationCreateRoute
-import com.andlife.invitation_edit.screen.edit.MyInvitationEditRoute
+import com.andlife.invitation_edit.screen.create.InvitationCreateRoute
+import com.andlife.invitation_edit.screen.edit.InvitationEditRoute
 import kotlinx.serialization.Serializable
 
 object MyInvitationNavArgs {
@@ -18,44 +18,44 @@ object MyInvitationNavArgs {
 }
 
 @Serializable
-data object MyInvitationCreate
+data object InvitationCreate
 
 @Serializable
-data class MyInvitationEdit(
+data class InvitationEdit(
     val id: Long,
 )
 
 @Serializable
 data object AddressSearch
 
-fun NavController.navigateToMyInvitationCreate(navOptions: NavOptions) {
-    navigate(MyInvitationCreate, navOptions)
+fun NavController.navigateToInvitationCreate(navOptions: NavOptions) {
+    navigate(InvitationCreate, navOptions)
 }
 
-fun NavController.navigateToMyInvitationEdit(
+fun NavController.navigateToInvitationEdit(
     id: Long,
     navOptions: NavOptions,
 ) {
-    navigate(MyInvitationEdit(id), navOptions)
+    navigate(InvitationEdit(id), navOptions)
 }
 
 fun NavController.navigateToAddressSearch(navOptions: NavOptions) {
     navigate(AddressSearch, navOptions)
 }
 
-fun NavGraphBuilder.myInvitationCreateNavGraph(
+fun NavGraphBuilder.invitationCreateNavGraph(
     onNavigateToAddressSearch: () -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateCreateCard: () -> Unit,
     onNavigateToInvitationDetail: (Long) -> Unit,
 ) {
-    composable<MyInvitationCreate> { backStackEntry ->
+    composable<InvitationCreate> { backStackEntry ->
         val selectedAddressUiModel by
         backStackEntry.savedStateHandle
             .getStateFlow<AddressUiModel?>(MyInvitationNavArgs.SELECTED_ADDRESS, null)
             .collectAsStateWithLifecycle()
 
-        MyInvitationCreateRoute(
+        InvitationCreateRoute(
             onNavigateToAddressSearch = onNavigateToAddressSearch,
             onNavigateBack = onNavigateBack,
             modifier = Modifier,
@@ -66,19 +66,19 @@ fun NavGraphBuilder.myInvitationCreateNavGraph(
     }
 }
 
-fun NavGraphBuilder.myInvitationEditNavGraph(
+fun NavGraphBuilder.invitationEditNavGraph(
     onNavigateToAddressSearch: () -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateCreateCard: () -> Unit,
     onNavigateToInvitationDetail: (Long) -> Unit,
 ) {
-    composable<MyInvitationEdit> { backStackEntry ->
+    composable<InvitationEdit> { backStackEntry ->
         val selectedAddressUiModel by
         backStackEntry.savedStateHandle
             .getStateFlow<AddressUiModel?>(MyInvitationNavArgs.SELECTED_ADDRESS, null)
             .collectAsStateWithLifecycle()
 
-        MyInvitationEditRoute(
+        InvitationEditRoute(
             onNavigateToAddressSearch = onNavigateToAddressSearch,
             onNavigateBack = onNavigateBack,
             modifier = Modifier,

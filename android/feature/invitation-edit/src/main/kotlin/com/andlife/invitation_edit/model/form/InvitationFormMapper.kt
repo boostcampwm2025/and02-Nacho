@@ -1,19 +1,19 @@
-package com.andlife.invitation_edit.model.create
+package com.andlife.invitation_edit.model.form
 
 import com.andlife.domain.model.card.NachoCard
-import com.andlife.domain.model.invitation.CreateAnnouncementParam
-import com.andlife.domain.model.invitation.CreateInvitationParam
+import com.andlife.domain.model.invitation.AnnouncementSaveParam
+import com.andlife.domain.model.invitation.InvitationSaveParam
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
-fun CreateInvitationUiModel.toCreateParam(
+fun InvitationFormUiModel.toCreateParam(
     thumbnails: List<String>,
     date: LocalDate,
     startTime: LocalTime,
     endTime: LocalTime?,
     invitationCard: NachoCard?,
-): CreateInvitationParam {
-    return CreateInvitationParam(
+): InvitationSaveParam {
+    return InvitationSaveParam(
         title = title,
         displayHostName = author,
         thumbnailUrls = thumbnails,
@@ -32,8 +32,8 @@ fun CreateInvitationUiModel.toCreateParam(
     )
 }
 
-fun AnnouncementUiModel.toCreateParam(index: Int): CreateAnnouncementParam {
-    return CreateAnnouncementParam(
+fun AnnouncementUiModel.toCreateParam(index: Int): AnnouncementSaveParam {
+    return AnnouncementSaveParam(
         title = title,
         content = content,
         displayOrder = index
