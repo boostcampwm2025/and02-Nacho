@@ -82,6 +82,7 @@ class HomeViewModel @Inject constructor(
             is HomeUiEvent.ClickInvitationTitle -> navigateToDetail(event.invitationId, event.isOwner)
             is HomeUiEvent.ClickVisualMedia -> {}
             is HomeUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
+            is HomeUiEvent.ClickVideoPlayButton -> clickVideoPlayButton(event.url, event.itemId)
             is HomeUiEvent.ClickSetting -> navigateToSetting()
             is HomeUiEvent.ClickCreate -> navigateToCreate()
             is HomeUiEvent.Refresh -> refresh()
@@ -99,6 +100,13 @@ class HomeViewModel @Inject constructor(
             videoPlayerPool.pauseAllPlayers()
             audioPlayerManager.togglePlay(url)
         }
+    }
+
+    private fun clickVideoPlayButton(url: String, itemId: Long) {
+        val isCurrentlyPlaying = uiState.value.isAudioPlaying
+        if (!isCurrentlyPlaying) return
+        audioPlayerManager.pause()
+        videoPlayerPool.playPlayer(url, itemId)
     }
 
     private fun navigateToDetail(invitationId: Long, isOwner: Boolean) {

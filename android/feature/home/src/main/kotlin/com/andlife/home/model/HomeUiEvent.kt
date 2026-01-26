@@ -22,6 +22,11 @@ sealed interface HomeUiEvent : BaseUiEvent {
         val url: String,
     ) : HomeUiEvent
 
+    data class ClickVideoPlayButton(
+        val url: String,
+        val itemId: Long,
+    ) : HomeUiEvent
+
     data object ClickSetting : HomeUiEvent
 
     data object ClickCreate : HomeUiEvent

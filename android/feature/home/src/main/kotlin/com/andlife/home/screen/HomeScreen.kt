@@ -336,6 +336,9 @@ fun HomeScreen(
                         },
                         onVisualMediaClick = { url -> onEvent(HomeUiEvent.ClickVisualMedia(url)) },
                         onAudioMediaClick = { url -> onEvent(HomeUiEvent.ClickAudioMedia(url)) },
+                        onPlayVideoClick = { url, itemId ->
+                            onEvent(HomeUiEvent.ClickVideoPlayButton(url, itemId))
+                        },
                     )
                 }
             }
@@ -543,6 +546,7 @@ private fun LazyListScope.homeGuestBookSection(
     onInvitationTitleClick: (invitationId: Long, isOwner: Boolean) -> Unit,
     onVisualMediaClick: (String) -> Unit,
     onAudioMediaClick: (String) -> Unit,
+    onPlayVideoClick: (String, Long) -> Unit,
 ) {
     item {
         Text(
@@ -599,6 +603,7 @@ private fun LazyListScope.homeGuestBookSection(
                     onVisualMediaClick = { onVisualMediaClick(it.url) },
                     onAudioMediaClick = { onAudioMediaClick(it.url) },
                     onMenuClick = { },
+                    onPlayVideoClick = { url -> onPlayVideoClick(url, guestBook.id) },
                 )
             }
         }

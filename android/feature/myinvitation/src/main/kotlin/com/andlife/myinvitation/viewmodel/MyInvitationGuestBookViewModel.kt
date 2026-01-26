@@ -109,6 +109,7 @@ constructor(
             is MyInvitationGuestBookUiEvent.UploadMedias -> handleUploadMedias()
             is MyInvitationGuestBookUiEvent.ClearError -> clearError()
             is MyInvitationGuestBookUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
+            is MyInvitationGuestBookUiEvent.ClickVideoPlayButton -> clickVideoPlayButton(event.url, event.itemId)
 
             is MyInvitationGuestBookUiEvent.ClickGuestBookMenu -> sendEffect(
                 MyInvitationGuestBookSideEffect.ShowSnackbar("방명록 메뉴 클릭됨: ${event.guestBookId}"),
@@ -139,6 +140,13 @@ constructor(
             videoPlayerPool.pauseAllPlayers()
             audioPlayerManager.togglePlay(url)
         }
+    }
+
+    private fun clickVideoPlayButton(url: String, itemId: Long) {
+        val isCurrentlyPlaying = uiState.value.isAudioPlaying
+        if (!isCurrentlyPlaying) return
+        audioPlayerManager.pause()
+        videoPlayerPool.playPlayer(url, itemId)
     }
 
     private fun updateSelectedMedias(medias: List<SelectedMedia>) {
