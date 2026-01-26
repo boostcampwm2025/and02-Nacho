@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -70,6 +71,7 @@ import com.andlife.ui.util.toFormatDuration
 import com.andlife.ui.util.toRelativeTimeString
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.delay
 import kotlinx.datetime.LocalDateTime
 import com.andlife.designsystem.R as designR
 
@@ -378,20 +380,21 @@ private fun GuestBookItemVisualMediaSection(
                             guestBookId = guestBookId,
                             videoUrl = media.url,
                             thumbnailUrl = media.thumbnailUrl,
+                            totalDurationSeconds = media.durationSeconds,
                             shouldPlay = shouldPlayVideo && pagerState.currentPage == page,
                             videoPlayerPool = videoPlayerPool,
                             onPlayVideoClick = onPlayVideoClick,
                         )
 
-                        media.durationSeconds?.let {
-                            MediaOverlay(
-                                modifier =
-                                    Modifier
-                                        .align(Alignment.BottomEnd)
-                                        .padding(NachoSpacing.small),
-                                text = it.toFormatDuration(), // TODO: 타이머 기능 추가해야 함.
-                            )
-                        }
+//                        media.durationSeconds?.let {
+//                            MediaOverlay(
+//                                modifier =
+//                                    Modifier
+//                                        .align(Alignment.BottomEnd)
+//                                        .padding(NachoSpacing.small),
+//                                text = it.toFormatDuration(), // TODO: 타이머 기능 추가해야 함.
+//                            )
+//                        }
                     }
 
                     else -> {
@@ -449,12 +452,16 @@ private fun VideoPlayerContainer(
     guestBookId: Long,
     videoUrl: String,
     thumbnailUrl: String?,
+    totalDurationSeconds: Int?,
     shouldPlay: Boolean,
     videoPlayerPool: AutoVideoPlayerPool,
     onPlayVideoClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var isVideoReady by remember(videoUrl) { mutableStateOf(false) }
+    var remainingDurationMs by remember(videoUrl) {
+        mutableLongStateOf((totalDurationSeconds?.times(1000))?.toLong() ?: 0L)
+    }
 
     val thumbnailAlpha by animateFloatAsState(
         targetValue = if (shouldPlay && isVideoReady) 0f else 1f,
@@ -476,6 +483,20 @@ private fun VideoPlayerContainer(
     ) {
         if (shouldPlay) {
             val currentPlayer = remember(videoUrl) { videoPlayerPool.getPlayer(videoUrl) }
+
+            LaunchedEffect(isVideoReady) {
+                if (isVideoReady && totalDurationSeconds != null) {
+                    while (true) {
+                        val duration = currentPlayer.exoPlayer.duration
+                        val position = currentPlayer.exoPlayer.currentPosition
+
+                        remainingDurationMs = (duration - position).coerceAtLeast(0L)
+                        delay(1000L)
+                    }
+                } else {
+                    remainingDurationMs = (totalDurationSeconds?.times(1000))?.toLong() ?: 0L
+                }
+            }
 
             DisposableEffect(currentPlayer, videoUrl) {
                 val listener = object : Player.Listener {
@@ -514,6 +535,15 @@ private fun VideoPlayerContainer(
                 modifier = Modifier
                     .fillMaxSize()
                     .alpha(thumbnailAlpha),
+            )
+        }
+
+        if (totalDurationSeconds != null) {
+            VideoDurationOverlay(
+                duration = (remainingDurationMs / 1000).toInt().toFormatDuration(),
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(NachoSpacing.small),
             )
         }
     }
@@ -566,6 +596,17 @@ private fun ThumbnailWrapper(
                 ) { onPlayVideoClick() }
         )
     }
+}
+
+@Composable
+private fun VideoDurationOverlay(
+    duration: String,
+    modifier: Modifier = Modifier,
+) {
+    MediaOverlay(
+        modifier = modifier,
+        text = duration
+    )
 }
 
 @Composable
