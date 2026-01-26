@@ -4,7 +4,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/andlife?serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/andlife?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: root
     password: ${MYSQL_PASSWORD}
 
