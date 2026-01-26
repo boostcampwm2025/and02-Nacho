@@ -172,11 +172,13 @@ fun HomeRoute(
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
+                    viewModel.onEvent(HomeUiEvent.UpdateMediaPlayState(true))
                     viewModel.videoPlayerPool.resumeLastPlayed()
                     isMediaActive = true
                 }
 
                 Lifecycle.Event.ON_PAUSE -> {
+                    viewModel.onEvent(HomeUiEvent.UpdateMediaPlayState(false))
                     viewModel.videoPlayerPool.pauseAllPlayers()
                     viewModel.audioPlayerManager.pause()
                 }
@@ -590,7 +592,7 @@ private fun LazyListScope.homeGuestBookSection(
                     guestBook = guestBook,
                     useMenuButton = false,
                     videoPlayerPool = videoPlayerPool,
-                    shouldPlayVideo = isMediaActive && (index == playVideoIndex),
+                    shouldPlayVideo = uiState.isMediaPlaying && (index == playVideoIndex),
                     audioPlaybackState = uiState.audioPlaybackState,
                     onInvitationTitleClick = {
                         onInvitationTitleClick(

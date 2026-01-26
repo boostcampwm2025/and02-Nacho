@@ -20,6 +20,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -69,10 +70,15 @@ class HomeViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
 
-        uiState.map { it.audioPlaybackState.isAudioPlaying }
+        combine(
+            uiState.map { it.audioPlaybackState.isAudioPlaying },
+            uiState.map { it.isMediaPlaying }
+        ) { isAudioPlaying, isMediaPlaying ->
+            isAudioPlaying to isMediaPlaying
+        }
             .distinctUntilChanged()
-            .onEach { isAudioPlaying ->
-                if (!isAudioPlaying) {
+            .onEach { (isAudioPlaying, isMediaPlaying) ->
+                if (!isAudioPlaying && isMediaPlaying) {
                     videoPlayerPool.resumeLastPlayed()
                 }
             }
@@ -89,6 +95,7 @@ class HomeViewModel @Inject constructor(
             is HomeUiEvent.ClickSetting -> navigateToSetting()
             is HomeUiEvent.ClickCreate -> navigateToCreate()
             is HomeUiEvent.Refresh -> refresh()
+            is HomeUiEvent.UpdateMediaPlayState -> updatePlayState(event.isPlaying)
         }
     }
 
@@ -147,5 +154,9 @@ class HomeViewModel @Inject constructor(
                 sendEffect(HomeSideEffect.ScrollToTop)
             }
         }
+    }
+
+    private fun updatePlayState(isPlaying: Boolean) {
+        updateState { copy(isMediaPlaying = isPlaying) }
     }
 }
