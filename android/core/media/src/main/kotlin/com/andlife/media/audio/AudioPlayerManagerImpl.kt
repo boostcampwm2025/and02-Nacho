@@ -7,17 +7,14 @@ import androidx.media3.common.Player
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import com.andlife.media.di.ApplicationMainScope
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,9 +27,8 @@ data class AudioInfo(
 
 class AudioPlayerManagerImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
+    @param:ApplicationMainScope private val applicationScope: CoroutineScope
 ) : AudioPlayerManager {
-
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private var exoPlayer: ExoPlayer? = null
     private var timerJob: Job? = null
@@ -124,7 +120,7 @@ class AudioPlayerManagerImpl @Inject constructor(
     private fun controlTimer() {
         timerJob?.cancel()
 
-        timerJob = scope.launch {
+        timerJob = applicationScope.launch {
             do {
                 _currentAudio.update {
                     it?.copy(
@@ -150,7 +146,6 @@ class AudioPlayerManagerImpl @Inject constructor(
         Log.d("AudioPlayerManager", "Releasing AudioPlayerManager resources")
         timerJob?.cancel()
         timerJob = null
-        //scope.cancel()
         exoPlayer?.release()
         exoPlayer = null
         _currentAudio.update { null }
