@@ -1,6 +1,7 @@
 package com.andlife.media.audio
 
 import android.content.Context
+import android.util.Log
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.datasource.DefaultDataSource
@@ -31,7 +32,7 @@ class AudioPlayerManagerImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
 ) : AudioPlayerManager {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private var exoPlayer: ExoPlayer? = null
     private var timerJob: Job? = null
@@ -122,17 +123,16 @@ class AudioPlayerManagerImpl @Inject constructor(
 
     private fun controlTimer() {
         timerJob?.cancel()
-        val player = exoPlayer ?: return
 
         timerJob = scope.launch {
-            while (isActive && player.isPlaying) {
+            do {
                 _currentAudio.update {
                     it?.copy(
-                        currentPositionMs = player.currentPosition
+                        currentPositionMs = exoPlayer?.currentPosition ?: 0L
                     )
                 }
-                delay(1000L)
-            }
+                delay(100L)
+            } while (_currentAudio.value?.isPlaying == true && exoPlayer?.isPlaying == true)
         }
     }
 
@@ -147,8 +147,10 @@ class AudioPlayerManagerImpl @Inject constructor(
     }
 
     override fun release() {
+        Log.d("AudioPlayerManager", "Releasing AudioPlayerManager resources")
         timerJob?.cancel()
-        scope.cancel()
+        timerJob = null
+        //scope.cancel()
         exoPlayer?.release()
         exoPlayer = null
         _currentAudio.update { null }
