@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -559,7 +560,10 @@ private fun ThumbnailWrapper(
         PlayerThumbnailIcon(
             modifier = Modifier
                 .align(Alignment.Center)
-                .clickable { onPlayVideoClick() }
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { onPlayVideoClick() }
         )
     }
 }
