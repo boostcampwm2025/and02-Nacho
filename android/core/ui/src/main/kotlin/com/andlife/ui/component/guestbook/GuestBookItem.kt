@@ -642,6 +642,13 @@ private fun GuestBookAudioItem(
             R.drawable.ic_play_arrow_24
         }
 
+    val remainingDurationMs =
+        if (isAudioPlaying && audioCurrentPositionMs != null && audioDurationMs != null) {
+            (audioDurationMs - audioCurrentPositionMs).coerceAtLeast(0L)
+        } else {
+            (audio.durationSeconds?.times(1000))?.toLong() ?: 0L
+        }
+
     Row(
         modifier =
             modifier
@@ -680,11 +687,7 @@ private fun GuestBookAudioItem(
                 color = NachoTheme.colorScheme.textPrimary,
             )
             Text(
-                text = if (isAudioPlaying && audioCurrentPositionMs != null && audioDurationMs != null) {
-                    "${(audioCurrentPositionMs / 1000).toInt().toFormatDuration()} / ${(audioDurationMs / 1000).toInt().toFormatDuration()}"
-                } else {
-                    (audio.durationSeconds ?: 0).toFormatDuration()
-                },
+                text = (remainingDurationMs / 1000).toInt().toFormatDuration(),
                 style = NachoTheme.typography.bodySmallRegular,
                 color = NachoTheme.colorScheme.textSecondary,
             )
