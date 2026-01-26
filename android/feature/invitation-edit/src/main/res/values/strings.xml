@@ -28,6 +28,11 @@
     <string name="txt_update_card">초대카드 편집</string>
     <string name="txt_create_card_explain">초대카드를 꾸며보세요</string>
 
+
+    <string name="txt_edit_title">초대 수정</string>
+    <string name="btn_edit">초대 수정하기</string>
+
+
     <string name="msg_search_guide">찾으시는 장소나 주소를 입력해 주세요. </string>
 
     <string name="desc_top_bar_back">주소검색 창을 닫는 뒤로가기 아이콘 버튼</string>
