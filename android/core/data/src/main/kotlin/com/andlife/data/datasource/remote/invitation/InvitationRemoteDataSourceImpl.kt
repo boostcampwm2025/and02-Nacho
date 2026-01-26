@@ -11,12 +11,16 @@ import com.andlife.network.model.invitation.InvitationResponse
 import com.andlife.network.api.invitation.InvitationService
 import com.andlife.network.model.PagingResponse
 import com.andlife.network.model.invitation.InvitationSummaryResponse
+import com.andlife.network.model.invitation.JoinResponse
 import com.andlife.network.model.invitation.UpcomingInvitationResponse
 import javax.inject.Inject
 
 internal class InvitationRemoteDataSourceImpl @Inject constructor(
     private val invitationService: InvitationService,
 ) : InvitationRemoteDataSource {
+    override suspend fun joinInvitation(invitationId: Long): Result<JoinResponse, DataError> =
+        apiCall { invitationService.joinInvitation(invitationId) }
+
     override suspend fun createInvitation(request: CreateInvitationRequest): Result<InvitationResponse, DataError> =
         apiCall { invitationService.createInvitation(request) }
 
