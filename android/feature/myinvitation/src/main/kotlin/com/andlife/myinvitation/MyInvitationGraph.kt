@@ -55,6 +55,7 @@ fun NavGraphBuilder.myInvitationNavGraph(
 
 fun NavGraphBuilder.myInvitationDetailNavGraph(
     onNavigateBack: () -> Unit,
+    onNavigateToEditInvitation: (Long) -> Unit,
     onNavigateToEditCard: (Long) -> Unit,
     onNavigateToCreateCard: (Long) -> Unit,
 ) {
@@ -81,6 +82,7 @@ fun NavGraphBuilder.myInvitationDetailNavGraph(
 
         MyInvitationDetailRoute(
             onNavigateBack = onNavigateBack,
+            onNavigateToEditInvitation = onNavigateToEditInvitation,
             onNavigateToEditCard = onNavigateToEditCard,
             onNavigateToCreateCard = onNavigateToCreateCard,
             modifier = Modifier.padding(),
