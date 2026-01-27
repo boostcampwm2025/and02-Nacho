@@ -131,7 +131,7 @@ fun EmptyImageSection(
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_image_24),
-                contentDescription = null,
+                contentDescription = stringResource(R.string.desc_image),
                 tint = NachoTheme.colorScheme.textTertiary,
                 modifier = Modifier
                     .size(NachoIconSize.huge)

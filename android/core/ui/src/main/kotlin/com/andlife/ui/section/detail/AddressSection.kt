@@ -101,7 +101,7 @@ fun EmptyAddressSection(
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_location_24),
-                contentDescription = null,
+                contentDescription = stringResource(R.string.desc_location),
                 tint = NachoTheme.colorScheme.textTertiary,
             )
 

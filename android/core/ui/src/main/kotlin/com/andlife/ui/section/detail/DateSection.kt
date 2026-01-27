@@ -107,7 +107,7 @@ fun EmptyDateSection(
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_calendar_24),
-                contentDescription = null,
+                contentDescription = stringResource(R.string.desc_date_time),
                 tint = NachoTheme.colorScheme.textTertiary,
             )
             Text(

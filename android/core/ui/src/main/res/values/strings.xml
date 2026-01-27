@@ -102,6 +102,7 @@
     <!--  ImageSection  -->
     <string name="desc_invitation_image">초대장 상세 이미지</string>
     <string name="desc_invitation_image_error">초대장 상세 이미지 에러</string>
+    <string name="desc_image">이미지</string>
     <!--  AuthorSection  -->
     <string name="desc_profile_image">프로필 이미지</string>
     <string name="txt_host">주최자</string>
@@ -117,6 +118,12 @@
     <string name="txt_place_guide_title">오시는 길</string>
     <string name="txt_map_loading">지도 로딩중...</string>
     <string name="btn_open_map_app">지도 앱으로 열기</string>
+    <!-- AddressSection  -->
+    <string name="desc_location">장소</string>
+    <!-- DateSection -->
+    <string name="desc_date_time">날짜 및 시간</string>
+    <!-- EmptyItemSection -->
+    <string name="desc_info">정보</string>
 
     <!-- Preview placeholders -->
     <string name="txt_image_placeholder">대표 이미지를 추가해주세요</string>
