@@ -2,8 +2,10 @@ package com.andlife.myinvitation.screen.guestbook
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -49,6 +51,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -110,6 +113,7 @@ fun MyInvitationGuestBookRoute(
 
     val snackbarHostState = remember { SnackbarHostState() }
     var showDeleteDialog by remember { mutableStateOf<Long?>(null) }
+    var showPermissionDialog by remember { mutableStateOf<String?>(null) }
     var scrollToTop by remember { mutableStateOf(false) }
 
 
@@ -124,6 +128,8 @@ fun MyInvitationGuestBookRoute(
     ) { isGranted ->
         if (isGranted) {
             viewModel.onEvent(MyInvitationGuestBookUiEvent.ClickCamera)
+        } else {
+            showPermissionDialog = Manifest.permission.CAMERA
         }
     }
 
@@ -148,6 +154,8 @@ fun MyInvitationGuestBookRoute(
     ) { isGranted ->
         if (isGranted) {
             viewModel.onEvent(MyInvitationGuestBookUiEvent.ClickMicrophone)
+        } else {
+            showPermissionDialog = Manifest.permission.RECORD_AUDIO
         }
     }
 
@@ -310,6 +318,55 @@ fun MyInvitationGuestBookRoute(
                         Text(
                             text = stringResource(R.string.btn_label_delete),
                             color = NachoTheme.colorScheme.brandDark,
+                            style = NachoTheme.typography.bodyMediumSemiBold,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    if (showPermissionDialog != null) {
+        NachoDialog(
+            onDismiss = { showPermissionDialog = null }
+        ) {
+            Column(
+                modifier = Modifier.padding(NachoSpacing.xLarge),
+                verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
+            ) {
+                Text(
+                    text = when (showPermissionDialog) {
+                        Manifest.permission.CAMERA -> "사진을 촬영하려면 카메라 권한이 필요합니다."
+                        Manifest.permission.RECORD_AUDIO -> "음성을 녹음하려면 마이크 권한이 필요합니다."
+                        else -> "권한이 필요합니다."
+                    },
+                    color = NachoTheme.colorScheme.textSecondary,
+                    style = NachoTheme.typography.bodyMediumRegular,
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    TextButton(
+                        onClick = { showPermissionDialog = null }
+                    ) {
+                        Text(
+                            text = "취소",
+                            color = NachoTheme.colorScheme.textPrimary,
+                            style = NachoTheme.typography.bodyMediumSemiBold,
+                        )
+                    }
+                    TextButton(
+                        onClick = {
+                            showPermissionDialog = null
+                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                            intent.data = "package:${context.packageName}".toUri()
+                            context.startActivity(intent)
+                        }
+                    ) {
+                        Text(
+                            text = "설정으로 이동",
+                            color = NachoTheme.colorScheme.brandPrimary,
                             style = NachoTheme.typography.bodyMediumSemiBold,
                         )
                     }
