@@ -143,14 +143,14 @@ fun InvitationGuestBookForm(
                 } else {
                     NachoTheme.colorScheme.iconDisabled
                 }
-            Row(horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium)) {
                 Icon(
                     painter = painterResource(R.drawable.ic_image_16),
                     contentDescription = null,
                     tint = iconColor,
                     modifier =
                         Modifier
-                            .size(NachoIconSize.medium)
+                            .size(NachoIconSize.semiLarge)
                             .let {
                                 if (isMediaAddEnabled) {
                                     it.clickable {
@@ -167,7 +167,7 @@ fun InvitationGuestBookForm(
                     tint = iconColor,
                     modifier =
                         Modifier
-                            .size(NachoIconSize.medium)
+                            .size(NachoIconSize.semiLarge)
                             .let {
                                 if (isMediaAddEnabled) {
                                     it.clickable {
@@ -184,7 +184,7 @@ fun InvitationGuestBookForm(
                     tint = iconColor,
                     modifier =
                         Modifier
-                            .size(NachoIconSize.medium)
+                            .size(NachoIconSize.semiLarge)
                             .let {
                                 if (isMediaAddEnabled) {
                                     it.clickable {
@@ -201,7 +201,7 @@ fun InvitationGuestBookForm(
                     tint = if (isAudioRecording) Color.Green else iconColor,
                     modifier =
                         Modifier
-                            .size(NachoIconSize.medium)
+                            .size(NachoIconSize.semiLarge)
                             .let {
                                 if (isMediaAddEnabled) {
                                     it.clickable {
