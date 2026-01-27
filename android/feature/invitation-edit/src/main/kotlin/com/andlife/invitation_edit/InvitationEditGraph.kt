@@ -11,11 +11,8 @@ import com.andlife.invitation_edit.model.address.AddressUiModel
 import com.andlife.invitation_edit.screen.address.AddressSearchRoute
 import com.andlife.invitation_edit.screen.create.InvitationCreateRoute
 import com.andlife.invitation_edit.screen.edit.InvitationEditRoute
+import com.andlife.model.util.NavigationKeyConstant
 import kotlinx.serialization.Serializable
-
-object MyInvitationNavArgs {
-    const val SELECTED_ADDRESS = "selectedAddress"
-}
 
 @Serializable
 data object InvitationCreate
@@ -52,7 +49,7 @@ fun NavGraphBuilder.invitationCreateNavGraph(
     composable<InvitationCreate> { backStackEntry ->
         val selectedAddressUiModel by
         backStackEntry.savedStateHandle
-            .getStateFlow<AddressUiModel?>(MyInvitationNavArgs.SELECTED_ADDRESS, null)
+            .getStateFlow<AddressUiModel?>(NavigationKeyConstant.SELECTED_ADDRESS, null)
             .collectAsStateWithLifecycle()
 
         InvitationCreateRoute(
@@ -67,15 +64,14 @@ fun NavGraphBuilder.invitationCreateNavGraph(
 }
 
 fun NavGraphBuilder.invitationEditNavGraph(
+    navController: NavController,
     onNavigateToAddressSearch: () -> Unit,
     onNavigateBack: () -> Unit,
-    onNavigateCreateCard: () -> Unit,
-    onNavigateToInvitationDetail: (Long) -> Unit,
 ) {
     composable<InvitationEdit> { backStackEntry ->
         val selectedAddressUiModel by
         backStackEntry.savedStateHandle
-            .getStateFlow<AddressUiModel?>(MyInvitationNavArgs.SELECTED_ADDRESS, null)
+            .getStateFlow<AddressUiModel?>(NavigationKeyConstant.SELECTED_ADDRESS, null)
             .collectAsStateWithLifecycle()
 
         InvitationEditRoute(
@@ -83,8 +79,12 @@ fun NavGraphBuilder.invitationEditNavGraph(
             onNavigateBack = onNavigateBack,
             modifier = Modifier,
             address = selectedAddressUiModel,
-            onNavigateCreateCard = onNavigateCreateCard,
-            onNavigateToInvitationDetail = onNavigateToInvitationDetail
+            onSuccessSave = {
+                navController.previousBackStackEntry
+                    ?.savedStateHandle
+                    ?.set(NavigationKeyConstant.INVITATION_UPDATED, true)
+                onNavigateBack()
+            },
         )
     }
 }
@@ -99,7 +99,7 @@ fun NavGraphBuilder.addressSearchNavGraph(
             onAddressSelect = { addressUiModel ->
                 navController.previousBackStackEntry
                     ?.savedStateHandle
-                    ?.set(MyInvitationNavArgs.SELECTED_ADDRESS, addressUiModel)
+                    ?.set(NavigationKeyConstant.SELECTED_ADDRESS, addressUiModel)
                 onNavigateBack()
             },
         )

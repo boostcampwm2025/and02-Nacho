@@ -19,7 +19,7 @@ import com.andlife.invitation_edit.model.form.InvitationFormUiEvent
 import com.andlife.invitation_edit.model.form.InvitationFormUiState
 import com.andlife.invitation_edit.model.form.InvitationTimeUiModel
 import com.andlife.invitation_edit.model.form.ThumbnailImageUiModel
-import com.andlife.invitation_edit.model.form.toCreateParam
+import com.andlife.invitation_edit.model.form.toSaveParam
 import com.andlife.invitation_edit.model.form.toLocalTime
 import com.andlife.model.editor.CardImage
 import com.andlife.model.editor.NachoUiCard
@@ -60,7 +60,6 @@ class InvitationCreateViewModel @Inject constructor(
             is InvitationFormUiEvent.RemoveAnnouncement -> updateRemoveAnnouncement(event)
             InvitationFormUiEvent.OnClickBack -> onBackClick()
             InvitationFormUiEvent.OnClickSave -> createInvitation()
-            else -> {}
         }
     }
 
@@ -200,7 +199,7 @@ class InvitationCreateViewModel @Inject constructor(
 
             val nachoCard = cardResult.data?.toDomain()
 
-            val createParam = uiModel.toCreateParam(
+            val createParam = uiModel.toSaveParam(
                 thumbnails = uploadedThumbnailsResult.data,
                 date = date,
                 startTime = startTime,
