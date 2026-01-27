@@ -68,17 +68,17 @@ fun PlaceGuideSection(
                     location = location,
                     onMapError = onMapError,
                 )
-            }
 
-            location.guide?.takeIf { it.isNotBlank() }?.let { guide ->
-                Text(
-                    text = guide,
-                    style = NachoTheme.typography.bodyMediumRegular,
-                    color = NachoTheme.colorScheme.textSecondary,
-                    modifier =
-                        Modifier
-                            .padding(horizontal = NachoSpacing.small),
-                )
+                location.guide?.takeIf { it.isNotBlank() }?.let { guide ->
+                    Text(
+                        text = guide,
+                        style = NachoTheme.typography.bodyMediumRegular,
+                        color = NachoTheme.colorScheme.textSecondary,
+                        modifier =
+                            Modifier
+                                .padding(horizontal = NachoSpacing.small),
+                    )
+                }
             }
         }
     }
