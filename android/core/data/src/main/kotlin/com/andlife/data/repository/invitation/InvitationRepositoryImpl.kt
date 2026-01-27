@@ -21,6 +21,7 @@ import com.andlife.domain.model.invitation.UpcomingInvitation
 import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.map
+import com.andlife.domain.util.onSuccess
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -41,7 +42,9 @@ internal class InvitationRepositoryImpl @Inject constructor(
     }
 
     override suspend fun leaveInvitation(invitationId: Long): Result<Unit, DataError> {
-        return invitationRemoteDataSource.leaveInvitation(invitationId)
+        return invitationRemoteDataSource.leaveInvitation(invitationId).onSuccess {
+            userStorage.deleteInvitationId(invitationId)
+        }
     }
 
     override suspend fun createInvitation(params: CreateInvitationParam): Result<Long, DataError> {
