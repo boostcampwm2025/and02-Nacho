@@ -20,6 +20,7 @@
     <string name="txt_guide_address">오시는 길을 입력해주세요.</string>
     <string name="txt_announcement">공지사항</string>
     <string name="txt_add_announcement">공지사항 추가</string>
+    <string name="txt_remove_announcement_title">공지사항 삭제</string>
     <string name="txt_remove_announcement">해당 공지사항을 삭제하시겠습니까?</string>
     <string name="txt_remove">삭제하기</string>
     <string name="txt_cancel">취소하기</string>
