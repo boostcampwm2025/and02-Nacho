@@ -66,7 +66,7 @@ private fun InvitationPreviewScreen(
                 title = stringResource(R.string.txt_preview),
                 onBackClick = onNavigateBack,
                 onPreviewClick = {},
-                isLoading = false
+                isPreviewMode = true,
             )
         },
     ) { paddingValues ->
