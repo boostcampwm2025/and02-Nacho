@@ -66,7 +66,7 @@ fun InvitationCreateRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val res = LocalResources.current
-    val snackbarHost = remember { SnackbarHostState() }
+    val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var isShowDatePicker by remember { mutableStateOf(false) }
     var isShowStartTimePicker by remember { mutableStateOf(false) }
@@ -78,7 +78,10 @@ fun InvitationCreateRoute(
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             InvitationFormSideEffect.FullImage -> {
-                snackbarHost.showSnackbar(message = res.getString(R.string.snack_full_image))
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(message = res.getString(R.string.snack_full_image))
+                }
             }
 
             InvitationFormSideEffect.OnBack -> {
@@ -86,7 +89,10 @@ fun InvitationCreateRoute(
             }
 
             InvitationFormSideEffect.FailSave -> {
-                snackbarHost.showSnackbar(message = res.getString(R.string.snack_full_image))
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(message = res.getString(R.string.snack_fail_save))
+                }
             }
 
             is InvitationFormSideEffect.SuccessSave -> {
@@ -108,7 +114,7 @@ fun InvitationCreateRoute(
                 viewModel.onEvent(InvitationFormUiEvent.UpdateImageList(imageList))
             } else {
                 scope.launch {
-                    snackbarHost.showSnackbar(message = res.getString(R.string.snack_load_error_image))
+                    snackbarHostState.showSnackbar(message = res.getString(R.string.snack_load_error_image))
                 }
             }
         }
@@ -125,7 +131,7 @@ fun InvitationCreateRoute(
 
     InvitationCreateScreen(
         uiState = uiState,
-        snackbarHostState = snackbarHost,
+        snackbarHostState = snackbarHostState,
         onEvent = viewModel::onEvent,
         onNavigateToAddressSearch = onNavigateToAddressSearch,
         onAddImageClick = {
