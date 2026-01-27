@@ -12,4 +12,8 @@ sealed interface MyInvitationGuestBookSideEffect : BaseSideEffect {
     data object UpdateGuestBookSuccess : MyInvitationGuestBookSideEffect
 
     data object DeleteGuestBookSuccess : MyInvitationGuestBookSideEffect
+
+    data object ScrollToTop : MyInvitationGuestBookSideEffect
+
+    data object RefreshFailure : MyInvitationGuestBookSideEffect
 }

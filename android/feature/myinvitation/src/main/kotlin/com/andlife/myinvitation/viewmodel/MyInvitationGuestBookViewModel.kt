@@ -114,6 +114,7 @@ constructor(
             is MyInvitationGuestBookUiEvent.CancelEdit -> cancelEdit()
             is MyInvitationGuestBookUiEvent.ClickDeleteMenu -> deleteGuestBook(event.guestBookId)
             is MyInvitationGuestBookUiEvent.UpdateMediaPlayState -> updatePlayState(event.isPlaying)
+            MyInvitationGuestBookUiEvent.Refresh -> refresh()
         }
     }
 
@@ -380,5 +381,23 @@ constructor(
 
     private fun updatePlayState(isPlaying: Boolean) {
         updateState { copy(isMediaPlaying = isPlaying) }
+    }
+
+    private fun refresh() {
+        invalidateGuestBooks()
+        updateState { copy(isRefreshing = true) }
+    }
+
+    fun onRefreshFinished(hasError: Boolean) {
+        val wasUserTriggered = uiState.value.isRefreshing
+        updateState { copy(isRefreshing = false) }
+
+        if (hasError) {
+            sendEffect(MyInvitationGuestBookSideEffect.RefreshFailure)
+        } else {
+            if (wasUserTriggered) {
+                sendEffect(MyInvitationGuestBookSideEffect.ScrollToTop)
+            }
+        }
     }
 }

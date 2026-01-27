@@ -63,4 +63,6 @@ sealed interface InvitationGuestBookUiEvent : BaseUiEvent {
     data class UpdateMediaPlayState(
         val isPlaying: Boolean
     ) : InvitationGuestBookUiEvent
+
+    data object Refresh : InvitationGuestBookUiEvent
 }

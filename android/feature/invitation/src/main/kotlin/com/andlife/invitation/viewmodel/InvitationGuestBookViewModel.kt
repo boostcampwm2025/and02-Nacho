@@ -120,6 +120,7 @@ constructor(
             is InvitationGuestBookUiEvent.CancelEdit -> cancelEdit()
             is InvitationGuestBookUiEvent.ClickDeleteMenu -> deleteGuestBook(event.guestBookId)
             is InvitationGuestBookUiEvent.UpdateMediaPlayState -> updatePlayState(event.isPlaying)
+            InvitationGuestBookUiEvent.Refresh -> refresh()
         }
     }
 
@@ -355,6 +356,7 @@ constructor(
             is Result.Success -> {
                 clearFormInput()
                 if (isUpdate) {
+                    //videoPlayerPool.clearCacheById(result.data.id)
                     sendEffect(InvitationGuestBookSideEffect.UpdateGuestBookSuccess)
                 } else {
                     sendEffect(InvitationGuestBookSideEffect.CreateGuestBookSuccess)
@@ -431,5 +433,23 @@ constructor(
 
     private fun updatePlayState(isPlaying: Boolean) {
         updateState { copy(isMediaPlaying = isPlaying) }
+    }
+
+    private fun refresh() {
+        invalidateGuestBooks()
+        updateState { copy(isRefreshing = true) }
+    }
+
+    fun onRefreshFinished(hasError: Boolean) {
+        val wasUserTriggered = uiState.value.isRefreshing
+        updateState { copy(isRefreshing = false) }
+
+        if (hasError) {
+            sendEffect(InvitationGuestBookSideEffect.RefreshFailure)
+        } else {
+            if (wasUserTriggered) {
+                sendEffect(InvitationGuestBookSideEffect.ScrollToTop)
+            }
+        }
     }
 }

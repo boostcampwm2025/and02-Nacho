@@ -24,6 +24,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -37,6 +38,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -88,12 +90,26 @@ fun MyInvitationGuestBookRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val guestBooks = viewModel.guestBooksPagingFlow.collectAsLazyPagingItems()
 
+    val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
+    val res = LocalResources.current
     val lazyListState = rememberLazyListState()
 
     val snackbarHostState = remember { SnackbarHostState() }
     var showDeleteDialog by remember { mutableStateOf<Long?>(null) }
     var scrollToTop by remember { mutableStateOf(false) }
+
+    var isMediaActive by remember { mutableStateOf(true) }
+    val navigateBackWithCleanup: () -> Unit = {
+        isMediaActive = false
+        coroutineScope.launch {
+            viewModel.videoPlayerPool.pauseAllPlayers()
+            viewModel.onEvent(MyInvitationGuestBookUiEvent.ClickAudioMedia(""))
+
+            delay(50L)
+            onNavigateBack()
+        }
+    }
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
@@ -114,8 +130,22 @@ fun MyInvitationGuestBookRoute(
             }
 
             is MyInvitationGuestBookSideEffect.DeleteGuestBookSuccess -> {
-                viewModel.videoPlayerPool.clearCacheById(uiState.editingGuestBookId)
                 viewModel.invalidateGuestBooks()
+            }
+
+            is MyInvitationGuestBookSideEffect.ScrollToTop -> {
+                coroutineScope.launch {
+                    if (guestBooks.itemCount > 0) {
+                        lazyListState.animateScrollToItem(0)
+                    }
+                }
+            }
+
+            is MyInvitationGuestBookSideEffect.RefreshFailure -> {
+                coroutineScope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(res.getString(R.string.guide_guestbook_refresh_failure))
+                }
             }
         }
     }
@@ -126,6 +156,14 @@ fun MyInvitationGuestBookRoute(
                 lazyListState.animateScrollToItem(0)
             }
             scrollToTop = false
+        }
+    }
+
+    LaunchedEffect(guestBooks.loadState.refresh) {
+        if (guestBooks.loadState.refresh !is LoadState.Loading) {
+            viewModel.onRefreshFinished(
+                hasError = guestBooks.loadState.refresh is LoadState.Error
+            )
         }
     }
 
@@ -218,7 +256,8 @@ fun MyInvitationGuestBookRoute(
         uiState = uiState,
         guestBooks = guestBooks,
         onEvent = viewModel::onEvent,
-        onNavigateBack = onNavigateBack,
+        isMediaActive = isMediaActive,
+        navigateBackWithCleanup = navigateBackWithCleanup,
         snackbarHostState = snackbarHostState,
         lazyListState = lazyListState,
         videoPlayerPool = viewModel.videoPlayerPool,
@@ -233,31 +272,19 @@ private fun InvitationGuestBookScreen(
     uiState: MyInvitationGuestBookUiState,
     guestBooks: LazyPagingItems<GuestBookUiModel>,
     onEvent: (MyInvitationGuestBookUiEvent) -> Unit,
+    isMediaActive: Boolean,
+    navigateBackWithCleanup: () -> Unit,
     snackbarHostState: SnackbarHostState,
     lazyListState: LazyListState,
     videoPlayerPool: AutoVideoPlayerPool,
-    onNavigateBack: () -> Unit,
     onDeleteMenuClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
     val isImVisible = WindowInsets.isImeVisible
 
     var playVideoIndex by remember { mutableIntStateOf(-1) }
-    var isMediaActive by remember { mutableStateOf(true) }
     var isTextFieldFocused by remember { mutableStateOf(false) }
-
-    val navigateBackWithCleanup: () -> Unit = {
-        isMediaActive = false
-        coroutineScope.launch {
-            videoPlayerPool.pauseAllPlayers()
-            onEvent(MyInvitationGuestBookUiEvent.ClickAudioMedia(""))
-
-            delay(50L)
-            onNavigateBack()
-        }
-    }
 
     LaunchedEffect(isImVisible) {
         if (!isImVisible) focusManager.clearFocus()
@@ -368,58 +395,66 @@ private fun InvitationGuestBookScreen(
             }
         }
     ) { innerPadding ->
-        if (isMediaActive) {
-            val isInitialLoading = guestBooks.loadState.refresh is LoadState.Loading && guestBooks.itemCount == 0
+        PullToRefreshBox(
+            isRefreshing = uiState.isRefreshing,
+            onRefresh = { onEvent(MyInvitationGuestBookUiEvent.Refresh) },
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = innerPadding.calculateBottomPadding())
+        ) {
+            if (isMediaActive) {
+                val isInitialLoading = guestBooks.loadState.refresh is LoadState.Loading && guestBooks.itemCount == 0
 
-            if (isInitialLoading || guestBooks.itemCount == 0) {
-                PagingStateContent(
-                    loadState = guestBooks.loadState.refresh,
-                    itemCount = guestBooks.itemCount,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = innerPadding.calculateBottomPadding()),
-                    onRetry = { guestBooks.retry() }
-                ) {}
-            } else {
-                LazyColumn(
-                    state = lazyListState,
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        bottom = innerPadding.calculateBottomPadding()
-                    )
-                ) {
-                    items(
-                        count = guestBooks.itemCount,
-                        key = guestBooks.itemKey { it.id }
-                    ) { index ->
-                        guestBooks[index]?.let { guestBook ->
-                            GuestBookItem(
-                                modifier = Modifier
-                                    .animateItem(),
-                                guestBook = guestBook,
-                                videoPlayerPool = videoPlayerPool,
-                                shouldPlayVideo = uiState.canPlayVideo && (index == playVideoIndex),
-                                audioPlaybackState = uiState.audioPlaybackState,
-                                isEditing = uiState.editingGuestBookId == guestBook.id,
-                                onEditClick = { onEvent(MyInvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
-                                onDeleteClick = { onDeleteMenuClick(guestBook.id) },
-                                onVisualMediaClick = { onEvent(MyInvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
-                                onAudioMediaClick = { onEvent(MyInvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
-                                onMenuClick = { onEvent(MyInvitationGuestBookUiEvent.ClickGuestBookMenu(guestBook.id)) },
-                                onPlayVideoClick = { url -> onEvent(MyInvitationGuestBookUiEvent.ClickVideoPlayButton(url, guestBook.id))}
-                            )
+                if (isInitialLoading || guestBooks.itemCount == 0) {
+                    PagingStateContent(
+                        loadState = guestBooks.loadState.refresh,
+                        itemCount = guestBooks.itemCount,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(bottom = innerPadding.calculateBottomPadding()),
+                        onRetry = { guestBooks.retry() }
+                    ) {}
+                } else {
+                    LazyColumn(
+                        state = lazyListState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            bottom = innerPadding.calculateBottomPadding()
+                        )
+                    ) {
+                        items(
+                            count = guestBooks.itemCount,
+                            key = guestBooks.itemKey { it.id }
+                        ) { index ->
+                            guestBooks[index]?.let { guestBook ->
+                                GuestBookItem(
+                                    modifier = Modifier
+                                        .animateItem(),
+                                    guestBook = guestBook,
+                                    videoPlayerPool = videoPlayerPool,
+                                    shouldPlayVideo = uiState.canPlayVideo && (index == playVideoIndex),
+                                    audioPlaybackState = uiState.audioPlaybackState,
+                                    isEditing = uiState.editingGuestBookId == guestBook.id,
+                                    onEditClick = { onEvent(MyInvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
+                                    onDeleteClick = { onDeleteMenuClick(guestBook.id) },
+                                    onVisualMediaClick = { onEvent(MyInvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
+                                    onAudioMediaClick = { onEvent(MyInvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
+                                    onMenuClick = { onEvent(MyInvitationGuestBookUiEvent.ClickGuestBookMenu(guestBook.id)) },
+                                    onPlayVideoClick = { url -> onEvent(MyInvitationGuestBookUiEvent.ClickVideoPlayButton(url, guestBook.id))}
+                                )
+                            }
                         }
-                    }
 
-                    if (guestBooks.loadState.append is LoadState.Loading) {
-                        item {
-                            Box(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(NachoSpacing.medium),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
+                        if (guestBooks.loadState.append is LoadState.Loading) {
+                            item {
+                                Box(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(NachoSpacing.medium),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator()
+                                }
                             }
                         }
                     }
@@ -475,7 +510,8 @@ private fun InvitationGuestBookEmptyPreview() {
             uiState = MyInvitationGuestBookUiState(isLoadingGuestBooks = false),
             guestBooks = emptyGuestBooks,
             onEvent = {},
-            onNavigateBack = {},
+            isMediaActive = true,
+            navigateBackWithCleanup = {},
             videoPlayerPool = FakeVideoPlayerPool(),
             snackbarHostState = SnackbarHostState(),
             lazyListState = rememberLazyListState(),
