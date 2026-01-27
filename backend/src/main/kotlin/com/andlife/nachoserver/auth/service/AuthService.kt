@@ -1,0 +1,116 @@
+package com.andlife.nachoserver.auth.service
+
+import com.andlife.nachoserver.auth.client.KakaoAuthClient
+import com.andlife.nachoserver.auth.dto.AuthResponse
+import com.andlife.nachoserver.auth.dto.KakaoLoginRequest
+import com.andlife.nachoserver.auth.dto.KakaoUserResponse
+import com.andlife.nachoserver.auth.dto.RefreshTokenRequest
+import com.andlife.nachoserver.auth.dto.UserResponse
+import com.andlife.nachoserver.auth.jwt.JwtProvider
+import com.andlife.nachoserver.entity.User
+import com.andlife.nachoserver.repository.user.UserRepository
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+
+@Service
+class AuthService(
+    private val kakaoAuthClient: KakaoAuthClient,
+    private val jwtProvider: JwtProvider,
+    private val userRepository: UserRepository
+) {
+
+    @Transactional
+    fun loginWithKakao(request: KakaoLoginRequest): AuthResponse {
+        println("카카오 API 유효성그증")
+        val kakaoUser = kakaoAuthClient.getUserInfo(request.accessToken)
+        println("카카오 API 성공 ${kakaoUser}")
+        val user = userRepository.findByKakaoId(kakaoUser.id)
+            ?: createUser(kakaoUser)
+
+        updateUserProfileIfNeeded(user, kakaoUser)
+
+        return generateAuthResponse(user)
+    }
+
+    @Transactional(readOnly = true)
+    fun refreshAccessToken(request: RefreshTokenRequest): AuthResponse {
+        val refreshToken = request.refreshToken
+
+        if (!jwtProvider.validateToken(refreshToken)) {
+            throw IllegalArgumentException("Invalid refresh token")
+        }
+
+        if (!jwtProvider.isRefreshToken(refreshToken)) {
+            throw IllegalArgumentException("Not a refresh token")
+        }
+
+        val userId = jwtProvider.getUserId(refreshToken)
+        val user = userRepository.findById(userId)
+            .orElseThrow { IllegalArgumentException("User not found") }
+
+        return generateAuthResponse(user)
+    }
+
+    private fun createUser(
+        kakaoUser: KakaoUserResponse
+    ): User {
+        val email = kakaoUser.kakaoAccount?.email
+            ?: throw IllegalArgumentException("Email is required for registration")
+
+        val name = kakaoUser.kakaoAccount.profile?.nickname
+            ?: "User${kakaoUser.id}"
+
+        val profileImageUrl = kakaoUser.kakaoAccount.profile?.profileImageUrl
+
+        val newUser = User(
+            kakaoId = kakaoUser.id,
+            email = email,
+            name = name,
+            profileImageUrl = profileImageUrl
+        )
+
+        return userRepository.save(newUser)
+    }
+
+    private fun updateUserProfileIfNeeded(
+        user: User,
+        kakaoUser: KakaoUserResponse
+    ) {
+        val kakaoProfile = kakaoUser.kakaoAccount?.profile
+        var updated = false
+
+        kakaoProfile?.nickname?.let { newName ->
+            if (user.name != newName) {
+                user.name = newName
+                updated = true
+            }
+        }
+
+        kakaoProfile?.profileImageUrl?.let { newProfileUrl ->
+            if (user.profileImageUrl != newProfileUrl) {
+                user.profileImageUrl = newProfileUrl
+                updated = true
+            }
+        }
+
+        if (updated) {
+            userRepository.save(user)
+        }
+    }
+
+    private fun generateAuthResponse(user: User): AuthResponse {
+        val accessToken = jwtProvider.generateAccessToken(user.id)
+        val refreshToken = jwtProvider.generateRefreshToken(user.id)
+
+        return AuthResponse(
+            accessToken = accessToken,
+            refreshToken = refreshToken,
+            user = UserResponse(
+                id = user.id,
+                email = user.email,
+                name = user.name,
+                profileImageUrl = user.profileImageUrl
+            )
+        )
+    }
+}
