@@ -58,6 +58,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MyInvitationCreateRoute(
     onNavigateToAddressSearch: () -> Unit,
+    onNavigateToPreview: () -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateCreateCard: () -> Unit,
     onNavigateToInvitationDetail: (Long) -> Unit,
@@ -127,6 +128,7 @@ fun MyInvitationCreateRoute(
         snackbarHostState = snackbarHost,
         onEvent = viewModel::onEvent,
         onNavigateToAddressSearch = onNavigateToAddressSearch,
+        onNavigateToPreview = onNavigateToPreview,
         onAddImageClick = {
             pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         },
@@ -216,6 +218,7 @@ private fun MyInvitationCreateScreen(
     onStartTimeClick: () -> Unit,
     onEndTimeClick: () -> Unit,
     onNavigateToAddressSearch: () -> Unit,
+    onNavigateToPreview: () -> Unit,
     onAddAnnouncementClick: () -> Unit,
     onClickCreateCard: () -> Unit,
     onRemoveAnnouncementClick: (AnnouncementUiModel) -> Unit,
@@ -232,7 +235,7 @@ private fun MyInvitationCreateScreen(
             TopBarSection(
                 title = stringResource(R.string.txt_create),
                 onBackClick = { onEvent(CreateInvitationUiEvent.OnClickBack) },
-                onPreviewClick = {},
+                onPreviewClick = onNavigateToPreview,
                 isLoading = uiState.isLoading
             )
         },

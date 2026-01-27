@@ -29,6 +29,7 @@ import com.andlife.invitation_card.createCardByInvitationNavGraph
 import com.andlife.invitation_card.createCardNavGraph
 import com.andlife.invitation_card.updateCardNavGraph
 import com.andlife.invitation_edit.addressSearchNavGraph
+import com.andlife.invitation_edit.invitationPreviewNavGraph
 import com.andlife.invitation_edit.myInvitationCreateNavGraph
 import com.andlife.model.util.NavigationKeyConstant.CREATE_CARD_BY_INVITATION_ID
 import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
@@ -104,12 +105,18 @@ fun NachoNavHost(
 
             myInvitationCreateNavGraph(
                 onNavigateToAddressSearch = navigator::navigateToAddressSearch,
+                onNavigateToPreview = navigator::navigateToInvitationPreview,
                 onNavigateBack = navigator::navigatePopBackStack,
                 onNavigateCreateCard = navigator::navigateToCreateCard,
                 onNavigateToInvitationDetail = navigator::navigateToMyInvitationDetailByCreate
             )
 
             addressSearchNavGraph(
+                navController = navigator.navController,
+                onNavigateBack = navigator::navigatePopBackStack,
+            )
+
+            invitationPreviewNavGraph(
                 navController = navigator.navController,
                 onNavigateBack = navigator::navigatePopBackStack,
             )
