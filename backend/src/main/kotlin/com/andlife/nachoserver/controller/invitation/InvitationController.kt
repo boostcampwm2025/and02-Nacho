@@ -166,10 +166,15 @@ class InvitationController(
 
     @PostMapping
     fun createInvitation(
+        authContext: AuthContext,
         @RequestBody request: CreateInvitationRequest
     ): BaseResponse<InvitationResponse> {
+        if (authContext !is AuthContext.Member) {
+            return BaseResponse.error(CommonResponseCode.UNAUTHORIZED)
+        }
+
         return try {
-            val response = invitationService.createInvitation(request)
+            val response = invitationService.createInvitation(authContext.userId, request)
             BaseResponse.success(response)
         } catch (e: IllegalArgumentException) {
             println(e.message)
