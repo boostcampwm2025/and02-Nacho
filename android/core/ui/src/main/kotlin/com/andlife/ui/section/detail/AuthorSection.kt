@@ -97,7 +97,7 @@ fun EmptyAuthorSection(
             Icon(
                 painter = painterResource(designR.drawable.ic_person_24),
                 contentDescription = stringResource(R.string.desc_profile_image),
-                tint = NachoTheme.colorScheme.iconSecondary,
+                tint = NachoTheme.colorScheme.textTertiary,
                 modifier = Modifier
                     .size(NachoIconSize.large)
             )
