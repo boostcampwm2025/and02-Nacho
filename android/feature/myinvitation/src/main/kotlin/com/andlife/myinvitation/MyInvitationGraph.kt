@@ -75,16 +75,10 @@ fun NavGraphBuilder.myInvitationDetailNavGraph(
         ).collectAsStateWithLifecycle()
 
         LaunchedEffect(cardCreated, cardUpdated, invitationUpdated) {
-            if (cardCreated) {
+            if (cardCreated || cardUpdated || invitationUpdated) {
                 viewModel.onEvent(MyInvitationDetailUiEvent.RetryLoad)
                 backStackEntry.savedStateHandle.remove<Boolean>(CREATE_CARD_BY_INVITATION_ID)
-            }
-            if (cardUpdated) {
-                viewModel.onEvent(MyInvitationDetailUiEvent.RetryLoad)
                 backStackEntry.savedStateHandle.remove<Boolean>(UPDATE_CARD)
-            }
-            if (invitationUpdated) {
-                viewModel.onEvent(MyInvitationDetailUiEvent.RetryLoad)
                 backStackEntry.savedStateHandle.remove<Boolean>(INVITATION_UPDATED)
             }
         }
