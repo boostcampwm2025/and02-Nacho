@@ -58,6 +58,6 @@ jobs:
             cd ${{ steps.set-env.outputs.target_dir }}
             export SERVER_PORT=${{ steps.set-env.outputs.server_port }}
             export DB_PORT=${{ steps.set-env.outputs.db_port }}
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            export JWT_SECRET=${{ secrets.JWT_SECRET }}
             docker compose down
             docker compose up --build -d
