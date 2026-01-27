@@ -6,8 +6,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.provider.Settings
 import androidx.activity.result.ActivityResultLauncher
 import java.io.File
 import androidx.compose.foundation.layout.Arrangement
@@ -50,6 +52,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -109,6 +112,7 @@ fun InvitationGuestBookRoute(
 
     val snackbarHostState = remember { SnackbarHostState() }
     var showDeleteDialog by remember { mutableStateOf<Long?>(null) }
+    var showPermissionDialog by remember { mutableStateOf<String?>(null) }
     var scrollToTop by remember { mutableStateOf(false) }
 
     var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -124,6 +128,8 @@ fun InvitationGuestBookRoute(
     ) { isGranted ->
         if (isGranted) {
             viewModel.onEvent(InvitationGuestBookUiEvent.ClickCamera)
+        } else {
+            showPermissionDialog = Manifest.permission.CAMERA
         }
     }
 
@@ -148,6 +154,8 @@ fun InvitationGuestBookRoute(
     ) { isGranted ->
         if (isGranted) {
             viewModel.onEvent(InvitationGuestBookUiEvent.ClickMicrophone)
+        } else {
+            showPermissionDialog = Manifest.permission.RECORD_AUDIO
         }
     }
 
@@ -320,6 +328,54 @@ fun InvitationGuestBookRoute(
         }
     }
 
+    if (showPermissionDialog != null) {
+        NachoDialog(
+            onDismiss = { showPermissionDialog = null }
+        ) {
+            Column(
+                modifier = Modifier.padding(NachoSpacing.xLarge),
+                verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
+            ) {
+                Text(
+                    text = when (showPermissionDialog) {
+                        Manifest.permission.CAMERA -> stringResource(R.string.txt_permission_camera)
+                        Manifest.permission.RECORD_AUDIO -> stringResource(R.string.txt_permission_audio)
+                        else -> stringResource(R.string.txt_permission_etc)
+                    },
+                    color = NachoTheme.colorScheme.textSecondary,
+                    style = NachoTheme.typography.bodyMediumRegular,
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    TextButton(
+                        onClick = { showPermissionDialog = null }
+                    ) {
+                        Text(
+                            text = stringResource(R.string.btn_label_cancel),
+                            color = NachoTheme.colorScheme.textPrimary,
+                            style = NachoTheme.typography.bodyMediumSemiBold,
+                        )
+                    }
+                    TextButton(
+                        onClick = {
+                            showPermissionDialog = null
+                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                            intent.data = "package:${context.packageName}".toUri()
+                            context.startActivity(intent)
+                        }
+                    ) {
+                        Text(
+                            text = stringResource(R.string.btn_label_to_setting),                            color = NachoTheme.colorScheme.brandPrimary,
+                            style = NachoTheme.typography.bodyMediumSemiBold,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     InvitationGuestBookScreen(
         uiState = uiState,
         guestBooks = guestBooks,
@@ -380,6 +436,7 @@ private fun InvitationGuestBookScreen(
             isImVisible -> {
                 focusManager.clearFocus()
             }
+
             uiState.editingGuestBookId != null -> {
                 focusManager.clearFocus()
                 onEvent(InvitationGuestBookUiEvent.CancelEdit)
