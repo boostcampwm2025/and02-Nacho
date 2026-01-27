@@ -99,7 +99,7 @@ private fun InvitationPreviewScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "미리보기 화면입니다",
+                    text = stringResource(R.string.txt_it_is_preview_screen),
                     color = NachoTheme.colorScheme.textOnPrimary,
                     style = NachoTheme.typography.bodyMediumMedium
                 )
