@@ -1,7 +1,6 @@
 package com.andlife.media.audio
 
 import android.content.Context
-import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -24,7 +23,8 @@ data class AudioInfo(
     val url: String,
     val totalDurationMs: Long,
     val currentPositionMs: Long,
-    val isPlaying: Boolean
+    val isPlaying: Boolean,
+    val isLoading: Boolean = false
 )
 
 class AudioPlayerManagerImpl @Inject constructor(
@@ -59,7 +59,9 @@ class AudioPlayerManagerImpl @Inject constructor(
                         Player.STATE_READY -> {
                             _currentAudio.update {
                                 it?.copy(
-                                    totalDurationMs = this@apply.duration
+                                    totalDurationMs = this@apply.duration,
+                                    currentPositionMs = 0L,
+                                    isLoading = false
                                 )
                             }
                         }
@@ -70,7 +72,7 @@ class AudioPlayerManagerImpl @Inject constructor(
                         }
 
                         Player.STATE_BUFFERING -> {
-                            // No-op
+                            _currentAudio.update { it?.copy(isLoading = true) }
                         }
 
                         Player.STATE_IDLE -> {
@@ -105,7 +107,8 @@ class AudioPlayerManagerImpl @Inject constructor(
                     url = url,
                     totalDurationMs = 0L,
                     currentPositionMs = 0L,
-                    isPlaying = false
+                    isPlaying = false,
+                    isLoading = true
                 )
             }
 
@@ -146,7 +149,6 @@ class AudioPlayerManagerImpl @Inject constructor(
     }
 
     override fun release() {
-        Log.d("AudioPlayerManager", "Releasing AudioPlayerManager resources")
         timerJob?.cancel()
         timerJob = null
         exoPlayer?.release()
