@@ -1,6 +1,6 @@
 package com.andlife.home.model
 
-import com.andlife.model.guestbook.AudioPlaybackState
+import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.model.invitation.UpcomingInvitationUiModel
 import com.andlife.ui.base.BaseUiState
 import kotlinx.collections.immutable.ImmutableList
@@ -14,5 +14,5 @@ data class HomeUiState(
 ) : BaseUiState {
 
     val canPlayVideo: Boolean
-        get() = isMediaPlaying && !audioPlaybackState.isAudioLoading && !audioPlaybackState.isAudioPlaying
+        get() = isMediaPlaying && !audioPlaybackState.isLoading && !audioPlaybackState.isPlaying
 }

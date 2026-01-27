@@ -3,7 +3,7 @@ package com.andlife.media.audio
 import kotlinx.coroutines.flow.StateFlow
 
 interface AudioPlayerManager {
-    val currentTrack: StateFlow<AudioInfo?>
+    val currentAudio: StateFlow<AudioPlaybackState?>
     fun togglePlay(url: String)
     fun pause()
     fun stopAll()

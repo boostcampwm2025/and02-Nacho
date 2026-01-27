@@ -221,10 +221,10 @@ fun HomeScreen(
 ) {
     var playVideoIndex by remember { mutableStateOf(-1) }
 
-    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.audioPlaybackState.isAudioPlaying) {
+    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.audioPlaybackState.isPlaying) {
         var pendingIndex = -1
         var lastChangedTime = 0L
-        if (!isMediaActive || uiState.audioPlaybackState.isAudioPlaying) {
+        if (!isMediaActive || uiState.audioPlaybackState.isPlaying) {
             playVideoIndex = -1
             return@LaunchedEffect
         }

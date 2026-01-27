@@ -17,6 +17,7 @@ import com.andlife.domain.util.Result
 import com.andlife.domain.util.ThumbnailGenerator
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
+import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.media.audio.AudioPlayerManager
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.model.guestbook.GuestBookUiModel
@@ -78,18 +79,10 @@ constructor(
     }
 
     private fun observeAudioPlayerState() {
-        audioPlayerManager.currentTrack
-            .onEach { track ->
+        audioPlayerManager.currentAudio
+            .onEach { audioPlaybackState ->
                 updateState {
-                    copy(
-                        audioPlaybackState = audioPlaybackState.copy(
-                            playingAudioUrl = track?.url,
-                            isAudioPlaying = track?.isPlaying ?: false,
-                            audioCurrentPositionMs = track?.currentPositionMs ?: 0L,
-                            audioTotalDurationMs = track?.totalDurationMs ?: 0L,
-                            isAudioLoading = track?.isLoading ?: false,
-                        )
-                    )
+                    copy( audioPlaybackState = audioPlaybackState ?: AudioPlaybackState())
                 }
             }
             .launchIn(viewModelScope)
@@ -125,8 +118,8 @@ constructor(
     }
 
     private fun clickAudioMedia(url: String) {
-        val isCurrentlyPlaying = uiState.value.audioPlaybackState.isAudioPlaying
-        val currentUrl = uiState.value.audioPlaybackState.playingAudioUrl
+        val isCurrentlyPlaying = uiState.value.audioPlaybackState.isPlaying
+        val currentUrl = uiState.value.audioPlaybackState.playingUrl
 
         if (currentUrl == url && isCurrentlyPlaying) {
             audioPlayerManager.togglePlay(url)
@@ -138,7 +131,7 @@ constructor(
     }
 
     private fun clickVideoPlayButton(url: String, itemId: Long) {
-        val isCurrentlyPlaying = uiState.value.audioPlaybackState.isAudioPlaying
+        val isCurrentlyPlaying = uiState.value.audioPlaybackState.isPlaying
         if (!isCurrentlyPlaying) return
         audioPlayerManager.pause()
         videoPlayerPool.playPlayer(url, itemId)

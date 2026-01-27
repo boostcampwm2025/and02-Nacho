@@ -1,6 +1,6 @@
 package com.andlife.invitation.model.guestbook
 
-import com.andlife.model.guestbook.AudioPlaybackState
+import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.ui.base.BaseUiState
 import com.andlife.ui.component.invitation.SelectedMedia
 import kotlinx.collections.immutable.ImmutableList
@@ -39,5 +39,5 @@ data class InvitationGuestBookUiState(
         get() = (textContent.isNotBlank() || selectedMedias.isNotEmpty()) && !isUploading && isContentChanged
 
     val canPlayVideo: Boolean
-        get() = isMediaPlaying && !audioPlaybackState.isAudioLoading && !audioPlaybackState.isAudioPlaying
+        get() = isMediaPlaying && !audioPlaybackState.isLoading && !audioPlaybackState.isPlaying
 }

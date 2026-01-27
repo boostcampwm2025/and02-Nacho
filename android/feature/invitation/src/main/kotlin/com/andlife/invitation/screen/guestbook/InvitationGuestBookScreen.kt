@@ -68,11 +68,11 @@ import com.andlife.invitation.model.guestbook.InvitationGuestBookSideEffect
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiEvent
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiState
 import com.andlife.invitation.viewmodel.InvitationGuestBookViewModel
+import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.media.video.FakeVideoPlayerPool
 import com.andlife.model.common.AuthorUiModel
 import com.andlife.model.common.VideoCandidate
-import com.andlife.model.guestbook.AudioPlaybackState
 import com.andlife.model.guestbook.GuestBookInvitationUiModel
 import com.andlife.model.guestbook.GuestBookMediaUiModel
 import com.andlife.model.guestbook.GuestBookUiModel
@@ -393,10 +393,10 @@ private fun InvitationGuestBookScreen(
         }
     }
 
-    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.audioPlaybackState.isAudioPlaying) {
+    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.audioPlaybackState.isPlaying) {
         var pendingIndex = -1
         var lastChangedTime = 0L
-        if (!isMediaActive || uiState.audioPlaybackState.isAudioPlaying) {
+        if (!isMediaActive || uiState.audioPlaybackState.isPlaying) {
             playVideoIndex = -1
             return@LaunchedEffect
         }

@@ -19,13 +19,27 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class AudioInfo(
-    val url: String,
-    val totalDurationMs: Long,
-    val currentPositionMs: Long,
-    val isPlaying: Boolean,
-    val isLoading: Boolean = false
-)
+//data class AudioInfo(
+//    val url: String,
+//    val totalDurationMs: Long,
+//    val currentPositionMs: Long,
+//    val isPlaying: Boolean,
+//    val isLoading: Boolean = false
+//)
+
+data class AudioPlaybackState(
+    val playingUrl: String? = null,
+    val isPlaying: Boolean = false,
+    val isLoading: Boolean = false,
+    val currentPositionMs: Long = 0L,
+    val totalDurationMs: Long = 0L
+) {
+    fun isAudioPlayingForGuestBook(guestBookAudioUrls: List<String>): Boolean =
+        isPlaying && guestBookAudioUrls.any { it == playingUrl }
+
+    fun isAudioPlayingForUrl(url: String): Boolean =
+        isPlaying && playingUrl == url
+}
 
 class AudioPlayerManagerImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
@@ -35,8 +49,8 @@ class AudioPlayerManagerImpl @Inject constructor(
     private var exoPlayer: ExoPlayer? = null
     private var timerJob: Job? = null
 
-    private val _currentAudio = MutableStateFlow<AudioInfo?>(null)
-    override val currentTrack = _currentAudio.asStateFlow()
+    private val _currentAudio = MutableStateFlow<AudioPlaybackState?>(null)
+    override val currentAudio = _currentAudio.asStateFlow()
 
     private fun preparePlayer() {
         if (exoPlayer != null) return
@@ -91,7 +105,7 @@ class AudioPlayerManagerImpl @Inject constructor(
 
         val current = _currentAudio.value
 
-        if (current?.url == url) {
+        if (current?.playingUrl == url) {
             if (player.isPlaying) {
                 player.pause()
             } else {
@@ -103,8 +117,8 @@ class AudioPlayerManagerImpl @Inject constructor(
             player.clearMediaItems()
 
             _currentAudio.update {
-                AudioInfo(
-                    url = url,
+                AudioPlaybackState(
+                    playingUrl = url,
                     totalDurationMs = 0L,
                     currentPositionMs = 0L,
                     isPlaying = false,

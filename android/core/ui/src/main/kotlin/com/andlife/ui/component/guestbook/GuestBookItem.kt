@@ -57,14 +57,13 @@ import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
 import coil3.compose.SubcomposeAsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.media.video.AutoVideoPlayer
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.model.common.AuthorUiModel
-import com.andlife.model.guestbook.AudioPlaybackState
 import com.andlife.model.guestbook.GuestBookInvitationUiModel
 import com.andlife.model.guestbook.GuestBookMediaUiModel
 import com.andlife.model.guestbook.GuestBookUiModel
@@ -621,10 +620,10 @@ private fun GuestBookItemAudioSection(
             GuestBookAudioItem(
                 audio = audio,
                 isAudioPlaying = audioPlaybackState.isAudioPlayingForGuestBook(audioMedias.map { it.url })
-                    && (audio.url == audioPlaybackState.playingAudioUrl),
-                isCurrentAudio = audio.url == audioPlaybackState.playingAudioUrl,
-                audioCurrentPositionMs = audioPlaybackState.audioCurrentPositionMs,
-                audioDurationMs = audioPlaybackState.audioTotalDurationMs,
+                    && (audio.url == audioPlaybackState.playingUrl),
+                isCurrentAudio = audio.url == audioPlaybackState.playingUrl,
+                audioCurrentPositionMs = audioPlaybackState.currentPositionMs,
+                audioDurationMs = audioPlaybackState.totalDurationMs,
                 onAudioMediaClick = onAudioMediaClick,
             )
         }
