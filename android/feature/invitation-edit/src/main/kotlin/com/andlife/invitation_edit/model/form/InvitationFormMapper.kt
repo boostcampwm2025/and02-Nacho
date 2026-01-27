@@ -6,7 +6,7 @@ import com.andlife.domain.model.invitation.InvitationSaveParam
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
-fun InvitationFormUiModel.toCreateParam(
+fun InvitationFormUiModel.toSaveParam(
     thumbnails: List<String>,
     date: LocalDate,
     startTime: LocalTime,
@@ -27,12 +27,12 @@ fun InvitationFormUiModel.toCreateParam(
         locationGuide = placeGuide.ifBlank { null },
         invitationCard = invitationCard,
         announcements = announcement.mapIndexed { index, announcementUiModel ->
-            announcementUiModel.toCreateParam(index)
+            announcementUiModel.toSaveParam(index)
         }
     )
 }
 
-fun AnnouncementUiModel.toCreateParam(index: Int): AnnouncementSaveParam {
+fun AnnouncementUiModel.toSaveParam(index: Int): AnnouncementSaveParam {
     return AnnouncementSaveParam(
         title = title,
         content = content,

@@ -59,6 +59,4 @@ sealed interface InvitationFormUiEvent : BaseUiEvent {
     data object OnClickBack : InvitationFormUiEvent
 
     data object OnClickSave : InvitationFormUiEvent
-
-    data object OnClickEditCard : InvitationFormUiEvent
 }
