@@ -19,14 +19,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-//data class AudioInfo(
-//    val url: String,
-//    val totalDurationMs: Long,
-//    val currentPositionMs: Long,
-//    val isPlaying: Boolean,
-//    val isLoading: Boolean = false
-//)
-
 data class AudioPlaybackState(
     val playingUrl: String? = null,
     val isPlaying: Boolean = false,
@@ -141,14 +133,22 @@ class AudioPlayerManagerImpl @Inject constructor(
         timerJob?.cancel()
 
         timerJob = applicationScope.launch {
-            do {
+//            do {
+//                _currentAudio.update {
+//                    it?.copy(
+//                        currentPositionMs = exoPlayer?.currentPosition ?: 0L
+//                    )
+//                }
+//                delay(100L)
+//            } while (_currentAudio.value?.isPlaying == true && exoPlayer?.isPlaying == true)
+            while (_currentAudio.value?.isPlaying == true && exoPlayer?.isPlaying == true) {
                 _currentAudio.update {
                     it?.copy(
                         currentPositionMs = exoPlayer?.currentPosition ?: 0L
                     )
                 }
-                delay(10L)
-            } while (_currentAudio.value?.isPlaying == true && exoPlayer?.isPlaying == true)
+                delay(100L)
+            }
         }
     }
 
