@@ -119,7 +119,7 @@ private fun InvitationPreviewContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(NachoTheme.colorScheme.backgroundTertiary)
+            .background(NachoTheme.colorScheme.backgroundPrimary)
             .verticalScroll(scrollState),
     ) {
         // ImageSection

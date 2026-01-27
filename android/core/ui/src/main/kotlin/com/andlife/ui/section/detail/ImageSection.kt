@@ -123,7 +123,8 @@ fun EmptyImageSection(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(16f / 9f),
+            .aspectRatio(16f / 9f)
+            .background(NachoTheme.colorScheme.backgroundSecondary),
         contentAlignment = Alignment.Center,
     ) {
         Column(
