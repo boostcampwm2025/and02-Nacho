@@ -40,7 +40,8 @@ fun CardSection(
     cardUiModel: CardUiModel?,
     onClickCreatedCard: () -> Unit,
     modifier: Modifier = Modifier,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    isPreviewMode: Boolean = false,
 ) {
     val defaultColor = NachoTheme.colorScheme.textPrimary
     Box(modifier = modifier.background(NachoTheme.colorScheme.backgroundPrimary)) {
@@ -57,23 +58,28 @@ fun CardSection(
                     color = NachoTheme.colorScheme.textPrimary,
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                TextButton(
-                    onClick = onClickCreatedCard,
-                    enabled = !isLoading
-                ) {
-                    Icon(
-                        imageVector = if (cardUiModel == null) Icons.Default.Add else Icons.Default.Edit,
-                        contentDescription = if (cardUiModel == null) stringResource(R.string.desc_create_card)
-                        else stringResource(R.string.desc_update_card),
-                        tint = NachoTheme.colorScheme.brandPrimary,
-                    )
-                    Text(
-                        text = if (cardUiModel == null) stringResource(R.string.txt_create_card)
-                        else stringResource(R.string.txt_update_card),
-                        style = NachoTheme.typography.bodyMediumMedium,
-                        color = NachoTheme.colorScheme.brandPrimary,
-                    )
+                if (!isPreviewMode) {
+                    TextButton(
+                        onClick = onClickCreatedCard,
+                        enabled = !isLoading
+                    ) {
+                        Icon(
+                            imageVector = if (cardUiModel == null) Icons.Default.Add else Icons.Default.Edit,
+                            contentDescription = if (cardUiModel == null) stringResource(R.string.desc_create_card)
+                            else stringResource(R.string.desc_update_card),
+                            tint = NachoTheme.colorScheme.brandPrimary,
+                        )
+                        Text(
+                            text = if (cardUiModel == null) stringResource(R.string.txt_create_card)
+                            else stringResource(R.string.txt_update_card),
+                            style = NachoTheme.typography.bodyMediumMedium,
+                            color = NachoTheme.colorScheme.brandPrimary,
+                        )
+                    }
                 }
+            }
+            if (isPreviewMode) {
+                Spacer(modifier = Modifier.height(NachoSpacing.small))
             }
             val card = cardUiModel
             if (card != null) {

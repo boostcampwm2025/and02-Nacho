@@ -184,6 +184,7 @@ private fun InvitationPreviewContent(
             CardSection(
                 cardUiModel = model.card,
                 onClickCreatedCard = {},
+                isPreviewMode = true,
             )
         }
 
