@@ -40,6 +40,7 @@ class InvitationController(
     ): BaseResponse<JoinResponse> {
         val result = when (authContext) {
             is AuthContext.Member -> {
+                println(">>> [멤버 진입] UserID: ${authContext.userId}")
                 invitationService.joinInvitation(
                     invitationId = invitationId,
                     userId = authContext.userId,
@@ -47,6 +48,7 @@ class InvitationController(
                 )
             }
             is AuthContext.Guest -> {
+                println(">>> [게스트 진입] 초대장 목록: ${authContext.invitationIds}")
                 invitationService.joinInvitation(
                     invitationId = invitationId,
                     userId = null,

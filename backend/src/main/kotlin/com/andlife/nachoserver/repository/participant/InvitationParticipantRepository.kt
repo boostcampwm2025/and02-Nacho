@@ -12,10 +12,6 @@ import java.time.LocalTime
 interface InvitationParticipantRepository : JpaRepository<InvitationParticipant, Long> {
 
     // 전체 목록
-    @Query(
-        value = "SELECT p FROM InvitationParticipant p JOIN FETCH p.invitation WHERE p.user.id = :userId",
-        countQuery = "SELECT count(p) FROM InvitationParticipant p WHERE p.user.id = :userId"
-    )
     fun existsByInvitationIdAndUserId(invitationId: Long, userId: Long): Boolean
 
     @Query(

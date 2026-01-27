@@ -65,6 +65,7 @@ class InvitationDetailViewModel @Inject constructor(
     }
 
     private suspend fun loadInvitation() {
+        Log.d("InvitationDetailViewModel", "일반 데이터 조회")
         updateState { copy(isLoading = true, isError = false, editableCache = null) }
 
         invitationRepository.getInvitation(invitationId)

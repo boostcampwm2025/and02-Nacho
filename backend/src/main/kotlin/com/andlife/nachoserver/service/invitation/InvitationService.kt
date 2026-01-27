@@ -56,7 +56,9 @@ class InvitationService(
                 val userProxy = userRepository.getReferenceById(userId)
                 participantRepository.save(InvitationParticipant(invitation = invitation, user = userProxy))
             }
-            return JoinResponse(invitationId = invitationId, isMember = true, alreadyJoined = isAlreadyJoined)
+            val response = JoinResponse(invitationId = invitationId, isMember = true, alreadyJoined = isAlreadyJoined)
+            println(">>> [Join 성공 직전] $response")
+            return response
         }
 
         val alreadyHasAccess = guestInvitationIds.contains(invitationId)
