@@ -13,6 +13,7 @@ import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 import androidx.core.graphics.scale
+import java.io.ByteArrayInputStream
 
 private object Constants {
     const val COMPRESS_QUALITY = 80
@@ -43,13 +44,13 @@ class ImageCompressorImpl @Inject constructor(
 
             ensureActive()
 
-            val exifOrientation = contentResolver.openInputStream(uri)?.use { inputStream ->
+            val exifOrientation = ByteArrayInputStream(inputBytes).use { inputStream ->
                 val exif = ExifInterface(inputStream)
                 exif.getAttributeInt(
                     ExifInterface.TAG_ORIENTATION,
                     ExifInterface.ORIENTATION_NORMAL
                 )
-            } ?: ExifInterface.ORIENTATION_NORMAL
+            }
 
             withContext(Dispatchers.Default) {
                 val bitmap = BitmapFactory.decodeByteArray(inputBytes, 0, inputBytes.size)
