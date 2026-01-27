@@ -17,11 +17,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.isImeVisible
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -45,13 +42,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -111,9 +106,11 @@ fun InvitationGuestBookRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val guestBooks = viewModel.guestBooksPagingFlow.collectAsLazyPagingItems()
 
-    val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
     val res = LocalResources.current
+    val focusManager = LocalFocusManager.current
+
+    val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -182,15 +179,18 @@ fun InvitationGuestBookRoute(
             }
 
             is InvitationGuestBookSideEffect.CreateGuestBookSuccess -> {
-                viewModel.invalidateGuestBooks()
+                focusManager.clearFocus()
                 scrollToTop = true
+                viewModel.invalidateGuestBooks()
             }
 
             is InvitationGuestBookSideEffect.UpdateGuestBookSuccess -> {
+                focusManager.clearFocus()
                 viewModel.invalidateGuestBooks()
             }
 
             is InvitationGuestBookSideEffect.DeleteGuestBookSuccess -> {
+                focusManager.clearFocus()
                 viewModel.invalidateGuestBooks()
             }
 
@@ -370,6 +370,7 @@ fun InvitationGuestBookRoute(
         onEvent = viewModel::onEvent,
         isMediaActive = isMediaActive,
         navigateBackWithCleanup = navigateBackWithCleanup,
+        focusManager = focusManager,
         snackbarHostState = snackbarHostState,
         lazyListState = lazyListState,
         videoPlayerPool = viewModel.videoPlayerPool,
@@ -389,6 +390,7 @@ private fun InvitationGuestBookScreen(
     onEvent: (InvitationGuestBookUiEvent) -> Unit,
     isMediaActive: Boolean,
     navigateBackWithCleanup: () -> Unit,
+    focusManager: FocusManager,
     snackbarHostState: SnackbarHostState,
     lazyListState: LazyListState,
     videoPlayerPool: AutoVideoPlayerPool,
@@ -398,7 +400,6 @@ private fun InvitationGuestBookScreen(
     audioPermissionLauncher: ActivityResultLauncher<String>,
     modifier: Modifier = Modifier,
 ) {
-    val focusManager = LocalFocusManager.current
     val isImVisible = WindowInsets.isImeVisible
 
     var playVideoIndex by remember { mutableIntStateOf(-1) }
@@ -592,10 +593,8 @@ private fun GuestBookFormSection(
 ) {
     InvitationGuestBookForm(
         modifier = modifier
-            .padding(
-                horizontal = NachoSpacing.large,
-                //vertical = NachoSpacing.xSmall,
-            ),
+            .fillMaxWidth()
+            .padding(horizontal = NachoSpacing.large),
         selectedMedias = uiState.selectedMedias,
         textContent = uiState.textContent,
         isUploading = uiState.isUploading,
@@ -663,6 +662,7 @@ private fun InvitationGuestBookEmptyPreview() {
             snackbarHostState = SnackbarHostState(),
             lazyListState = rememberLazyListState(),
             onDeleteMenuClick = {},
+            focusManager =  LocalFocusManager.current,
             context = LocalContext.current,
             cameraPermissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestPermission()

@@ -35,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
@@ -89,9 +90,11 @@ fun MyInvitationGuestBookRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val guestBooks = viewModel.guestBooksPagingFlow.collectAsLazyPagingItems()
 
-    val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
     val res = LocalResources.current
+    val focusManager = LocalFocusManager.current
+
+    val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -120,15 +123,18 @@ fun MyInvitationGuestBookRoute(
             }
 
             is MyInvitationGuestBookSideEffect.CreateGuestBookSuccess -> {
+                focusManager.clearFocus()
                 scrollToTop = true
                 viewModel.invalidateGuestBooks()
             }
 
             is MyInvitationGuestBookSideEffect.UpdateGuestBookSuccess -> {
+                focusManager.clearFocus()
                 viewModel.invalidateGuestBooks()
             }
 
             is MyInvitationGuestBookSideEffect.DeleteGuestBookSuccess -> {
+                focusManager.clearFocus()
                 viewModel.invalidateGuestBooks()
             }
 
@@ -257,6 +263,7 @@ fun MyInvitationGuestBookRoute(
         onEvent = viewModel::onEvent,
         isMediaActive = isMediaActive,
         navigateBackWithCleanup = navigateBackWithCleanup,
+        focusManager = focusManager,
         snackbarHostState = snackbarHostState,
         lazyListState = lazyListState,
         videoPlayerPool = viewModel.videoPlayerPool,
@@ -273,13 +280,13 @@ private fun InvitationGuestBookScreen(
     onEvent: (MyInvitationGuestBookUiEvent) -> Unit,
     isMediaActive: Boolean,
     navigateBackWithCleanup: () -> Unit,
+    focusManager: FocusManager,
     snackbarHostState: SnackbarHostState,
     lazyListState: LazyListState,
     videoPlayerPool: AutoVideoPlayerPool,
     onDeleteMenuClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val focusManager = LocalFocusManager.current
     val isImVisible = WindowInsets.isImeVisible
 
     var playVideoIndex by remember { mutableIntStateOf(-1) }
@@ -464,14 +471,12 @@ private fun GuestBookFormSection(
     uiState: MyInvitationGuestBookUiState,
     onEvent: (MyInvitationGuestBookUiEvent) -> Unit,
     onFocusChanged: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     InvitationGuestBookForm(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(
-                horizontal = NachoSpacing.large,
-                vertical = NachoSpacing.xSmall,
-            ),
+            .padding(horizontal = NachoSpacing.large),
         selectedMedias = uiState.selectedMedias,
         textContent = uiState.textContent,
         isUploading = uiState.isUploading,
@@ -507,6 +512,7 @@ private fun InvitationGuestBookEmptyPreview() {
             onEvent = {},
             isMediaActive = true,
             navigateBackWithCleanup = {},
+            focusManager = LocalFocusManager.current,
             videoPlayerPool = FakeVideoPlayerPool(),
             snackbarHostState = SnackbarHostState(),
             lazyListState = rememberLazyListState(),
