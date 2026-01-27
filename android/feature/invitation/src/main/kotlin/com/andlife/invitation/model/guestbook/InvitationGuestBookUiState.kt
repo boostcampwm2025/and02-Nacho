@@ -37,4 +37,7 @@ data class InvitationGuestBookUiState(
 
     val isSubmittable: Boolean
         get() = (textContent.isNotBlank() || selectedMedias.isNotEmpty()) && !isUploading && isContentChanged
+
+    val canPlayVideo: Boolean
+        get() = isMediaPlaying && !audioPlaybackState.isAudioLoading && !audioPlaybackState.isAudioPlaying
 }

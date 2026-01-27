@@ -38,8 +38,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -90,22 +88,9 @@ constructor(
                             isAudioPlaying = track?.isPlaying ?: false,
                             audioCurrentPositionMs = track?.currentPositionMs ?: 0L,
                             audioTotalDurationMs = track?.totalDurationMs ?: 0L,
+                            isAudioLoading = track?.isLoading ?: false,
                         )
                     )
-                }
-            }
-            .launchIn(viewModelScope)
-
-        combine(
-            uiState.map { it.audioPlaybackState.isAudioPlaying },
-            uiState.map { it.isMediaPlaying }
-        ) { isAudioPlaying, isMediaPlaying ->
-            isAudioPlaying to isMediaPlaying
-        }
-            .distinctUntilChanged()
-            .onEach { (isAudioPlaying, isMediaPlaying) ->
-                if (!isAudioPlaying && isMediaPlaying) {
-                    videoPlayerPool.resumeLastPlayed()
                 }
             }
             .launchIn(viewModelScope)

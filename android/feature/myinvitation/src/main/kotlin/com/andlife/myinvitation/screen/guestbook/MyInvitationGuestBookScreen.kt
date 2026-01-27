@@ -398,7 +398,7 @@ private fun InvitationGuestBookScreen(
                                     .animateItem(),
                                 guestBook = guestBook,
                                 videoPlayerPool = videoPlayerPool,
-                                shouldPlayVideo = uiState.isMediaPlaying && (index == playVideoIndex),
+                                shouldPlayVideo = uiState.canPlayVideo && (index == playVideoIndex),
                                 audioPlaybackState = uiState.audioPlaybackState,
                                 isEditing = uiState.editingGuestBookId == guestBook.id,
                                 onEditClick = { onEvent(MyInvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
