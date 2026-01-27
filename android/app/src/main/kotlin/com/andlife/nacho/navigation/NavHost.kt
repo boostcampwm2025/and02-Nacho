@@ -112,10 +112,9 @@ fun NachoNavHost(
             )
 
             invitationEditNavGraph(
+                navController = navigator.navController,
                 onNavigateToAddressSearch = navigator::navigateToAddressSearch,
                 onNavigateBack = navigator::navigatePopBackStack,
-                onNavigateCreateCard = navigator::navigateToCreateCard,
-                onNavigateToInvitationDetail = navigator::navigateToMyInvitationDetail
             )
 
             addressSearchNavGraph(

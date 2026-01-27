@@ -13,6 +13,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.andlife.model.util.NavigationKeyConstant.CREATE_CARD_BY_INVITATION_ID
+import com.andlife.model.util.NavigationKeyConstant.INVITATION_UPDATED
 import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiEvent
 import com.andlife.myinvitation.screen.MyInvitationDetailRoute
@@ -69,7 +70,11 @@ fun NavGraphBuilder.myInvitationDetailNavGraph(
             UPDATE_CARD, false
         ).collectAsStateWithLifecycle()
 
-        LaunchedEffect(cardCreated, cardUpdated) {
+        val invitationUpdated by backStackEntry.savedStateHandle.getStateFlow<Boolean>(
+            INVITATION_UPDATED, false
+        ).collectAsStateWithLifecycle()
+
+        LaunchedEffect(cardCreated, cardUpdated, invitationUpdated) {
             if (cardCreated) {
                 viewModel.onEvent(MyInvitationDetailUiEvent.RetryLoad)
                 backStackEntry.savedStateHandle.remove<Boolean>(CREATE_CARD_BY_INVITATION_ID)
@@ -77,6 +82,10 @@ fun NavGraphBuilder.myInvitationDetailNavGraph(
             if (cardUpdated) {
                 viewModel.onEvent(MyInvitationDetailUiEvent.RetryLoad)
                 backStackEntry.savedStateHandle.remove<Boolean>(UPDATE_CARD)
+            }
+            if (invitationUpdated) {
+                viewModel.onEvent(MyInvitationDetailUiEvent.RetryLoad)
+                backStackEntry.savedStateHandle.remove<Boolean>(INVITATION_UPDATED)
             }
         }
 
