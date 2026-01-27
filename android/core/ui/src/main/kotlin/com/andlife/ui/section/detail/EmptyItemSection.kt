@@ -56,7 +56,7 @@ fun EmptyItemSection(
             )
             Text(
                 text = placeholder,
-                style = NachoTheme.typography.bodyMediumMedium,
+                style = NachoTheme.typography.bodyMediumRegular,
                 color = NachoTheme.colorScheme.textTertiary,
             )
         }

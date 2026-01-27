@@ -101,7 +101,7 @@ private fun InvitationPreviewScreen(
                 Text(
                     text = stringResource(R.string.txt_it_is_preview_screen),
                     color = NachoTheme.colorScheme.textOnPrimary,
-                    style = NachoTheme.typography.bodyMediumMedium
+                    style = NachoTheme.typography.bodyMediumRegular,
                 )
             }
         }

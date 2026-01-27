@@ -112,7 +112,7 @@ fun EmptyDateSection(
             )
             Text(
                 text = datePlaceholder,
-                style = NachoTheme.typography.bodyLargeMedium,
+                style = NachoTheme.typography.bodyMediumRegular,
                 color = NachoTheme.colorScheme.textTertiary,
                 modifier = Modifier.alpha(0.6f),
             )
