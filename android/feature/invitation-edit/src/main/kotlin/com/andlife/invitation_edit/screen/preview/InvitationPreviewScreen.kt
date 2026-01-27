@@ -1,18 +1,23 @@
 package com.andlife.invitation_edit.screen.preview
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.preview.PreviewTheme
+import com.andlife.designsystem.theme.NachoSpacing
 import kotlinx.collections.immutable.toImmutableList
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
@@ -70,12 +75,36 @@ private fun InvitationPreviewScreen(
             )
         },
     ) { paddingValues ->
-        InvitationPreviewContent(
-            uiState = uiState,
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-        )
+        ) {
+            InvitationPreviewContent(
+                uiState = uiState,
+                modifier = Modifier.fillMaxSize()
+            )
+
+            // 하단 고정 미리보기 안내 박스
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(NachoSpacing.large)
+                    .background(
+                        color = NachoTheme.colorScheme.backgroundOverlay,
+                        shape = NachoTheme.shapes.small,
+                    )
+                    .padding(NachoSpacing.large),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "미리보기 화면입니다",
+                    color = NachoTheme.colorScheme.textOnPrimary,
+                    style = NachoTheme.typography.bodyMediumMedium
+                )
+            }
+        }
     }
 }
 
