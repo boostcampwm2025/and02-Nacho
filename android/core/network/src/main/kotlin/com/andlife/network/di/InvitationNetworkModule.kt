@@ -1,6 +1,7 @@
 package com.andlife.network.di
 
 import com.andlife.network.BuildConfig
+import com.andlife.network.api.auth.AuthService
 import com.andlife.network.api.guestbook.GuestBookService
 import com.andlife.network.api.invitation.InvitationService
 import com.andlife.network.api.media.MediaService
@@ -97,4 +98,10 @@ object InvitationNetworkModule {
     fun provideInvitationService(
         @Invitation retrofit: Retrofit,
     ): InvitationService = retrofit.create(InvitationService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideAuthService(
+        @Invitation retrofit: Retrofit,
+    ): AuthService = retrofit.create(AuthService::class.java)
 }
