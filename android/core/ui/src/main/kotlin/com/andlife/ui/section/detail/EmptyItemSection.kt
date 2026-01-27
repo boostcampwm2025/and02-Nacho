@@ -27,6 +27,7 @@ fun EmptyItemSection(
         modifier =
             modifier
                 .fillMaxWidth()
+                .background(NachoTheme.colorScheme.backgroundPrimary)
                 .padding(vertical = NachoSpacing.large, horizontal = NachoSpacing.medium),
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
