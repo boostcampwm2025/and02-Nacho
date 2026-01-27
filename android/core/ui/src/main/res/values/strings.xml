@@ -103,9 +103,19 @@
     <string name="desc_invitation_image">초대장 상세 이미지</string>
     <string name="desc_invitation_image_error">초대장 상세 이미지 에러</string>
     <string name="desc_image">이미지</string>
+    <string name="txt_image_placeholder">대표 이미지를 추가해주세요</string>
+    <!--  TitleSection  -->
+    <string name="txt_title_placeholder">제목을 입력해주세요</string>
     <!--  AuthorSection  -->
     <string name="desc_profile_image">프로필 이미지</string>
     <string name="txt_host">주최자</string>
+    <string name="txt_author_placeholder">주최자를 입력해주세요</string>
+    <!--  DateSection  -->
+    <string name="desc_date_time">날짜 및 시간</string>
+    <string name="txt_datetime_placeholder">날짜와 시간을 입력해주세요</string>
+    <!--  AddressSection  -->
+    <string name="desc_location">장소</string>
+    <string name="txt_address_placeholder">장소를 입력해주세요</string>
     <!--  InvitationCardSection  -->
     <string name="txt_card_create">초대카드 생성</string>
     <string name="txt_card_edit">초대카드 편집</string>
@@ -118,18 +128,7 @@
     <string name="txt_place_guide_title">오시는 길</string>
     <string name="txt_map_loading">지도 로딩중...</string>
     <string name="btn_open_map_app">지도 앱으로 열기</string>
-    <!-- AddressSection  -->
-    <string name="desc_location">장소</string>
-    <!-- DateSection -->
-    <string name="desc_date_time">날짜 및 시간</string>
-    <!-- EmptyItemSection -->
+    <!--  EmptyItemSection  -->
     <string name="desc_info">정보</string>
-
-    <!-- Preview placeholders -->
-    <string name="txt_image_placeholder">대표 이미지를 추가해주세요</string>
-    <string name="txt_title_placeholder">제목을 입력해주세요</string>
-    <string name="txt_author_placeholder">주최자를 입력해주세요</string>
-    <string name="txt_datetime_placeholder">날짜와 시간을 입력해주세요</string>
-    <string name="txt_address_placeholder">장소를 입력해주세요</string>
 
 </resources>
