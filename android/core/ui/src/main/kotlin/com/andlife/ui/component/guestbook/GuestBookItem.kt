@@ -1,7 +1,9 @@
 package com.andlife.ui.component.guestbook
 
 import androidx.annotation.OptIn
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -17,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -56,6 +59,7 @@ import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
 import coil3.compose.SubcomposeAsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
+import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
@@ -614,8 +618,8 @@ private fun GuestBookItemAudioSection(
                 isAudioPlaying = audioPlaybackState.isAudioPlayingForGuestBook(audioMedias.map { it.url })
                     && (audio.url == audioPlaybackState.playingUrl),
                 isCurrentAudio = audio.url == audioPlaybackState.playingUrl,
-                audioCurrentPositionMs = audioPlaybackState.currentPositionMs,
-                audioDurationMs = audioPlaybackState.totalDurationMs,
+                currentPositionMs = audioPlaybackState.currentPositionMs,
+                totalDurationMs = audioPlaybackState.totalDurationMs,
                 onAudioMediaClick = onAudioMediaClick,
             )
         }
@@ -627,30 +631,36 @@ private fun GuestBookAudioItem(
     audio: GuestBookMediaUiModel,
     isAudioPlaying: Boolean,
     isCurrentAudio: Boolean,
-    audioCurrentPositionMs: Long?,
-    audioDurationMs: Long?,
+    currentPositionMs: Long,
+    totalDurationMs: Long,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val playIconResId =
-        if (isAudioPlaying) {
-            R.drawable.ic_pause_filled_24
-        } else {
-            R.drawable.ic_play_arrow_24
-        }
-
-    val remainingDurationMs = if (isCurrentAudio && audioCurrentPositionMs != null && audioDurationMs != null) {
-        (audioDurationMs - audioCurrentPositionMs).coerceAtLeast(0L)
+    val playIconResId = if (isAudioPlaying) {
+        R.drawable.ic_pause_filled_24
     } else {
-        (audio.durationSeconds?.times(1000))?.toLong() ?: 0L
+        R.drawable.ic_play_arrow_24
     }
 
-    val progress = if (isCurrentAudio && audioDurationMs != null && audioDurationMs > 0) {
-        val played = audioCurrentPositionMs ?: 0L
-        (played.toFloat() / audioDurationMs.toFloat()).coerceIn(0f, 1f)
+    val originalDurationMs = (audio.durationSeconds?.times(1000))?.toLong() ?: 0L
+    val isReady = isCurrentAudio && totalDurationMs > 0
+
+    val remainingDurationMs = if (isReady) {
+        (totalDurationMs - currentPositionMs).coerceAtLeast(0L)
+    } else {
+        originalDurationMs
+    }
+
+    val progress = if (isReady) {
+        (currentPositionMs.toFloat() / totalDurationMs.toFloat()).coerceIn(0f, 1f)
     } else {
         0f
     }
+
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = if (progress == 0f) snap() else tween(durationMillis = 100, easing = LinearEasing)
+    )
 
     Row(
         modifier =
@@ -667,7 +677,7 @@ private fun GuestBookAudioItem(
         Box(
             modifier =
                 Modifier
-                    .size(48.dp)
+                    .size(NachoIconSize.xLarge)
                     .background(
                         color = NachoTheme.colorScheme.brandPrimary,
                         shape = CircleShape,
@@ -680,25 +690,24 @@ private fun GuestBookAudioItem(
                 tint = NachoTheme.colorScheme.iconTertiary,
             )
         }
-        Column(modifier = Modifier.weight(1f)) {
-            LinearProgressIndicator(
-                progress = { progress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .clip(NachoTheme.shapes.small),
-                color = NachoTheme.colorScheme.brandPrimary,
-                trackColor = NachoTheme.colorScheme.backgroundBorder,
-                gapSize = 0.dp,
-                strokeCap = StrokeCap.Square,
-                drawStopIndicator = { /* No-op */ },
-            )
-            Text(
-                text = (remainingDurationMs / 1000).toInt().toFormatDuration(),
-                style = NachoTheme.typography.bodySmallRegular,
-                color = NachoTheme.colorScheme.textSecondary,
-            )
-        }
+        LinearProgressIndicator(
+            progress = { animatedProgress },
+            modifier = Modifier
+                .weight(1f)
+                .height(6.dp)
+                .clip(NachoTheme.shapes.small),
+            color = NachoTheme.colorScheme.brandPrimary,
+            trackColor = NachoTheme.colorScheme.backgroundBorder,
+            gapSize = 0.dp,
+            strokeCap = StrokeCap.Square,
+            drawStopIndicator = { /* No-op */ },
+        )
+        Text(
+            text = (remainingDurationMs / 1000).toInt().toFormatDuration(),
+            style = NachoTheme.typography.bodySmallRegular,
+            color = NachoTheme.colorScheme.textSecondary,
+            modifier = Modifier.widthIn(min = 40.dp)
+        )
         Surface(
             modifier = Modifier.size(40.dp),
             shape = CircleShape,
