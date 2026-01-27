@@ -2,6 +2,7 @@ package com.andlife.invitation
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
@@ -36,11 +37,13 @@ fun NavController.navigateToInvitationDetail(
 fun NavGraphBuilder.invitationNavGraph(
     paddingValues: PaddingValues,
     onNavigateToDetail: (Long) -> Unit,
+    snackbarHostState: SnackbarHostState,
 ) {
     composable<Invitation> {
         InvitationRoute(
             onNavigateToDetail = onNavigateToDetail,
             modifier = Modifier.padding(paddingValues),
+            snackbarHostState = snackbarHostState
         )
     }
 }

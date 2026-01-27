@@ -42,6 +42,8 @@
     </string-array>
     <string name="desc_invitation_create">초대장 생성</string>
 
+    <string name="msg_refresh_failure">새로고침에 실패했습니다.</string>
+
     <string name="txt_leave_invitation_title">초대장 나가기</string>
     <string name="txt_leave_invitation_message">초대장에서 나가시겠습니까?\n나간 후에는 초대 링크가 있어야 다시 입장할 수 있습니다.</string>
     <string name="txt_confirm">확인</string>
