@@ -79,7 +79,6 @@ class InvitationEditViewModel @Inject constructor(
                     copy(
                         invitationId = invitation.id,
                         cardId = invitation.invitationCard?.id,
-                        originalCard = invitation.invitationCard?.card,
                         invitationFormUiModel = invitationFormUiModel.copy(
                             title = invitation.title,
                             author = invitation.displayHostName,
@@ -230,7 +229,7 @@ class InvitationEditViewModel @Inject constructor(
                 date = date,
                 startTime = startTime,
                 endTime = uiModel.endTime?.toLocalTime(),
-                invitationCard = uiState.value.originalCard,
+                invitationCard = null,
             )
 
             invitationRepository.updateInvitation(invitationId, updateParam)
@@ -246,20 +245,28 @@ class InvitationEditViewModel @Inject constructor(
     }
 
     private suspend fun processThumbnails(currentImages: List<ThumbnailImageUiModel>): Result<List<String>, DataError> {
-        val newImages = currentImages.filter { it.id.isEmpty() }
+        val newImages = currentImages.filter { !it.id.startsWith(PREFIX_EXISTING_IMAGE) }
 
         if (newImages.isEmpty()) {
             return Result.Success(currentImages.map { it.url })
         }
 
-        val mediaFiles = mediaFileProvider.createFromUris(newImages.map { it.url })
+        val newImageUrls = newImages.map { it.url }
+        val mediaFiles = mediaFileProvider.createFromUris(newImageUrls)
+
+        if (mediaFiles.isEmpty()) return Result.Error(DataError.LocalImage.NotFound)
+
         val uploadResult = mediaUploader.uploadMedias(mediaFiles)
 
         return when (uploadResult) {
             is Result.Success -> {
-                val uploadedUrls = uploadResult.data
-                var newUploadIndex = 0
+                val uploadedUrls = uploadResult.data.filterNotNull()
 
+                if (uploadedUrls.size != newImages.size) {
+                    return Result.Error(DataError.Network.UNKNOWN)
+                }
+
+                var newUploadIndex = 0
                 val finalUrls = currentImages.mapNotNull { image ->
                     if (image.id.startsWith(PREFIX_EXISTING_IMAGE)) {
                         image.url
@@ -274,7 +281,6 @@ class InvitationEditViewModel @Inject constructor(
                     Result.Success(finalUrls)
                 }
             }
-
             is Result.Error -> Result.Error(uploadResult.error)
         }
     }
