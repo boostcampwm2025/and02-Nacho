@@ -5,13 +5,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -73,6 +71,7 @@ import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.invitation.InvitationGuestBookForm
 import com.andlife.ui.component.paging.PagingStateContent
 import com.andlife.ui.util.collectWithLifecycle
+import com.andlife.ui.util.imeWithoutNavBars
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
@@ -377,88 +376,84 @@ private fun InvitationGuestBookScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
-        bottomBar = {
-            Surface(
-                tonalElevation = NachoElevation.medium,
-                shadowElevation = NachoElevation.large,
-                color = NachoTheme.colorScheme.backgroundPrimary
-            ) {
-                Box(modifier = Modifier.imePadding()) {
-                    GuestBookFormSection(
-                        uiState = uiState,
-                        onEvent = onEvent,
-                        onFocusChanged = { focused ->
-                            isTextFieldFocused = focused
-                        }
-                    )
-                }
-            }
-        }
     ) { innerPadding ->
-        PullToRefreshBox(
-            isRefreshing = uiState.isRefreshing,
-            onRefresh = { onEvent(MyInvitationGuestBookUiEvent.Refresh) },
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = innerPadding.calculateBottomPadding())
-        ) {
-            if (isMediaActive) {
-                val isInitialLoading = guestBooks.loadState.refresh is LoadState.Loading && guestBooks.itemCount == 0
+        innerPadding
+        Column(modifier = Modifier.fillMaxSize()) {
+            PullToRefreshBox(
+                isRefreshing = uiState.isRefreshing,
+                onRefresh = { onEvent(MyInvitationGuestBookUiEvent.Refresh) },
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                if (isMediaActive) {
+                    val isInitialLoading = guestBooks.loadState.refresh is LoadState.Loading && guestBooks.itemCount == 0
 
-                if (isInitialLoading || guestBooks.itemCount == 0) {
-                    PagingStateContent(
-                        loadState = guestBooks.loadState.refresh,
-                        itemCount = guestBooks.itemCount,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(bottom = innerPadding.calculateBottomPadding()),
-                        onRetry = { guestBooks.retry() }
-                    ) {}
-                } else {
-                    LazyColumn(
-                        state = lazyListState,
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(
-                            bottom = innerPadding.calculateBottomPadding()
-                        )
-                    ) {
-                        items(
-                            count = guestBooks.itemCount,
-                            key = guestBooks.itemKey { it.id }
-                        ) { index ->
-                            guestBooks[index]?.let { guestBook ->
-                                GuestBookItem(
-                                    modifier = Modifier
-                                        .animateItem(),
-                                    guestBook = guestBook,
-                                    videoPlayerPool = videoPlayerPool,
-                                    shouldPlayVideo = uiState.canPlayVideo && (index == playVideoIndex),
-                                    audioPlaybackState = uiState.audioPlaybackState,
-                                    isEditing = uiState.editingGuestBookId == guestBook.id,
-                                    onEditClick = { onEvent(MyInvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
-                                    onDeleteClick = { onDeleteMenuClick(guestBook.id) },
-                                    onVisualMediaClick = { onEvent(MyInvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
-                                    onAudioMediaClick = { onEvent(MyInvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
-                                    onMenuClick = { onEvent(MyInvitationGuestBookUiEvent.ClickGuestBookMenu(guestBook.id)) },
-                                    onPlayVideoClick = { url -> onEvent(MyInvitationGuestBookUiEvent.ClickVideoPlayButton(url, guestBook.id))}
-                                )
+                    if (isInitialLoading || guestBooks.itemCount == 0) {
+                        PagingStateContent(
+                            loadState = guestBooks.loadState.refresh,
+                            itemCount = guestBooks.itemCount,
+                            modifier = Modifier.fillMaxSize(),
+                            onRetry = { guestBooks.retry() }
+                        ) {}
+                    } else {
+                        LazyColumn(
+                            state = lazyListState,
+                            modifier = Modifier.fillMaxSize(),
+                        ) {
+                            items(
+                                count = guestBooks.itemCount,
+                                key = guestBooks.itemKey { it.id }
+                            ) { index ->
+                                guestBooks[index]?.let { guestBook ->
+                                    GuestBookItem(
+                                        modifier = Modifier.animateItem(),
+                                        guestBook = guestBook,
+                                        videoPlayerPool = videoPlayerPool,
+                                        shouldPlayVideo = uiState.canPlayVideo && (index == playVideoIndex),
+                                        audioPlaybackState = uiState.audioPlaybackState,
+                                        isEditing = uiState.editingGuestBookId == guestBook.id,
+                                        onEditClick = { onEvent(MyInvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
+                                        onDeleteClick = { onDeleteMenuClick(guestBook.id) },
+                                        onVisualMediaClick = { onEvent(MyInvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
+                                        onAudioMediaClick = { onEvent(MyInvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
+                                        onMenuClick = { onEvent(MyInvitationGuestBookUiEvent.ClickGuestBookMenu(guestBook.id)) },
+                                        onPlayVideoClick = { url -> onEvent(MyInvitationGuestBookUiEvent.ClickVideoPlayButton(url, guestBook.id))}
+                                    )
+                                }
                             }
-                        }
 
-                        if (guestBooks.loadState.append is LoadState.Loading) {
-                            item {
-                                Box(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(NachoSpacing.medium),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator()
+                            if (guestBooks.loadState.append is LoadState.Loading) {
+                                item {
+                                    Box(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(NachoSpacing.medium),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
                                 }
                             }
                         }
                     }
                 }
+            }
+
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .imeWithoutNavBars(),
+                color = NachoTheme.colorScheme.backgroundPrimary,
+                shadowElevation = NachoElevation.large
+            ) {
+                GuestBookFormSection(
+                    uiState = uiState,
+                    onEvent = onEvent,
+                    onFocusChanged = { focused ->
+                        isTextFieldFocused = focused
+                    }
+                )
             }
         }
     }
