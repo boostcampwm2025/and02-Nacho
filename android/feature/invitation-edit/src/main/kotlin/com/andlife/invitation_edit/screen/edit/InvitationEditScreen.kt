@@ -105,6 +105,13 @@ fun InvitationEditRoute(
             is InvitationFormSideEffect.SuccessSave -> {
                 onSuccessSave()
             }
+
+            is InvitationFormSideEffect.InvalidTime -> {
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(message = res.getString(R.string.snack_load_error_time))
+                }
+            }
         }
     }
 
