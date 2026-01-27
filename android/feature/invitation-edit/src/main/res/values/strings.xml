@@ -52,7 +52,7 @@
 
     <string name="txt_invitation_card_placeholder">초대카드를 꾸며보세요</string>
     <string name="txt_announcement_placeholder">공지사항을 입력해주세요</string>
-    <string name="txt_place_guide">공지사항</string>
+    <string name="txt_place_guide">오시는 길</string>
     <string name="txt_place_guide_placeholder">오시는 길을 입력해주세요</string>
     <string name="txt_it_is_preview_screen">미리보기 화면입니다</string>
 
