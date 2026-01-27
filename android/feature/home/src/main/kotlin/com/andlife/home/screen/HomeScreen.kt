@@ -53,7 +53,6 @@ import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import com.andlife.designsystem.R as designR
 import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.component.NachoDivider
 import com.andlife.designsystem.preview.PreviewTheme
@@ -83,6 +82,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
+import com.andlife.designsystem.R as designR
 
 private const val GUESTBOOK_KEY_OFFSET = 2
 private const val UPCOMING_CARD_WIDTH_RATIO = 0.85f
@@ -317,28 +317,26 @@ fun HomeScreen(
                     bottom = paddingValues.calculateBottomPadding(),
                 ),
             ) {
-                if (isMediaActive) {
-                    homeUpcomingSection(
-                        upcomingInvitations = upcomingInvitations,
-                        onInvitationClick = { id, isOwner ->
-                            onEvent(HomeUiEvent.ClickUpcomingInvitation(id, isOwner))
-                        },
-                        onNavigateToCreate = { onEvent(HomeUiEvent.ClickCreate) },
-                    )
+                homeUpcomingSection(
+                    upcomingInvitations = upcomingInvitations,
+                    onInvitationClick = { id, isOwner ->
+                        onEvent(HomeUiEvent.ClickUpcomingInvitation(id, isOwner))
+                    },
+                    onNavigateToCreate = { onEvent(HomeUiEvent.ClickCreate) },
+                )
 
-                    homeGuestBookSection(
-                        isMediaActive = isMediaActive,
-                        guestBooks = guestBooks,
-                        uiState = uiState,
-                        playVideoIndex = playVideoIndex,
-                        videoPlayerPool = videoPlayerPool,
-                        onInvitationTitleClick = { id, isOwner ->
-                            onEvent(HomeUiEvent.ClickInvitationTitle(id, isOwner))
-                        },
-                        onVisualMediaClick = { url -> onEvent(HomeUiEvent.ClickVisualMedia(url)) },
-                        onAudioMediaClick = { url -> onEvent(HomeUiEvent.ClickAudioMedia(url)) },
-                    )
-                }
+                homeGuestBookSection(
+                    isMediaActive = isMediaActive,
+                    guestBooks = guestBooks,
+                    uiState = uiState,
+                    playVideoIndex = playVideoIndex,
+                    videoPlayerPool = videoPlayerPool,
+                    onInvitationTitleClick = { id, isOwner ->
+                        onEvent(HomeUiEvent.ClickInvitationTitle(id, isOwner))
+                    },
+                    onVisualMediaClick = { url -> onEvent(HomeUiEvent.ClickVisualMedia(url)) },
+                    onAudioMediaClick = { url -> onEvent(HomeUiEvent.ClickAudioMedia(url)) },
+                )
             }
         }
     }
