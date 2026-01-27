@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -74,6 +76,45 @@ fun AuthorSection(
     }
 }
 
+@Composable
+fun EmptyAuthorSection(
+    placeholderText: String = stringResource(R.string.txt_author_placeholder),
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(NachoTheme.colorScheme.backgroundPrimary)
+                .padding(NachoSpacing.medium),
+        verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                painter = painterResource(designR.drawable.ic_person_24),
+                contentDescription = stringResource(R.string.desc_profile_image),
+                tint = NachoTheme.colorScheme.iconSecondary,
+                modifier = Modifier
+                    .size(NachoIconSize.large)
+            )
+
+            Text(
+                text = placeholderText,
+                style = NachoTheme.typography.bodyLargeMedium,
+                color = NachoTheme.colorScheme.textTertiary,
+                modifier = Modifier
+                    .alpha(0.6f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
+}
+
 @PreviewTheme
 @Composable
 private fun AuthorSectionPreview() {
@@ -82,5 +123,13 @@ private fun AuthorSectionPreview() {
             profileUrl = "https://example.com/image.jpg",
             author = "안드라이프",
         )
+    }
+}
+
+@PreviewTheme
+@Composable
+private fun EmptyAuthorSectionPreview() {
+    NachoTheme {
+        EmptyAuthorSection()
     }
 }

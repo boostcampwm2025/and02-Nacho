@@ -11,8 +11,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
@@ -87,6 +89,37 @@ private fun IconTextRow(
     }
 }
 
+@Composable
+fun EmptyDateSection(
+    datePlaceholder: String = stringResource(R.string.txt_datetime_placeholder),
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(NachoTheme.colorScheme.backgroundPrimary)
+            .padding(vertical = NachoSpacing.xSmall, horizontal = NachoSpacing.large),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_calendar_24),
+                contentDescription = null,
+                tint = NachoTheme.colorScheme.textTertiary,
+            )
+            Text(
+                text = datePlaceholder,
+                style = NachoTheme.typography.bodyLargeRegular,
+                color = NachoTheme.colorScheme.textTertiary,
+                modifier = Modifier.alpha(0.6f),
+            )
+        }
+    }
+}
+
 @PreviewTheme
 @Composable
 private fun DateSectionPreview() {
@@ -94,5 +127,13 @@ private fun DateSectionPreview() {
         DateSection(
             dateTime = DateTimeInfo()
         )
+    }
+}
+
+@PreviewTheme
+@Composable
+private fun EmptyDateSectionPreview() {
+    NachoTheme {
+        EmptyDateSection()
     }
 }
