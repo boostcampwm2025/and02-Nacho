@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
@@ -94,10 +95,15 @@ constructor(
             }
             .launchIn(viewModelScope)
 
-        uiState.map { it.audioPlaybackState.isAudioPlaying }
+        combine(
+            uiState.map { it.audioPlaybackState.isAudioPlaying },
+            uiState.map { it.isMediaPlaying }
+        ) { isAudioPlaying, isMediaPlaying ->
+            isAudioPlaying to isMediaPlaying
+        }
             .distinctUntilChanged()
-            .onEach { isAudioPlaying ->
-                if (!isAudioPlaying) {
+            .onEach { (isAudioPlaying, isMediaPlaying) ->
+                if (!isAudioPlaying && isMediaPlaying) {
                     videoPlayerPool.resumeLastPlayed()
                 }
             }
@@ -129,6 +135,7 @@ constructor(
             is MyInvitationGuestBookUiEvent.ClickEditMenu -> startEditing(event.guestBook)
             is MyInvitationGuestBookUiEvent.CancelEdit -> cancelEdit()
             is MyInvitationGuestBookUiEvent.ClickDeleteMenu -> deleteGuestBook(event.guestBookId)
+            is MyInvitationGuestBookUiEvent.UpdateMediaPlayState -> updatePlayState(event.isPlaying)
         }
     }
 
@@ -391,5 +398,9 @@ constructor(
                 originalMediaIds = emptySet(),
             )
         }
+    }
+
+    private fun updatePlayState(isPlaying: Boolean) {
+        updateState { copy(isMediaPlaying = isPlaying) }
     }
 }

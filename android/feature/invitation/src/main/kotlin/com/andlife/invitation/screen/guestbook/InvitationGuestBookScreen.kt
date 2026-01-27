@@ -249,10 +249,12 @@ fun InvitationGuestBookRoute(
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
+                    viewModel.onEvent(InvitationGuestBookUiEvent.UpdateMediaPlayState(true))
                     viewModel.videoPlayerPool.resumeLastPlayed()
                 }
 
                 Lifecycle.Event.ON_PAUSE -> {
+                    viewModel.onEvent(InvitationGuestBookUiEvent.UpdateMediaPlayState(false))
                     viewModel.videoPlayerPool.pauseAllPlayers()
                     viewModel.audioPlayerManager.pause()
                 }
@@ -512,7 +514,7 @@ private fun InvitationGuestBookScreen(
                                     .animateItem(),
                                 guestBook = guestBook,
                                 videoPlayerPool = videoPlayerPool,
-                                shouldPlayVideo = isMediaActive && (index == playVideoIndex),
+                                shouldPlayVideo = uiState.isMediaPlaying && (index == playVideoIndex),
                                 audioPlaybackState = uiState.audioPlaybackState,
                                 isEditing = uiState.editingGuestBookId == guestBook.id,
                                 onEditClick = { onEvent(InvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },

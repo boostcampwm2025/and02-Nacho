@@ -59,4 +59,8 @@ sealed interface InvitationGuestBookUiEvent : BaseUiEvent {
     data class ClickDeleteMenu(
         val guestBookId: Long,
     ) : InvitationGuestBookUiEvent
+
+    data class UpdateMediaPlayState(
+        val isPlaying: Boolean
+    ) : InvitationGuestBookUiEvent
 }

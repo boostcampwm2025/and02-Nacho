@@ -10,6 +10,7 @@ data class MyInvitationGuestBookUiState(
     val selectedMedias: ImmutableList<SelectedMedia> = persistentListOf(),
     val textContent: String = "",
     val isUploading: Boolean = false,
+    val isMediaPlaying: Boolean = false,
     val originalTextContent: String = "",
     val originalMediaIds: Set<Long> = emptySet(),
     val errorMessage: String? = null,

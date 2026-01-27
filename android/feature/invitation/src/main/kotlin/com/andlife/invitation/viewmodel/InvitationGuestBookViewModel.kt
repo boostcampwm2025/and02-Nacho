@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
@@ -95,10 +96,15 @@ constructor(
             }
             .launchIn(viewModelScope)
 
-        uiState.map { it.audioPlaybackState.isAudioPlaying }
+        combine(
+            uiState.map { it.audioPlaybackState.isAudioPlaying },
+            uiState.map { it.isMediaPlaying }
+        ) { isAudioPlaying, isMediaPlaying ->
+            isAudioPlaying to isMediaPlaying
+        }
             .distinctUntilChanged()
-            .onEach { isAudioPlaying ->
-                if (!isAudioPlaying) {
+            .onEach { (isAudioPlaying, isMediaPlaying) ->
+                if (!isAudioPlaying && isMediaPlaying) {
                     videoPlayerPool.resumeLastPlayed()
                 }
             }
@@ -135,6 +141,7 @@ constructor(
             is InvitationGuestBookUiEvent.ClickEditMenu -> startEditing(event.guestBook)
             is InvitationGuestBookUiEvent.CancelEdit -> cancelEdit()
             is InvitationGuestBookUiEvent.ClickDeleteMenu -> deleteGuestBook(event.guestBookId)
+            is InvitationGuestBookUiEvent.UpdateMediaPlayState -> updatePlayState(event.isPlaying)
         }
     }
 
@@ -442,5 +449,9 @@ constructor(
     private fun handleStopAudioRecording() {
         updateState { copy(isAudioRecording = false, audioRecordingDuration = 0) }
         sendEffect(InvitationGuestBookSideEffect.StopAudioRecording)
+    }
+
+    private fun updatePlayState(isPlaying: Boolean) {
+        updateState { copy(isMediaPlaying = isPlaying) }
     }
 }
