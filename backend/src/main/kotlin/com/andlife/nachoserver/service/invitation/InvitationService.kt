@@ -63,6 +63,18 @@ class InvitationService(
         return JoinResponse(invitationId = invitationId, isMember = false, alreadyJoined = alreadyHasAccess)
     }
 
+    @Transactional
+    fun leaveInvitation(invitationId: Long, userId: Long) {
+        val participant = participantRepository.findByUserIdAndInvitationId(userId, invitationId)
+            ?: throw NoSuchElementException("참여 정보를 찾을 수 없습니다. (UserID: $userId, InvitationID: $invitationId)")
+
+        participantRepository.delete(participant)
+    }
+
+    fun leaveInvitationForGuest(invitationId: Long) {
+        println("Guest left invitation: $invitationId")
+    }
+
     @Transactional(readOnly = true)
     fun getParticipantInvitations(
         userId: Long,

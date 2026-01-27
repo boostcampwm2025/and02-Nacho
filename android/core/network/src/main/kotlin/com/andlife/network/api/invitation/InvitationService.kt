@@ -22,6 +22,11 @@ interface InvitationService {
         @Path("invitationId") invitationId: Long
     ): BaseResponse<JoinResponse>
 
+    @POST("/api/invitations/{invitationId}/leave")
+    suspend fun leaveInvitation(
+        @Path("invitationId") invitationId: Long
+    ): BaseResponse<Unit>
+
     @GET("/api/invitations/{invitationId}")
     suspend fun getInvitation(
         @Path("invitationId") invitationId: Long,

@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface InvitationRepository {
     suspend fun joinInvitation(invitationId: Long): Result<InvitationJoin, DataError>
+    suspend fun leaveInvitation(invitationId: Long): Result<Unit, DataError>
     suspend fun createInvitation(params: CreateInvitationParam): Result<Long, DataError>
     suspend fun getInvitation(invitationId: Long): Result<Invitation, DataError>
     fun getParticipantInvitations(

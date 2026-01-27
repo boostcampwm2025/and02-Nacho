@@ -69,4 +69,10 @@ interface InvitationParticipantRepository : JpaRepository<InvitationParticipant,
         @Param("nowTime") nowTime: LocalTime,
         pageable: Pageable
     ): Page<InvitationParticipant>
+
+    @Query("SELECT p FROM InvitationParticipant p WHERE p.user.id = :userId AND p.invitation.id = :invitationId")
+    fun findByUserIdAndInvitationId(
+        @Param("userId") userId: Long,
+        @Param("invitationId") invitationId: Long
+    ): InvitationParticipant?
 }

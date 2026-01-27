@@ -21,6 +21,9 @@ internal class InvitationRemoteDataSourceImpl @Inject constructor(
     override suspend fun joinInvitation(invitationId: Long): Result<JoinResponse, DataError> =
         apiCall { invitationService.joinInvitation(invitationId) }
 
+    override suspend fun leaveInvitation(invitationId: Long): Result<Unit, DataError> =
+        apiCall { invitationService.leaveInvitation(invitationId) }
+
     override suspend fun createInvitation(request: CreateInvitationRequest): Result<InvitationResponse, DataError> =
         apiCall { invitationService.createInvitation(request) }
 

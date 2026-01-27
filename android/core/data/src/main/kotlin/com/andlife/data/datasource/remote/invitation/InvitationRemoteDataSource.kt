@@ -14,6 +14,7 @@ import com.andlife.network.model.invitation.UpcomingInvitationResponse
 
 interface InvitationRemoteDataSource {
     suspend fun joinInvitation(invitationId: Long): Result<JoinResponse, DataError>
+    suspend fun leaveInvitation(invitationId: Long): Result<Unit, DataError>
     suspend fun createInvitation(request: CreateInvitationRequest): Result<InvitationResponse, DataError>
     suspend fun getInvitation(invitationId: Long): Result<InvitationResponse, DataError>
     suspend fun getParticipantInvitations(

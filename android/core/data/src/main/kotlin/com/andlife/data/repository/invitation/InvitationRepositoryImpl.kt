@@ -40,6 +40,10 @@ internal class InvitationRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun leaveInvitation(invitationId: Long): Result<Unit, DataError> {
+        return invitationRemoteDataSource.leaveInvitation(invitationId)
+    }
+
     override suspend fun createInvitation(params: CreateInvitationParam): Result<Long, DataError> {
         val request = params.toRequest(json)
         return invitationRemoteDataSource.createInvitation(request).map { response ->

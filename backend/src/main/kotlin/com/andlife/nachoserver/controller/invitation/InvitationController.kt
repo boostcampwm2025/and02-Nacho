@@ -76,6 +76,22 @@ class InvitationController(
         }
     }
 
+    @PostMapping("/{invitationId}/leave")
+    fun leaveInvitation(
+        @PathVariable invitationId: Long,
+        authContext: AuthContext
+    ): BaseResponse<Unit> {
+        when (authContext) {
+            is AuthContext.Member -> {
+                invitationService.leaveInvitation(invitationId, authContext.userId)
+            }
+            is AuthContext.Guest -> {
+                invitationService.leaveInvitationForGuest(invitationId)
+            }
+        }
+        return BaseResponse.success(Unit)
+    }
+
     @GetMapping("/mine")
     fun getMyInvitations(
         authContext: AuthContext,
