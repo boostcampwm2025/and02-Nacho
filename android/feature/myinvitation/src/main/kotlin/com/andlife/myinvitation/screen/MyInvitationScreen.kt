@@ -201,7 +201,6 @@ private fun MyInvitationScreen(
                                         address = invitation.address,
                                         dDayText = dDayLabel,
                                         onClick = { onEvent(MyInvitationUiEvent.ClickInvitation(invitation.id)) },
-                                        onMoreClick = {}
                                     )
                                 }
                             }

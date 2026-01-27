@@ -8,4 +8,5 @@ sealed interface InvitationUiEvent : BaseUiEvent {
     data class SelectTab(val index: Int) : InvitationUiEvent
     data class ClickInvitation(val id: Long) : InvitationUiEvent
     data class ChangeSort(val isUpcoming: Boolean, val newSort: SortDirection) : InvitationUiEvent
+    data class ClickLeaveInvitation(val id: Long) : InvitationUiEvent
 }
