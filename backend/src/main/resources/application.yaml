@@ -32,3 +32,8 @@ r2:
   bucket-name: video-test-boostcamp
   public-url: ${R2_PUBLIC_URL}
   region: auto
+
+jwt:
+  secret: ${JWT_SECRET:your-256-bit-secret-key-here-must-be-at-least-32-characters}
+  access-token-expiration-ms: 3600000    # 1시간
+  refresh-token-expiration-ms: 1209600000 # 14일
