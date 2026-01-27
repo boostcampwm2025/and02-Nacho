@@ -19,6 +19,7 @@ data object Invitation
 @Serializable
 data class InvitationDetail(
     val id: Long,
+    val isFromDeepLink: Boolean = false
 )
 
 fun NavController.navigateToInvitation(navOptions: NavOptions) {
