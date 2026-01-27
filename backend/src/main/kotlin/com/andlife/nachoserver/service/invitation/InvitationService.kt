@@ -10,6 +10,7 @@ import com.andlife.nachoserver.repository.invitation.AnnouncementRepository
 import com.andlife.nachoserver.repository.invitation.InvitationCardRepository
 import com.andlife.nachoserver.repository.invitation.InvitationRepository
 import com.andlife.nachoserver.repository.participant.InvitationParticipantRepository
+import com.andlife.nachoserver.repository.user.UserRepository
 import com.andlife.nachoserver.request.invitation.CreateInvitationRequest
 import com.andlife.nachoserver.request.invitation.InvitationCardRequest
 import com.andlife.nachoserver.response.PagingMetaResponse
@@ -36,7 +37,8 @@ class InvitationService(
     private val invitationRepository: InvitationRepository,
     private val invitationCardRepository: InvitationCardRepository,
     private val announcementRepository: AnnouncementRepository,
-    private val participantRepository: InvitationParticipantRepository
+    private val participantRepository: InvitationParticipantRepository,
+    private val userRepository: UserRepository
 ) {
     @Transactional(readOnly = true)
     fun getParticipantInvitations(
@@ -209,7 +211,9 @@ class InvitationService(
     }
 
     @Transactional
-    fun createInvitation(request: CreateInvitationRequest): InvitationResponse {
+    fun createInvitation(userId: Long, request: CreateInvitationRequest): InvitationResponse {
+        val host = userRepository.findById(userId)
+            .orElseThrow { NoSuchElementException("User not found: $userId") }
 
         val invitationDate = LocalDate.parse(request.invitationDate)
         val startTime = LocalTime.parse(request.startTime, DateTimeFormatter.ofPattern("HH:mm"))
@@ -217,7 +221,7 @@ class InvitationService(
             LocalTime.parse(it, DateTimeFormatter.ofPattern("HH:mm"))
         }
         val invitation = Invitation(
-            host = User(1, "donghyun@boostcamp.com", "동현", "https://picsum.photos/200/200?random=10"),
+            host = host,
             title = request.title,
             displayHostName = request.displayHostName,
             thumbnailUrls = request.thumbnailUrls,
