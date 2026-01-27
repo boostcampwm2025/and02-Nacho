@@ -55,6 +55,8 @@ import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.coroutines.launch
 
+private const val MAX_IMAGE_COUNT = 10
+
 @Composable
 fun InvitationEditRoute(
     onNavigateToAddressSearch: () -> Unit,
@@ -113,7 +115,7 @@ fun InvitationEditRoute(
     }
 
     val pickMedia =
-        rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(10)) { uris ->
+        rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(MAX_IMAGE_COUNT)) { uris ->
             if (uris.isNotEmpty()) {
                 val imageList = uris.map { it.toString() }
                 viewModel.onEvent(InvitationFormUiEvent.UpdateImageList(imageList))
