@@ -118,4 +118,11 @@
     <string name="txt_map_loading">지도 로딩중...</string>
     <string name="btn_open_map_app">지도 앱으로 열기</string>
 
+    <!-- Preview placeholders -->
+    <string name="txt_image_placeholder">대표 이미지를 추가해주세요</string>
+    <string name="txt_title_placeholder">제목을 입력해주세요</string>
+    <string name="txt_author_placeholder">주최자를 입력해주세요</string>
+    <string name="txt_datetime_placeholder">날짜와 시간을 입력해주세요</string>
+    <string name="txt_address_placeholder">장소를 입력해주세요</string>
+
 </resources>
