@@ -336,9 +336,9 @@ fun MyInvitationGuestBookRoute(
             ) {
                 Text(
                     text = when (showPermissionDialog) {
-                        Manifest.permission.CAMERA -> "사진을 촬영하려면 카메라 권한이 필요합니다."
-                        Manifest.permission.RECORD_AUDIO -> "음성을 녹음하려면 마이크 권한이 필요합니다."
-                        else -> "권한이 필요합니다."
+                        Manifest.permission.CAMERA -> stringResource(R.string.txt_permission_camera)
+                        Manifest.permission.RECORD_AUDIO -> stringResource(R.string.txt_permission_audio)
+                        else -> stringResource(R.string.txt_permission_etc)
                     },
                     color = NachoTheme.colorScheme.textSecondary,
                     style = NachoTheme.typography.bodyMediumRegular,
@@ -351,7 +351,7 @@ fun MyInvitationGuestBookRoute(
                         onClick = { showPermissionDialog = null }
                     ) {
                         Text(
-                            text = "취소",
+                            text = stringResource(R.string.btn_label_cancel),
                             color = NachoTheme.colorScheme.textPrimary,
                             style = NachoTheme.typography.bodyMediumSemiBold,
                         )
@@ -365,7 +365,7 @@ fun MyInvitationGuestBookRoute(
                         }
                     ) {
                         Text(
-                            text = "설정으로 이동",
+                            text = stringResource(R.string.btn_label_to_setting),
                             color = NachoTheme.colorScheme.brandPrimary,
                             style = NachoTheme.typography.bodyMediumSemiBold,
                         )
