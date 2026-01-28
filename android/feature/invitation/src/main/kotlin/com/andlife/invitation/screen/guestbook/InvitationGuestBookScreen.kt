@@ -412,7 +412,8 @@ fun InvitationGuestBookRoute(
                         }
                     ) {
                         Text(
-                            text = stringResource(R.string.btn_label_to_setting),                            color = NachoTheme.colorScheme.brandPrimary,
+                            text = stringResource(R.string.btn_label_to_setting),
+                            color = NachoTheme.colorScheme.brandPrimary,
                             style = NachoTheme.typography.bodyMediumSemiBold,
                         )
                     }
