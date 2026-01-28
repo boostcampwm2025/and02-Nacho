@@ -25,10 +25,12 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import com.andlife.ui.R
+import com.andlife.ui.component.media.MediaItemSkeleton
 
 @Composable
 fun NachoMediaGridView(
     items: ImmutableList<CollectionUiModel>,
+    isLoading: Boolean,
     onItemClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -36,14 +38,25 @@ fun NachoMediaGridView(
         modifier = modifier,
         color = NachoTheme.colorScheme.backgroundPrimary,
     ) {
-        if (items.isEmpty()) {
+        if (isLoading) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                modifier = modifier,
+                contentPadding = PaddingValues(NachoSpacing.small),
+                horizontalArrangement = Arrangement.spacedBy(NachoSpacing.twoXSmall),
+                verticalArrangement = Arrangement.spacedBy(NachoSpacing.twoXSmall),
+                userScrollEnabled = false
+            ) {
+                items(9) {
+                    MediaItemSkeleton()
+                }
+            }
+        } else if (items.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = stringResource(R.string.txt_collection_empty)
-                )
+                Text(text = stringResource(R.string.txt_collection_empty))
             }
         } else {
             LazyVerticalGrid(
@@ -112,6 +125,19 @@ private fun NachoMediaGridViewPreview() {
     NachoTheme {
         NachoMediaGridView(
             items = mockItems,
+            isLoading = false,
+            onItemClick = {},
+        )
+    }
+}
+
+@PreviewTheme
+@Composable
+private fun NachoMediaGridViewLoadingPreview() {
+    NachoTheme {
+        NachoMediaGridView(
+            items = persistentListOf(),
+            isLoading = true,
             onItemClick = {},
         )
     }
