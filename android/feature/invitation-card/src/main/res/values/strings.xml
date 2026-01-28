@@ -10,6 +10,9 @@
     <string name="txt_update_card">초대카드 수정</string>
     <string name="snackbar_fail_create_card">초대카드 생성에 실패했습니다 다시 시도해 주세요</string>
     <string name="snackbar_fila_update_card">초대카드 수정에 실패했습니다 다시 시도해 주세요</string>
-
+    <string name="txt_exit_dialog_title">작성 취소</string>
+    <string name="txt_exit_dialog_message">작성을 취소하시겠습니까?\n작성 중인 내용은 저장되지 않습니다.</string>
+    <string name="btn_exit">나가기</string>
+    <string name="btn_continue">계속 작성</string>
 </resources>
 

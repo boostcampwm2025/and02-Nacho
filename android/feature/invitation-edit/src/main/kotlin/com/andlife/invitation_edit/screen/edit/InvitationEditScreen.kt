@@ -1,4 +1,4 @@
-package com.andlife.invitation_edit.screen.create
+package com.andlife.invitation_edit.screen.edit
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -22,52 +21,54 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.component.dialog.NachoDialog
+import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
 import com.andlife.invitation_edit.component.DeleteDialogContent
-import com.andlife.invitation_edit.model.AddressUiModel
-import com.andlife.invitation_edit.model.create.AnnouncementUiModel
-import com.andlife.invitation_edit.model.create.CreateInvitationSideEffect
-import com.andlife.invitation_edit.model.create.CreateInvitationUiEvent
-import com.andlife.invitation_edit.model.create.CreateInvitationUiState
+import com.andlife.invitation_edit.model.address.AddressUiModel
+import com.andlife.invitation_edit.model.form.AnnouncementUiModel
+import com.andlife.invitation_edit.model.form.InvitationFormSideEffect
+import com.andlife.invitation_edit.model.form.InvitationFormUiEvent
+import com.andlife.invitation_edit.model.form.InvitationFormUiState
 import com.andlife.invitation_edit.section.AddressSection
 import com.andlife.invitation_edit.section.AuthorSection
 import com.andlife.invitation_edit.section.BottomBarSection
-import com.andlife.invitation_edit.section.CardSection
+import com.andlife.invitation_edit.section.CardGuideSection
 import com.andlife.invitation_edit.section.DateSection
 import com.andlife.invitation_edit.section.ImageSection
 import com.andlife.invitation_edit.section.TimeSection
 import com.andlife.invitation_edit.section.TitleSection
 import com.andlife.invitation_edit.section.TopBarSection
 import com.andlife.invitation_edit.section.announcementSection
-import com.andlife.invitation_edit.viewmodel.CreateInvitationViewModel
+import com.andlife.invitation_edit.viewmodel.InvitationEditViewModel
 import com.andlife.ui.component.InvitationDatePickerBottomSheet
 import com.andlife.ui.component.InvitationTimePickerBottomSheet
 import com.andlife.ui.component.addannouncement.InvitationAddAnnouncementBottomSheet
+import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.coroutines.launch
 
+private const val MAX_IMAGE_COUNT = 10
+
 @Composable
-fun MyInvitationCreateRoute(
+fun InvitationEditRoute(
     onNavigateToAddressSearch: () -> Unit,
     onNavigateBack: () -> Unit,
-    onNavigateCreateCard: () -> Unit,
-    onNavigateToInvitationDetail: (Long) -> Unit,
+    onSuccessSave: () -> Unit,
     modifier: Modifier = Modifier,
     address: AddressUiModel? = null,
-    viewModel: CreateInvitationViewModel = hiltViewModel(),
+    viewModel: InvitationEditViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val res = LocalResources.current
-    val snackbarHost = remember { SnackbarHostState() }
+    val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var isShowDatePicker by remember { mutableStateOf(false) }
     var isShowStartTimePicker by remember { mutableStateOf(false) }
@@ -78,53 +79,70 @@ fun MyInvitationCreateRoute(
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
-            CreateInvitationSideEffect.FullImage -> {
-                snackbarHost.showSnackbar(message = res.getString(R.string.snack_full_image))
+            InvitationFormSideEffect.FullImage -> {
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(message = res.getString(R.string.snack_full_image))
+                }
             }
 
-            CreateInvitationSideEffect.OnBack -> {
+            InvitationFormSideEffect.OnBack -> {
                 onNavigateBack()
             }
 
-            CreateInvitationSideEffect.FailCreate -> {
-                snackbarHost.showSnackbar(message = res.getString(R.string.snack_full_image))
+            InvitationFormSideEffect.FailSave -> {
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(message = res.getString(R.string.snack_fail_save))
+                }
             }
 
-            is CreateInvitationSideEffect.SuccessCreate -> {
-                onNavigateToInvitationDetail(effect.id)
+            InvitationFormSideEffect.FailLoad -> {
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(message = res.getString(R.string.snack_fail_load))
+                }
+            }
+
+            is InvitationFormSideEffect.SuccessSave -> {
+                onSuccessSave()
+            }
+
+            is InvitationFormSideEffect.InvalidTime -> {
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(message = res.getString(R.string.snack_load_error_time))
+                }
             }
         }
     }
 
     BackHandler {
-        viewModel.onEvent(CreateInvitationUiEvent.OnClickBack)
+        viewModel.onEvent(InvitationFormUiEvent.OnClickBack)
     }
 
     val pickMedia =
-        rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(10)) { uris ->
+        rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(MAX_IMAGE_COUNT)) { uris ->
             if (uris.isNotEmpty()) {
                 val imageList = uris.map { it.toString() }
-                viewModel.onEvent(CreateInvitationUiEvent.UpdateImageList(imageList))
+                viewModel.onEvent(InvitationFormUiEvent.UpdateImageList(imageList))
             } else {
                 scope.launch {
-                    snackbarHost.showSnackbar(message = res.getString(R.string.snack_load_error_image))
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(message = res.getString(R.string.snack_load_error_image))
                 }
             }
         }
 
     LaunchedEffect(address) {
         if (address != null) {
-            viewModel.onEvent(CreateInvitationUiEvent.UpdateAddress(address))
+            viewModel.onEvent(InvitationFormUiEvent.UpdateAddress(address))
         }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.getCardEditorResult()
-    }
-
-    MyInvitationCreateScreen(
+    InvitationEditScreen(
         uiState = uiState,
-        snackbarHostState = snackbarHost,
+        snackbarHostState = snackbarHostState,
         onEvent = viewModel::onEvent,
         onNavigateToAddressSearch = onNavigateToAddressSearch,
         onAddImageClick = {
@@ -146,15 +164,12 @@ fun MyInvitationCreateRoute(
             selectedAnnouncement = it
             isShowDeleteAnnouncement = true
         },
-        onClickCreateCard = {
-            onNavigateCreateCard()
-        },
         modifier = modifier,
     )
 
     if (isShowDatePicker) {
         InvitationDatePickerBottomSheet(
-            onConfirm = { viewModel.onEvent(CreateInvitationUiEvent.UpdateDate(it)) },
+            onConfirm = { viewModel.onEvent(InvitationFormUiEvent.UpdateDate(it)) },
             onDismiss = { isShowDatePicker = false },
         )
     }
@@ -162,29 +177,29 @@ fun MyInvitationCreateRoute(
     if (isShowStartTimePicker) {
         InvitationTimePickerBottomSheet(
             onConfirm = { hour, min ->
-                viewModel.onEvent(CreateInvitationUiEvent.UpdateStartTime(hour, min))
+                viewModel.onEvent(InvitationFormUiEvent.UpdateStartTime(hour, min))
             },
             onDismissRequest = { isShowStartTimePicker = false },
-            initialHour = uiState.createInvitationUiModel.startTime?.hour ?: 9,
-            initialMinute = uiState.createInvitationUiModel.startTime?.min ?: 0,
+            initialHour = uiState.invitationFormUiModel.startTime?.hour ?: 9,
+            initialMinute = uiState.invitationFormUiModel.startTime?.min ?: 0,
         )
     }
 
     if (isShowEndTimePicker) {
         InvitationTimePickerBottomSheet(
             onConfirm = { hour, min ->
-                viewModel.onEvent(CreateInvitationUiEvent.UpdateEndTime(hour, min))
+                viewModel.onEvent(InvitationFormUiEvent.UpdateEndTime(hour, min))
             },
             onDismissRequest = { isShowEndTimePicker = false },
-            initialHour = uiState.createInvitationUiModel.endTime?.hour ?: 9,
-            initialMinute = uiState.createInvitationUiModel.endTime?.min ?: 0,
+            initialHour = uiState.invitationFormUiModel.endTime?.hour ?: 9,
+            initialMinute = uiState.invitationFormUiModel.endTime?.min ?: 0,
         )
     }
 
     if (isShowAnnouncementSheet) {
         InvitationAddAnnouncementBottomSheet(
             onConfirm = { title, content ->
-                viewModel.onEvent(CreateInvitationUiEvent.UpdateAnnouncement(title, content))
+                viewModel.onEvent(InvitationFormUiEvent.UpdateAnnouncement(title, content))
             },
             onDismiss = { isShowAnnouncementSheet = false },
         )
@@ -195,7 +210,7 @@ fun MyInvitationCreateRoute(
             DeleteDialogContent(
                 onConfirm = {
                     selectedAnnouncement?.let {
-                        viewModel.onEvent(CreateInvitationUiEvent.RemoveAnnouncement(it))
+                        viewModel.onEvent(InvitationFormUiEvent.RemoveAnnouncement(it))
                         selectedAnnouncement = null
                     }
                     isShowDeleteAnnouncement = false
@@ -207,17 +222,16 @@ fun MyInvitationCreateRoute(
 }
 
 @Composable
-private fun MyInvitationCreateScreen(
-    uiState: CreateInvitationUiState,
+private fun InvitationEditScreen(
+    uiState: InvitationFormUiState,
     snackbarHostState: SnackbarHostState,
-    onEvent: (CreateInvitationUiEvent) -> Unit,
+    onEvent: (InvitationFormUiEvent) -> Unit,
     onAddImageClick: () -> Unit,
     onDateClick: () -> Unit,
     onStartTimeClick: () -> Unit,
     onEndTimeClick: () -> Unit,
     onNavigateToAddressSearch: () -> Unit,
     onAddAnnouncementClick: () -> Unit,
-    onClickCreateCard: () -> Unit,
     onRemoveAnnouncementClick: (AnnouncementUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -230,63 +244,63 @@ private fun MyInvitationCreateScreen(
         },
         topBar = {
             TopBarSection(
-                title = stringResource(R.string.txt_create),
-                onBackClick = { onEvent(CreateInvitationUiEvent.OnClickBack) },
-                onPreviewClick = {},
+                title = stringResource(R.string.txt_edit_title),
+                onBackClick = { onEvent(InvitationFormUiEvent.OnClickBack) },
+                onPreviewClick = null,
                 isLoading = uiState.isLoading
             )
         },
         bottomBar = {
             BottomBarSection(
-                title = stringResource(R.string.txt_create_button),
+                title = stringResource(R.string.btn_edit),
                 enabled = uiState.isValid && !uiState.isLoading,
-                onClick = { onEvent(CreateInvitationUiEvent.OnClickCreate) },
+                onClick = { onEvent(InvitationFormUiEvent.OnClickSave) },
             )
         },
     ) { padding ->
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(padding)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
             LazyColumn(
                 state = listState,
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .background(NachoTheme.colorScheme.backgroundTertiary),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(NachoTheme.colorScheme.backgroundTertiary),
             ) {
                 item {
                     TitleSection(
-                        title = uiState.createInvitationUiModel.title,
-                        onTitleChange = { onEvent(CreateInvitationUiEvent.UpdateTitle(it)) },
-                        isLoading = uiState.isLoading
+                        title = uiState.invitationFormUiModel.title,
+                        onTitleChange = { onEvent(InvitationFormUiEvent.UpdateTitle(it)) },
+                        isLoading = uiState.isLoading,
                     )
                 }
 
                 item {
                     AuthorSection(
-                        authorName = uiState.createInvitationUiModel.author,
-                        onAuthorNameChange = { onEvent(CreateInvitationUiEvent.UpdateAuthor(it)) },
+                        authorName = uiState.invitationFormUiModel.author,
+                        onAuthorNameChange = { onEvent(InvitationFormUiEvent.UpdateAuthor(it)) },
+                        isLoading = uiState.isLoading,
                         modifier = Modifier.padding(top = NachoSpacing.medium),
-                        isLoading = uiState.isLoading
                     )
                 }
 
                 item {
                     ImageSection(
-                        imageList = uiState.createInvitationUiModel.imageList,
+                        imageList = uiState.invitationFormUiModel.imageList,
                         onAddImageClick = onAddImageClick,
-                        onRemoveClick = { onEvent(CreateInvitationUiEvent.RemoveImage(it)) },
+                        onRemoveClick = { onEvent(InvitationFormUiEvent.RemoveImage(it)) },
                         isLoading = uiState.isLoading,
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(top = NachoSpacing.medium),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = NachoSpacing.medium),
                     )
                 }
 
                 item {
                     DateSection(
-                        date = uiState.createInvitationUiModel.date,
+                        date = uiState.invitationFormUiModel.date,
                         onDateClick = onDateClick,
                         isLoading = uiState.isLoading,
                         modifier = Modifier.padding(top = NachoSpacing.medium),
@@ -295,8 +309,8 @@ private fun MyInvitationCreateScreen(
 
                 item {
                     TimeSection(
-                        startTime = uiState.createInvitationUiModel.startTime,
-                        endTime = uiState.createInvitationUiModel.endTime,
+                        startTime = uiState.invitationFormUiModel.startTime,
+                        endTime = uiState.invitationFormUiModel.endTime,
                         onStartTimeClick = onStartTimeClick,
                         onEndTimeClick = onEndTimeClick,
                         isLoading = uiState.isLoading,
@@ -306,11 +320,11 @@ private fun MyInvitationCreateScreen(
 
                 item {
                     AddressSection(
-                        placeName = uiState.createInvitationUiModel.placeName,
-                        placeAddress = uiState.createInvitationUiModel.placeAddress,
-                        addressGuide = uiState.createInvitationUiModel.placeGuide,
-                        onChangePlaceAddress = { onEvent(CreateInvitationUiEvent.UpdatePlaceAddress(it)) },
-                        onChangeAddressGuide = { onEvent(CreateInvitationUiEvent.UpdateAddressGuide(it)) },
+                        placeName = uiState.invitationFormUiModel.placeName,
+                        placeAddress = uiState.invitationFormUiModel.placeAddress,
+                        addressGuide = uiState.invitationFormUiModel.placeGuide,
+                        onChangePlaceAddress = { onEvent(InvitationFormUiEvent.UpdatePlaceAddress(it)) },
+                        onChangeAddressGuide = { onEvent(InvitationFormUiEvent.UpdateAddressGuide(it)) },
                         onNavigateToAddressSearch = onNavigateToAddressSearch,
                         isLoading = uiState.isLoading,
                         modifier = Modifier.padding(top = NachoSpacing.medium),
@@ -318,27 +332,42 @@ private fun MyInvitationCreateScreen(
                 }
 
                 item {
-                    CardSection(
-                        cardUiModel = uiState.createInvitationUiModel.card,
-                        onClickCreatedCard = onClickCreateCard,
-                        isLoading = uiState.isLoading,
+                    CardGuideSection(
                         modifier = Modifier.padding(top = NachoSpacing.medium),
                     )
                 }
 
                 announcementSection(
-                    announcementList = uiState.createInvitationUiModel.announcement,
+                    announcementList = uiState.invitationFormUiModel.announcement,
                     onAddAnnouncementClick = onAddAnnouncementClick,
                     onRemoveAnnouncementClick = onRemoveAnnouncementClick,
                     isLoading = uiState.isLoading,
                     modifier = Modifier.padding(top = NachoSpacing.medium),
                 )
             }
+
             if (uiState.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                InvitationLoadingIndicator()
             }
         }
+    }
+}
+
+@PreviewTheme
+@Composable
+fun InvitationEditScreenPreview() {
+    NachoTheme {
+        InvitationEditScreen(
+            uiState = InvitationFormUiState(),
+            snackbarHostState = remember { SnackbarHostState() },
+            onEvent = {},
+            onAddImageClick = {},
+            onDateClick = {},
+            onStartTimeClick = {},
+            onEndTimeClick = {},
+            onNavigateToAddressSearch = {},
+            onAddAnnouncementClick = {},
+            onRemoveAnnouncementClick = {},
+        )
     }
 }

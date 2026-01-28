@@ -29,7 +29,9 @@ import com.andlife.invitation_card.createCardByInvitationNavGraph
 import com.andlife.invitation_card.createCardNavGraph
 import com.andlife.invitation_card.updateCardNavGraph
 import com.andlife.invitation_edit.addressSearchNavGraph
-import com.andlife.invitation_edit.myInvitationCreateNavGraph
+import com.andlife.invitation_edit.invitationCreateNavGraph
+import com.andlife.invitation_edit.invitationEditNavGraph
+import com.andlife.invitation_edit.invitationPreviewNavGraph
 import com.andlife.login.loginNavGraph
 import com.andlife.model.util.NavigationKeyConstant.CREATE_CARD_BY_INVITATION_ID
 import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
@@ -84,6 +86,7 @@ fun NachoNavHost(
             invitationNavGraph(
                 paddingValues = innerPadding,
                 onNavigateToDetail = navigator::navigateToInvitationDetail,
+                snackbarHostState = snackbarHostState
             )
 
             invitationDetailNavGraph(
@@ -99,18 +102,31 @@ fun NachoNavHost(
 
             myInvitationDetailNavGraph(
                 onNavigateBack = navigator::navigatePopBackStack,
+                onNavigateToEditInvitation = navigator::navigateToMyInvitationEdit,
                 onNavigateToEditCard = navigator::navigateToUpdateCard,
                 onNavigateToCreateCard = navigator::navigateToCreateCardByInvitation
             )
 
-            myInvitationCreateNavGraph(
+            invitationCreateNavGraph(
                 onNavigateToAddressSearch = navigator::navigateToAddressSearch,
+                onNavigateToPreview = navigator::navigateToInvitationPreview,
                 onNavigateBack = navigator::navigatePopBackStack,
                 onNavigateCreateCard = navigator::navigateToCreateCard,
                 onNavigateToInvitationDetail = navigator::navigateToMyInvitationDetailByCreate
             )
 
+            invitationEditNavGraph(
+                navController = navigator.navController,
+                onNavigateToAddressSearch = navigator::navigateToAddressSearch,
+                onNavigateBack = navigator::navigatePopBackStack,
+            )
+
             addressSearchNavGraph(
+                navController = navigator.navController,
+                onNavigateBack = navigator::navigatePopBackStack,
+            )
+
+            invitationPreviewNavGraph(
                 navController = navigator.navController,
                 onNavigateBack = navigator::navigatePopBackStack,
             )
@@ -122,7 +138,8 @@ fun NachoNavHost(
             createCardByInvitationNavGraph(
                 onBackClick = navigator::navigatePopBackStack,
                 onSuccessCreateCard = {
-                    navigator.navController.previousBackStackEntry?.savedStateHandle[CREATE_CARD_BY_INVITATION_ID] = true
+                    navigator.navController.previousBackStackEntry?.savedStateHandle[CREATE_CARD_BY_INVITATION_ID] =
+                        true
                     navigator.navigatePopBackStack()
                 }
             )

@@ -32,17 +32,17 @@ class Invitation(
     var displayHostName: String,
 
     @Convert(converter = StringListConverter::class)
-    @Column(name = "thumbnail_urls")
+    @Column(name = "thumbnail_urls", columnDefinition = "TEXT")
     var thumbnailUrls: List<String> = emptyList(),
 
     @Column(name = "invitation_date", nullable = false)
-    val invitationDate: LocalDate,
+    var invitationDate: LocalDate,
 
     @Column(name = "start_time", nullable = false)
-    val startTime: LocalTime,
+    var startTime: LocalTime,
 
     @Column(name = "end_time")
-    val endTime: LocalTime? = null,
+    var endTime: LocalTime? = null,
 
     @Column(name = "place_name", nullable = false)
     var placeName: String,
@@ -51,10 +51,10 @@ class Invitation(
     var address: String,
 
     @Column(nullable = false)
-    val lat: Double,
+    var lat: Double,
 
     @Column(nullable = false)
-    val lng: Double,
+    var lng: Double,
 
     @Column(name = "location_guide")
     var locationGuide: String? = null

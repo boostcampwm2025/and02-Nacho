@@ -58,7 +58,7 @@ fun NavGraphBuilder.updateCardNavGraph(
     composable<UpdateCard> { backStackEntry ->
         UpdateCardRoute(
             onSuccessfulUpdate = onSuccessCreateCard,
-            onBackNavigation = onBackClick,
+            onBackClick = onBackClick,
         )
     }
 }

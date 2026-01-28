@@ -1,4 +1,4 @@
-package com.andlife.invitation_edit.model
+package com.andlife.invitation_edit.model.address
 
 import android.os.Parcelable
 import com.andlife.domain.model.address.Address

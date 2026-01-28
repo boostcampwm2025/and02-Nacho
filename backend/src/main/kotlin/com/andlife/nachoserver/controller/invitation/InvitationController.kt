@@ -4,6 +4,7 @@ import com.andlife.nachoserver.request.invitation.CreateInvitationRequest
 import com.andlife.nachoserver.auth.AuthContext
 import com.andlife.nachoserver.request.invitation.InvitationCardRequest
 import com.andlife.nachoserver.request.guestbook.GuestBookRequest
+import com.andlife.nachoserver.request.invitation.UpdateInvitationRequest
 import com.andlife.nachoserver.response.BaseResponse
 import com.andlife.nachoserver.response.CommonResponseCode
 import com.andlife.nachoserver.response.PagingResponse
@@ -12,6 +13,7 @@ import com.andlife.nachoserver.response.invitation.InvitationSummaryResponse
 import com.andlife.nachoserver.response.invitation.UpcomingInvitationResponse
 import com.andlife.nachoserver.response.guestbook.CollectionResponse
 import com.andlife.nachoserver.response.guestbook.GuestBookResponse
+import com.andlife.nachoserver.response.invitation.JoinResponse
 import com.andlife.nachoserver.service.invitation.InvitationService
 import com.andlife.nachoserver.service.guestbook.GuestBookService
 import org.springframework.data.domain.Pageable
@@ -32,6 +34,32 @@ class InvitationController(
     private val invitationService: InvitationService,
     private val guestBookService: GuestBookService,
 ) {
+    @PostMapping("/{invitationId}/join")
+    fun joinInvitation(
+        @PathVariable invitationId: Long,
+        authContext: AuthContext
+    ): BaseResponse<JoinResponse> {
+        val result = when (authContext) {
+            is AuthContext.Member -> {
+                println(">>> [멤버 진입] UserID: ${authContext.userId}")
+                invitationService.joinInvitation(
+                    invitationId = invitationId,
+                    userId = authContext.userId,
+                    guestInvitationIds = emptyList()
+                )
+            }
+            is AuthContext.Guest -> {
+                println(">>> [게스트 진입] 초대장 목록: ${authContext.invitationIds}")
+                invitationService.joinInvitation(
+                    invitationId = invitationId,
+                    userId = null,
+                    guestInvitationIds = authContext.invitationIds
+                )
+            }
+        }
+        return BaseResponse.success(result)
+    }
+
     @GetMapping("/joined")
     fun getParticipantInvitations(
         authContext: AuthContext,
@@ -49,6 +77,22 @@ class InvitationController(
                 BaseResponse.success(result)
             }
         }
+    }
+
+    @PostMapping("/{invitationId}/leave")
+    fun leaveInvitation(
+        @PathVariable invitationId: Long,
+        authContext: AuthContext
+    ): BaseResponse<Unit> {
+        when (authContext) {
+            is AuthContext.Member -> {
+                invitationService.leaveInvitation(invitationId, authContext.userId)
+            }
+            is AuthContext.Guest -> {
+                invitationService.leaveInvitationForGuest(invitationId)
+            }
+        }
+        return BaseResponse.success(Unit)
     }
 
     @GetMapping("/mine")
@@ -175,6 +219,32 @@ class InvitationController(
 
         return try {
             val response = invitationService.createInvitation(authContext.userId, request)
+            BaseResponse.success(response)
+        } catch (e: IllegalArgumentException) {
+            println(e.message)
+            BaseResponse.error(
+                responseCode = CommonResponseCode.BAD_REQUEST,
+                customMessage = e.message
+            )
+        } catch (e: NoSuchElementException) {
+            println(e.message)
+            BaseResponse.error(
+                responseCode = CommonResponseCode.NOT_FOUND,
+                customMessage = e.message
+            )
+        } catch (e: Exception) {
+            println(e.message)
+            BaseResponse.error(responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    @PutMapping("/{invitationId}")
+    fun updateInvitation(
+        @PathVariable invitationId: Long,
+        @RequestBody request: UpdateInvitationRequest
+    ): BaseResponse<InvitationResponse> {
+        return try {
+            val response = invitationService.updateInvitation(invitationId, request)
             BaseResponse.success(response)
         } catch (e: IllegalArgumentException) {
             println(e.message)

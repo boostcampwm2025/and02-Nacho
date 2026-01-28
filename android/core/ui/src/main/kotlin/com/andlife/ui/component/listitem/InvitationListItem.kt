@@ -14,10 +14,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,7 +40,13 @@ import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
-import com.andlife.ui.component.loading.InvitationLoadingIndicator
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+
+data class MenuItem(
+    val title: String,
+    val onClick: () -> Unit
+)
 
 @Composable
 fun InvitationListItem(
@@ -45,21 +57,21 @@ fun InvitationListItem(
     address: String,
     dDayText: String?,
     onClick: () -> Unit,
-    onMoreClick: () -> Unit,
     modifier: Modifier = Modifier,
+    menuItems: ImmutableList<MenuItem> = persistentListOf(),
 ) {
+    var isMenuExpanded by remember { mutableStateOf(false) }
+
     Card(
         onClick = onClick,
         shape = NachoTheme.shapes.medium,
-        colors =
-            CardDefaults.cardColors(
-                containerColor = NachoTheme.colorScheme.backgroundPrimary,
-            ),
-        border =
-            BorderStroke(
-                NachoStroke.small,
-                NachoTheme.colorScheme.backgroundBorder,
-            ),
+        colors = CardDefaults.cardColors(
+            containerColor = NachoTheme.colorScheme.backgroundPrimary,
+        ),
+        border = BorderStroke(
+            NachoStroke.small,
+            NachoTheme.colorScheme.backgroundBorder,
+        ),
         modifier = modifier,
     ) {
         Column {
@@ -85,9 +97,7 @@ fun InvitationListItem(
                                     .background(NachoTheme.colorScheme.backgroundSecondary),
                             )
                         },
-                        success = {
-                            SubcomposeAsyncImageContent()
-                        },
+                        success = { SubcomposeAsyncImageContent() },
                         error = {
                             Image(
                                 painter = painterResource(R.drawable.bg_thumbnail),
@@ -102,22 +112,52 @@ fun InvitationListItem(
                     )
                 }
 
-                IconButton(
-                    onClick = onMoreClick,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(NachoSpacing.medium)
-                        .background(
-                            color = NachoTheme.colorScheme.backgroundPrimary,
-                            shape = NachoTheme.shapes.extraLarge,
-                        )
-                        .size(NachoIconSize.large),
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_more_vert_24),
-                        contentDescription = stringResource(R.string.desc_invitation_more_btn),
-                        modifier = Modifier.size(NachoIconSize.small)
-                    )
+                if (menuItems.isNotEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(NachoSpacing.medium)
+                    ) {
+                        IconButton(
+                            onClick = {
+                                isMenuExpanded = true
+                            },
+                            modifier = Modifier
+                                .background(
+                                    color = NachoTheme.colorScheme.backgroundPrimary,
+                                    shape = NachoTheme.shapes.extraLarge,
+                                )
+                                .size(NachoIconSize.large),
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_more_vert_24),
+                                contentDescription = stringResource(R.string.desc_invitation_more_btn),
+                                modifier = Modifier.size(NachoIconSize.small)
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = isMenuExpanded,
+                            onDismissRequest = { isMenuExpanded = false },
+                            modifier = Modifier.background(NachoTheme.colorScheme.backgroundTertiary),
+                        ) {
+                            menuItems.forEach { item ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = item.title,
+                                            style = NachoTheme.typography.bodyMediumMedium,
+                                            color = NachoTheme.colorScheme.textPrimary
+                                        )
+                                    },
+                                    onClick = {
+                                        item.onClick()
+                                        isMenuExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
@@ -125,9 +165,7 @@ fun InvitationListItem(
                 modifier = Modifier.padding(NachoSpacing.medium),
                 verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = title,
                         style = NachoTheme.typography.headingSmallSemiBold,
@@ -136,12 +174,7 @@ fun InvitationListItem(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-
-                    dDayText?.let {
-                        NachoDdayChip(
-                            label = it
-                        )
-                    }
+                    dDayText?.let { NachoDdayChip(label = it) }
                 }
 
                 hostName?.let {
@@ -154,9 +187,7 @@ fun InvitationListItem(
                     )
                 }
 
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
-                ) {
+                Column(verticalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall)) {
                     IconTextRow(iconRes = R.drawable.ic_calendar_24, text = startTime)
                     IconTextRow(iconRes = R.drawable.ic_location_24, text = address)
                 }
@@ -208,7 +239,12 @@ private fun InvitationListItemPreview() {
                 address = "강남대로62길 23 4층 코드스쿼드",
                 dDayText = "D-3",
                 onClick = {},
-                onMoreClick = {},
+                menuItems = persistentListOf(
+                    MenuItem(
+                        title = "초대장 나가기",
+                        onClick = {}
+                    )
+                )
             )
 
             InvitationListItem(
@@ -219,7 +255,6 @@ private fun InvitationListItemPreview() {
                 address = "강남대로62길 23 4층 코드스쿼드",
                 dDayText = "D-3",
                 onClick = {},
-                onMoreClick = {},
             )
         }
     }

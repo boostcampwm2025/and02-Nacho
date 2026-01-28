@@ -1,15 +1,13 @@
-package com.andlife.invitation_edit.model.create
+package com.andlife.invitation_edit.model.form
 
 import android.text.Editable
-import com.andlife.domain.model.invitation.Invitation
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import java.util.UUID
 
-data class CreateInvitationUiModel(
+data class InvitationFormUiModel(
     val title: String = "",
     val author: String = "",
     val imageList: ImmutableList<ThumbnailImageUiModel> = persistentListOf(),
@@ -25,8 +23,20 @@ data class CreateInvitationUiModel(
     val card: CardUiModel? = null,
 ) {
     val isValid: Boolean
-        get() = title.isNotBlank() && author.isNotBlank() && date != null
-            && startTime != null && placeName.isNotBlank() && placeAddress.isNotBlank()
+        get() = title.isNotBlank() &&
+            author.isNotBlank() &&
+            date != null &&
+            startTime != null &&
+            placeName.isNotBlank() &&
+            placeAddress.isNotBlank() &&
+            isEndTimeValid
+    val isEndTimeValid: Boolean
+        get() {
+            if (endTime == null || startTime == null) return true
+            val start = LocalTime(startTime.hour, startTime.min)
+            val end = LocalTime(endTime.hour, endTime.min)
+            return end > start
+        }
 }
 
 data class ThumbnailImageUiModel(
@@ -48,10 +58,9 @@ data class AnnouncementUiModel(
 data class CardUiModel(
     val editable: Editable,
     val backgroundColor: Int,
-    val backgroundImageUrl: String? = null
+    val backgroundImageUrl: String? = null,
 )
 
 fun InvitationTimeUiModel.toLocalTime(): LocalTime {
     return LocalTime(hour, min)
 }
-

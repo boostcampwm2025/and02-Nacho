@@ -6,29 +6,29 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
+import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoSpacing
@@ -46,6 +46,7 @@ import com.andlife.ui.section.detail.EmptyCardGuide
 import com.andlife.ui.section.detail.ImageSection
 import com.andlife.ui.section.detail.PlaceGuideSection
 import com.andlife.ui.section.detail.TitleSection
+import com.andlife.designsystem.R as designR
 
 @Composable
 fun MyInvitationContentsScreen(
@@ -143,17 +144,26 @@ private fun MyInvitationCardSection(
                     style = NachoTheme.typography.headingSmallSemiBold,
                     color = NachoTheme.colorScheme.textPrimary,
                 )
-                Spacer(modifier = Modifier.weight(1f))
-                TextButton(onClick = onCreateCard) {
+                NachoButton(
+                    onClick = onCreateCard,
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = NachoElevation.none,
+                        pressedElevation = NachoElevation.none,
+                    ),
+                    containerColor = NachoTheme.colorScheme.brandOnPrimary,
+                    contentColor = NachoTheme.colorScheme.brandPrimary,
+                    contentPadding = PaddingValues(horizontal = NachoSpacing.small, vertical = NachoSpacing.xSmall),
+                ) {
                     Icon(
-                        imageVector = Icons.Default.Add,
+                        painter = painterResource(designR.drawable.ic_add_24),
                         contentDescription = null,
                         tint = NachoTheme.colorScheme.brandPrimary,
                     )
+                    Spacer(Modifier.width(NachoSpacing.small))
                     Text(
                         text = stringResource(R.string.txt_card_create),
+                        style = NachoTheme.typography.bodyMediumMedium,
                         color = NachoTheme.colorScheme.brandPrimary,
-                        style = NachoTheme.typography.bodyMediumRegular,
                     )
                 }
             }
@@ -178,22 +188,27 @@ private fun MyInvitationCardSection(
                     style = NachoTheme.typography.headingSmallSemiBold,
                     color = NachoTheme.colorScheme.textPrimary,
                 )
-                Spacer(modifier = Modifier.weight(1f))
-                TextButton(
+                NachoButton(
                     onClick = onEditCard,
                     enabled = editCardEnabled,
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = NachoTheme.colorScheme.brandPrimary,
-                        disabledContentColor = NachoTheme.colorScheme.textTertiary
-                    )
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = NachoElevation.none,
+                        pressedElevation = NachoElevation.none,
+                    ),
+                    containerColor = NachoTheme.colorScheme.brandOnPrimary,
+                    contentColor = NachoTheme.colorScheme.brandPrimary,
+                    contentPadding = PaddingValues(horizontal = NachoSpacing.small, vertical = NachoSpacing.xSmall),
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Edit,
+                        painter = painterResource(designR.drawable.ic_edit_24),
                         contentDescription = null,
+                        tint = NachoTheme.colorScheme.brandPrimary,
                     )
+                    Spacer(Modifier.width(NachoSpacing.small))
                     Text(
                         text = stringResource(R.string.txt_card_edit),
-                        style = NachoTheme.typography.bodyMediumRegular,
+                        style = NachoTheme.typography.bodyMediumMedium,
+                        color = NachoTheme.colorScheme.brandPrimary,
                     )
                 }
             }

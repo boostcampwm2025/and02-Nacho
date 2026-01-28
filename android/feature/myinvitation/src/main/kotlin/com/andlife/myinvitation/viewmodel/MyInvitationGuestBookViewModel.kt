@@ -17,6 +17,7 @@ import com.andlife.domain.util.Result
 import com.andlife.domain.util.ThumbnailGenerator
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
+import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.media.audio.AudioPlayerManager
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.model.guestbook.GuestBookUiModel
@@ -37,8 +38,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -80,22 +79,10 @@ constructor(
     }
 
     private fun observeAudioPlayerState() {
-        audioPlayerManager.currentAudioUrl
-            .combine(audioPlayerManager.isPlaying) { url, isPlaying ->
+        audioPlayerManager.currentAudio
+            .onEach { audioPlaybackState ->
                 updateState {
-                    copy(
-                        playingAudioUrl = url,
-                        isAudioPlaying = isPlaying,
-                    )
-                }
-            }
-            .launchIn(viewModelScope)
-
-        uiState.map { it.isAudioPlaying }
-            .distinctUntilChanged()
-            .onEach { isAudioPlaying ->
-                if (!isAudioPlaying) {
-                    videoPlayerPool.resumeLastPlayed()
+                    copy( audioPlaybackState = audioPlaybackState ?: AudioPlaybackState())
                 }
             }
             .launchIn(viewModelScope)
@@ -107,8 +94,13 @@ constructor(
             is MyInvitationGuestBookUiEvent.UpdateTextContent -> updateTextContent(event.textContent)
             is MyInvitationGuestBookUiEvent.RemoveMedia -> removeMedia(event.media)
             is MyInvitationGuestBookUiEvent.UploadMedias -> handleUploadMedias()
+            is MyInvitationGuestBookUiEvent.ClickCamera -> handleCameraClick()
+            is MyInvitationGuestBookUiEvent.ClickMicrophone -> handleMicrophoneClick()
+            is MyInvitationGuestBookUiEvent.StartAudioRecording -> handleStartAudioRecording()
+            is MyInvitationGuestBookUiEvent.StopAudioRecording -> handleStopAudioRecording()
             is MyInvitationGuestBookUiEvent.ClearError -> clearError()
             is MyInvitationGuestBookUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
+            is MyInvitationGuestBookUiEvent.ClickVideoPlayButton -> clickVideoPlayButton(event.url, event.itemId)
 
             is MyInvitationGuestBookUiEvent.ClickGuestBookMenu -> sendEffect(
                 MyInvitationGuestBookSideEffect.ShowSnackbar("방명록 메뉴 클릭됨: ${event.guestBookId}"),
@@ -125,12 +117,14 @@ constructor(
             is MyInvitationGuestBookUiEvent.ClickEditMenu -> startEditing(event.guestBook)
             is MyInvitationGuestBookUiEvent.CancelEdit -> cancelEdit()
             is MyInvitationGuestBookUiEvent.ClickDeleteMenu -> deleteGuestBook(event.guestBookId)
+            is MyInvitationGuestBookUiEvent.UpdateMediaPlayState -> updatePlayState(event.isPlaying)
+            MyInvitationGuestBookUiEvent.Refresh -> refresh()
         }
     }
 
     private fun clickAudioMedia(url: String) {
-        val isCurrentlyPlaying = uiState.value.isAudioPlaying
-        val currentUrl = uiState.value.playingAudioUrl
+        val isCurrentlyPlaying = uiState.value.audioPlaybackState.isPlaying
+        val currentUrl = uiState.value.audioPlaybackState.playingUrl
 
         if (currentUrl == url && isCurrentlyPlaying) {
             audioPlayerManager.togglePlay(url)
@@ -139,6 +133,13 @@ constructor(
             videoPlayerPool.pauseAllPlayers()
             audioPlayerManager.togglePlay(url)
         }
+    }
+
+    private fun clickVideoPlayButton(url: String, itemId: Long) {
+        val isCurrentlyPlaying = uiState.value.audioPlaybackState.isPlaying
+        if (!isCurrentlyPlaying) return
+        audioPlayerManager.pause()
+        videoPlayerPool.playPlayer(url, itemId)
     }
 
     private fun updateSelectedMedias(medias: List<SelectedMedia>) {
@@ -203,6 +204,7 @@ constructor(
                             val thumbnails = generateAndUploadThumbnails(newMedias)
                             uploadResult.data to thumbnails
                         }
+
                         is Result.Error -> {
                             updateState { copy(isUploading = false) }
                             sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("업로드 실패: ${uploadResult.message}"))
@@ -290,9 +292,12 @@ constructor(
         thumbnailUrls: List<String?>,
         allSelectedMedias: List<SelectedMedia>
     ) {
-        val existingImageIds = allSelectedMedias.filter { it.id != null && it.type == UiMediaType.IMAGE }.mapNotNull { it.id }
-        val existingAudioIds = allSelectedMedias.filter { it.id != null && it.type == UiMediaType.AUDIO }.mapNotNull { it.id }
-        val existingVideoIds = allSelectedMedias.filter { it.id != null && it.type == UiMediaType.VIDEO }.mapNotNull { it.id }
+        val existingImageIds =
+            allSelectedMedias.filter { it.id != null && it.type == UiMediaType.IMAGE }.mapNotNull { it.id }
+        val existingAudioIds =
+            allSelectedMedias.filter { it.id != null && it.type == UiMediaType.AUDIO }.mapNotNull { it.id }
+        val existingVideoIds =
+            allSelectedMedias.filter { it.id != null && it.type == UiMediaType.VIDEO }.mapNotNull { it.id }
 
         val onlyNewMedias = allSelectedMedias.filter { it.id == null }
 
@@ -379,6 +384,61 @@ constructor(
                 originalTextContent = "",
                 originalMediaIds = emptySet(),
             )
+        }
+    }
+
+    private fun handleCameraClick() {
+        val state = uiState.value
+        if (state.selectedMedias.size >= 5) {
+            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("최대 5개까지 미디어를 추가할 수 있습니다."))
+            return
+        }
+        sendEffect(MyInvitationGuestBookSideEffect.LaunchCamera)
+    }
+
+    private fun handleMicrophoneClick() {
+        val state = uiState.value
+
+        if (state.isAudioRecording) {
+            onEvent(MyInvitationGuestBookUiEvent.StopAudioRecording)
+        } else {
+            if (state.selectedMedias.size >= 5) {
+                sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("최대 5개까지 미디어를 추가할 수 있습니다."))
+                return
+            }
+            onEvent(MyInvitationGuestBookUiEvent.StartAudioRecording)
+        }
+    }
+
+    private fun handleStartAudioRecording() {
+        updateState { copy(isAudioRecording = true, audioRecordingDuration = 0) }
+        sendEffect(MyInvitationGuestBookSideEffect.StartAudioRecording)
+    }
+
+    private fun handleStopAudioRecording() {
+        updateState { copy(isAudioRecording = false, audioRecordingDuration = 0) }
+        sendEffect(MyInvitationGuestBookSideEffect.StopAudioRecording)
+    }
+
+    private fun updatePlayState(isPlaying: Boolean) {
+        updateState { copy(isMediaPlaying = isPlaying) }
+    }
+
+    private fun refresh() {
+        invalidateGuestBooks()
+        updateState { copy(isRefreshing = true) }
+    }
+
+    fun onRefreshFinished(hasError: Boolean) {
+        val wasUserTriggered = uiState.value.isRefreshing
+        updateState { copy(isRefreshing = false) }
+
+        if (hasError) {
+            sendEffect(MyInvitationGuestBookSideEffect.RefreshFailure)
+        } else {
+            if (wasUserTriggered) {
+                sendEffect(MyInvitationGuestBookSideEffect.ScrollToTop)
+            }
         }
     }
 }
