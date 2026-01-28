@@ -149,7 +149,7 @@ fun MyInvitationGuestBookRoute(
             is MyInvitationGuestBookSideEffect.RefreshFailure -> {
                 coroutineScope.launch {
                     snackbarHostState.currentSnackbarData?.dismiss()
-                    snackbarHostState.showSnackbar(res.getString(R.string.guide_guestbook_refresh_failure))
+                    snackbarHostState.showSnackbar(res.getString(R.string.msg_guestbook_refresh_failure))
                 }
             }
         }

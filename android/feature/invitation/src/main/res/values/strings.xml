@@ -19,6 +19,6 @@
     <string name="txt_delete_dialog_message">삭제된 방명록은 복구할 수 없습니다.</string>
     <string name="btn_label_cancel">취소</string>
     <string name="btn_label_delete">삭제</string>
-    <string name="guide_guestbook_refresh_failure">잠시 후 다시 시도해 주세요.</string>
+    <string name="msg_guestbook_refresh_failure">잠시 후 다시 시도해 주세요.</string>
 </resources>
 
