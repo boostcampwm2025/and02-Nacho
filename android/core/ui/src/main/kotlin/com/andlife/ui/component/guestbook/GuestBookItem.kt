@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -613,10 +614,13 @@ private fun GuestBookItemAudioSection(
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
     ) {
         audioMedias.forEach { audio ->
+            val isCurrentAudio = audio.url == audioPlaybackState.playingUrl
+
             GuestBookAudioItem(
                 audio = audio,
                 isAudioPlaying = audioPlaybackState.isAudioPlayingForUrl(audio.url),
-                isCurrentAudio = audio.url == audioPlaybackState.playingUrl,
+                isCurrentAudio = isCurrentAudio,
+                isLoading = isCurrentAudio && audioPlaybackState.isLoading,
                 currentPositionMs = audioPlaybackState.currentPositionMs,
                 totalDurationMs = audioPlaybackState.totalDurationMs,
                 onAudioMediaClick = onAudioMediaClick,
@@ -630,6 +634,7 @@ private fun GuestBookAudioItem(
     audio: GuestBookMediaUiModel,
     isAudioPlaying: Boolean,
     isCurrentAudio: Boolean,
+    isLoading: Boolean,
     currentPositionMs: Long,
     totalDurationMs: Long,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
@@ -719,11 +724,19 @@ private fun GuestBookAudioItem(
             onClick = { onAudioMediaClick(audio) },
         ) {
             Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    painter = painterResource(playIconResId),
-                    contentDescription = stringResource(R.string.desc_play_audio),
-                    tint = NachoTheme.colorScheme.textSecondary,
-                )
+                if (isCurrentAudio && isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(NachoIconSize.xSmall),
+                        color = NachoTheme.colorScheme.textSecondary,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(playIconResId),
+                        contentDescription = stringResource(R.string.desc_play_audio),
+                        tint = NachoTheme.colorScheme.textSecondary,
+                    )
+                }
             }
         }
     }

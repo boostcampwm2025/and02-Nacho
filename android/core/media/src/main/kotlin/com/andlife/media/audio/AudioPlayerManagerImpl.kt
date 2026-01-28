@@ -26,8 +26,6 @@ data class AudioPlaybackState(
     val currentPositionMs: Long = 0L,
     val totalDurationMs: Long = 0L
 ) {
-//    fun isAudioPlayingForGuestBook(guestBookAudioUrls: List<String>): Boolean =
-//        isPlaying && guestBookAudioUrls.any { it == playingUrl }
 
     fun isAudioPlayingForUrl(url: String): Boolean =
         isPlaying && playingUrl == url
