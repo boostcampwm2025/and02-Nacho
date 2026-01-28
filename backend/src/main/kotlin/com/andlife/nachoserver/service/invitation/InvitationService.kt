@@ -10,6 +10,7 @@ import com.andlife.nachoserver.repository.invitation.AnnouncementRepository
 import com.andlife.nachoserver.repository.invitation.InvitationCardRepository
 import com.andlife.nachoserver.repository.invitation.InvitationRepository
 import com.andlife.nachoserver.repository.participant.InvitationParticipantRepository
+import com.andlife.nachoserver.repository.user.UserRepository
 import com.andlife.nachoserver.request.invitation.AnnouncementRequest
 import com.andlife.nachoserver.request.invitation.CreateInvitationRequest
 import com.andlife.nachoserver.request.invitation.InvitationCardRequest
@@ -20,6 +21,7 @@ import com.andlife.nachoserver.response.invitation.AnnouncementResponse
 import com.andlife.nachoserver.response.invitation.InvitationCardResponse
 import com.andlife.nachoserver.response.invitation.InvitationResponse
 import com.andlife.nachoserver.response.invitation.InvitationSummaryResponse
+import com.andlife.nachoserver.response.invitation.JoinResponse
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -39,8 +41,45 @@ class InvitationService(
     private val invitationRepository: InvitationRepository,
     private val invitationCardRepository: InvitationCardRepository,
     private val announcementRepository: AnnouncementRepository,
-    private val participantRepository: InvitationParticipantRepository
+    private val participantRepository: InvitationParticipantRepository,
+    private val userRepository: UserRepository
 ) {
+    @Transactional
+    fun joinInvitation(
+        invitationId: Long,
+        userId: Long?,
+        guestInvitationIds: List<Long>
+    ): JoinResponse {
+        val invitation = invitationRepository.findById(invitationId)
+            .orElseThrow { NoSuchElementException("초대장을 찾을 수 없습니다. ID: $invitationId") }
+
+        if (userId != null) {
+            val isAlreadyJoined = participantRepository.existsByInvitationIdAndUserId(invitationId, userId)
+            if (!isAlreadyJoined) {
+                val userProxy = userRepository.getReferenceById(userId)
+                participantRepository.save(InvitationParticipant(invitation = invitation, user = userProxy))
+            }
+            val response = JoinResponse(invitationId = invitationId, isMember = true, alreadyJoined = isAlreadyJoined)
+            println(">>> [Join 성공 직전] $response")
+            return response
+        }
+
+        val alreadyHasAccess = guestInvitationIds.contains(invitationId)
+        return JoinResponse(invitationId = invitationId, isMember = false, alreadyJoined = alreadyHasAccess)
+    }
+
+    @Transactional
+    fun leaveInvitation(invitationId: Long, userId: Long) {
+        val participant = participantRepository.findByUserIdAndInvitationId(userId, invitationId)
+            ?: throw NoSuchElementException("참여 정보를 찾을 수 없습니다. (UserID: $userId, InvitationID: $invitationId)")
+
+        participantRepository.delete(participant)
+    }
+
+    fun leaveInvitationForGuest(invitationId: Long) {
+        println("Guest left invitation: $invitationId")
+    }
+
     @Transactional(readOnly = true)
     fun getParticipantInvitations(
         userId: Long,
