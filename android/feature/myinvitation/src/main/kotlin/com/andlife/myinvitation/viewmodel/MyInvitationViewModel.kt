@@ -111,6 +111,7 @@ class MyInvitationViewModel @Inject constructor(
 
     fun deleteInvitation(invitationId: Long) {
         viewModelScope.launch {
+            updateState { copy(isRefreshing = true) }
             invitationRepository.deleteInvitation(invitationId)
                 .onSuccess {
                     sendEffect(MyInvitationSideEffect.DeleteSuccess)
@@ -118,6 +119,7 @@ class MyInvitationViewModel @Inject constructor(
                 .onFailure { it, msg ->
                     sendEffect(MyInvitationSideEffect.DeleteFailure)
                 }
+            updateState { copy(isRefreshing = false) }
         }
     }
 }

@@ -1,9 +1,13 @@
 package com.andlife.myinvitation.screen
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -11,6 +15,8 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,6 +36,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.andlife.designsystem.component.dialog.NachoDialog
 import com.andlife.designsystem.R as designR
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
@@ -44,9 +51,11 @@ import com.andlife.ui.component.GenericTabRow
 import com.andlife.ui.component.invitation.InvitationListHeader
 import com.andlife.ui.component.invitation.InvitationTopBar
 import com.andlife.ui.component.listitem.InvitationListItem
+import com.andlife.ui.component.listitem.MenuItem
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.component.paging.PagingStateContent
 import com.andlife.ui.util.collectWithLifecycle
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 
@@ -81,6 +90,8 @@ fun MyInvitationRoute(
                 scope.launch {
                     snackbarHostState.showSnackbar(deleteSuccessMessage)
                 }
+                upcomingItems.refresh()
+                pastItems.refresh()
             }
             is MyInvitationSideEffect.DeleteFailure -> {
                 scope.launch {
@@ -102,12 +113,68 @@ fun MyInvitationRoute(
         }
     }
 
+    invitationIdToDelete?.let { id ->
+        NachoDialog(
+            onDismiss = { invitationIdToDelete = null }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(NachoSpacing.xLarge)
+            ) {
+                Text(
+                    text = stringResource(R.string.txt_delete_invitation_title),
+                    style = NachoTheme.typography.headingSmallSemiBold,
+                    color = NachoTheme.colorScheme.textPrimary
+                )
+
+                Text(
+                    text = stringResource(R.string.txt_delete_invitation_message),
+                    modifier = Modifier.padding(top = NachoSpacing.medium, bottom = NachoSpacing.xLarge),
+                    style = NachoTheme.typography.bodyMediumMedium,
+                    color = NachoTheme.colorScheme.textSecondary
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                ) {
+                    TextButton(
+                        onClick = { invitationIdToDelete = null }
+                    ) {
+                        Text(
+                            text = stringResource(R.string.txt_cancel),
+                            color = NachoTheme.colorScheme.textSecondary
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.padding(horizontal = NachoSpacing.small))
+
+                    TextButton(
+                        onClick = {
+                            viewModel.deleteInvitation(id)
+                            invitationIdToDelete = null
+                        },
+                        shape = NachoTheme.shapes.small
+                    ) {
+                        Text(
+                            text = stringResource(R.string.txt_confirm),
+                            color = NachoTheme.colorScheme.brandPrimary
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     MyInvitationScreen(
         uiState = uiState,
         upcomingItems = upcomingItems,
         pastItems = pastItems,
         modifier = modifier,
         onEvent = viewModel::onEvent,
+        onDeleteClick = { invitationIdToDelete = it }
     )
 }
 
@@ -117,8 +184,9 @@ private fun MyInvitationScreen(
     uiState: MyInvitationUiState,
     upcomingItems: LazyPagingItems<InvitationSummaryUiModel>,
     pastItems: LazyPagingItems<InvitationSummaryUiModel>,
+    onEvent: (MyInvitationUiEvent) -> Unit,
+    onDeleteClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
-    onEvent: (MyInvitationUiEvent) -> Unit
 ) {
     val tabs = stringArrayResource(R.array.arr_invitation_tabs).toImmutableList()
     val upcomingSortOptions = stringArrayResource(R.array.arr_invitation_sort_options).toImmutableList()
@@ -227,6 +295,12 @@ private fun MyInvitationScreen(
                                         address = invitation.address,
                                         dDayText = dDayLabel,
                                         onClick = { onEvent(MyInvitationUiEvent.ClickInvitation(invitation.id)) },
+                                        menuItems = persistentListOf(
+                                            MenuItem(
+                                                title = stringResource(R.string.txt_delete_invitation_title),
+                                                onClick = { onDeleteClick(invitation.id) }
+                                            )
+                                        )
                                     )
                                 }
                             }
