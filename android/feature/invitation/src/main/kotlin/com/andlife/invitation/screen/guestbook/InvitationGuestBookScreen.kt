@@ -8,7 +8,6 @@ import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import android.provider.Settings
-import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -115,7 +114,7 @@ fun InvitationGuestBookRoute(
     val res = LocalResources.current
     val focusManager = LocalFocusManager.current
 
-    val coroutineScope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -126,7 +125,7 @@ fun InvitationGuestBookRoute(
     var isMediaActive by remember { mutableStateOf(true) }
     val navigateBackWithCleanup: () -> Unit = {
         isMediaActive = false
-        coroutineScope.launch {
+        scope.launch {
             viewModel.videoPlayerPool.pauseAllPlayers()
             viewModel.onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(""))
 
@@ -182,7 +181,7 @@ fun InvitationGuestBookRoute(
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is InvitationGuestBookSideEffect.ShowSnackbar -> {
-                coroutineScope.launch {
+                scope.launch {
                     snackbarHostState.currentSnackbarData?.dismiss()
                     snackbarHostState.showSnackbar(
                         message = effect.message,
@@ -259,7 +258,7 @@ fun InvitationGuestBookRoute(
             }
 
             is InvitationGuestBookSideEffect.ScrollToTop -> {
-                coroutineScope.launch {
+                scope.launch {
                     if (guestBooks.itemCount > 0) {
                         lazyListState.animateScrollToItem(0)
                     }
@@ -267,7 +266,7 @@ fun InvitationGuestBookRoute(
             }
 
             is InvitationGuestBookSideEffect.RefreshFailure -> {
-                coroutineScope.launch {
+                scope.launch {
                     snackbarHostState.currentSnackbarData?.dismiss()
                     snackbarHostState.showSnackbar(res.getString(R.string.msg_guestbook_refresh_failure))
                 }

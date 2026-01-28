@@ -115,7 +115,7 @@ fun MyInvitationGuestBookRoute(
     val res = LocalResources.current
     val focusManager = LocalFocusManager.current
 
-    val coroutineScope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -126,7 +126,7 @@ fun MyInvitationGuestBookRoute(
     var isMediaActive by remember { mutableStateOf(true) }
     val navigateBackWithCleanup: () -> Unit = {
         isMediaActive = false
-        coroutineScope.launch {
+        scope.launch {
             viewModel.videoPlayerPool.pauseAllPlayers()
             viewModel.onEvent(MyInvitationGuestBookUiEvent.ClickAudioMedia(""))
 
@@ -181,7 +181,7 @@ fun MyInvitationGuestBookRoute(
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is MyInvitationGuestBookSideEffect.ShowSnackbar -> {
-                coroutineScope.launch {
+                scope.launch {
                     snackbarHostState.currentSnackbarData?.dismiss()
                     snackbarHostState.showSnackbar(
                         message = effect.message,
@@ -207,7 +207,7 @@ fun MyInvitationGuestBookRoute(
             }
 
             is MyInvitationGuestBookSideEffect.ScrollToTop -> {
-                coroutineScope.launch {
+                scope.launch {
                     if (guestBooks.itemCount > 0) {
                         lazyListState.animateScrollToItem(0)
                     }
@@ -215,7 +215,7 @@ fun MyInvitationGuestBookRoute(
             }
 
             is MyInvitationGuestBookSideEffect.RefreshFailure -> {
-                coroutineScope.launch {
+                scope.launch {
                     snackbarHostState.currentSnackbarData?.dismiss()
                     snackbarHostState.showSnackbar(res.getString(R.string.msg_guestbook_refresh_failure))
                 }
