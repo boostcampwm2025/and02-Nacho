@@ -6,6 +6,7 @@ import com.andlife.nachoserver.entity.Invitation
 import com.andlife.nachoserver.entity.InvitationCard
 import com.andlife.nachoserver.entity.User
 import com.andlife.nachoserver.entity.InvitationParticipant
+import com.andlife.nachoserver.repository.guestbook.GuestBookRepository
 import com.andlife.nachoserver.repository.invitation.AnnouncementRepository
 import com.andlife.nachoserver.repository.invitation.InvitationCardRepository
 import com.andlife.nachoserver.repository.invitation.InvitationRepository
@@ -17,8 +18,6 @@ import com.andlife.nachoserver.request.invitation.InvitationCardRequest
 import com.andlife.nachoserver.request.invitation.UpdateInvitationRequest
 import com.andlife.nachoserver.response.PagingMetaResponse
 import com.andlife.nachoserver.response.PagingResponse
-import com.andlife.nachoserver.response.invitation.AnnouncementResponse
-import com.andlife.nachoserver.response.invitation.InvitationCardResponse
 import com.andlife.nachoserver.response.invitation.InvitationResponse
 import com.andlife.nachoserver.response.invitation.InvitationSummaryResponse
 import com.andlife.nachoserver.response.invitation.JoinResponse
@@ -42,7 +41,8 @@ class InvitationService(
     private val invitationCardRepository: InvitationCardRepository,
     private val announcementRepository: AnnouncementRepository,
     private val participantRepository: InvitationParticipantRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val guestBookRepository: GuestBookRepository
 ) {
     @Transactional
     fun joinInvitation(
@@ -205,6 +205,27 @@ class InvitationService(
         card.backgroundImageUrl = request.backgroundImageUrl
 
         return invitationCardRepository.save(card).id
+    }
+
+    @Transactional
+    fun deleteInvitation(invitationId: Long, userId: Long) {
+        val invitation = invitationRepository.findByIdAndHostId(invitationId, userId)
+            ?: throw NoSuchElementException("삭제 권한이 없거나 초대장을 찾을 수 없습니다. ID: $invitationId")
+
+        // 연관된 데이터 삭제
+        val guestBooks = guestBookRepository.findAllByInvitationId(invitationId)
+        guestBookRepository.deleteAll(guestBooks)
+
+        announcementRepository.deleteAllByInvitationId(invitationId)
+        invitationCardRepository.deleteByInvitationId(invitationId)
+        participantRepository.deleteAllByInvitationId(invitationId)
+
+        /**
+         * Todo
+         * - R2에 업로드 된 미디어 삭제 로직
+         */
+
+        invitationRepository.delete(invitation)
     }
 
     fun getInvitation(invitationId: Long): InvitationResponse {
