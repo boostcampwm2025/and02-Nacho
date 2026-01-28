@@ -8,6 +8,7 @@ import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +28,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -180,26 +182,29 @@ fun InvitationGuestBookRoute(
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is InvitationGuestBookSideEffect.ShowSnackbar -> {
-                snackbarHostState.showSnackbar(
-                    message = effect.message,
-                    duration = SnackbarDuration.Short,
-                )
+                coroutineScope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(
+                        message = effect.message,
+                        duration = SnackbarDuration.Short,
+                    )
+                }
             }
 
             is InvitationGuestBookSideEffect.CreateGuestBookSuccess -> {
                 focusManager.clearFocus()
                 scrollToTop = true
-                viewModel.invalidateGuestBooks()
+                guestBooks.refresh()
             }
 
             is InvitationGuestBookSideEffect.UpdateGuestBookSuccess -> {
                 focusManager.clearFocus()
-                viewModel.invalidateGuestBooks()
+                guestBooks.refresh()
             }
 
             is InvitationGuestBookSideEffect.DeleteGuestBookSuccess -> {
                 focusManager.clearFocus()
-                viewModel.invalidateGuestBooks()
+                guestBooks.refresh()
             }
 
             is InvitationGuestBookSideEffect.LaunchCamera -> {
@@ -553,6 +558,7 @@ private fun InvitationGuestBookScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         innerPadding
         Column(modifier = Modifier.fillMaxSize()) {

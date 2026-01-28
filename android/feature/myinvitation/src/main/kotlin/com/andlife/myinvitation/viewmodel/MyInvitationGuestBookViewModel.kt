@@ -101,19 +101,9 @@ constructor(
             is MyInvitationGuestBookUiEvent.ClearError -> clearError()
             is MyInvitationGuestBookUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
             is MyInvitationGuestBookUiEvent.ClickVideoPlayButton -> clickVideoPlayButton(event.url, event.itemId)
-
-            is MyInvitationGuestBookUiEvent.ClickGuestBookMenu -> sendEffect(
-                MyInvitationGuestBookSideEffect.ShowSnackbar("방명록 메뉴 클릭됨: ${event.guestBookId}"),
-            )
-
-            is MyInvitationGuestBookUiEvent.ClickInvitationTitle -> sendEffect(
-                MyInvitationGuestBookSideEffect.ShowSnackbar("초대장 제목 클릭됨: ${event.invitationId}"),
-            )
-
-            is MyInvitationGuestBookUiEvent.ClickVisualMedia -> sendEffect(
-                MyInvitationGuestBookSideEffect.ShowSnackbar("비주얼 미디어 클릭됨: ${event.url}"),
-            )
-
+            is MyInvitationGuestBookUiEvent.ClickGuestBookMenu -> {}
+            is MyInvitationGuestBookUiEvent.ClickInvitationTitle -> {}
+            is MyInvitationGuestBookUiEvent.ClickVisualMedia -> {}
             is MyInvitationGuestBookUiEvent.ClickEditMenu -> startEditing(event.guestBook)
             is MyInvitationGuestBookUiEvent.CancelEdit -> cancelEdit()
             is MyInvitationGuestBookUiEvent.ClickDeleteMenu -> deleteGuestBook(event.guestBookId)
