@@ -234,7 +234,7 @@ private fun InvitationScreen(
                             if (currentItems.itemCount > 0) {
                                 item {
                                     InvitationListHeader(
-                                        totalCount = currentItems.itemCount,
+                                        totalCount = if (isUpcoming) uiState.upcomingTotalCount else uiState.pastTotalCount,
                                         currentSort = currentSortOptions[currentSortIndex],
                                         sortOptions = currentSortOptions,
                                         onSortSelected = { index ->

@@ -23,12 +23,14 @@ interface InvitationRepository {
     fun getParticipantInvitations(
         status: InvitationStatus,
         sortType: SortDirection,
-        isMyInvitation: Boolean
+        isMyInvitation: Boolean,
+        onTotalCountLoaded: (Int) -> Unit
     ): Flow<PagingData<InvitationSummary>>
     fun getMyInvitations(
         status: InvitationStatus,
         sortType: SortDirection,
-        isMyInvitation: Boolean
+        isMyInvitation: Boolean,
+        onTotalCountLoaded: (Int) -> Unit
     ): Flow<PagingData<InvitationSummary>>
     fun getUpcomingInvitations(): Flow<PagingData<UpcomingInvitation>>
     suspend fun createInvitationCard(invitationId: Long, card: NachoCard): Result<Long, DataError>
