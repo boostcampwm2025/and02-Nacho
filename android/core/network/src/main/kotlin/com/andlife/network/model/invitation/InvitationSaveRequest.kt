@@ -6,7 +6,7 @@ import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CreateInvitationRequest(
+data class InvitationSaveRequest(
     val title: String,
     val displayHostName: String,
     val thumbnailUrls: List<String>,

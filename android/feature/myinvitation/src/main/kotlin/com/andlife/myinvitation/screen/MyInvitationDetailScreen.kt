@@ -69,6 +69,7 @@ import com.andlife.designsystem.R as designR
 @Composable
 fun MyInvitationDetailRoute(
     onNavigateBack: () -> Unit,
+    onNavigateToEditInvitation: (Long) -> Unit,
     onNavigateToEditCard: (Long) -> Unit,
     onNavigateToCreateCard: (Long) -> Unit,
     modifier: Modifier = Modifier,
@@ -101,6 +102,10 @@ fun MyInvitationDetailRoute(
 
             is MyInvitationDetailSideEffect.NavigateToCreateCard -> {
                 onNavigateToCreateCard(effect.myInvitationId)
+            }
+
+            is MyInvitationDetailSideEffect.NavigateToEditInvitation -> {
+                onNavigateToEditInvitation(effect.myInvitationId)
             }
         }
     }

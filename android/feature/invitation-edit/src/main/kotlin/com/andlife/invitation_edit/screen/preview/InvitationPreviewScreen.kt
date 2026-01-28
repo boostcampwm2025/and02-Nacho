@@ -20,17 +20,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
-import kotlinx.collections.immutable.toImmutableList
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
-import com.andlife.invitation_edit.model.create.CreateInvitationUiState
+import com.andlife.invitation_edit.model.form.InvitationFormUiState
 import com.andlife.invitation_edit.section.CardSection
 import com.andlife.invitation_edit.section.TopBarSection
-import com.andlife.invitation_edit.viewmodel.CreateInvitationViewModel
+import com.andlife.invitation_edit.viewmodel.InvitationCreateViewModel
+import com.andlife.model.invitation.AnnouncementUiModel
 import com.andlife.model.invitation.DateTimeInfo
 import com.andlife.model.invitation.LocationInfo
 import com.andlife.model.invitation.TimeUiModel
-import com.andlife.model.invitation.AnnouncementUiModel
 import com.andlife.ui.section.detail.AddressSection
 import com.andlife.ui.section.detail.AnnouncementSection
 import com.andlife.ui.section.detail.AuthorSection
@@ -44,12 +43,13 @@ import com.andlife.ui.section.detail.EmptyTitleSection
 import com.andlife.ui.section.detail.ImageSection
 import com.andlife.ui.section.detail.PlaceGuideSection
 import com.andlife.ui.section.detail.TitleSection
+import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 fun InvitationPreviewRoute(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: CreateInvitationViewModel,
+    viewModel: InvitationCreateViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -62,7 +62,7 @@ fun InvitationPreviewRoute(
 
 @Composable
 private fun InvitationPreviewScreen(
-    uiState: CreateInvitationUiState,
+    uiState: InvitationFormUiState,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -87,7 +87,6 @@ private fun InvitationPreviewScreen(
                 modifier = Modifier.fillMaxSize()
             )
 
-            // 하단 고정 미리보기 안내 박스
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -112,10 +111,10 @@ private fun InvitationPreviewScreen(
 
 @Composable
 private fun InvitationPreviewContent(
-    uiState: CreateInvitationUiState,
+    uiState: InvitationFormUiState,
     modifier: Modifier = Modifier,
 ) {
-    val model = uiState.createInvitationUiModel
+    val model = uiState.invitationFormUiModel
     val scrollState = rememberScrollState()
 
     Column(
@@ -124,7 +123,6 @@ private fun InvitationPreviewContent(
             .background(NachoTheme.colorScheme.backgroundPrimary)
             .verticalScroll(scrollState),
     ) {
-        // ImageSection
         if (model.imageList.isEmpty()) {
             EmptyImageSection()
         } else {
@@ -134,14 +132,12 @@ private fun InvitationPreviewContent(
             )
         }
 
-        // TitleSection
         if (model.title.isEmpty()) {
             EmptyTitleSection()
         } else {
             TitleSection(title = model.title)
         }
 
-        // Author Section
         if (model.author.isEmpty()) {
             EmptyAuthorSection()
         } else {
@@ -151,7 +147,6 @@ private fun InvitationPreviewContent(
             )
         }
 
-        // DateSection
         val hasDate = model.date != null
         val hasTime = model.startTime != null
 
@@ -166,7 +161,6 @@ private fun InvitationPreviewContent(
             )
         }
 
-        // AddressSection
         if (model.placeName.isEmpty() && model.placeAddress.isEmpty()) {
             EmptyAddressSection()
         } else {
@@ -178,7 +172,6 @@ private fun InvitationPreviewContent(
 
         Spacer(modifier = Modifier.height(NachoSpacing.medium))
 
-        // CardSection
         if (model.card == null) {
             EmptyItemSection(
                 title = stringResource(R.string.txt_card),
@@ -192,7 +185,6 @@ private fun InvitationPreviewContent(
             )
         }
 
-        // AnnouncementSection
         if (model.announcement.isEmpty()) {
             EmptyItemSection(
                 title = stringResource(R.string.txt_announcement),
@@ -209,7 +201,6 @@ private fun InvitationPreviewContent(
             )
         }
 
-        // PlaceGuideSection
         if (model.placeGuide.isEmpty()) {
             EmptyItemSection(
                 title = stringResource(R.string.txt_place_guide),
@@ -232,7 +223,7 @@ private fun InvitationPreviewContent(
 @PreviewTheme
 fun InvitationPreviewScreenPreview() {
     InvitationPreviewScreen(
-        uiState = CreateInvitationUiState(),
+        uiState = InvitationFormUiState(),
         onNavigateBack = {},
     )
 }

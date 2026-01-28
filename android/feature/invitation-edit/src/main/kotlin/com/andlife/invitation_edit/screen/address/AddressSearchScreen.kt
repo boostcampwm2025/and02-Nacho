@@ -39,10 +39,10 @@ import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
-import com.andlife.invitation_edit.model.AddressSearchSideEffect
-import com.andlife.invitation_edit.model.AddressSearchUiEvent
-import com.andlife.invitation_edit.model.AddressSearchUiState
-import com.andlife.invitation_edit.model.AddressUiModel
+import com.andlife.invitation_edit.model.address.AddressSearchSideEffect
+import com.andlife.invitation_edit.model.address.AddressSearchUiEvent
+import com.andlife.invitation_edit.model.address.AddressSearchUiState
+import com.andlife.invitation_edit.model.address.AddressUiModel
 import com.andlife.invitation_edit.viewmodel.AddressSearchViewModel
 import com.andlife.ui.component.paging.PagingStateContent
 import com.andlife.ui.util.collectWithLifecycle
