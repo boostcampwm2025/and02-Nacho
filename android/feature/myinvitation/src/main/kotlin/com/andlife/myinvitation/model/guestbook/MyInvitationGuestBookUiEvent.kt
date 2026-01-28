@@ -19,6 +19,14 @@ sealed interface MyInvitationGuestBookUiEvent : BaseUiEvent {
 
     data object UploadMedias : MyInvitationGuestBookUiEvent
 
+    data object ClickCamera : MyInvitationGuestBookUiEvent
+
+    data object ClickMicrophone : MyInvitationGuestBookUiEvent
+
+    data object StartAudioRecording : MyInvitationGuestBookUiEvent
+
+    data object StopAudioRecording : MyInvitationGuestBookUiEvent
+
     data object ClearError : MyInvitationGuestBookUiEvent
 
     data class ClickInvitationTitle(
@@ -55,4 +63,6 @@ sealed interface MyInvitationGuestBookUiEvent : BaseUiEvent {
     data class UpdateMediaPlayState(
         val isPlaying: Boolean
     ) : MyInvitationGuestBookUiEvent
+
+    data object Refresh : MyInvitationGuestBookUiEvent
 }

@@ -1,14 +1,20 @@
 package com.andlife.invitation_card.screen.createcard
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.andlife.designsystem.component.dialog.NachoDialog
 import com.andlife.editor.screen.EditorScreen
 import com.andlife.editor.state.EditorState
 import com.andlife.invitation_card.R
+import com.andlife.invitation_card.component.BackDialogContent
 import com.andlife.invitation_card.viewmodel.CreateCardViewModel
 
 @Composable
@@ -17,9 +23,13 @@ fun CreateCardRoute(
     modifier: Modifier = Modifier,
     viewModel: CreateCardViewModel = hiltViewModel()
 ) {
-    val state = remember {
-        viewModel.getState()
+    var showBackDialog by remember { mutableStateOf(false) }
+
+    BackHandler(enabled = true) {
+        showBackDialog = true
     }
+
+    val state = remember { viewModel.getState() }
 
     LaunchedEffect(Unit) {
         viewModel.loadEditable()
@@ -27,13 +37,25 @@ fun CreateCardRoute(
 
     CreateCardScreen(
         state = state,
-        onBackClick = onBackClick,
+        onBackClick = { showBackDialog = true },
         onSaveComplete = {
             viewModel.saveCard()
             onBackClick()
         },
         modifier = modifier
     )
+
+    if (showBackDialog) {
+        NachoDialog(onDismiss = { showBackDialog = false }) {
+            BackDialogContent(
+                onConfirm = {
+                    showBackDialog = false
+                    onBackClick()
+                },
+                onDismiss = { showBackDialog = false }
+            )
+        }
+    }
 }
 
 @Composable

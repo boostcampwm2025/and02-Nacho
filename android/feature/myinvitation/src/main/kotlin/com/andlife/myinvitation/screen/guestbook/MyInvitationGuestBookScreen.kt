@@ -1,17 +1,24 @@
 package com.andlife.myinvitation.screen.guestbook
 
+import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,6 +31,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -36,8 +44,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -70,14 +84,22 @@ import com.andlife.myinvitation.viewmodel.MyInvitationGuestBookViewModel
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.invitation.InvitationGuestBookForm
 import com.andlife.ui.component.paging.PagingStateContent
+import com.andlife.ui.util.audio.AudioRecorder
 import com.andlife.ui.util.collectWithLifecycle
+import com.andlife.ui.util.imeWithoutNavBars
+import com.andlife.ui.util.media.uriToSelectedMedia
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
+import java.io.File
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.toString
+
+private const val CAMERA_IMAGES_DIR = "camera_images"
+private const val AUDIO_RECORDINGS_DIR = "audio_recordings"
 
 @Composable
 fun MyInvitationGuestBookRoute(
@@ -89,11 +111,71 @@ fun MyInvitationGuestBookRoute(
     val guestBooks = viewModel.guestBooksPagingFlow.collectAsLazyPagingItems()
 
     val lifecycleOwner = LocalLifecycleOwner.current
+    val res = LocalResources.current
+    val focusManager = LocalFocusManager.current
+
+    val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
 
     val snackbarHostState = remember { SnackbarHostState() }
     var showDeleteDialog by remember { mutableStateOf<Long?>(null) }
+    var showPermissionDialog by remember { mutableStateOf<String?>(null) }
     var scrollToTop by remember { mutableStateOf(false) }
+
+    var isMediaActive by remember { mutableStateOf(true) }
+    val navigateBackWithCleanup: () -> Unit = {
+        isMediaActive = false
+        coroutineScope.launch {
+            viewModel.videoPlayerPool.pauseAllPlayers()
+            viewModel.onEvent(MyInvitationGuestBookUiEvent.ClickAudioMedia(""))
+
+            delay(50L)
+            onNavigateBack()
+        }
+    }
+
+
+    val context = LocalContext.current
+
+    var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
+    val audioRecorder = remember { AudioRecorder(context) }
+
+    // 카메라 권한 요청 launcher
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.onEvent(MyInvitationGuestBookUiEvent.ClickCamera)
+        } else {
+            showPermissionDialog = Manifest.permission.CAMERA
+        }
+    }
+
+    // 카메라 촬영을 위한 launcher
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success && cameraImageUri != null) {
+            val currentMedias = uiState.selectedMedias
+            if (currentMedias.size < 5) {
+                // 촬영한 사진을 SelectedMedia로 변환하여 추가
+                val newMedia = uriToSelectedMedia(context, cameraImageUri.toString())
+                val updatedMedias = (currentMedias + newMedia).toImmutableList()
+                viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias))
+            }
+        }
+    }
+
+    // 오디오 권한 요청 launcher
+    val audioPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.onEvent(MyInvitationGuestBookUiEvent.ClickMicrophone)
+        } else {
+            showPermissionDialog = Manifest.permission.RECORD_AUDIO
+        }
+    }
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
@@ -105,17 +187,85 @@ fun MyInvitationGuestBookRoute(
             }
 
             is MyInvitationGuestBookSideEffect.CreateGuestBookSuccess -> {
+                focusManager.clearFocus()
                 scrollToTop = true
                 viewModel.invalidateGuestBooks()
             }
 
             is MyInvitationGuestBookSideEffect.UpdateGuestBookSuccess -> {
+                focusManager.clearFocus()
                 viewModel.invalidateGuestBooks()
             }
 
             is MyInvitationGuestBookSideEffect.DeleteGuestBookSuccess -> {
-                viewModel.videoPlayerPool.clearCacheById(uiState.editingGuestBookId)
+                focusManager.clearFocus()
                 viewModel.invalidateGuestBooks()
+            }
+
+            is MyInvitationGuestBookSideEffect.ScrollToTop -> {
+                coroutineScope.launch {
+                    if (guestBooks.itemCount > 0) {
+                        lazyListState.animateScrollToItem(0)
+                    }
+                }
+            }
+
+            is MyInvitationGuestBookSideEffect.RefreshFailure -> {
+                coroutineScope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(res.getString(R.string.msg_guestbook_refresh_failure))
+                }
+            }
+
+            is MyInvitationGuestBookSideEffect.LaunchCamera -> {
+                // 임시 파일 생성
+                val cameraImagesDir = File(context.cacheDir, CAMERA_IMAGES_DIR)
+                if (!cameraImagesDir.exists()) {
+                    cameraImagesDir.mkdirs()
+                }
+                val photoFile = File(
+                    cameraImagesDir,
+                    "camera_photo_${System.currentTimeMillis()}.jpg"
+                )
+                val photoUri = FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.provider",
+                    photoFile
+                )
+                cameraImageUri = photoUri
+                cameraLauncher.launch(photoUri)
+            }
+
+            is MyInvitationGuestBookSideEffect.StartAudioRecording -> {
+                // 오디오 녹음 시작
+                val audioRecordingsDir = File(context.cacheDir, AUDIO_RECORDINGS_DIR)
+                if (!audioRecordingsDir.exists()) {
+                    audioRecordingsDir.mkdirs()
+                }
+                val audioFile = File(
+                    audioRecordingsDir,
+                    "audio_${System.currentTimeMillis()}.m4a"
+                )
+
+                audioRecorder.startRecording(audioFile) { e ->
+                    viewModel.onEvent(MyInvitationGuestBookUiEvent.StopAudioRecording)
+                    // exception 표시
+                }
+            }
+
+            is MyInvitationGuestBookSideEffect.StopAudioRecording -> {
+                // 오디오 녹음 중지
+                audioRecorder.stopRecording { recordedFile ->
+                    if (recordedFile != null) {
+                        // 녹음된 오디오 파일을 SelectedMedia로 변환
+                        val currentMedias = uiState.selectedMedias
+                        if (currentMedias.size < 5) {
+                            val audioMedia = uriToSelectedMedia(context, recordedFile.toURI().toString())
+                            val updatedMedias = (currentMedias + audioMedia).toImmutableList()
+                            viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias))
+                        }
+                    }
+                }
             }
         }
     }
@@ -126,6 +276,14 @@ fun MyInvitationGuestBookRoute(
                 lazyListState.animateScrollToItem(0)
             }
             scrollToTop = false
+        }
+    }
+
+    LaunchedEffect(guestBooks.loadState.refresh) {
+        if (guestBooks.loadState.refresh !is LoadState.Loading) {
+            viewModel.onRefreshFinished(
+                hasError = guestBooks.loadState.refresh is LoadState.Error
+            )
         }
     }
 
@@ -214,15 +372,69 @@ fun MyInvitationGuestBookRoute(
         }
     }
 
+    if (showPermissionDialog != null) {
+        NachoDialog(
+            onDismiss = { showPermissionDialog = null }
+        ) {
+            Column(
+                modifier = Modifier.padding(NachoSpacing.xLarge),
+                verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
+            ) {
+                Text(
+                    text = when (showPermissionDialog) {
+                        Manifest.permission.CAMERA -> stringResource(R.string.txt_permission_camera)
+                        Manifest.permission.RECORD_AUDIO -> stringResource(R.string.txt_permission_audio)
+                        else -> stringResource(R.string.txt_permission_etc)
+                    },
+                    color = NachoTheme.colorScheme.textSecondary,
+                    style = NachoTheme.typography.bodyMediumRegular,
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    TextButton(
+                        onClick = { showPermissionDialog = null }
+                    ) {
+                        Text(
+                            text = stringResource(R.string.btn_label_cancel),
+                            color = NachoTheme.colorScheme.textPrimary,
+                            style = NachoTheme.typography.bodyMediumSemiBold,
+                        )
+                    }
+                    TextButton(
+                        onClick = {
+                            showPermissionDialog = null
+                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                            intent.data = "package:${context.packageName}".toUri()
+                            context.startActivity(intent)
+                        }
+                    ) {
+                        Text(
+                            text = stringResource(R.string.btn_label_to_setting),
+                            color = NachoTheme.colorScheme.brandPrimary,
+                            style = NachoTheme.typography.bodyMediumSemiBold,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     InvitationGuestBookScreen(
         uiState = uiState,
         guestBooks = guestBooks,
         onEvent = viewModel::onEvent,
-        onNavigateBack = onNavigateBack,
+        isMediaActive = isMediaActive,
+        navigateBackWithCleanup = navigateBackWithCleanup,
+        focusManager = focusManager,
         snackbarHostState = snackbarHostState,
         lazyListState = lazyListState,
         videoPlayerPool = viewModel.videoPlayerPool,
         onDeleteMenuClick = { guestBookId -> showDeleteDialog = guestBookId },
+        context = context,
+        cameraPermissionLauncher = cameraPermissionLauncher,
+        audioPermissionLauncher = audioPermissionLauncher,
         modifier = modifier,
     )
 }
@@ -233,31 +445,22 @@ private fun InvitationGuestBookScreen(
     uiState: MyInvitationGuestBookUiState,
     guestBooks: LazyPagingItems<GuestBookUiModel>,
     onEvent: (MyInvitationGuestBookUiEvent) -> Unit,
+    isMediaActive: Boolean,
+    navigateBackWithCleanup: () -> Unit,
+    focusManager: FocusManager,
     snackbarHostState: SnackbarHostState,
     lazyListState: LazyListState,
     videoPlayerPool: AutoVideoPlayerPool,
-    onNavigateBack: () -> Unit,
     onDeleteMenuClick: (Long) -> Unit,
+    context: Context,
+    cameraPermissionLauncher: ActivityResultLauncher<String>,
+    audioPermissionLauncher: ActivityResultLauncher<String>,
     modifier: Modifier = Modifier,
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    val focusManager = LocalFocusManager.current
     val isImVisible = WindowInsets.isImeVisible
 
     var playVideoIndex by remember { mutableIntStateOf(-1) }
-    var isMediaActive by remember { mutableStateOf(true) }
     var isTextFieldFocused by remember { mutableStateOf(false) }
-
-    val navigateBackWithCleanup: () -> Unit = {
-        isMediaActive = false
-        coroutineScope.launch {
-            videoPlayerPool.pauseAllPlayers()
-            onEvent(MyInvitationGuestBookUiEvent.ClickAudioMedia(""))
-
-            delay(50L)
-            onNavigateBack()
-        }
-    }
 
     LaunchedEffect(isImVisible) {
         if (!isImVisible) focusManager.clearFocus()
@@ -350,80 +553,87 @@ private fun InvitationGuestBookScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
-        bottomBar = {
-            Surface(
-                tonalElevation = NachoElevation.medium,
-                shadowElevation = NachoElevation.large,
-                color = NachoTheme.colorScheme.backgroundPrimary
-            ) {
-                Box(modifier = Modifier.imePadding()) {
-                    GuestBookFormSection(
-                        uiState = uiState,
-                        onEvent = onEvent,
-                        onFocusChanged = { focused ->
-                            isTextFieldFocused = focused
-                        }
-                    )
-                }
-            }
-        }
     ) { innerPadding ->
-        if (isMediaActive) {
-            val isInitialLoading = guestBooks.loadState.refresh is LoadState.Loading && guestBooks.itemCount == 0
+        innerPadding
+        Column(modifier = Modifier.fillMaxSize()) {
+            PullToRefreshBox(
+                isRefreshing = uiState.isRefreshing,
+                onRefresh = { onEvent(MyInvitationGuestBookUiEvent.Refresh) },
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                if (isMediaActive) {
+                    val isInitialLoading = guestBooks.loadState.refresh is LoadState.Loading && guestBooks.itemCount == 0
 
-            if (isInitialLoading || guestBooks.itemCount == 0) {
-                PagingStateContent(
-                    loadState = guestBooks.loadState.refresh,
-                    itemCount = guestBooks.itemCount,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = innerPadding.calculateBottomPadding()),
-                    onRetry = { guestBooks.retry() }
-                ) {}
-            } else {
-                LazyColumn(
-                    state = lazyListState,
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        bottom = innerPadding.calculateBottomPadding()
-                    )
-                ) {
-                    items(
-                        count = guestBooks.itemCount,
-                        key = guestBooks.itemKey { it.id }
-                    ) { index ->
-                        guestBooks[index]?.let { guestBook ->
-                            GuestBookItem(
-                                modifier = Modifier
-                                    .animateItem(),
-                                guestBook = guestBook,
-                                videoPlayerPool = videoPlayerPool,
-                                shouldPlayVideo = uiState.canPlayVideo && (index == playVideoIndex),
-                                audioPlaybackState = uiState.audioPlaybackState,
-                                isEditing = uiState.editingGuestBookId == guestBook.id,
-                                onEditClick = { onEvent(MyInvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
-                                onDeleteClick = { onDeleteMenuClick(guestBook.id) },
-                                onVisualMediaClick = { onEvent(MyInvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
-                                onAudioMediaClick = { onEvent(MyInvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
-                                onMenuClick = { onEvent(MyInvitationGuestBookUiEvent.ClickGuestBookMenu(guestBook.id)) },
-                                onPlayVideoClick = { url -> onEvent(MyInvitationGuestBookUiEvent.ClickVideoPlayButton(url, guestBook.id))}
-                            )
-                        }
-                    }
+                    if (isInitialLoading || guestBooks.itemCount == 0) {
+                        PagingStateContent(
+                            loadState = guestBooks.loadState.refresh,
+                            itemCount = guestBooks.itemCount,
+                            modifier = Modifier.fillMaxSize(),
+                            onRetry = { guestBooks.retry() }
+                        ) {}
+                    } else {
+                        LazyColumn(
+                            state = lazyListState,
+                            modifier = Modifier.fillMaxSize(),
+                        ) {
+                            items(
+                                count = guestBooks.itemCount,
+                                key = guestBooks.itemKey { it.id }
+                            ) { index ->
+                                guestBooks[index]?.let { guestBook ->
+                                    GuestBookItem(
+                                        modifier = Modifier.animateItem(),
+                                        guestBook = guestBook,
+                                        videoPlayerPool = videoPlayerPool,
+                                        shouldPlayVideo = uiState.canPlayVideo && (index == playVideoIndex),
+                                        audioPlaybackState = uiState.audioPlaybackState,
+                                        isEditing = uiState.editingGuestBookId == guestBook.id,
+                                        onEditClick = { onEvent(MyInvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
+                                        onDeleteClick = { onDeleteMenuClick(guestBook.id) },
+                                        onVisualMediaClick = { onEvent(MyInvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
+                                        onAudioMediaClick = { onEvent(MyInvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
+                                        onMenuClick = { onEvent(MyInvitationGuestBookUiEvent.ClickGuestBookMenu(guestBook.id)) },
+                                        onPlayVideoClick = { url -> onEvent(MyInvitationGuestBookUiEvent.ClickVideoPlayButton(url, guestBook.id))}
+                                    )
+                                }
+                            }
 
-                    if (guestBooks.loadState.append is LoadState.Loading) {
-                        item {
-                            Box(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(NachoSpacing.medium),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
+                            if (guestBooks.loadState.append is LoadState.Loading) {
+                                item {
+                                    Box(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(NachoSpacing.medium),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
+                                }
                             }
                         }
                     }
                 }
+            }
+
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .imeWithoutNavBars(),
+                color = NachoTheme.colorScheme.backgroundPrimary,
+                shadowElevation = NachoElevation.large
+            ) {
+                GuestBookFormSection(
+                    uiState = uiState,
+                    onEvent = onEvent,
+                    onFocusChanged = { focused ->
+                        isTextFieldFocused = focused
+                    },
+                    context = context,
+                    cameraPermissionLauncher = cameraPermissionLauncher,
+                    audioPermissionLauncher = audioPermissionLauncher
+                )
             }
         }
     }
@@ -434,19 +644,21 @@ private fun GuestBookFormSection(
     uiState: MyInvitationGuestBookUiState,
     onEvent: (MyInvitationGuestBookUiEvent) -> Unit,
     onFocusChanged: (Boolean) -> Unit,
+    context: Context,
+    cameraPermissionLauncher: ActivityResultLauncher<String>,
+    audioPermissionLauncher: ActivityResultLauncher<String>,
+    modifier: Modifier = Modifier,
 ) {
     InvitationGuestBookForm(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(
-                horizontal = NachoSpacing.large,
-                vertical = NachoSpacing.xSmall,
-            ),
+            .padding(horizontal = NachoSpacing.large),
         selectedMedias = uiState.selectedMedias,
         textContent = uiState.textContent,
         isUploading = uiState.isUploading,
         isSubmittable = uiState.isSubmittable,
         editingGuestBookId = uiState.editingGuestBookId,
+        isAudioRecording = uiState.isAudioRecording,
         onMediasSelected = { medias ->
             onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(medias))
         },
@@ -459,11 +671,38 @@ private fun GuestBookFormSection(
         onUploadClick = {
             onEvent(MyInvitationGuestBookUiEvent.UploadMedias)
         },
-        onCameraClick = {},
-        onMicrophoneClick = {},
-
         onFocusChanged = onFocusChanged,
-    )
+        onCameraClick = {
+            // 카메라 권한 체크
+            val hasPermission = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (hasPermission) {
+                onEvent(MyInvitationGuestBookUiEvent.ClickCamera)
+            } else {
+                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+        },
+        onMicrophoneClick = {
+            // 오디오 권한 체크
+            val hasPermission = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (hasPermission) {
+                if (uiState.isAudioRecording) {
+                    onEvent(MyInvitationGuestBookUiEvent.StopAudioRecording)
+                } else {
+                    onEvent(MyInvitationGuestBookUiEvent.StartAudioRecording)
+                }
+            } else {
+                audioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+            }
+        },
+        )
 }
 
 @PreviewTheme
@@ -475,11 +714,20 @@ private fun InvitationGuestBookEmptyPreview() {
             uiState = MyInvitationGuestBookUiState(isLoadingGuestBooks = false),
             guestBooks = emptyGuestBooks,
             onEvent = {},
-            onNavigateBack = {},
+            isMediaActive = true,
+            navigateBackWithCleanup = {},
+            focusManager = LocalFocusManager.current,
             videoPlayerPool = FakeVideoPlayerPool(),
             snackbarHostState = SnackbarHostState(),
             lazyListState = rememberLazyListState(),
             onDeleteMenuClick = {},
+            context = LocalContext.current,
+            cameraPermissionLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestPermission()
+            ) {},
+            audioPermissionLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestPermission()
+            ) {},
         )
     }
 }

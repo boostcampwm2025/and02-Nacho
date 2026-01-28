@@ -24,41 +24,54 @@ internal fun DeleteDialogContent(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(NachoSpacing.large),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(top = NachoSpacing.xLarge, bottom = NachoSpacing.large)
+            .padding(horizontal = NachoSpacing.xLarge),
+        horizontalAlignment = Alignment.Start
     ) {
         Text(
+            text = stringResource(R.string.txt_remove_announcement_title),
+            style = NachoTheme.typography.headingSmallSemiBold,
+            color = NachoTheme.colorScheme.textPrimary
+        )
+
+        Text(
+            modifier = Modifier.padding(top = NachoSpacing.small),
             text = stringResource(R.string.txt_remove_announcement),
-            style = NachoTheme.typography.bodyLargeSemiBold
+            style = NachoTheme.typography.bodyMediumRegular,
+            color = NachoTheme.colorScheme.textSecondary,
+            lineHeight = NachoTheme.typography.bodyMediumRegular.lineHeight * 1.3
         )
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = NachoSpacing.large),
-            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
+                .padding(top = NachoSpacing.twoXLarge),
+            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             NachoButton(
                 modifier = Modifier.weight(1f),
                 onClick = onDismiss,
-                containerColor = NachoTheme.colorScheme.backgroundBorder,
+                containerColor = NachoTheme.colorScheme.backgroundSecondary,
+                contentColor = NachoTheme.colorScheme.textSecondary
             ) {
                 Text(
                     text = stringResource(R.string.txt_cancel),
-                    style = NachoTheme.typography.bodyMediumMedium
+                    style = NachoTheme.typography.bodyMediumSemiBold
                 )
             }
 
             NachoButton(
                 modifier = Modifier.weight(1f),
-                onClick = onConfirm
+                onClick = onConfirm,
+                containerColor = NachoTheme.colorScheme.brandPrimary,
+                contentColor = NachoTheme.colorScheme.backgroundPrimary
             ) {
                 Text(
                     text = stringResource(R.string.txt_remove),
-                    style = NachoTheme.typography.bodyMediumMedium
+                    style = NachoTheme.typography.bodyMediumSemiBold
                 )
             }
-
         }
     }
 }

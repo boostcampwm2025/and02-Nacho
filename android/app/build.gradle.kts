@@ -103,6 +103,7 @@ dependencies {
     implementation(libs.kotlinx.immutable)
     implementation(projects.core.deeplink)
     implementation(projects.feature.model)
+    implementation(projects.feature.login)
 
     // Hilt
     implementation(libs.hilt.android)

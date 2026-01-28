@@ -1,17 +1,17 @@
 package com.andlife.data.repository.invitation.mapper
 
 import com.andlife.domain.model.card.NachoCard
-import com.andlife.domain.model.invitation.CreateAnnouncementParam
-import com.andlife.domain.model.invitation.CreateInvitationParam
+import com.andlife.domain.model.invitation.AnnouncementSaveParam
+import com.andlife.domain.model.invitation.InvitationSaveParam
 import com.andlife.network.model.invitation.AnnouncementRequest
-import com.andlife.network.model.invitation.CreateInvitationRequest
+import com.andlife.network.model.invitation.InvitationSaveRequest
 import com.andlife.network.model.invitation.InvitationCardRequest
 import kotlinx.serialization.json.Json
 
-fun CreateInvitationParam.toRequest(
+fun InvitationSaveParam.toRequest(
     json: Json,
-): CreateInvitationRequest {
-    return CreateInvitationRequest(
+): InvitationSaveRequest {
+    return InvitationSaveRequest(
         title = title,
         displayHostName = displayHostName,
         thumbnailUrls = thumbnailUrls,
@@ -36,7 +36,7 @@ fun NachoCard.toRequest(json: Json): InvitationCardRequest {
     )
 }
 
-fun CreateAnnouncementParam.toRequest(): AnnouncementRequest {
+fun AnnouncementSaveParam.toRequest(): AnnouncementRequest {
     return AnnouncementRequest(
         title = title,
         content = content,

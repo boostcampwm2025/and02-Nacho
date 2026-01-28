@@ -10,19 +10,24 @@ import com.andlife.nachoserver.repository.invitation.AnnouncementRepository
 import com.andlife.nachoserver.repository.invitation.InvitationCardRepository
 import com.andlife.nachoserver.repository.invitation.InvitationRepository
 import com.andlife.nachoserver.repository.participant.InvitationParticipantRepository
+import com.andlife.nachoserver.repository.user.UserRepository
+import com.andlife.nachoserver.request.invitation.AnnouncementRequest
 import com.andlife.nachoserver.request.invitation.CreateInvitationRequest
 import com.andlife.nachoserver.request.invitation.InvitationCardRequest
+import com.andlife.nachoserver.request.invitation.UpdateInvitationRequest
 import com.andlife.nachoserver.response.PagingMetaResponse
 import com.andlife.nachoserver.response.PagingResponse
 import com.andlife.nachoserver.response.invitation.AnnouncementResponse
 import com.andlife.nachoserver.response.invitation.InvitationCardResponse
 import com.andlife.nachoserver.response.invitation.InvitationResponse
 import com.andlife.nachoserver.response.invitation.InvitationSummaryResponse
+import com.andlife.nachoserver.response.invitation.JoinResponse
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import com.andlife.nachoserver.response.invitation.UpcomingInvitationResponse
+import com.andlife.nachoserver.response.invitation.toInvitationResponse
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -36,8 +41,45 @@ class InvitationService(
     private val invitationRepository: InvitationRepository,
     private val invitationCardRepository: InvitationCardRepository,
     private val announcementRepository: AnnouncementRepository,
-    private val participantRepository: InvitationParticipantRepository
+    private val participantRepository: InvitationParticipantRepository,
+    private val userRepository: UserRepository
 ) {
+    @Transactional
+    fun joinInvitation(
+        invitationId: Long,
+        userId: Long?,
+        guestInvitationIds: List<Long>
+    ): JoinResponse {
+        val invitation = invitationRepository.findById(invitationId)
+            .orElseThrow { NoSuchElementException("초대장을 찾을 수 없습니다. ID: $invitationId") }
+
+        if (userId != null) {
+            val isAlreadyJoined = participantRepository.existsByInvitationIdAndUserId(invitationId, userId)
+            if (!isAlreadyJoined) {
+                val userProxy = userRepository.getReferenceById(userId)
+                participantRepository.save(InvitationParticipant(invitation = invitation, user = userProxy))
+            }
+            val response = JoinResponse(invitationId = invitationId, isMember = true, alreadyJoined = isAlreadyJoined)
+            println(">>> [Join 성공 직전] $response")
+            return response
+        }
+
+        val alreadyHasAccess = guestInvitationIds.contains(invitationId)
+        return JoinResponse(invitationId = invitationId, isMember = false, alreadyJoined = alreadyHasAccess)
+    }
+
+    @Transactional
+    fun leaveInvitation(invitationId: Long, userId: Long) {
+        val participant = participantRepository.findByUserIdAndInvitationId(userId, invitationId)
+            ?: throw NoSuchElementException("참여 정보를 찾을 수 없습니다. (UserID: $userId, InvitationID: $invitationId)")
+
+        participantRepository.delete(participant)
+    }
+
+    fun leaveInvitationForGuest(invitationId: Long) {
+        println("Guest left invitation: $invitationId")
+    }
+
     @Transactional(readOnly = true)
     fun getParticipantInvitations(
         userId: Long,
@@ -172,39 +214,9 @@ class InvitationService(
         val invitationCard = invitationCardRepository.findByInvitationIdWithDetails(invitationId)
         val announcements = announcementRepository.findAllByInvitationIdOrderByDisplayOrder(invitationId)
 
-        return InvitationResponse(
-            id = invitation.id,
-            hostId = invitation.host.id,
-            title = invitation.title,
-            displayHostName = invitation.displayHostName,
-            hostProfileUrl = invitation.host.profileImageUrl,
-            thumbnailUrls = invitation.thumbnailUrls,
-            invitationDate = invitation.invitationDate.toString(),
-            startTime = invitation.startTime.toString(),
-            endTime = invitation.endTime?.toString(),
-            placename = invitation.placeName,
-            address = invitation.address,
-            lat = invitation.lat,
-            lng = invitation.lng,
-            locationGuide = invitation.locationGuide,
-            invitationCard = invitationCard?.let {
-                InvitationCardResponse(
-                    id = it.id,
-                    invitationId = invitation.id,
-                    contentJson = it.contentJson,
-                    backgroundImageUrl = it.backgroundImageUrl,
-                    backgroundColor = it.backgroundColor
-                )
-            },
-            announcements = announcements.map {
-                AnnouncementResponse(
-                    id = it.id,
-                    invitationId = invitation.id,
-                    title = it.title,
-                    content = it.content,
-                    displayOrder = it.displayOrder,
-                )
-            },
+        return invitation.toInvitationResponse(
+            card = invitationCard,
+            announcements = announcements
         )
     }
 
@@ -253,52 +265,61 @@ class InvitationService(
             announcementRepository.save(announcement)
         }
 
-        return toInvitationResponse(
-            invitation = savedInvitation,
+        return savedInvitation.toInvitationResponse(
             card = savedCard,
             announcements = savedAnnouncements,
         )
     }
 
-    private fun toInvitationResponse(
-        invitation: Invitation,
-        card: InvitationCard?,
-        announcements: List<AnnouncementSection>,
-    ): InvitationResponse {
-        return InvitationResponse(
-            id = invitation.id,
-            hostId = invitation.host.id,
-            title = invitation.title,
-            displayHostName = invitation.displayHostName,
-            hostProfileUrl = invitation.host.profileImageUrl,
-            thumbnailUrls = invitation.thumbnailUrls,
-            invitationDate = invitation.invitationDate.toString(),
-            startTime = invitation.startTime.toString(),
-            endTime = invitation.endTime?.toString(),
-            placename = invitation.placeName,
-            address = invitation.address,
-            lat = invitation.lat,
-            lng = invitation.lng,
-            locationGuide = invitation.locationGuide,
-            invitationCard = card?.let {
-                InvitationCardResponse(
-                    id = it.id,
-                    invitationId = invitation.id,
-                    contentJson = it.contentJson,
-                    backgroundColor = it.backgroundColor,
-                    backgroundImageUrl = it.backgroundImageUrl,
-                )
-            },
-            announcements = announcements.map { announcement ->
-                AnnouncementResponse(
-                    id = announcement.id,
-                    invitationId = invitation.id,
-                    title = announcement.title,
-                    content = announcement.content,
-                    displayOrder = announcement.displayOrder,
-                )
-            },
+    @Transactional
+    fun updateInvitation(invitationId: Long, request: UpdateInvitationRequest): InvitationResponse {
+        val invitation = invitationRepository.findByInvitationIdWithHost(invitationId)
+            ?: throw NoSuchElementException("Invitation not found: $invitationId")
+
+        val invitationDate = LocalDate.parse(request.invitationDate)
+        val startTime = LocalTime.parse(request.startTime, DateTimeFormatter.ofPattern("HH:mm"))
+        val endTime = request.endTime?.let {
+            LocalTime.parse(it, DateTimeFormatter.ofPattern("HH:mm"))
+        }
+
+        invitation.title = request.title
+        invitation.displayHostName = request.displayHostName
+        invitation.thumbnailUrls = request.thumbnailUrls
+        invitation.invitationDate = invitationDate
+        invitation.startTime = startTime
+        invitation.endTime = endTime
+        invitation.placeName = request.placename
+        invitation.address = request.address
+        invitation.lat = request.latitude
+        invitation.lng = request.longitude
+        invitation.locationGuide = request.locationGuide
+
+        val savedInvitation = invitationRepository.save(invitation)
+        val existingCard = invitationCardRepository.findByInvitationIdWithDetails(invitationId)
+        val savedAnnouncements = replaceAnnouncements(savedInvitation, request.announcements)
+
+        return invitation.toInvitationResponse(
+            card = existingCard,
+            announcements = savedAnnouncements
         )
+    }
+
+    private fun replaceAnnouncements(
+        invitation: Invitation,
+        announcementRequests: List<AnnouncementRequest>
+    ): List<AnnouncementSection> {
+        announcementRepository.deleteAllByInvitationId(invitation.id)
+
+        return announcementRequests.map { req ->
+            announcementRepository.save(
+                AnnouncementSection(
+                    invitation = invitation,
+                    title = req.title,
+                    content = req.content,
+                    displayOrder = req.displayOrder
+                )
+            )
+        }
     }
 
     fun getUpcomingInvitations(

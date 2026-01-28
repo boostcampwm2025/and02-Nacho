@@ -46,6 +46,9 @@ val IconOnSecondary = Color(0xFF374151)
 val IconTertiary = Color(0xFFFFFFFF)
 val IconDisabled = Color(0xFFE5E7EB)
 
+val KakaoButtonColor = Color(0xFFFEE500)
+val KakaoTextColor = Color(0xFF000000).copy(alpha = 0.85f)
+
 @Immutable
 data class InvitationColorScheme(
     val backgroundPrimary: Color,

@@ -10,5 +10,6 @@ sealed interface MainSideEffect : BaseSideEffect {
 
     data class NavigateToDetail(
         val invitationId: Long,
+        val isFromDeepLink: Boolean = true,
     ) : MainSideEffect
 }

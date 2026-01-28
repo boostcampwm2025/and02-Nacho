@@ -7,6 +7,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 data class MyInvitationGuestBookUiState(
+    val isRefreshing: Boolean = false,
     val selectedMedias: ImmutableList<SelectedMedia> = persistentListOf(),
     val textContent: String = "",
     val isUploading: Boolean = false,
@@ -19,6 +20,8 @@ data class MyInvitationGuestBookUiState(
     val isLoadingGuestBooks: Boolean = false,
     val deleteTargetId: Long? = null,
     val guestBooksErrorMessage: String? = null,
+    val isAudioRecording: Boolean = false,
+    val audioRecordingDuration: Int = 0,
 ) : BaseUiState {
 
     val isContentChanged: Boolean

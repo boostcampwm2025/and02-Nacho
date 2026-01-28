@@ -2,11 +2,12 @@ package com.andlife.network.api.invitation
 
 import com.andlife.network.model.BaseResponse
 import com.andlife.network.model.PagingResponse
-import com.andlife.network.model.invitation.CreateInvitationRequest
+import com.andlife.network.model.invitation.InvitationSaveRequest
 import com.andlife.network.model.invitation.InvitationCardRequest
 import com.andlife.network.model.invitation.InvitationResponse
 import retrofit2.http.Body
 import com.andlife.network.model.invitation.InvitationSummaryResponse
+import com.andlife.network.model.invitation.JoinResponse
 import com.andlife.network.model.invitation.UpcomingInvitationResponse
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -15,6 +16,16 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface InvitationService {
+
+    @POST("/api/invitations/{invitationId}/join")
+    suspend fun joinInvitation(
+        @Path("invitationId") invitationId: Long
+    ): BaseResponse<JoinResponse>
+
+    @POST("/api/invitations/{invitationId}/leave")
+    suspend fun leaveInvitation(
+        @Path("invitationId") invitationId: Long
+    ): BaseResponse<Unit>
 
     @GET("/api/invitations/{invitationId}")
     suspend fun getInvitation(
@@ -39,7 +50,13 @@ interface InvitationService {
 
     @POST("/api/invitations")
     suspend fun createInvitation(
-        @Body request: CreateInvitationRequest,
+        @Body request: InvitationSaveRequest,
+    ): BaseResponse<InvitationResponse>
+
+    @PUT("/api/invitations/{invitationId}")
+    suspend fun updateInvitation(
+        @Path("invitationId") invitationId: Long,
+        @Body request: InvitationSaveRequest,
     ): BaseResponse<InvitationResponse>
 
     @GET("/api/invitations/upcoming")
