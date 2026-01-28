@@ -23,18 +23,19 @@ import com.andlife.invitation_edit.navigateToAddressSearch
 import com.andlife.invitation_edit.navigateToInvitationCreate
 import com.andlife.invitation_edit.navigateToInvitationEdit
 import com.andlife.invitation_edit.navigateToInvitationPreview
+import com.andlife.login.Login
 import com.andlife.login.navigateToLogin
 import com.andlife.myinvitation.navigateToMyInvitation
 import com.andlife.myinvitation.navigateToMyInvitationDetail
+import kotlin.reflect.KClass
 
 @Stable
 class NachoNavigator(
     val navController: NavHostController,
+    val startDestination: KClass<*> = Login::class
 ) {
     val currentDestination: NavDestination?
         @Composable get() = navController.currentBackStackEntryAsState().value?.destination
-
-    val startDestination = Home
 
     val mainBottomTabs = MainBottomTab.entries
 
@@ -152,7 +153,8 @@ class NachoNavigator(
 @Composable
 internal fun rememberInvitationNavigator(
     navController: NavHostController = rememberNavController(),
+    startDestination: KClass<*> = Login::class
 ): NachoNavigator =
     remember(navController) {
-        NachoNavigator(navController)
+        NachoNavigator(navController, startDestination)
     }
