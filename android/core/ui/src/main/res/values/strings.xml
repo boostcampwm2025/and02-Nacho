@@ -50,6 +50,8 @@
     <string name="txt_cancel">취소</string>
     <string name="msg_leave_success">초대장에서 나갔습니다.</string>
     <string name="msg_leave_failure">나가기에 실패했습니다. 다시 시도해주세요.</string>
+    <string name="msg_delete_success">초대장을 삭제했습니다.</string>
+    <string name="msg_delete_failure">삭제에 실패했습니다. 다시 시도해주세요.</string>
 
     <!--  모아보기 Media  -->
     <string name="desc_media_image">방명록의 이미지</string>

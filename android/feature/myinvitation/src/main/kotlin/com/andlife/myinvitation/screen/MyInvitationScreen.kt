@@ -10,12 +10,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -45,9 +48,11 @@ import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.component.paging.PagingStateContent
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.launch
 
 @Composable
 fun MyInvitationRoute(
+    snackbarHostState: SnackbarHostState,
     onNavigateToCreate: () -> Unit,
     onNavigateToDetail: (Long) -> Unit,
     modifier: Modifier = Modifier,
@@ -56,12 +61,32 @@ fun MyInvitationRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val upcomingItems = viewModel.upcomingMyInvitationPagingFlow.collectAsLazyPagingItems()
     val pastItems = viewModel.pastMyInvitationPagingFlow.collectAsLazyPagingItems()
+    val scope = rememberCoroutineScope()
+    var invitationIdToDelete by remember { mutableStateOf<Long?>(null) }
+
+    val refreshFailureMessage = stringResource(R.string.msg_refresh_failure)
+    val deleteSuccessMessage = stringResource(R.string.msg_delete_success)
+    val deleteFailureMessage = stringResource(R.string.msg_delete_failure)
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is MyInvitationSideEffect.NavigateToDetail -> onNavigateToDetail(effect.id)
-            is MyInvitationSideEffect.RefreshFailure -> { /* TODO : 에러 스낵바 처리 */ }
+            is MyInvitationSideEffect.RefreshFailure -> {
+                scope.launch {
+                    snackbarHostState.showSnackbar(refreshFailureMessage)
+                }
+            }
             is MyInvitationSideEffect.NavigateToCreate -> onNavigateToCreate()
+            is MyInvitationSideEffect.DeleteSuccess -> {
+                scope.launch {
+                    snackbarHostState.showSnackbar(deleteSuccessMessage)
+                }
+            }
+            is MyInvitationSideEffect.DeleteFailure -> {
+                scope.launch {
+                    snackbarHostState.showSnackbar(deleteFailureMessage)
+                }
+            }
         }
     }
 
