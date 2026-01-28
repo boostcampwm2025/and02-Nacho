@@ -615,8 +615,7 @@ private fun GuestBookItemAudioSection(
         audioMedias.forEach { audio ->
             GuestBookAudioItem(
                 audio = audio,
-                isAudioPlaying = audioPlaybackState.isAudioPlayingForGuestBook(audioMedias.map { it.url })
-                    && (audio.url == audioPlaybackState.playingUrl),
+                isAudioPlaying = audioPlaybackState.isAudioPlayingForUrl(audio.url),
                 isCurrentAudio = audio.url == audioPlaybackState.playingUrl,
                 currentPositionMs = audioPlaybackState.currentPositionMs,
                 totalDurationMs = audioPlaybackState.totalDurationMs,
