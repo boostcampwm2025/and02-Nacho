@@ -54,9 +54,12 @@ import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.coroutines.launch
 
+private const val MAX_IMAGE_COUNT = 10
+
 @Composable
 fun InvitationCreateRoute(
     onNavigateToAddressSearch: () -> Unit,
+    onNavigateToPreview: () -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateCreateCard: () -> Unit,
     onNavigateToInvitationDetail: (Long) -> Unit,
@@ -115,7 +118,7 @@ fun InvitationCreateRoute(
     }
 
     val pickMedia =
-        rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(10)) { uris ->
+        rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(MAX_IMAGE_COUNT)) { uris ->
             if (uris.isNotEmpty()) {
                 val imageList = uris.map { it.toString() }
                 viewModel.onEvent(InvitationFormUiEvent.UpdateImageList(imageList))
@@ -141,6 +144,7 @@ fun InvitationCreateRoute(
         snackbarHostState = snackbarHostState,
         onEvent = viewModel::onEvent,
         onNavigateToAddressSearch = onNavigateToAddressSearch,
+        onNavigateToPreview = onNavigateToPreview,
         onAddImageClick = {
             pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         },
@@ -230,6 +234,7 @@ private fun InvitationCreateScreen(
     onStartTimeClick: () -> Unit,
     onEndTimeClick: () -> Unit,
     onNavigateToAddressSearch: () -> Unit,
+    onNavigateToPreview: () -> Unit,
     onAddAnnouncementClick: () -> Unit,
     onClickCreateCard: () -> Unit,
     onRemoveAnnouncementClick: (AnnouncementUiModel) -> Unit,
@@ -246,7 +251,7 @@ private fun InvitationCreateScreen(
             TopBarSection(
                 title = stringResource(R.string.txt_create),
                 onBackClick = { onEvent(InvitationFormUiEvent.OnClickBack) },
-                onPreviewClick = {},
+                onPreviewClick = onNavigateToPreview,
                 isLoading = uiState.isLoading
             )
         },

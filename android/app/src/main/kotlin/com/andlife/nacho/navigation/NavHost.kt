@@ -31,6 +31,8 @@ import com.andlife.invitation_card.updateCardNavGraph
 import com.andlife.invitation_edit.addressSearchNavGraph
 import com.andlife.invitation_edit.invitationCreateNavGraph
 import com.andlife.invitation_edit.invitationEditNavGraph
+import com.andlife.invitation_edit.invitationPreviewNavGraph
+import com.andlife.login.loginNavGraph
 import com.andlife.model.util.NavigationKeyConstant.CREATE_CARD_BY_INVITATION_ID
 import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
 import com.andlife.myinvitation.myInvitationDetailNavGraph
@@ -106,6 +108,7 @@ fun NachoNavHost(
 
             invitationCreateNavGraph(
                 onNavigateToAddressSearch = navigator::navigateToAddressSearch,
+                onNavigateToPreview = navigator::navigateToInvitationPreview,
                 onNavigateBack = navigator::navigatePopBackStack,
                 onNavigateCreateCard = navigator::navigateToCreateCard,
                 onNavigateToInvitationDetail = navigator::navigateToMyInvitationDetailByCreate
@@ -122,6 +125,11 @@ fun NachoNavHost(
                 onNavigateBack = navigator::navigatePopBackStack,
             )
 
+            invitationPreviewNavGraph(
+                navController = navigator.navController,
+                onNavigateBack = navigator::navigatePopBackStack,
+            )
+
             createCardNavGraph(
                 onBackClick = navigator::navigatePopBackStack
             )
@@ -129,7 +137,8 @@ fun NachoNavHost(
             createCardByInvitationNavGraph(
                 onBackClick = navigator::navigatePopBackStack,
                 onSuccessCreateCard = {
-                    navigator.navController.previousBackStackEntry?.savedStateHandle[CREATE_CARD_BY_INVITATION_ID] = true
+                    navigator.navController.previousBackStackEntry?.savedStateHandle[CREATE_CARD_BY_INVITATION_ID] =
+                        true
                     navigator.navigatePopBackStack()
                 }
             )
@@ -141,6 +150,8 @@ fun NachoNavHost(
                     navigator.navigatePopBackStack()
                 }
             )
+
+            loginNavGraph()
         }
     }
 }

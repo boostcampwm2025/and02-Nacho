@@ -11,8 +11,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
@@ -81,6 +83,38 @@ private fun IconTextRow(
     }
 }
 
+@Composable
+fun EmptyAddressSection(
+    placeholderText: String = stringResource(R.string.txt_address_placeholder),
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(NachoTheme.colorScheme.backgroundPrimary)
+            .padding(vertical = NachoSpacing.xSmall, horizontal = NachoSpacing.large),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_location_24),
+                contentDescription = stringResource(R.string.desc_location),
+                tint = NachoTheme.colorScheme.textTertiary,
+            )
+
+            Text(
+                text = placeholderText,
+                style = NachoTheme.typography.bodyMediumRegular,
+                color = NachoTheme.colorScheme.textTertiary,
+                modifier = Modifier.alpha(0.6f),
+            )
+        }
+    }
+}
+
 @PreviewTheme
 @Composable
 private fun AddressSectionPreview() {
@@ -89,5 +123,13 @@ private fun AddressSectionPreview() {
             placeName = "코드스쿼드",
             placeAddress = "강남대로62길 23 4층",
         )
+    }
+}
+
+@PreviewTheme
+@Composable
+private fun EmptyAddressSectionPreview() {
+    NachoTheme {
+        EmptyAddressSection()
     }
 }

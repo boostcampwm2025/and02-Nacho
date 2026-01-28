@@ -20,7 +20,6 @@
     <string name="txt_guide_address">오시는 길을 입력해주세요.</string>
     <string name="txt_announcement">공지사항</string>
     <string name="txt_add_announcement">공지사항 추가</string>
-    <string name="txt_remove_announcement_title">공지사항 삭제</string>
     <string name="txt_remove_announcement">해당 공지사항을 삭제하시겠습니까?</string>
     <string name="txt_remove">삭제하기</string>
     <string name="txt_cancel">취소하기</string>
@@ -56,5 +55,11 @@
     <string name="snack_fail_save">저장에 실패했습니다. 다시 시도해 주세요.</string>
     <string name="snack_fail_load">초대장을 불러오는 데 실패했습니다.</string>
     <string name="snack_load_error_image">사진을 불러오는 데 실패했습니다.</string>
-    <string name="snack_load_error_time">종료 시간은 시작 시간보다 늦어야 합니다.</string>
+
+    <string name="txt_invitation_card_placeholder">초대카드를 꾸며보세요</string>
+    <string name="txt_announcement_placeholder">공지사항을 입력해주세요</string>
+    <string name="txt_place_guide">오시는 길</string>
+    <string name="txt_place_guide_placeholder">오시는 길을 입력해주세요</string>
+    <string name="txt_it_is_preview_screen">미리보기 화면입니다</string>
+
 </resources>

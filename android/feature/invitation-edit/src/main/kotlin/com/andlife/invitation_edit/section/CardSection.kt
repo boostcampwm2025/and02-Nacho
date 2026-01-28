@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ButtonDefaults
@@ -41,7 +42,8 @@ fun CardSection(
     cardUiModel: CardUiModel?,
     onClickCreatedCard: () -> Unit,
     modifier: Modifier = Modifier,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    isPreviewMode: Boolean = false,
 ) {
     val defaultColor = NachoTheme.colorScheme.textPrimary
     val iconRes = if (cardUiModel == null) designR.drawable.ic_add_24 else designR.drawable.ic_edit_24
@@ -86,6 +88,9 @@ fun CardSection(
                         color = NachoTheme.colorScheme.brandPrimary,
                     )
                 }
+            }
+            if (isPreviewMode) {
+                Spacer(modifier = Modifier.height(NachoSpacing.small))
             }
             val card = cardUiModel
             if (card != null) {
