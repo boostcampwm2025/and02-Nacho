@@ -246,9 +246,27 @@ class GuestBookService(
 
         validateOwner(guestBook.user.id, authContext)
 
-        val mediaKeysToDelete = getAllMediaKeys(guestBook).toMutableList()
+        val mediaKeysToDelete = mutableListOf<String>()
+
+        guestBook.images
+            .filter { !request.existingImageIds.contains(it.id) }
+            .forEach { mediaKeysToDelete.add(mediaService.extractKey(it.imageUrl)) }
+
+        guestBook.audios
+            .filter { !request.existingAudioIds.contains(it.id) }
+            .forEach { mediaKeysToDelete.add(mediaService.extractKey(it.audioUrl)) }
+
+        guestBook.videos
+            .filter { !request.existingVideoIds.contains(it.id) }
+            .forEach {
+                mediaKeysToDelete.add(mediaService.extractKey(it.videoUrl))
+                if (it.thumbnailUrl.isNotBlank()) {
+                    mediaKeysToDelete.add(mediaService.extractKey(it.thumbnailUrl))
+                }
+            }
 
         guestBook.textContent = request.textContent
+
         guestBook.images.removeIf { !request.existingImageIds.contains(it.id) }
         guestBook.audios.removeIf { !request.existingAudioIds.contains(it.id) }
         guestBook.videos.removeIf { !request.existingVideoIds.contains(it.id) }
