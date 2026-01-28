@@ -16,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.designsystem.R as designR
 import com.andlife.ui.R
 
 @Composable
@@ -50,7 +51,7 @@ fun EmptyItemSection(
             horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_info_24),
+                painter = painterResource(designR.drawable.ic_info_24),
                 contentDescription = stringResource(R.string.desc_info),
                 tint = NachoTheme.colorScheme.textTertiary,
             )

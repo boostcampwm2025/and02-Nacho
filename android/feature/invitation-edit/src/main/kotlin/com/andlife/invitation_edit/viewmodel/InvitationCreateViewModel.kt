@@ -105,12 +105,24 @@ class InvitationCreateViewModel @Inject constructor(
 
     private fun updateStartTime(event: InvitationFormUiEvent.UpdateStartTime) {
         val time = InvitationTimeUiModel(hour = event.hour, min = event.min)
-        updateState { copy(invitationFormUiModel = invitationFormUiModel.copy(startTime = time)) }
+        val updatedModel = uiState.value.invitationFormUiModel.copy(startTime = time)
+
+        if (!updatedModel.isEndTimeValid) {
+            sendEffect(InvitationFormSideEffect.InvalidTime)
+        }
+
+        updateState { copy(invitationFormUiModel = updatedModel) }
     }
 
     private fun updateEndTime(event: InvitationFormUiEvent.UpdateEndTime) {
         val time = InvitationTimeUiModel(hour = event.hour, min = event.min)
-        updateState { copy(invitationFormUiModel = invitationFormUiModel.copy(endTime = time)) }
+        val updatedModel = uiState.value.invitationFormUiModel.copy(endTime = time)
+
+        if (!updatedModel.isEndTimeValid) {
+            sendEffect(InvitationFormSideEffect.InvalidTime)
+        }
+
+        updateState { copy(invitationFormUiModel = updatedModel) }
     }
 
     private fun updateAddress(event: InvitationFormUiEvent.UpdateAddress) {

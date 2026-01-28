@@ -1,4 +1,4 @@
-package com.andlife.invitation_edit.component
+package com.andlife.invitation_card.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,10 +13,10 @@ import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
-import com.andlife.invitation_edit.R
+import com.andlife.invitation_card.R
 
 @Composable
-internal fun DeleteDialogContent(
+internal fun BackDialogContent(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
@@ -29,14 +29,14 @@ internal fun DeleteDialogContent(
         horizontalAlignment = Alignment.Start
     ) {
         Text(
-            text = stringResource(R.string.txt_remove_announcement_title),
+            text = stringResource(R.string.txt_exit_dialog_title),
             style = NachoTheme.typography.headingSmallSemiBold,
             color = NachoTheme.colorScheme.textPrimary
         )
 
         Text(
             modifier = Modifier.padding(top = NachoSpacing.small),
-            text = stringResource(R.string.txt_remove_announcement),
+            text = stringResource(R.string.txt_exit_dialog_message),
             style = NachoTheme.typography.bodyMediumRegular,
             color = NachoTheme.colorScheme.textSecondary,
             lineHeight = NachoTheme.typography.bodyMediumRegular.lineHeight * 1.3
@@ -51,24 +51,24 @@ internal fun DeleteDialogContent(
         ) {
             NachoButton(
                 modifier = Modifier.weight(1f),
-                onClick = onDismiss,
+                onClick = onConfirm,
                 containerColor = NachoTheme.colorScheme.backgroundSecondary,
                 contentColor = NachoTheme.colorScheme.textSecondary
             ) {
                 Text(
-                    text = stringResource(R.string.txt_cancel),
+                    text = stringResource(R.string.btn_exit),
                     style = NachoTheme.typography.bodyMediumSemiBold
                 )
             }
 
             NachoButton(
                 modifier = Modifier.weight(1f),
-                onClick = onConfirm,
+                onClick = onDismiss,
                 containerColor = NachoTheme.colorScheme.brandPrimary,
                 contentColor = NachoTheme.colorScheme.backgroundPrimary
             ) {
                 Text(
-                    text = stringResource(R.string.txt_remove),
+                    text = stringResource(R.string.btn_continue),
                     style = NachoTheme.typography.bodyMediumSemiBold
                 )
             }

@@ -8,4 +8,5 @@ sealed interface InvitationFormSideEffect : BaseSideEffect {
     data object FailLoad : InvitationFormSideEffect
     data object FailSave : InvitationFormSideEffect
     data class SuccessSave(val id: Long) : InvitationFormSideEffect
+    data object InvalidTime : InvitationFormSideEffect
 }

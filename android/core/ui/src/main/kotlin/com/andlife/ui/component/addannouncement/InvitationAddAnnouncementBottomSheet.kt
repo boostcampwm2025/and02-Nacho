@@ -1,5 +1,6 @@
 package com.andlife.ui.component.addannouncement
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +13,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -51,17 +51,18 @@ fun InvitationAddAnnouncementBottomSheet(
     val scope = rememberCoroutineScope()
     val draft by viewModel.announcementDraft.collectAsStateWithLifecycle()
 
+    BackHandler {
+        scope.launch {
+            keyboardManager?.hide()
+            sheetState.hide()
+        }.invokeOnCompletion { onDismiss() }
+    }
+
     ModalBottomSheet(
-        onDismissRequest = { }, // 사용하지 않음
+        onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
-        dragHandle = null,
-        sheetGesturesEnabled = false,
-        properties =
-            ModalBottomSheetProperties(
-                shouldDismissOnBackPress = false,
-                shouldDismissOnClickOutside = false,
-            ),
+        dragHandle = {},
         modifier = modifier,
     ) {
         Box(
