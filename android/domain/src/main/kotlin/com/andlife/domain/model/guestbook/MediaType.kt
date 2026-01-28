@@ -6,7 +6,7 @@ enum class MediaType(
     val extensions: Set<String>
 ) {
     VIDEO("videos", "video/mp4", setOf("mp4", "mov", "avi", "mkv")),
-    IMAGE("images", "image/jpeg", setOf("jpg", "jpeg", "png", "gif", "webp")),
+    IMAGE("images", "image/webp", setOf("jpg", "jpeg", "png", "gif", "webp")),
     AUDIO("audios", "audio/mpeg", setOf("mp3", "wav", "m4a", "aac"));
 
     fun getExtension(): String = when (this) {
