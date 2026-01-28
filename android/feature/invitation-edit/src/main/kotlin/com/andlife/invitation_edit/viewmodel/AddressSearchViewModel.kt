@@ -5,11 +5,11 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
 import com.andlife.domain.repository.address.AddressRepository
-import com.andlife.invitation_edit.model.AddressSearchSideEffect
-import com.andlife.invitation_edit.model.AddressSearchUiEvent
-import com.andlife.invitation_edit.model.AddressSearchUiState
-import com.andlife.invitation_edit.model.AddressUiModel
-import com.andlife.invitation_edit.model.toUiModel
+import com.andlife.invitation_edit.model.address.AddressSearchSideEffect
+import com.andlife.invitation_edit.model.address.AddressSearchUiEvent
+import com.andlife.invitation_edit.model.address.AddressSearchUiState
+import com.andlife.invitation_edit.model.address.AddressUiModel
+import com.andlife.invitation_edit.model.address.toUiModel
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi

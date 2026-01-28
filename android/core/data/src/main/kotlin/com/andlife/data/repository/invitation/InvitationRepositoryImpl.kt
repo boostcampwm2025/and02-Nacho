@@ -11,7 +11,7 @@ import com.andlife.data.repository.invitation.mapper.toRequest
 import com.andlife.datastore.UserStorage
 import com.andlife.domain.error.DataError
 import com.andlife.domain.model.card.NachoCard
-import com.andlife.domain.model.invitation.CreateInvitationParam
+import com.andlife.domain.model.invitation.InvitationSaveParam
 import com.andlife.domain.model.invitation.Invitation
 import com.andlife.domain.model.invitation.InvitationJoin
 import com.andlife.domain.model.invitation.InvitationStatus
@@ -47,9 +47,19 @@ internal class InvitationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun createInvitation(params: CreateInvitationParam): Result<Long, DataError> {
+    override suspend fun createInvitation(params: InvitationSaveParam): Result<Long, DataError> {
         val request = params.toRequest(json)
         return invitationRemoteDataSource.createInvitation(request).map { response ->
+            response.id
+        }
+    }
+
+    override suspend fun updateInvitation(
+        invitationId: Long,
+        params: InvitationSaveParam
+    ): Result<Long, DataError> {
+        val request = params.toRequest(json)
+        return invitationRemoteDataSource.updateInvitation(invitationId, request).map { response ->
             response.id
         }
     }

@@ -13,6 +13,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.andlife.model.util.NavigationKeyConstant.CREATE_CARD_BY_INVITATION_ID
+import com.andlife.model.util.NavigationKeyConstant.INVITATION_UPDATED
 import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiEvent
 import com.andlife.myinvitation.screen.MyInvitationDetailRoute
@@ -55,6 +56,7 @@ fun NavGraphBuilder.myInvitationNavGraph(
 
 fun NavGraphBuilder.myInvitationDetailNavGraph(
     onNavigateBack: () -> Unit,
+    onNavigateToEditInvitation: (Long) -> Unit,
     onNavigateToEditCard: (Long) -> Unit,
     onNavigateToCreateCard: (Long) -> Unit,
 ) {
@@ -68,19 +70,22 @@ fun NavGraphBuilder.myInvitationDetailNavGraph(
             UPDATE_CARD, false
         ).collectAsStateWithLifecycle()
 
-        LaunchedEffect(cardCreated, cardUpdated) {
-            if (cardCreated) {
+        val invitationUpdated by backStackEntry.savedStateHandle.getStateFlow<Boolean>(
+            INVITATION_UPDATED, false
+        ).collectAsStateWithLifecycle()
+
+        LaunchedEffect(cardCreated, cardUpdated, invitationUpdated) {
+            if (cardCreated || cardUpdated || invitationUpdated) {
                 viewModel.onEvent(MyInvitationDetailUiEvent.RetryLoad)
                 backStackEntry.savedStateHandle.remove<Boolean>(CREATE_CARD_BY_INVITATION_ID)
-            }
-            if (cardUpdated) {
-                viewModel.onEvent(MyInvitationDetailUiEvent.RetryLoad)
                 backStackEntry.savedStateHandle.remove<Boolean>(UPDATE_CARD)
+                backStackEntry.savedStateHandle.remove<Boolean>(INVITATION_UPDATED)
             }
         }
 
         MyInvitationDetailRoute(
             onNavigateBack = onNavigateBack,
+            onNavigateToEditInvitation = onNavigateToEditInvitation,
             onNavigateToEditCard = onNavigateToEditCard,
             onNavigateToCreateCard = onNavigateToCreateCard,
             modifier = Modifier.padding(),

@@ -2,7 +2,7 @@ package com.andlife.network.api.invitation
 
 import com.andlife.network.model.BaseResponse
 import com.andlife.network.model.PagingResponse
-import com.andlife.network.model.invitation.CreateInvitationRequest
+import com.andlife.network.model.invitation.InvitationSaveRequest
 import com.andlife.network.model.invitation.InvitationCardRequest
 import com.andlife.network.model.invitation.InvitationResponse
 import retrofit2.http.Body
@@ -50,7 +50,13 @@ interface InvitationService {
 
     @POST("/api/invitations")
     suspend fun createInvitation(
-        @Body request: CreateInvitationRequest,
+        @Body request: InvitationSaveRequest,
+    ): BaseResponse<InvitationResponse>
+
+    @PUT("/api/invitations/{invitationId}")
+    suspend fun updateInvitation(
+        @Path("invitationId") invitationId: Long,
+        @Body request: InvitationSaveRequest,
     ): BaseResponse<InvitationResponse>
 
     @GET("/api/invitations/upcoming")

@@ -6,37 +6,41 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.preview.PreviewTheme
+import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
-import com.andlife.invitation_edit.model.create.AnnouncementUiModel
+import com.andlife.invitation_edit.model.form.AnnouncementUiModel
 import kotlinx.collections.immutable.ImmutableList
+import com.andlife.designsystem.R as designR
 
 fun LazyListScope.announcementSection(
     announcementList: ImmutableList<AnnouncementUiModel>,
@@ -60,15 +64,25 @@ fun LazyListScope.announcementSection(
                     style = NachoTheme.typography.bodyMediumSemiBold,
                     color = NachoTheme.colorScheme.textPrimary,
                 )
-                TextButton(
+
+                NachoButton(
                     onClick = onAddAnnouncementClick,
-                    enabled = !isLoading
+                    enabled = !isLoading,
+                    elevation =
+                        ButtonDefaults.buttonElevation(
+                            defaultElevation = NachoElevation.none,
+                            pressedElevation = NachoElevation.none,
+                        ),
+                    containerColor = NachoTheme.colorScheme.brandOnPrimary,
+                    contentColor = NachoTheme.colorScheme.brandPrimary,
+                    contentPadding = PaddingValues(horizontal = NachoSpacing.small, vertical = NachoSpacing.xSmall),
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Add,
+                        painter = painterResource(id = designR.drawable.ic_add_24),
                         contentDescription = stringResource(R.string.desc_add_announcement),
                         tint = NachoTheme.colorScheme.brandPrimary,
                     )
+                    Spacer(Modifier.width(NachoSpacing.small))
                     Text(
                         text = stringResource(R.string.txt_add_announcement),
                         style = NachoTheme.typography.bodyMediumMedium,

@@ -53,6 +53,7 @@ import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.andlife.designsystem.R as designR
 import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.component.NachoDivider
 import com.andlife.designsystem.preview.PreviewTheme
@@ -446,7 +447,7 @@ private fun LazyListScope.homeUpcomingSection(
                         description = stringResource(R.string.txt_empty_upcoming_desc),
                         buttonText = stringResource(R.string.txt_action_create_invitation),
                         onButtonClick = onNavigateToCreate,
-                        buttonIconRes = com.andlife.ui.R.drawable.ic_add_24
+                        buttonIconRes = designR.drawable.ic_add_24
                     )
                 }
 

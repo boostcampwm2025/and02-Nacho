@@ -107,7 +107,8 @@ class MyInvitationDetailViewModel @Inject constructor(
     private fun deleteInvitation() { /* TODO: 초대장 삭제 로직 */
     }
 
-    private fun navigateToEditInvitation() { /* TODO: 초대장 편집 이동 */
+    private fun navigateToEditInvitation() {
+        sendEffect(MyInvitationDetailSideEffect.NavigateToEditInvitation(myInvitationId))
     }
 
     private fun showThanksCardOnboarding() { /* TODO: 감사카드 온보딩 */

@@ -4,51 +4,59 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
-import com.andlife.invitation_edit.model.create.CardUiModel
+import com.andlife.invitation_edit.model.form.CardUiModel
+import com.andlife.designsystem.R as designR
 
 @Composable
 fun CardSection(
     cardUiModel: CardUiModel?,
     onClickCreatedCard: () -> Unit,
     modifier: Modifier = Modifier,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    isPreviewMode: Boolean = false,
 ) {
     val defaultColor = NachoTheme.colorScheme.textPrimary
+    val iconRes = if (cardUiModel == null) designR.drawable.ic_add_24 else designR.drawable.ic_edit_24
+    val buttonDescRes = if (cardUiModel == null) R.string.desc_create_card else R.string.desc_update_card
+    val buttonText = if (cardUiModel == null) R.string.txt_create_card else R.string.txt_update_card
+
     Box(modifier = modifier.background(NachoTheme.colorScheme.backgroundPrimary)) {
         Column {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = NachoSpacing.large),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -56,24 +64,33 @@ fun CardSection(
                     style = NachoTheme.typography.bodyMediumSemiBold,
                     color = NachoTheme.colorScheme.textPrimary,
                 )
-                Spacer(modifier = Modifier.weight(1f))
-                TextButton(
+                NachoButton(
                     onClick = onClickCreatedCard,
-                    enabled = !isLoading
+                    enabled = !isLoading,
+                    elevation =
+                        ButtonDefaults.buttonElevation(
+                            defaultElevation = NachoElevation.none,
+                            pressedElevation = NachoElevation.none,
+                        ),
+                    containerColor = NachoTheme.colorScheme.brandOnPrimary,
+                    contentColor = NachoTheme.colorScheme.brandPrimary,
+                    contentPadding = PaddingValues(horizontal = NachoSpacing.small, vertical = NachoSpacing.xSmall),
                 ) {
                     Icon(
-                        imageVector = if (cardUiModel == null) Icons.Default.Add else Icons.Default.Edit,
-                        contentDescription = if (cardUiModel == null) stringResource(R.string.desc_create_card)
-                        else stringResource(R.string.desc_update_card),
+                        painter = painterResource(iconRes),
+                        contentDescription = stringResource(buttonDescRes),
                         tint = NachoTheme.colorScheme.brandPrimary,
                     )
+                    Spacer(Modifier.width(NachoSpacing.small))
                     Text(
-                        text = if (cardUiModel == null) stringResource(R.string.txt_create_card)
-                        else stringResource(R.string.txt_update_card),
+                        text = stringResource(buttonText),
                         style = NachoTheme.typography.bodyMediumMedium,
                         color = NachoTheme.colorScheme.brandPrimary,
                     )
                 }
+            }
+            if (isPreviewMode) {
+                Spacer(modifier = Modifier.height(NachoSpacing.small))
             }
             val card = cardUiModel
             if (card != null) {

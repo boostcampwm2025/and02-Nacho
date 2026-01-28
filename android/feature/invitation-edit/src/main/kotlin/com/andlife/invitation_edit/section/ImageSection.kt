@@ -24,7 +24,7 @@ import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
 import com.andlife.invitation_edit.component.RemovableImage
-import com.andlife.invitation_edit.model.create.ThumbnailImageUiModel
+import com.andlife.invitation_edit.model.form.ThumbnailImageUiModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 

@@ -10,12 +10,15 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -24,6 +27,7 @@ import androidx.compose.ui.res.vectorResource
 import coil3.compose.SubcomposeAsyncImage
 import coil3.compose.SubcomposeAsyncImageContent
 import com.andlife.designsystem.preview.PreviewTheme
+import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
@@ -113,6 +117,39 @@ fun ImageSection(
 }
 
 @Composable
+fun EmptyImageSection(
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .aspectRatio(16f / 9f)
+            .background(NachoTheme.colorScheme.backgroundSecondary),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_image_24),
+                contentDescription = stringResource(R.string.desc_image),
+                tint = NachoTheme.colorScheme.textTertiary,
+                modifier = Modifier
+                    .size(NachoIconSize.huge)
+                    .alpha(0.6f),
+            )
+            Text(
+                text = stringResource(R.string.txt_image_placeholder),
+                style = NachoTheme.typography.bodyMediumRegular,
+                color = NachoTheme.colorScheme.textTertiary,
+                modifier = Modifier.alpha(0.6f),
+            )
+
+        }
+    }
+}
+
+@Composable
 @PreviewTheme
 private fun ImageSectionPreview() {
     NachoTheme {
@@ -125,5 +162,13 @@ private fun ImageSectionPreview() {
                 ).toImmutableList(),
             onImageClick = { },
         )
+    }
+}
+
+@Composable
+@PreviewTheme
+private fun EmptyImageSectionPreview() {
+    NachoTheme {
+        EmptyImageSection()
     }
 }
