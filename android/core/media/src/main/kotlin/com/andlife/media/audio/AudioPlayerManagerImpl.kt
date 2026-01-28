@@ -131,14 +131,6 @@ class AudioPlayerManagerImpl @Inject constructor(
         timerJob?.cancel()
 
         timerJob = applicationScope.launch {
-//            do {
-//                _currentAudio.update {
-//                    it?.copy(
-//                        currentPositionMs = exoPlayer?.currentPosition ?: 0L
-//                    )
-//                }
-//                delay(100L)
-//            } while (_currentAudio.value?.isPlaying == true && exoPlayer?.isPlaying == true)
             while (_currentAudio.value?.isPlaying == true && exoPlayer?.isPlaying == true) {
                 _currentAudio.update {
                     it?.copy(
