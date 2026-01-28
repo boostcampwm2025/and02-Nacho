@@ -1,7 +1,7 @@
 package com.andlife.login.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.viewModelScope
+import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.user.UserRepository
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
@@ -17,29 +17,44 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val authStateManager: AuthStateManager
 ) : BaseViewModel<LoginUiState, LoginUiEvent, LoginSideEffect>(LoginUiState()) {
 
 
     override val uiState: StateFlow<LoginUiState> = mutableUiState.asStateFlow()
     override fun onEvent(event: LoginUiEvent) {
         when (event) {
-            LoginUiEvent.GuestLogin -> {}
-            is LoginUiEvent.SocialLoginSuccess -> {
-                login(event.accessToken)
-            }
+            LoginUiEvent.GuestLogin -> guest()
+            is LoginUiEvent.SocialLoginSuccess -> login(event.accessToken)
         }
     }
 
     private fun login(accessToken: String) {
         viewModelScope.launch {
+            updateState { copy(true) }
             userRepository.login(accessToken)
                 .onFailure { error, msg ->
-                    Log.d("login fail", "login fail: $msg")
+                    sendEffect(LoginSideEffect.FailSocialLogin)
                 }
                 .onSuccess {
-                    Log.d("login success", "success")
+                    authStateManager.navigateToHome()
                 }
+            updateState { copy(false) }
+        }
+    }
+
+    private fun guest() {
+        viewModelScope.launch {
+            updateState { copy(true) }
+            userRepository.guestLogin()
+                .onFailure { error, msg ->
+                    sendEffect(LoginSideEffect.FailGuestLogin)
+                }
+                .onSuccess {
+                    authStateManager.navigateToHome()
+                }
+            updateState { copy(false) }
         }
     }
 }
