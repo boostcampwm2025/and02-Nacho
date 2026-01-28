@@ -7,6 +7,8 @@ import androidx.paging.map
 import com.andlife.domain.model.invitation.InvitationStatus
 import com.andlife.domain.model.invitation.SortDirection
 import com.andlife.domain.repository.invitation.InvitationRepository
+import com.andlife.domain.util.onFailure
+import com.andlife.domain.util.onSuccess
 import com.andlife.model.invitation.InvitationSummaryUiModel
 import com.andlife.model.invitation.toUiModel
 import com.andlife.myinvitation.model.MyInvitationSideEffect
@@ -22,6 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 import javax.inject.Inject
 
@@ -95,6 +98,9 @@ class MyInvitationViewModel @Inject constructor(
             is MyInvitationUiEvent.ClickCreate -> {
                 sendEffect(MyInvitationSideEffect.NavigateToCreate)
             }
+            is MyInvitationUiEvent.ClickDeleteInvitation -> {
+                deleteInvitation(event.id)
+            }
         }
     }
 
@@ -103,4 +109,15 @@ class MyInvitationViewModel @Inject constructor(
         if (hasError) sendEffect(MyInvitationSideEffect.RefreshFailure)
     }
 
+    fun deleteInvitation(invitationId: Long) {
+        viewModelScope.launch {
+            invitationRepository.deleteInvitation(invitationId)
+                .onSuccess {
+                    sendEffect(MyInvitationSideEffect.DeleteSuccess)
+                }
+                .onFailure { it, msg ->
+                    sendEffect(MyInvitationSideEffect.DeleteFailure)
+                }
+        }
+    }
 }
