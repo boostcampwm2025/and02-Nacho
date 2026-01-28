@@ -40,7 +40,7 @@ import com.andlife.invitation_edit.model.form.InvitationFormUiState
 import com.andlife.invitation_edit.section.AddressSection
 import com.andlife.invitation_edit.section.AuthorSection
 import com.andlife.invitation_edit.section.BottomBarSection
-import com.andlife.invitation_edit.section.CardSection
+import com.andlife.invitation_edit.section.CardGuideSection
 import com.andlife.invitation_edit.section.DateSection
 import com.andlife.invitation_edit.section.ImageSection
 import com.andlife.invitation_edit.section.TimeSection
@@ -327,6 +327,12 @@ private fun InvitationEditScreen(
                         onChangeAddressGuide = { onEvent(InvitationFormUiEvent.UpdateAddressGuide(it)) },
                         onNavigateToAddressSearch = onNavigateToAddressSearch,
                         isLoading = uiState.isLoading,
+                        modifier = Modifier.padding(top = NachoSpacing.medium),
+                    )
+                }
+
+                item {
+                    CardGuideSection(
                         modifier = Modifier.padding(top = NachoSpacing.medium),
                     )
                 }
