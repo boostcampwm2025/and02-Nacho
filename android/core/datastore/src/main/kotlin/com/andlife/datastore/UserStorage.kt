@@ -18,6 +18,9 @@ class UserStorage @Inject constructor(
     companion object {
         private val USER_ID = longPreferencesKey("USER_ID")
         private val GUEST_INVITATION_IDS = stringSetPreferencesKey("GUEST_INVITATION_IDS")
+        private val ACCESS_TOKEN = stringPreferencesKey("access_token")
+        private val REFRESH_TOKEN = stringPreferencesKey("refresh_token")
+        private val WAS_LOGGED_IN = booleanPreferencesKey("was_logged_in")
     }
 
     fun getUserId(): Long? = runBlocking {
@@ -56,6 +59,43 @@ class UserStorage @Inject constructor(
     suspend fun clearGuestData() {
         context.dataStore.edit { prefs ->
             prefs.remove(GUEST_INVITATION_IDS)
+        }
+    }
+
+    suspend fun setWasLoggedIn(wasLoggedIn: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[WAS_LOGGED_IN] = wasLoggedIn
+        }
+    }
+
+    suspend fun getWasLoggedIn(): Boolean {
+        return context.dataStore.data.first()[WAS_LOGGED_IN] ?: false
+    }
+
+    // NOTE: 호출 하는 곳에서 예외 처리 해줘야 함
+    suspend fun saveTokens(
+        accessToken: String,
+        refreshToken: String
+    ) {
+        context.dataStore.edit { preferences ->
+            preferences[ACCESS_TOKEN] = accessToken
+            preferences[REFRESH_TOKEN] = refreshToken
+        }
+    }
+
+    suspend fun getAccessToken(): String? {
+        return context.dataStore.data.first()[ACCESS_TOKEN]
+    }
+
+    suspend fun getRefreshToken(): String? {
+        return context.dataStore.data.first()[REFRESH_TOKEN]
+    }
+
+    suspend fun clearTokens() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(ACCESS_TOKEN)
+            preferences.remove(REFRESH_TOKEN)
+            preferences.remove(WAS_LOGGED_IN)
         }
     }
 }
