@@ -91,7 +91,9 @@ fun InvitationGuestBookForm(
         InvitationMediaUpload(
             selectedMedias = selectedMedias,
             onMediaRemove = onMediaRemove,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = NachoSpacing.xSmall),
         )
 
         Box {
