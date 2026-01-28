@@ -246,7 +246,7 @@ private fun InvitationEditScreen(
             TopBarSection(
                 title = stringResource(R.string.txt_edit_title),
                 onBackClick = { onEvent(InvitationFormUiEvent.OnClickBack) },
-                onPreviewClick = {},
+                onPreviewClick = null,
                 isLoading = uiState.isLoading
             )
         },
