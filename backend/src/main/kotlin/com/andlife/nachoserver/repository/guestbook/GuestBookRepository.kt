@@ -37,6 +37,9 @@ interface GuestBookRepository : JpaRepository<GuestBook, Long> {
             ORDER BY gb.createdAt DESC
         """
     )
+
+    fun findAllByInvitationId(invitationId: Long): List<GuestBook>
+
     fun findAllByMyRelatedInvitations(
         @Param("userId") userId: Long,
         pageable: Pageable
