@@ -33,7 +33,7 @@ internal class GuestBookRepositoryImpl @Inject constructor(
         Pager(
             config = PagingConfig(
                 pageSize = PAGE_SIZE,
-                enablePlaceholders = false,
+                enablePlaceholders = true,
                 initialLoadSize = PAGE_SIZE,
             ),
             pagingSourceFactory = {
