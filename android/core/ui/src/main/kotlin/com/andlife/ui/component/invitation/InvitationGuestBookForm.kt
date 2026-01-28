@@ -15,10 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -61,7 +58,6 @@ fun InvitationGuestBookForm(
     isAudioRecording: Boolean = false,
 ) {
     val context = LocalContext.current
-    var isFocused by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(editingGuestBookId) {
@@ -95,7 +91,9 @@ fun InvitationGuestBookForm(
         InvitationMediaUpload(
             selectedMedias = selectedMedias,
             onMediaRemove = onMediaRemove,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = NachoSpacing.xSmall),
         )
 
         Box {
@@ -111,12 +109,11 @@ fun InvitationGuestBookForm(
                     .fillMaxWidth()
                     .focusRequester(focusRequester)
                     .onFocusChanged { focusState ->
-                        isFocused = focusState.isFocused
                         onFocusChanged(focusState.isFocused)
                     },
                 singleLine = false,
                 minLines = 3,
-                maxLines = if (isFocused) Int.MAX_VALUE else 3,
+                maxLines = 3,
             )
 
             Text(

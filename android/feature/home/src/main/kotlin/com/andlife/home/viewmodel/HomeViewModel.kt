@@ -9,6 +9,7 @@ import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.home.model.HomeSideEffect
 import com.andlife.home.model.HomeUiEvent
 import com.andlife.home.model.HomeUiState
+import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.media.audio.AudioPlayerManager
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.model.guestbook.GuestBookUiModel
@@ -20,8 +21,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -55,22 +54,10 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun observeAudioPlayerState() {
-        audioPlayerManager.currentAudioUrl
-            .combine(audioPlayerManager.isPlaying) { url, isPlaying ->
+        audioPlayerManager.currentAudio
+            .onEach { audioPlaybackState ->
                 updateState {
-                    copy(
-                        playingAudioUrl = url,
-                        isAudioPlaying = isPlaying,
-                    )
-                }
-            }
-            .launchIn(viewModelScope)
-
-        uiState.map { it.isAudioPlaying }
-            .distinctUntilChanged()
-            .onEach { isAudioPlaying ->
-                if (!isAudioPlaying) {
-                    videoPlayerPool.resumeLastPlayed()
+                    copy( audioPlaybackState = audioPlaybackState ?: AudioPlaybackState())
                 }
             }
             .launchIn(viewModelScope)
@@ -82,15 +69,17 @@ class HomeViewModel @Inject constructor(
             is HomeUiEvent.ClickInvitationTitle -> navigateToDetail(event.invitationId, event.isOwner)
             is HomeUiEvent.ClickVisualMedia -> {}
             is HomeUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
+            is HomeUiEvent.ClickVideoPlayButton -> clickVideoPlayButton(event.url, event.itemId)
             is HomeUiEvent.ClickSetting -> navigateToSetting()
             is HomeUiEvent.ClickCreate -> navigateToCreate()
             is HomeUiEvent.Refresh -> refresh()
+            is HomeUiEvent.UpdateMediaPlayState -> updatePlayState(event.isPlaying)
         }
     }
 
     private fun clickAudioMedia(url: String) {
-        val isCurrentlyPlaying = uiState.value.isAudioPlaying
-        val currentUrl = uiState.value.playingAudioUrl
+        val isCurrentlyPlaying = uiState.value.audioPlaybackState.isPlaying
+        val currentUrl = uiState.value.audioPlaybackState.playingUrl
 
         if (currentUrl == url && isCurrentlyPlaying) {
             audioPlayerManager.togglePlay(url)
@@ -99,6 +88,13 @@ class HomeViewModel @Inject constructor(
             videoPlayerPool.pauseAllPlayers()
             audioPlayerManager.togglePlay(url)
         }
+    }
+
+    private fun clickVideoPlayButton(url: String, itemId: Long) {
+        val isCurrentlyPlaying = uiState.value.audioPlaybackState.isPlaying
+        if (!isCurrentlyPlaying) return
+        audioPlayerManager.pause()
+        videoPlayerPool.playPlayer(url, itemId)
     }
 
     private fun navigateToDetail(invitationId: Long, isOwner: Boolean) {
@@ -136,5 +132,9 @@ class HomeViewModel @Inject constructor(
                 sendEffect(HomeSideEffect.ScrollToTop)
             }
         }
+    }
+
+    private fun updatePlayState(isPlaying: Boolean) {
+        updateState { copy(isMediaPlaying = isPlaying) }
     }
 }

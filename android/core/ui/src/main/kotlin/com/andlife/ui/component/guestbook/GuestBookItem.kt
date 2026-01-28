@@ -1,7 +1,9 @@
 package com.andlife.ui.component.guestbook
 
 import androidx.annotation.OptIn
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -13,23 +15,28 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -52,9 +60,11 @@ import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
 import coil3.compose.SubcomposeAsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
+import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.media.video.AutoVideoPlayer
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.model.common.AuthorUiModel
@@ -69,17 +79,18 @@ import com.andlife.ui.util.toFormatDuration
 import com.andlife.ui.util.toRelativeTimeString
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.delay
 import kotlinx.datetime.LocalDateTime
 import com.andlife.designsystem.R as designR
 
 @Composable
 fun GuestBookItem(
     guestBook: GuestBookUiModel,
-    isAudioPlaying: Boolean,
-    playingAudioUrl: String?,
+    audioPlaybackState: AudioPlaybackState,
     videoPlayerPool: AutoVideoPlayerPool,
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
+    onPlayVideoClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     shouldPlayVideo: Boolean = false,
     isEditing: Boolean = false,
@@ -128,11 +139,11 @@ fun GuestBookItem(
             shouldPlayVideo = shouldPlayVideo,
             videoPlayerPool = videoPlayerPool,
             onVisualMediaClick = onVisualMediaClick,
+            onPlayVideoClick = onPlayVideoClick,
         )
         GuestBookItemAudioSection(
             audioMedias = guestBook.audioMedias,
-            isAudioPlaying = isAudioPlaying,
-            playingAudioUrl = playingAudioUrl,
+            audioPlaybackState = audioPlaybackState,
             onAudioMediaClick = onAudioMediaClick,
         )
         HorizontalDivider(
@@ -332,6 +343,7 @@ private fun GuestBookItemVisualMediaSection(
     shouldPlayVideo: Boolean,
     videoPlayerPool: AutoVideoPlayerPool,
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
+    onPlayVideoClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (visualMediaUrls.isEmpty()) return
@@ -374,19 +386,11 @@ private fun GuestBookItemVisualMediaSection(
                             guestBookId = guestBookId,
                             videoUrl = media.url,
                             thumbnailUrl = media.thumbnailUrl,
+                            totalDurationSeconds = media.durationSeconds,
                             shouldPlay = shouldPlayVideo && pagerState.currentPage == page,
                             videoPlayerPool = videoPlayerPool,
+                            onPlayVideoClick = onPlayVideoClick,
                         )
-
-                        media.durationSeconds?.let {
-                            MediaOverlay(
-                                modifier =
-                                    Modifier
-                                        .align(Alignment.BottomEnd)
-                                        .padding(NachoSpacing.small),
-                                text = it.toFormatDuration(), // TODO: 타이머 기능 추가해야 함.
-                            )
-                        }
                     }
 
                     else -> {
@@ -444,11 +448,16 @@ private fun VideoPlayerContainer(
     guestBookId: Long,
     videoUrl: String,
     thumbnailUrl: String?,
+    totalDurationSeconds: Int?,
     shouldPlay: Boolean,
     videoPlayerPool: AutoVideoPlayerPool,
+    onPlayVideoClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var isVideoReady by remember(videoUrl) { mutableStateOf(false) }
+    var remainingDurationMs by remember(videoUrl) {
+        mutableLongStateOf((totalDurationSeconds?.times(1000))?.toLong() ?: 0L)
+    }
 
     val thumbnailAlpha by animateFloatAsState(
         targetValue = if (shouldPlay && isVideoReady) 0f else 1f,
@@ -470,6 +479,20 @@ private fun VideoPlayerContainer(
     ) {
         if (shouldPlay) {
             val currentPlayer = remember(videoUrl) { videoPlayerPool.getPlayer(videoUrl) }
+
+            LaunchedEffect(isVideoReady) {
+                if (isVideoReady && totalDurationSeconds != null) {
+                    while (true) {
+                        val duration = currentPlayer.exoPlayer.duration
+                        val position = currentPlayer.exoPlayer.currentPosition
+
+                        remainingDurationMs = (duration - position).coerceAtLeast(0L)
+                        delay(1000L)
+                    }
+                } else {
+                    remainingDurationMs = (totalDurationSeconds?.times(1000))?.toLong() ?: 0L
+                }
+            }
 
             DisposableEffect(currentPlayer, videoUrl) {
                 val listener = object : Player.Listener {
@@ -504,9 +527,19 @@ private fun VideoPlayerContainer(
         if (thumbnailUrl != null && thumbnailAlpha > 0f) {
             ThumbnailWrapper(
                 thumbnailUrl = thumbnailUrl,
+                onPlayVideoClick = { onPlayVideoClick(videoUrl) },
                 modifier = Modifier
                     .fillMaxSize()
                     .alpha(thumbnailAlpha),
+            )
+        }
+
+        if (totalDurationSeconds != null) {
+            VideoDurationOverlay(
+                duration = (remainingDurationMs / 1000).toInt().toFormatDuration(),
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(NachoSpacing.small),
             )
         }
     }
@@ -538,10 +571,11 @@ private fun VideoPlayerView(
 @Composable
 private fun ThumbnailWrapper(
     thumbnailUrl: String?,
+    onPlayVideoClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier
+        modifier = modifier.clickable { onPlayVideoClick() }
     ) {
         AsyncImage(
             model = thumbnailUrl,
@@ -554,10 +588,20 @@ private fun ThumbnailWrapper(
 }
 
 @Composable
+private fun VideoDurationOverlay(
+    duration: String,
+    modifier: Modifier = Modifier,
+) {
+    MediaOverlay(
+        modifier = modifier,
+        text = duration
+    )
+}
+
+@Composable
 private fun GuestBookItemAudioSection(
     audioMedias: ImmutableList<GuestBookMediaUiModel>,
-    isAudioPlaying: Boolean,
-    playingAudioUrl: String?,
+    audioPlaybackState: AudioPlaybackState,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -570,9 +614,15 @@ private fun GuestBookItemAudioSection(
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
     ) {
         audioMedias.forEach { audio ->
+            val isCurrentAudio = audio.url == audioPlaybackState.playingUrl
+
             GuestBookAudioItem(
                 audio = audio,
-                isAudioPlaying = isAudioPlaying && (audio.url == playingAudioUrl),
+                isAudioPlaying = audioPlaybackState.isAudioPlayingForUrl(audio.url),
+                isCurrentAudio = isCurrentAudio,
+                isLoading = isCurrentAudio && audioPlaybackState.isLoading,
+                currentPositionMs = audioPlaybackState.currentPositionMs,
+                totalDurationMs = audioPlaybackState.totalDurationMs,
                 onAudioMediaClick = onAudioMediaClick,
             )
         }
@@ -583,15 +633,38 @@ private fun GuestBookItemAudioSection(
 private fun GuestBookAudioItem(
     audio: GuestBookMediaUiModel,
     isAudioPlaying: Boolean,
+    isCurrentAudio: Boolean,
+    isLoading: Boolean,
+    currentPositionMs: Long,
+    totalDurationMs: Long,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val playIconResId =
-        if (isAudioPlaying) {
-            R.drawable.ic_pause_filled_24
-        } else {
-            R.drawable.ic_play_arrow_24
-        }
+    val playIconResId = if (isAudioPlaying) {
+        R.drawable.ic_pause_filled_24
+    } else {
+        R.drawable.ic_play_arrow_24
+    }
+
+    val originalDurationMs = (audio.durationSeconds?.times(1000))?.toLong() ?: 0L
+    val isReady = isCurrentAudio && totalDurationMs > 0
+
+    val remainingDurationMs = if (isReady) {
+        (totalDurationMs - currentPositionMs).coerceAtLeast(0L)
+    } else {
+        originalDurationMs
+    }
+
+    val progress = if (isReady) {
+        (currentPositionMs.toFloat() / totalDurationMs.toFloat()).coerceIn(0f, 1f)
+    } else {
+        0f
+    }
+
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = if (progress == 0f) snap() else tween(durationMillis = 100, easing = LinearEasing)
+    )
 
     Row(
         modifier =
@@ -608,7 +681,7 @@ private fun GuestBookAudioItem(
         Box(
             modifier =
                 Modifier
-                    .size(48.dp)
+                    .size(NachoIconSize.xLarge)
                     .background(
                         color = NachoTheme.colorScheme.brandPrimary,
                         shape = CircleShape,
@@ -621,25 +694,24 @@ private fun GuestBookAudioItem(
                 tint = NachoTheme.colorScheme.iconTertiary,
             )
         }
-        Column(
-            modifier =
-                Modifier.weight(1f),
-        ) {
-            Text(
-                text = "오디오 제목", // TODO: 오디오 제목 필요
-                style = NachoTheme.typography.bodyMediumMedium,
-                color = NachoTheme.colorScheme.textPrimary,
-            )
-            Text(
-                text =
-                    stringResource(
-                        R.string.format_audio_duration,
-                        audio.durationSeconds ?: 0,
-                    ),
-                style = NachoTheme.typography.bodySmallRegular,
-                color = NachoTheme.colorScheme.textSecondary,
-            )
-        }
+        LinearProgressIndicator(
+            progress = { animatedProgress },
+            modifier = Modifier
+                .weight(1f)
+                .height(6.dp)
+                .clip(NachoTheme.shapes.small),
+            color = NachoTheme.colorScheme.brandPrimary,
+            trackColor = NachoTheme.colorScheme.backgroundBorder,
+            gapSize = 0.dp,
+            strokeCap = StrokeCap.Square,
+            drawStopIndicator = { /* No-op */ },
+        )
+        Text(
+            text = (remainingDurationMs / 1000).toInt().toFormatDuration(),
+            style = NachoTheme.typography.bodySmallRegular,
+            color = NachoTheme.colorScheme.textSecondary,
+            modifier = Modifier.widthIn(min = 40.dp)
+        )
         Surface(
             modifier = Modifier.size(40.dp),
             shape = CircleShape,
@@ -652,11 +724,19 @@ private fun GuestBookAudioItem(
             onClick = { onAudioMediaClick(audio) },
         ) {
             Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    painter = painterResource(playIconResId),
-                    contentDescription = stringResource(R.string.desc_play_audio),
-                    tint = NachoTheme.colorScheme.textSecondary,
-                )
+                if (isCurrentAudio && isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(NachoIconSize.xSmall),
+                        color = NachoTheme.colorScheme.textSecondary,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(playIconResId),
+                        contentDescription = stringResource(R.string.desc_play_audio),
+                        tint = NachoTheme.colorScheme.textSecondary,
+                    )
+                }
             }
         }
     }
@@ -724,12 +804,12 @@ private fun GuestBookItemPreview() {
                         ),
                     videoPlayerPool = FakeAutoVideoPlayerPool(),
                     shouldPlayVideo = false,
-                    isAudioPlaying = true,
-                    playingAudioUrl = null,
+                    audioPlaybackState = AudioPlaybackState(),
                     isEditing = true,
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},
                     onAudioMediaClick = {},
+                    onPlayVideoClick = {},
                     onMenuClick = {},
                     onEditClick = {},
                     onDeleteClick = {},
@@ -787,12 +867,12 @@ private fun GuestBookItemPreview() {
                         ),
                     videoPlayerPool = FakeAutoVideoPlayerPool(),
                     shouldPlayVideo = false,
-                    isAudioPlaying = false,
-                    playingAudioUrl = null,
+                    audioPlaybackState = AudioPlaybackState(),
                     isEditing = false,
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},
                     onAudioMediaClick = {},
+                    onPlayVideoClick = {},
                     onMenuClick = {},
                     onEditClick = {},
                     onDeleteClick = {},

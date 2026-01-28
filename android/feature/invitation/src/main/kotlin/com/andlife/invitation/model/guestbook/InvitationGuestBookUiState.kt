@@ -1,19 +1,21 @@
 package com.andlife.invitation.model.guestbook
 
+import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.ui.base.BaseUiState
 import com.andlife.ui.component.invitation.SelectedMedia
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 data class InvitationGuestBookUiState(
+    val isRefreshing: Boolean = false,
     val selectedMedias: ImmutableList<SelectedMedia> = persistentListOf(),
     val textContent: String = "",
     val isUploading: Boolean = false,
+    val isMediaPlaying: Boolean = false,
     val originalTextContent: String = "",
     val originalMediaIds: Set<Long> = emptySet(),
     val errorMessage: String? = null,
-    val playingAudioUrl: String? = null,
-    val isAudioPlaying: Boolean = false,
+    val audioPlaybackState: AudioPlaybackState = AudioPlaybackState(),
     val editingGuestBookId: Long? = null,
     val isLoadingGuestBooks: Boolean = false,
     val deleteTargetId: Long? = null,
@@ -36,4 +38,7 @@ data class InvitationGuestBookUiState(
 
     val isSubmittable: Boolean
         get() = (textContent.isNotBlank() || selectedMedias.isNotEmpty()) && !isUploading && isContentChanged
+
+    val canPlayVideo: Boolean
+        get() = isMediaPlaying && !audioPlaybackState.isLoading && !audioPlaybackState.isPlaying
 }

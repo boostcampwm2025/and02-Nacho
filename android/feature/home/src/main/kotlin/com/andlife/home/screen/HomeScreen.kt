@@ -173,11 +173,13 @@ fun HomeRoute(
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
+                    viewModel.onEvent(HomeUiEvent.UpdateMediaPlayState(true))
                     viewModel.videoPlayerPool.resumeLastPlayed()
                     isMediaActive = true
                 }
 
                 Lifecycle.Event.ON_PAUSE -> {
+                    viewModel.onEvent(HomeUiEvent.UpdateMediaPlayState(false))
                     viewModel.videoPlayerPool.pauseAllPlayers()
                     viewModel.audioPlayerManager.pause()
                 }
@@ -220,10 +222,10 @@ fun HomeScreen(
 ) {
     var playVideoIndex by remember { mutableStateOf(-1) }
 
-    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.isAudioPlaying) {
+    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.audioPlaybackState.isPlaying) {
         var pendingIndex = -1
         var lastChangedTime = 0L
-        if (!isMediaActive || uiState.isAudioPlaying) {
+        if (!isMediaActive || uiState.audioPlaybackState.isPlaying) {
             playVideoIndex = -1
             return@LaunchedEffect
         }
@@ -336,6 +338,9 @@ fun HomeScreen(
                     },
                     onVisualMediaClick = { url -> onEvent(HomeUiEvent.ClickVisualMedia(url)) },
                     onAudioMediaClick = { url -> onEvent(HomeUiEvent.ClickAudioMedia(url)) },
+                    onPlayVideoClick = { url, itemId ->
+                        onEvent(HomeUiEvent.ClickVideoPlayButton(url, itemId))
+                    },
                 )
             }
         }
@@ -542,6 +547,7 @@ private fun LazyListScope.homeGuestBookSection(
     onInvitationTitleClick: (invitationId: Long, isOwner: Boolean) -> Unit,
     onVisualMediaClick: (String) -> Unit,
     onAudioMediaClick: (String) -> Unit,
+    onPlayVideoClick: (String, Long) -> Unit,
 ) {
     item {
         Text(
@@ -585,19 +591,18 @@ private fun LazyListScope.homeGuestBookSection(
                     guestBook = guestBook,
                     useMenuButton = false,
                     videoPlayerPool = videoPlayerPool,
-                    shouldPlayVideo = isMediaActive && (index == playVideoIndex),
-                    isAudioPlaying = uiState.isAudioPlaying &&
-                        guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
+                    shouldPlayVideo = uiState.canPlayVideo && (index == playVideoIndex),
+                    audioPlaybackState = uiState.audioPlaybackState,
                     onInvitationTitleClick = {
                         onInvitationTitleClick(
                             guestBook.invitation?.id ?: -1L,
                             guestBook.isOwner,
                         )
                     },
-                    playingAudioUrl = uiState.playingAudioUrl,
                     onVisualMediaClick = { onVisualMediaClick(it.url) },
                     onAudioMediaClick = { onAudioMediaClick(it.url) },
                     onMenuClick = { },
+                    onPlayVideoClick = { url -> onPlayVideoClick(url, guestBook.id) },
                 )
             }
         }

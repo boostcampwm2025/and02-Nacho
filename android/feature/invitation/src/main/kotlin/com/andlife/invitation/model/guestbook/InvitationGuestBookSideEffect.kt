@@ -18,4 +18,8 @@ sealed interface InvitationGuestBookSideEffect : BaseSideEffect {
     data object StartAudioRecording : InvitationGuestBookSideEffect
 
     data object StopAudioRecording : InvitationGuestBookSideEffect
+
+    data object ScrollToTop : InvitationGuestBookSideEffect
+
+    data object RefreshFailure : InvitationGuestBookSideEffect
 }
