@@ -82,6 +82,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
+import com.andlife.designsystem.R as designR
 
 private const val GUESTBOOK_KEY_OFFSET = 2
 private const val UPCOMING_CARD_WIDTH_RATIO = 0.85f
@@ -318,31 +319,29 @@ fun HomeScreen(
                     bottom = paddingValues.calculateBottomPadding(),
                 ),
             ) {
-                if (isMediaActive) {
-                    homeUpcomingSection(
-                        upcomingInvitations = upcomingInvitations,
-                        onInvitationClick = { id, isOwner ->
-                            onEvent(HomeUiEvent.ClickUpcomingInvitation(id, isOwner))
-                        },
-                        onNavigateToCreate = { onEvent(HomeUiEvent.ClickCreate) },
-                    )
+                homeUpcomingSection(
+                    upcomingInvitations = upcomingInvitations,
+                    onInvitationClick = { id, isOwner ->
+                        onEvent(HomeUiEvent.ClickUpcomingInvitation(id, isOwner))
+                    },
+                    onNavigateToCreate = { onEvent(HomeUiEvent.ClickCreate) },
+                )
 
-                    homeGuestBookSection(
-                        isMediaActive = isMediaActive,
-                        guestBooks = guestBooks,
-                        uiState = uiState,
-                        playVideoIndex = playVideoIndex,
-                        videoPlayerPool = videoPlayerPool,
-                        onInvitationTitleClick = { id, isOwner ->
-                            onEvent(HomeUiEvent.ClickInvitationTitle(id, isOwner))
-                        },
-                        onVisualMediaClick = { url -> onEvent(HomeUiEvent.ClickVisualMedia(url)) },
-                        onAudioMediaClick = { url -> onEvent(HomeUiEvent.ClickAudioMedia(url)) },
-                        onPlayVideoClick = { url, itemId ->
-                            onEvent(HomeUiEvent.ClickVideoPlayButton(url, itemId))
-                        },
-                    )
-                }
+                homeGuestBookSection(
+                    isMediaActive = isMediaActive,
+                    guestBooks = guestBooks,
+                    uiState = uiState,
+                    playVideoIndex = playVideoIndex,
+                    videoPlayerPool = videoPlayerPool,
+                    onInvitationTitleClick = { id, isOwner ->
+                        onEvent(HomeUiEvent.ClickInvitationTitle(id, isOwner))
+                    },
+                    onVisualMediaClick = { url -> onEvent(HomeUiEvent.ClickVisualMedia(url)) },
+                    onAudioMediaClick = { url -> onEvent(HomeUiEvent.ClickAudioMedia(url)) },
+                    onPlayVideoClick = { url, itemId ->
+                        onEvent(HomeUiEvent.ClickVideoPlayButton(url, itemId))
+                    },
+                )
             }
         }
     }
@@ -451,7 +450,7 @@ private fun LazyListScope.homeUpcomingSection(
                         description = stringResource(R.string.txt_empty_upcoming_desc),
                         buttonText = stringResource(R.string.txt_action_create_invitation),
                         onButtonClick = onNavigateToCreate,
-                        buttonIconRes = com.andlife.ui.R.drawable.ic_add_24
+                        buttonIconRes = designR.drawable.ic_add_24
                     )
                 }
 

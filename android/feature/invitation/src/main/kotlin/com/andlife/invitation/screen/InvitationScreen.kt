@@ -1,19 +1,28 @@
 package com.andlife.invitation.screen
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringArrayResource
@@ -24,6 +33,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.andlife.designsystem.component.dialog.NachoDialog
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.invitation.SortDirection
@@ -37,13 +47,17 @@ import com.andlife.ui.component.GenericTabRow
 import com.andlife.ui.component.invitation.InvitationListHeader
 import com.andlife.ui.component.invitation.InvitationTopBar
 import com.andlife.ui.component.listitem.InvitationListItem
+import com.andlife.ui.component.listitem.MenuItem
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.component.paging.PagingStateContent
 import com.andlife.ui.util.collectWithLifecycle
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.launch
 
 @Composable
 fun InvitationRoute(
+    snackbarHostState: SnackbarHostState,
     onNavigateToDetail: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: InvitationViewModel = hiltViewModel(),
@@ -52,10 +66,34 @@ fun InvitationRoute(
     val upcomingItems = viewModel.upcomingInvitationPagingFlow.collectAsLazyPagingItems()
     val pastItems = viewModel.pastInvitationPagingFlow.collectAsLazyPagingItems()
 
+    var invitationIdToLeave by remember { mutableStateOf<Long?>(null) }
+
+    val scope = rememberCoroutineScope()
+
+    val refreshFailureMessage = stringResource(R.string.msg_refresh_failure)
+    val leaveSuccessMessage = stringResource(R.string.msg_leave_success)
+    val leaveFailureMessage = stringResource(R.string.msg_leave_failure)
+
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is InvitationSideEffect.NavigateToDetail -> onNavigateToDetail(effect.id)
-            is InvitationSideEffect.RefreshFailure -> { /* TODO : 에러 스낵바 처리 */ }
+            is InvitationSideEffect.RefreshFailure -> {
+                scope.launch {
+                    snackbarHostState.showSnackbar(refreshFailureMessage)
+                }
+            }
+            is InvitationSideEffect.LeaveSuccess -> {
+                scope.launch {
+                    snackbarHostState.showSnackbar(leaveSuccessMessage)
+                }
+                upcomingItems.refresh()
+                pastItems.refresh()
+            }
+            is InvitationSideEffect.LeaveFailure -> {
+                scope.launch {
+                    snackbarHostState.showSnackbar(leaveFailureMessage)
+                }
+            }
         }
     }
 
@@ -71,12 +109,68 @@ fun InvitationRoute(
         }
     }
 
+    invitationIdToLeave?.let { id ->
+        NachoDialog(
+            onDismiss = { invitationIdToLeave = null }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(NachoSpacing.xLarge)
+            ) {
+                Text(
+                    text = stringResource(R.string.txt_leave_invitation_title),
+                    style = NachoTheme.typography.headingSmallSemiBold,
+                    color = NachoTheme.colorScheme.textPrimary
+                )
+
+                Text(
+                    text = stringResource(R.string.txt_leave_invitation_message),
+                    modifier = Modifier.padding(top = NachoSpacing.medium, bottom = NachoSpacing.xLarge),
+                    style = NachoTheme.typography.bodyMediumMedium,
+                    color = NachoTheme.colorScheme.textSecondary
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                ) {
+                    TextButton(
+                        onClick = { invitationIdToLeave = null }
+                    ) {
+                        Text(
+                            text = stringResource(R.string.txt_cancel),
+                            color = NachoTheme.colorScheme.textSecondary
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.padding(horizontal = NachoSpacing.small))
+
+                    TextButton(
+                        onClick = {
+                            viewModel.leaveInvitation(id)
+                            invitationIdToLeave = null
+                        },
+                        shape = NachoTheme.shapes.small
+                    ) {
+                        Text(
+                            text = stringResource(R.string.txt_confirm),
+                            color = NachoTheme.colorScheme.brandPrimary
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     InvitationScreen(
         uiState = uiState,
         upcomingItems = upcomingItems,
         pastItems = pastItems,
         modifier = modifier,
         onEvent = viewModel::onEvent,
+        onLeaveClick = { invitationIdToLeave = it }
     )
 }
 
@@ -86,8 +180,9 @@ private fun InvitationScreen(
     uiState: InvitationUiState,
     upcomingItems: LazyPagingItems<InvitationSummaryUiModel>,
     pastItems: LazyPagingItems<InvitationSummaryUiModel>,
-    modifier: Modifier = Modifier,
-    onEvent: (InvitationUiEvent) -> Unit
+    onEvent: (InvitationUiEvent) -> Unit,
+    onLeaveClick: (Long) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val tabs = stringArrayResource(R.array.arr_invitation_tabs).toImmutableList()
     val upcomingSortOptions = stringArrayResource(R.array.arr_invitation_sort_options).toImmutableList()
@@ -183,7 +278,12 @@ private fun InvitationScreen(
                                         address = invitation.address,
                                         dDayText = dDayLabel,
                                         onClick = { onEvent(InvitationUiEvent.ClickInvitation(invitation.id)) },
-                                        onMoreClick = {}
+                                        menuItems = persistentListOf(
+                                            MenuItem(
+                                                title = stringResource(R.string.txt_leave_invitation_title),
+                                                onClick = { onLeaveClick(invitation.id) }
+                                            )
+                                        )
                                     )
                                 }
                             }

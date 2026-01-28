@@ -12,6 +12,8 @@ import java.time.LocalTime
 interface InvitationParticipantRepository : JpaRepository<InvitationParticipant, Long> {
 
     // 전체 목록
+    fun existsByInvitationIdAndUserId(invitationId: Long, userId: Long): Boolean
+
     @Query(
         value = "SELECT p FROM InvitationParticipant p JOIN FETCH p.invitation WHERE p.user.id = :userId",
         countQuery = "SELECT count(p) FROM InvitationParticipant p WHERE p.user.id = :userId"
@@ -63,4 +65,10 @@ interface InvitationParticipantRepository : JpaRepository<InvitationParticipant,
         @Param("nowTime") nowTime: LocalTime,
         pageable: Pageable
     ): Page<InvitationParticipant>
+
+    @Query("SELECT p FROM InvitationParticipant p WHERE p.user.id = :userId AND p.invitation.id = :invitationId")
+    fun findByUserIdAndInvitationId(
+        @Param("userId") userId: Long,
+        @Param("invitationId") invitationId: Long
+    ): InvitationParticipant?
 }

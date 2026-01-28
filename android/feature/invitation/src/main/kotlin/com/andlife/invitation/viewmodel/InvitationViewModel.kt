@@ -1,5 +1,6 @@
 package com.andlife.invitation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
@@ -7,6 +8,8 @@ import androidx.paging.map
 import com.andlife.domain.model.invitation.InvitationStatus
 import com.andlife.domain.model.invitation.SortDirection
 import com.andlife.domain.repository.invitation.InvitationRepository
+import com.andlife.domain.util.onFailure
+import com.andlife.domain.util.onSuccess
 import com.andlife.invitation.model.InvitationSideEffect
 import com.andlife.invitation.model.InvitationUiEvent
 import com.andlife.invitation.model.InvitationUiState
@@ -22,6 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 import javax.inject.Inject
 
@@ -94,6 +98,24 @@ class InvitationViewModel @Inject constructor(
                     _pastSort.value = event.newSort
                 }
             }
+            is InvitationUiEvent.ClickLeaveInvitation -> {
+                leaveInvitation(event.id)
+            }
+        }
+    }
+
+    fun leaveInvitation(invitationId: Long) {
+        viewModelScope.launch {
+            updateState { copy(isRefreshing = true) }
+            invitationRepository.leaveInvitation(invitationId)
+                .onSuccess {
+                    sendEffect(InvitationSideEffect.LeaveSuccess)
+                }
+                .onFailure { it, msg ->
+                    sendEffect(InvitationSideEffect.LeaveFailure)
+                    Log.e("InvitationViewModel", "에러 발생: $it")
+                }
+            updateState { copy(isRefreshing = false) }
         }
     }
 

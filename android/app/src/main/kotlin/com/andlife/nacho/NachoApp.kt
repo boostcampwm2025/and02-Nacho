@@ -28,7 +28,12 @@ fun NachoApp(
 
             is MainSideEffect.NavigateToDetail -> {
                 Log.d("NachoApp", "Received Deferred DeepLink invitationId: ${effect.invitationId}")
-                navigator.navController.navigate(InvitationDetail(effect.invitationId)) {
+                navigator.navController.navigate(
+                    InvitationDetail(
+                        id = effect.invitationId,
+                        isFromDeepLink = true
+                    )
+                ) {
                     popUpTo(navigator.navController.graph.startDestinationId)
                     launchSingleTop = true
                 }

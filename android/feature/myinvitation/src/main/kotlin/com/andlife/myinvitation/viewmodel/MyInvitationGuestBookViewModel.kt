@@ -94,6 +94,10 @@ constructor(
             is MyInvitationGuestBookUiEvent.UpdateTextContent -> updateTextContent(event.textContent)
             is MyInvitationGuestBookUiEvent.RemoveMedia -> removeMedia(event.media)
             is MyInvitationGuestBookUiEvent.UploadMedias -> handleUploadMedias()
+            is MyInvitationGuestBookUiEvent.ClickCamera -> handleCameraClick()
+            is MyInvitationGuestBookUiEvent.ClickMicrophone -> handleMicrophoneClick()
+            is MyInvitationGuestBookUiEvent.StartAudioRecording -> handleStartAudioRecording()
+            is MyInvitationGuestBookUiEvent.StopAudioRecording -> handleStopAudioRecording()
             is MyInvitationGuestBookUiEvent.ClearError -> clearError()
             is MyInvitationGuestBookUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
             is MyInvitationGuestBookUiEvent.ClickVideoPlayButton -> clickVideoPlayButton(event.url, event.itemId)
@@ -200,6 +204,7 @@ constructor(
                             val thumbnails = generateAndUploadThumbnails(newMedias)
                             uploadResult.data to thumbnails
                         }
+
                         is Result.Error -> {
                             updateState { copy(isUploading = false) }
                             sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("업로드 실패: ${uploadResult.message}"))
@@ -287,9 +292,12 @@ constructor(
         thumbnailUrls: List<String?>,
         allSelectedMedias: List<SelectedMedia>
     ) {
-        val existingImageIds = allSelectedMedias.filter { it.id != null && it.type == UiMediaType.IMAGE }.mapNotNull { it.id }
-        val existingAudioIds = allSelectedMedias.filter { it.id != null && it.type == UiMediaType.AUDIO }.mapNotNull { it.id }
-        val existingVideoIds = allSelectedMedias.filter { it.id != null && it.type == UiMediaType.VIDEO }.mapNotNull { it.id }
+        val existingImageIds =
+            allSelectedMedias.filter { it.id != null && it.type == UiMediaType.IMAGE }.mapNotNull { it.id }
+        val existingAudioIds =
+            allSelectedMedias.filter { it.id != null && it.type == UiMediaType.AUDIO }.mapNotNull { it.id }
+        val existingVideoIds =
+            allSelectedMedias.filter { it.id != null && it.type == UiMediaType.VIDEO }.mapNotNull { it.id }
 
         val onlyNewMedias = allSelectedMedias.filter { it.id == null }
 
@@ -377,6 +385,39 @@ constructor(
                 originalMediaIds = emptySet(),
             )
         }
+    }
+
+    private fun handleCameraClick() {
+        val state = uiState.value
+        if (state.selectedMedias.size >= 5) {
+            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("최대 5개까지 미디어를 추가할 수 있습니다."))
+            return
+        }
+        sendEffect(MyInvitationGuestBookSideEffect.LaunchCamera)
+    }
+
+    private fun handleMicrophoneClick() {
+        val state = uiState.value
+
+        if (state.isAudioRecording) {
+            onEvent(MyInvitationGuestBookUiEvent.StopAudioRecording)
+        } else {
+            if (state.selectedMedias.size >= 5) {
+                sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("최대 5개까지 미디어를 추가할 수 있습니다."))
+                return
+            }
+            onEvent(MyInvitationGuestBookUiEvent.StartAudioRecording)
+        }
+    }
+
+    private fun handleStartAudioRecording() {
+        updateState { copy(isAudioRecording = true, audioRecordingDuration = 0) }
+        sendEffect(MyInvitationGuestBookSideEffect.StartAudioRecording)
+    }
+
+    private fun handleStopAudioRecording() {
+        updateState { copy(isAudioRecording = false, audioRecordingDuration = 0) }
+        sendEffect(MyInvitationGuestBookSideEffect.StopAudioRecording)
     }
 
     private fun updatePlayState(isPlaying: Boolean) {

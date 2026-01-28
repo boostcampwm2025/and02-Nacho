@@ -6,13 +6,20 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.runtime.CompositionLocalProvider
 import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.login.LocalLoginManager
+import com.andlife.login.social.LoginManager
 import com.andlife.nacho.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
+
+    @Inject
+    lateinit var loginManager: LoginManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,7 +28,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NachoTheme {
-                NachoApp()
+                CompositionLocalProvider(LocalLoginManager provides loginManager) {
+                    NachoApp()
+                }
             }
         }
     }
