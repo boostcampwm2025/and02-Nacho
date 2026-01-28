@@ -31,4 +31,7 @@ dependencies {
 
     // exif
     implementation(libs.androidx.exifinterface)
+
+    // workmanager
+    implementation(libs.androidx.work.runtime.ktx)
 }
