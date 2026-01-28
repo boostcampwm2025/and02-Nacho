@@ -197,6 +197,7 @@ fun MyInvitationGuestBookRoute(
                     "${context.packageName}.provider",
                     photoFile
                 )
+                cameraImageUri = photoUri
                 cameraLauncher.launch(photoUri)
             }
 
