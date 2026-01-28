@@ -12,4 +12,6 @@ interface AnnouncementRepository : JpaRepository<AnnouncementSection, Long> {
         ORDER BY a.displayOrder ASC
     """)
     fun findAllByInvitationIdOrderByDisplayOrder(@Param("invitationId") invitationId: Long): List<AnnouncementSection>
+
+    fun deleteAllByInvitationId(invitationId: Long)
 }

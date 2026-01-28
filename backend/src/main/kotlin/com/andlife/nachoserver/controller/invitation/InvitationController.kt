@@ -4,6 +4,7 @@ import com.andlife.nachoserver.request.invitation.CreateInvitationRequest
 import com.andlife.nachoserver.auth.AuthContext
 import com.andlife.nachoserver.request.invitation.InvitationCardRequest
 import com.andlife.nachoserver.request.guestbook.GuestBookRequest
+import com.andlife.nachoserver.request.invitation.UpdateInvitationRequest
 import com.andlife.nachoserver.response.BaseResponse
 import com.andlife.nachoserver.response.CommonResponseCode
 import com.andlife.nachoserver.response.PagingResponse
@@ -175,6 +176,32 @@ class InvitationController(
 
         return try {
             val response = invitationService.createInvitation(authContext.userId, request)
+            BaseResponse.success(response)
+        } catch (e: IllegalArgumentException) {
+            println(e.message)
+            BaseResponse.error(
+                responseCode = CommonResponseCode.BAD_REQUEST,
+                customMessage = e.message
+            )
+        } catch (e: NoSuchElementException) {
+            println(e.message)
+            BaseResponse.error(
+                responseCode = CommonResponseCode.NOT_FOUND,
+                customMessage = e.message
+            )
+        } catch (e: Exception) {
+            println(e.message)
+            BaseResponse.error(responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    @PutMapping("/{invitationId}")
+    fun updateInvitation(
+        @PathVariable invitationId: Long,
+        @RequestBody request: UpdateInvitationRequest
+    ): BaseResponse<InvitationResponse> {
+        return try {
+            val response = invitationService.updateInvitation(invitationId, request)
             BaseResponse.success(response)
         } catch (e: IllegalArgumentException) {
             println(e.message)

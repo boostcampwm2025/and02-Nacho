@@ -2,8 +2,6 @@ package com.andlife.login.screem
 
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Scaffold
@@ -26,29 +23,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withLink
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.andlife.designsystem.preview.PreviewTheme
+import com.andlife.designsystem.theme.KakaoButtonColor
+import com.andlife.designsystem.theme.KakaoTextColor
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
@@ -152,7 +146,7 @@ private fun KakaoLoginButton(
     Surface(
         modifier = modifier,
         shape = shape,
-        color = Color(0xFFFEE500),
+        color = KakaoButtonColor,
         onClick = onLoginClick
     ) {
         Row(
@@ -170,7 +164,7 @@ private fun KakaoLoginButton(
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = stringResource(R.string.txt_kakao_login),
-                color = Color(0xFF000000).copy(alpha = 0.85f),
+                color = KakaoTextColor,
             )
             Spacer(modifier = Modifier.weight(1f))
         }
@@ -219,6 +213,7 @@ private fun PolicyAndTermsText(
     onPrivacyPolicyClick: () -> Unit,
     onTermsOfServiceClick: () -> Unit
 ) {
+    val res = LocalResources.current
     CompositionLocalProvider(
         LocalTextStyle provides NachoTheme.typography.bodySmallRegular.copy(
             color = NachoTheme.colorScheme.textTertiary
@@ -230,7 +225,7 @@ private fun PolicyAndTermsText(
         )
 
         val annotatedString = buildAnnotatedString {
-            append("로그인 시 ")
+            append(res.getString(R.string.whenloggingin))
 
             withLink(
                 LinkAnnotation.Clickable(
@@ -239,10 +234,10 @@ private fun PolicyAndTermsText(
                     linkInteractionListener = { _ -> onTermsOfServiceClick() }
                 )
             ) {
-                append("이용약관")
+                append(res.getString(R.string.termsofuse))
             }
 
-            append(" 및 ")
+            append(res.getString(R.string.and))
 
             withLink(
                 LinkAnnotation.Clickable(
@@ -251,10 +246,10 @@ private fun PolicyAndTermsText(
                     linkInteractionListener = { _ -> onPrivacyPolicyClick() }
                 )
             ) {
-                append("개인정보처리방침")
+                append(res.getString(R.string.privacypolicy))
             }
 
-            append("에\n동의하는 것으로 간주됩니다.")
+            append(res.getString(R.string.agree))
         }
 
         Text(

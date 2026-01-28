@@ -24,6 +24,7 @@ internal fun TopBarSection(
     onPreviewClick: () -> Unit,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
+    isPreviewMode: Boolean = false,
 ) {
     TopAppBar(
         title = {
@@ -45,12 +46,14 @@ internal fun TopBarSection(
             }
         },
         actions = {
-            TextButton(onPreviewClick) {
-                Text(
-                    text = stringResource(R.string.txt_preview),
-                    style = NachoTheme.typography.bodyLargeSemiBold,
-                    color = NachoTheme.colorScheme.brandPrimary,
-                )
+            if (!isPreviewMode) {
+                TextButton(onPreviewClick) {
+                    Text(
+                        text = stringResource(R.string.txt_preview),
+                        style = NachoTheme.typography.bodyLargeSemiBold,
+                        color = NachoTheme.colorScheme.brandPrimary,
+                    )
+                }
             }
         },
         colors =

@@ -27,6 +27,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.andlife.designsystem.R as designR
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.invitation.SortDirection
@@ -115,7 +116,7 @@ private fun MyInvitationScreen(
                 modifier = Modifier.padding(NachoSpacing.medium)
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_add_24),
+                    painter = painterResource(id = designR.drawable.ic_add_24),
                     contentDescription = stringResource(R.string.desc_invitation_create)
                 )
             }

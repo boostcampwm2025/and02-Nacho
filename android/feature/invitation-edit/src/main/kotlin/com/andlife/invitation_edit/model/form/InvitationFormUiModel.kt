@@ -1,15 +1,13 @@
-package com.andlife.invitation_edit.model.create
+package com.andlife.invitation_edit.model.form
 
 import android.text.Editable
-import com.andlife.domain.model.invitation.Invitation
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import java.util.UUID
 
-data class CreateInvitationUiModel(
+data class InvitationFormUiModel(
     val title: String = "",
     val author: String = "",
     val imageList: ImmutableList<ThumbnailImageUiModel> = persistentListOf(),
@@ -48,10 +46,9 @@ data class AnnouncementUiModel(
 data class CardUiModel(
     val editable: Editable,
     val backgroundColor: Int,
-    val backgroundImageUrl: String? = null
+    val backgroundImageUrl: String? = null,
 )
 
 fun InvitationTimeUiModel.toLocalTime(): LocalTime {
     return LocalTime(hour, min)
 }
-
