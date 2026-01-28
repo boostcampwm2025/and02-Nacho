@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -23,6 +24,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import coil3.compose.AsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
+import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.component.media.AudioPlayer
 import com.andlife.ui.component.media.VideoPlayer
@@ -88,8 +90,16 @@ fun StoryContent(
             AsyncImage(
                 model = if (item.type == UiMediaType.IMAGE) item.mediaUrl else item.thumbnailUrl,
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().blur(NachoSpacing.xLarge),
                 contentScale = ContentScale.Crop,
+                alpha = 0.5f
+            )
+
+            AsyncImage(
+                model = if (item.type == UiMediaType.IMAGE) item.mediaUrl else item.thumbnailUrl,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit,
             )
         }
 
