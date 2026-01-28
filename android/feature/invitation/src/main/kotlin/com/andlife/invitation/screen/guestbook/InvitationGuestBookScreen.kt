@@ -233,7 +233,7 @@ fun InvitationGuestBookRoute(
                 )
 
                 audioRecorder.startRecording(audioFile) { e ->
-                    viewModel.onEvent(InvitationGuestBookUiEvent.StopAudioRecording)
+                    viewModel.onEvent(InvitationGuestBookUiEvent.ClickMicrophone)
                     // exception 표시
                 }
             }
@@ -694,11 +694,7 @@ private fun GuestBookFormSection(
             ) == PackageManager.PERMISSION_GRANTED
 
             if (hasPermission) {
-                if (uiState.isAudioRecording) {
-                    onEvent(InvitationGuestBookUiEvent.StopAudioRecording)
-                } else {
-                    onEvent(InvitationGuestBookUiEvent.StartAudioRecording)
-                }
+                onEvent(InvitationGuestBookUiEvent.ClickMicrophone)
             } else {
                 audioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
             }
