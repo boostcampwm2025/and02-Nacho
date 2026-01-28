@@ -95,7 +95,6 @@ fun GuestBookItem(
     shouldPlayVideo: Boolean = false,
     isEditing: Boolean = false,
     useMenuButton: Boolean = true,
-    onMenuClick: () -> Unit = {},
     onEditClick: (GuestBookUiModel) -> Unit = {},
     onDeleteClick: (GuestBookUiModel) -> Unit = {},
     onInvitationTitleClick: (Long) -> Unit? = {},
@@ -122,7 +121,6 @@ fun GuestBookItem(
             author = guestBook.author,
             createdAt = guestBook.createdAt,
             isOwner = useMenuButton && guestBook.isOwner,
-            onMenuClick = onMenuClick,
             onEditClick = { onEditClick(guestBook) },
             onDeleteClick = { onDeleteClick(guestBook) },
         )
@@ -162,7 +160,6 @@ private fun GuestBookItemHeader(
     isOwner: Boolean,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    onMenuClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var isMenuExpanded by remember { mutableStateOf(false) }
@@ -810,7 +807,6 @@ private fun GuestBookItemPreview() {
                     onVisualMediaClick = {},
                     onAudioMediaClick = {},
                     onPlayVideoClick = {},
-                    onMenuClick = {},
                     onEditClick = {},
                     onDeleteClick = {},
                 )
@@ -873,7 +869,6 @@ private fun GuestBookItemPreview() {
                     onVisualMediaClick = {},
                     onAudioMediaClick = {},
                     onPlayVideoClick = {},
-                    onMenuClick = {},
                     onEditClick = {},
                     onDeleteClick = {},
                 )

@@ -101,8 +101,6 @@ constructor(
             is MyInvitationGuestBookUiEvent.ClearError -> clearError()
             is MyInvitationGuestBookUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
             is MyInvitationGuestBookUiEvent.ClickVideoPlayButton -> clickVideoPlayButton(event.url, event.itemId)
-            is MyInvitationGuestBookUiEvent.ClickGuestBookMenu -> {}
-            is MyInvitationGuestBookUiEvent.ClickInvitationTitle -> {}
             is MyInvitationGuestBookUiEvent.ClickVisualMedia -> {}
             is MyInvitationGuestBookUiEvent.ClickEditMenu -> startEditing(event.guestBook)
             is MyInvitationGuestBookUiEvent.CancelEdit -> cancelEdit()

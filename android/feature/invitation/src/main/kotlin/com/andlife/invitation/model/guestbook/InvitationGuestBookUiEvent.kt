@@ -29,14 +29,6 @@ sealed interface InvitationGuestBookUiEvent : BaseUiEvent {
 
     data object ClearError : InvitationGuestBookUiEvent
 
-    data class ClickInvitationTitle(
-        val invitationId: Long,
-    ) : InvitationGuestBookUiEvent
-
-    data class ClickGuestBookMenu(
-        val guestBookId: Long,
-    ) : InvitationGuestBookUiEvent
-
     data class ClickVisualMedia(
         val url: String,
     ) : InvitationGuestBookUiEvent
