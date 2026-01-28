@@ -28,4 +28,7 @@ dependencies {
 
     // kotlinx datetime
     implementation(libs.kotlinx.datetime)
+
+    // exif
+    implementation(libs.androidx.exifinterface)
 }

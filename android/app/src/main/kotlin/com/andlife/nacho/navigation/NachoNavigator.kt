@@ -22,6 +22,7 @@ import com.andlife.invitation_edit.MyInvitationCreate
 import com.andlife.invitation_edit.navigateToAddressSearch
 import com.andlife.invitation_edit.navigateToMyInvitationCreate
 import com.andlife.invitation_edit.navigateToInvitationPreview
+import com.andlife.login.navigateToLogin
 import com.andlife.myinvitation.navigateToMyInvitation
 import com.andlife.myinvitation.navigateToMyInvitationDetail
 
@@ -129,6 +130,10 @@ class NachoNavigator(
 
     fun navigateToUpdateCard(cardId: Long) {
         navController.navigateToUpdateCard(cardId)
+    }
+
+    fun navigateToLogin() {
+        navController.navigateToLogin()
     }
 
     fun navigatePopBackStack() {

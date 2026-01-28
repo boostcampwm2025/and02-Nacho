@@ -31,6 +31,7 @@ import com.andlife.invitation_card.updateCardNavGraph
 import com.andlife.invitation_edit.addressSearchNavGraph
 import com.andlife.invitation_edit.invitationPreviewNavGraph
 import com.andlife.invitation_edit.myInvitationCreateNavGraph
+import com.andlife.login.loginNavGraph
 import com.andlife.model.util.NavigationKeyConstant.CREATE_CARD_BY_INVITATION_ID
 import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
 import com.andlife.myinvitation.myInvitationDetailNavGraph
@@ -140,6 +141,8 @@ fun NachoNavHost(
                     navigator.navigatePopBackStack()
                 }
             )
+
+            loginNavGraph()
         }
     }
 }
