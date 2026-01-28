@@ -27,6 +27,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import com.andlife.nachoserver.response.invitation.UpcomingInvitationResponse
 import com.andlife.nachoserver.response.invitation.toInvitationResponse
+import com.andlife.nachoserver.service.guestbook.GuestBookService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -42,7 +43,8 @@ class InvitationService(
     private val announcementRepository: AnnouncementRepository,
     private val participantRepository: InvitationParticipantRepository,
     private val userRepository: UserRepository,
-    private val guestBookRepository: GuestBookRepository
+    private val guestBookRepository: GuestBookRepository,
+    private val guestBookService: GuestBookService
 ) {
     @Transactional
     fun joinInvitation(
@@ -213,17 +215,10 @@ class InvitationService(
             ?: throw NoSuchElementException("삭제 권한이 없거나 초대장을 찾을 수 없습니다. ID: $invitationId")
 
         // 연관된 데이터 삭제
-        val guestBooks = guestBookRepository.findAllByInvitationId(invitationId)
-        guestBookRepository.deleteAll(guestBooks)
-
+        guestBookService.deleteAllByInvitation(invitationId)
         announcementRepository.deleteAllByInvitationId(invitationId)
         invitationCardRepository.deleteByInvitationId(invitationId)
         participantRepository.deleteAllByInvitationId(invitationId)
-
-        /**
-         * Todo
-         * - R2에 업로드 된 미디어 삭제 로직
-         */
 
         invitationRepository.delete(invitation)
     }
