@@ -74,6 +74,7 @@
     <string name="desc_close">닫기</string>
     <string name="txt_delete_all">모두 지우기</string>
     <string name="txt_submit">등록</string>
+    <string name="txt_collection_empty">아직 미디어가 없습니다.</string>
 
     <!-- GuestBook -->
     <string name="desc_edit_guest_book">수정을 위한 더보기 아이콘</string>
