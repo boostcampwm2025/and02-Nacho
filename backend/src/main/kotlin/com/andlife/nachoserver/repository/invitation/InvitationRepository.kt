@@ -39,21 +39,32 @@ interface InvitationRepository : JpaRepository<Invitation, Long> {
     """)
     fun findPastByHostId(hostId: Long, nowDate: LocalDate, nowTime: LocalTime, pageable: Pageable): Page<Invitation>
 
-    @Query(
-        """
-            SELECT DISTINCT i FROM Invitation i
-            JOIN FETCH i.host
-            LEFT JOIN InvitationParticipant ip ON i.id = ip.invitation.id
-            WHERE (i.host.id = :userId OR ip.user.id = :userId)
-            AND i.invitationDate >= :today 
-            AND i.invitationDate <= :limitDate
-            ORDER BY i.invitationDate ASC, i.startTime ASC
-        """
-    )
-    fun findUpcomingInvitationsWithinDays(
+    @Query("""
+        SELECT DISTINCT i FROM Invitation i
+        JOIN FETCH i.host
+        LEFT JOIN InvitationParticipant ip ON i.id = ip.invitation.id
+        WHERE (i.host.id = :userId OR ip.user.id = :userId)
+        AND i.invitationDate BETWEEN :startDate AND :endDate
+        ORDER BY i.invitationDate ASC, i.startTime ASC
+    """)
+    fun findUpcomingByParticipantIdWithinDays(
         @Param("userId") userId: Long,
-        @Param("today") today: LocalDate,
-        @Param("limitDate") limitDate: LocalDate,
+        @Param("startDate") startDate: LocalDate,
+        @Param("endDate") endDate: LocalDate,
+        pageable: Pageable
+    ): Page<Invitation>
+
+    @Query("""
+        SELECT i FROM Invitation i
+        JOIN FETCH i.host
+        WHERE i.id IN :ids
+        AND i.invitationDate BETWEEN :startDate AND :endDate
+        ORDER BY i.invitationDate ASC, i.startTime ASC
+    """)
+    fun findAllByIdInAndDateRange(
+        @Param("ids") ids: List<Long>,
+        @Param("startDate") startDate: LocalDate,
+        @Param("endDate") endDate: LocalDate,
         pageable: Pageable
     ): Page<Invitation>
 

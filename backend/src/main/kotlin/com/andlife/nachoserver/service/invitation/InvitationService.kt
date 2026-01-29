@@ -378,53 +378,56 @@ class InvitationService(
         days: Long,
         pageable: Pageable
     ): PagingResponse<UpcomingInvitationResponse> {
-
         val today = LocalDate.now()
         val limitDate = today.plusDays(days)
 
-        val currentUserId = (authContext as? AuthContext.Member)?.userId
-
-        val upcomingInvitationsPage = when (authContext) {
+        val upcomingInvitationsPage: Page<Invitation> = when (authContext) {
             is AuthContext.Member -> {
-                invitationRepository.findUpcomingInvitationsWithinDays(
+                invitationRepository.findUpcomingByParticipantIdWithinDays(
                     userId = authContext.userId,
-                    today = today,
-                    limitDate = limitDate,
+                    startDate = today,
+                    endDate = limitDate,
                     pageable = pageable
                 )
             }
             is AuthContext.Guest -> {
-                Page.empty(pageable) //TODO: 비로그인 유저 임시 빈값 조회
+                if (authContext.invitationIds.isEmpty()) {
+                    Page.empty(pageable)
+                } else {
+                    invitationRepository.findAllByIdInAndDateRange(
+                        ids = authContext.invitationIds,
+                        startDate = today,
+                        endDate = limitDate,
+                        pageable = pageable
+                    )
+                }
             }
         }
 
-        val responsePage = upcomingInvitationsPage.map { invitation ->
-            try {
-                UpcomingInvitationResponse(
-                    id = invitation.id,
-                    hostId = invitation.host.id,
-                    isOwner = invitation.host.id == currentUserId,
-                    title = invitation.title,
-                    thumbnailUrl = invitation.thumbnailUrls.firstOrNull(),
-                    invitationDate = invitation.invitationDate.toString(),
-                    startTime = invitation.startTime.toString(),
-                    displayHostName = invitation.displayHostName,
-                    hostProfileUrl = invitation.host.profileImageUrl,
-                )
-            } catch (e: Exception) {
-                println("ERROR: Mapping failed for Invitation ID ${invitation.id}: ${e.message}")
-                throw e
-            }
+        val currentUserId = (authContext as? AuthContext.Member)?.userId
+
+        val contents = upcomingInvitationsPage.content.map { invitation ->
+            UpcomingInvitationResponse(
+                id = invitation.id,
+                hostId = invitation.host.id,
+                isOwner = invitation.host.id == currentUserId,
+                title = invitation.title,
+                thumbnailUrl = invitation.thumbnailUrls.firstOrNull(),
+                invitationDate = invitation.invitationDate.toString(),
+                startTime = invitation.startTime.toString(),
+                displayHostName = invitation.displayHostName,
+                hostProfileUrl = invitation.host.profileImageUrl,
+            )
         }
 
         return PagingResponse(
             meta = PagingMetaResponse(
-                isEnd = !responsePage.hasNext(),
-                pageableCount = responsePage.numberOfElements,
-                totalCount = responsePage.totalElements,
-                currentPage = responsePage.number + 1
+                isEnd = upcomingInvitationsPage.isLast,
+                pageableCount = upcomingInvitationsPage.numberOfElements,
+                totalCount = upcomingInvitationsPage.totalElements,
+                currentPage = upcomingInvitationsPage.number
             ),
-            content = responsePage.content
+            content = contents
         )
     }
 }
