@@ -7,17 +7,21 @@ import androidx.navigation.compose.composable
 import com.andlife.login.screem.LoginRoute
 import kotlinx.serialization.Serializable
 
-@Serializable
-data object Login
+//@Serializable
+//data object Login
 
-fun NavController.navigateToLogin() {
-    navigate(Login)
+@Serializable
+data class Login(val fromSplash: Boolean = true)
+
+fun NavController.navigateToLogin(fromSplash: Boolean) {
+    navigate(Login(fromSplash))
 }
 
 fun NavGraphBuilder.loginNavGraph(
+    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     composable<Login> {
-        LoginRoute()
+        LoginRoute(onNavigateBack = onNavigateBack)
     }
 }

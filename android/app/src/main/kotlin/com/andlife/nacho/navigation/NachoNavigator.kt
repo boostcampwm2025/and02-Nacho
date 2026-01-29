@@ -141,8 +141,8 @@ class NachoNavigator(
         navController.navigateToUpdateCard(cardId)
     }
 
-    fun navigateToLogin() {
-        navController.navigateToLogin()
+    fun navigateToLogin(fromSplash: Boolean = true) {
+        navController.navigateToLogin(fromSplash)
     }
 
     fun navigatePopBackStack() {

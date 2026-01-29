@@ -106,7 +106,7 @@ private const val AUDIO_RECORDINGS_DIR = "audio_recordings"
 @Composable
 fun MyInvitationGuestBookRoute(
     onNavigateBack: () -> Unit,
-    onNavigateToLogin: () -> Unit,
+    onNavigateToLogin: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MyInvitationGuestBookViewModel = hiltViewModel(),
 ) {
@@ -143,7 +143,7 @@ fun MyInvitationGuestBookRoute(
             viewModel.onEvent(MyInvitationGuestBookUiEvent.ClickAudioMedia(""))
 
             delay(50L)
-            onNavigateToLogin()
+            onNavigateToLogin(false)
         }
     }
 

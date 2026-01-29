@@ -58,7 +58,7 @@ fun NavGraphBuilder.myInvitationNavGraph(
 
 fun NavGraphBuilder.myInvitationDetailNavGraph(
     onNavigateBack: () -> Unit,
-    onNavigateToLogin: () -> Unit,
+    onNavigateToLogin: (Boolean) -> Unit,
     onNavigateToEditInvitation: (Long) -> Unit,
     onNavigateToEditCard: (Long) -> Unit,
     onNavigateToCreateCard: (Long) -> Unit,

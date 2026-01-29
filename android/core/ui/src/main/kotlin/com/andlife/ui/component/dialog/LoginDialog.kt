@@ -42,7 +42,7 @@ fun LoginDialog(
             ) {
                 TextButton(onClick = onDismiss) {
                     Text(
-                        text = stringResource(R.string.txt_cancel),
+                        text = stringResource(R.string.txt_label_cancel),
                         color = NachoTheme.colorScheme.textPrimary,
                         style = NachoTheme.typography.bodyMediumSemiBold,
                     )

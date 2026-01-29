@@ -154,7 +154,9 @@ fun NachoNavHost(
                 }
             )
 
-            loginNavGraph()
+            loginNavGraph(
+                onNavigateBack = navigator::navigatePopBackStack,
+            )
         }
     }
 }

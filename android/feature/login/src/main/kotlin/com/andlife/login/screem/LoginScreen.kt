@@ -56,14 +56,17 @@ import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.login.LocalLoginManager
 import com.andlife.login.R
+import com.andlife.login.model.LoginSideEffect
 import com.andlife.login.model.LoginUiState
 import com.andlife.login.model.LoginUiEvent
 import com.andlife.login.social.SocialType
 import com.andlife.login.viewmodel.LoginViewModel
+import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.coroutines.launch
 
 @Composable
 fun LoginRoute(
+    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
@@ -73,6 +76,14 @@ fun LoginRoute(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val res = LocalResources.current
+
+    viewModel.effectFlow.collectWithLifecycle { effect ->
+        when (effect) {
+            LoginSideEffect.FailGuestLogin -> {}
+            LoginSideEffect.FailSocialLogin -> {}
+            LoginSideEffect.NavigateBack -> onNavigateBack()
+        }
+    }
 
     LoginScreen(
         uiState = uiState,

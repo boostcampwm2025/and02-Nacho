@@ -1,10 +1,13 @@
 package com.andlife.login.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.user.UserRepository
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
+import com.andlife.login.Login
 import com.andlife.login.model.LoginSideEffect
 import com.andlife.login.model.LoginUiEvent
 import com.andlife.login.model.LoginUiState
@@ -18,9 +21,11 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val authStateManager: AuthStateManager
+    private val authStateManager: AuthStateManager,
+    private val savedStateHandle: SavedStateHandle
 ) : BaseViewModel<LoginUiState, LoginUiEvent, LoginSideEffect>(LoginUiState()) {
 
+    private val fromSplash : Boolean = savedStateHandle.toRoute<Login>().fromSplash
 
     override val uiState: StateFlow<LoginUiState> = mutableUiState.asStateFlow()
     override fun onEvent(event: LoginUiEvent) {
@@ -38,7 +43,11 @@ class LoginViewModel @Inject constructor(
                     sendEffect(LoginSideEffect.FailSocialLogin)
                 }
                 .onSuccess {
-                    authStateManager.navigateToHome()
+                    if (fromSplash) {
+                        authStateManager.navigateToHome()
+                    } else {
+                        sendEffect(LoginSideEffect.NavigateBack)
+                    }
                 }
             updateState { copy(false) }
         }
@@ -52,7 +61,11 @@ class LoginViewModel @Inject constructor(
                     sendEffect(LoginSideEffect.FailGuestLogin)
                 }
                 .onSuccess {
-                    authStateManager.navigateToHome()
+                    if (fromSplash) {
+                        authStateManager.navigateToHome()
+                    } else {
+                        sendEffect(LoginSideEffect.NavigateBack)
+                    }
                 }
             updateState { copy(false) }
         }
