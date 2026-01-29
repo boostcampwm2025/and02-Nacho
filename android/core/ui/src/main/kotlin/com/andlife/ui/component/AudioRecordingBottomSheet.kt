@@ -40,6 +40,8 @@ import com.andlife.ui.util.toFormatDuration
 import kotlinx.coroutines.launch
 import java.io.File
 
+private const val AUDIO_RECORDINGS_DIR = "audio_recordings"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AudioRecordingBottomSheet(
@@ -184,7 +186,7 @@ fun AudioRecordingBottomSheet(
                             }
                         } else {
                             // 녹음 시작
-                            val audioRecordingsDir = File(context.cacheDir, "audio_recordings")
+                            val audioRecordingsDir = File(context.cacheDir, AUDIO_RECORDINGS_DIR)
                             if (!audioRecordingsDir.exists()) {
                                 audioRecordingsDir.mkdirs()
                             }
