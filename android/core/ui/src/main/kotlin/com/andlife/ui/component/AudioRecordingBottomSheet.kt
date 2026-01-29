@@ -128,28 +128,40 @@ fun AudioRecordingBottomSheet(
             }
 
             // 파형과 녹음시간
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // 파형 시각화
-                if (isRecording && !isPaused) {
-                    WaveformVisualization(
-                        amplitude = amplitude,
-                        modifier = Modifier.weight(1f)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = NachoTheme.colorScheme.brandLight,
+                        shape = NachoTheme.shapes.small
                     )
-                } else {
-                    Box(modifier = Modifier.weight(1f))
-                }
+                    .padding(
+                        all = NachoSpacing.large,
+                    )
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // 파형
+                    if (isRecording && !isPaused) {
+                        WaveformVisualization(
+                            amplitude = amplitude,
+                            modifier = Modifier.weight(1f)
+                        )
+                    } else {
+                        Box(modifier = Modifier.weight(1f))
+                    }
 
-                // 녹음 시간
-                Text(
-                    text = recordingDuration.toFormatDuration(),
-                    style = NachoTheme.typography.headingSmallBold,
-                    color = NachoTheme.colorScheme.textPrimary,
-                    modifier = Modifier.padding(start = NachoSpacing.medium)
-                )
+                    // 타이머
+                    Text(
+                        text = recordingDuration.toFormatDuration(),
+                        style = NachoTheme.typography.bodyMediumMedium,
+                        color = NachoTheme.colorScheme.textPrimary,
+                        modifier = Modifier.padding(start = NachoSpacing.medium)
+                    )
+                }
             }
 
             // 녹음 관련 버튼들
