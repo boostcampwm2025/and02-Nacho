@@ -43,7 +43,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 private const val AUDIO_RECORDINGS_DIR = "audio_recordings"
-private const val MAX_BARS_COUNT = 30
+private const val MAX_BARS_COUNT = 40
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
