@@ -58,4 +58,21 @@ interface InvitationRepository : JpaRepository<Invitation, Long> {
     ): Page<Invitation>
 
     fun findByIdAndHostId(id: Long, hostId: Long): Invitation?
+
+    @Query("""
+        SELECT i FROM Invitation i 
+        WHERE i.id IN :ids 
+        AND (
+            (:status = 'UPCOMING' AND (i.invitationDate > CURRENT_DATE OR (i.invitationDate = CURRENT_DATE AND i.startTime >= CURRENT_TIME)))
+            OR 
+            (:status = 'PAST' AND (i.invitationDate < CURRENT_DATE OR (i.invitationDate = CURRENT_DATE AND i.startTime < CURRENT_TIME)))
+            OR
+            (:status = 'ALL')
+        )
+    """)
+    fun findAllByIdInWithStatus(
+        @Param("ids") ids: List<Long>,
+        @Param("status") status: String,
+        pageable: Pageable
+    ): Page<Invitation>
 }
