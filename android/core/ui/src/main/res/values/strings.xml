@@ -145,4 +145,14 @@
     <!--  EmptyItemSection  -->
     <string name="desc_info">정보</string>
 
+    <!-- AudioRecording -->
+    <string name="label_audio_recording">음성 녹음</string>
+    <string name="txt_recording_guide">마이크 버튼을 눌러 녹음을 시작하세요</string>
+    <string name="txt_recording_in_progress">녹음 중...</string>
+    <string name="txt_recording_paused">녹음이 일시정지되었습니다</string>
+    <string name="desc_start_recording">녹음 시작</string>
+    <string name="desc_stop_recording">녹음 중지</string>
+    <string name="desc_pause_recording">녹음 일시정지</string>
+    <string name="desc_resume_recording">녹음 재개</string>
+
 </resources>
