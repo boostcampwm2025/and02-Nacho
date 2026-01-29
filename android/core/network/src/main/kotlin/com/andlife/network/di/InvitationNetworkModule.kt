@@ -57,6 +57,21 @@ object InvitationNetworkModule {
 
     @Provides
     @Singleton
+    @NachoMedia
+    fun provideNachoMediaOkHttpClient(
+        loggingInterceptor: HttpLoggingInterceptor,
+    ): OkHttpClient =
+        OkHttpClient
+            .Builder()
+            .addInterceptor(loggingInterceptor)
+            .connectTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .build()
+
+
+    @Provides
+    @Singleton
     @NonAuthInvitation
     fun provideNonAuthInvitationOkHttpClient(
         loggingInterceptor: HttpLoggingInterceptor,
