@@ -143,6 +143,7 @@ class AudioRecorder(
         recordingJob = scope.launch {
             while (isActive && _isRecording.value) {
                 delay(1000)
+                if (_isPaused.value) continue
                 _recordingDuration.value += 1
             }
         }
