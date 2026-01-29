@@ -57,4 +57,8 @@ sealed interface InvitationGuestBookUiEvent : BaseUiEvent {
     ) : InvitationGuestBookUiEvent
 
     data object Refresh : InvitationGuestBookUiEvent
+
+    data object CheckLogin : InvitationGuestBookUiEvent
+
+    data object DismissLoginDialog : InvitationGuestBookUiEvent
 }

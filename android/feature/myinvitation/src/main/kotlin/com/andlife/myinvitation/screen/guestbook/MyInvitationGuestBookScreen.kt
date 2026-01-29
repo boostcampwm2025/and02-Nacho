@@ -68,6 +68,7 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.domain.model.auth.AuthState
 import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.media.video.FakeVideoPlayerPool
@@ -97,7 +98,6 @@ import kotlinx.datetime.LocalDateTime
 import java.io.File
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.toString
 
 private const val CAMERA_IMAGES_DIR = "camera_images"
 private const val AUDIO_RECORDINGS_DIR = "audio_recordings"
@@ -105,6 +105,7 @@ private const val AUDIO_RECORDINGS_DIR = "audio_recordings"
 @Composable
 fun MyInvitationGuestBookRoute(
     onNavigateBack: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MyInvitationGuestBookViewModel = hiltViewModel(),
 ) {
@@ -132,6 +133,16 @@ fun MyInvitationGuestBookRoute(
 
             delay(50L)
             onNavigateBack()
+        }
+    }
+    val navigateToLoginWithCleanup: () -> Unit = {
+        isMediaActive = false
+        scope.launch {
+            viewModel.videoPlayerPool.pauseAllPlayers()
+            viewModel.onEvent(MyInvitationGuestBookUiEvent.ClickAudioMedia(""))
+
+            delay(50L)
+            onNavigateToLogin()
         }
     }
 
@@ -425,6 +436,18 @@ fun MyInvitationGuestBookRoute(
         }
     }
 
+    if (uiState.showLoginDialog) {
+        LoginDialog(
+            onDismiss = {
+                viewModel.onEvent(MyInvitationGuestBookUiEvent.DismissLoginDialog)
+            },
+            onConfirm = {
+                viewModel.onEvent(MyInvitationGuestBookUiEvent.DismissLoginDialog)
+                navigateToLoginWithCleanup()
+            }
+        )
+    }
+
     InvitationGuestBookScreen(
         uiState = uiState,
         guestBooks = guestBooks,
@@ -634,6 +657,11 @@ private fun InvitationGuestBookScreen(
                     onFocusChanged = { focused ->
                         isTextFieldFocused = focused
                     },
+                    isAuthenticated = when (uiState.authState) {
+                        is AuthState.Authenticated -> true
+                        is AuthState.Guest -> false
+                        is AuthState.Loading -> false
+                    },
                     context = context,
                     cameraPermissionLauncher = cameraPermissionLauncher,
                     audioPermissionLauncher = audioPermissionLauncher
@@ -648,6 +676,7 @@ private fun GuestBookFormSection(
     uiState: MyInvitationGuestBookUiState,
     onEvent: (MyInvitationGuestBookUiEvent) -> Unit,
     onFocusChanged: (Boolean) -> Unit,
+    isAuthenticated: Boolean,
     context: Context,
     cameraPermissionLauncher: ActivityResultLauncher<String>,
     audioPermissionLauncher: ActivityResultLauncher<String>,
@@ -675,6 +704,8 @@ private fun GuestBookFormSection(
         onUploadClick = {
             onEvent(MyInvitationGuestBookUiEvent.UploadMedias)
         },
+        isAuthenticated = isAuthenticated,
+        onTextFieldClick = { onEvent(MyInvitationGuestBookUiEvent.CheckLogin) },
         onFocusChanged = onFocusChanged,
         onCameraClick = {
             // 카메라 권한 체크
@@ -791,6 +822,49 @@ private fun InvitationGuestBookResultPreview() {
                     onAudioMediaClick = {},
                     onPlayVideoClick = {}
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LoginDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    NachoDialog(onDismiss = onDismiss) {
+        Column(
+            modifier = Modifier.padding(NachoSpacing.xLarge),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
+        ) {
+            Text(
+                text = "로그인",
+                color = NachoTheme.colorScheme.textPrimary,
+                style = NachoTheme.typography.headingSmallSemiBold,
+            )
+            Text(
+                text = "로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?",
+                color = NachoTheme.colorScheme.textSecondary,
+                style = NachoTheme.typography.bodyMediumRegular,
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                TextButton(onClick = onDismiss) {
+                    Text(
+                        text = "취소",
+                        color = NachoTheme.colorScheme.textPrimary,
+                        style = NachoTheme.typography.bodyMediumSemiBold,
+                    )
+                }
+                TextButton(onClick = onConfirm) {
+                    Text(
+                        text = "확인",
+                        color = NachoTheme.colorScheme.brandDark,
+                        style = NachoTheme.typography.bodyMediumSemiBold,
+                    )
+                }
             }
         }
     }
