@@ -559,8 +559,7 @@ private fun InvitationGuestBookScreen(
                     .fillMaxWidth()
             ) {
                 if (isMediaActive) {
-                    val isInitialLoading =
-                        guestBooks.loadState.refresh is LoadState.Loading && guestBooks.itemCount == 0
+                    val isInitialLoading = guestBooks.loadState.refresh is LoadState.Loading && guestBooks.itemCount == 0
 
                     if (isInitialLoading || guestBooks.itemCount == 0) {
                         PagingStateContent(
@@ -591,14 +590,7 @@ private fun InvitationGuestBookScreen(
                                         onVisualMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
                                         onAudioMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
                                         onMenuClick = { onEvent(InvitationGuestBookUiEvent.ClickGuestBookMenu(guestBook.id)) },
-                                        onPlayVideoClick = { url ->
-                                            onEvent(
-                                                InvitationGuestBookUiEvent.ClickVideoPlayButton(
-                                                    url,
-                                                    guestBook.id
-                                                )
-                                            )
-                                        }
+                                        onPlayVideoClick = { url -> onEvent(InvitationGuestBookUiEvent.ClickVideoPlayButton(url, guestBook.id)) }
                                     )
                                 }
                             }
