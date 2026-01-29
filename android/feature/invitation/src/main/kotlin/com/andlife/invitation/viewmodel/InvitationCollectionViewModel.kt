@@ -18,9 +18,9 @@ import com.andlife.invitation.InvitationDetail
 import com.andlife.invitation.model.collection.InvitationCollectionSideEffect
 import com.andlife.invitation.model.collection.InvitationCollectionUiEvent
 import com.andlife.invitation.model.collection.InvitationCollectionUiState
-import com.andlife.ui.base.BaseViewModel
-import com.andlife.model.guestbook.UiMediaType
 import com.andlife.model.collection.toUiModel
+import com.andlife.model.guestbook.UiMediaType
+import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.toImmutableList
@@ -180,19 +180,30 @@ class InvitationCollectionViewModel @Inject constructor(
             UiMediaType.VIDEO -> MediaType.VIDEO
             UiMediaType.AUDIO -> MediaType.AUDIO
         }
-        val fileName = "nacho_${System.currentTimeMillis()}${domainType.getExtension()}"
+        val fileName = "$FILE_NAME_PREFIX${System.currentTimeMillis()}${domainType.getExtension()}"
         val workId = mediaDownloader.enqueueDownload(url, fileName, domainType)
-        Log.d("Download", "enqueued: $workId")
 
         viewModelScope.launch {
             mediaDownloader.getDownloadStatus(workId).collect { state ->
+                updateState { copy(downloadState = state) }
                 when (state) {
-                    is DownloadState.Success -> Log.d("Download", "완료: ${state.url}")
-                    is DownloadState.Error -> Log.e("Download", "실패: ${state.message}")
-                    is DownloadState.Downloading -> Log.d("Download", "진행: ${state.progress}%")
-                    is DownloadState.Idle -> {}
+                    is DownloadState.Success -> {
+                        sendEffect(InvitationCollectionSideEffect.DownloadSuccess)
+                        updateState { copy(downloadState = DownloadState.Idle) }
+                    }
+
+                    is DownloadState.Error -> {
+                        sendEffect(InvitationCollectionSideEffect.DownloadFailed)
+                        updateState { copy(downloadState = DownloadState.Idle) }
+                    }
+
+                    else -> {}
                 }
             }
         }
+    }
+
+    companion object {
+        private const val FILE_NAME_PREFIX = "nacho_"
     }
 }

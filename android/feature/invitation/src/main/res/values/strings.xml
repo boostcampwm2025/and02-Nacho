@@ -24,5 +24,9 @@
     <string name="txt_permission_audio">음성을 녹음하려면 마이크 권한이 필요합니다.</string>
     <string name="txt_permission_etc">권한이 필요합니다.</string>
     <string name="btn_label_to_setting">설정으로 이동</string>
+
+    <string name="snack_download_success">저장이 완료되었습니다.</string>
+    <string name="snack_download_fail">저장에 실패하였습니다</string>
+
 </resources>
 
