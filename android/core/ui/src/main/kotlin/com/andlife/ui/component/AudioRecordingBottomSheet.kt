@@ -7,9 +7,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,6 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.preview.PreviewTheme
+import com.andlife.designsystem.theme.NachoCardSize
 import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
@@ -38,6 +45,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 private const val AUDIO_RECORDINGS_DIR = "audio_recordings"
+private const val MAX_BARS_COUNT = 30
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,6 +62,7 @@ fun AudioRecordingBottomSheet(
     val isRecording by audioRecorder.isRecording.collectAsStateWithLifecycle()
     val isPaused by audioRecorder.isPaused.collectAsStateWithLifecycle()
     val recordingDuration by audioRecorder.recordingDuration.collectAsStateWithLifecycle()
+    val amplitude by audioRecorder.amplitude.collectAsStateWithLifecycle()
 
     BackHandler {
         scope.launch {
@@ -120,13 +129,30 @@ fun AudioRecordingBottomSheet(
                 }
             }
 
-            // 녹음 시간 표시
-            Text(
-                text = recordingDuration.toFormatDuration(),
-                style = NachoTheme.typography.headingSmallBold,
-                color = NachoTheme.colorScheme.textPrimary,
-                textAlign = TextAlign.Center
-            )
+            // 파형과 녹음시간
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // 파형 시각화
+                if (isRecording && !isPaused) {
+                    WaveformVisualization(
+                        amplitude = amplitude,
+                        modifier = Modifier.weight(1f)
+                    )
+                } else {
+                    Box(modifier = Modifier.weight(1f))
+                }
+
+                // 녹음 시간
+                Text(
+                    text = recordingDuration.toFormatDuration(),
+                    style = NachoTheme.typography.headingSmallBold,
+                    color = NachoTheme.colorScheme.textPrimary,
+                    modifier = Modifier.padding(start = NachoSpacing.medium)
+                )
+            }
 
             // 녹음 관련 버튼들
             Row(
@@ -228,6 +254,47 @@ fun AudioRecordingBottomSheet(
         }
     }
 }
+
+@Composable
+private fun WaveformVisualization(
+    amplitude: Int,
+    modifier: Modifier = Modifier
+) {
+    val waveformHeights = remember { mutableStateListOf<Float>() }
+
+    LaunchedEffect(amplitude) {
+        val normalized = (amplitude / 32767f)
+            .coerceIn(0f, 1f)
+
+        waveformHeights.add(normalized)
+
+        if (waveformHeights.size > MAX_BARS_COUNT) {
+            waveformHeights.removeFirst()
+        }
+    }
+
+    Row(
+        modifier = modifier.height(NachoCardSize.media),
+        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.twoXSmall),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        waveformHeights.forEach { height ->
+            Box(
+                modifier = Modifier
+                    .width(NachoSpacing.twoXSmall)
+                    .height(
+                        (NachoCardSize.media * height)
+                            .coerceAtLeast(NachoSpacing.twoXSmall)
+                    )
+                    .background(
+                        color = NachoTheme.colorScheme.brandPrimary,
+                        shape = NachoTheme.shapes.extraSmall
+                    )
+            )
+        }
+    }
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @PreviewTheme
