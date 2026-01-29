@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -133,14 +134,16 @@ fun AudioRecordingBottomSheet(
                     .fillMaxWidth()
                     .background(
                         color = NachoTheme.colorScheme.brandLight,
-                        shape = NachoTheme.shapes.small
+                        shape = NachoTheme.shapes.medium
                     )
                     .padding(
                         all = NachoSpacing.large,
                     )
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(NachoIconSize.xLarge),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -286,9 +289,9 @@ private fun WaveformVisualization(
 
     Row(
         modifier = modifier
-            .height(NachoCardSize.media)
+            .fillMaxHeight()
             .fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.twoXSmall),
+        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
         verticalAlignment = Alignment.CenterVertically
     ) {
         waveformHeights.forEach { height ->
@@ -296,8 +299,8 @@ private fun WaveformVisualization(
                 modifier = Modifier
                     .weight(1f)
                     .height(
-                        (NachoCardSize.media * height)
-                            .coerceAtLeast(NachoSpacing.twoXSmall)
+                        (NachoIconSize.xLarge * height)
+                            .coerceAtLeast(NachoSpacing.xSmall)
                     )
                     .background(
                         color = NachoTheme.colorScheme.brandPrimary,
