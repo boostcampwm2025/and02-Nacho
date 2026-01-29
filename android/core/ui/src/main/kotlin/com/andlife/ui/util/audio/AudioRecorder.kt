@@ -121,6 +121,8 @@ class AudioRecorder(
 
             mediaRecorder = null
             _isRecording.value = false
+            _isPaused.value = false
+            _recordingDuration.value = 0
             recordingJob?.cancel()
             currentAudioFile = null
 
