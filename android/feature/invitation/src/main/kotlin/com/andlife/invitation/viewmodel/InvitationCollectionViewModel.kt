@@ -65,6 +65,9 @@ class InvitationCollectionViewModel @Inject constructor(
             is InvitationCollectionUiEvent.PageChanged -> pageChanged(event.index)
             is InvitationCollectionUiEvent.ToggleExpand -> toggleExpand()
             is InvitationCollectionUiEvent.DownloadMedia -> downloadCurrentMedia()
+            is InvitationCollectionUiEvent.DisableNetworkDialogPermanently -> {
+                updateState { copy(networkDialogDismissed = true) }
+            }
         }
     }
 

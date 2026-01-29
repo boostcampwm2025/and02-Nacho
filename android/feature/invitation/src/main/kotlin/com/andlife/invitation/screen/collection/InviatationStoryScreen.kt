@@ -15,11 +15,14 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.Player
@@ -38,6 +41,8 @@ import com.andlife.model.collection.CollectionUiModel
 import com.andlife.model.util.toUiType
 import com.andlife.ui.component.collection.StoryContent
 import com.andlife.ui.component.collection.StoryTopHeader
+import com.andlife.ui.component.dialog.NachoInfoDialog
+import com.andlife.ui.component.dialog.NachoPermissionDialog
 import com.andlife.ui.util.shouldRequestStoragePermission
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
@@ -58,16 +63,16 @@ fun InvitationStoryRoute(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
+    var showPermissionDeniedDialog by remember { mutableStateOf(false) }
+    var showNetworkInfoDialog by remember { mutableStateOf(false) }
+
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
             viewModel.onEvent(InvitationCollectionUiEvent.DownloadMedia)
         } else {
-            scope.launch {
-                snackbarHostState.currentSnackbarData?.dismiss()
-                snackbarHostState.showSnackbar(context.getString(R.string.snack_permission_denied))
-            }
+            showPermissionDeniedDialog = true
         }
     }
 
@@ -101,12 +106,37 @@ fun InvitationStoryRoute(
         onDownloadClick = {
             if (context.shouldRequestStoragePermission()) {
                 permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            } else if (!uiState.networkDialogDismissed) {
+                showNetworkInfoDialog = true
             } else {
                 viewModel.onEvent(InvitationCollectionUiEvent.DownloadMedia)
             }
         },
         snackbarHostState = snackbarHostState,
     )
+
+    if (showNetworkInfoDialog) {
+        NachoInfoDialog(
+            title = stringResource(R.string.dialog_network_title),
+            message = stringResource(R.string.dialog_network_message),
+            confirmText = stringResource(R.string.dialog_confirm),
+            dismissText = stringResource(R.string.dialog_cancel),
+            showDoNotShowAgain = true,
+            onDoNotShowAgainChecked = { viewModel.onEvent(InvitationCollectionUiEvent.DisableNetworkDialogPermanently) },
+            onConfirm = {
+                showNetworkInfoDialog = false
+                viewModel.onEvent(InvitationCollectionUiEvent.DownloadMedia)
+            },
+            onDismiss = { showNetworkInfoDialog = false },
+        )
+    }
+
+    if (showPermissionDeniedDialog) {
+        NachoPermissionDialog(
+            message = stringResource(R.string.snack_permission_denied),
+            onDismiss = { showPermissionDeniedDialog = false },
+        )
+    }
 }
 
 @Composable
