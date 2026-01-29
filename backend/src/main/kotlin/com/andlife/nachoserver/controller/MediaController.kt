@@ -13,7 +13,6 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.services.s3.S3Configuration
 import software.amazon.awssdk.services.s3.model.CompleteMultipartUploadRequest
 import software.amazon.awssdk.services.s3.model.CompletedMultipartUpload
 import software.amazon.awssdk.services.s3.model.CompletedPart
@@ -62,11 +61,6 @@ class R2Config {
             .region(Region.of(region))
             .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
             .endpointOverride(URI.create(endpoint))
-            .serviceConfiguration(
-                S3Configuration.builder()
-                    .checksumValidationEnabled(false)
-                    .build()
-            )
             .build()
     }
 }

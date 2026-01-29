@@ -18,6 +18,7 @@ import com.andlife.network.model.media.FileUploadInfoRequest
 import com.andlife.network.api.media.MediaService
 import com.andlife.network.model.media.PartInfoRequest
 import com.andlife.network.di.InvitationMedia
+import com.andlife.network.di.NachoMedia
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -42,7 +43,7 @@ constructor(
     private val contentResolver: ContentResolver,
     private val mediaService: MediaService,
     private val imageCompressor: ImageCompressor,
-    @param:InvitationMedia private val okHttpClient: OkHttpClient,
+    @param:NachoMedia private val okHttpClient: OkHttpClient,
 ) : MediaUploader {
     override suspend fun uploadMedias(files: List<MediaFile>): Result<List<String?>, DataError> =
         withContext(Dispatchers.IO) {
