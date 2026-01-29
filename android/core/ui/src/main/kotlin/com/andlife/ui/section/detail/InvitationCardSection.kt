@@ -29,9 +29,9 @@ import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
-import com.andlife.designsystem.R as designR
 import com.andlife.model.invitation.InvitationCardUiModel
 import com.andlife.ui.R
+import com.andlife.designsystem.R as designR
 
 @Composable
 fun InvitationCardSection(
@@ -149,7 +149,7 @@ fun EmptyCardGuide(
         horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_info_24),
+            painter = painterResource(designR.drawable.ic_info_24),
             contentDescription = null,
             tint = NachoTheme.colorScheme.textTertiary,
         )

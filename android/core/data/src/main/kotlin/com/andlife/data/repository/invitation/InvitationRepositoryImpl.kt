@@ -8,10 +8,12 @@ import com.andlife.data.datasource.remote.invitation.InvitationRemoteDataSource
 import com.andlife.data.datasource.remote.invitation.UpcomingInvitationPagingSource
 import com.andlife.data.repository.invitation.mapper.toDomain
 import com.andlife.data.repository.invitation.mapper.toRequest
+import com.andlife.datastore.UserStorage
 import com.andlife.domain.error.DataError
 import com.andlife.domain.model.card.NachoCard
 import com.andlife.domain.model.invitation.InvitationSaveParam
 import com.andlife.domain.model.invitation.Invitation
+import com.andlife.domain.model.invitation.InvitationJoin
 import com.andlife.domain.model.invitation.InvitationStatus
 import com.andlife.domain.model.invitation.InvitationSummary
 import com.andlife.domain.model.invitation.SortDirection
@@ -19,14 +21,32 @@ import com.andlife.domain.model.invitation.UpcomingInvitation
 import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.map
+import com.andlife.domain.util.onSuccess
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 internal class InvitationRepositoryImpl @Inject constructor(
     private val invitationRemoteDataSource: InvitationRemoteDataSource,
+    private val userStorage: UserStorage,
     private val json: Json
 ) : InvitationRepository {
+    override suspend fun joinInvitation(invitationId: Long): Result<InvitationJoin, DataError> {
+        return invitationRemoteDataSource.joinInvitation(invitationId).map { dto ->
+            dto.toDomain().also { domainModel ->
+                if (!domainModel.isMember) {
+                    userStorage.addInvitationId(domainModel.invitationId)
+                }
+            }
+        }
+    }
+
+    override suspend fun leaveInvitation(invitationId: Long): Result<Unit, DataError> {
+        return invitationRemoteDataSource.leaveInvitation(invitationId).onSuccess {
+            userStorage.deleteInvitationId(invitationId)
+        }
+    }
+
     override suspend fun createInvitation(params: InvitationSaveParam): Result<Long, DataError> {
         val request = params.toRequest(json)
         return invitationRemoteDataSource.createInvitation(request).map { response ->
@@ -44,6 +64,9 @@ internal class InvitationRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteInvitation(invitationId: Long): Result<Unit, DataError> =
+        invitationRemoteDataSource.deleteInvitation(invitationId)
+
     override suspend fun getInvitation(invitationId: Long): Result<Invitation, DataError> =
         invitationRemoteDataSource.getInvitation(invitationId).map { response ->
             response.toDomain(json)
@@ -52,7 +75,8 @@ internal class InvitationRepositoryImpl @Inject constructor(
     override fun getParticipantInvitations(
         status: InvitationStatus,
         sortType: SortDirection,
-        isMyInvitation: Boolean
+        isMyInvitation: Boolean,
+        onTotalCountLoaded: (Int) -> Unit
     ): Flow<PagingData<InvitationSummary>> {
         return Pager(
             config = PagingConfig(
@@ -60,14 +84,15 @@ internal class InvitationRepositoryImpl @Inject constructor(
                 enablePlaceholders = false,
                 initialLoadSize = PAGE_SIZE
             ),
-            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType, isMyInvitation) }
+            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType, isMyInvitation, onTotalCountLoaded) }
         ).flow
     }
 
     override fun getMyInvitations(
         status: InvitationStatus,
         sortType: SortDirection,
-        isMyInvitation: Boolean
+        isMyInvitation: Boolean,
+        onTotalCountLoaded: (Int) -> Unit
     ): Flow<PagingData<InvitationSummary>> {
         return Pager(
             config = PagingConfig(
@@ -75,7 +100,7 @@ internal class InvitationRepositoryImpl @Inject constructor(
                 enablePlaceholders = false,
                 initialLoadSize = PAGE_SIZE
             ),
-            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType, isMyInvitation) }
+            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType, isMyInvitation, onTotalCountLoaded) }
         ).flow
     }
 

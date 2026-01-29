@@ -1,6 +1,5 @@
 package com.andlife.invitation.viewmodel
 
-import android.text.Editable
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -23,6 +22,7 @@ import com.andlife.invitation.InvitationDetail
 import com.andlife.invitation.model.guestbook.InvitationGuestBookSideEffect
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiEvent
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiState
+import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.media.audio.AudioPlayerManager
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.model.guestbook.GuestBookUiModel
@@ -39,8 +39,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -82,26 +80,15 @@ constructor(
     }
 
     private fun observeAudioPlayerState() {
-        audioPlayerManager.currentAudioUrl
-            .combine(audioPlayerManager.isPlaying) { url, isPlaying ->
+        audioPlayerManager.currentAudio
+            .onEach { audioPlaybackState ->
                 updateState {
-                    copy(
-                        playingAudioUrl = url,
-                        isAudioPlaying = isPlaying,
-                    )
-                }
-            }
-            .launchIn(viewModelScope)
-
-        uiState.map { it.isAudioPlaying }
-            .distinctUntilChanged()
-            .onEach { isAudioPlaying ->
-                if (!isAudioPlaying) {
-                    videoPlayerPool.resumeLastPlayed()
+                    copy( audioPlaybackState = audioPlaybackState ?: AudioPlaybackState() )
                 }
             }
             .launchIn(viewModelScope)
     }
+
 
     override fun onEvent(event: InvitationGuestBookUiEvent) {
         when (event) {
@@ -115,6 +102,7 @@ constructor(
             is InvitationGuestBookUiEvent.StopAudioRecording -> handleStopAudioRecording()
             is InvitationGuestBookUiEvent.ClearError -> clearError()
             is InvitationGuestBookUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
+            is InvitationGuestBookUiEvent.ClickVideoPlayButton -> clickVideoPlayButton(event.url, event.itemId)
 
             is InvitationGuestBookUiEvent.ClickGuestBookMenu -> sendEffect(
                 InvitationGuestBookSideEffect.ShowSnackbar("방명록 메뉴 클릭됨: ${event.guestBookId}"),
@@ -131,12 +119,14 @@ constructor(
             is InvitationGuestBookUiEvent.ClickEditMenu -> startEditing(event.guestBook)
             is InvitationGuestBookUiEvent.CancelEdit -> cancelEdit()
             is InvitationGuestBookUiEvent.ClickDeleteMenu -> deleteGuestBook(event.guestBookId)
+            is InvitationGuestBookUiEvent.UpdateMediaPlayState -> updatePlayState(event.isPlaying)
+            InvitationGuestBookUiEvent.Refresh -> refresh()
         }
     }
 
     private fun clickAudioMedia(url: String) {
-        val isCurrentlyPlaying = uiState.value.isAudioPlaying
-        val currentUrl = uiState.value.playingAudioUrl
+        val isCurrentlyPlaying = uiState.value.audioPlaybackState.isPlaying
+        val currentUrl = uiState.value.audioPlaybackState.playingUrl
 
         if (currentUrl == url && isCurrentlyPlaying) {
             audioPlayerManager.togglePlay(url)
@@ -145,6 +135,13 @@ constructor(
             videoPlayerPool.pauseAllPlayers()
             audioPlayerManager.togglePlay(url)
         }
+    }
+
+    private fun clickVideoPlayButton(url: String, itemId: Long) {
+        val isCurrentlyPlaying = uiState.value.audioPlaybackState.isPlaying
+        if (!isCurrentlyPlaying) return
+        audioPlayerManager.pause()
+        videoPlayerPool.playPlayer(url, itemId)
     }
 
     private fun updateSelectedMedias(medias: List<SelectedMedia>) {
@@ -359,6 +356,7 @@ constructor(
             is Result.Success -> {
                 clearFormInput()
                 if (isUpdate) {
+                    //videoPlayerPool.clearCacheById(result.data.id)
                     sendEffect(InvitationGuestBookSideEffect.UpdateGuestBookSuccess)
                 } else {
                     sendEffect(InvitationGuestBookSideEffect.CreateGuestBookSuccess)
@@ -431,5 +429,27 @@ constructor(
     private fun handleStopAudioRecording() {
         updateState { copy(isAudioRecording = false, audioRecordingDuration = 0) }
         sendEffect(InvitationGuestBookSideEffect.StopAudioRecording)
+    }
+
+    private fun updatePlayState(isPlaying: Boolean) {
+        updateState { copy(isMediaPlaying = isPlaying) }
+    }
+
+    private fun refresh() {
+        invalidateGuestBooks()
+        updateState { copy(isRefreshing = true) }
+    }
+
+    fun onRefreshFinished(hasError: Boolean) {
+        val wasUserTriggered = uiState.value.isRefreshing
+        updateState { copy(isRefreshing = false) }
+
+        if (hasError) {
+            sendEffect(InvitationGuestBookSideEffect.RefreshFailure)
+        } else {
+            if (wasUserTriggered) {
+                sendEffect(InvitationGuestBookSideEffect.ScrollToTop)
+            }
+        }
     }
 }

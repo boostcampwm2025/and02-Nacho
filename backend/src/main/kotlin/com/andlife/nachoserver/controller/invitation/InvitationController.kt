@@ -13,11 +13,13 @@ import com.andlife.nachoserver.response.invitation.InvitationSummaryResponse
 import com.andlife.nachoserver.response.invitation.UpcomingInvitationResponse
 import com.andlife.nachoserver.response.guestbook.CollectionResponse
 import com.andlife.nachoserver.response.guestbook.GuestBookResponse
+import com.andlife.nachoserver.response.invitation.JoinResponse
 import com.andlife.nachoserver.service.invitation.InvitationService
 import com.andlife.nachoserver.service.guestbook.GuestBookService
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -33,6 +35,32 @@ class InvitationController(
     private val invitationService: InvitationService,
     private val guestBookService: GuestBookService,
 ) {
+    @PostMapping("/{invitationId}/join")
+    fun joinInvitation(
+        @PathVariable invitationId: Long,
+        authContext: AuthContext
+    ): BaseResponse<JoinResponse> {
+        val result = when (authContext) {
+            is AuthContext.Member -> {
+                println(">>> [멤버 진입] UserID: ${authContext.userId}")
+                invitationService.joinInvitation(
+                    invitationId = invitationId,
+                    userId = authContext.userId,
+                    guestInvitationIds = emptyList()
+                )
+            }
+            is AuthContext.Guest -> {
+                println(">>> [게스트 진입] 초대장 목록: ${authContext.invitationIds}")
+                invitationService.joinInvitation(
+                    invitationId = invitationId,
+                    userId = null,
+                    guestInvitationIds = authContext.invitationIds
+                )
+            }
+        }
+        return BaseResponse.success(result)
+    }
+
     @GetMapping("/joined")
     fun getParticipantInvitations(
         authContext: AuthContext,
@@ -50,6 +78,22 @@ class InvitationController(
                 BaseResponse.success(result)
             }
         }
+    }
+
+    @PostMapping("/{invitationId}/leave")
+    fun leaveInvitation(
+        @PathVariable invitationId: Long,
+        authContext: AuthContext
+    ): BaseResponse<Unit> {
+        when (authContext) {
+            is AuthContext.Member -> {
+                invitationService.leaveInvitation(invitationId, authContext.userId)
+            }
+            is AuthContext.Guest -> {
+                invitationService.leaveInvitationForGuest(invitationId)
+            }
+        }
+        return BaseResponse.success(Unit)
     }
 
     @GetMapping("/mine")
@@ -218,6 +262,22 @@ class InvitationController(
         } catch (e: Exception) {
             println(e.message)
             BaseResponse.error(responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    @DeleteMapping("/{invitationId}")
+    fun deleteInvitation(
+        @PathVariable invitationId: Long,
+        authContext: AuthContext
+    ): BaseResponse<Unit> {
+        return when (authContext) {
+            is AuthContext.Member -> {
+                invitationService.deleteInvitation(invitationId, authContext.userId)
+                BaseResponse.success(Unit)
+            }
+            is AuthContext.Guest -> {
+                BaseResponse.error(CommonResponseCode.FORBIDDEN)
+            }
         }
     }
 

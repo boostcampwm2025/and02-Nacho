@@ -53,7 +53,6 @@ import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import com.andlife.designsystem.R as designR
 import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.component.NachoDivider
 import com.andlife.designsystem.preview.PreviewTheme
@@ -83,6 +82,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
+import com.andlife.designsystem.R as designR
 
 private const val GUESTBOOK_KEY_OFFSET = 2
 private const val UPCOMING_CARD_WIDTH_RATIO = 0.85f
@@ -173,11 +173,13 @@ fun HomeRoute(
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
+                    viewModel.onEvent(HomeUiEvent.UpdateMediaPlayState(true))
                     viewModel.videoPlayerPool.resumeLastPlayed()
                     isMediaActive = true
                 }
 
                 Lifecycle.Event.ON_PAUSE -> {
+                    viewModel.onEvent(HomeUiEvent.UpdateMediaPlayState(false))
                     viewModel.videoPlayerPool.pauseAllPlayers()
                     viewModel.audioPlayerManager.pause()
                 }
@@ -220,10 +222,10 @@ fun HomeScreen(
 ) {
     var playVideoIndex by remember { mutableStateOf(-1) }
 
-    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.isAudioPlaying) {
+    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.audioPlaybackState.isPlaying) {
         var pendingIndex = -1
         var lastChangedTime = 0L
-        if (!isMediaActive || uiState.isAudioPlaying) {
+        if (!isMediaActive || uiState.audioPlaybackState.isPlaying) {
             playVideoIndex = -1
             return@LaunchedEffect
         }
@@ -317,28 +319,29 @@ fun HomeScreen(
                     bottom = paddingValues.calculateBottomPadding(),
                 ),
             ) {
-                if (isMediaActive) {
-                    homeUpcomingSection(
-                        upcomingInvitations = upcomingInvitations,
-                        onInvitationClick = { id, isOwner ->
-                            onEvent(HomeUiEvent.ClickUpcomingInvitation(id, isOwner))
-                        },
-                        onNavigateToCreate = { onEvent(HomeUiEvent.ClickCreate) },
-                    )
+                homeUpcomingSection(
+                    upcomingInvitations = upcomingInvitations,
+                    onInvitationClick = { id, isOwner ->
+                        onEvent(HomeUiEvent.ClickUpcomingInvitation(id, isOwner))
+                    },
+                    onNavigateToCreate = { onEvent(HomeUiEvent.ClickCreate) },
+                )
 
-                    homeGuestBookSection(
-                        isMediaActive = isMediaActive,
-                        guestBooks = guestBooks,
-                        uiState = uiState,
-                        playVideoIndex = playVideoIndex,
-                        videoPlayerPool = videoPlayerPool,
-                        onInvitationTitleClick = { id, isOwner ->
-                            onEvent(HomeUiEvent.ClickInvitationTitle(id, isOwner))
-                        },
-                        onVisualMediaClick = { url -> onEvent(HomeUiEvent.ClickVisualMedia(url)) },
-                        onAudioMediaClick = { url -> onEvent(HomeUiEvent.ClickAudioMedia(url)) },
-                    )
-                }
+                homeGuestBookSection(
+                    isMediaActive = isMediaActive,
+                    guestBooks = guestBooks,
+                    uiState = uiState,
+                    playVideoIndex = playVideoIndex,
+                    videoPlayerPool = videoPlayerPool,
+                    onInvitationTitleClick = { id, isOwner ->
+                        onEvent(HomeUiEvent.ClickInvitationTitle(id, isOwner))
+                    },
+                    onVisualMediaClick = { url -> onEvent(HomeUiEvent.ClickVisualMedia(url)) },
+                    onAudioMediaClick = { url -> onEvent(HomeUiEvent.ClickAudioMedia(url)) },
+                    onPlayVideoClick = { url, itemId ->
+                        onEvent(HomeUiEvent.ClickVideoPlayButton(url, itemId))
+                    },
+                )
             }
         }
     }
@@ -544,6 +547,7 @@ private fun LazyListScope.homeGuestBookSection(
     onInvitationTitleClick: (invitationId: Long, isOwner: Boolean) -> Unit,
     onVisualMediaClick: (String) -> Unit,
     onAudioMediaClick: (String) -> Unit,
+    onPlayVideoClick: (String, Long) -> Unit,
 ) {
     item {
         Text(
@@ -587,19 +591,18 @@ private fun LazyListScope.homeGuestBookSection(
                     guestBook = guestBook,
                     useMenuButton = false,
                     videoPlayerPool = videoPlayerPool,
-                    shouldPlayVideo = isMediaActive && (index == playVideoIndex),
-                    isAudioPlaying = uiState.isAudioPlaying &&
-                        guestBook.audioMedias.any { it.url == uiState.playingAudioUrl },
+                    shouldPlayVideo = uiState.canPlayVideo && (index == playVideoIndex),
+                    audioPlaybackState = uiState.audioPlaybackState,
                     onInvitationTitleClick = {
                         onInvitationTitleClick(
                             guestBook.invitation?.id ?: -1L,
                             guestBook.isOwner,
                         )
                     },
-                    playingAudioUrl = uiState.playingAudioUrl,
                     onVisualMediaClick = { onVisualMediaClick(it.url) },
                     onAudioMediaClick = { onAudioMediaClick(it.url) },
                     onMenuClick = { },
+                    onPlayVideoClick = { url -> onPlayVideoClick(url, guestBook.id) },
                 )
             }
         }

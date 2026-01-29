@@ -1,28 +1,33 @@
 package com.andlife.invitation_edit.section
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.preview.PreviewTheme
+import com.andlife.designsystem.theme.NachoElevation
+import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
+import com.andlife.designsystem.R as designR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun TopBarSection(
     title: String,
     onBackClick: () -> Unit,
-    onPreviewClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onPreviewClick: (() -> Unit)? = null,
     isLoading: Boolean = false,
     isPreviewMode: Boolean = false,
 ) {
@@ -40,18 +45,31 @@ internal fun TopBarSection(
                 enabled = !isLoading,
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                    painter = painterResource(designR.drawable.ic_arrow_back_24),
                     contentDescription = stringResource(R.string.desc_back),
+                    tint = NachoTheme.colorScheme.iconSecondary,
                 )
             }
         },
         actions = {
-            if (!isPreviewMode) {
-                TextButton(onPreviewClick) {
+            if (onPreviewClick != null && !isPreviewMode) {
+                NachoButton(
+                    modifier = Modifier.padding(end = NachoSpacing.medium),
+                    onClick = onPreviewClick,
+                    enabled = !isLoading,
+                    contentPadding = PaddingValues(
+                        horizontal = NachoSpacing.medium,
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = NachoElevation.none,
+                        pressedElevation = NachoElevation.none,
+                    ),
+                    containerColor = NachoTheme.colorScheme.brandOnPrimary,
+                    contentColor = NachoTheme.colorScheme.brandPrimary,
+                ) {
                     Text(
                         text = stringResource(R.string.txt_preview),
                         style = NachoTheme.typography.bodyLargeSemiBold,
-                        color = NachoTheme.colorScheme.brandPrimary,
                     )
                 }
             }

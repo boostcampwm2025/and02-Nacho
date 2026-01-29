@@ -23,8 +23,20 @@ data class InvitationFormUiModel(
     val card: CardUiModel? = null,
 ) {
     val isValid: Boolean
-        get() = title.isNotBlank() && author.isNotBlank() && date != null
-            && startTime != null && placeName.isNotBlank() && placeAddress.isNotBlank()
+        get() = title.isNotBlank() &&
+            author.isNotBlank() &&
+            date != null &&
+            startTime != null &&
+            placeName.isNotBlank() &&
+            placeAddress.isNotBlank() &&
+            isEndTimeValid
+    val isEndTimeValid: Boolean
+        get() {
+            if (endTime == null || startTime == null) return true
+            val start = LocalTime(startTime.hour, startTime.min)
+            val end = LocalTime(endTime.hour, endTime.min)
+            return end > start
+        }
 }
 
 data class ThumbnailImageUiModel(

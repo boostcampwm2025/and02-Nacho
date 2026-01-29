@@ -8,7 +8,10 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.toRoute
+import com.andlife.domain.model.guestbook.DownloadState
+import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.domain.repository.guestbook.GuestBookRepository
+import com.andlife.domain.util.MediaDownloader
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.invitation.InvitationDetail
@@ -31,6 +34,7 @@ import javax.inject.Inject
 @HiltViewModel
 class InvitationCollectionViewModel @Inject constructor(
     private val guestBookRepository: GuestBookRepository,
+    private val mediaDownloader: MediaDownloader,
     @param:ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<InvitationCollectionUiState, InvitationCollectionUiEvent, InvitationCollectionSideEffect>(
@@ -46,7 +50,7 @@ class InvitationCollectionViewModel @Inject constructor(
                 }.stateIn(
                     scope = viewModelScope,
                     started = SharingStarted.WhileSubscribed(5_000),
-                    initialValue = InvitationCollectionUiState(),
+                    initialValue = InvitationCollectionUiState(isLoading = true),
                 )
 
         val exoPlayer: ExoPlayer = ExoPlayer.Builder(context).build().apply {
@@ -159,6 +163,29 @@ class InvitationCollectionViewModel @Inject constructor(
             copy(
                 isTextExpanded = !isTextExpanded,
             )
+        }
+    }
+
+    // TODO: 임시 다운로드 테스트용
+    fun downloadMedia(url: String, mediaType: UiMediaType) {
+        val domainType = when (mediaType) {
+            UiMediaType.IMAGE -> MediaType.IMAGE
+            UiMediaType.VIDEO -> MediaType.VIDEO
+            UiMediaType.AUDIO -> MediaType.AUDIO
+        }
+        val fileName = "nacho_${System.currentTimeMillis()}${domainType.getExtension()}"
+        val workId = mediaDownloader.enqueueDownload(url, fileName, domainType)
+        Log.d("Download", "enqueued: $workId")
+
+        viewModelScope.launch {
+            mediaDownloader.getDownloadStatus(workId).collect { state ->
+                when (state) {
+                    is DownloadState.Success -> Log.d("Download", "완료: ${state.url}")
+                    is DownloadState.Error -> Log.e("Download", "실패: ${state.message}")
+                    is DownloadState.Downloading -> Log.d("Download", "진행: ${state.progress}%")
+                    is DownloadState.Idle -> {}
+                }
+            }
         }
     }
 }

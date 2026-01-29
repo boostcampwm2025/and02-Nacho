@@ -1,7 +1,9 @@
 package com.andlife.nachoserver.repository.invitation
 
 import com.andlife.nachoserver.entity.InvitationCard
+import jakarta.transaction.Transactional
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 
@@ -12,4 +14,9 @@ interface InvitationCardRepository : JpaRepository<InvitationCard, Long> {
         WHERE ic.invitation.id = :invitationId
     """)
     fun findByInvitationIdWithDetails(@Param("invitationId") invitationId: Long): InvitationCard?
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM InvitationCard ic WHERE ic.invitation.id = :invitationId")
+    fun deleteByInvitationId(@Param("invitationId") invitationId: Long)
 }

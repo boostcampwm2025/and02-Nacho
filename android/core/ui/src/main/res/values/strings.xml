@@ -42,6 +42,19 @@
     </string-array>
     <string name="desc_invitation_create">초대장 생성</string>
 
+    <string name="msg_refresh_failure">새로고침에 실패했습니다.</string>
+
+    <string name="txt_leave_invitation_title">초대장 나가기</string>
+    <string name="txt_delete_invitation_title">초대장 삭제</string>
+    <string name="txt_leave_invitation_message">초대장에서 나가시겠습니까?\n나간 후에는 초대 링크가 있어야 다시 입장할 수 있습니다.</string>
+    <string name="txt_delete_invitation_message">초대장을 삭제하시겠습니까?\n삭제한 초대장은 복구할 수 없습니다.</string>
+    <string name="txt_confirm">확인</string>
+    <string name="txt_cancel">취소</string>
+    <string name="msg_leave_success">초대장에서 나갔습니다.</string>
+    <string name="msg_leave_failure">나가기에 실패했습니다. 다시 시도해주세요.</string>
+    <string name="msg_delete_success">초대장을 삭제했습니다.</string>
+    <string name="msg_delete_failure">삭제에 실패했습니다. 다시 시도해주세요.</string>
+
     <!--  모아보기 Media  -->
     <string name="desc_media_image">방명록의 이미지</string>
     <string name="desc_media_audio">방명록의 오디오</string>
@@ -65,6 +78,7 @@
     <string name="desc_close">닫기</string>
     <string name="txt_delete_all">모두 지우기</string>
     <string name="txt_submit">등록</string>
+    <string name="txt_collection_empty">아직 미디어가 없습니다.</string>
 
     <!-- GuestBook -->
     <string name="desc_edit_guest_book">수정을 위한 더보기 아이콘</string>
