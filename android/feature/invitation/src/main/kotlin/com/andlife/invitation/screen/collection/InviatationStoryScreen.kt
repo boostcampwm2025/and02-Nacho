@@ -1,5 +1,8 @@
 package com.andlife.invitation.screen.collection
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,7 +20,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.Player
@@ -36,6 +38,7 @@ import com.andlife.model.collection.CollectionUiModel
 import com.andlife.model.util.toUiType
 import com.andlife.ui.component.collection.StoryContent
 import com.andlife.ui.component.collection.StoryTopHeader
+import com.andlife.ui.util.shouldRequestStoragePermission
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -53,23 +56,35 @@ fun InvitationStoryRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val res = LocalResources.current
+    val context = LocalContext.current
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.onEvent(InvitationCollectionUiEvent.DownloadMedia)
+        } else {
+            scope.launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar(context.getString(R.string.snack_permission_denied))
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.effectFlow.collect { effect ->
             when (effect) {
-
                 is InvitationCollectionSideEffect.DownloadSuccess -> {
                     scope.launch {
                         snackbarHostState.currentSnackbarData?.dismiss()
-                        snackbarHostState.showSnackbar(res.getString(R.string.snack_download_success))
+                        snackbarHostState.showSnackbar(context.getString(R.string.snack_download_success))
                     }
                 }
 
                 is InvitationCollectionSideEffect.DownloadFailed -> {
                     scope.launch {
                         snackbarHostState.currentSnackbarData?.dismiss()
-                        snackbarHostState.showSnackbar(res.getString(R.string.snack_download_fail))
+                        snackbarHostState.showSnackbar(context.getString(R.string.snack_download_fail))
                     }
                 }
             }
@@ -83,7 +98,13 @@ fun InvitationStoryRoute(
         onPageChanged = onPageChanged,
         onToggleExpand = onToggleExpand,
         onClose = onClose,
-        onDownloadClick = { viewModel.onEvent(InvitationCollectionUiEvent.DownloadMedia) },
+        onDownloadClick = {
+            if (context.shouldRequestStoragePermission()) {
+                permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            } else {
+                viewModel.onEvent(InvitationCollectionUiEvent.DownloadMedia)
+            }
+        },
         snackbarHostState = snackbarHostState,
     )
 }
@@ -157,6 +178,7 @@ fun InvitationStoryScreen(
         }
     }
 }
+
 
 @PreviewTheme
 @Composable
