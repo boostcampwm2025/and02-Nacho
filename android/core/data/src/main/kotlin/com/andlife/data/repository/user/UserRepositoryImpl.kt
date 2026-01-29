@@ -62,7 +62,13 @@ internal class UserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun logout() {
-        TODO("Not yet implemented")
+        authStateManager.setLoading()
+        userStorage.clearTokens()
+        userStorage.setWasLoggedIn(false)
+    }
+
+    override suspend fun getUserInfo(): AuthState {
+        return authStateManager.authState.value
     }
 
     private suspend fun saveToken(accessToken: String, refreshToken: String): Result<Unit, DataError> {
