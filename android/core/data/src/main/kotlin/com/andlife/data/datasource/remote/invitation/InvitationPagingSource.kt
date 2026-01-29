@@ -12,7 +12,8 @@ class InvitationPagingSource(
     private val remoteDataSource: InvitationRemoteDataSource,
     private val status: InvitationStatus,
     private val sortType: SortDirection,
-    private val isMyInvitation: Boolean = false
+    private val isMyInvitation: Boolean = false,
+    private val onTotalCountLoaded: (Int) -> Unit
 ) : PagingSource<Int, InvitationSummary>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, InvitationSummary> {
@@ -37,6 +38,9 @@ class InvitationPagingSource(
         return when (result) {
             is Result.Success -> {
                 val pagingResponse = result.data
+
+                onTotalCountLoaded(pagingResponse.meta.totalCount)
+
                 LoadResult.Page(
                     data = pagingResponse.content.map { it.toDomain() },
                     prevKey = if (page == 0) null else page - 1,

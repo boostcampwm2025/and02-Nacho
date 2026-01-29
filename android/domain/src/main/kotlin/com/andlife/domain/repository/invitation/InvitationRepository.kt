@@ -18,16 +18,19 @@ interface InvitationRepository {
     suspend fun leaveInvitation(invitationId: Long): Result<Unit, DataError>
     suspend fun createInvitation(params: InvitationSaveParam): Result<Long, DataError>
     suspend fun updateInvitation(invitationId: Long, params: InvitationSaveParam): Result<Long, DataError>
+    suspend fun deleteInvitation(invitationId: Long): Result<Unit, DataError>
     suspend fun getInvitation(invitationId: Long): Result<Invitation, DataError>
     fun getParticipantInvitations(
         status: InvitationStatus,
         sortType: SortDirection,
-        isMyInvitation: Boolean
+        isMyInvitation: Boolean,
+        onTotalCountLoaded: (Int) -> Unit
     ): Flow<PagingData<InvitationSummary>>
     fun getMyInvitations(
         status: InvitationStatus,
         sortType: SortDirection,
-        isMyInvitation: Boolean
+        isMyInvitation: Boolean,
+        onTotalCountLoaded: (Int) -> Unit
     ): Flow<PagingData<InvitationSummary>>
     fun getUpcomingInvitations(): Flow<PagingData<UpcomingInvitation>>
     suspend fun createInvitationCard(invitationId: Long, card: NachoCard): Result<Long, DataError>

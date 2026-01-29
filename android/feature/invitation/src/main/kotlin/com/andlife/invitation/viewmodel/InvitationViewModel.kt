@@ -44,7 +44,10 @@ class InvitationViewModel @Inject constructor(
             invitationRepository.getParticipantInvitations(
                 status = InvitationStatus.UPCOMING,
                 sortType = sort,
-                isMyInvitation = false
+                isMyInvitation = false,
+                onTotalCountLoaded = { totalCount ->
+                    updateState { copy(upcomingTotalCount = totalCount) }
+                }
             ).map { pagingData ->
                 pagingData.map { summary ->
                     summary.toUiModel { date, time ->
@@ -60,7 +63,10 @@ class InvitationViewModel @Inject constructor(
             invitationRepository.getParticipantInvitations(
                 status = InvitationStatus.PAST,
                 sortType = sort,
-                isMyInvitation = false
+                isMyInvitation = false,
+                onTotalCountLoaded = { totalCount ->
+                    updateState { copy(pastTotalCount = totalCount) }
+                }
             ).map { pagingData ->
                 pagingData.map { summary ->
                     summary.toUiModel { date, time ->

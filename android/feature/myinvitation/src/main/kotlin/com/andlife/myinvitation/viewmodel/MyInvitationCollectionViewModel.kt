@@ -47,7 +47,7 @@ class MyInvitationCollectionViewModel
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = MyInvitationCollectionUiState(),
+                initialValue = MyInvitationCollectionUiState(isLoading = true),
             )
 
     val exoPlayer: ExoPlayer = ExoPlayer.Builder(context).build().apply {
