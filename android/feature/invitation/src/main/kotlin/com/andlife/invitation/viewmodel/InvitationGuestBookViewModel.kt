@@ -288,7 +288,6 @@ constructor(
 
         val result = guestBookRepository.createGuestBook(
             invitationId = invitationId,
-            userId = 1,
             textContent = uiState.value.textContent,
             medias = guestBookMedias,
         )

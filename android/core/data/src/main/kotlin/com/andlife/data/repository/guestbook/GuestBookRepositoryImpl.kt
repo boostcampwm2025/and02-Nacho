@@ -46,13 +46,11 @@ internal class GuestBookRepositoryImpl @Inject constructor(
 
     override suspend fun createGuestBook(
         invitationId: Long,
-        userId: Long,
         textContent: String,
         medias: List<GuestBookMedia>,
     ): Result<GuestBook, DataError> {
         val request =
             GuestBookRequest(
-                userId = userId,
                 textContent = textContent,
                 medias = medias.map { it.toRequest() },
             )
