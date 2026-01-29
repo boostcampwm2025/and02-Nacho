@@ -25,6 +25,9 @@ class AudioRecorder(
     private val _isRecording = MutableStateFlow(false)
     val isRecording: StateFlow<Boolean> = _isRecording.asStateFlow()
 
+    private val _isPaused = MutableStateFlow(false)
+    val isPaused: StateFlow<Boolean> = _isPaused.asStateFlow()
+
     private val _recordingDuration = MutableStateFlow(0)
     val recordingDuration: StateFlow<Int> = _recordingDuration.asStateFlow()
 
@@ -75,6 +78,27 @@ class AudioRecorder(
             onError(e)
         }
     }
+
+    fun pauseRecording(onError: (Exception) -> Unit = {}) {
+        if (!_isRecording.value || _isPaused.value) return
+        try {
+            mediaRecorder?.pause()
+            _isPaused.value = true
+        } catch (e: Exception) {
+            onError(e)
+        }
+    }
+
+    fun resumeRecording(onError: (Exception) -> Unit = {}) {
+        if (!_isRecording.value || !_isPaused.value) return
+        try {
+            mediaRecorder?.resume()
+            _isPaused.value = false
+        } catch (e: Exception) {
+            onError(e)
+        }
+    }
+
 
     fun stopRecording(onComplete: (File?) -> Unit = {}) {
         try {
