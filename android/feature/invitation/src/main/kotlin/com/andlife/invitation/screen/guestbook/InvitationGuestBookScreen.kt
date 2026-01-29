@@ -222,12 +222,8 @@ fun InvitationGuestBookRoute(
                 cameraLauncher.launch(photoUri)
             }
 
-            is InvitationGuestBookSideEffect.StartAudioRecording -> {
+            is InvitationGuestBookSideEffect.ShowAudioRecordingBottomSheet -> {
                 showRecordingBottomSheet = true
-            }
-
-            is InvitationGuestBookSideEffect.StopAudioRecording -> {
-                // TODO: 아무것도 안하는데요
             }
 
             is InvitationGuestBookSideEffect.ScrollToTop -> {

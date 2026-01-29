@@ -412,7 +412,7 @@ constructor(
             return
         }
         updateState { copy(audioRecordingDuration = 0) }
-        sendEffect(InvitationGuestBookSideEffect.StartAudioRecording)
+        sendEffect(InvitationGuestBookSideEffect.ShowAudioRecordingBottomSheet)
     }
 
     private fun updatePlayState(isPlaying: Boolean) {
