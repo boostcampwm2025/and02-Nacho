@@ -17,7 +17,7 @@ import java.util.UUID
 import javax.inject.Inject
 
 class MediaDownloaderImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) : MediaDownloader {
     private val workManager = WorkManager.getInstance(context)
 

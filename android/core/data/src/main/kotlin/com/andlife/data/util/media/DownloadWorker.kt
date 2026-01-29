@@ -108,9 +108,8 @@ class DownloadWorker @AssistedInject constructor(
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
             put(MediaStore.MediaColumns.MIME_TYPE, getMimeType(fileName, mediaType))
             put(MediaStore.MediaColumns.RELATIVE_PATH, "${mediaType.directory}/Nacho")
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                put(MediaStore.MediaColumns.IS_PENDING, 1)
-            }
+            put(MediaStore.MediaColumns.IS_PENDING, 1)
+
         }
 
         val uri = contentResolver.insert(collection, contentValues) ?: throw IllegalStateException("Media insert 실패")
@@ -120,11 +119,9 @@ class DownloadWorker @AssistedInject constructor(
                 copyWithProgress(inputStream, outputStream, contentLength)
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                contentValues.clear()
-                contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
-                contentResolver.update(uri, contentValues, null, null)
-            }
+            contentValues.clear()
+            contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
+            contentResolver.update(uri, contentValues, null, null)
 
             return Pair(uri.toString(), getPathFromUri(uri))
 
