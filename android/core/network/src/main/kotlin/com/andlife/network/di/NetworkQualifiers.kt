@@ -16,6 +16,10 @@ annotation class InvitationMedia
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
+annotation class NachoMedia
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
 annotation class Kakao
 
 @Qualifier
