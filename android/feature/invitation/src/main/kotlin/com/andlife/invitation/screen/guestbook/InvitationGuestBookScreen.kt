@@ -133,12 +133,8 @@ fun InvitationGuestBookRoute(
         }
     }
 
-    var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
-
     val context = LocalContext.current
-
-    // 오디오 녹음 관련
-    val audioRecorder = remember { AudioRecorder(context) }
+    var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
 
     // 카메라 권한 요청 launcher
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
@@ -176,6 +172,10 @@ fun InvitationGuestBookRoute(
             showPermissionDialog = Manifest.permission.RECORD_AUDIO
         }
     }
+
+    // 오디오 녹음 객체
+    val audioRecorder = remember { AudioRecorder(context) }
+
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
