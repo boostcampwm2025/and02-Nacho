@@ -560,7 +560,8 @@ private fun InvitationGuestBookScreen(
                     .fillMaxWidth()
             ) {
                 if (isMediaActive) {
-                    val isInitialLoading = guestBooks.loadState.refresh is LoadState.Loading && guestBooks.itemCount == 0
+                    val isInitialLoading =
+                        guestBooks.loadState.refresh is LoadState.Loading && guestBooks.itemCount == 0
 
                     if (isInitialLoading || guestBooks.itemCount == 0) {
                         PagingStateContent(
@@ -591,7 +592,14 @@ private fun InvitationGuestBookScreen(
                                         onVisualMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
                                         onAudioMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
                                         onMenuClick = { onEvent(InvitationGuestBookUiEvent.ClickGuestBookMenu(guestBook.id)) },
-                                        onPlayVideoClick = { url -> onEvent(InvitationGuestBookUiEvent.ClickVideoPlayButton(url, guestBook.id))}
+                                        onPlayVideoClick = { url ->
+                                            onEvent(
+                                                InvitationGuestBookUiEvent.ClickVideoPlayButton(
+                                                    url,
+                                                    guestBook.id
+                                                )
+                                            )
+                                        }
                                     )
                                 }
                             }
@@ -654,7 +662,6 @@ private fun GuestBookFormSection(
         isUploading = uiState.isUploading,
         isSubmittable = uiState.isSubmittable,
         editingGuestBookId = uiState.editingGuestBookId,
-        isAudioRecording = uiState.isAudioRecording,
         onMediasSelected = { medias ->
             onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(medias))
         },
@@ -712,7 +719,7 @@ private fun InvitationGuestBookEmptyPreview() {
             snackbarHostState = SnackbarHostState(),
             lazyListState = rememberLazyListState(),
             onDeleteMenuClick = {},
-            focusManager =  LocalFocusManager.current,
+            focusManager = LocalFocusManager.current,
             context = LocalContext.current,
             cameraPermissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestPermission()

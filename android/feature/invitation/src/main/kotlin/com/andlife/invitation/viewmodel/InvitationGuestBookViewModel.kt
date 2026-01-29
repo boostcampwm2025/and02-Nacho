@@ -407,12 +407,11 @@ constructor(
 
     private fun handleMicrophoneClick() {
         val state = uiState.value
-        if (state.isAudioRecording) return
         if (state.selectedMedias.size >= 5) {
             sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("최대 5개까지 미디어를 추가할 수 있습니다."))
             return
         }
-        updateState { copy(isAudioRecording = true, audioRecordingDuration = 0) }
+        updateState { copy(audioRecordingDuration = 0) }
         sendEffect(InvitationGuestBookSideEffect.StartAudioRecording)
     }
 
