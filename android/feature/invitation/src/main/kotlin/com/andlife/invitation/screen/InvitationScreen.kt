@@ -1,20 +1,14 @@
 package com.andlife.invitation.screen
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,7 +27,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import com.andlife.designsystem.component.dialog.NachoDialog
+import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.invitation.SortDirection
@@ -110,58 +104,17 @@ fun InvitationRoute(
     }
 
     invitationIdToLeave?.let { id ->
-        NachoDialog(
-            onDismiss = { invitationIdToLeave = null }
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(NachoSpacing.xLarge)
-            ) {
-                Text(
-                    text = stringResource(R.string.txt_leave_invitation_title),
-                    style = NachoTheme.typography.headingSmallSemiBold,
-                    color = NachoTheme.colorScheme.textPrimary
-                )
-
-                Text(
-                    text = stringResource(R.string.txt_leave_invitation_message),
-                    modifier = Modifier.padding(top = NachoSpacing.medium, bottom = NachoSpacing.xLarge),
-                    style = NachoTheme.typography.bodyMediumMedium,
-                    color = NachoTheme.colorScheme.textSecondary
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                ) {
-                    TextButton(
-                        onClick = { invitationIdToLeave = null }
-                    ) {
-                        Text(
-                            text = stringResource(R.string.txt_cancel),
-                            color = NachoTheme.colorScheme.textSecondary
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.padding(horizontal = NachoSpacing.small))
-
-                    TextButton(
-                        onClick = {
-                            viewModel.leaveInvitation(id)
-                            invitationIdToLeave = null
-                        },
-                        shape = NachoTheme.shapes.small
-                    ) {
-                        Text(
-                            text = stringResource(R.string.txt_confirm),
-                            color = NachoTheme.colorScheme.brandPrimary
-                        )
-                    }
-                }
-            }
-        }
+        NachoInfoDialog(
+            title = stringResource(R.string.txt_leave_invitation_title),
+            message = stringResource(R.string.txt_leave_invitation_message),
+            confirmText = stringResource(R.string.txt_confirm),
+            dismissText = stringResource(R.string.txt_cancel),
+            onConfirm = {
+                viewModel.leaveInvitation(id)
+                invitationIdToLeave = null
+            },
+            onDismiss = { invitationIdToLeave = null },
+        )
     }
 
     InvitationScreen(

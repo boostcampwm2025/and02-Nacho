@@ -1,30 +1,22 @@
 package com.andlife.invitation.screen.guestbook
 
-import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.FileProvider
 import android.Manifest
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.provider.Settings
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
-import java.io.File
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.isImeVisible
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -34,8 +26,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -52,7 +42,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
+import androidx.core.content.FileProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -63,7 +53,6 @@ import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import com.andlife.designsystem.component.dialog.NachoDialog
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoSpacing
@@ -81,6 +70,8 @@ import com.andlife.model.guestbook.GuestBookInvitationUiModel
 import com.andlife.model.guestbook.GuestBookMediaUiModel
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
+import com.andlife.ui.component.dialog.NachoInfoDialog
+import com.andlife.ui.component.dialog.NachoPermissionDialog
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.invitation.InvitationGuestBookForm
 import com.andlife.ui.component.paging.PagingStateContent
@@ -92,6 +83,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
+import java.io.File
 import kotlin.math.max
 import kotlin.math.min
 
@@ -279,102 +271,30 @@ fun InvitationGuestBookRoute(
     }
 
     if (showDeleteDialog != null) {
-        NachoDialog(
-            onDismiss = { showDeleteDialog = null }
-        ) {
-            Column(
-                modifier = Modifier.padding(NachoSpacing.xLarge),
-                verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
-            ) {
-                Text(
-                    text = stringResource(R.string.txt_delete_dialog_title),
-                    color = NachoTheme.colorScheme.textPrimary,
-                    style = NachoTheme.typography.headingSmallSemiBold,
-                )
-                Spacer(modifier = Modifier.padding(NachoSpacing.xSmall))
-                Text(
-                    text = stringResource(R.string.txt_delete_dialog_message),
-                    color = NachoTheme.colorScheme.textSecondary,
-                    style = NachoTheme.typography.bodyMediumRegular,
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                ) {
-                    TextButton(
-                        onClick = { showDeleteDialog = null }
-                    ) {
-                        Text(
-                            text = stringResource(R.string.btn_label_cancel),
-                            color = NachoTheme.colorScheme.textPrimary,
-                            style = NachoTheme.typography.bodyMediumSemiBold,
-                        )
-                    }
-                    TextButton(
-                        onClick = {
-                            showDeleteDialog?.let { guestBookId ->
-                                viewModel.onEvent(InvitationGuestBookUiEvent.ClickDeleteMenu(guestBookId))
-                            }
-                            showDeleteDialog = null
-                        }
-                    ) {
-                        Text(
-                            text = stringResource(R.string.btn_label_delete),
-                            color = NachoTheme.colorScheme.brandDark,
-                            style = NachoTheme.typography.bodyMediumSemiBold,
-                        )
-                    }
+        NachoInfoDialog(
+            title = stringResource(R.string.txt_delete_dialog_title),
+            message = stringResource(R.string.txt_delete_dialog_message),
+            confirmText = stringResource(R.string.btn_label_delete),
+            dismissText = stringResource(R.string.btn_label_cancel),
+            onConfirm = {
+                showDeleteDialog?.let { guestBookId ->
+                    viewModel.onEvent(InvitationGuestBookUiEvent.ClickDeleteMenu(guestBookId))
                 }
-            }
-        }
+                showDeleteDialog = null
+            },
+            onDismiss = { showDeleteDialog = null },
+        )
     }
 
     if (showPermissionDialog != null) {
-        NachoDialog(
-            onDismiss = { showPermissionDialog = null }
-        ) {
-            Column(
-                modifier = Modifier.padding(NachoSpacing.xLarge),
-                verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
-            ) {
-                Text(
-                    text = when (showPermissionDialog) {
-                        Manifest.permission.CAMERA -> stringResource(R.string.txt_permission_camera)
-                        Manifest.permission.RECORD_AUDIO -> stringResource(R.string.txt_permission_audio)
-                        else -> stringResource(R.string.txt_permission_etc)
-                    },
-                    color = NachoTheme.colorScheme.textSecondary,
-                    style = NachoTheme.typography.bodyMediumRegular,
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                ) {
-                    TextButton(
-                        onClick = { showPermissionDialog = null }
-                    ) {
-                        Text(
-                            text = stringResource(R.string.btn_label_cancel),
-                            color = NachoTheme.colorScheme.textPrimary,
-                            style = NachoTheme.typography.bodyMediumSemiBold,
-                        )
-                    }
-                    TextButton(
-                        onClick = {
-                            showPermissionDialog = null
-                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                            intent.data = "package:${context.packageName}".toUri()
-                            context.startActivity(intent)
-                        }
-                    ) {
-                        Text(
-                            text = stringResource(R.string.btn_label_to_setting),                            color = NachoTheme.colorScheme.brandPrimary,
-                            style = NachoTheme.typography.bodyMediumSemiBold,
-                        )
-                    }
-                }
-            }
-        }
+        NachoPermissionDialog(
+            message = when (showPermissionDialog) {
+                Manifest.permission.CAMERA -> stringResource(R.string.txt_permission_camera)
+                Manifest.permission.RECORD_AUDIO -> stringResource(R.string.txt_permission_audio)
+                else -> stringResource(R.string.txt_permission_etc)
+            },
+            onDismiss = { showPermissionDialog = null },
+        )
     }
 
     InvitationGuestBookScreen(
