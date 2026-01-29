@@ -21,12 +21,12 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.guestbook.MediaType
-import com.andlife.ui.component.collection.StoryContent
+import com.andlife.invitation.model.collection.InvitationCollectionUiEvent
 import com.andlife.invitation.model.collection.InvitationCollectionUiState
-import com.andlife.model.collection.CollectionUiModel
-import com.andlife.model.guestbook.UiMediaType
-import com.andlife.model.util.toUiType
 import com.andlife.invitation.viewmodel.InvitationCollectionViewModel
+import com.andlife.model.collection.CollectionUiModel
+import com.andlife.model.util.toUiType
+import com.andlife.ui.component.collection.StoryContent
 import com.andlife.ui.component.collection.StoryTopHeader
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Clock
@@ -50,7 +50,7 @@ fun InvitationStoryRoute(
         onPageChanged = onPageChanged,
         onToggleExpand = onToggleExpand,
         onClose = onClose,
-        onDownloadClick = { url, type -> viewModel.downloadMedia(url, type) },
+        onDownloadClick = { viewModel.onEvent(InvitationCollectionUiEvent.DownloadMedia) },
     )
 }
 
@@ -62,7 +62,7 @@ fun InvitationStoryScreen(
     onPageChanged: (Int) -> Unit,
     onToggleExpand: () -> Unit,
     onClose: () -> Unit,
-    onDownloadClick: (url: String, type: UiMediaType) -> Unit = { _, _ -> },
+    onDownloadClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val pagerState =
@@ -89,7 +89,7 @@ fun InvitationStoryScreen(
                 date = item.createdAt,
                 profileUrl = item.authorProfileUrl,
                 onClose = onClose,
-                onDownloadClick = { onDownloadClick(item.mediaUrl, item.type) },
+                onDownloadClick = onDownloadClick,
             )
         }
 
@@ -169,6 +169,7 @@ private fun InvitationStoryScreenPreview() {
             onPageChanged = {},
             onToggleExpand = {},
             exoPlayer = dummyPlayer,
+            onDownloadClick = {},
             onClose = {},
         )
     }

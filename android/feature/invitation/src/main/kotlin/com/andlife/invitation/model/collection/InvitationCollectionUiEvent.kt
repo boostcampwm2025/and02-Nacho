@@ -14,4 +14,6 @@ sealed interface InvitationCollectionUiEvent : BaseUiEvent {
     ) : InvitationCollectionUiEvent
 
     data object ToggleExpand : InvitationCollectionUiEvent
+
+    data object DownloadMedia : InvitationCollectionUiEvent
 }

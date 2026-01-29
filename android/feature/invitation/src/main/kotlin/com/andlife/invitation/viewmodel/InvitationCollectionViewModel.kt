@@ -43,20 +43,20 @@ class InvitationCollectionViewModel @Inject constructor(
 
     private val invitationId: Long = savedStateHandle.toRoute<InvitationDetail>().id
 
-        override val uiState: StateFlow<InvitationCollectionUiState> =
-            mutableUiState
-                .onStart {
-                    loadMediaCollection()
-                }.stateIn(
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(5_000),
-                    initialValue = InvitationCollectionUiState(),
-                )
+    override val uiState: StateFlow<InvitationCollectionUiState> =
+        mutableUiState
+            .onStart {
+                loadMediaCollection()
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = InvitationCollectionUiState(isLoading = true),
+            )
 
-        val exoPlayer: ExoPlayer = ExoPlayer.Builder(context).build().apply {
-            repeatMode = Player.REPEAT_MODE_ONE
-            playWhenReady = true
-        }
+    val exoPlayer: ExoPlayer = ExoPlayer.Builder(context).build().apply {
+        repeatMode = Player.REPEAT_MODE_ONE
+        playWhenReady = true
+    }
 
     override fun onEvent(event: InvitationCollectionUiEvent) {
         when (event) {
@@ -64,18 +64,19 @@ class InvitationCollectionViewModel @Inject constructor(
             is InvitationCollectionUiEvent.CloseStory -> closeStory()
             is InvitationCollectionUiEvent.PageChanged -> pageChanged(event.index)
             is InvitationCollectionUiEvent.ToggleExpand -> toggleExpand()
+            is InvitationCollectionUiEvent.DownloadMedia -> downloadCurrentMedia()
         }
     }
 
-        override fun onCleared() {
-            super.onCleared()
-            exoPlayer.release()
-        }
+    override fun onCleared() {
+        super.onCleared()
+        exoPlayer.release()
+    }
 
-        private fun loadMediaCollection() {
-            viewModelScope.launch {
-                Log.d("ViewModel", "id:$invitationId")
-                updateState { copy(isLoading = true) }
+    private fun loadMediaCollection() {
+        viewModelScope.launch {
+            Log.d("ViewModel", "id:$invitationId")
+            updateState { copy(isLoading = true) }
 
             guestBookRepository
                 .getMediaCollection(invitationId)
@@ -94,69 +95,70 @@ class InvitationCollectionViewModel @Inject constructor(
         }
     }
 
-        private fun openStory(index: Int) {
-            updateState {
-                copy(
-                    isDetailMode = true,
-                    selectedIndex = index,
-                )
-            }
-            val selectedMedia = uiState.value.mediaItems.getOrNull(index)
+    private fun openStory(index: Int) {
+        updateState {
+            copy(
+                isDetailMode = true,
+                selectedIndex = index,
+            )
+        }
+        val selectedMedia = uiState.value.mediaItems.getOrNull(index)
 
-            if (selectedMedia?.type == UiMediaType.VIDEO || selectedMedia?.type == UiMediaType.AUDIO) {
+        if (selectedMedia?.type == UiMediaType.VIDEO || selectedMedia?.type == UiMediaType.AUDIO) {
+            prepareMedia(selectedMedia.mediaUrl)
+        }
+    }
+
+    private fun closeStory() {
+        updateState {
+            copy(
+                isDetailMode = false,
+                selectedIndex = -1,
+            )
+        }
+        exoPlayer.pause()
+    }
+
+    private fun pageChanged(index: Int) {
+        updateState {
+            copy(
+                selectedIndex = index,
+                isTextExpanded = false
+            )
+        }
+
+        val selectedMedia = uiState.value.mediaItems.getOrNull(index)
+
+        when (selectedMedia?.type) {
+            UiMediaType.VIDEO, UiMediaType.AUDIO -> {
                 prepareMedia(selectedMedia.mediaUrl)
             }
-        }
 
-        private fun closeStory() {
-            updateState {
-                copy(
-                    isDetailMode = false,
-                    selectedIndex = -1,
-                )
-            }
-            exoPlayer.pause()
-        }
-
-        private fun pageChanged(index: Int) {
-            updateState {
-                copy(
-                    selectedIndex = index,
-                    isTextExpanded = false
-                )
-            }
-
-            val selectedMedia = uiState.value.mediaItems.getOrNull(index)
-
-            when (selectedMedia?.type) {
-                UiMediaType.VIDEO, UiMediaType.AUDIO -> {
-                    prepareMedia(selectedMedia.mediaUrl)
-                }
-                else -> {
-                    exoPlayer.pause()
-                }
+            else -> {
+                exoPlayer.pause()
             }
         }
+    }
 
-        private fun prepareMedia(url: String) {
-            if (url.isEmpty()) return
+    private fun prepareMedia(url: String) {
+        if (url.isEmpty()) return
 
-            val currentUri = exoPlayer.currentMediaItem?.localConfiguration?.uri?.toString()
+        val currentUri = exoPlayer.currentMediaItem?.localConfiguration?.uri?.toString()
 
-            if (currentUri == url) {
-                exoPlayer.seekTo(0)
-                exoPlayer.play()
-                return
-            }
-
-            exoPlayer.stop()
-            exoPlayer.clearMediaItems()
-
-            val mediaItem = MediaItem.fromUri(url)
-            exoPlayer.setMediaItem(mediaItem)
-            exoPlayer.prepare()
+        if (currentUri == url) {
+            exoPlayer.seekTo(0)
             exoPlayer.play()
+            return
         }
+
+        exoPlayer.stop()
+        exoPlayer.clearMediaItems()
+
+        val mediaItem = MediaItem.fromUri(url)
+        exoPlayer.setMediaItem(mediaItem)
+        exoPlayer.prepare()
+        exoPlayer.play()
+    }
 
     private fun toggleExpand() {
         updateState {
@@ -166,8 +168,13 @@ class InvitationCollectionViewModel @Inject constructor(
         }
     }
 
-    // TODO: 임시 다운로드 테스트용
-    fun downloadMedia(url: String, mediaType: UiMediaType) {
+
+    private fun downloadCurrentMedia() {
+        val item = uiState.value.mediaItems.getOrNull(uiState.value.selectedIndex) ?: return
+        downloadMedia(item.mediaUrl, item.type)
+    }
+
+    private fun downloadMedia(url: String, mediaType: UiMediaType) {
         val domainType = when (mediaType) {
             UiMediaType.IMAGE -> MediaType.IMAGE
             UiMediaType.VIDEO -> MediaType.VIDEO
