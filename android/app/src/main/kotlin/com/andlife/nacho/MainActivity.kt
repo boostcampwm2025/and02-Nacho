@@ -7,6 +7,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.login.LocalLoginManager
 import com.andlife.login.social.LoginManager
@@ -23,13 +26,21 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val splashScreen = installSplashScreen()
         viewModel.handleDeepLink(intent)
-
+        splashScreen.setKeepOnScreenCondition {
+            viewModel.uiState.value.isSplash
+        }
         enableEdgeToEdge()
         setContent {
             NachoTheme {
                 CompositionLocalProvider(LocalLoginManager provides loginManager) {
-                    NachoApp()
+                    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                    if (!uiState.isSplash) {
+                        NachoApp(
+                            startDestination = uiState.startDestination
+                        )
+                    }
                 }
             }
         }

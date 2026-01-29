@@ -1,15 +1,16 @@
 -- 1. 유저 데이터
-INSERT INTO users (id, email, name, profile_image_url, created_at, updated_at) VALUES
-(1, 'donghyun@boostcamp.com', '동현', 'https://picsum.photos/200/200?random=10', NOW(), NOW()),
-(2, 'ant@boostcamp.com', '미오', 'https://picsum.photos/200/200?random=11', NOW(), NOW()),
-(3, 'dk0000@boostcamp.com', '동경', 'https://picsum.photos/200/200?random=12', NOW(), NOW()),
-(4, 'jeongwoo@boostcamp.com', '정우', 'https://picsum.photos/200/200?random=14', NOW(), NOW()),
-(5, 'jimin@boostcamp.com', '지민', 'https://picsum.photos/200/200?random=15', NOW(), NOW()),
-(6, 'andlife@example.com', '안드라이프', 'https://picsum.photos/200?random=16', NOW(), NOW()),
-(7, 'minsu@test.com', '민수', 'https://picsum.photos/200?random=17', NOW(), NOW()),
-(8, 'sujin@test.com', '수진', 'https://picsum.photos/200?random=18', NOW(), NOW()),
-(9, 'geonu@test.com', '건우', 'https://picsum.photos/200?random=19', NOW(), NOW()),
-(10, 'nayoung@test.com', '나영', 'https://picsum.photos/200?random=20', NOW(), NOW());
+-- kakao_id는 개발용 더미값 (실제로는 카카오 로그인 시 발급)
+INSERT INTO users (id, kakao_id, email, name, profile_image_url, created_at, updated_at) VALUES
+(1, 1000000001, 'donghyun@boostcamp.com', '동현', 'https://picsum.photos/200/200?random=10', NOW(), NOW()),
+(2, 1000000002, 'ant@boostcamp.com', '미오', 'https://picsum.photos/200/200?random=11', NOW(), NOW()),
+(3, 1000000003, 'dk0000@boostcamp.com', '동경', 'https://picsum.photos/200/200?random=12', NOW(), NOW()),
+(4, 1000000004, 'jeongwoo@boostcamp.com', '정우', 'https://picsum.photos/200/200?random=14', NOW(), NOW()),
+(5, 1000000005, 'jimin@boostcamp.com', '지민', 'https://picsum.photos/200/200?random=15', NOW(), NOW()),
+(6, 1000000006, 'andlife@example.com', '안드라이프', 'https://picsum.photos/200?random=16', NOW(), NOW()),
+(7, 1000000007, 'minsu@test.com', '민수', 'https://picsum.photos/200?random=17', NOW(), NOW()),
+(8, 1000000008, 'sujin@test.com', '수진', 'https://picsum.photos/200?random=18', NOW(), NOW()),
+(9, 1000000009, 'geonu@test.com', '건우', 'https://picsum.photos/200?random=19', NOW(), NOW()),
+(10, 1000000010, 'nayoung@test.com', '나영', 'https://picsum.photos/200?random=20', NOW(), NOW());
 
 -- 2. 초대장 데이터
 INSERT INTO invitations (id, host_id, title, display_host_name, thumbnail_urls, invitation_date, start_time, end_time, place_name, address, lat, lng, location_guide, created_at, updated_at) VALUES

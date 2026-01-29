@@ -9,4 +9,5 @@ sealed interface MyInvitationUiEvent : BaseUiEvent {
     data class ClickInvitation(val id: Long) : MyInvitationUiEvent
     data class ChangeSort(val isUpcoming: Boolean, val newSort: SortDirection) : MyInvitationUiEvent
     data object ClickCreate : MyInvitationUiEvent
+    data class ClickDeleteInvitation(val id: Long) : MyInvitationUiEvent
 }

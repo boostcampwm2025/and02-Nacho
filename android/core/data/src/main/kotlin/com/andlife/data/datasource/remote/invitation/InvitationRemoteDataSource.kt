@@ -37,4 +37,5 @@ interface InvitationRemoteDataSource {
     ): Result<PagingResponse<UpcomingInvitationResponse>, DataError>
     suspend fun createInvitationCard(invitationId: Long, request: InvitationCardRequest): Result<Long, DataError>
     suspend fun updateInvitationCard(cardId: Long, request: InvitationCardRequest): Result<Long, DataError>
+    suspend fun deleteInvitation(invitationId: Long): Result<Unit, DataError>
 }

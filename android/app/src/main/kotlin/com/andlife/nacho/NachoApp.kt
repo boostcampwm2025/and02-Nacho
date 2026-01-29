@@ -6,17 +6,20 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.andlife.invitation.InvitationDetail
 import com.andlife.nacho.model.MainSideEffect
+import com.andlife.nacho.navigation.MainBottomTab
 import com.andlife.nacho.navigation.NachoNavHost
 import com.andlife.nacho.navigation.rememberInvitationNavigator
 import com.andlife.nacho.viewmodel.MainViewModel
 import com.andlife.ui.util.collectWithLifecycle
+import kotlin.reflect.KClass
 
 @Composable
 fun NachoApp(
+    startDestination: KClass<*>,
     modifier: Modifier = Modifier,
     viewModel: MainViewModel = hiltViewModel(),
 ) {
-    val navigator = rememberInvitationNavigator()
+    val navigator = rememberInvitationNavigator(startDestination = startDestination)
     val deepLinkManager = viewModel.deepLinkManager
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
@@ -37,6 +40,14 @@ fun NachoApp(
                     popUpTo(navigator.navController.graph.startDestinationId)
                     launchSingleTop = true
                 }
+            }
+
+            MainSideEffect.NavigateToHome -> {
+                navigator.navigate(MainBottomTab.HOME)
+            }
+
+            MainSideEffect.NavigateToLogin -> {
+                navigator.navigateToLogin()
             }
         }
     }

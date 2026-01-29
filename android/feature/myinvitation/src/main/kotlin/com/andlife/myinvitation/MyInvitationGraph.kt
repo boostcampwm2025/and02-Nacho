@@ -1,8 +1,8 @@
 package com.andlife.myinvitation
 
-import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -41,12 +41,14 @@ fun NavController.navigateToMyInvitationDetail(
 }
 
 fun NavGraphBuilder.myInvitationNavGraph(
+    snackbarHostState: SnackbarHostState,
     paddingValues: PaddingValues,
     onNavigateToCreate: () -> Unit,
     onNavigateToDetail: (Long) -> Unit,
 ) {
     composable<MyInvitation> {
         MyInvitationRoute(
+            snackbarHostState = snackbarHostState,
             onNavigateToCreate = onNavigateToCreate,
             onNavigateToDetail = onNavigateToDetail,
             modifier = Modifier.padding(paddingValues),

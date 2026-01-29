@@ -1,6 +1,13 @@
 package com.andlife.data.datasource.remote.user
 
+import com.andlife.domain.error.DataError
+import com.andlife.domain.util.Result
+import com.andlife.network.model.auth.AuthRequest
+import com.andlife.network.model.auth.AuthResponse
+import com.andlife.network.model.auth.UserResponse
+
 interface UserRemoteDataSource {
-    // Todo : 유저 정보 불러오기
-    // 큰 틀만 추가하기 위해 만들었습니다.
+    suspend fun login(request: AuthRequest): Result<AuthResponse, DataError>
+    suspend fun getUserInfo(): Result<UserResponse, DataError>
+    suspend fun reissue(refreshToken: String): Result<AuthResponse, DataError>
 }

@@ -1,5 +1,7 @@
 package com.andlife.nachoserver.response
 
+import org.springframework.http.ResponseEntity
+
 data class BaseResponse<out T>(
     val code: Int,
     val data: T?,
@@ -28,6 +30,20 @@ data class BaseResponse<out T>(
                 message = customMessage ?: responseCode.message
             )
         }
-    }
 
+        fun errorWithStatus(
+            responseCode: ResponseCode,
+            customMessage: String? = null
+        ): ResponseEntity<BaseResponse<Nothing>> {
+            return ResponseEntity
+                .status(responseCode.httpStatus)
+                .body(
+                    BaseResponse(
+                        code = responseCode.httpStatus.value(),
+                        data = null,
+                        message = customMessage ?: responseCode.message
+                    )
+                )
+        }
+    }
 }

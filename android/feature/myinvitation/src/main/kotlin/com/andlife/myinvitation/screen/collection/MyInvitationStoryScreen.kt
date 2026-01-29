@@ -86,6 +86,7 @@ fun InvitationStoryScreen(
                 date = item.createdAt,
                 profileUrl = item.authorProfileUrl,
                 onClose = onClose,
+                onDownloadClick = {},
             )
         }
 

@@ -1,5 +1,8 @@
 package com.andlife.data.util.media
 
+import com.andlife.domain.util.MediaDownloader
+import com.andlife.domain.util.MediaFileProvider
+import com.andlife.domain.util.MediaUploader
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -8,9 +11,21 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class MediaUtilModule { // TODO: util에 있는 모든 것들 여기에 통합해도 될 듯요.
+abstract class MediaUtilModule {
 
     @Binds
     @Singleton
     abstract fun bindImageCompressor(impl: ImageCompressorImpl): ImageCompressor
+
+    @Binds
+    @Singleton
+    abstract fun bindMediaUploader(impl: MediaUploaderImpl): MediaUploader
+
+    @Binds
+    @Singleton
+    abstract fun bindMediaDownloader(impl: MediaDownloaderImpl): MediaDownloader
+
+    @Binds
+    @Singleton
+    abstract fun bindMediaFileProvider(mediaFileProviderImpl: MediaFileProviderImpl): MediaFileProvider
 }
