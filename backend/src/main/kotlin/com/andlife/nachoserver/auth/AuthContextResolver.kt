@@ -25,7 +25,6 @@ class AuthContextResolver(
         binderFactory: WebDataBinderFactory?
     ): AuthContext {
         val authHeader = webRequest.getHeader("Authorization")
-
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             val token = authHeader.removePrefix("Bearer ")
 
