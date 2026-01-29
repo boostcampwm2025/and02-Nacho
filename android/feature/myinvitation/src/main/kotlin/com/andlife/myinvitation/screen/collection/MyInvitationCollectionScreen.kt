@@ -58,6 +58,7 @@ fun MyInvitationCollectionScreen(
     NachoMediaGridView(
         items = uiState.mediaItems,
         onItemClick = onOpenStory,
+        isLoading = uiState.isLoading,
         modifier = modifier,
     )
 

@@ -94,6 +94,7 @@ fun NachoNavHost(
             )
 
             myInvitationNavGraph(
+                snackbarHostState = snackbarHostState,
                 paddingValues = innerPadding,
                 onNavigateToCreate = navigator::navigateToMyInvitationCreate,
                 onNavigateToDetail = navigator::navigateToMyInvitationDetail,

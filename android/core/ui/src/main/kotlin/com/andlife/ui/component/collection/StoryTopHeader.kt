@@ -38,6 +38,7 @@ fun StoryTopHeader(
     name: String,
     date: LocalDateTime,
     onClose: () -> Unit,
+    onDownloadClick: () -> Unit,
     modifier: Modifier = Modifier,
     profileUrl: String? = null,
 ) {
@@ -93,7 +94,7 @@ fun StoryTopHeader(
             )
         }
 
-        IconButton(onClick = { /* Todo: 다운로드 로직 */ }) {
+        IconButton(onClick = onDownloadClick) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_download_24),
                 contentDescription = stringResource(R.string.desc_btn_download),
@@ -112,6 +113,7 @@ private fun StoryTopHeaderPreview() {
             name = "사용자 이름",
             date = now,
             onClose = {},
+            onDownloadClick = {},
         )
     }
 }

@@ -56,4 +56,6 @@ interface InvitationRepository : JpaRepository<Invitation, Long> {
         @Param("limitDate") limitDate: LocalDate,
         pageable: Pageable
     ): Page<Invitation>
+
+    fun findByIdAndHostId(id: Long, hostId: Long): Invitation?
 }

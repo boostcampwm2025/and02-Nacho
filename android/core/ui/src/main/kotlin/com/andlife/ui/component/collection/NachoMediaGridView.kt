@@ -1,13 +1,18 @@
 package com.andlife.ui.component.collection
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
@@ -19,10 +24,13 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import com.andlife.ui.R
+import com.andlife.ui.component.media.MediaItemSkeleton
 
 @Composable
 fun NachoMediaGridView(
     items: ImmutableList<CollectionUiModel>,
+    isLoading: Boolean,
     onItemClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -30,24 +38,46 @@ fun NachoMediaGridView(
         modifier = modifier,
         color = NachoTheme.colorScheme.backgroundPrimary,
     ) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
-            modifier = modifier,
-            contentPadding = PaddingValues(NachoSpacing.small),
-            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.twoXSmall),
-            verticalArrangement = Arrangement.spacedBy(NachoSpacing.twoXSmall),
-        ) {
-            itemsIndexed(
-                items = items,
-                key = { index, item -> "${item.type}_${item.id}" },
-            ) { index, item ->
-                MediaItem(
-                    mediaUrl = item.mediaUrl,
-                    thumbnailUrl = item.thumbnailUrl,
-                    mediaType = item.type,
-                    duration = item.durationSeconds,
-                    onClick = { onItemClick(index) },
-                )
+        if (isLoading) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                modifier = modifier,
+                contentPadding = PaddingValues(NachoSpacing.small),
+                horizontalArrangement = Arrangement.spacedBy(NachoSpacing.twoXSmall),
+                verticalArrangement = Arrangement.spacedBy(NachoSpacing.twoXSmall),
+                userScrollEnabled = false
+            ) {
+                items(9) {
+                    MediaItemSkeleton()
+                }
+            }
+        } else if (items.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = stringResource(R.string.txt_collection_empty))
+            }
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                modifier = modifier,
+                contentPadding = PaddingValues(NachoSpacing.small),
+                horizontalArrangement = Arrangement.spacedBy(NachoSpacing.twoXSmall),
+                verticalArrangement = Arrangement.spacedBy(NachoSpacing.twoXSmall),
+            ) {
+                itemsIndexed(
+                    items = items,
+                    key = { index, item -> "${item.type}_${item.id}" },
+                ) { index, item ->
+                    MediaItem(
+                        mediaUrl = item.mediaUrl,
+                        thumbnailUrl = item.thumbnailUrl,
+                        mediaType = item.type,
+                        duration = item.durationSeconds,
+                        onClick = { onItemClick(index) },
+                    )
+                }
             }
         }
     }
@@ -95,6 +125,19 @@ private fun NachoMediaGridViewPreview() {
     NachoTheme {
         NachoMediaGridView(
             items = mockItems,
+            isLoading = false,
+            onItemClick = {},
+        )
+    }
+}
+
+@PreviewTheme
+@Composable
+private fun NachoMediaGridViewLoadingPreview() {
+    NachoTheme {
+        NachoMediaGridView(
+            items = persistentListOf(),
+            isLoading = true,
             onItemClick = {},
         )
     }

@@ -2,6 +2,8 @@ package com.andlife.nacho
 
 import android.app.Application
 import android.util.Log
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
 import com.andlife.deeplink.DeepLinkConfig
 import com.andlife.deeplink.DeepLinkManager
 import com.andlife.deeplink.di.AppsFlyerDevKey
@@ -15,7 +17,11 @@ import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
 @HiltAndroidApp
-class NachoApplication : Application() {
+class NachoApplication : Application(), Configuration.Provider {
+
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
+
     @Inject
     @KakaoNativeKey
     lateinit var kakaoNativeKey: String
@@ -30,6 +36,11 @@ class NachoApplication : Application() {
 
     @Inject
     lateinit var deepLinkManager: DeepLinkManager
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
 
     override fun onCreate() {
         super.onCreate()

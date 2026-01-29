@@ -9,6 +9,7 @@ import retrofit2.http.Body
 import com.andlife.network.model.invitation.InvitationSummaryResponse
 import com.andlife.network.model.invitation.JoinResponse
 import com.andlife.network.model.invitation.UpcomingInvitationResponse
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -58,6 +59,11 @@ interface InvitationService {
         @Path("invitationId") invitationId: Long,
         @Body request: InvitationSaveRequest,
     ): BaseResponse<InvitationResponse>
+
+    @DELETE("/api/invitations/{invitationId}")
+    suspend fun deleteInvitation(
+        @Path("invitationId") invitationId: Long,
+    ): BaseResponse<Unit>
 
     @GET("/api/invitations/upcoming")
     suspend fun getUpcomingInvitations(

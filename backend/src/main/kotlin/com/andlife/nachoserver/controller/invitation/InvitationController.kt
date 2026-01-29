@@ -19,6 +19,7 @@ import com.andlife.nachoserver.service.guestbook.GuestBookService
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -261,6 +262,22 @@ class InvitationController(
         } catch (e: Exception) {
             println(e.message)
             BaseResponse.error(responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    @DeleteMapping("/{invitationId}")
+    fun deleteInvitation(
+        @PathVariable invitationId: Long,
+        authContext: AuthContext
+    ): BaseResponse<Unit> {
+        return when (authContext) {
+            is AuthContext.Member -> {
+                invitationService.deleteInvitation(invitationId, authContext.userId)
+                BaseResponse.success(Unit)
+            }
+            is AuthContext.Guest -> {
+                BaseResponse.error(CommonResponseCode.FORBIDDEN)
+            }
         }
     }
 

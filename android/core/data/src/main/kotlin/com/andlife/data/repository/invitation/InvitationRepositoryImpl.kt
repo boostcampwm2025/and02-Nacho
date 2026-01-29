@@ -64,6 +64,9 @@ internal class InvitationRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteInvitation(invitationId: Long): Result<Unit, DataError> =
+        invitationRemoteDataSource.deleteInvitation(invitationId)
+
     override suspend fun getInvitation(invitationId: Long): Result<Invitation, DataError> =
         invitationRemoteDataSource.getInvitation(invitationId).map { response ->
             response.toDomain(json)
@@ -72,7 +75,8 @@ internal class InvitationRepositoryImpl @Inject constructor(
     override fun getParticipantInvitations(
         status: InvitationStatus,
         sortType: SortDirection,
-        isMyInvitation: Boolean
+        isMyInvitation: Boolean,
+        onTotalCountLoaded: (Int) -> Unit
     ): Flow<PagingData<InvitationSummary>> {
         return Pager(
             config = PagingConfig(
@@ -80,14 +84,15 @@ internal class InvitationRepositoryImpl @Inject constructor(
                 enablePlaceholders = false,
                 initialLoadSize = PAGE_SIZE
             ),
-            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType, isMyInvitation) }
+            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType, isMyInvitation, onTotalCountLoaded) }
         ).flow
     }
 
     override fun getMyInvitations(
         status: InvitationStatus,
         sortType: SortDirection,
-        isMyInvitation: Boolean
+        isMyInvitation: Boolean,
+        onTotalCountLoaded: (Int) -> Unit
     ): Flow<PagingData<InvitationSummary>> {
         return Pager(
             config = PagingConfig(
@@ -95,7 +100,7 @@ internal class InvitationRepositoryImpl @Inject constructor(
                 enablePlaceholders = false,
                 initialLoadSize = PAGE_SIZE
             ),
-            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType, isMyInvitation) }
+            pagingSourceFactory = { InvitationPagingSource(invitationRemoteDataSource, status, sortType, isMyInvitation, onTotalCountLoaded) }
         ).flow
     }
 
