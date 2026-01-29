@@ -25,7 +25,7 @@ class MediaDownloaderImpl @Inject constructor(
         url: String,
         fileName: String,
         mediaType: MediaType
-    ): UUID {
+    ): String {
         val inputData = workDataOf(
             DownloadWorker.KEY_URL to url,
             DownloadWorker.KEY_FILE_NAME to fileName,
@@ -44,16 +44,18 @@ class MediaDownloaderImpl @Inject constructor(
 
         workManager.enqueue(downloadRequest)
 
-        return downloadRequest.id
+        return downloadRequest.id.toString()
     }
 
-    override fun getDownloadStatus(workId: UUID): Flow<DownloadState> {
-        return workManager.getWorkInfoByIdFlow(workId)
+    override fun getDownloadStatus(workId: String): Flow<DownloadState> {
+        val uuid: UUID = UUID.fromString(workId)
+        return workManager.getWorkInfoByIdFlow(uuid)
             .map { workInfo -> workInfo.toDownloadState() }
     }
 
-    override fun cancelDownload(workId: UUID) {
-        workManager.cancelWorkById(workId)
+    override fun cancelDownload(workId: String) {
+        val uuid: UUID = UUID.fromString(workId)
+        workManager.cancelWorkById(uuid)
     }
 
     override fun cancelAllDownloads() {
