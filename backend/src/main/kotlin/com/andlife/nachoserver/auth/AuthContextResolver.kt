@@ -1,7 +1,7 @@
 package com.andlife.nachoserver.auth
 
-import com.andlife.nachoserver.error.BusinessException
-import com.andlife.nachoserver.response.CommonResponseCode
+import com.andlife.nachoserver.auth.exception.TokenExpiredException
+import com.andlife.nachoserver.auth.jwt.JwtProvider
 import org.springframework.core.MethodParameter
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.support.WebDataBinderFactory
@@ -10,7 +10,9 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
 
 @Component
-class AuthContextResolver : HandlerMethodArgumentResolver {
+class AuthContextResolver(
+    private val jwtProvider: JwtProvider
+) : HandlerMethodArgumentResolver {
 
     override fun supportsParameter(parameter: MethodParameter): Boolean {
         return parameter.parameterType == AuthContext::class.java
@@ -22,12 +24,19 @@ class AuthContextResolver : HandlerMethodArgumentResolver {
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?
     ): AuthContext {
-        val userIdHeader = webRequest.getHeader("Nacho-User-Id")
+        val authHeader = webRequest.getHeader("Authorization")
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            val token = authHeader.removePrefix("Bearer ")
 
-        if (!userIdHeader.isNullOrBlank()) {
-            val userId = userIdHeader.toLongOrNull()
-                ?: throw BusinessException(CommonResponseCode.BAD_REQUEST)
-            return AuthContext.Member(userId)
+            if (jwtProvider.validateToken(token)) {
+                val userId = jwtProvider.getUserId(token)
+                return AuthContext.Member(userId)
+            }
+
+            if (jwtProvider.isTokenExpired(token)) {
+                throw TokenExpiredException()
+            }
+
         }
 
         val invitationIdsHeader = webRequest.getHeader("Nacho-Guest-Invitation-Ids")

@@ -1,14 +1,21 @@
 package com.andlife.nachoserver.util
 
+import com.andlife.nachoserver.auth.exception.TokenExpiredException
 import com.andlife.nachoserver.error.BusinessException
 import com.andlife.nachoserver.response.BaseResponse
 import com.andlife.nachoserver.response.CommonResponseCode
 import jakarta.persistence.EntityNotFoundException
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
+
+    @ExceptionHandler(TokenExpiredException::class)
+    fun handleTokenExpired(e: TokenExpiredException): ResponseEntity<BaseResponse<Nothing>> {
+        return BaseResponse.errorWithStatus(CommonResponseCode.TOKEN_EXPIRED)
+    }
 
     @ExceptionHandler(EntityNotFoundException::class)
     fun handleNotFound(e: EntityNotFoundException): BaseResponse<Nothing> {

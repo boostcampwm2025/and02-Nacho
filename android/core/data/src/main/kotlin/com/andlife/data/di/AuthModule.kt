@@ -1,6 +1,8 @@
 package com.andlife.data.di
 
+import com.andlife.data.auth.AuthStateManagerImpl
 import com.andlife.data.auth.AuthTokenProviderImpl
+import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.network.auth.AuthTokenProvider
 import dagger.Binds
 import dagger.Module
@@ -14,4 +16,9 @@ abstract class AuthModule {
     abstract fun bindAuthTokenProvider(
         impl: AuthTokenProviderImpl
     ): AuthTokenProvider
+
+    @Binds
+    abstract fun bindAuthStateManager(
+        impl: AuthStateManagerImpl
+    ): AuthStateManager
 }
