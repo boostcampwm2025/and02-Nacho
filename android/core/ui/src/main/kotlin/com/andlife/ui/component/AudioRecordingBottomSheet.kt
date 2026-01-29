@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,7 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -275,14 +273,16 @@ private fun WaveformVisualization(
     }
 
     Row(
-        modifier = modifier.height(NachoCardSize.media),
+        modifier = modifier
+            .height(NachoCardSize.media)
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(NachoSpacing.twoXSmall),
         verticalAlignment = Alignment.CenterVertically
     ) {
         waveformHeights.forEach { height ->
             Box(
                 modifier = Modifier
-                    .width(NachoSpacing.twoXSmall)
+                    .weight(1f)
                     .height(
                         (NachoCardSize.media * height)
                             .coerceAtLeast(NachoSpacing.twoXSmall)
@@ -295,7 +295,6 @@ private fun WaveformVisualization(
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @PreviewTheme
