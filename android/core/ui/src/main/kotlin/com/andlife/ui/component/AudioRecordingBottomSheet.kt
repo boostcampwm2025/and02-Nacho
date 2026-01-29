@@ -272,13 +272,13 @@ private fun WaveformVisualization(
 ) {
     val waveformHeights = remember {
         mutableStateListOf<Float>().apply {
-            repeat(MAX_BARS_COUNT) { add(0f) }
+            repeat(MAX_BARS_COUNT) { add(0.05f) }
         }
     }
 
     LaunchedEffect(amplitude) {
         val normalized = (amplitude / 32767f)
-            .coerceIn(0f, 1f)
+            .coerceIn(0.05f, 1f)
 
         waveformHeights.add(normalized)
         waveformHeights.removeFirst()
