@@ -83,6 +83,7 @@ import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookSideEffect
 import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookUiEvent
 import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookUiState
 import com.andlife.myinvitation.viewmodel.MyInvitationGuestBookViewModel
+import com.andlife.ui.component.dialog.LoginDialog
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.invitation.InvitationGuestBookForm
 import com.andlife.ui.component.paging.PagingStateContent
@@ -822,49 +823,6 @@ private fun InvitationGuestBookResultPreview() {
                     onAudioMediaClick = {},
                     onPlayVideoClick = {}
                 )
-            }
-        }
-    }
-}
-
-@Composable
-private fun LoginDialog(
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-) {
-    NachoDialog(onDismiss = onDismiss) {
-        Column(
-            modifier = Modifier.padding(NachoSpacing.xLarge),
-            verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
-        ) {
-            Text(
-                text = "로그인",
-                color = NachoTheme.colorScheme.textPrimary,
-                style = NachoTheme.typography.headingSmallSemiBold,
-            )
-            Text(
-                text = "로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?",
-                color = NachoTheme.colorScheme.textSecondary,
-                style = NachoTheme.typography.bodyMediumRegular,
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-            ) {
-                TextButton(onClick = onDismiss) {
-                    Text(
-                        text = "취소",
-                        color = NachoTheme.colorScheme.textPrimary,
-                        style = NachoTheme.typography.bodyMediumSemiBold,
-                    )
-                }
-                TextButton(onClick = onConfirm) {
-                    Text(
-                        text = "확인",
-                        color = NachoTheme.colorScheme.brandDark,
-                        style = NachoTheme.typography.bodyMediumSemiBold,
-                    )
-                }
             }
         }
     }
