@@ -34,6 +34,10 @@ class AuthStateManagerImpl @Inject constructor(
         userStorage.setWasLoggedIn(true)
     }
 
+    override suspend fun setLoading() {
+        _authState.update { AuthState.Loading }
+    }
+
     override suspend fun navigateToLogin() {
         _authEvent.send(AuthEvent.NavigateToLogin)
     }
