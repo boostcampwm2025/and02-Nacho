@@ -281,6 +281,9 @@ fun InvitationGuestBookRoute(
                     viewModel.onEvent(InvitationGuestBookUiEvent.UpdateMediaPlayState(false))
                     viewModel.videoPlayerPool.pauseAllPlayers()
                     viewModel.audioPlayerManager.pause()
+                    if (audioRecorder.isRecording.value) {
+                        audioRecorder.pauseRecording()
+                    }
                 }
 
                 Lifecycle.Event.ON_DESTROY -> {
