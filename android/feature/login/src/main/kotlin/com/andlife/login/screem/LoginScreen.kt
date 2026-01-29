@@ -3,6 +3,7 @@ package com.andlife.login.screem
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Scaffold
@@ -19,6 +21,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -38,6 +41,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.andlife.designsystem.preview.PreviewTheme
@@ -51,6 +56,7 @@ import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.login.LocalLoginManager
 import com.andlife.login.R
+import com.andlife.login.model.LoginUiState
 import com.andlife.login.model.LoginUiEvent
 import com.andlife.login.social.SocialType
 import com.andlife.login.viewmodel.LoginViewModel
@@ -61,6 +67,7 @@ fun LoginRoute(
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val loginManager = LocalLoginManager.current
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -68,8 +75,10 @@ fun LoginRoute(
     val res = LocalResources.current
 
     LoginScreen(
+        uiState = uiState,
         modifier = modifier,
         snackbarHostState = snackbarHostState,
+        onEvent = viewModel::onEvent,
         onSocialLogin = { socialType ->
             scope.launch {
                 loginManager.login(
@@ -92,8 +101,10 @@ fun LoginRoute(
 
 @Composable
 private fun LoginScreen(
+    uiState: LoginUiState,
     snackbarHostState: SnackbarHostState,
     onSocialLogin: (SocialType) -> Unit,
+    onEvent: (LoginUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -103,36 +114,42 @@ private fun LoginScreen(
             SnackbarHost(snackbarHostState)
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier.padding(innerPadding),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(NachoSpacing.large)
-        ) {
+        Box(modifier = Modifier.padding(innerPadding)) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(NachoSpacing.large)
+            ) {
 
-            Spacer(modifier = Modifier.fillMaxHeight(0.7f))
-            KakaoLoginButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = NachoSpacing.large),
-                onLoginClick = { onSocialLogin(SocialType.KAKAO) }
-            )
-            GuestLoginButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = NachoSpacing.large),
-                onGuestLoginClick = {}
-            )
+                Spacer(modifier = Modifier.fillMaxHeight(0.7f))
+                KakaoLoginButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = NachoSpacing.large),
+                    onLoginClick = { onSocialLogin(SocialType.KAKAO) }
+                )
+                GuestLoginButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = NachoSpacing.large),
+                    onGuestLoginClick = { onEvent(LoginUiEvent.GuestLogin) }
+                )
 
-            PolicyAndTermsText(
-                modifier = Modifier.padding(top = NachoSpacing.large),
-                onPrivacyPolicyClick = {
-                    Log.d("Login", "onPrivacyPolicyClick")
-                },
-                onTermsOfServiceClick = {
-                    Log.d("Login", "onTermsOfServiceClick")
-                }
-            )
-            Spacer(modifier = Modifier.fillMaxHeight(0.05f))
+                PolicyAndTermsText(
+                    modifier = Modifier.padding(top = NachoSpacing.large),
+                    onPrivacyPolicyClick = {
+                        Log.d("Login", "onPrivacyPolicyClick")
+                    },
+                    onTermsOfServiceClick = {
+                        Log.d("Login", "onTermsOfServiceClick")
+                    }
+                )
+                Spacer(modifier = Modifier.fillMaxHeight(0.05f))
+            }
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
         }
     }
 }
@@ -142,11 +159,13 @@ private fun KakaoLoginButton(
     modifier: Modifier = Modifier,
     onLoginClick: () -> Unit,
     shape: Shape = RoundedCornerShape(NachoSpacing.medium),
+    isLoading: Boolean = false
 ) {
     Surface(
         modifier = modifier,
         shape = shape,
         color = KakaoButtonColor,
+        enabled = !isLoading,
         onClick = onLoginClick
     ) {
         Row(
@@ -175,7 +194,8 @@ private fun KakaoLoginButton(
 private fun GuestLoginButton(
     onGuestLoginClick: () -> Unit,
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(NachoSpacing.medium)
+    shape: Shape = RoundedCornerShape(NachoSpacing.medium),
+    isLoading: Boolean = false
 ) {
     Surface(
         modifier = modifier,
@@ -185,6 +205,7 @@ private fun GuestLoginButton(
             width = NachoStroke.small,
             color = NachoTheme.colorScheme.backgroundBorder
         ),
+        enabled = !isLoading,
         color = NachoTheme.colorScheme.backgroundPrimary,
         onClick = onGuestLoginClick
     ) {
@@ -265,8 +286,10 @@ private fun PolicyAndTermsText(
 private fun LoginScreenPreview() {
     NachoTheme {
         LoginScreen(
+            uiState = LoginUiState(),
             snackbarHostState = remember { SnackbarHostState() },
-            onSocialLogin = {}
+            onSocialLogin = {},
+            onEvent = {}
         )
     }
 }

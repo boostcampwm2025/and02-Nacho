@@ -47,7 +47,6 @@ fun NachoNavHost(
     modifier: Modifier = Modifier,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
-
     Scaffold(
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
         snackbarHost = {
