@@ -81,6 +81,7 @@ import com.andlife.model.guestbook.GuestBookInvitationUiModel
 import com.andlife.model.guestbook.GuestBookMediaUiModel
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
+import com.andlife.ui.component.AudioRecordingBottomSheet
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.invitation.InvitationGuestBookForm
 import com.andlife.ui.component.paging.PagingStateContent
@@ -98,7 +99,6 @@ import kotlin.math.max
 import kotlin.math.min
 
 private const val CAMERA_IMAGES_DIR = "camera_images"
-private const val AUDIO_RECORDINGS_DIR = "audio_recordings"
 
 @Composable
 fun InvitationGuestBookRoute(
@@ -120,6 +120,7 @@ fun InvitationGuestBookRoute(
     var showDeleteDialog by remember { mutableStateOf<Long?>(null) }
     var showPermissionDialog by remember { mutableStateOf<String?>(null) }
     var scrollToTop by remember { mutableStateOf(false) }
+    var showRecordingBottomSheet by remember { mutableStateOf(false) }
 
     var isMediaActive by remember { mutableStateOf(true) }
     val navigateBackWithCleanup: () -> Unit = {
@@ -222,35 +223,11 @@ fun InvitationGuestBookRoute(
             }
 
             is InvitationGuestBookSideEffect.StartAudioRecording -> {
-                // 오디오 녹음 시작
-                val audioRecordingsDir = File(context.cacheDir, AUDIO_RECORDINGS_DIR)
-                if (!audioRecordingsDir.exists()) {
-                    audioRecordingsDir.mkdirs()
-                }
-                val audioFile = File(
-                    audioRecordingsDir,
-                    "audio_${System.currentTimeMillis()}.m4a"
-                )
-
-                audioRecorder.startRecording(audioFile) { e ->
-                    viewModel.onEvent(InvitationGuestBookUiEvent.ClickMicrophone)
-                    // exception 표시
-                }
+                showRecordingBottomSheet = true
             }
 
             is InvitationGuestBookSideEffect.StopAudioRecording -> {
-                // 오디오 녹음 중지
-                audioRecorder.stopRecording { recordedFile ->
-                    if (recordedFile != null) {
-                        // 녹음된 오디오 파일을 SelectedMedia로 변환
-                        val currentMedias = uiState.selectedMedias
-                        if (currentMedias.size < 5) {
-                            val audioMedia = uriToSelectedMedia(context, recordedFile.toURI().toString())
-                            val updatedMedias = (currentMedias + audioMedia).toImmutableList()
-                            viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias))
-                        }
-                    }
-                }
+                // TODO: 아무것도 안하는데요
             }
 
             is InvitationGuestBookSideEffect.ScrollToTop -> {
@@ -438,6 +415,24 @@ fun InvitationGuestBookRoute(
         audioPermissionLauncher = audioPermissionLauncher,
         modifier = modifier,
     )
+
+    if (showRecordingBottomSheet) {
+        AudioRecordingBottomSheet(
+            audioRecorder = audioRecorder,
+            onRecordingComplete = { recordedFile ->
+                val currentMedias = uiState.selectedMedias
+                if (currentMedias.size < 5) {
+                    val newMedia = uriToSelectedMedia(context, recordedFile.toURI().toString())
+                    val updatedMedias = (currentMedias + newMedia).toImmutableList()
+                    viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias))
+                }
+                showRecordingBottomSheet = false
+            },
+            onDismiss = {
+                showRecordingBottomSheet = false
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
