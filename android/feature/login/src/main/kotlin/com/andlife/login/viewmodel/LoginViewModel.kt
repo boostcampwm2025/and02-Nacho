@@ -1,5 +1,10 @@
 package com.andlife.login.viewmodel
 
+import android.util.Log
+import androidx.lifecycle.viewModelScope
+import com.andlife.domain.repository.user.UserRepository
+import com.andlife.domain.util.onFailure
+import com.andlife.domain.util.onSuccess
 import com.andlife.login.model.LoginSideEffect
 import com.andlife.login.model.LoginUiEvent
 import com.andlife.login.model.LoginUiState
@@ -7,16 +12,34 @@ import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-
+    private val userRepository: UserRepository
 ) : BaseViewModel<LoginUiState, LoginUiEvent, LoginSideEffect>(LoginUiState()) {
 
 
     override val uiState: StateFlow<LoginUiState> = mutableUiState.asStateFlow()
     override fun onEvent(event: LoginUiEvent) {
-        TODO("Not yet implemented")
+        when (event) {
+            LoginUiEvent.GuestLogin -> {}
+            is LoginUiEvent.SocialLoginSuccess -> {
+                login(event.accessToken)
+            }
+        }
+    }
+
+    private fun login(accessToken: String) {
+        viewModelScope.launch {
+            userRepository.login(accessToken)
+                .onFailure { error, msg ->
+                    Log.d("login fail", "login fail: $msg")
+                }
+                .onSuccess {
+                    Log.d("login success", "success")
+                }
+        }
     }
 }

@@ -38,6 +38,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.KakaoButtonColor
 import com.andlife.designsystem.theme.KakaoTextColor
@@ -49,12 +51,15 @@ import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.login.LocalLoginManager
 import com.andlife.login.R
+import com.andlife.login.model.LoginUiEvent
 import com.andlife.login.social.SocialType
+import com.andlife.login.viewmodel.LoginViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun LoginRoute(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: LoginViewModel = hiltViewModel()
 ) {
     val loginManager = LocalLoginManager.current
     val scope = rememberCoroutineScope()
@@ -72,7 +77,7 @@ fun LoginRoute(
                     context = context
                 )
                     .onSuccess {
-                        Log.d("Login", "Login success: $it")
+                        viewModel.onEvent(LoginUiEvent.SocialLoginSuccess(it))
                     }
                     .onFailure { error, msg ->
                         if (error !is LoginError.Cancel) {

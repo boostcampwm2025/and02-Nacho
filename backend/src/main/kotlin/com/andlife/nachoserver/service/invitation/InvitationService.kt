@@ -237,7 +237,9 @@ class InvitationService(
     }
 
     @Transactional
-    fun createInvitation(request: CreateInvitationRequest): InvitationResponse {
+    fun createInvitation(userId: Long, request: CreateInvitationRequest): InvitationResponse {
+        val host = userRepository.findById(userId)
+            .orElseThrow { NoSuchElementException("User not found: $userId") }
 
         val invitationDate = LocalDate.parse(request.invitationDate)
         val startTime = LocalTime.parse(request.startTime, DateTimeFormatter.ofPattern("HH:mm"))
@@ -245,7 +247,7 @@ class InvitationService(
             LocalTime.parse(it, DateTimeFormatter.ofPattern("HH:mm"))
         }
         val invitation = Invitation(
-            host = User(1, "donghyun@boostcamp.com", "동현", "https://picsum.photos/200/200?random=10"),
+            host = host,
             title = request.title,
             displayHostName = request.displayHostName,
             thumbnailUrls = request.thumbnailUrls,
