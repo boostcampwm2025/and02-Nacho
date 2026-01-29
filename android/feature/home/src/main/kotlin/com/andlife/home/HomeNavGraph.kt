@@ -49,11 +49,13 @@ fun NavGraphBuilder.homeNavGraph(
 
 fun NavGraphBuilder.settingNavGraph(
     onNavigateBack: () -> Unit,
+    onNavigateToLogin: () -> Unit,
 ) {
     composable<Setting> {
         SettingRoute(
             onNavigateBack = onNavigateBack,
             modifier = Modifier.padding(),
+            onNavigateToLogin = onNavigateToLogin
         )
     }
 }
