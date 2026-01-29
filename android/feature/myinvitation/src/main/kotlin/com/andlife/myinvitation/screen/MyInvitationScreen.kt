@@ -82,12 +82,14 @@ fun MyInvitationRoute(
             is MyInvitationSideEffect.NavigateToDetail -> onNavigateToDetail(effect.id)
             is MyInvitationSideEffect.RefreshFailure -> {
                 scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
                     snackbarHostState.showSnackbar(refreshFailureMessage)
                 }
             }
             is MyInvitationSideEffect.NavigateToCreate -> onNavigateToCreate()
             is MyInvitationSideEffect.DeleteSuccess -> {
                 scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
                     snackbarHostState.showSnackbar(deleteSuccessMessage)
                 }
                 upcomingItems.refresh()
@@ -95,6 +97,7 @@ fun MyInvitationRoute(
             }
             is MyInvitationSideEffect.DeleteFailure -> {
                 scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
                     snackbarHostState.showSnackbar(deleteFailureMessage)
                 }
             }
