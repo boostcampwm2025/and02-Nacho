@@ -151,7 +151,7 @@ fun AudioRecordingBottomSheet(
                             }
                         },
                         modifier = Modifier
-                            .size(NachoIconSize.xLarge)
+                            .size(NachoIconSize.twoXLarge)
                             .background(
                                 color = NachoTheme.colorScheme.backgroundSecondary,
                                 shape = CircleShape
@@ -167,7 +167,7 @@ fun AudioRecordingBottomSheet(
                                 stringResource(R.string.desc_pause_recording)
                             },
                             tint = NachoTheme.colorScheme.textPrimary,
-                            modifier = Modifier.size(NachoIconSize.small)
+                            modifier = Modifier.size(NachoIconSize.medium)
                         )
                     }
                 }
@@ -200,7 +200,7 @@ fun AudioRecordingBottomSheet(
                         }
                     },
                     modifier = Modifier
-                        .size(NachoIconSize.xLarge)
+                        .size(NachoIconSize.twoXLarge)
                         .background(
                             color = NachoTheme.colorScheme.brandPrimary,
                             shape = CircleShape
@@ -216,7 +216,7 @@ fun AudioRecordingBottomSheet(
                             stringResource(R.string.desc_start_recording)
                         },
                         tint = NachoTheme.colorScheme.backgroundPrimary,
-                        modifier = Modifier.size(NachoIconSize.small)
+                        modifier = Modifier.size(NachoIconSize.medium)
                     )
                 }
             }
