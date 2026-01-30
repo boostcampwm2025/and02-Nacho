@@ -1,4 +1,4 @@
-package com.andlife.home.model
+package com.andlife.home.model.home
 
 import com.andlife.ui.base.BaseUiEvent
 
