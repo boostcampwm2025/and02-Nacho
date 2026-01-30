@@ -25,8 +25,14 @@ class AudioRecorder(
     private val _isRecording = MutableStateFlow(false)
     val isRecording: StateFlow<Boolean> = _isRecording.asStateFlow()
 
+    private val _isPaused = MutableStateFlow(false)
+    val isPaused: StateFlow<Boolean> = _isPaused.asStateFlow()
+
     private val _recordingDuration = MutableStateFlow(0)
     val recordingDuration: StateFlow<Int> = _recordingDuration.asStateFlow()
+
+    private val _amplitude = MutableStateFlow(0)
+    val amplitude: StateFlow<Int> = _amplitude.asStateFlow()
 
     private val scope = CoroutineScope(Dispatchers.Main)
 
@@ -63,8 +69,9 @@ class AudioRecorder(
 
                     _isRecording.value = true
                     _recordingDuration.value = 0
+                    _amplitude.value = 0
 
-                    // 타이머 시작
+                    // 타이머와 볼륨 모니터링 시작
                     startTimer()
                 } catch (e: IOException) {
                     cleanup()
@@ -75,6 +82,27 @@ class AudioRecorder(
             onError(e)
         }
     }
+
+    fun pauseRecording(onError: (Exception) -> Unit = {}) {
+        if (!_isRecording.value || _isPaused.value) return
+        try {
+            mediaRecorder?.pause()
+            _isPaused.value = true
+        } catch (e: Exception) {
+            onError(e)
+        }
+    }
+
+    fun resumeRecording(onError: (Exception) -> Unit = {}) {
+        if (!_isRecording.value || !_isPaused.value) return
+        try {
+            mediaRecorder?.resume()
+            _isPaused.value = false
+        } catch (e: Exception) {
+            onError(e)
+        }
+    }
+
 
     fun stopRecording(onComplete: (File?) -> Unit = {}) {
         try {
@@ -97,6 +125,9 @@ class AudioRecorder(
 
             mediaRecorder = null
             _isRecording.value = false
+            _isPaused.value = false
+            _recordingDuration.value = 0
+            _amplitude.value = 0
             recordingJob?.cancel()
             currentAudioFile = null
 
@@ -117,9 +148,25 @@ class AudioRecorder(
     private fun startTimer() {
         recordingJob?.cancel()
         recordingJob = scope.launch {
+            var secondsCounter = 0
             while (isActive && _isRecording.value) {
-                delay(1000)
-                _recordingDuration.value += 1
+                delay(100) // 100ms마다 체크
+                if (_isPaused.value) continue
+                
+                // 볼륨 업데이트 (100ms마다)
+                try {
+                    val amplitude = mediaRecorder?.maxAmplitude ?: 0
+                    _amplitude.value = amplitude
+                } catch (e: Exception) {
+                    // 무시
+                }
+                
+                // 시간 업데이트 (1초마다)
+                secondsCounter++
+                if (secondsCounter >= 10) { // 100ms * 10 = 1초
+                    _recordingDuration.value += 1
+                    secondsCounter = 0
+                }
             }
         }
     }
