@@ -58,7 +58,6 @@ fun InvitationGuestBookForm(
     onTextFieldClick: () -> Unit,
     modifier: Modifier = Modifier,
     editingGuestBookId: Long? = null,
-    isAudioRecording: Boolean = false,
 ) {
     val context = LocalContext.current
     val focusRequester = remember { FocusRequester() }
@@ -215,7 +214,7 @@ fun InvitationGuestBookForm(
                 Icon(
                     painter = painterResource(R.drawable.ic_mic_16),
                     contentDescription = null,
-                    tint = if (isAudioRecording) Color.Green else iconColor,
+                    tint = iconColor,
                     modifier =
                         Modifier
                             .size(NachoIconSize.semiLarge)

@@ -20,11 +20,9 @@ sealed interface MyInvitationGuestBookSideEffect : BaseSideEffect {
 
     data object LaunchCamera : MyInvitationGuestBookSideEffect
 
-    data object StartAudioRecording : MyInvitationGuestBookSideEffect
-
-    data object StopAudioRecording : MyInvitationGuestBookSideEffect
-
     data class AuthStateChanged(
         val authState: AuthState
     ) : MyInvitationGuestBookSideEffect
+
+    data object ShowAudioRecordingBottomSheet : MyInvitationGuestBookSideEffect
 }

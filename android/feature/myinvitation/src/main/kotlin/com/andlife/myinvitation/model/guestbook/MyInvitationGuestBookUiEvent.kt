@@ -23,10 +23,6 @@ sealed interface MyInvitationGuestBookUiEvent : BaseUiEvent {
 
     data object ClickMicrophone : MyInvitationGuestBookUiEvent
 
-    data object StartAudioRecording : MyInvitationGuestBookUiEvent
-
-    data object StopAudioRecording : MyInvitationGuestBookUiEvent
-
     data object ClearError : MyInvitationGuestBookUiEvent
 
     data class ClickVisualMedia(

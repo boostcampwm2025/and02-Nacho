@@ -1,5 +1,6 @@
 package com.andlife.data.repository.invitation
 
+import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -36,6 +37,7 @@ internal class InvitationRepositoryImpl @Inject constructor(
             dto.toDomain().also { domainModel ->
                 if (!domainModel.isMember) {
                     userStorage.addInvitationId(domainModel.invitationId)
+                    Log.d("InvitationRepositoryImpl", "참여 성공: ${domainModel.invitationId}")
                 }
             }
         }

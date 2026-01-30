@@ -69,7 +69,7 @@ import com.andlife.designsystem.R as designR
 @Composable
 fun MyInvitationDetailRoute(
     onNavigateBack: () -> Unit,
-    onNavigateToLogin: (Boolean) -> Unit,
+    onNavigateToLogin: () -> Unit,
     onNavigateToEditInvitation: (Long) -> Unit,
     onNavigateToEditCard: (Long) -> Unit,
     onNavigateToCreateCard: (Long) -> Unit,
@@ -132,7 +132,7 @@ private fun MyInvitationDetailScreen(
     onEvent: (MyInvitationDetailUiEvent) -> Unit,
     onSaveEditableCache: (Editable) -> Unit,
     onNavigateBack: () -> Unit,
-    onNavigateToLogin: (Boolean) -> Unit,
+    onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()

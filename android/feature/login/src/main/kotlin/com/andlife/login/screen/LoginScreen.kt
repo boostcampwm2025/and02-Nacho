@@ -1,4 +1,4 @@
-package com.andlife.login.screem
+package com.andlife.login.screen
 
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
@@ -43,8 +43,6 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.KakaoButtonColor
 import com.andlife.designsystem.theme.KakaoTextColor
@@ -66,7 +64,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun LoginRoute(
-    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
@@ -79,9 +76,14 @@ fun LoginRoute(
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
-            LoginSideEffect.FailGuestLogin -> {}
-            LoginSideEffect.FailSocialLogin -> {}
-            LoginSideEffect.NavigateBack -> onNavigateBack()
+            LoginSideEffect.FailGuestLogin -> {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar(res.getString(R.string.fail_guest_login))
+            }
+            LoginSideEffect.FailSocialLogin -> {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar(res.getString(R.string.fail_kakao_login))
+            }
         }
     }
 

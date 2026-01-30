@@ -58,7 +58,7 @@ import com.andlife.designsystem.R as designR
 @Composable
 fun InvitationDetailRoute(
     onNavigateBack: () -> Unit,
-    onNavigateToLogin: (Boolean) -> Unit,
+    onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: InvitationDetailViewModel = hiltViewModel(),
 ) {
@@ -105,7 +105,7 @@ private fun InvitationDetailScreen(
     scrollBehavior: TopAppBarScrollBehavior,
     onEvent: (InvitationDetailUiEvent) -> Unit,
     onNavigateBack: () -> Unit,
-    onNavigateToLogin: (Boolean) -> Unit,
+    onNavigateToLogin: () -> Unit,
     onEditableSave: (Editable) -> Unit,
     modifier: Modifier = Modifier,
 ) {

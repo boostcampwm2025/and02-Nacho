@@ -98,7 +98,7 @@ constructor(
         audioPlayerManager.currentAudio
             .onEach { audioPlaybackState ->
                 updateState {
-                    copy( audioPlaybackState = audioPlaybackState ?: AudioPlaybackState())
+                    copy(audioPlaybackState = audioPlaybackState ?: AudioPlaybackState())
                 }
             }
             .launchIn(viewModelScope)
@@ -112,8 +112,6 @@ constructor(
             is MyInvitationGuestBookUiEvent.UploadMedias -> handleUploadMedias()
             is MyInvitationGuestBookUiEvent.ClickCamera -> handleCameraClick()
             is MyInvitationGuestBookUiEvent.ClickMicrophone -> handleMicrophoneClick()
-            is MyInvitationGuestBookUiEvent.StartAudioRecording -> handleStartAudioRecording()
-            is MyInvitationGuestBookUiEvent.StopAudioRecording -> handleStopAudioRecording()
             is MyInvitationGuestBookUiEvent.ClearError -> clearError()
             is MyInvitationGuestBookUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
             is MyInvitationGuestBookUiEvent.ClickVideoPlayButton -> clickVideoPlayButton(event.url, event.itemId)
@@ -421,26 +419,12 @@ constructor(
 
     private fun handleMicrophoneClick() {
         val state = uiState.value
-
-        if (state.isAudioRecording) {
-            onEvent(MyInvitationGuestBookUiEvent.StopAudioRecording)
-        } else {
-            if (state.selectedMedias.size >= 5) {
-                sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("최대 5개까지 미디어를 추가할 수 있습니다."))
-                return
-            }
-            onEvent(MyInvitationGuestBookUiEvent.StartAudioRecording)
+        if (state.selectedMedias.size >= 5) {
+            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("최대 5개까지 미디어를 추가할 수 있습니다."))
+            return
         }
-    }
-
-    private fun handleStartAudioRecording() {
-        updateState { copy(isAudioRecording = true, audioRecordingDuration = 0) }
-        sendEffect(MyInvitationGuestBookSideEffect.StartAudioRecording)
-    }
-
-    private fun handleStopAudioRecording() {
-        updateState { copy(isAudioRecording = false, audioRecordingDuration = 0) }
-        sendEffect(MyInvitationGuestBookSideEffect.StopAudioRecording)
+        updateState { copy(audioRecordingDuration = 0) }
+        sendEffect(MyInvitationGuestBookSideEffect.ShowAudioRecordingBottomSheet)
     }
 
     private fun updatePlayState(isPlaying: Boolean) {

@@ -6,9 +6,9 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.repository.invitation.InvitationRepository
-import com.andlife.home.model.HomeSideEffect
-import com.andlife.home.model.HomeUiEvent
-import com.andlife.home.model.HomeUiState
+import com.andlife.home.model.home.HomeSideEffect
+import com.andlife.home.model.home.HomeUiEvent
+import com.andlife.home.model.home.HomeUiState
 import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.media.audio.AudioPlayerManager
 import com.andlife.media.video.AutoVideoPlayerPool

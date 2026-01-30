@@ -22,10 +22,7 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val authStateManager: AuthStateManager,
-    private val savedStateHandle: SavedStateHandle
 ) : BaseViewModel<LoginUiState, LoginUiEvent, LoginSideEffect>(LoginUiState()) {
-
-    private val fromSplash : Boolean = savedStateHandle.toRoute<Login>().fromSplash
 
     override val uiState: StateFlow<LoginUiState> = mutableUiState.asStateFlow()
     override fun onEvent(event: LoginUiEvent) {
@@ -43,11 +40,7 @@ class LoginViewModel @Inject constructor(
                     sendEffect(LoginSideEffect.FailSocialLogin)
                 }
                 .onSuccess {
-                    if (fromSplash) {
-                        authStateManager.navigateToHome()
-                    } else {
-                        sendEffect(LoginSideEffect.NavigateBack)
-                    }
+                    authStateManager.navigateToHome()
                 }
             updateState { copy(false) }
         }
@@ -61,11 +54,7 @@ class LoginViewModel @Inject constructor(
                     sendEffect(LoginSideEffect.FailGuestLogin)
                 }
                 .onSuccess {
-                    if (fromSplash) {
-                        authStateManager.navigateToHome()
-                    } else {
-                        sendEffect(LoginSideEffect.NavigateBack)
-                    }
+                    authStateManager.navigateToHome()
                 }
             updateState { copy(false) }
         }

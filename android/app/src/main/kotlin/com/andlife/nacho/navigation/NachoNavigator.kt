@@ -7,6 +7,7 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptions
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
@@ -76,6 +77,10 @@ class NachoNavigator(
         }
     }
 
+    fun navigateToHome(navOptions: NavOptions) {
+        navController.navigateToHome(navOptions)
+    }
+
     fun navigateToSetting() {
         navController.navigateToSetting(
             navOptions = navOptions { launchSingleTop = true },
@@ -141,8 +146,8 @@ class NachoNavigator(
         navController.navigateToUpdateCard(cardId)
     }
 
-    fun navigateToLogin(fromSplash: Boolean = true) {
-        navController.navigateToLogin(fromSplash)
+    fun navigateToLogin(navOptions: NavOptions) {
+        navController.navigateToLogin(navOptions)
     }
 
     fun navigatePopBackStack() {

@@ -50,6 +50,9 @@
     <string name="txt_delete_invitation_message">초대장을 삭제하시겠습니까?\n삭제한 초대장은 복구할 수 없습니다.</string>
     <string name="txt_confirm">확인</string>
     <string name="txt_cancel">취소</string>
+    <string name="desc_not_logged">현재 비로그인 상태입니다\n로그인 하여 초대장을 작성해보세요</string>
+    <string name="txt_go_login">로그인하기</string>
+
     <string name="msg_leave_success">초대장에서 나갔습니다.</string>
     <string name="msg_leave_failure">나가기에 실패했습니다. 다시 시도해주세요.</string>
     <string name="msg_delete_success">초대장을 삭제했습니다.</string>
@@ -148,5 +151,15 @@
     <string name="msg_guide_login">로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?</string>
     <string name="txt_move">이동</string>
     <string name="txt_label_cancel">취소</string>
+
+    <!-- AudioRecording -->
+    <string name="label_audio_recording">음성 녹음</string>
+    <string name="txt_recording_guide">마이크 버튼을 눌러 녹음을 시작하세요</string>
+    <string name="txt_recording_in_progress">녹음 중...</string>
+    <string name="txt_recording_paused">녹음이 일시정지되었습니다</string>
+    <string name="desc_start_recording">녹음 시작</string>
+    <string name="desc_stop_recording">녹음 중지</string>
+    <string name="desc_pause_recording">녹음 일시정지</string>
+    <string name="desc_resume_recording">녹음 재개</string>
 
 </resources>

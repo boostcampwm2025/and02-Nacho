@@ -68,16 +68,28 @@ class InvitationController(
         @RequestParam(required = false, defaultValue = "ASC") sortType: String,
         @PageableDefault(size = 10) pageable: Pageable
     ): BaseResponse<PagingResponse<InvitationSummaryResponse>> {
-        return when (authContext) {
+        val result = when (authContext) {
             is AuthContext.Member -> {
-                val result = invitationService.getParticipantInvitations(authContext.userId, status, sortType, pageable)
-                BaseResponse.success(result)
+                invitationService.getParticipantInvitations(
+                    userId = authContext.userId,
+                    guestInvitationIds = emptyList(),
+                    status = status,
+                    sortType = sortType,
+                    pageable = pageable
+                )
             }
             is AuthContext.Guest -> {
-                val result = invitationService.getParticipantInvitations(2L, status, sortType, pageable)
-                BaseResponse.success(result)
+                println(">>> [게스트 진입] 초대장 목록: ${authContext.invitationIds}")
+                invitationService.getParticipantInvitations(
+                    userId = null,
+                    guestInvitationIds = authContext.invitationIds,
+                    status = status,
+                    sortType = sortType,
+                    pageable = pageable
+                )
             }
         }
+        return BaseResponse.success(result)
     }
 
     @PostMapping("/{invitationId}/leave")
