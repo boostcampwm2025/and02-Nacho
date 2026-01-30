@@ -79,17 +79,17 @@ constructor(
 
     init {
         observeAuthState()
-        // 임시로 로그인 상태 초기화
-//        viewModelScope.launch {
-//            authStateManager.setGuest()
-//        }
         observeAudioPlayerState()
     }
 
     private fun observeAuthState() {
         authStateManager.authState
             .onEach { authState ->
+                val isStateChanged = uiState.value.isAuthStateChanged(authState)
                 updateState { copy( authState = authState ) }
+                if (isStateChanged) {
+                    sendEffect(MyInvitationGuestBookSideEffect.AuthStateChanged(authState) )
+                }
             }
             .launchIn(viewModelScope)
     }

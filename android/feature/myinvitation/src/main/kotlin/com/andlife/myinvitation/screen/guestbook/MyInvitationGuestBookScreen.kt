@@ -283,6 +283,10 @@ fun MyInvitationGuestBookRoute(
                     }
                 }
             }
+
+            is MyInvitationGuestBookSideEffect.AuthStateChanged -> {
+                guestBooks.refresh()
+            }
         }
     }
 

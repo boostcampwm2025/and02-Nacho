@@ -285,6 +285,10 @@ fun InvitationGuestBookRoute(
                     snackbarHostState.showSnackbar(res.getString(R.string.msg_guestbook_refresh_failure))
                 }
             }
+
+            is InvitationGuestBookSideEffect.AuthStateChanged -> {
+                guestBooks.refresh()
+            }
         }
     }
 

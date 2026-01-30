@@ -44,4 +44,7 @@ data class MyInvitationGuestBookUiState(
 
     val canPlayVideo: Boolean
         get() = isMediaPlaying && !audioPlaybackState.isLoading && !audioPlaybackState.isPlaying
+
+    fun isAuthStateChanged(current: AuthState) =
+        authState::class != current::class && current !is AuthState.Loading
 }

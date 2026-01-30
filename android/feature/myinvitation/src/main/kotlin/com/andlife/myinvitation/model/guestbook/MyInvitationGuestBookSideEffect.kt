@@ -1,5 +1,6 @@
 package com.andlife.myinvitation.model.guestbook
 
+import com.andlife.domain.model.auth.AuthState
 import com.andlife.ui.base.BaseSideEffect
 
 sealed interface MyInvitationGuestBookSideEffect : BaseSideEffect {
@@ -22,4 +23,8 @@ sealed interface MyInvitationGuestBookSideEffect : BaseSideEffect {
     data object StartAudioRecording : MyInvitationGuestBookSideEffect
 
     data object StopAudioRecording : MyInvitationGuestBookSideEffect
+
+    data class AuthStateChanged(
+        val authState: AuthState
+    ) : MyInvitationGuestBookSideEffect
 }
