@@ -5,7 +5,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import com.andlife.login.screem.LoginRoute
+import com.andlife.login.screen.LoginRoute
 import kotlinx.serialization.Serializable
 
 @Serializable

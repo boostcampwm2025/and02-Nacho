@@ -1,4 +1,4 @@
-package com.andlife.login.screem
+package com.andlife.login.screen
 
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
@@ -43,8 +43,6 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.KakaoButtonColor
 import com.andlife.designsystem.theme.KakaoTextColor
