@@ -153,7 +153,7 @@ fun InvitationGuestBookForm(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // 미디어 아이콘 표시
-            val isMediaAddEnabled = selectedMedias.size < MAX_MEDIAS_COUNT
+            val isMediaAddEnabled = isAuthenticated && selectedMedias.size < MAX_MEDIAS_COUNT
             val iconColor =
                 if (isMediaAddEnabled) {
                     NachoTheme.colorScheme.brandPrimary
@@ -232,7 +232,7 @@ fun InvitationGuestBookForm(
             }
             NachoButton(
                 onClick = onUploadClick,
-                enabled = isSubmittable,
+                enabled = isSubmittable && isAuthenticated,
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
