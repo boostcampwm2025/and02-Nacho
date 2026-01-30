@@ -106,10 +106,19 @@ fun NachoNavHost(
             )
 
             myInvitationNavGraph(
-                snackbarHostState = snackbarHostState,
+                 snackbarHostState = snackbarHostState,
                 paddingValues = innerPadding,
                 onNavigateToCreate = navigator::navigateToMyInvitationCreate,
                 onNavigateToDetail = navigator::navigateToMyInvitationDetail,
+                onNavigateToLogin = {
+                    val navOptions = navOptions {
+                        popUpTo(navigator.navController.graph.id) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                    navigator.navigateToLogin(navOptions)
+                }
             )
 
             myInvitationDetailNavGraph(
