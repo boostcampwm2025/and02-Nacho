@@ -26,7 +26,7 @@ fun NachoApp(
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is MainSideEffect.NavigateToDetail -> {
-                Log.d("NachoApp", "Received Deferred DeepLink invitationId: ${effect.invitationId}")
+                Log.d("DeepLink Debug", "Received Deferred DeepLink invitationId: ${effect.invitationId}")
                 navigator.navController.navigate(
                     InvitationDetail(
                         id = effect.invitationId,

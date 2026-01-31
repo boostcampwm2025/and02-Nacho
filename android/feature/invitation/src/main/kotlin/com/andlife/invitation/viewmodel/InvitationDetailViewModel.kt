@@ -39,6 +39,7 @@ class InvitationDetailViewModel @Inject constructor(
     override val uiState: StateFlow<InvitationDetailUiState> =
         mutableUiState
             .onStart {
+                Log.d("DeepLink Debug", "[${this@InvitationDetailViewModel.hashCode()}] 딥링크 진입 : $isFromDeepLink")
                 if (isFromDeepLink) {
                     joinAndLoadInvitation()
                 } else {

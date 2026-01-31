@@ -1,6 +1,7 @@
 package com.andlife.nacho.viewmodel
 
 import android.content.Intent
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.andlife.deeplink.DeepLinkConfig
 import com.andlife.deeplink.DeepLinkManager
@@ -17,6 +18,7 @@ import com.andlife.nacho.model.MainUiEvent
 import com.andlife.nacho.model.MainUiState
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
@@ -67,12 +69,22 @@ class MainViewModel @Inject constructor(
     private fun observeDeferredDeepLink() {
         deepLinkManager.deferredDeepLinkId
             .filterNotNull()
-            .filter { it != lastProcessedId }
+            .filter { invitationId ->
+                val isNew = invitationId != lastProcessedId
+                if (!isNew) Log.d("DeepLink Debug", "중복된 ID($invitationId)라 필터링됨")
+                isNew
+            }
             .onEach { invitationId ->
                 lastProcessedId = invitationId
                 invitationId.toLongOrNull()?.let { id ->
                     sendEffect(MainSideEffect.NavigateToDetail(id))
+                    Log.d("DeepLink Debug", "DeferredDeepLink: ${id}")
                     deepLinkManager.clearInvitationId()
+                }
+                viewModelScope.launch {
+                    delay(1000)
+                    lastProcessedId = null
+                    Log.d("DeepLink Debug", "lastProcessedId 초기화 완료 - 딥링크 재사용 가능")
                 }
             }.launchIn(viewModelScope)
     }
@@ -97,6 +109,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun handleDeepLink(intent: Intent?) {
+        Log.d("DeepLink Debug", "handleDeepLink: ${intent?.data}")
         val data = intent?.data ?: return
 
         val inviteId = data.getQueryParameter(DeepLinkConfig.KAKAO_PARAM_INVITE_ID)
