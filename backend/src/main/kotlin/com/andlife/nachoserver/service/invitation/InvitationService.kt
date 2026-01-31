@@ -59,21 +59,27 @@ class InvitationService(
             println(">>> [초대장 조회 성공] ID: $invitationId")
 
             if (userId != null) {
-                println(">>> [멤버 로직 시작]")
+                val isHost = invitation.host.id == userId
+                if (isHost) {
+                    return JoinResponse(
+                        invitationId = invitationId,
+                        isMember = true,
+                        alreadyJoined = true
+                    )
+                }
+
                 val isAlreadyJoined = participantRepository.existsByInvitationIdAndUserId(invitationId, userId)
                 if (!isAlreadyJoined) {
                     val userProxy = userRepository.getReferenceById(userId)
                     participantRepository.save(InvitationParticipant(invitation = invitation, user = userProxy))
                 }
-                val response = JoinResponse(invitationId = invitationId, isMember = true, alreadyJoined = isAlreadyJoined)
-                println(">>> [Join 성공 직전] $response")
-                return response
+
+                return JoinResponse(invitationId = invitationId, isMember = true, alreadyJoined = isAlreadyJoined)
+
             }
 
-            println(">>> [게스트 로직 시작]")
             val alreadyHasAccess = guestInvitationIds.contains(invitationId)
             val response = JoinResponse(invitationId = invitationId, isMember = false, alreadyJoined = alreadyHasAccess)
-            println(">>> [Join 게스트 성공 직전] $response")
             response
         } catch (e: Exception) {
             println(">>> [서비스 에러] ${e.javaClass.simpleName}: ${e.message}")
