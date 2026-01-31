@@ -24,11 +24,6 @@ fun NachoApp(
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
-            is MainSideEffect.HandleDeepLink -> {
-                Log.d("NachoApp", "Received deepLink intent: ${effect.intent.data}")
-                navigator.navController.handleDeepLink(effect.intent)
-            }
-
             is MainSideEffect.NavigateToDetail -> {
                 Log.d("NachoApp", "Received Deferred DeepLink invitationId: ${effect.invitationId}")
                 navigator.navController.navigate(
