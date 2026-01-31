@@ -107,7 +107,7 @@ class DownloadWorker @AssistedInject constructor(
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
             put(MediaStore.MediaColumns.MIME_TYPE, getMimeType(fileName, mediaType))
-            put(MediaStore.MediaColumns.RELATIVE_PATH, "${mediaType.directory}/Nacho")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, "${mediaType.directory}/나에게로의 초대")
             put(MediaStore.MediaColumns.IS_PENDING, 1)
 
         }
@@ -139,7 +139,7 @@ class DownloadWorker @AssistedInject constructor(
         contentLength: Long,
     ): Pair<String, String> {
         val publicDir = Environment.getExternalStoragePublicDirectory(mediaType.directory)
-        val directory = File(publicDir, "Nacho")
+        val directory = File(publicDir, "나에게로의 초대")
 
         if (!directory.exists()) {
             directory.mkdirs()
