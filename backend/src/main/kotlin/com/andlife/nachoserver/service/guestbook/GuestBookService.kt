@@ -371,7 +371,11 @@ class GuestBookService(
                 guestBookRepository.findAllByMyRelatedInvitations(authContext.userId, pageable)
             }
             is AuthContext.Guest -> {
-                Page.empty(pageable) //TODO: 비로그인 유저 임시 빈값 조회
+                if (authContext.invitationIds.isEmpty()) {
+                    Page.empty(pageable)
+                } else {
+                    guestBookRepository.findAllByInvitationIdIn(authContext.invitationIds, pageable)
+                }
             }
         }
 
