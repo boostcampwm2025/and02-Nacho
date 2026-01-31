@@ -4,7 +4,6 @@ import com.andlife.nachoserver.auth.AuthContext
 import com.andlife.nachoserver.entity.AnnouncementSection
 import com.andlife.nachoserver.entity.Invitation
 import com.andlife.nachoserver.entity.InvitationCard
-import com.andlife.nachoserver.entity.User
 import com.andlife.nachoserver.entity.InvitationParticipant
 import com.andlife.nachoserver.repository.guestbook.GuestBookRepository
 import com.andlife.nachoserver.repository.invitation.AnnouncementRepository
@@ -43,7 +42,6 @@ class InvitationService(
     private val announcementRepository: AnnouncementRepository,
     private val participantRepository: InvitationParticipantRepository,
     private val userRepository: UserRepository,
-    private val guestBookRepository: GuestBookRepository,
     private val guestBookService: GuestBookService
 ) {
     @Transactional
