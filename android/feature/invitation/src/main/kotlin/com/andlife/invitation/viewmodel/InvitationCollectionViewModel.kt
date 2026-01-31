@@ -178,12 +178,17 @@ class InvitationCollectionViewModel @Inject constructor(
     }
 
     private fun downloadMedia(url: String, mediaType: UiMediaType) {
+        if(uiState.value.downloadingUrls.contains(url)) return
+
         val domainType = when (mediaType) {
             UiMediaType.IMAGE -> MediaType.IMAGE
             UiMediaType.VIDEO -> MediaType.VIDEO
             UiMediaType.AUDIO -> MediaType.AUDIO
         }
         val fileName = "$FILE_NAME_PREFIX${System.currentTimeMillis()}${domainType.getExtension()}"
+
+        updateState { copy(downloadingUrls = downloadingUrls + url) }
+
         val workId = mediaDownloader.enqueueDownload(url, fileName, domainType)
 
         viewModelScope.launch {
@@ -191,11 +196,13 @@ class InvitationCollectionViewModel @Inject constructor(
                 updateState { copy(downloadState = state) }
                 when (state) {
                     is DownloadState.Success -> {
+                        updateState { copy(downloadingUrls = downloadingUrls - url) }
                         sendEffect(InvitationCollectionSideEffect.DownloadSuccess)
                         updateState { copy(downloadState = DownloadState.Idle) }
                     }
 
                     is DownloadState.Error -> {
+                        updateState { copy(downloadingUrls = downloadingUrls - url) }
                         sendEffect(InvitationCollectionSideEffect.DownloadFailed)
                         updateState { copy(downloadState = DownloadState.Idle) }
                     }

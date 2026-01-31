@@ -110,7 +110,7 @@ fun StoryTopHeader(
         } else {
             IconButton(onClick = onDownloadClick) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_download_24),
+                    painter = painterResource(id = designR.drawable.ic_download_24),
                     contentDescription = stringResource(R.string.desc_btn_download),
                     tint = NachoTheme.colorScheme.iconTertiary,
                 )

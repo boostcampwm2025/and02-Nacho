@@ -151,19 +151,21 @@ fun InvitationStoryScreen(
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
 ) {
-    val isDownloading = uiState.downloadState is DownloadState.Downloading
-
     val pagerState =
         rememberPagerState(
             initialPage = initialIndex,
             pageCount = { uiState.mediaItems.size },
         )
 
+    val currentItem = uiState.mediaItems.getOrNull(pagerState.currentPage)
+
+    val isDownloading = currentItem?.let {
+        uiState.downloadingUrls.contains(it.mediaUrl)
+    } ?: false
+
     LaunchedEffect(pagerState.currentPage) {
         onPageChanged(pagerState.currentPage)
     }
-
-    val currentItem = uiState.mediaItems.getOrNull(pagerState.currentPage)
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },

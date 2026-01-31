@@ -14,5 +14,6 @@ data class InvitationCollectionUiState(
     val selectedIndex: Int = 0,
     val isTextExpanded: Boolean = false,
     val downloadState: DownloadState = DownloadState.Idle,
+    val downloadingUrls: Set<String> = emptySet(),
     val networkDialogDismissed: Boolean = false
 ) : BaseUiState
