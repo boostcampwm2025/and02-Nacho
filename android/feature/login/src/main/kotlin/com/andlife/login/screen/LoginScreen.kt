@@ -1,4 +1,4 @@
-package com.andlife.login.screem
+package com.andlife.login.screen
 
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
@@ -43,8 +43,6 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.KakaoButtonColor
 import com.andlife.designsystem.theme.KakaoTextColor
@@ -56,10 +54,12 @@ import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.login.LocalLoginManager
 import com.andlife.login.R
+import com.andlife.login.model.LoginSideEffect
 import com.andlife.login.model.LoginUiState
 import com.andlife.login.model.LoginUiEvent
 import com.andlife.login.social.SocialType
 import com.andlife.login.viewmodel.LoginViewModel
+import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.coroutines.launch
 
 @Composable
@@ -73,6 +73,19 @@ fun LoginRoute(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val res = LocalResources.current
+
+    viewModel.effectFlow.collectWithLifecycle { effect ->
+        when (effect) {
+            LoginSideEffect.FailGuestLogin -> {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar(res.getString(R.string.fail_guest_login))
+            }
+            LoginSideEffect.FailSocialLogin -> {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar(res.getString(R.string.fail_kakao_login))
+            }
+        }
+    }
 
     LoginScreen(
         uiState = uiState,

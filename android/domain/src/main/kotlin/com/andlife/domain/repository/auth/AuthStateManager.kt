@@ -13,6 +13,7 @@ interface AuthStateManager {
 
     suspend fun setAuthenticated(user: User)
     suspend fun setGuest()
+    suspend fun setLoading()
 
     suspend fun navigateToLogin()
     suspend fun navigateToHome()

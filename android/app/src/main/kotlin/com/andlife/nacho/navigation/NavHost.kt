@@ -18,9 +18,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.navigation.compose.NavHost
 import androidx.navigation.navDeepLink
+import androidx.navigation.navOptions
 import com.andlife.deeplink.DeepLinkManager
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.home.Setting
 import com.andlife.home.homeNavGraph
 import com.andlife.home.settingNavGraph
 import com.andlife.invitation.invitationDetailNavGraph
@@ -32,6 +34,7 @@ import com.andlife.invitation_edit.addressSearchNavGraph
 import com.andlife.invitation_edit.invitationCreateNavGraph
 import com.andlife.invitation_edit.invitationEditNavGraph
 import com.andlife.invitation_edit.invitationPreviewNavGraph
+import com.andlife.login.Login
 import com.andlife.login.loginNavGraph
 import com.andlife.model.util.NavigationKeyConstant.CREATE_CARD_BY_INVITATION_ID
 import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
@@ -80,6 +83,15 @@ fun NachoNavHost(
 
             settingNavGraph(
                 onNavigateBack = navigator::navigatePopBackStack,
+                onNavigateToLogin = {
+                    val navOptions = navOptions {
+                        popUpTo(navigator.navController.graph.id) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                    navigator.navigateToLogin(navOptions)
+                }
             )
 
             invitationNavGraph(
@@ -94,10 +106,19 @@ fun NachoNavHost(
             )
 
             myInvitationNavGraph(
-                snackbarHostState = snackbarHostState,
+                 snackbarHostState = snackbarHostState,
                 paddingValues = innerPadding,
                 onNavigateToCreate = navigator::navigateToMyInvitationCreate,
                 onNavigateToDetail = navigator::navigateToMyInvitationDetail,
+                onNavigateToLogin = {
+                    val navOptions = navOptions {
+                        popUpTo(navigator.navController.graph.id) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                    navigator.navigateToLogin(navOptions)
+                }
             )
 
             myInvitationDetailNavGraph(
