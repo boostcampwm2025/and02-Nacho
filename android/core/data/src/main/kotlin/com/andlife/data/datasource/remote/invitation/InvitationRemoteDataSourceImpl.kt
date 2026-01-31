@@ -70,5 +70,8 @@ internal class InvitationRemoteDataSourceImpl @Inject constructor(
         request: InvitationCardRequest
     ): Result<Long, DataError> =
         apiCall { invitationService.updateInvitationCard(cardId, request) }
+
+    override suspend fun deleteInvitation(invitationId: Long): Result<Unit, DataError> =
+        apiCall { invitationService.deleteInvitation(invitationId) }
 }
 

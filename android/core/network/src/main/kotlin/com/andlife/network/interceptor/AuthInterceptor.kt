@@ -2,6 +2,7 @@ package com.andlife.network.interceptor
 
 import com.andlife.network.BuildConfig
 import com.andlife.network.auth.AuthTokenProvider
+import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Response
 import javax.inject.Inject
@@ -13,17 +14,21 @@ class AuthInterceptor @Inject constructor(
         val originalRequest = chain.request()
         val builder = originalRequest.newBuilder()
 
-//        val userId = tokenProvider.getUserId()
-        val userId = 1L
+        val accessToken = runBlocking { tokenProvider.getAccessToken() }
         val invitationIds = tokenProvider.getInvitationIds()
 
-        if (userId != null) {
-            builder.addHeader(BuildConfig.HEADER_USER_ID, userId.toString())
+        if (accessToken != null) {
+            builder.addHeader(AUTH_HEADER, "$BEARER $accessToken")
         } else if (invitationIds.isNotEmpty()) {
             val idsString = invitationIds.joinToString(",")
             builder.addHeader(BuildConfig.HEADER_GUEST_IDS, idsString)
         }
 
         return chain.proceed(builder.build())
+    }
+
+    companion object {
+        private const val AUTH_HEADER = "Authorization"
+        private const val BEARER = "Bearer"
     }
 }

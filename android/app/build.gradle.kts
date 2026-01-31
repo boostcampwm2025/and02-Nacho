@@ -103,6 +103,7 @@ dependencies {
     implementation(projects.core.deeplink)
     implementation(projects.feature.model)
     implementation(projects.feature.login)
+    implementation(projects.domain)
 
     // Hilt
     implementation(libs.hilt.android)
@@ -121,6 +122,9 @@ dependencies {
 
     // Naver Map
     implementation(libs.naver.map)
+
+    // Splash
+    implementation(libs.androidx.core.splashscreen)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -1,28 +1,46 @@
 package com.andlife.media.audio
 
 import android.content.Context
+import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import com.andlife.media.di.ApplicationMainScope
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+data class AudioPlaybackState(
+    val playingUrl: String? = null,
+    val isPlaying: Boolean = false,
+    val isLoading: Boolean = false,
+    val currentPositionMs: Long = 0L,
+    val totalDurationMs: Long = 0L
+) {
+
+    fun isAudioPlayingForUrl(url: String): Boolean =
+        isPlaying && playingUrl == url
+}
 
 class AudioPlayerManagerImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
+    @param:ApplicationMainScope private val applicationScope: CoroutineScope
 ) : AudioPlayerManager {
 
     private var exoPlayer: ExoPlayer? = null
+    private var timerJob: Job? = null
 
-    private val _currentAudioUrl = MutableStateFlow<String?>(null)
-    override val currentAudioUrl = _currentAudioUrl.asStateFlow()
-
-    private val _isPlaying = MutableStateFlow(false)
-    override val isPlaying = _isPlaying.asStateFlow()
+    private val _currentAudio = MutableStateFlow<AudioPlaybackState?>(null)
+    override val currentAudio = _currentAudio.asStateFlow()
 
     private fun preparePlayer() {
         if (exoPlayer != null) return
@@ -31,34 +49,72 @@ class AudioPlayerManagerImpl @Inject constructor(
             repeatMode = Player.REPEAT_MODE_OFF
             addListener(object : Player.Listener {
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
-                    _isPlaying.update { isPlaying }
+                    _currentAudio.update { it?.copy(isPlaying = isPlaying) }
+
+                    if (isPlaying) {
+                        controlTimer()
+                    } else {
+                        timerJob?.cancel()
+                    }
                 }
 
                 override fun onPlaybackStateChanged(playbackState: Int) {
-                    if (playbackState == Player.STATE_ENDED) {
-                        _isPlaying.update { false }
-                        _currentAudioUrl.update { null }
+                    when (playbackState) {
+                        Player.STATE_READY -> {
+                            _currentAudio.update {
+                                it?.copy(
+                                    totalDurationMs = this@apply.duration,
+                                    currentPositionMs = 0L,
+                                    isLoading = false
+                                )
+                            }
+                        }
+
+                        Player.STATE_ENDED -> {
+                            timerJob?.cancel()
+                            _currentAudio.update { null }
+                        }
+
+                        Player.STATE_BUFFERING -> {
+                            _currentAudio.update { it?.copy(isLoading = true) }
+                        }
+
+                        Player.STATE_IDLE -> {
+                            // No-op
+                        }
                     }
                 }
             })
         }
     }
 
+    @OptIn(UnstableApi::class)
     override fun togglePlay(url: String) {
         preparePlayer()
         val player = exoPlayer ?: return
 
-        if (_currentAudioUrl.value == url) {
+        val current = _currentAudio.value
+
+        if (current?.playingUrl == url) {
             if (player.isPlaying) {
                 player.pause()
             } else {
                 player.play()
             }
         } else {
+            timerJob?.cancel()
             player.stop()
             player.clearMediaItems()
 
-            _currentAudioUrl.update { url }
+            _currentAudio.update {
+                AudioPlaybackState(
+                    playingUrl = url,
+                    totalDurationMs = 0L,
+                    currentPositionMs = 0L,
+                    isPlaying = false,
+                    isLoading = true
+                )
+            }
 
             val mediaItem = MediaItem.fromUri(url)
             val mediaSource =
@@ -71,20 +127,36 @@ class AudioPlayerManagerImpl @Inject constructor(
         }
     }
 
+    private fun controlTimer() {
+        timerJob?.cancel()
+
+        timerJob = applicationScope.launch {
+            while (_currentAudio.value?.isPlaying == true && exoPlayer?.isPlaying == true) {
+                _currentAudio.update {
+                    it?.copy(
+                        currentPositionMs = exoPlayer?.currentPosition ?: 0L
+                    )
+                }
+                delay(100L)
+            }
+        }
+    }
+
     override fun pause() {
         exoPlayer?.pause()
     }
 
     override fun stopAll() {
+        timerJob?.cancel()
         exoPlayer?.stop()
-        _currentAudioUrl.update { null }
-        _isPlaying.update { false }
+        _currentAudio.update { null }
     }
 
     override fun release() {
+        timerJob?.cancel()
+        timerJob = null
         exoPlayer?.release()
         exoPlayer = null
-        _currentAudioUrl.update { null }
-        _isPlaying.update { false }
+        _currentAudio.update { null }
     }
 }

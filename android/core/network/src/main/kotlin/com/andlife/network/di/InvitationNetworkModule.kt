@@ -1,10 +1,13 @@
 package com.andlife.network.di
 
 import com.andlife.network.BuildConfig
+import com.andlife.network.api.auth.AuthService
 import com.andlife.network.api.guestbook.GuestBookService
 import com.andlife.network.api.invitation.InvitationService
 import com.andlife.network.api.media.MediaService
+import com.andlife.network.api.user.UserService
 import com.andlife.network.interceptor.AuthInterceptor
+import com.andlife.network.interceptor.NachoAuthenticator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,23 +28,65 @@ object InvitationNetworkModule {
 
     @Provides
     @Singleton
-    @Invitation
+    @AuthInvitation
     fun provideInvitationOkHttpClient(
         loggingInterceptor: HttpLoggingInterceptor,
-        authInterceptor: AuthInterceptor
+        authInterceptor: AuthInterceptor,
+        authenticator: NachoAuthenticator
     ): OkHttpClient =
         OkHttpClient
             .Builder()
             .addInterceptor(loggingInterceptor)
             .addInterceptor(authInterceptor)
+            .authenticator(authenticator)
             .build()
 
     @Provides
     @Singleton
-    @Invitation
+    @AuthInvitation
     fun provideInvitationRetrofit(
         json: Json,
-        @Invitation okHttpClient: OkHttpClient,
+        @AuthInvitation okHttpClient: OkHttpClient,
+    ): Retrofit =
+        Retrofit
+            .Builder()
+            .baseUrl(SERVER_BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+
+    @Provides
+    @Singleton
+    @NachoMedia
+    fun provideNachoMediaOkHttpClient(
+        loggingInterceptor: HttpLoggingInterceptor,
+    ): OkHttpClient =
+        OkHttpClient
+            .Builder()
+            .addInterceptor(loggingInterceptor)
+            .connectTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .build()
+
+
+    @Provides
+    @Singleton
+    @NonAuthInvitation
+    fun provideNonAuthInvitationOkHttpClient(
+        loggingInterceptor: HttpLoggingInterceptor,
+    ): OkHttpClient =
+        OkHttpClient
+            .Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
+
+    @Provides
+    @Singleton
+    @NonAuthInvitation
+    fun provideNonInvitationRetrofit(
+        json: Json,
+        @NonAuthInvitation okHttpClient: OkHttpClient,
     ): Retrofit =
         Retrofit
             .Builder()
@@ -89,12 +134,24 @@ object InvitationNetworkModule {
     @Provides
     @Singleton
     fun provideGuestBookService(
-        @Invitation retrofit: Retrofit,
+        @AuthInvitation retrofit: Retrofit,
     ): GuestBookService = retrofit.create(GuestBookService::class.java)
 
     @Provides
     @Singleton
     fun provideInvitationService(
-        @Invitation retrofit: Retrofit,
+        @AuthInvitation retrofit: Retrofit,
     ): InvitationService = retrofit.create(InvitationService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideAuthService(
+        @NonAuthInvitation retrofit: Retrofit,
+    ): AuthService = retrofit.create(AuthService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideUserService(
+        @AuthInvitation retrofit: Retrofit,
+    ): UserService = retrofit.create(UserService::class.java)
 }

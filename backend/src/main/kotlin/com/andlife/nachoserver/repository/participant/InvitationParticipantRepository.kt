@@ -1,9 +1,11 @@
 package com.andlife.nachoserver.repository.participant
 
 import com.andlife.nachoserver.entity.InvitationParticipant
+import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import java.time.LocalDate
@@ -71,4 +73,9 @@ interface InvitationParticipantRepository : JpaRepository<InvitationParticipant,
         @Param("userId") userId: Long,
         @Param("invitationId") invitationId: Long
     ): InvitationParticipant?
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM InvitationParticipant p WHERE p.invitation.id = :invitationId")
+    fun deleteAllByInvitationId(@Param("invitationId") invitationId: Long)
 }

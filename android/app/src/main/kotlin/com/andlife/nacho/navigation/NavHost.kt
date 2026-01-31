@@ -47,7 +47,6 @@ fun NachoNavHost(
     modifier: Modifier = Modifier,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
-
     Scaffold(
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
         snackbarHost = {
@@ -95,6 +94,7 @@ fun NachoNavHost(
             )
 
             myInvitationNavGraph(
+                snackbarHostState = snackbarHostState,
                 paddingValues = innerPadding,
                 onNavigateToCreate = navigator::navigateToMyInvitationCreate,
                 onNavigateToDetail = navigator::navigateToMyInvitationDetail,

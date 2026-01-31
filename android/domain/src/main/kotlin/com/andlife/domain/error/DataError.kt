@@ -12,6 +12,8 @@ sealed interface DataError : InvitationError {
 
     enum class Local : DataError {
         DISK_FULL,
+        IOEXCEPTION,
+        UNKNOWN,
     }
 
     enum class LocalImage : DataError {

@@ -12,14 +12,17 @@ import jakarta.persistence.Id
 class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
+    val id: Long = 0,
+
+    @Column(name = "kakao_id", nullable = false, unique = true)
+    val kakaoId: Long,
 
     @Column(nullable = false, unique = true)
     val email: String,
 
     @Column(nullable = false)
-    val name: String,
+    var name: String,
 
     @Column(name = "profile_image_url")
-    val profileImageUrl: String? = null,
+    var profileImageUrl: String? = null,
 ): BaseTimeEntity()

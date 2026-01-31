@@ -12,4 +12,8 @@ sealed interface MainSideEffect : BaseSideEffect {
         val invitationId: Long,
         val isFromDeepLink: Boolean = true,
     ) : MainSideEffect
+
+    data object NavigateToLogin : MainSideEffect
+
+    data object NavigateToHome : MainSideEffect
 }

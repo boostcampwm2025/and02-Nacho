@@ -4,11 +4,19 @@ import javax.inject.Qualifier
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class Invitation
+annotation class AuthInvitation
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class NonAuthInvitation
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class InvitationMedia
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class NachoMedia
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)

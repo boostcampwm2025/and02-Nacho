@@ -17,6 +17,7 @@ import com.andlife.domain.util.Result
 import com.andlife.domain.util.ThumbnailGenerator
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
+import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.media.audio.AudioPlayerManager
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.model.guestbook.GuestBookUiModel
@@ -37,8 +38,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -80,22 +79,10 @@ constructor(
     }
 
     private fun observeAudioPlayerState() {
-        audioPlayerManager.currentAudioUrl
-            .combine(audioPlayerManager.isPlaying) { url, isPlaying ->
+        audioPlayerManager.currentAudio
+            .onEach { audioPlaybackState ->
                 updateState {
-                    copy(
-                        playingAudioUrl = url,
-                        isAudioPlaying = isPlaying,
-                    )
-                }
-            }
-            .launchIn(viewModelScope)
-
-        uiState.map { it.isAudioPlaying }
-            .distinctUntilChanged()
-            .onEach { isAudioPlaying ->
-                if (!isAudioPlaying) {
-                    videoPlayerPool.resumeLastPlayed()
+                    copy( audioPlaybackState = audioPlaybackState ?: AudioPlaybackState())
                 }
             }
             .launchIn(viewModelScope)
@@ -113,6 +100,7 @@ constructor(
             is MyInvitationGuestBookUiEvent.StopAudioRecording -> handleStopAudioRecording()
             is MyInvitationGuestBookUiEvent.ClearError -> clearError()
             is MyInvitationGuestBookUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
+            is MyInvitationGuestBookUiEvent.ClickVideoPlayButton -> clickVideoPlayButton(event.url, event.itemId)
 
             is MyInvitationGuestBookUiEvent.ClickGuestBookMenu -> sendEffect(
                 MyInvitationGuestBookSideEffect.ShowSnackbar("방명록 메뉴 클릭됨: ${event.guestBookId}"),
@@ -129,12 +117,14 @@ constructor(
             is MyInvitationGuestBookUiEvent.ClickEditMenu -> startEditing(event.guestBook)
             is MyInvitationGuestBookUiEvent.CancelEdit -> cancelEdit()
             is MyInvitationGuestBookUiEvent.ClickDeleteMenu -> deleteGuestBook(event.guestBookId)
+            is MyInvitationGuestBookUiEvent.UpdateMediaPlayState -> updatePlayState(event.isPlaying)
+            MyInvitationGuestBookUiEvent.Refresh -> refresh()
         }
     }
 
     private fun clickAudioMedia(url: String) {
-        val isCurrentlyPlaying = uiState.value.isAudioPlaying
-        val currentUrl = uiState.value.playingAudioUrl
+        val isCurrentlyPlaying = uiState.value.audioPlaybackState.isPlaying
+        val currentUrl = uiState.value.audioPlaybackState.playingUrl
 
         if (currentUrl == url && isCurrentlyPlaying) {
             audioPlayerManager.togglePlay(url)
@@ -143,6 +133,13 @@ constructor(
             videoPlayerPool.pauseAllPlayers()
             audioPlayerManager.togglePlay(url)
         }
+    }
+
+    private fun clickVideoPlayButton(url: String, itemId: Long) {
+        val isCurrentlyPlaying = uiState.value.audioPlaybackState.isPlaying
+        if (!isCurrentlyPlaying) return
+        audioPlayerManager.pause()
+        videoPlayerPool.playPlayer(url, itemId)
     }
 
     private fun updateSelectedMedias(medias: List<SelectedMedia>) {
@@ -421,5 +418,27 @@ constructor(
     private fun handleStopAudioRecording() {
         updateState { copy(isAudioRecording = false, audioRecordingDuration = 0) }
         sendEffect(MyInvitationGuestBookSideEffect.StopAudioRecording)
+    }
+
+    private fun updatePlayState(isPlaying: Boolean) {
+        updateState { copy(isMediaPlaying = isPlaying) }
+    }
+
+    private fun refresh() {
+        invalidateGuestBooks()
+        updateState { copy(isRefreshing = true) }
+    }
+
+    fun onRefreshFinished(hasError: Boolean) {
+        val wasUserTriggered = uiState.value.isRefreshing
+        updateState { copy(isRefreshing = false) }
+
+        if (hasError) {
+            sendEffect(MyInvitationGuestBookSideEffect.RefreshFailure)
+        } else {
+            if (wasUserTriggered) {
+                sendEffect(MyInvitationGuestBookSideEffect.ScrollToTop)
+            }
+        }
     }
 }
