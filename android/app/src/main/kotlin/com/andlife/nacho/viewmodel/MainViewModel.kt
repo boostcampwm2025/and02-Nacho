@@ -2,6 +2,7 @@ package com.andlife.nacho.viewmodel
 
 import android.content.Intent
 import androidx.lifecycle.viewModelScope
+import com.andlife.deeplink.DeepLinkConfig
 import com.andlife.deeplink.DeepLinkManager
 import com.andlife.domain.model.auth.AuthEvent
 import com.andlife.domain.model.auth.AuthState
@@ -97,6 +98,16 @@ class MainViewModel @Inject constructor(
 
     fun handleDeepLink(intent: Intent?) {
         val data = intent?.data ?: return
-        sendEffect(MainSideEffect.HandleDeepLink(intent))
+
+        val inviteId = data.getQueryParameter(DeepLinkConfig.KAKAO_PARAM_INVITE_ID)
+            ?: data.getQueryParameter(DeepLinkConfig.AF_DEEP_LINK_SUB1)
+
+        if (inviteId != null) {
+            viewModelScope.launch {
+                if (inviteId != lastProcessedId) {
+                    deepLinkManager.emitInvitationId(inviteId)
+                }
+            }
+        }
     }
 }
