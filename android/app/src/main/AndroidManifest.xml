@@ -98,6 +98,9 @@
             android:foregroundServiceType="dataSync"
             tools:node="merge" />
 
-    </application>
+        <receiver
+            android:name="com.andlife.data.util.media.DownloadCancelReceiver"
+            android:exported="false" />
 
+    </application>
 </manifest>

@@ -27,9 +27,9 @@ class MediaDownloaderImpl @Inject constructor(
         mediaType: MediaType
     ): String {
         val inputData = workDataOf(
-            DownloadWorker.KEY_URL to url,
-            DownloadWorker.KEY_FILE_NAME to fileName,
-            DownloadWorker.KEY_MEDIA_TYPE to mediaType.ordinal
+            DownloadKey.URL to url,
+            DownloadKey.FILE_NAME to fileName,
+            DownloadKey.MEDIA_TYPE to mediaType.ordinal
         )
 
         val constraints = Constraints.Builder()
@@ -39,7 +39,7 @@ class MediaDownloaderImpl @Inject constructor(
         val downloadRequest = OneTimeWorkRequestBuilder<DownloadWorker>()
             .setInputData(inputData)
             .setConstraints(constraints)
-            .addTag(DOWNLOAD_WORK_TAG)
+            .addTag(DownloadKey.TAG_MEDIA_DOWNLOAD)
             .build()
 
         workManager.enqueue(downloadRequest)
@@ -59,11 +59,7 @@ class MediaDownloaderImpl @Inject constructor(
     }
 
     override fun cancelAllDownloads() {
-        workManager.cancelAllWorkByTag(DOWNLOAD_WORK_TAG)
-    }
-
-    companion object {
-        const val DOWNLOAD_WORK_TAG = "media_download"
+        workManager.cancelAllWorkByTag(DownloadKey.TAG_MEDIA_DOWNLOAD)
     }
 }
 
@@ -74,22 +70,22 @@ private fun WorkInfo?.toDownloadState(): DownloadState {
         WorkInfo.State.ENQUEUED -> DownloadState.Idle
 
         WorkInfo.State.RUNNING -> {
-            val progressValue = progress.getInt(DownloadWorker.KEY_PROGRESS, 0)
+            val progressValue = progress.getInt(DownloadKey.PROGRESS, 0)
             DownloadState.Downloading(progressValue)
         }
 
         WorkInfo.State.SUCCEEDED -> {
-            val resultUrl = outputData.getString(DownloadWorker.KEY_RESULT_URL) ?: ""
+            val resultUrl = outputData.getString(DownloadKey.RESULT_URL).orEmpty()
             DownloadState.Success(url = resultUrl)
         }
 
         WorkInfo.State.FAILED -> {
-            val errorMsg = outputData.getString(DownloadWorker.KEY_ERROR_MESSAGE) ?: "알 수 없는 오류"
+            val errorMsg = outputData.getString(DownloadKey.ERROR_MESSAGE) ?: DownloadError.UNKNOWN
             DownloadState.Error(message = errorMsg)
         }
 
         WorkInfo.State.CANCELLED -> {
-            DownloadState.Error(message = "다운로드가 취소되었습니다.")
+            DownloadState.Error(message = DownloadNoti.MSG_CANCELLED)
         }
 
         else -> DownloadState.Idle

@@ -33,6 +33,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
+import kotlin.coroutines.cancellation.CancellationException
 
 @HiltWorker
 class DownloadWorker @AssistedInject constructor(
@@ -55,23 +56,25 @@ class DownloadWorker @AssistedInject constructor(
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         prepareNotificationChannels()
 
-        val url = inputData.getString(KEY_URL) ?: return@withContext Result.failure(errorData(ERROR_MISSING_URL))
+        val url = inputData.getString(DownloadKey.URL)
+            ?: return@withContext Result.failure(errorData(DownloadError.MISSING_URL))
         val fileName =
-            inputData.getString(KEY_FILE_NAME) ?: return@withContext Result.failure(errorData(ERROR_MISSING_FILE_NAME))
-        val mediaType = inputData.getInt(KEY_MEDIA_TYPE, -1).let { MediaType.entries.getOrNull(it) }
-            ?: return@withContext Result.failure(errorData(ERROR_MISSING_MEDIA_TYPE))
+            inputData.getString(DownloadKey.FILE_NAME)
+                ?: return@withContext Result.failure(errorData(DownloadError.MISSING_FILE_NAME))
+        val mediaType = inputData.getInt(DownloadKey.MEDIA_TYPE, -1).let { MediaType.entries.getOrNull(it) }
+            ?: return@withContext Result.failure(errorData(DownloadError.MISSING_MEDIA_TYPE))
 
         return@withContext try {
             runCatching { setForeground(getForegroundInfo()) }
                 .onFailure { Log.e("DownloadWorker", "Foreground 승격 실패", it) }
 
-            setProgress(workDataOf(KEY_PROGRESS to 0))
+            setProgress(workDataOf(DownloadKey.PROGRESS to 0))
 
             val request = Request.Builder().url(url).build()
             okHttpClient.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) throw Exception("$ERROR_DOWNLOAD_FAILED${response.code}")
+                if (!response.isSuccessful) throw Exception("${DownloadError.FAILED}${response.code}")
 
-                val body = checkNotNull(response.body) { ERROR_MISSING_BODY }
+                val body = checkNotNull(response.body) { DownloadError.MISSING_BODY }
 
                 val (uri, path) = saveToStorage(
                     inputStream = body.byteStream(),
@@ -81,11 +84,15 @@ class DownloadWorker @AssistedInject constructor(
                 )
 
                 updateCompleteNotification(fileName, mediaType)
-                Result.success(workDataOf(KEY_RESULT_URL to uri, KEY_RESULT_PATH to path))
+                Result.success(workDataOf(DownloadKey.RESULT_URL to uri, DownloadKey.RESULT_PATH to path))
             }
         } catch (e: Exception) {
-            Log.e("DownloadWorker", "다운로드 중 오류 발생", e)
-            Result.failure(errorData(e.message ?: ERROR_UNKNOWN))
+            if (e is CancellationException || isStopped) {
+                Log.d("DownloadWorker", "작업이 취소되었습니다.")
+            } else {
+                Log.e("DownloadWorker", "다운로드 중 오류 발생", e)
+            }
+            Result.failure(errorData(e.message ?: DownloadError.UNKNOWN))
         }
     }
 
@@ -95,16 +102,16 @@ class DownloadWorker @AssistedInject constructor(
 
             val channels = listOf(
                 NotificationChannel(
-                    CHANNEL_ID_PROGRESS,
-                    CHANNEL_NAME_PROGRESS,
+                    DownloadNoti.CHANNEL_ID_PROGRESS,
+                    DownloadNoti.CHANNEL_NAME_PROGRESS,
                     NotificationManager.IMPORTANCE_LOW
                 ).apply {
                     setSound(null, null)
                     enableVibration(false)
                 },
                 NotificationChannel(
-                    CHANNEL_ID_COMPLETE,
-                    CHANNEL_NAME_COMPLETE,
+                    DownloadNoti.CHANNEL_ID_COMPLETE,
+                    DownloadNoti.CHANNEL_NAME_COMPLETE,
                     NotificationManager.IMPORTANCE_DEFAULT
                 ).apply {
                     setSound(null, null)
@@ -116,23 +123,35 @@ class DownloadWorker @AssistedInject constructor(
     }
 
     private fun createDownloadNotification(progress: Int): Notification {
-        return NotificationCompat.Builder(context, CHANNEL_ID_PROGRESS)
+        val cancelIntent = Intent(context, DownloadCancelReceiver::class.java).apply {
+            putExtra(DownloadKey.EXTRA_WORK_ID, id.toString())
+        }
+
+        val cancelPendingIntent = PendingIntent.getBroadcast(
+            context,
+            id.hashCode(),
+            cancelIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        return NotificationCompat.Builder(context, DownloadNoti.CHANNEL_ID_PROGRESS)
             .setSmallIcon(android.R.drawable.stat_sys_download)
-            .setContentTitle(TITLE_DOWNLOADING)
-            .setContentText(if (progress > 0) "$progress%" else MSG_PREPARING)
+            .setContentTitle(DownloadNoti.TITLE_DOWNLOADING)
+            .setContentText(if (progress > 0) "$progress%" else DownloadNoti.MSG_PREPARING)
             .setProgress(100, progress, progress <= 0)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
+            .addAction(android.R.drawable.ic_menu_close_clear_cancel, DownloadNoti.ACTION_CANCEL, cancelPendingIntent)
             .build()
     }
 
     private fun updateCompleteNotification(fileName: String, mediaType: MediaType) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(DownloadFile.PREF_NAME, Context.MODE_PRIVATE)
 
         val isAudio = mediaType == MediaType.AUDIO
-        val notificationId = if (isAudio) COMPLETE_AUDIO_NOTIFICATION_ID else COMPLETE_VISUAL_NOTIFICATION_ID
-        val countKey = if (isAudio) KEY_COUNT_AUDIO else KEY_COUNT_VISUAL
+        val notificationId = if (isAudio) DownloadNoti.ID_COMPLETE_VISUAL else DownloadNoti.ID_COMPLETE_AUDIO
+        val countKey = if (isAudio) DownloadFile.KEY_COUNT_AUDIO else DownloadFile.KEY_COUNT_VISUAL
 
         val currentCount = synchronized(DownloadWorker::class.java) {
             val activeNotification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -152,10 +171,10 @@ class DownloadWorker @AssistedInject constructor(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID_COMPLETE)
+        val notification = NotificationCompat.Builder(context, DownloadNoti.CHANNEL_ID_COMPLETE)
             .setSmallIcon(android.R.drawable.stat_sys_download_done)
-            .setContentTitle(if (isAudio) TITLE_COMPLETE_AUDIO else TITLE_COMPLETE_VISUAL)
-            .setContentText("$currentCount$MSG_COMPLETE_SUFFIX")
+            .setContentTitle(if (isAudio) DownloadNoti.TITLE_COMPLETE_AUDIO else DownloadNoti.TITLE_COMPLETE_VISUAL)
+            .setContentText("$currentCount${DownloadNoti.MSG_COMPLETE_SUFFIX}")
             .setSubText(fileName)
             .setNumber(currentCount)
             .setOnlyAlertOnce(true)
@@ -198,7 +217,7 @@ class DownloadWorker @AssistedInject constructor(
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
             put(MediaStore.MediaColumns.MIME_TYPE, getMimeType(fileName, mediaType))
-            put(MediaStore.MediaColumns.RELATIVE_PATH, "${mediaType.directory}/${SAVE_DIRECTORY_NAME}")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, "${mediaType.directory}/${DownloadFile.SAVE_DIRECTORY_NAME}")
             put(MediaStore.MediaColumns.IS_PENDING, 1)
 
         }
@@ -230,7 +249,7 @@ class DownloadWorker @AssistedInject constructor(
         contentLength: Long,
     ): Pair<String, String> {
         val publicDir = Environment.getExternalStoragePublicDirectory(mediaType.directory)
-        val directory = File(publicDir, SAVE_DIRECTORY_NAME)
+        val directory = File(publicDir, DownloadFile.SAVE_DIRECTORY_NAME)
 
         if (!directory.exists()) {
             directory.mkdirs()
@@ -249,7 +268,7 @@ class DownloadWorker @AssistedInject constructor(
         outputStream: OutputStream,
         contentLength: Long,
     ) {
-        val buffer = ByteArray(BUFFER_SIZE)
+        val buffer = ByteArray(DownloadFile.BUFFER_SIZE)
         var downloadedBytes = 0L
         var lastProgress = -1
 
@@ -267,9 +286,9 @@ class DownloadWorker @AssistedInject constructor(
                     lastProgress = progress
 
                     val progressData = workDataOf(
-                        KEY_PROGRESS to progress,
-                        KEY_DOWNLOADED_BYTES to downloadedBytes,
-                        KEY_TOTAL_BYTES to contentLength
+                        DownloadKey.PROGRESS to progress,
+                        DownloadKey.DOWNLOADED_BYTES to downloadedBytes,
+                        DownloadKey.TOTAL_BYTES to contentLength
                     )
 
                     setProgress(progressData)
@@ -294,7 +313,7 @@ class DownloadWorker @AssistedInject constructor(
             }
         }
         outputStream.flush()
-        setProgress(workDataOf(KEY_PROGRESS to 100))
+        setProgress(workDataOf(DownloadKey.PROGRESS to 100))
     }
 
     private fun generateUniqueFile(directory: File, fileName: String): File {
@@ -323,9 +342,9 @@ class DownloadWorker @AssistedInject constructor(
             .getMimeTypeFromExtension(extension.lowercase())
 
         return mimeType ?: when (mediaType) {
-            MediaType.IMAGE -> MIME_TYPE_IMAGE_ALL
-            MediaType.VIDEO -> MIME_TYPE_VIDEO_ALL
-            MediaType.AUDIO -> MIME_TYPE_AUDIO_ALL
+            MediaType.IMAGE -> DownloadFile.MIME_IMAGE
+            MediaType.VIDEO -> DownloadFile.MIME_VIDEO
+            MediaType.AUDIO -> DownloadFile.MIME_AUDIO
         }
     }
 
@@ -346,7 +365,7 @@ class DownloadWorker @AssistedInject constructor(
     }
 
     fun errorData(message: String): Data {
-        return workDataOf(KEY_ERROR_MESSAGE to message)
+        return workDataOf(DownloadKey.ERROR_MESSAGE to message)
     }
 
     private val MediaType.directory: String
@@ -366,7 +385,8 @@ class DownloadWorker @AssistedInject constructor(
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI
                     else MediaStore.Video.Media.EXTERNAL_CONTENT_URI
 
-                    val folderMimeType = if (mediaType == MediaType.IMAGE) MIME_TYPE_IMAGE_ALL else MIME_TYPE_VIDEO_ALL
+                    val folderMimeType =
+                        if (mediaType == MediaType.IMAGE) DownloadFile.MIME_IMAGE else DownloadFile.MIME_VIDEO
 
                     setDataAndType(uri, folderMimeType)
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -376,8 +396,8 @@ class DownloadWorker @AssistedInject constructor(
             MediaType.AUDIO -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     Intent(Intent.ACTION_VIEW).apply {
-                        val rootUri = Uri.parse(URI_EXTERNAL_STORAGE_ROOT)
-                        setDataAndType(rootUri, MIME_TYPE_FOLDER_ANDROID_Q)
+                        val rootUri = Uri.parse(DownloadFile.URI_STORAGE_ROOT)
+                        setDataAndType(rootUri, DownloadFile.MIME_FOLDER_Q)
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
                 } else {
@@ -389,54 +409,5 @@ class DownloadWorker @AssistedInject constructor(
                 }
             }
         }
-    }
-
-    companion object {
-        const val KEY_URL = "url"
-        const val KEY_FILE_NAME = "file_name"
-        const val KEY_MEDIA_TYPE = "media_type"
-        const val KEY_RESULT_URL = "result_url"
-        const val KEY_RESULT_PATH = "result_path"
-        const val KEY_ERROR_MESSAGE = "error_message"
-
-        const val KEY_PROGRESS = "progress"
-        const val KEY_DOWNLOADED_BYTES = "downloaded_bytes"
-        const val KEY_TOTAL_BYTES = "total_bytes"
-
-        const val CHANNEL_ID_PROGRESS = "download_progress_channel"
-        const val CHANNEL_ID_COMPLETE = "download_complete_channel"
-
-        const val COMPLETE_VISUAL_NOTIFICATION_ID = 1001
-        const val COMPLETE_AUDIO_NOTIFICATION_ID = 1002
-
-        const val CHANNEL_NAME_PROGRESS = "다운로드 진행 상태"
-        const val CHANNEL_NAME_COMPLETE = "다운로드 완료 안내"
-
-        const val TITLE_DOWNLOADING = "다운로드 중"
-        const val MSG_PREPARING = "파일을 저장하고 있습니다."
-        const val TITLE_COMPLETE_AUDIO = "음성 메시지 저장 완료"
-        const val TITLE_COMPLETE_VISUAL = "미디어 저장 완료"
-        const val MSG_COMPLETE_SUFFIX = "개의 파일이 저장되었습니다."
-
-        const val SAVE_DIRECTORY_NAME = "나에게로의 초대"
-
-        private const val PREF_NAME = "download_prefs"
-        private const val KEY_COUNT_AUDIO = "audio_count"
-        private const val KEY_COUNT_VISUAL = "visual_count"
-
-        private const val BUFFER_SIZE = 8 * 1024
-
-        private const val ERROR_MISSING_URL = "URL이 없습니다"
-        private const val ERROR_MISSING_FILE_NAME = "파일명이 없습니다"
-        private const val ERROR_MISSING_MEDIA_TYPE = "미디어 타입이 없습니다"
-        private const val ERROR_MISSING_BODY = "응답 본문이 없습니다."
-        private const val ERROR_DOWNLOAD_FAILED = "다운로드 실패: "
-        private const val ERROR_UNKNOWN = "알 수 없는 오류"
-
-        private const val MIME_TYPE_IMAGE_ALL = "image/*"
-        private const val MIME_TYPE_VIDEO_ALL = "video/*"
-        private const val MIME_TYPE_AUDIO_ALL = "audio/*"
-        private const val MIME_TYPE_FOLDER_ANDROID_Q = "vnd.android.document/root"
-        private const val URI_EXTERNAL_STORAGE_ROOT = "content://com.android.externalstorage.documents/root/primary"
     }
 }
