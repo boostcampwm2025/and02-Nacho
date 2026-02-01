@@ -60,6 +60,7 @@ class InvitationDetailViewModel @Inject constructor(
 
         invitationRepository.joinInvitation(invitationId)
             .onSuccess {
+                RefreshEventHub.emit(RefreshTarget.ALL)
                 loadInvitation()
             }
             .onFailure { error, _ ->
@@ -100,9 +101,6 @@ class InvitationDetailViewModel @Inject constructor(
     }
 
     private fun clickClose() {
-        if (isFromDeepLink) {
-            RefreshEventHub.emit(RefreshTarget.INVITATION)
-        }
         sendEffect(InvitationDetailSideEffect.NavigateBack)
     }
 
