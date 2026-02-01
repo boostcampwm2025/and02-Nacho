@@ -55,9 +55,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.AspectRatioFrameLayout
-import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
 import coil3.compose.SubcomposeAsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
@@ -543,28 +540,6 @@ private fun VideoPlayerContainer(
     }
 }
 
-//@OptIn(UnstableApi::class)
-//@Composable
-//private fun VideoPlayerView(
-//    player: ExoPlayer,
-//    modifier: Modifier = Modifier,
-//) {
-//    AndroidView(
-//        factory = { context ->
-//            PlayerView(context).apply {
-//                useController = false
-//                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-//                this.player = player
-//            }
-//        },
-//        update = { playerView ->
-//            if (playerView.player != player) {
-//                playerView.player = player
-//            }
-//        },
-//        modifier = modifier,
-//    )
-//}
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -574,14 +549,9 @@ private fun VideoPlayerView(
 ) {
     AndroidView(
         factory = {
-            // 새로 생성하지 않고 이미 만들어진 View를 반환
             autoPlayer.playerView.apply {
-                // 중요: 다른 아이템에 붙어있었다면 떼어내고 현재 아이템으로 이동
                 (parent as? ViewGroup)?.removeView(this)
             }
-        },
-        update = {
-            // 이미 player가 세팅된 View이므로 추가 작업 없음
         },
         modifier = modifier,
     )

@@ -5,7 +5,6 @@ import android.content.Context
 import androidx.annotation.OptIn
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
-import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.cache.CacheDataSource
@@ -38,15 +37,7 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
 
     private var currentPlayingUrl: String? = null
 
-    // 프리캐싱을 위한 코루틴 스코프
-    // SupervisorJob을 사용하여 하나의 작업 실패가 전체 스코프에 영향을 미치지 않도록 함 -> 하나의 비디오 프리캐싱 실패가 다른 작업에 영향 X
     private val precacheScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
-    // 현재 프리캐싱 중인 작업들을 추적하기 위한 맵
-    // 왜 ConcurrentHashMap을 사용하는가? -> 멀티스레드 환경에서 안전하게 접근하기 위해
-    // 예를 들어, 여러 비디오 url이 동시에 프리캐싱 요청될 때, 여러 스레드가 이 맵에 접근할 수 있기 때문
-    // 이를 통해 race condition이나 데이터 불일치 문제를 방지할 수 있음
-    // 위에서 precacheScope가 여러 코루틴을 동시에 실행할 수 있기 때문에, 이 맵도 멀티스레드 환경에서 안전해야 함
     private val activePrecacheJobs = ConcurrentHashMap<String, Job>()
 
     init {
@@ -56,7 +47,7 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
     @OptIn(UnstableApi::class)
     override fun preparePlayers() {
         if (playerInstances.isNotEmpty()) return
-        Log.d("wwwwww", "플레이어 풀 초기화, 크기: $maxPoolSize")
+
         repeat(maxPoolSize) {
             val exoPlayer =
                 ExoPlayer.Builder(context).build().apply {
@@ -166,42 +157,31 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
 
     @OptIn(UnstableApi::class)
     override fun precacheVideos(urls: List<String>) {
-        Log.d("wwwwww", "프리캐싱 요청됨: $urls")
-        val cache = cacheDataSourceFactory.cache ?: return // 캐시가 없으면 프리캐싱 불가
-        Log.d("wwwwww", "캐시 존재, 프리캐싱 시작: $urls")
+        val cache = cacheDataSourceFactory.cache ?: return
 
         urls.forEach { url ->
             val uri = url.toUri()
 
-            if (activePrecacheJobs.contains(url)) {
-                Log.d("wwwwww", "이미 프리캐싱 중: $url")
-                return@forEach // 이미 프리캐싱 중인 경우 건너뜀
-            }
+            if (activePrecacheJobs.contains(url)) return@forEach
 
-            val cacheBytes = cache.getCachedBytes( // 이미 캐시된 바이트 수 확인
+            val cacheBytes = cache.getCachedBytes(
                 CacheKeyFactory.DEFAULT.buildCacheKey(DataSpec(uri)),
                 0,
                 PRECACHE_SIZE_BYTES
             )
 
-            if (cacheBytes >= PRECACHE_SIZE_BYTES) {
-                Log.d("wwwwww", "이미 캐시 완료됨: $url")
-                return@forEach // 이미 충분히 캐시된 경우 건너뜀
-            }
+            if (cacheBytes >= PRECACHE_SIZE_BYTES) return@forEach
 
-            Log.d("wwwwww", "프리캐싱 시작 필요: $url, 이미 캐시된 바이트: $cacheBytes")
-
-            activePrecacheJobs[url] = precacheScope.launch { // url이 여러 개면 각각의 코루틴에서 프리캐싱 작업 수행 -> 그래서 ConcurrentHashMap을 사용하는 것
-                Log.d("wwwwww", "이전에 캐시되지 않은 비디오 프리캐싱 시작: $url")
+            activePrecacheJobs[url] = precacheScope.launch {
                 try {
                     val dataSpec = DataSpec.Builder()
                         .setUri(uri)
                         .setLength(PRECACHE_SIZE_BYTES)
-                        .setFlags(DataSpec.FLAG_ALLOW_CACHE_FRAGMENTATION) // 조각화된 캐시 허용
+                        .setFlags(DataSpec.FLAG_ALLOW_CACHE_FRAGMENTATION)
                         .build()
 
                     val cacheWriter = CacheWriter(
-                        cacheDataSourceFactory.createDataSourceForDownloading(), // 다운로드 전용 데이터 소스
+                        cacheDataSourceFactory.createDataSourceForDownloading(),
                         dataSpec,
                         null,
                         null
@@ -214,8 +194,6 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
                 }
             }
         }
-
-        Log.d("wwwwww", "프리캐싱 작업 개수: ${activePrecacheJobs.size}")
     }
 
     override fun resetPool() {
@@ -238,35 +216,16 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
         val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val memoryInfo = ActivityManager.MemoryInfo()
         activityManager.getMemoryInfo(memoryInfo)
-
-        // 전체 메모리 크기에 따라 풀 크기 결정. 8기가 이상 : 4, 4기가 이상 : 3, 그 이하 : 2
-        Log.d("wwwwww", "memoryInfo.totalMem: ${memoryInfo.totalMem}")
-        Log.d("wwwwww", "memoryInfo.availMem: ${memoryInfo.availMem}")
-        Log.d("wwwwww", "memoryInfo.lowMemory: ${memoryInfo.lowMemory}")
-        Log.d("wwwwww", "memoryInfo.threshold: ${memoryInfo.threshold}")
-        Log.d("wwwwww", "디바이스 메모리 상태: ${if (memoryInfo.lowMemory) "낮음" else "양호"}")
-        Log.d("wwwwww", "디바이스 사용 가능 메모리: ${memoryInfo.availMem / (1024 * 1024)} MB")
-        Log.d("wwwwww", "디바이스 전체 메모리 MB: ${memoryInfo.totalMem / (1024 * 1024)} MB")
-        Log.d("wwwwww", "디바이스 전체 메모리: ${memoryInfo.totalMem / (1024 * 1024 * 1024)} GB")
-       // val totalMemoryGb = memoryInfo.totalMem / (1024 * 1024 * 1024)
-//        return when {
-//            totalMemoryGb >= 8 -> 4
-//            totalMemoryGb >= 4 -> 3
-//            else -> 2
-//        }
         val totalMemoryGb = memoryInfo.totalMem.toDouble() / (1024 * 1024 * 1024)
-        Log.d("wwwwww", "디바이스 실제 GB: $totalMemoryGb")
 
         return when {
             totalMemoryGb >= 7.0 -> 4
             totalMemoryGb >= 5.0 -> 3
-            //totalMemoryGb >= 3.5 -> 2 // 3.8GB이므로 여기서 3개로 잡힘
             else -> 2
         }
     }
 
     companion object {
-        //private const val MAX_POOL_SIZE = 5
         private const val PRECACHE_SIZE_BYTES = 1 * 1024 * 1024L
     }
 }
