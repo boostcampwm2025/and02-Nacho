@@ -1,6 +1,9 @@
 package com.andlife.ui.component.invitation
 
+import android.os.Build
+import android.os.ext.SdkExtensions
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -65,9 +68,29 @@ fun InvitationGuestBookForm(
         }
     }
 
+    val usePhotoPickerAPI = Build.VERSION.SDK_INT >= 33 ||
+        (Build.VERSION.SDK_INT >= 30 && SdkExtensions.getExtensionVersion(Build.VERSION_CODES.R) >= 2)
+
     val launcher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetMultipleContents(),
+        ) { uris ->
+            val uriStrings = uris.map { it.toString() }
+            val availableSlots = MAX_MEDIAS_COUNT - selectedMedias.size
+
+            if (availableSlots <= 0) return@rememberLauncherForActivityResult
+
+            val mediasToAdd =
+                uriStrings
+                    .take(availableSlots)
+                    .map { uriToSelectedMedia(context, it) }
+
+            onMediasSelected((selectedMedias + mediasToAdd).toImmutableList())
+        }
+
+    val photoPickerLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.PickMultipleVisualMedia(MAX_MEDIAS_COUNT)
         ) { uris ->
             val uriStrings = uris.map { it.toString() }
             val availableSlots = MAX_MEDIAS_COUNT - selectedMedias.size
@@ -150,7 +173,14 @@ fun InvitationGuestBookForm(
                             .let {
                                 if (isMediaAddEnabled) {
                                     it.clickable {
-                                        launcher.launch("image/*")
+                                        if (usePhotoPickerAPI) {
+                                            photoPickerLauncher.launch(
+                                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
+                                            )
+                                        } else {
+                                            // Photo Picker API를 사용할 수 없으면 기존 파일 선택기 사용
+                                            launcher.launch("image/*")
+                                        }
                                     }
                                 } else {
                                     it
