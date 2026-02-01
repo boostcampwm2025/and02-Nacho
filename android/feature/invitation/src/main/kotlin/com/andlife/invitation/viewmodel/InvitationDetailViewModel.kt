@@ -33,10 +33,8 @@ class InvitationDetailViewModel @Inject constructor(
     initialState = InvitationDetailUiState(),
 ) {
     private val route = savedStateHandle.toRoute<InvitationDetail>()
-    private val invitationId: Long = route.id
-
     private val isFromDeepLink: Boolean = route.isFromDeepLink
-    private val savedState = savedStateHandle
+    private val invitationId: Long = route.id
 
     override val uiState: StateFlow<InvitationDetailUiState> =
         mutableUiState
@@ -55,7 +53,6 @@ class InvitationDetailViewModel @Inject constructor(
             )
 
     private suspend fun joinAndLoadInvitation() {
-        Log.d("InvitationDetailViewModel", "참여 요청")
         updateState { copy(isLoading = true, isError = false) }
 
         invitationRepository.joinInvitation(invitationId)
@@ -65,12 +62,10 @@ class InvitationDetailViewModel @Inject constructor(
             }
             .onFailure { error, _ ->
                 updateState { copy(isLoading = false, isError = true) }
-                Log.e("InvitationDetailViewModel", "참여 실패: $error")
             }
     }
 
     private suspend fun loadInvitation() {
-        Log.d("InvitationDetailViewModel", "일반 데이터 조회")
         updateState { copy(isLoading = true, isError = false, editableCache = null) }
 
         invitationRepository.getInvitation(invitationId)
@@ -85,7 +80,6 @@ class InvitationDetailViewModel @Inject constructor(
                 }
             }.onFailure { it, msg ->
                 updateState { copy(isLoading = false, isError = true) }
-                Log.e("InvitationDetailViewModel", "에러 발생: $it")
             }
     }
 
