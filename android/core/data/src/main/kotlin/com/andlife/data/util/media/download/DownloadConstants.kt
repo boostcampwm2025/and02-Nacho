@@ -38,7 +38,7 @@ object DownloadNoti {
 
     const val TITLE_DOWNLOADING = "다운로드 중"
     const val MSG_PREPARING = "파일을 저장하고 있습니다."
-    const val TITLE_COMPLETE_AUDIO = "음성 메시지 저장 완료"
+    const val TITLE_COMPLETE_AUDIO = "오디오 저장 완료"
     const val TITLE_COMPLETE_VISUAL = "미디어 저장 완료"
     const val MSG_COMPLETE_SUFFIX = "개의 파일이 저장되었습니다."
     const val ACTION_CANCEL = "취소"
