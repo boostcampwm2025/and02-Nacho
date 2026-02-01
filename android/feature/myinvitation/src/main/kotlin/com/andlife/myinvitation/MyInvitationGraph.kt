@@ -12,13 +12,17 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import com.andlife.model.util.NavigationEventhub
+import com.andlife.model.util.NavigationEventhub.RefreshTarget
 import com.andlife.model.util.NavigationKeyConstant.CREATE_CARD_BY_INVITATION_ID
 import com.andlife.model.util.NavigationKeyConstant.INVITATION_UPDATED
 import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
+import com.andlife.myinvitation.model.MyInvitationUiEvent
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiEvent
 import com.andlife.myinvitation.screen.MyInvitationDetailRoute
 import com.andlife.myinvitation.screen.MyInvitationRoute
 import com.andlife.myinvitation.viewmodel.MyInvitationDetailViewModel
+import com.andlife.myinvitation.viewmodel.MyInvitationViewModel
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -48,12 +52,22 @@ fun NavGraphBuilder.myInvitationNavGraph(
     onNavigateToLogin: () -> Unit,
 ) {
     composable<MyInvitation> {
+        val viewModel: MyInvitationViewModel = hiltViewModel()
+
+        val refreshTarget by NavigationEventhub.refreshEvent.collectAsStateWithLifecycle(initialValue = null)
+
+        LaunchedEffect(refreshTarget) {
+            if (refreshTarget == RefreshTarget.MY_INVITATION || refreshTarget == RefreshTarget.ALL) {
+                viewModel.handleRefresh()
+            }
+        }
         MyInvitationRoute(
+            viewModel = viewModel,
             snackbarHostState = snackbarHostState,
             onNavigateToCreate = onNavigateToCreate,
             onNavigateToDetail = onNavigateToDetail,
             onNavigateToLogin = onNavigateToLogin,
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier.padding(paddingValues)
         )
     }
 }
