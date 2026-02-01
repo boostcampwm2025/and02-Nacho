@@ -1,4 +1,19 @@
-package com.andlife.data.util.media
+package com.andlife.data.util.media.download
+
+import android.webkit.MimeTypeMap
+import com.andlife.domain.model.guestbook.MediaType
+
+internal fun resolveMimeType(fileName: String, mediaType: MediaType): String {
+    val extension = fileName.substringAfterLast(".", "")
+    val mimeType = MimeTypeMap.getSingleton()
+        .getMimeTypeFromExtension(extension.lowercase())
+
+    return mimeType ?: when (mediaType) {
+        MediaType.IMAGE -> DownloadFile.MIME_IMAGE
+        MediaType.VIDEO -> DownloadFile.MIME_VIDEO
+        MediaType.AUDIO -> DownloadFile.MIME_AUDIO
+    }
+}
 
 object DownloadKey {
     const val URL = "url"
@@ -7,8 +22,6 @@ object DownloadKey {
     const val RESULT_URL = "result_url"
     const val ERROR_MESSAGE = "error_message"
     const val PROGRESS = "progress"
-    const val DOWNLOADED_BYTES = "downloaded_bytes"
-    const val TOTAL_BYTES = "total_bytes"
     const val EXTRA_WORK_ID = "extra_work_id"
 
     const val TAG_MEDIA_DOWNLOAD = "tag_media_download"

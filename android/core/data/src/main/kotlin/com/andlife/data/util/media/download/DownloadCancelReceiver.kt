@@ -1,4 +1,4 @@
-package com.andlife.data.util.media
+package com.andlife.data.util.media.download
 
 import android.content.BroadcastReceiver
 import android.content.Context
