@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -40,6 +41,7 @@ class DownloadWorker @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted private val params: WorkerParameters,
     @param:InvitationMedia private val okHttpClient: OkHttpClient,
+    private val contentResolver: ContentResolver,
 ) : CoroutineWorker(context, params) {
 
     private val uniqueNotificationId: Int by lazy { id.hashCode() }
@@ -206,7 +208,7 @@ class DownloadWorker @AssistedInject constructor(
         mediaType: MediaType,
         contentLength: Long,
     ): Pair<String, String> {
-        val contentResolver = context.contentResolver
+        val contentResolver = contentResolver
 
         val collection = when (mediaType) {
             MediaType.IMAGE -> MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
@@ -350,7 +352,7 @@ class DownloadWorker @AssistedInject constructor(
 
     private fun getPathFromUri(uri: Uri): String {
         return try {
-            context.contentResolver.query(
+            contentResolver.query(
                 uri,
                 arrayOf(MediaStore.MediaColumns.DATA),
                 null, null, null
