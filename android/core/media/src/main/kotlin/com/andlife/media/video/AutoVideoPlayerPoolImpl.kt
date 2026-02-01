@@ -15,6 +15,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import com.andlife.media.di.VideoCacheDataSourceFactory
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +27,7 @@ import javax.inject.Inject
 
 class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    private val cacheDataSourceFactory: CacheDataSource.Factory,
+    @param:VideoCacheDataSourceFactory private val cacheDataSourceFactory: CacheDataSource.Factory,
 ) : AutoVideoPlayerPool {
 
     private val maxPoolSize: Int by lazy { getDynamicPoolSize() }
