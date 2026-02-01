@@ -125,6 +125,7 @@ fun MyInvitationGuestBookRoute(
     var showPermissionDialog by remember { mutableStateOf<String?>(null) }
     var scrollToTop by remember { mutableStateOf(false) }
     var showRecordingBottomSheet by remember { mutableStateOf(false) }
+    var lastPrecachedCount by remember { mutableIntStateOf(0) }
 
     var isMediaActive by remember { mutableStateOf(true) }
     val navigateBackWithCleanup: () -> Unit = {
@@ -265,6 +266,24 @@ fun MyInvitationGuestBookRoute(
             else -> {}
         }
     }
+
+    LaunchedEffect(guestBooks.itemCount) {
+        val currentCount = guestBooks.itemCount
+        if (currentCount < lastPrecachedCount) lastPrecachedCount = 0
+        if (currentCount <= lastPrecachedCount) return@LaunchedEffect
+
+        val videoUrls = (lastPrecachedCount until currentCount).mapNotNull { index ->
+            val item = guestBooks.peek(index)
+            item?.visualMedias?.firstOrNull { it.type == MediaUiType.VIDEO }?.url
+        }.distinct()
+
+        lastPrecachedCount = currentCount
+
+        if (videoUrls.isNotEmpty()) {
+            viewModel.videoPlayerPool.precacheVideos(videoUrls)
+        }
+    }
+
 
     LaunchedEffect(guestBooks.loadState.refresh, scrollToTop) {
         if (scrollToTop && guestBooks.loadState.refresh is LoadState.NotLoading) {
