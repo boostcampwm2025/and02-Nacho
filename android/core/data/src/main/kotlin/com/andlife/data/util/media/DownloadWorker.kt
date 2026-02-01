@@ -1,5 +1,6 @@
 package com.andlife.data.util.media
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -40,155 +41,131 @@ class DownloadWorker @AssistedInject constructor(
     @param:InvitationMedia private val okHttpClient: OkHttpClient,
 ) : CoroutineWorker(context, params) {
 
+    private val uniqueNotificationId: Int by lazy { id.hashCode() }
+
     override suspend fun getForegroundInfo(): ForegroundInfo {
-        return createForegroundInfo(progress = 0)
+        val notification = createDownloadNotification(0)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(uniqueNotificationId, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            ForegroundInfo(uniqueNotificationId, notification)
+        }
     }
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        try {
-            setForeground(getForegroundInfo())
-        } catch (e: Exception) {
-            Log.e("DownloadWorker", "Foreground 승격 실패", e)
-        }
+        prepareNotificationChannels()
 
-        val url = inputData.getString(KEY_URL) ?: return@withContext Result.failure(errorData("URL이 없습니다"))
-        val fileName = inputData.getString(KEY_FILE_NAME) ?: return@withContext Result.failure(errorData("파일명이 없습니다"))
-        val mediaTypeOrdinal = inputData.getInt(KEY_MEDIA_TYPE, -1)
+        val url = inputData.getString(KEY_URL) ?: return@withContext Result.failure(errorData(ERROR_MISSING_URL))
+        val fileName =
+            inputData.getString(KEY_FILE_NAME) ?: return@withContext Result.failure(errorData(ERROR_MISSING_FILE_NAME))
+        val mediaType = inputData.getInt(KEY_MEDIA_TYPE, -1).let { MediaType.entries.getOrNull(it) }
+            ?: return@withContext Result.failure(errorData(ERROR_MISSING_MEDIA_TYPE))
 
-        if (mediaTypeOrdinal == -1) {
-            return@withContext Result.failure(errorData("미디어 타입이 없습니다"))
-        }
+        return@withContext try {
+            runCatching { setForeground(getForegroundInfo()) }
+                .onFailure { Log.e("DownloadWorker", "Foreground 승격 실패", it) }
 
-        val mediaType = MediaType.entries[mediaTypeOrdinal]
-
-        try {
             setProgress(workDataOf(KEY_PROGRESS to 0))
 
             val request = Request.Builder().url(url).build()
-
             okHttpClient.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) {
-                    return@withContext Result.failure(errorData("다운로드 실패: ${response.code}"))
-                }
+                if (!response.isSuccessful) throw Exception("$ERROR_DOWNLOAD_FAILED${response.code}")
 
-                val body = response.body ?: return@withContext Result.failure(errorData("응답 본문이 없습니다."))
-
-                val contentLength = body.contentLength()
-                val inputStream = body.byteStream()
+                val body = checkNotNull(response.body) { ERROR_MISSING_BODY }
 
                 val (uri, path) = saveToStorage(
-                    inputStream = inputStream,
+                    inputStream = body.byteStream(),
                     fileName = fileName,
                     mediaType = mediaType,
-                    contentLength = contentLength,
+                    contentLength = body.contentLength(),
                 )
 
-                val resultData = workDataOf(
-                    KEY_RESULT_URL to uri,
-                    KEY_RESULT_PATH to path,
-                )
-
-                showDownloadCompleteNotification(fileName, uri, mediaType)
-
-                Result.success(resultData)
+                updateCompleteNotification(fileName, mediaType)
+                Result.success(workDataOf(KEY_RESULT_URL to uri, KEY_RESULT_PATH to path))
             }
         } catch (e: Exception) {
-            Result.failure(errorData(e.message ?: "알 수 없는 오류"))
+            Log.e("DownloadWorker", "다운로드 중 오류 발생", e)
+            Result.failure(errorData(e.message ?: ERROR_UNKNOWN))
         }
     }
 
-    private fun createForegroundInfo(progress: Int): ForegroundInfo {
-        val channelId = DOWNLOAD_CHANNEL_ID
-
+    private fun prepareNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                "미디어 다운로드",
-                NotificationManager.IMPORTANCE_LOW,
-            )
-            val manager = context.getSystemService(NotificationManager::class.java)
-            manager.createNotificationChannel(channel)
-        }
+            val manager = context.getSystemService(NotificationManager::class.java) ?: return
 
-        val notification = NotificationCompat.Builder(context, channelId)
+            val channels = listOf(
+                NotificationChannel(
+                    CHANNEL_ID_PROGRESS,
+                    CHANNEL_NAME_PROGRESS,
+                    NotificationManager.IMPORTANCE_LOW
+                ).apply {
+                    setSound(null, null)
+                    enableVibration(false)
+                },
+                NotificationChannel(
+                    CHANNEL_ID_COMPLETE,
+                    CHANNEL_NAME_COMPLETE,
+                    NotificationManager.IMPORTANCE_DEFAULT
+                ).apply {
+                    setSound(null, null)
+                    setShowBadge(true)
+                }
+            )
+            manager.createNotificationChannels(channels)
+        }
+    }
+
+    private fun createDownloadNotification(progress: Int): Notification {
+        return NotificationCompat.Builder(context, CHANNEL_ID_PROGRESS)
             .setSmallIcon(android.R.drawable.stat_sys_download)
-            .setContentTitle("다운로드 중")
-            .setContentText(if (progress > 0) "$progress%" else "미디어를 저장하고 있습니다")
+            .setContentTitle(TITLE_DOWNLOADING)
+            .setContentText(if (progress > 0) "$progress%" else MSG_PREPARING)
             .setProgress(100, progress, progress <= 0)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
             .build()
-
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ForegroundInfo(
-                DOWNLOAD_NOTIFICATION_ID,
-                notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-            )
-        } else {
-            ForegroundInfo(DOWNLOAD_NOTIFICATION_ID, notification)
-        }
     }
 
-    private suspend fun updateNotificationProgress(progress: Int) {
-        setForeground(createForegroundInfo(progress))
-    }
-
-    private fun showDownloadCompleteNotification(fileName: String, uri: String, mediaType: MediaType) {
+    private fun updateCompleteNotification(fileName: String, mediaType: MediaType) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
         val isAudio = mediaType == MediaType.AUDIO
         val notificationId = if (isAudio) COMPLETE_AUDIO_NOTIFICATION_ID else COMPLETE_VISUAL_NOTIFICATION_ID
+        val countKey = if (isAudio) KEY_COUNT_AUDIO else KEY_COUNT_VISUAL
 
-        val title = if (isAudio) "음성 메시지 저장 완료" else "이미지/영상 저장 완료"
-
-        val activeNotifications = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            notificationManager.activeNotifications
-        } else {
-            emptyArray()
-        }
-        val existingNotification = activeNotifications.find { it.id == notificationId }
-        val currentCount = (existingNotification?.notification?.number ?: 0) + 1
-
-        val viewIntent = Intent(Intent.ACTION_VIEW).apply {
-            setDataAndType(Uri.parse(uri), getMimeType(fileName, mediaType))
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-
-        val canOpen = viewIntent.resolveActivity(context.packageManager) != null
-
-        val pendingIntent = if (canOpen) {
-            PendingIntent.getActivity(
-                context,
-                notificationId,
-                viewIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-            )
-        } else {
-            null
-        }
-
-        val notificationContent = when {
-            currentCount > 1 && isAudio -> "${currentCount}개의 음성 메시지가 저장되었습니다."
-            currentCount > 1 -> "${currentCount}개의 미디어가 저장되었습니다."
-            else -> fileName
-        }
-
-        val notification = NotificationCompat.Builder(context, DOWNLOAD_CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.stat_sys_download_done)
-            .setContentTitle(title)
-            .setContentText(notificationContent)
-            .setNumber(currentCount)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setAutoCancel(true)
-            .setOngoing(false)
-            .setProgress(0, 0, false)
-            .apply {
-                if (pendingIntent != null) setContentIntent(pendingIntent)
+        val currentCount = synchronized(DownloadWorker::class.java) {
+            val activeNotification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                notificationManager.activeNotifications.any { it.id == notificationId }
+            } else {
+                true
             }
+
+            val newCount = if (!activeNotification) 1 else prefs.getInt(countKey, 0) + 1
+            prefs.edit().putInt(countKey, newCount).apply()
+            newCount
+        }
+
+        val viewIntent = context.createFolderViewIntent(mediaType, fileName)
+        val pendingIntent = PendingIntent.getActivity(
+            context, notificationId, viewIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID_COMPLETE)
+            .setSmallIcon(android.R.drawable.stat_sys_download_done)
+            .setContentTitle(if (isAudio) TITLE_COMPLETE_AUDIO else TITLE_COMPLETE_VISUAL)
+            .setContentText("$currentCount$MSG_COMPLETE_SUFFIX")
+            .setSubText(fileName)
+            .setNumber(currentCount)
+            .setOnlyAlertOnce(true)
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
             .build()
 
         notificationManager.notify(notificationId, notification)
+        Log.d("DownloadWorker", "알림 전송 완료: ID=$notificationId, 현재 카운트=$currentCount")
     }
 
     private suspend fun saveToStorage(
@@ -221,7 +198,7 @@ class DownloadWorker @AssistedInject constructor(
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
             put(MediaStore.MediaColumns.MIME_TYPE, getMimeType(fileName, mediaType))
-            put(MediaStore.MediaColumns.RELATIVE_PATH, "${mediaType.directory}/나에게로의 초대")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, "${mediaType.directory}/${SAVE_DIRECTORY_NAME}")
             put(MediaStore.MediaColumns.IS_PENDING, 1)
 
         }
@@ -253,7 +230,7 @@ class DownloadWorker @AssistedInject constructor(
         contentLength: Long,
     ): Pair<String, String> {
         val publicDir = Environment.getExternalStoragePublicDirectory(mediaType.directory)
-        val directory = File(publicDir, "나에게로의 초대")
+        val directory = File(publicDir, SAVE_DIRECTORY_NAME)
 
         if (!directory.exists()) {
             directory.mkdirs()
@@ -296,7 +273,23 @@ class DownloadWorker @AssistedInject constructor(
                     )
 
                     setProgress(progressData)
-                    updateNotificationProgress(progress)
+
+                    val notification = createDownloadNotification(progress)
+                    val info = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        ForegroundInfo(
+                            uniqueNotificationId,
+                            notification,
+                            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                        )
+                    } else {
+                        ForegroundInfo(uniqueNotificationId, notification)
+                    }
+
+                    try {
+                        setForeground(info)
+                    } catch (e: Exception) {
+                        Log.e("DownloadWorker", "알림 갱신 실패", e)
+                    }
                 }
             }
         }
@@ -330,9 +323,9 @@ class DownloadWorker @AssistedInject constructor(
             .getMimeTypeFromExtension(extension.lowercase())
 
         return mimeType ?: when (mediaType) {
-            MediaType.IMAGE -> "image/*"
-            MediaType.VIDEO -> "video/*"
-            MediaType.AUDIO -> "audio/*"
+            MediaType.IMAGE -> MIME_TYPE_IMAGE_ALL
+            MediaType.VIDEO -> MIME_TYPE_VIDEO_ALL
+            MediaType.AUDIO -> MIME_TYPE_AUDIO_ALL
         }
     }
 
@@ -363,11 +356,45 @@ class DownloadWorker @AssistedInject constructor(
             MediaType.AUDIO -> Environment.DIRECTORY_MUSIC
         }
 
+    fun Context.createFolderViewIntent(mediaType: MediaType, fileName: String): Intent {
+        val specificMimeType = getMimeType(fileName, mediaType)
+
+        return when (mediaType) {
+            MediaType.IMAGE, MediaType.VIDEO -> {
+                Intent(Intent.ACTION_VIEW).apply {
+                    val uri = if (mediaType == MediaType.IMAGE)
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                    else MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+
+                    val folderMimeType = if (mediaType == MediaType.IMAGE) MIME_TYPE_IMAGE_ALL else MIME_TYPE_VIDEO_ALL
+
+                    setDataAndType(uri, folderMimeType)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            }
+
+            MediaType.AUDIO -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    Intent(Intent.ACTION_VIEW).apply {
+                        val rootUri = Uri.parse(URI_EXTERNAL_STORAGE_ROOT)
+                        setDataAndType(rootUri, MIME_TYPE_FOLDER_ANDROID_Q)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                } else {
+                    Intent(Intent.ACTION_GET_CONTENT).apply {
+                        type = specificMimeType
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                }
+            }
+        }
+    }
+
     companion object {
         const val KEY_URL = "url"
         const val KEY_FILE_NAME = "file_name"
         const val KEY_MEDIA_TYPE = "media_type"
-
         const val KEY_RESULT_URL = "result_url"
         const val KEY_RESULT_PATH = "result_path"
         const val KEY_ERROR_MESSAGE = "error_message"
@@ -376,11 +403,40 @@ class DownloadWorker @AssistedInject constructor(
         const val KEY_DOWNLOADED_BYTES = "downloaded_bytes"
         const val KEY_TOTAL_BYTES = "total_bytes"
 
+        const val CHANNEL_ID_PROGRESS = "download_progress_channel"
+        const val CHANNEL_ID_COMPLETE = "download_complete_channel"
+
+        const val COMPLETE_VISUAL_NOTIFICATION_ID = 1001
+        const val COMPLETE_AUDIO_NOTIFICATION_ID = 1002
+
+        const val CHANNEL_NAME_PROGRESS = "다운로드 진행 상태"
+        const val CHANNEL_NAME_COMPLETE = "다운로드 완료 안내"
+
+        const val TITLE_DOWNLOADING = "다운로드 중"
+        const val MSG_PREPARING = "파일을 저장하고 있습니다."
+        const val TITLE_COMPLETE_AUDIO = "음성 메시지 저장 완료"
+        const val TITLE_COMPLETE_VISUAL = "미디어 저장 완료"
+        const val MSG_COMPLETE_SUFFIX = "개의 파일이 저장되었습니다."
+
+        const val SAVE_DIRECTORY_NAME = "나에게로의 초대"
+
+        private const val PREF_NAME = "download_prefs"
+        private const val KEY_COUNT_AUDIO = "audio_count"
+        private const val KEY_COUNT_VISUAL = "visual_count"
+
         private const val BUFFER_SIZE = 8 * 1024
 
-        const val DOWNLOAD_CHANNEL_ID = "download_channel"
-        const val DOWNLOAD_NOTIFICATION_ID = 1001
-        const val COMPLETE_VISUAL_NOTIFICATION_ID = 1002
-        const val COMPLETE_AUDIO_NOTIFICATION_ID = 1003
+        private const val ERROR_MISSING_URL = "URL이 없습니다"
+        private const val ERROR_MISSING_FILE_NAME = "파일명이 없습니다"
+        private const val ERROR_MISSING_MEDIA_TYPE = "미디어 타입이 없습니다"
+        private const val ERROR_MISSING_BODY = "응답 본문이 없습니다."
+        private const val ERROR_DOWNLOAD_FAILED = "다운로드 실패: "
+        private const val ERROR_UNKNOWN = "알 수 없는 오류"
+
+        private const val MIME_TYPE_IMAGE_ALL = "image/*"
+        private const val MIME_TYPE_VIDEO_ALL = "video/*"
+        private const val MIME_TYPE_AUDIO_ALL = "audio/*"
+        private const val MIME_TYPE_FOLDER_ANDROID_Q = "vnd.android.document/root"
+        private const val URI_EXTERNAL_STORAGE_ROOT = "content://com.android.externalstorage.documents/root/primary"
     }
 }
