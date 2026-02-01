@@ -81,6 +81,7 @@ fun MyInvitationDetailRoute(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     val mapErrorMessage = stringResource(R.string.snack_load_error_map)
+    val linkCopiedMessage = stringResource(R.string.snack_link_copied)
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
@@ -94,9 +95,8 @@ fun MyInvitationDetailRoute(
 
             MyInvitationDetailSideEffect.ShowMapErrorSnackbar -> {
                 coroutineScope.launch {
-                    snackbarHostState.showSnackbar(
-                        message = mapErrorMessage
-                    )
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(message = mapErrorMessage)
                 }
             }
 
@@ -106,6 +106,13 @@ fun MyInvitationDetailRoute(
 
             is MyInvitationDetailSideEffect.NavigateToEditInvitation -> {
                 onNavigateToEditInvitation(effect.myInvitationId)
+            }
+
+            MyInvitationDetailSideEffect.LinkCopied -> {
+                coroutineScope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(message = linkCopiedMessage)
+                }
             }
         }
     }
@@ -162,6 +169,7 @@ private fun MyInvitationDetailScreen(
                 onBack = navigateBackWithMapCleanup,
                 onClickThanksCard = { onEvent(MyInvitationDetailUiEvent.ClickThanksCard) },
                 onShare = { onEvent(MyInvitationDetailUiEvent.ClickShare) },
+                onCopyLink = { onEvent(MyInvitationDetailUiEvent.CopyInvitationLink) },
                 onEdit = { onEvent(MyInvitationDetailUiEvent.ClickEdit) },
                 onDelete = { onEvent(MyInvitationDetailUiEvent.ClickDelete) },
                 onCreateThanksCard = { onEvent(MyInvitationDetailUiEvent.CreateThanksCard) },
@@ -235,6 +243,7 @@ private fun MyInvitationDetailTopBar(
     onBack: () -> Unit,
     onClickThanksCard: () -> Unit,
     onShare: () -> Unit,
+    onCopyLink: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     onCreateThanksCard: () -> Unit,
@@ -275,13 +284,10 @@ private fun MyInvitationDetailTopBar(
                         )
                     }
                 }
-                IconButton(onClick = onShare) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_share_24),
-                        contentDescription = stringResource(R.string.desc_top_bar_share),
-                        tint = NachoTheme.colorScheme.iconSecondary,
-                    )
-                }
+                ShareMenu(
+                    onShare = onShare,
+                    onCopyLink = onCopyLink,
+                )
 
                 InvitationMoreMenu(
                     hasThanksCard = hasThanksCard,
@@ -297,6 +303,62 @@ private fun MyInvitationDetailTopBar(
         ),
         scrollBehavior = scrollBehavior,
     )
+}
+
+@Composable
+private fun ShareMenu(
+    onShare: () -> Unit,
+    onCopyLink: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var isMenuExpanded by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
+        IconButton(onClick = { isMenuExpanded = true }) {
+            Icon(
+                painter = painterResource(R.drawable.ic_share_24),
+                contentDescription = stringResource(R.string.desc_top_bar_share),
+                tint = NachoTheme.colorScheme.iconSecondary,
+            )
+        }
+
+        DropdownMenu(
+            expanded = isMenuExpanded,
+            onDismissRequest = { isMenuExpanded = false },
+            modifier = Modifier.background(NachoTheme.colorScheme.backgroundPrimary),
+            shape = RoundedCornerShape(NachoSpacing.medium),
+        ) {
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = stringResource(R.string.txt_share_kakao),
+                        style = NachoTheme.typography.bodyMediumMedium,
+                        color = NachoTheme.colorScheme.textPrimary,
+                    )
+                },
+                onClick = {
+                    isMenuExpanded = false
+                    onShare()
+                },
+            )
+
+            NachoDivider()
+
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = stringResource(R.string.txt_copy_invitation_link),
+                        style = NachoTheme.typography.bodyMediumMedium,
+                        color = NachoTheme.colorScheme.textPrimary,
+                    )
+                },
+                onClick = {
+                    isMenuExpanded = false
+                    onCopyLink()
+                },
+            )
+        }
+    }
 }
 
 @Composable

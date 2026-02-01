@@ -1,5 +1,6 @@
 package com.andlife.data.di
 
+import android.content.ClipboardManager
 import android.content.ContentResolver
 import android.content.Context
 import dagger.Module
@@ -17,4 +18,10 @@ object ContextModule {
     fun provideContentResolver(
         @ApplicationContext context: Context,
     ): ContentResolver = context.contentResolver
+
+    @Provides
+    @Singleton
+    fun provideClipboardManager(
+        @ApplicationContext context: Context,
+    ): ClipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 }
