@@ -1,5 +1,6 @@
 package com.andlife.ui.component.guestbook
 
+import android.view.ViewGroup
 import androidx.annotation.OptIn
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -516,7 +517,7 @@ private fun VideoPlayerContainer(
             }
 
             VideoPlayerView(
-                player = currentPlayer.exoPlayer,
+                autoPlayer = currentPlayer,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -542,24 +543,45 @@ private fun VideoPlayerContainer(
     }
 }
 
+//@OptIn(UnstableApi::class)
+//@Composable
+//private fun VideoPlayerView(
+//    player: ExoPlayer,
+//    modifier: Modifier = Modifier,
+//) {
+//    AndroidView(
+//        factory = { context ->
+//            PlayerView(context).apply {
+//                useController = false
+//                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+//                this.player = player
+//            }
+//        },
+//        update = { playerView ->
+//            if (playerView.player != player) {
+//                playerView.player = player
+//            }
+//        },
+//        modifier = modifier,
+//    )
+//}
+
 @OptIn(UnstableApi::class)
 @Composable
 private fun VideoPlayerView(
-    player: ExoPlayer,
+    autoPlayer: AutoVideoPlayer,
     modifier: Modifier = Modifier,
 ) {
     AndroidView(
-        factory = { context ->
-            PlayerView(context).apply {
-                useController = false
-                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-                this.player = player
+        factory = {
+            // 새로 생성하지 않고 이미 만들어진 View를 반환
+            autoPlayer.playerView.apply {
+                // 중요: 다른 아이템에 붙어있었다면 떼어내고 현재 아이템으로 이동
+                (parent as? ViewGroup)?.removeView(this)
             }
         },
-        update = { playerView ->
-            if (playerView.player != player) {
-                playerView.player = player
-            }
+        update = {
+            // 이미 player가 세팅된 View이므로 추가 작업 없음
         },
         modifier = modifier,
     )

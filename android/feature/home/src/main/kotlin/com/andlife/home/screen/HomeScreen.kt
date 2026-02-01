@@ -685,6 +685,7 @@ private fun HomeScreenPreview() {
             override fun pauseAllPlayers() {}
             override fun resumeLastPlayed() {}
             override fun clearCacheById(itemId: Long?) {}
+            override fun precacheVideos(urls: List<String>) {}
             override fun resetPool() {}
             override fun releaseAllPlayers() {}
         }

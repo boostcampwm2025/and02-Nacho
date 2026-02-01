@@ -12,6 +12,8 @@ import androidx.media3.datasource.cache.CacheKeyFactory
 import androidx.media3.datasource.cache.CacheWriter
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -48,6 +50,7 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
         preparePlayers()
     }
 
+    @OptIn(UnstableApi::class)
     override fun preparePlayers() {
         if (playerInstances.isNotEmpty()) return
         repeat(MAX_POOL_SIZE) {
@@ -55,15 +58,21 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
                 ExoPlayer.Builder(context).build().apply {
                     repeatMode = ExoPlayer.REPEAT_MODE_ONE
                 }
-            playerInstances.add(AutoVideoPlayer(exoPlayer, ""))
+
+            val playerView = PlayerView(context).apply {
+                useController = false
+                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                player = exoPlayer
+                setBackgroundColor(android.graphics.Color.BLACK)
+            }
+
+            playerInstances.add(AutoVideoPlayer(exoPlayer, playerView, ""))
         }
     }
 
     @OptIn(UnstableApi::class)
     override fun getPlayer(url: String): AutoVideoPlayer {
-        if (playerInstances.isEmpty()) {
-            preparePlayers()
-        }
+        if (playerInstances.isEmpty()) preparePlayers()
         activePlayers[url]?.let { existingPlayer ->
             if (existingPlayer.exoPlayer.currentMediaItem?.localConfiguration?.uri.toString() == url) {
                 return existingPlayer
@@ -99,7 +108,8 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
                 .Factory(cacheDataSourceFactory)
                 .createMediaSource(MediaItem.fromUri(url))
 
-        playerToUse.exoPlayer.setMediaSource(mediaSource)
+        playerToUse.setMediaSource(mediaSource)
+        playerToUse.prepare()
         activePlayers[url] = playerToUse
         return playerToUse
     }
