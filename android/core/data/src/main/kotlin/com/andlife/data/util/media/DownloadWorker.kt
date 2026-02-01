@@ -23,7 +23,7 @@ import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.andlife.domain.model.guestbook.MediaType
-import com.andlife.network.di.InvitationMedia
+import com.andlife.network.di.NachoMedia
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
@@ -40,7 +40,7 @@ import kotlin.coroutines.cancellation.CancellationException
 class DownloadWorker @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted private val params: WorkerParameters,
-    @param:InvitationMedia private val okHttpClient: OkHttpClient,
+    @param:NachoMedia private val okHttpClient: OkHttpClient,
     private val contentResolver: ContentResolver,
 ) : CoroutineWorker(context, params) {
 
