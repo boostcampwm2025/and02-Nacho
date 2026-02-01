@@ -2,6 +2,7 @@
 
 package com.andlife.network.model.invitation
 
+import com.andlife.network.model.thankscard.ThanksCardResponse
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
 
@@ -22,6 +23,7 @@ data class InvitationResponse(
     val locationGuide: String?,
     val hostProfileUrl: String?,
     val invitationCard: InvitationCardResponse?,
+    val thanksCard: ThanksCardResponse?,
     val announcements: List<AnnouncementResponse>,
 )
 

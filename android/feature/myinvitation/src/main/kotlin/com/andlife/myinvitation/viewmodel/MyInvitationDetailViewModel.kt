@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.andlife.domain.repository.invitation.InvitationRepository
+import com.andlife.domain.repository.thankscard.ThanksCardRepository
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.editor.util.CreateCardSession
@@ -58,7 +59,6 @@ class MyInvitationDetailViewModel @Inject constructor(
                     copy(
                         isLoading = false,
                         isError = false,
-                        hasThanksCard = false, // TODO: 감사카드 존재 여부는 별도 API로 확인 필요
                         invitationContentsUiModel = invitation.toContentsUiModel(),
                     )
                 }
@@ -112,9 +112,11 @@ class MyInvitationDetailViewModel @Inject constructor(
     }
 
     private fun showThanksCardOnboarding() { /* TODO: 감사카드 온보딩 */
+        sendEffect(MyInvitationDetailSideEffect.ThanksCardOnBoarding)
     }
 
     private fun navigateToCreateThanksCard() { /* TODO: 감사카드 작성 이동 */
+        sendEffect(MyInvitationDetailSideEffect.NavigateToCreateThanksCard(myInvitationId))
     }
 
     private fun navigateToEditCard() { // TODO: 초대카드 편집 이동
@@ -133,6 +135,10 @@ class MyInvitationDetailViewModel @Inject constructor(
         if (cardUiModel == null) return
         createCardSession.save(editable, Color(cardUiModel.card.backgroundColor), cardUiModel.card.backgroundImageUrl)
         updateState { copy(editCardEnabled = true, cachedCardEditable = editable) }
+    }
+
+    fun saveThanksCardEditableCache(editable: Editable) {
+        updateState { copy(thanksCardEditableCache = editable) }
     }
 
     private fun navigateToFullScreenImage(imageList: ImmutableList<String>, index: Int) { /* TODO: 이미지 풀스크린*/ }

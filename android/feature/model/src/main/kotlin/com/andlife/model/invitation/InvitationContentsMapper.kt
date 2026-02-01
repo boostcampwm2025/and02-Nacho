@@ -36,6 +36,7 @@ fun Invitation.toContentsUiModel(): InvitationContentsUiModel {
             .map { it.toUiModel() }
             .toImmutableList(),
         invitationCard = invitationCard?.toUiModel(),
+        thanksCard = thanksCard?.toUiModel()
     )
 }
 

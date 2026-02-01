@@ -1,5 +1,6 @@
 package com.andlife.data.repository.invitation.mapper
 
+import com.andlife.data.repository.thankscard.mapper.toDomain
 import com.andlife.domain.model.invitation.Announcement
 import com.andlife.domain.model.invitation.Invitation
 import com.andlife.domain.model.invitation.InvitationSummary
@@ -32,6 +33,7 @@ fun InvitationResponse.toDomain(json: Json): Invitation {
         longitude = lng,
         locationGuide = locationGuide,
         invitationCard = invitationCard?.toDomain(json),
+        thanksCard = thanksCard?.toDomain(json),
         announcements = announcements.map { it.toDomain() },
     )
 }

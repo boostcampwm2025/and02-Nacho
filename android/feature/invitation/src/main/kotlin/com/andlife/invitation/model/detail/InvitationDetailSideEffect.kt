@@ -6,4 +6,6 @@ sealed interface InvitationDetailSideEffect : BaseSideEffect {
     data object NavigateBack : InvitationDetailSideEffect
 
     data object ShowMapErrorSnackbar : InvitationDetailSideEffect
+
+    data object ThanksCardOnBoarding : InvitationDetailSideEffect
 }
