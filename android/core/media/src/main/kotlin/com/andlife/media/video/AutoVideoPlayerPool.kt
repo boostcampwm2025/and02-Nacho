@@ -18,6 +18,8 @@ interface AutoVideoPlayerPool {
 
     fun clearCacheById(itemId: Long?)
 
+    fun precacheVideos(urls: List<String>)
+
     fun resetPool()
 
     fun releaseAllPlayers()
@@ -34,6 +36,7 @@ class FakeVideoPlayerPool : AutoVideoPlayerPool {
     override fun pauseAllPlayers() {}
     override fun resumeLastPlayed() {}
     override fun clearCacheById(itemId: Long?) {}
+    override fun precacheVideos(urls: List<String>) {}
     override fun resetPool() {}
     override fun releaseAllPlayers() {}
 }

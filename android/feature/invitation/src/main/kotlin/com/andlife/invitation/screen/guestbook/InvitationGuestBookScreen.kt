@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -125,6 +126,7 @@ fun InvitationGuestBookRoute(
     var showPermissionDialog by remember { mutableStateOf<String?>(null) }
     var scrollToTop by remember { mutableStateOf(false) }
     var showRecordingBottomSheet by remember { mutableStateOf(false) }
+    var lastPrecachedCount by remember { mutableIntStateOf(0) }
 
     var isMediaActive by remember { mutableStateOf(true) }
     val navigateBackWithCleanup: () -> Unit = {
@@ -263,6 +265,42 @@ fun InvitationGuestBookRoute(
                 guestBooks.refresh()
             }
         }
+    }
+
+    LaunchedEffect(guestBooks.itemCount) {
+        val currentCount = guestBooks.itemCount // 현재 아이템 수
+        if (currentCount < lastPrecachedCount) { // refresh 시 itemCount가 줄어들 수 있으므로 초기화 -> 왜? 새로고침 시 기존보다 아이템 수가 줄어들 수 있기 때문
+            lastPrecachedCount = 0
+        }
+        Log.d("wwwwww", "현재 아이템 수: $currentCount, 마지막 프리캐싱한 아이템 수: $lastPrecachedCount")
+        if (currentCount <= lastPrecachedCount) return@LaunchedEffect // 만약 현재 아이템 수가 이전에 프리캐싱한 수보다 작거나 같으면 프리캐싱 불필요 -> 이미 프리캐싱된 상태이기 때문
+
+        val videoUrls = (lastPrecachedCount until currentCount).mapNotNull { index ->
+            val item = guestBooks.peek(index)
+            item?.visualMedias?.firstOrNull { it.type == MediaUiType.VIDEO }?.url
+        }.distinct()
+        Log.d("wwwwww", "프리캐싱할 비디오 URL들: $videoUrls")
+
+        lastPrecachedCount = currentCount // 마지막으로 프리캐싱한 아이템 수 업데이트
+
+        if (videoUrls.isNotEmpty()) {
+            Log.d("wwwwww", "비디오 프리캐싱 시작: $videoUrls")
+            viewModel.videoPlayerPool.precacheVideos(videoUrls)
+        }
+
+//        Log.d("wwwwww", "방명록 아이템 수: ${guestBooks.itemCount}")
+//        if (guestBooks.itemCount > 0) {
+//            val videoUrls = (0 until guestBooks.itemCount).mapNotNull { index ->
+//                val item = guestBooks.peek(index)
+//                item?.visualMedias?.firstOrNull { it.type == MediaUiType.VIDEO }?.url
+//            }.distinct()
+//            Log.d("wwwwww", "프리캐싱할 비디오 URL들: $videoUrls")
+//
+//            if (videoUrls.isNotEmpty()) {
+//                Log.d("wwwwww", "비디오 프리캐싱 시작")
+//                viewModel.videoPlayerPool.precacheVideos(videoUrls)
+//            }
+//        }
     }
 
     LaunchedEffect(guestBooks.loadState.refresh, scrollToTop) {
