@@ -78,7 +78,7 @@ class DownloadWorker @AssistedInject constructor(
 
                 val body = checkNotNull(response.body) { DownloadError.MISSING_BODY }
 
-                val (uri, path) = saveToStorage(
+                val uri = saveToStorage(
                     inputStream = body.byteStream(),
                     fileName = fileName,
                     mediaType = mediaType,
@@ -86,7 +86,7 @@ class DownloadWorker @AssistedInject constructor(
                 )
 
                 updateCompleteNotification(fileName, mediaType)
-                Result.success(workDataOf(DownloadKey.RESULT_URL to uri, DownloadKey.RESULT_PATH to path))
+                Result.success(workDataOf(DownloadKey.RESULT_URL to uri))
             }
         } catch (e: Exception) {
             if (e is CancellationException || isStopped) {
@@ -194,7 +194,7 @@ class DownloadWorker @AssistedInject constructor(
         fileName: String,
         mediaType: MediaType,
         contentLength: Long,
-    ): Pair<String, String> {
+    ): String {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             saveToMediaStore(inputStream, fileName, mediaType, contentLength)
         } else {
@@ -207,7 +207,7 @@ class DownloadWorker @AssistedInject constructor(
         fileName: String,
         mediaType: MediaType,
         contentLength: Long,
-    ): Pair<String, String> {
+    ): String {
         val contentResolver = contentResolver
 
         val collection = when (mediaType) {
@@ -235,7 +235,7 @@ class DownloadWorker @AssistedInject constructor(
             contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
             contentResolver.update(uri, contentValues, null, null)
 
-            return Pair(uri.toString(), getPathFromUri(uri))
+            return uri.toString()
 
         } catch (e: Exception) {
             contentResolver.delete(uri, null, null)
@@ -249,7 +249,7 @@ class DownloadWorker @AssistedInject constructor(
         fileName: String,
         mediaType: MediaType,
         contentLength: Long,
-    ): Pair<String, String> {
+    ): String {
         val publicDir = Environment.getExternalStoragePublicDirectory(mediaType.directory)
         val directory = File(publicDir, DownloadFile.SAVE_DIRECTORY_NAME)
 
@@ -262,7 +262,7 @@ class DownloadWorker @AssistedInject constructor(
             copyWithProgress(inputStream, outputStream, contentLength)
         }
 
-        return Pair(Uri.fromFile(file).toString(), file.absolutePath)
+        return Uri.fromFile(file).toString()
     }
 
     private suspend fun copyWithProgress(
@@ -347,22 +347,6 @@ class DownloadWorker @AssistedInject constructor(
             MediaType.IMAGE -> DownloadFile.MIME_IMAGE
             MediaType.VIDEO -> DownloadFile.MIME_VIDEO
             MediaType.AUDIO -> DownloadFile.MIME_AUDIO
-        }
-    }
-
-    private fun getPathFromUri(uri: Uri): String {
-        return try {
-            contentResolver.query(
-                uri,
-                arrayOf(MediaStore.MediaColumns.DATA),
-                null, null, null
-            )?.use { cursor ->
-                if (cursor.moveToFirst()) {
-                    cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA))
-                } else uri.toString()
-            } ?: uri.toString()
-        } catch (e: Exception) {
-            uri.toString()
         }
     }
 

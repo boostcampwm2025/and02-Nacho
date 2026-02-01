@@ -5,7 +5,6 @@ object DownloadKey {
     const val FILE_NAME = "file_name"
     const val MEDIA_TYPE = "media_type"
     const val RESULT_URL = "result_url"
-    const val RESULT_PATH = "result_path"
     const val ERROR_MESSAGE = "error_message"
     const val PROGRESS = "progress"
     const val DOWNLOADED_BYTES = "downloaded_bytes"
