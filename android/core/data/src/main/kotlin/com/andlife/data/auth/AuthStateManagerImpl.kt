@@ -15,9 +15,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AuthStateManagerImpl @Inject constructor(
-    private val userStorage: UserStorage
-) : AuthStateManager {
+class AuthStateManagerImpl @Inject constructor() : AuthStateManager {
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Loading)
     override val authState: StateFlow<AuthState> = _authState.asStateFlow()
@@ -31,7 +29,10 @@ class AuthStateManagerImpl @Inject constructor(
 
     override suspend fun setGuest() {
         _authState.update { AuthState.Guest }
-        userStorage.setWasLoggedIn(true)
+    }
+
+    override suspend fun setLoading() {
+        _authState.update { AuthState.Loading }
     }
 
     override suspend fun navigateToLogin() {
