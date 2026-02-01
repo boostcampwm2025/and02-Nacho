@@ -1,5 +1,6 @@
 package com.andlife.media.video
 
+import android.app.ActivityManager
 import android.content.Context
 import androidx.annotation.OptIn
 import androidx.core.net.toUri
@@ -28,10 +29,11 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
     private val cacheDataSourceFactory: CacheDataSource.Factory,
 ) : AutoVideoPlayerPool {
 
+    private val maxPoolSize: Int by lazy { getDynamicPoolSize() }
     private val playerInstances = mutableListOf<AutoVideoPlayer>() // 재사용 가능한 플레이어 인스턴스 풀
     private val activePlayers = mutableMapOf<String, AutoVideoPlayer>() // 현재 사용 중인 플레이어 매핑
     private val lastPlayedUrlByGuestBookId =
-        LinkedHashMap<Long, String>(MAX_POOL_SIZE, 0.75f, true) // 방명록 ID별 마지막 재생 URL 추적
+        LinkedHashMap<Long, String>(maxPoolSize, 0.75f, true) // 방명록 ID별 마지막 재생 URL 추적
 
     private var currentPlayingUrl: String? = null
 
@@ -53,7 +55,8 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
     @OptIn(UnstableApi::class)
     override fun preparePlayers() {
         if (playerInstances.isNotEmpty()) return
-        repeat(MAX_POOL_SIZE) {
+        Log.d("wwwwww", "플레이어 풀 초기화, 크기: $maxPoolSize")
+        repeat(maxPoolSize) {
             val exoPlayer =
                 ExoPlayer.Builder(context).build().apply {
                     repeatMode = ExoPlayer.REPEAT_MODE_ONE
@@ -121,7 +124,7 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
         currentPlayingUrl = url
         lastPlayedUrlByGuestBookId[itemId] = url
 
-        if (lastPlayedUrlByGuestBookId.size > MAX_POOL_SIZE) {
+        if (lastPlayedUrlByGuestBookId.size > maxPoolSize) {
             lastPlayedUrlByGuestBookId.remove(lastPlayedUrlByGuestBookId.keys.first())
         }
 
@@ -230,8 +233,39 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
         currentPlayingUrl = null
     }
 
+    private fun getDynamicPoolSize(): Int {
+        val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val memoryInfo = ActivityManager.MemoryInfo()
+        activityManager.getMemoryInfo(memoryInfo)
+
+        // 전체 메모리 크기에 따라 풀 크기 결정. 8기가 이상 : 4, 4기가 이상 : 3, 그 이하 : 2
+        Log.d("wwwwww", "memoryInfo.totalMem: ${memoryInfo.totalMem}")
+        Log.d("wwwwww", "memoryInfo.availMem: ${memoryInfo.availMem}")
+        Log.d("wwwwww", "memoryInfo.lowMemory: ${memoryInfo.lowMemory}")
+        Log.d("wwwwww", "memoryInfo.threshold: ${memoryInfo.threshold}")
+        Log.d("wwwwww", "디바이스 메모리 상태: ${if (memoryInfo.lowMemory) "낮음" else "양호"}")
+        Log.d("wwwwww", "디바이스 사용 가능 메모리: ${memoryInfo.availMem / (1024 * 1024)} MB")
+        Log.d("wwwwww", "디바이스 전체 메모리 MB: ${memoryInfo.totalMem / (1024 * 1024)} MB")
+        Log.d("wwwwww", "디바이스 전체 메모리: ${memoryInfo.totalMem / (1024 * 1024 * 1024)} GB")
+       // val totalMemoryGb = memoryInfo.totalMem / (1024 * 1024 * 1024)
+//        return when {
+//            totalMemoryGb >= 8 -> 4
+//            totalMemoryGb >= 4 -> 3
+//            else -> 2
+//        }
+        val totalMemoryGb = memoryInfo.totalMem.toDouble() / (1024 * 1024 * 1024)
+        Log.d("wwwwww", "디바이스 실제 GB: $totalMemoryGb")
+
+        return when {
+            totalMemoryGb >= 7.0 -> 4
+            totalMemoryGb >= 5.0 -> 3
+            //totalMemoryGb >= 3.5 -> 2 // 3.8GB이므로 여기서 3개로 잡힘
+            else -> 2
+        }
+    }
+
     companion object {
-        private const val MAX_POOL_SIZE = 5
+        //private const val MAX_POOL_SIZE = 5
         private const val PRECACHE_SIZE_BYTES = 1 * 1024 * 1024L
     }
 }
