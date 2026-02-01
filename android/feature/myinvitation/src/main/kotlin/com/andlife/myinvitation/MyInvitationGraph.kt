@@ -13,6 +13,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.andlife.model.util.NavigationKeyConstant.CREATE_CARD_BY_INVITATION_ID
+import com.andlife.model.util.NavigationKeyConstant.CREATE_THANKS_CARD
 import com.andlife.model.util.NavigationKeyConstant.INVITATION_UPDATED
 import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiEvent
@@ -61,6 +62,7 @@ fun NavGraphBuilder.myInvitationDetailNavGraph(
     onNavigateToEditInvitation: (Long) -> Unit,
     onNavigateToEditCard: (Long) -> Unit,
     onNavigateToCreateCard: (Long) -> Unit,
+    onNavigateToCreateThanksCard: (Long) -> Unit,
 ) {
     composable<MyInvitationDetail> { backStackEntry ->
         val viewModel: MyInvitationDetailViewModel = hiltViewModel()
@@ -76,8 +78,12 @@ fun NavGraphBuilder.myInvitationDetailNavGraph(
             INVITATION_UPDATED, false
         ).collectAsStateWithLifecycle()
 
-        LaunchedEffect(cardCreated, cardUpdated, invitationUpdated) {
-            if (cardCreated || cardUpdated || invitationUpdated) {
+        val thanksCardUpdated by backStackEntry.savedStateHandle.getStateFlow<Boolean>(
+            CREATE_THANKS_CARD, false
+        ).collectAsStateWithLifecycle()
+
+        LaunchedEffect(cardCreated, cardUpdated, invitationUpdated, thanksCardUpdated) {
+            if (cardCreated || cardUpdated || invitationUpdated || thanksCardUpdated) {
                 viewModel.onEvent(MyInvitationDetailUiEvent.RetryLoad)
                 backStackEntry.savedStateHandle.remove<Boolean>(CREATE_CARD_BY_INVITATION_ID)
                 backStackEntry.savedStateHandle.remove<Boolean>(UPDATE_CARD)
@@ -90,6 +96,7 @@ fun NavGraphBuilder.myInvitationDetailNavGraph(
             onNavigateToEditInvitation = onNavigateToEditInvitation,
             onNavigateToEditCard = onNavigateToEditCard,
             onNavigateToCreateCard = onNavigateToCreateCard,
+            onNavigateToCreateThanksCard = onNavigateToCreateThanksCard,
             modifier = Modifier.padding(),
             viewModel = viewModel
         )
