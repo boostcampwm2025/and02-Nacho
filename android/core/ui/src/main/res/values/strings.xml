@@ -144,5 +144,10 @@
     <string name="btn_open_map_app">지도 앱으로 열기</string>
     <!--  EmptyItemSection  -->
     <string name="desc_info">정보</string>
+    <!--  CardDialog  -->
+    <string name="txt_exit_dialog_title">작성 취소</string>
+    <string name="txt_exit_dialog_message">작성을 취소하시겠습니까?\n작성 중인 내용은 저장되지 않습니다.</string>
+    <string name="btn_exit">나가기</string>
+    <string name="btn_continue">계속 작성</string>
 
 </resources>

@@ -9,6 +9,7 @@
     <string name="txt_send_thanks_card">감사카드 재전송</string>
     <string name="txt_edit">수정하기</string>
     <string name="txt_delete">삭제하기</string>
+    <string name="txt_confirm_thanks_card">감사카드 보기</string>
 
     <string name="txt_loading_invitation">초대장을 불러오는 중입니다.</string>
 
