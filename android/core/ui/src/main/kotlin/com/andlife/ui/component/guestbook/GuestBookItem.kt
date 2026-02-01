@@ -65,6 +65,7 @@ import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.media.video.AutoVideoPlayer
 import com.andlife.media.video.AutoVideoPlayerPool
+import com.andlife.media.video.FakeAutoVideoPlayerPool
 import com.andlife.model.common.AuthorUiModel
 import com.andlife.model.guestbook.GuestBookInvitationUiModel
 import com.andlife.model.guestbook.GuestBookMediaUiModel
@@ -867,20 +868,4 @@ private fun GuestBookItemPreview() {
             }
         }
     }
-}
-
-class FakeAutoVideoPlayerPool : AutoVideoPlayerPool {
-    override fun preparePlayers() {}
-    override fun getPlayer(url: String): AutoVideoPlayer {
-        throw NotImplementedError("Not yet implemented")
-    }
-
-    override fun playPlayer(url: String, itemId: Long) {}
-    override fun pausePlayer(url: String) {}
-    override fun pauseAllPlayers() {}
-    override fun resumeLastPlayed() {}
-    override fun clearCacheById(itemId: Long?) {}
-    override fun precacheVideos(urls: List<String>) {}
-    override fun resetPool() {}
-    override fun releaseAllPlayers() {}
 }

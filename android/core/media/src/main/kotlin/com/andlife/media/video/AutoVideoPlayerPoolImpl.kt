@@ -40,34 +40,34 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
     private val precacheScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val activePrecacheJobs = ConcurrentHashMap<String, Job>()
 
-    init {
-        preparePlayers()
-    }
-
     @OptIn(UnstableApi::class)
-    override fun preparePlayers() {
-        if (playerInstances.isNotEmpty()) return
-
-        repeat(maxPoolSize) {
-            val exoPlayer =
-                ExoPlayer.Builder(context).build().apply {
-                    repeatMode = ExoPlayer.REPEAT_MODE_ONE
-                }
-
-            val playerView = PlayerView(context).apply {
-                useController = false
-                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-                player = exoPlayer
-                setBackgroundColor(android.graphics.Color.BLACK)
-            }
-
-            playerInstances.add(AutoVideoPlayer(exoPlayer, playerView, ""))
+    override fun preparePlayers(neededCount: Int) {
+        val targetSize = minOf(playerInstances.size + neededCount, maxPoolSize)
+        while (playerInstances.size < targetSize) {
+            playerInstances.add(createNewPlayer())
         }
     }
 
     @OptIn(UnstableApi::class)
+    private fun createNewPlayer(): AutoVideoPlayer {
+        val exoPlayer =
+            ExoPlayer.Builder(context).build().apply {
+                repeatMode = ExoPlayer.REPEAT_MODE_ONE
+            }
+
+        val playerView = PlayerView(context).apply {
+            useController = false
+            resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+            player = exoPlayer
+            setBackgroundColor(android.graphics.Color.BLACK)
+        }
+
+        return AutoVideoPlayer(exoPlayer, playerView, "")
+    }
+
+    @OptIn(UnstableApi::class)
     override fun getPlayer(url: String): AutoVideoPlayer {
-        if (playerInstances.isEmpty()) preparePlayers()
+        if (playerInstances.isEmpty()) preparePlayers(maxPoolSize)
         activePlayers[url]?.let { existingPlayer ->
             if (existingPlayer.exoPlayer.currentMediaItem?.localConfiguration?.uri.toString() == url) {
                 return existingPlayer
@@ -75,7 +75,7 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
             return existingPlayer
         }
         if (playerInstances.isEmpty()) {
-            preparePlayers()
+            preparePlayers(maxPoolSize)
         }
 
         val playerToUse =

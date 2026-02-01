@@ -1,7 +1,7 @@
 package com.andlife.media.video
 
 interface AutoVideoPlayerPool {
-    fun preparePlayers()
+    fun preparePlayers(neededCount: Int)
 
     fun getPlayer(url: String): AutoVideoPlayer
 
@@ -25,8 +25,8 @@ interface AutoVideoPlayerPool {
     fun releaseAllPlayers()
 }
 
-class FakeVideoPlayerPool : AutoVideoPlayerPool {
-    override fun preparePlayers() {}
+class FakeAutoVideoPlayerPool : AutoVideoPlayerPool {
+    override fun preparePlayers(neededCount: Int) {}
     override fun getPlayer(url: String): AutoVideoPlayer {
         throw NotImplementedError()
     }
