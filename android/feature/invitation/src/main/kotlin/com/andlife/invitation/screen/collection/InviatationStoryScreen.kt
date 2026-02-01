@@ -157,7 +157,6 @@ fun InvitationStoryScreen(
         )
 
     val currentItem = uiState.mediaItems.getOrNull(pagerState.currentPage)
-
     val isDownloading = currentItem?.let {
         uiState.downloadingUrls.contains(it.mediaUrl)
     } ?: false
