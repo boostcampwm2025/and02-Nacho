@@ -5,4 +5,5 @@ object NavigationKeyConstant {
     const val UPDATE_CARD = "updateCard"
     const val INVITATION_UPDATED = "invitationUpdated"
     const val SELECTED_ADDRESS = "selectedAddress"
+    const val CREATE_THANKS_CARD = "createThanksCard"
 }
