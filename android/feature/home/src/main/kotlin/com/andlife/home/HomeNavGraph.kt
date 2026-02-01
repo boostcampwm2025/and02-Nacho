@@ -16,7 +16,7 @@ import androidx.navigation.compose.composable
 import com.andlife.home.screen.HomeRoute
 import com.andlife.home.screen.SettingRoute
 import com.andlife.home.viewmodel.HomeViewModel
-import com.andlife.model.util.RefreshEventHub
+import com.andlife.domain.util.RefreshEventHub
 import kotlinx.serialization.Serializable
 
 @Serializable

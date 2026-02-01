@@ -13,7 +13,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import com.andlife.model.util.RefreshEventHub
+import com.andlife.domain.util.RefreshEventHub
 import com.andlife.model.util.NavigationKeyConstant.CREATE_CARD_BY_INVITATION_ID
 import com.andlife.model.util.NavigationKeyConstant.INVITATION_UPDATED
 import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD

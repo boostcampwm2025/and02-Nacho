@@ -1,6 +1,5 @@
-package com.andlife.model.util
+package com.andlife.domain.util
 
-import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -14,7 +13,6 @@ object RefreshEventHub {
     val myInvitationRefresh = _myInvitationRefresh.asStateFlow()
 
     fun emit(target: RefreshTarget) {
-        Log.d("RefreshEventHub", "emit: $target")
         when (target) {
             RefreshTarget.HOME -> _homeRefresh.value = true
             RefreshTarget.INVITATION -> _invitationRefresh.value = true

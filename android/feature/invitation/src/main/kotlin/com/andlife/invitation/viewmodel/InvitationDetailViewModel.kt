@@ -13,8 +13,8 @@ import com.andlife.invitation.model.detail.InvitationDetailSideEffect
 import com.andlife.invitation.model.detail.InvitationDetailUiEvent
 import com.andlife.invitation.model.detail.InvitationDetailUiState
 import com.andlife.model.invitation.toContentsUiModel
-import com.andlife.model.util.RefreshEventHub
-import com.andlife.model.util.RefreshEventHub.RefreshTarget
+import com.andlife.domain.util.RefreshEventHub
+import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList

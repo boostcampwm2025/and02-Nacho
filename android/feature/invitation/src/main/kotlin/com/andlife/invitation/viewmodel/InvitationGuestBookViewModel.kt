@@ -29,8 +29,8 @@ import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.model.guestbook.UiMediaType
 import com.andlife.model.guestbook.toUiModel
-import com.andlife.model.util.RefreshEventHub
-import com.andlife.model.util.RefreshEventHub.RefreshTarget
+import com.andlife.domain.util.RefreshEventHub
+import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
 import dagger.hilt.android.lifecycle.HiltViewModel

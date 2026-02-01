@@ -7,7 +7,7 @@ import com.andlife.domain.error.DataError
 import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
-import com.andlife.model.util.RefreshEventHub
+import com.andlife.domain.util.RefreshEventHub
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess

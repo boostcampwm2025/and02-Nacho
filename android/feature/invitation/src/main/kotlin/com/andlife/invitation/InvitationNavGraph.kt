@@ -17,7 +17,7 @@ import androidx.navigation.compose.composable
 import com.andlife.invitation.screen.InvitationRoute
 import com.andlife.invitation.screen.detail.InvitationDetailRoute
 import com.andlife.invitation.viewmodel.InvitationViewModel
-import com.andlife.model.util.RefreshEventHub
+import com.andlife.domain.util.RefreshEventHub
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
 
