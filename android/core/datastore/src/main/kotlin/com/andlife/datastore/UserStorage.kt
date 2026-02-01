@@ -10,6 +10,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private val Context.dataStore by preferencesDataStore(name = "user_prefs")
+private val WIFI_DIALOG_DISMISSED = booleanPreferencesKey("wifi_dialog_dismissed")
+private val FIRST_DOWNLOAD_DONE = booleanPreferencesKey("first_download_done")
 
 @Singleton
 class UserStorage @Inject constructor(
@@ -97,5 +99,21 @@ class UserStorage @Inject constructor(
             preferences.remove(REFRESH_TOKEN)
             preferences.remove(WAS_LOGGED_IN)
         }
+    }
+
+    suspend fun isWifiDialogDismissed(): Boolean {
+        return context.dataStore.data.first()[WIFI_DIALOG_DISMISSED] ?: false
+    }
+
+    suspend fun setWifiDialogDismissed() {
+        context.dataStore.edit { it[WIFI_DIALOG_DISMISSED] = true }
+    }
+
+    suspend fun isFirstDownloadDone(): Boolean {
+        return context.dataStore.data.first()[FIRST_DOWNLOAD_DONE] ?: false
+    }
+
+    suspend fun setFirstDownloadDone() {
+        context.dataStore.edit { it[FIRST_DOWNLOAD_DONE] = true }
     }
 }

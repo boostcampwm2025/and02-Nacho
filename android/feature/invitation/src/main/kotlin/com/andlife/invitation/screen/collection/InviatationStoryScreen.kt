@@ -30,7 +30,6 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
-import com.andlife.domain.model.guestbook.DownloadState
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.invitation.R
 import com.andlife.invitation.model.collection.InvitationCollectionSideEffect
@@ -79,17 +78,17 @@ fun InvitationStoryRoute(
     LaunchedEffect(Unit) {
         viewModel.effectFlow.collect { effect ->
             when (effect) {
-                is InvitationCollectionSideEffect.DownloadSuccess -> {
-                    scope.launch {
-                        snackbarHostState.currentSnackbarData?.dismiss()
-                        snackbarHostState.showSnackbar(context.getString(R.string.snack_download_success))
-                    }
-                }
-
                 is InvitationCollectionSideEffect.DownloadFailed -> {
                     scope.launch {
                         snackbarHostState.currentSnackbarData?.dismiss()
                         snackbarHostState.showSnackbar(context.getString(R.string.snack_download_fail))
+                    }
+                }
+
+                is InvitationCollectionSideEffect.ShowDownloadGuide -> {
+                    scope.launch {
+                        snackbarHostState.currentSnackbarData?.dismiss()
+                        snackbarHostState.showSnackbar(context.getString(R.string.snack_download_guide))
                     }
                 }
             }

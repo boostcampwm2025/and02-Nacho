@@ -11,6 +11,7 @@ import androidx.navigation.toRoute
 import com.andlife.domain.model.guestbook.DownloadState
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.domain.repository.guestbook.GuestBookRepository
+import com.andlife.domain.repository.user.UserRepository
 import com.andlife.domain.util.MediaDownloader
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
@@ -35,6 +36,7 @@ import javax.inject.Inject
 class InvitationCollectionViewModel @Inject constructor(
     private val guestBookRepository: GuestBookRepository,
     private val mediaDownloader: MediaDownloader,
+    private val userRepository: UserRepository,
     @param:ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<InvitationCollectionUiState, InvitationCollectionUiEvent, InvitationCollectionSideEffect>(
@@ -47,6 +49,9 @@ class InvitationCollectionViewModel @Inject constructor(
         mutableUiState
             .onStart {
                 loadMediaCollection()
+
+                val dismissed = userRepository.isWifiDialogDismissed()
+                updateState { copy(networkDialogDismissed = dismissed) }
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
@@ -65,9 +70,7 @@ class InvitationCollectionViewModel @Inject constructor(
             is InvitationCollectionUiEvent.PageChanged -> pageChanged(event.index)
             is InvitationCollectionUiEvent.ToggleExpand -> toggleExpand()
             is InvitationCollectionUiEvent.DownloadMedia -> downloadCurrentMedia()
-            is InvitationCollectionUiEvent.DisableNetworkDialogPermanently -> {
-                updateState { copy(networkDialogDismissed = true) }
-            }
+            is InvitationCollectionUiEvent.DisableNetworkDialogPermanently -> disableNetworkDialogPermanently()
         }
     }
 
@@ -171,14 +174,21 @@ class InvitationCollectionViewModel @Inject constructor(
         }
     }
 
-
     private fun downloadCurrentMedia() {
         val item = uiState.value.mediaItems.getOrNull(uiState.value.selectedIndex) ?: return
+
+        viewModelScope.launch {
+            if (!userRepository.isFirstDownloadDone()) {
+                userRepository.setFirstDownloadDone()
+                sendEffect(InvitationCollectionSideEffect.ShowDownloadGuide)
+            }
+        }
+
         downloadMedia(item.mediaUrl, item.type)
     }
 
     private fun downloadMedia(url: String, mediaType: UiMediaType) {
-        if(uiState.value.downloadingUrls.contains(url)) return
+        if (uiState.value.downloadingUrls.contains(url)) return
 
         val domainType = when (mediaType) {
             UiMediaType.IMAGE -> MediaType.IMAGE
@@ -197,7 +207,6 @@ class InvitationCollectionViewModel @Inject constructor(
                 when (state) {
                     is DownloadState.Success -> {
                         updateState { copy(downloadingUrls = downloadingUrls - url) }
-                        sendEffect(InvitationCollectionSideEffect.DownloadSuccess)
                         updateState { copy(downloadState = DownloadState.Idle) }
                     }
 
@@ -210,6 +219,14 @@ class InvitationCollectionViewModel @Inject constructor(
                     else -> {}
                 }
             }
+        }
+    }
+
+    private fun disableNetworkDialogPermanently() {
+        updateState { copy(networkDialogDismissed = true) }
+
+        viewModelScope.launch {
+            userRepository.setWifiDialogDismissed()
         }
     }
 

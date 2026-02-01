@@ -84,4 +84,12 @@ internal class UserRepositoryImpl @Inject constructor(
             Result.Error(DataError.Local.UNKNOWN)
         }
     }
+
+    override suspend fun isWifiDialogDismissed(): Boolean = userStorage.isWifiDialogDismissed()
+
+    override suspend fun setWifiDialogDismissed() = userStorage.setWifiDialogDismissed()
+
+    override suspend fun isFirstDownloadDone(): Boolean = userStorage.isFirstDownloadDone()
+
+    override suspend fun setFirstDownloadDone() = userStorage.setFirstDownloadDone()
 }
