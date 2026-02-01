@@ -3,6 +3,8 @@ package com.andlife.nachoserver.response.invitation
 import com.andlife.nachoserver.entity.AnnouncementSection
 import com.andlife.nachoserver.entity.Invitation
 import com.andlife.nachoserver.entity.InvitationCard
+import com.andlife.nachoserver.entity.ThanksCard
+import com.andlife.nachoserver.response.thankscard.ThanksCardResponse
 
 data class InvitationResponse(
     val id: Long,
@@ -20,6 +22,7 @@ data class InvitationResponse(
     val lng: Double,
     val locationGuide: String?,
     val invitationCard: InvitationCardResponse?,
+    val thanksCard: ThanksCardResponse?,
     val announcements: List<AnnouncementResponse>,
 )
 
@@ -41,6 +44,7 @@ data class AnnouncementResponse(
 
 fun Invitation.toInvitationResponse(
     card: InvitationCard? = null,
+    thanksCard: ThanksCard? = null,
     announcements: List<AnnouncementSection> = emptyList()
 ): InvitationResponse {
     return InvitationResponse(
@@ -60,6 +64,15 @@ fun Invitation.toInvitationResponse(
         locationGuide = this.locationGuide,
         invitationCard = card?.let {
             InvitationCardResponse(
+                id = it.id,
+                invitationId = this.id,
+                contentJson = it.contentJson,
+                backgroundColor = it.backgroundColor,
+                backgroundImageUrl = it.backgroundImageUrl
+            )
+        },
+        thanksCard = thanksCard?.let {
+            ThanksCardResponse(
                 id = it.id,
                 invitationId = this.id,
                 contentJson = it.contentJson,
