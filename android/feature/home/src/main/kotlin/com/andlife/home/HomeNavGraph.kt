@@ -1,5 +1,6 @@
 package com.andlife.home
 
+import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHostState
@@ -15,8 +16,7 @@ import androidx.navigation.compose.composable
 import com.andlife.home.screen.HomeRoute
 import com.andlife.home.screen.SettingRoute
 import com.andlife.home.viewmodel.HomeViewModel
-import com.andlife.model.util.NavigationEventhub
-import com.andlife.model.util.NavigationEventhub.RefreshTarget
+import com.andlife.model.util.RefreshEventHub
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -45,11 +45,13 @@ fun NavGraphBuilder.homeNavGraph(
     composable<Home> {
         val viewModel: HomeViewModel = hiltViewModel()
 
-        val refreshTarget by NavigationEventhub.refreshEvent.collectAsStateWithLifecycle(initialValue = null)
+        val needsRefresh by RefreshEventHub.homeRefresh.collectAsStateWithLifecycle()
 
-        LaunchedEffect(refreshTarget) {
-            if (refreshTarget == RefreshTarget.HOME || refreshTarget == RefreshTarget.ALL) {
+        LaunchedEffect(needsRefresh) {
+            Log.d("RefreshEventHub", "home needsRefresh: $needsRefresh")
+            if (needsRefresh) {
                 viewModel.handleRefresh()
+                RefreshEventHub.consumeHome()
             }
         }
 

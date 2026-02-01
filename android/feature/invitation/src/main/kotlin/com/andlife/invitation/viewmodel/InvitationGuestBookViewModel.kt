@@ -29,6 +29,8 @@ import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.model.guestbook.UiMediaType
 import com.andlife.model.guestbook.toUiModel
+import com.andlife.model.util.RefreshEventHub
+import com.andlife.model.util.RefreshEventHub.RefreshTarget
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -351,6 +353,7 @@ constructor(
     }
 
     private fun handleResult(result: Result<GuestBook, DataError>, isUpdate: Boolean = false) = viewModelScope.launch {
+        Log.d("RefreshEventHub", "handleResult 진입 : ${result is Result.Success}")
         updateState { copy(isUploading = false) }
         when (result) {
             is Result.Success -> {
@@ -361,6 +364,7 @@ constructor(
                 } else {
                     sendEffect(InvitationGuestBookSideEffect.CreateGuestBookSuccess)
                 }
+                RefreshEventHub.emit(RefreshTarget.HOME)
             }
 
             is Result.Error -> sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("실패: ${result.message}"))

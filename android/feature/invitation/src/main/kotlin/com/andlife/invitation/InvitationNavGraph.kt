@@ -1,5 +1,6 @@
 package com.andlife.invitation
 
+import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHostState
@@ -15,10 +16,8 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.andlife.invitation.screen.InvitationRoute
 import com.andlife.invitation.screen.detail.InvitationDetailRoute
-import com.andlife.invitation.viewmodel.InvitationDetailViewModel
 import com.andlife.invitation.viewmodel.InvitationViewModel
-import com.andlife.model.util.NavigationEventhub
-import com.andlife.model.util.NavigationEventhub.RefreshTarget
+import com.andlife.model.util.RefreshEventHub
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
 
@@ -50,11 +49,13 @@ fun NavGraphBuilder.invitationNavGraph(
     composable<Invitation> {
         val viewModel: InvitationViewModel = hiltViewModel()
 
-        val refreshTarget by NavigationEventhub.refreshEvent.collectAsStateWithLifecycle(initialValue = null)
+        val needsRefresh by RefreshEventHub.invitationRefresh.collectAsStateWithLifecycle()
 
-        LaunchedEffect(refreshTarget) {
-            if (refreshTarget == RefreshTarget.INVITATION || refreshTarget == RefreshTarget.ALL) {
+        LaunchedEffect(needsRefresh) {
+            Log.d("RefreshEventHub", "invitation needsRefresh: $needsRefresh")
+            if (needsRefresh) {
                 viewModel.handleRefresh()
+                RefreshEventHub.consumeInvitation()
             }
         }
 
