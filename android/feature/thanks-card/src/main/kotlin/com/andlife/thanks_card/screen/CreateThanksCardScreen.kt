@@ -1,5 +1,7 @@
 package com.andlife.thanks_card.screen
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -7,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
@@ -90,13 +93,20 @@ fun ThanksCardScreen(
     onEvent: (CreateThanksUiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    EditorScreen(
-        modifier = modifier,
-        state = editor,
-        snackbarHostState = snackbarHostState,
-        titleText = stringResource(R.string.txt_create_thanks_card),
-        onBackClick = { onEvent(CreateThanksUiEvent.OnClickBack) },
-        onSaveChangesClick = { onEvent(CreateThanksUiEvent.OnClickCreate) },
-        isLoading = uiState.isLoading
-    )
+    Box {
+        EditorScreen(
+            modifier = modifier,
+            state = editor,
+            snackbarHostState = snackbarHostState,
+            titleText = stringResource(R.string.txt_create_thanks_card),
+            onBackClick = { onEvent(CreateThanksUiEvent.OnClickBack) },
+            onSaveChangesClick = { onEvent(CreateThanksUiEvent.OnClickCreate) },
+            isLoading = uiState.isLoading
+        )
+        if (uiState.isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+    }
 }

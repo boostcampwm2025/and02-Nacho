@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -25,6 +26,7 @@ import com.andlife.designsystem.theme.NachoTheme
 fun NachoDialog(
     onDismiss: () -> Unit,
     shape: Shape = NachoTheme.shapes.medium,
+    containerColor: Color = NachoTheme.colorScheme.backgroundTertiary,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
@@ -40,7 +42,7 @@ fun NachoDialog(
             shape = shape,
             colors =
                 CardDefaults.cardColors(
-                    containerColor = NachoTheme.colorScheme.backgroundTertiary,
+                    containerColor = containerColor,
                     contentColor = NachoTheme.colorScheme.textPrimary,
                 ),
         ) {

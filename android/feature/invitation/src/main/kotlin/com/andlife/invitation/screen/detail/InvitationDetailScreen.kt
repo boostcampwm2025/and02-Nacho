@@ -113,12 +113,14 @@ fun InvitationDetailRoute(
         NachoDialog(
             onDismiss = { isThanksCardVisible = false },
             shape = NachoTheme.shapes.small,
-            modifier = Modifier.fillMaxHeight(0.7f)
+            modifier = Modifier.fillMaxHeight(0.7f),
+            containerColor = Color(thanksCard.backgroundColor)
         ) {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState())
-            ) {
-                Box(modifier = Modifier.background(Color(thanksCard.backgroundColor))) {
+            Box(modifier = Modifier.background(Color(thanksCard.backgroundColor))) {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState())
+                ) {
+
                     AndroidView(
                         modifier = Modifier
                             .fillMaxWidth()
