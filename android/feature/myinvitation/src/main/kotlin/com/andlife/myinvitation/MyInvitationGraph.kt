@@ -61,6 +61,7 @@ fun NavGraphBuilder.myInvitationNavGraph(
                 viewModel.handleRefresh()
             }
         }
+
         MyInvitationRoute(
             viewModel = viewModel,
             snackbarHostState = snackbarHostState,

@@ -13,6 +13,8 @@ import com.andlife.invitation.model.detail.InvitationDetailSideEffect
 import com.andlife.invitation.model.detail.InvitationDetailUiEvent
 import com.andlife.invitation.model.detail.InvitationDetailUiState
 import com.andlife.model.invitation.toContentsUiModel
+import com.andlife.model.util.NavigationEventhub
+import com.andlife.model.util.NavigationEventhub.RefreshTarget
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
@@ -99,7 +101,7 @@ class InvitationDetailViewModel @Inject constructor(
 
     private fun clickClose() {
         if (isFromDeepLink) {
-            savedState[KEY_SHOULD_REFRESH] = true
+            NavigationEventhub.emit(RefreshTarget.INVITATION)
         }
         sendEffect(InvitationDetailSideEffect.NavigateBack)
     }
@@ -122,10 +124,6 @@ class InvitationDetailViewModel @Inject constructor(
         viewModelScope.launch {
             loadInvitation()
         }
-    }
-
-    companion object {
-        const val KEY_SHOULD_REFRESH = "should_refresh"
     }
 
 }
