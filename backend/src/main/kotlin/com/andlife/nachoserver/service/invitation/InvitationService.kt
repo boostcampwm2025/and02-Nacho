@@ -383,17 +383,21 @@ class InvitationService(
         pageable: Pageable
     ): PagingResponse<UpcomingInvitationResponse> {
         val today = LocalDate.now()
+        val nowTime = LocalTime.now()
         val limitDate = today.plusDays(days)
+        println(">>> 날짜 및 시간 : ${today.toString() + nowTime.toString()}")
 
         val upcomingInvitationsPage: Page<Invitation> = when (authContext) {
             is AuthContext.Member -> {
                 invitationRepository.findUpcomingByParticipantIdWithinDays(
                     userId = authContext.userId,
                     startDate = today,
+                    nowTime = nowTime,
                     endDate = limitDate,
                     pageable = pageable
                 )
             }
+
             is AuthContext.Guest -> {
                 if (authContext.invitationIds.isEmpty()) {
                     Page.empty(pageable)
@@ -401,6 +405,7 @@ class InvitationService(
                     invitationRepository.findAllByIdInAndDateRange(
                         ids = authContext.invitationIds,
                         startDate = today,
+                        nowTime = nowTime,
                         endDate = limitDate,
                         pageable = pageable
                     )
