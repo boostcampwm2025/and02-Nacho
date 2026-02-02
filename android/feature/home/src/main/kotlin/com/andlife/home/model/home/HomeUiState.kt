@@ -11,6 +11,7 @@ data class HomeUiState(
     val isMediaPlaying: Boolean = false,
     val upcomingInvitations: ImmutableList<UpcomingInvitationUiModel> = persistentListOf(),
     val audioPlaybackState: AudioPlaybackState = AudioPlaybackState(),
+    val showLoginDialog: Boolean = false,
 ) : BaseUiState {
 
     val canPlayVideo: Boolean

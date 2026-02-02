@@ -69,6 +69,7 @@ import com.andlife.model.common.VideoCandidate
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.model.invitation.UpcomingInvitationUiModel
+import com.andlife.ui.component.dialog.LoginDialog
 import com.andlife.ui.component.guestbook.FakeAutoVideoPlayerPool
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItem
@@ -92,6 +93,7 @@ private const val SKELETON_ITEM_COUNT = 2
 fun HomeRoute(
     snackbarHostState: SnackbarHostState,
     onNavigateToCreate: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     onNavigateToInvitationDetail: (Long) -> Unit,
     onNavigateToMyInvitationDetail: (Long) -> Unit,
     onNavigateToSetting: () -> Unit,
@@ -211,6 +213,18 @@ fun HomeRoute(
         videoPlayerPool = viewModel.videoPlayerPool,
         modifier = modifier,
     )
+
+    if (uiState.showLoginDialog) {
+        LoginDialog(
+            onDismiss = {
+                viewModel.onEvent(HomeUiEvent.DismissLoginDialog)
+            },
+            onConfirm = {
+                viewModel.onEvent(HomeUiEvent.DismissLoginDialog)
+                onNavigateToLogin()
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -351,7 +365,6 @@ fun HomeScreen(
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

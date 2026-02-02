@@ -38,13 +38,13 @@ fun NavGraphBuilder.homeNavGraph(
     paddingValues: PaddingValues,
     snackbarHostState: SnackbarHostState,
     onNavigateToCreate: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     onNavigateToInvitationDetail: (Long) -> Unit,
     onNavigateToMyInvitationDetail: (Long) -> Unit,
     onNavigateToSetting: () -> Unit,
 ) {
     composable<Home> {
         val viewModel: HomeViewModel = hiltViewModel()
-
         val needsRefresh by RefreshEventHub.homeRefresh.collectAsStateWithLifecycle()
 
         LaunchedEffect(needsRefresh) {
@@ -58,6 +58,7 @@ fun NavGraphBuilder.homeNavGraph(
         HomeRoute(
             snackbarHostState = snackbarHostState,
             onNavigateToCreate = onNavigateToCreate,
+            onNavigateToLogin = onNavigateToLogin,
             onNavigateToInvitationDetail = onNavigateToInvitationDetail,
             onNavigateToMyInvitationDetail = onNavigateToMyInvitationDetail,
             onNavigateToSetting = onNavigateToSetting,

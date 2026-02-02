@@ -36,4 +36,6 @@ sealed interface HomeUiEvent : BaseUiEvent {
     data class UpdateMediaPlayState(
         val isPlaying: Boolean
     ) : HomeUiEvent
+
+    data object DismissLoginDialog : HomeUiEvent
 }

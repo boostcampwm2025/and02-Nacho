@@ -78,6 +78,15 @@ fun NachoNavHost(
                 paddingValues = innerPadding,
                 snackbarHostState = snackbarHostState,
                 onNavigateToCreate = navigator::navigateToMyInvitationCreate,
+                onNavigateToLogin = {
+                    val navOptions = navOptions {
+                        popUpTo(navigator.navController.graph.id) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                    navigator.navigateToLogin(navOptions)
+                },
                 onNavigateToInvitationDetail = navigator::navigateToInvitationDetail,
                 onNavigateToMyInvitationDetail = navigator::navigateToMyInvitationDetail,
                 onNavigateToSetting = navigator::navigateToSetting,

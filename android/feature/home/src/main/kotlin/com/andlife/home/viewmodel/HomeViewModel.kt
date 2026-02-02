@@ -4,6 +4,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
+import com.andlife.domain.model.auth.AuthState
+import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.home.model.home.HomeSideEffect
@@ -30,6 +32,7 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val guestBookRepository: GuestBookRepository,
     private val invitationRepository: InvitationRepository,
+    private val authStateManager: AuthStateManager,
     val audioPlayerManager: AudioPlayerManager,
     val videoPlayerPool: AutoVideoPlayerPool,
 ) : BaseViewModel<HomeUiState, HomeUiEvent, HomeSideEffect>(initialState = HomeUiState()) {
@@ -74,6 +77,8 @@ class HomeViewModel @Inject constructor(
             is HomeUiEvent.ClickCreate -> navigateToCreate()
             is HomeUiEvent.Refresh -> refresh()
             is HomeUiEvent.UpdateMediaPlayState -> updatePlayState(event.isPlaying)
+            HomeUiEvent.DismissLoginDialog -> dismissLoginDialog()
+
         }
     }
 
@@ -110,7 +115,12 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun navigateToCreate() {
-        sendEffect(HomeSideEffect.NavigateToCreate)
+        val isAuthenticated = authStateManager.authState.value is AuthState.Authenticated
+        if (!isAuthenticated) {
+            updateState { copy(showLoginDialog = true) }
+        } else {
+            sendEffect(HomeSideEffect.NavigateToCreate)
+        }
     }
 
     private fun showMediaMessage(type: String, url: String) {
@@ -140,5 +150,9 @@ class HomeViewModel @Inject constructor(
 
     fun handleRefresh() {
         sendEffect(HomeSideEffect.NeedRefresh)
+    }
+
+    private fun dismissLoginDialog() {
+        updateState { copy(showLoginDialog = false) }
     }
 }

@@ -98,6 +98,7 @@ fun NachoInfoDialog(
                     Text(
                         text = dismissText,
                         color = NachoTheme.colorScheme.textSecondary,
+                        style = NachoTheme.typography.bodyMediumSemiBold,
                     )
                 }
 
@@ -113,6 +114,7 @@ fun NachoInfoDialog(
                     Text(
                         text = confirmText,
                         color = NachoTheme.colorScheme.brandPrimary,
+                        style = NachoTheme.typography.bodyMediumSemiBold,
                     )
                 }
             }
