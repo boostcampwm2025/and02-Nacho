@@ -43,10 +43,26 @@ class InvitationService(
     private val announcementRepository: AnnouncementRepository,
     private val participantRepository: InvitationParticipantRepository,
     private val userRepository: UserRepository,
-    private val guestBookRepository: GuestBookRepository,
     private val guestBookService: GuestBookService,
     private val thanksCardRepository: ThanksCardRepository
 ) {
+    @Transactional
+    fun syncInvitations(userId: Long, invitationIds: List<Long>) {
+        val user = userRepository.findById(userId)
+            .orElseThrow { NoSuchElementException("사용자를 찾을 수 없습니다. ID: $userId") }
+
+        invitationIds.forEach { invitationId ->
+            if (!participantRepository.existsByInvitationIdAndUserId(invitationId, userId)) {
+                invitationRepository.findById(invitationId).ifPresent { invitation ->
+                    participantRepository.save(
+                        InvitationParticipant(user = user, invitation = invitation)
+                    )
+                    println(">>> [Sync 성공] User${userId} → Invitation ID: $invitationId")
+                }
+            }
+        }
+    }
+
     @Transactional
     fun joinInvitation(
         invitationId: Long,
