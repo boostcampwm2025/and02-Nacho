@@ -50,7 +50,7 @@ fun ImageSection(
         if (imageUrls.isEmpty()) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 Image(
-                    painter = painterResource(R.drawable.bg_thumbnail),
+                    painter = painterResource(R.drawable.ic_thumbnail),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()

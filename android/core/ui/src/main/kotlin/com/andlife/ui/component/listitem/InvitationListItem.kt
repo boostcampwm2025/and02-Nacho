@@ -78,7 +78,7 @@ fun InvitationListItem(
             Box {
                 if (imageUrl.isBlank()) {
                     Image(
-                        painter = painterResource(R.drawable.bg_thumbnail),
+                        painter = painterResource(R.drawable.ic_thumbnail),
                         contentDescription = stringResource(R.string.desc_invitation_list_image),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -100,7 +100,7 @@ fun InvitationListItem(
                         success = { SubcomposeAsyncImageContent() },
                         error = {
                             Image(
-                                painter = painterResource(R.drawable.bg_thumbnail),
+                                painter = painterResource(R.drawable.ic_thumbnail),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize(),

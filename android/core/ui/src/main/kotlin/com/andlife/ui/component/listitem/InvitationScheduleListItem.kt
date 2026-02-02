@@ -57,7 +57,7 @@ fun InvitationScheduleListItem(
         Column {
             if (imageUrl.isBlank()) {
                 Image(
-                    painter = painterResource(R.drawable.bg_thumbnail),
+                    painter = painterResource(R.drawable.ic_thumbnail),
                     contentDescription = stringResource(R.string.desc_schedule_list_image),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -81,7 +81,7 @@ fun InvitationScheduleListItem(
                     },
                     error = {
                         Image(
-                            painter = painterResource(R.drawable.bg_thumbnail),
+                            painter = painterResource(R.drawable.ic_thumbnail),
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize(),

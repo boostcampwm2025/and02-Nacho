@@ -19,4 +19,6 @@ sealed interface MyInvitationDetailSideEffect : BaseSideEffect {
     ) : MyInvitationDetailSideEffect
 
     data object ShowMapErrorSnackbar : MyInvitationDetailSideEffect
+
+    data object LinkCopied : MyInvitationDetailSideEffect
 }
