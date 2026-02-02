@@ -48,9 +48,9 @@ class ThanksCardService(
         return thanksCardRepository.save(card).toResponse()
     }
 
-    fun getThanksCard(invitationId: Long): ThanksCardResponse {
-        val card = thanksCardRepository.findByInvitationIdWithDetails(invitationId)
-            ?: throw NoSuchElementException("Thanks card not found for invitation: $invitationId")
+    fun getThanksCard(cardId: Long): ThanksCardResponse {
+        val card = thanksCardRepository.findById(cardId)
+            .orElseThrow { NoSuchElementException("Thanks card not found: $cardId") }
 
         return card.toResponse()
     }
