@@ -34,16 +34,6 @@ class UserStorage @Inject constructor(
         ids.mapNotNull { it.toLongOrNull() }
     }
 
-    suspend fun saveUserId(userId: Long) {
-        context.dataStore.edit { it[USER_ID] = userId }
-    }
-
-    suspend fun clearUserSession() {
-        context.dataStore.edit { prefs ->
-            prefs.remove(USER_ID)
-        }
-    }
-
     suspend fun addInvitationId(invitationId: Long) {
         context.dataStore.edit { prefs ->
             val currentIds = prefs[GUEST_INVITATION_IDS] ?: emptySet()

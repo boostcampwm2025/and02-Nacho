@@ -20,11 +20,6 @@ internal class UserRepositoryImpl @Inject constructor(
     private val userRemoteDataSource: UserRemoteDataSource,
     private val authStateManager: AuthStateManager
 ) : UserRepository {
-    override fun getUserId(): Long? = userStorage.getUserId()
-
-    override suspend fun saveUserId(userId: Long) = userStorage.saveUserId(userId)
-
-    override suspend fun clearUserSession() = userStorage.clearUserSession()
     override suspend fun login(accessToken: String): Result<Unit, DataError> {
         return userRemoteDataSource.login(AuthRequest(accessToken))
             .map { authResponse ->
