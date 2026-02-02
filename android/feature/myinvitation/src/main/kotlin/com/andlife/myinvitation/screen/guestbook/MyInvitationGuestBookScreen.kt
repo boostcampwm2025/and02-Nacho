@@ -523,6 +523,7 @@ private fun InvitationGuestBookScreen(
                             loadState = guestBooks.loadState.refresh,
                             itemCount = guestBooks.itemCount,
                             modifier = Modifier.fillMaxSize(),
+                            emptyComment = stringResource(R.string.label_guestbook_empty),
                             onRetry = { guestBooks.retry() }
                         ) {}
                     } else {

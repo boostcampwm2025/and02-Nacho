@@ -268,6 +268,7 @@ private fun MyInvitationScreen(
                             PagingStateContent(
                                 loadState = currentItems.loadState.refresh,
                                 itemCount = currentItems.itemCount,
+                                emptyComment = stringResource(R.string.label_myinvitation_empty),
                                 onRetry = { currentItems.retry() }
                             ) {
                                 LazyColumn(
@@ -358,7 +359,8 @@ private fun MyInvitationScreen(
                         verticalArrangement = Arrangement.spacedBy(NachoSpacing.large)
                     ) {
                         Text(
-                            text = stringResource(R.string.desc_not_logged_title),                            style = NachoTheme.typography.headingSmallSemiBold,
+                            text = stringResource(R.string.desc_not_logged_title),
+                            style = NachoTheme.typography.headingSmallSemiBold,
                             color = NachoTheme.colorScheme.textPrimary,
                             textAlign = TextAlign.Center
                         )

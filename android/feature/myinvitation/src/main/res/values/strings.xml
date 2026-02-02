@@ -46,4 +46,6 @@
     <string name="txt_share_kakao">카카오톡 공유하기</string>
     <string name="txt_copy_invitation_link">초대장 링크 복사하기</string>
     <string name="snack_link_copied">초대장 링크가 복사되었습니다</string>
+
+    <string name="label_guestbook_empty">작성된 방명록이 없습니다.\n첫 인사를 남겨보세요!</string>
 </resources>
