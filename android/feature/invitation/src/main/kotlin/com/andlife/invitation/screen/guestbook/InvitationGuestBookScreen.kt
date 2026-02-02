@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -59,6 +60,7 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.domain.model.auth.AuthState
 import com.andlife.invitation.R
 import com.andlife.invitation.model.guestbook.InvitationGuestBookSideEffect
 import com.andlife.invitation.model.guestbook.InvitationGuestBookUiEvent
@@ -73,6 +75,8 @@ import com.andlife.model.guestbook.GuestBookInvitationUiModel
 import com.andlife.model.guestbook.GuestBookMediaUiModel
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
+import com.andlife.ui.component.dialog.LoginDialog
+import com.andlife.ui.component.AudioRecordingBottomSheet
 import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.ui.component.dialog.NachoPermissionDialog
 import com.andlife.ui.component.guestbook.GuestBookItem
@@ -92,11 +96,11 @@ import kotlin.math.max
 import kotlin.math.min
 
 private const val CAMERA_IMAGES_DIR = "camera_images"
-private const val AUDIO_RECORDINGS_DIR = "audio_recordings"
 
 @Composable
 fun InvitationGuestBookRoute(
     onNavigateBack: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: InvitationGuestBookViewModel = hiltViewModel(),
 ) {
@@ -107,18 +111,19 @@ fun InvitationGuestBookRoute(
     val res = LocalResources.current
     val focusManager = LocalFocusManager.current
 
-    val coroutineScope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
 
     val snackbarHostState = remember { SnackbarHostState() }
     var showDeleteDialog by remember { mutableStateOf<Long?>(null) }
     var showPermissionDialog by remember { mutableStateOf<String?>(null) }
     var scrollToTop by remember { mutableStateOf(false) }
+    var showRecordingBottomSheet by remember { mutableStateOf(false) }
 
     var isMediaActive by remember { mutableStateOf(true) }
     val navigateBackWithCleanup: () -> Unit = {
         isMediaActive = false
-        coroutineScope.launch {
+        scope.launch {
             viewModel.videoPlayerPool.pauseAllPlayers()
             viewModel.onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(""))
 
@@ -127,12 +132,19 @@ fun InvitationGuestBookRoute(
         }
     }
 
+    val navigateToLoginWithCleanup: () -> Unit = {
+        isMediaActive = false
+        scope.launch {
+            viewModel.videoPlayerPool.pauseAllPlayers()
+            viewModel.onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(""))
+
+            delay(50L)
+            onNavigateToLogin()
+        }
+    }
+
     var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
-
     val context = LocalContext.current
-
-    // 오디오 녹음 관련
-    val audioRecorder = remember { AudioRecorder(context) }
 
     // 카메라 권한 요청 launcher
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
@@ -171,29 +183,35 @@ fun InvitationGuestBookRoute(
         }
     }
 
+    // 오디오 녹음 객체
+    val audioRecorder = remember { AudioRecorder(context) }
+
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is InvitationGuestBookSideEffect.ShowSnackbar -> {
-                snackbarHostState.showSnackbar(
-                    message = effect.message,
-                    duration = SnackbarDuration.Short,
-                )
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(
+                        message = effect.message,
+                        duration = SnackbarDuration.Short,
+                    )
+                }
             }
 
             is InvitationGuestBookSideEffect.CreateGuestBookSuccess -> {
                 focusManager.clearFocus()
                 scrollToTop = true
-                viewModel.invalidateGuestBooks()
+                guestBooks.refresh()
             }
 
             is InvitationGuestBookSideEffect.UpdateGuestBookSuccess -> {
                 focusManager.clearFocus()
-                viewModel.invalidateGuestBooks()
+                guestBooks.refresh()
             }
 
             is InvitationGuestBookSideEffect.DeleteGuestBookSuccess -> {
                 focusManager.clearFocus()
-                viewModel.invalidateGuestBooks()
+                guestBooks.refresh()
             }
 
             is InvitationGuestBookSideEffect.LaunchCamera -> {
@@ -215,40 +233,12 @@ fun InvitationGuestBookRoute(
                 cameraLauncher.launch(photoUri)
             }
 
-            is InvitationGuestBookSideEffect.StartAudioRecording -> {
-                // 오디오 녹음 시작
-                val audioRecordingsDir = File(context.cacheDir, AUDIO_RECORDINGS_DIR)
-                if (!audioRecordingsDir.exists()) {
-                    audioRecordingsDir.mkdirs()
-                }
-                val audioFile = File(
-                    audioRecordingsDir,
-                    "audio_${System.currentTimeMillis()}.m4a"
-                )
-
-                audioRecorder.startRecording(audioFile) { e ->
-                    viewModel.onEvent(InvitationGuestBookUiEvent.StopAudioRecording)
-                    // exception 표시
-                }
-            }
-
-            is InvitationGuestBookSideEffect.StopAudioRecording -> {
-                // 오디오 녹음 중지
-                audioRecorder.stopRecording { recordedFile ->
-                    if (recordedFile != null) {
-                        // 녹음된 오디오 파일을 SelectedMedia로 변환
-                        val currentMedias = uiState.selectedMedias
-                        if (currentMedias.size < 5) {
-                            val audioMedia = uriToSelectedMedia(context, recordedFile.toURI().toString())
-                            val updatedMedias = (currentMedias + audioMedia).toImmutableList()
-                            viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias))
-                        }
-                    }
-                }
+            is InvitationGuestBookSideEffect.ShowAudioRecordingBottomSheet -> {
+                showRecordingBottomSheet = true
             }
 
             is InvitationGuestBookSideEffect.ScrollToTop -> {
-                coroutineScope.launch {
+                scope.launch {
                     if (guestBooks.itemCount > 0) {
                         lazyListState.animateScrollToItem(0)
                     }
@@ -256,10 +246,14 @@ fun InvitationGuestBookRoute(
             }
 
             is InvitationGuestBookSideEffect.RefreshFailure -> {
-                coroutineScope.launch {
+                scope.launch {
                     snackbarHostState.currentSnackbarData?.dismiss()
                     snackbarHostState.showSnackbar(res.getString(R.string.msg_guestbook_refresh_failure))
                 }
+            }
+
+            is InvitationGuestBookSideEffect.AuthStateChanged -> {
+                guestBooks.refresh()
             }
         }
     }
@@ -302,6 +296,9 @@ fun InvitationGuestBookRoute(
                     viewModel.onEvent(InvitationGuestBookUiEvent.UpdateMediaPlayState(false))
                     viewModel.videoPlayerPool.pauseAllPlayers()
                     viewModel.audioPlayerManager.pause()
+                    if (audioRecorder.isRecording.value) {
+                        audioRecorder.pauseRecording()
+                    }
                 }
 
                 Lifecycle.Event.ON_DESTROY -> {
@@ -343,6 +340,18 @@ fun InvitationGuestBookRoute(
         )
     }
 
+    if (uiState.showLoginDialog) {
+        LoginDialog(
+            onDismiss = {
+                viewModel.onEvent(InvitationGuestBookUiEvent.DismissLoginDialog)
+            },
+            onConfirm = {
+                viewModel.onEvent(InvitationGuestBookUiEvent.DismissLoginDialog)
+                navigateToLoginWithCleanup()
+            }
+        )
+    }
+
     InvitationGuestBookScreen(
         uiState = uiState,
         guestBooks = guestBooks,
@@ -359,6 +368,24 @@ fun InvitationGuestBookRoute(
         audioPermissionLauncher = audioPermissionLauncher,
         modifier = modifier,
     )
+
+    if (showRecordingBottomSheet) {
+        AudioRecordingBottomSheet(
+            audioRecorder = audioRecorder,
+            onRecordingComplete = { recordedFile ->
+                val currentMedias = uiState.selectedMedias
+                if (currentMedias.size < 5) {
+                    val newMedia = uriToSelectedMedia(context, recordedFile.toURI().toString())
+                    val updatedMedias = (currentMedias + newMedia).toImmutableList()
+                    viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias))
+                }
+                showRecordingBottomSheet = false
+            },
+            onDismiss = {
+                showRecordingBottomSheet = false
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -475,7 +502,9 @@ private fun InvitationGuestBookScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
+        innerPadding
         Column(modifier = Modifier.fillMaxSize()) {
             PullToRefreshBox(
                 isRefreshing = uiState.isRefreshing,
@@ -485,8 +514,7 @@ private fun InvitationGuestBookScreen(
                     .fillMaxWidth()
             ) {
                 if (isMediaActive) {
-                    val isInitialLoading =
-                        guestBooks.loadState.refresh is LoadState.Loading && guestBooks.itemCount == 0
+                    val isInitialLoading = guestBooks.loadState.refresh is LoadState.Loading && guestBooks.itemCount == 0
 
                     if (isInitialLoading || guestBooks.itemCount == 0) {
                         PagingStateContent(
@@ -516,15 +544,7 @@ private fun InvitationGuestBookScreen(
                                         onDeleteClick = { onDeleteMenuClick(guestBook.id) },
                                         onVisualMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
                                         onAudioMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
-                                        onMenuClick = { onEvent(InvitationGuestBookUiEvent.ClickGuestBookMenu(guestBook.id)) },
-                                        onPlayVideoClick = { url ->
-                                            onEvent(
-                                                InvitationGuestBookUiEvent.ClickVideoPlayButton(
-                                                    url,
-                                                    guestBook.id
-                                                )
-                                            )
-                                        }
+                                        onPlayVideoClick = { url -> onEvent(InvitationGuestBookUiEvent.ClickVideoPlayButton(url, guestBook.id))}
                                     )
                                 }
                             }
@@ -559,6 +579,11 @@ private fun InvitationGuestBookScreen(
                     onFocusChanged = { focused ->
                         isTextFieldFocused = focused
                     },
+                    isAuthenticated = when (uiState.authState) {
+                        is AuthState.Authenticated -> true
+                        is AuthState.Guest -> false
+                        is AuthState.Loading -> false
+                    },
                     context = context,
                     cameraPermissionLauncher = cameraPermissionLauncher,
                     audioPermissionLauncher = audioPermissionLauncher
@@ -573,6 +598,7 @@ private fun GuestBookFormSection(
     uiState: InvitationGuestBookUiState,
     onEvent: (InvitationGuestBookUiEvent) -> Unit,
     onFocusChanged: (Boolean) -> Unit,
+    isAuthenticated: Boolean,
     context: Context,
     cameraPermissionLauncher: ActivityResultLauncher<String>,
     audioPermissionLauncher: ActivityResultLauncher<String>,
@@ -587,7 +613,6 @@ private fun GuestBookFormSection(
         isUploading = uiState.isUploading,
         isSubmittable = uiState.isSubmittable,
         editingGuestBookId = uiState.editingGuestBookId,
-        isAudioRecording = uiState.isAudioRecording,
         onMediasSelected = { medias ->
             onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(medias))
         },
@@ -600,6 +625,8 @@ private fun GuestBookFormSection(
         onUploadClick = {
             onEvent(InvitationGuestBookUiEvent.UploadMedias)
         },
+        isAuthenticated = isAuthenticated,
+        onTextFieldClick = { onEvent(InvitationGuestBookUiEvent.CheckLogin) },
         onFocusChanged = onFocusChanged,
         onCameraClick = {
             // 카메라 권한 체크
@@ -622,11 +649,7 @@ private fun GuestBookFormSection(
             ) == PackageManager.PERMISSION_GRANTED
 
             if (hasPermission) {
-                if (uiState.isAudioRecording) {
-                    onEvent(InvitationGuestBookUiEvent.StopAudioRecording)
-                } else {
-                    onEvent(InvitationGuestBookUiEvent.StartAudioRecording)
-                }
+                onEvent(InvitationGuestBookUiEvent.ClickMicrophone)
             } else {
                 audioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
             }
@@ -714,7 +737,6 @@ private fun InvitationGuestBookResultPreview() {
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},
                     onAudioMediaClick = {},
-                    onMenuClick = {},
                     onPlayVideoClick = {}
                 )
             }

@@ -1,4 +1,4 @@
-package com.andlife.data.util.media
+package com.andlife.data.util.media.download
 
 import android.content.Context
 import androidx.work.Constraints

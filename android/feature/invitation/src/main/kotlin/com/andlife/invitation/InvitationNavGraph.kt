@@ -3,7 +3,9 @@ package com.andlife.invitation
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
@@ -11,6 +13,8 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.andlife.invitation.screen.InvitationRoute
 import com.andlife.invitation.screen.detail.InvitationDetailRoute
+import com.andlife.invitation.viewmodel.InvitationDetailViewModel
+import com.andlife.invitation.viewmodel.InvitationViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
 
@@ -39,11 +43,24 @@ fun NavGraphBuilder.invitationNavGraph(
     onNavigateToDetail: (Long) -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
-    composable<Invitation> {
+    composable<Invitation> { backStackEntry ->
+        val viewModel: InvitationViewModel = hiltViewModel()
+
+        val savedStateHandle = backStackEntry.savedStateHandle
+        val shouldRefresh = savedStateHandle.get<Boolean>(InvitationDetailViewModel.KEY_SHOULD_REFRESH) ?: false
+
+        LaunchedEffect(shouldRefresh) {
+            if (shouldRefresh) {
+                viewModel.handleDeepLinkRefresh()
+                savedStateHandle[InvitationDetailViewModel.KEY_SHOULD_REFRESH] = false
+            }
+        }
+
         InvitationRoute(
             onNavigateToDetail = onNavigateToDetail,
             modifier = Modifier.padding(paddingValues),
-            snackbarHostState = snackbarHostState
+            snackbarHostState = snackbarHostState,
+            viewModel = viewModel
         )
     }
 }
@@ -51,12 +68,14 @@ fun NavGraphBuilder.invitationNavGraph(
 fun NavGraphBuilder.invitationDetailNavGraph(
     deepLinks: NavDeepLink,
     onNavigateBack: () -> Unit,
+    onNavigateToLogin: () -> Unit,
 ) {
     composable<InvitationDetail>(
         deepLinks = persistentListOf(deepLinks),
     ) {
         InvitationDetailRoute(
             onNavigateBack = onNavigateBack,
+            onNavigateToLogin = onNavigateToLogin,
             modifier = Modifier.padding(),
         )
     }

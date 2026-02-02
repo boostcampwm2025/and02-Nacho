@@ -1,15 +1,27 @@
-package com.andlife.data.util.media
+package com.andlife.data.util.media.download
+
+import android.webkit.MimeTypeMap
+import com.andlife.domain.model.guestbook.MediaType
+
+internal fun resolveMimeType(fileName: String, mediaType: MediaType): String {
+    val extension = fileName.substringAfterLast(".", "")
+    val mimeType = MimeTypeMap.getSingleton()
+        .getMimeTypeFromExtension(extension.lowercase())
+
+    return mimeType ?: when (mediaType) {
+        MediaType.IMAGE -> DownloadFile.MIME_IMAGE
+        MediaType.VIDEO -> DownloadFile.MIME_VIDEO
+        MediaType.AUDIO -> DownloadFile.MIME_AUDIO
+    }
+}
 
 object DownloadKey {
     const val URL = "url"
     const val FILE_NAME = "file_name"
     const val MEDIA_TYPE = "media_type"
     const val RESULT_URL = "result_url"
-    const val RESULT_PATH = "result_path"
     const val ERROR_MESSAGE = "error_message"
     const val PROGRESS = "progress"
-    const val DOWNLOADED_BYTES = "downloaded_bytes"
-    const val TOTAL_BYTES = "total_bytes"
     const val EXTRA_WORK_ID = "extra_work_id"
 
     const val TAG_MEDIA_DOWNLOAD = "tag_media_download"
@@ -26,7 +38,7 @@ object DownloadNoti {
 
     const val TITLE_DOWNLOADING = "다운로드 중"
     const val MSG_PREPARING = "파일을 저장하고 있습니다."
-    const val TITLE_COMPLETE_AUDIO = "음성 메시지 저장 완료"
+    const val TITLE_COMPLETE_AUDIO = "오디오 저장 완료"
     const val TITLE_COMPLETE_VISUAL = "미디어 저장 완료"
     const val MSG_COMPLETE_SUFFIX = "개의 파일이 저장되었습니다."
     const val ACTION_CANCEL = "취소"

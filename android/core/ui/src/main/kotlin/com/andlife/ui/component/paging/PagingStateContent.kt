@@ -2,6 +2,8 @@ package com.andlife.ui.component.paging
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -35,7 +37,9 @@ fun PagingStateContent(
             is LoadState.NotLoading -> {
                 if (itemCount == 0) {
                     Box(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState()),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(text = stringResource(R.string.label_paging_empty_result))

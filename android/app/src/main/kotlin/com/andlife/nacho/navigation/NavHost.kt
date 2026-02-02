@@ -103,6 +103,15 @@ fun NachoNavHost(
             invitationDetailNavGraph(
                 deepLinks = navDeepLink { uriPattern = deepLinkManager.getKakaoDeepLinkPattern() },
                 onNavigateBack = navigator::navigatePopBackStack,
+                onNavigateToLogin = {
+                    val navOptions = navOptions {
+                        popUpTo(navigator.navController.graph.id) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                    navigator.navigateToLogin(navOptions)
+                }
             )
 
             myInvitationNavGraph(
@@ -123,6 +132,15 @@ fun NachoNavHost(
 
             myInvitationDetailNavGraph(
                 onNavigateBack = navigator::navigatePopBackStack,
+                onNavigateToLogin = {
+                    val navOptions = navOptions {
+                        popUpTo(navigator.navController.graph.id) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                    navigator.navigateToLogin(navOptions)
+                },
                 onNavigateToEditInvitation = navigator::navigateToMyInvitationEdit,
                 onNavigateToEditCard = navigator::navigateToUpdateCard,
                 onNavigateToCreateCard = navigator::navigateToCreateCardByInvitation
