@@ -16,7 +16,16 @@ class ThanksCardRemoteDataSourceImpl @Inject constructor(
         request: ThanksCardRequest
     ): Result<Long, DataError> = apiCall { thanksCardService.createThanksCard(invitationId, request) }
 
-    override suspend fun getThanksCard(invitationId: Long): Result<ThanksCardResponse, DataError> {
-        TODO("Not yet implemented")
+    override suspend fun getThanksCard(invitationId: Long): Result<ThanksCardResponse, DataError> =
+        apiCall { thanksCardService.getThanksCard(invitationId) }
+
+    override suspend fun deleteThanksCard(invitationId: Long): Result<Long, DataError> =
+        apiCall { thanksCardService.deleteThanksCard(invitationId) }
+
+    override suspend fun updateThanksCard(
+        cardId: Long,
+        request: ThanksCardRequest
+    ): Result<ThanksCardResponse, DataError> = apiCall {
+        thanksCardService.updateThanksCard(cardId, request)
     }
 }

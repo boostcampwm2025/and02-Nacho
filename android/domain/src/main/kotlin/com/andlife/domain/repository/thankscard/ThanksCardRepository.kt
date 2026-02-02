@@ -7,4 +7,6 @@ import com.andlife.domain.util.Result
 interface ThanksCardRepository {
     suspend fun createThanksCard(invitationId: Long, card: NachoCard): Result<Long, DataError>
     suspend fun getThanksCard(invitationId: Long): Result<NachoCard, DataError>
+    suspend fun deleteThanksCard(invitationId: Long): Result<Unit, DataError>
+    suspend fun updateThanksCard(cardId: Long, card: NachoCard): Result<Long, DataError>
 }

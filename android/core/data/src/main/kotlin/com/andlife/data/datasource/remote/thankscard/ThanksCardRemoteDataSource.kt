@@ -8,4 +8,6 @@ import com.andlife.network.model.thankscard.ThanksCardResponse
 interface ThanksCardRemoteDataSource {
     suspend fun createThanksCard(invitationId: Long, request: ThanksCardRequest): Result<Long, DataError>
     suspend fun getThanksCard(invitationId: Long): Result<ThanksCardResponse, DataError>
+    suspend fun deleteThanksCard(invitationId: Long): Result<Long, DataError>
+    suspend fun updateThanksCard(cardId: Long, request: ThanksCardRequest): Result<ThanksCardResponse, DataError>
 }
