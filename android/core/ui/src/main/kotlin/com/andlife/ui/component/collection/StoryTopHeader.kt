@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -39,6 +40,7 @@ fun StoryTopHeader(
     date: LocalDateTime,
     onClose: () -> Unit,
     onDownloadClick: () -> Unit,
+    isDownloading: Boolean = false,
     modifier: Modifier = Modifier,
     profileUrl: String? = null,
 ) {
@@ -94,12 +96,25 @@ fun StoryTopHeader(
             )
         }
 
-        IconButton(onClick = onDownloadClick) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_download_24),
-                contentDescription = stringResource(R.string.desc_btn_download),
-                tint = NachoTheme.colorScheme.iconTertiary,
-            )
+        if (isDownloading) {
+            Box(
+                modifier = Modifier.size(NachoIconSize.xLarge),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(NachoIconSize.medium),
+                    color = NachoTheme.colorScheme.iconTertiary,
+                    strokeWidth = NachoSpacing.twoXSmall,
+                )
+            }
+        } else {
+            IconButton(onClick = onDownloadClick) {
+                Icon(
+                    painter = painterResource(id = designR.drawable.ic_download_24),
+                    contentDescription = stringResource(R.string.desc_btn_download),
+                    tint = NachoTheme.colorScheme.iconTertiary,
+                )
+            }
         }
     }
 }

@@ -14,4 +14,8 @@ sealed interface MyInvitationCollectionUiEvent : BaseUiEvent {
     ) : MyInvitationCollectionUiEvent
 
     data object ToggleExpand : MyInvitationCollectionUiEvent
+
+    data object DownloadMedia : MyInvitationCollectionUiEvent
+
+    data object DisableNetworkDialogPermanently : MyInvitationCollectionUiEvent
 }

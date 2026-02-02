@@ -162,4 +162,9 @@
     <string name="desc_pause_recording">녹음 일시정지</string>
     <string name="desc_resume_recording">녹음 재개</string>
 
+    <!--  다이얼로그  -->
+    <string name="btn_label_cancel">취소</string>
+    <string name="btn_label_to_setting">설정으로 이동</string>
+    <string name="dialog_do_not_show_again">다시 보지 않기</string>
+
 </resources>

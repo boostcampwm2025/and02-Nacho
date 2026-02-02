@@ -8,11 +8,15 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.toRoute
+import com.andlife.domain.model.guestbook.DownloadState
+import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.domain.repository.guestbook.GuestBookRepository
+import com.andlife.domain.repository.user.UserRepository
+import com.andlife.domain.util.MediaDownloader
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
-import com.andlife.model.guestbook.UiMediaType
 import com.andlife.model.collection.toUiModel
+import com.andlife.model.guestbook.UiMediaType
 import com.andlife.myinvitation.MyInvitationDetail
 import com.andlife.myinvitation.model.collection.MyInvitationCollectionSideEffect
 import com.andlife.myinvitation.model.collection.MyInvitationCollectionUiEvent
@@ -29,21 +33,24 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MyInvitationCollectionViewModel
-    @Inject
-    constructor(
-        private val guestBookRepository: GuestBookRepository,
-        @param:ApplicationContext private val context: Context,
-        savedStateHandle: SavedStateHandle
-    ) : BaseViewModel<MyInvitationCollectionUiState, MyInvitationCollectionUiEvent, MyInvitationCollectionSideEffect>(
-            initialState = MyInvitationCollectionUiState(),
-        ) {
-        private val invitationId: Long = savedStateHandle.toRoute<MyInvitationDetail>().id
+class MyInvitationCollectionViewModel @Inject constructor(
+    private val guestBookRepository: GuestBookRepository,
+    private val mediaDownloader: MediaDownloader,
+    private val userRepository: UserRepository,
+    @param:ApplicationContext private val context: Context,
+    savedStateHandle: SavedStateHandle
+) : BaseViewModel<MyInvitationCollectionUiState, MyInvitationCollectionUiEvent, MyInvitationCollectionSideEffect>(
+    initialState = MyInvitationCollectionUiState(),
+) {
+    private val invitationId: Long = savedStateHandle.toRoute<MyInvitationDetail>().id
 
     override val uiState: StateFlow<MyInvitationCollectionUiState> =
         mutableUiState
             .onStart {
                 loadMediaCollection()
+
+                val dismissed = userRepository.isWifiDialogDismissed()
+                updateState { copy(networkDialogDismissed = dismissed) }
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
@@ -61,6 +68,8 @@ class MyInvitationCollectionViewModel
             is MyInvitationCollectionUiEvent.CloseStory -> closeStory()
             is MyInvitationCollectionUiEvent.PageChanged -> pageChanged(event.index)
             is MyInvitationCollectionUiEvent.ToggleExpand -> toggleExpand()
+            is MyInvitationCollectionUiEvent.DownloadMedia -> downloadCurrentMedia()
+            is MyInvitationCollectionUiEvent.DisableNetworkDialogPermanently -> disableNetworkDialogPermanently()
         }
     }
 
@@ -129,6 +138,7 @@ class MyInvitationCollectionViewModel
             UiMediaType.VIDEO, UiMediaType.AUDIO -> {
                 prepareMedia(selectedMedia.mediaUrl)
             }
+
             else -> {
                 exoPlayer.pause()
             }
@@ -161,5 +171,65 @@ class MyInvitationCollectionViewModel
                 isTextExpanded = !isTextExpanded,
             )
         }
+    }
+
+    private fun downloadCurrentMedia() {
+        val item = uiState.value.mediaItems.getOrNull(uiState.value.selectedIndex) ?: return
+
+        viewModelScope.launch {
+            if (!userRepository.isFirstDownloadDone()) {
+                userRepository.setFirstDownloadDone()
+                sendEffect(MyInvitationCollectionSideEffect.ShowDownloadGuide)
+            }
+        }
+
+        downloadMedia(item.mediaUrl, item.type)
+    }
+
+    private fun downloadMedia(url: String, mediaType: UiMediaType) {
+        if (uiState.value.downloadingUrls.contains(url)) return
+
+        val domainType = when (mediaType) {
+            UiMediaType.IMAGE -> MediaType.IMAGE
+            UiMediaType.VIDEO -> MediaType.VIDEO
+            UiMediaType.AUDIO -> MediaType.AUDIO
+        }
+        val fileName = "$FILE_NAME_PREFIX${System.currentTimeMillis()}${domainType.getExtension()}"
+
+        updateState { copy(downloadingUrls = downloadingUrls + url) }
+
+        val workId = mediaDownloader.enqueueDownload(url, fileName, domainType)
+
+        viewModelScope.launch {
+            mediaDownloader.getDownloadStatus(workId).collect { state ->
+                updateState { copy(downloadState = state) }
+                when (state) {
+                    is DownloadState.Success -> {
+                        updateState { copy(downloadingUrls = downloadingUrls - url) }
+                        updateState { copy(downloadState = DownloadState.Idle) }
+                    }
+
+                    is DownloadState.Error -> {
+                        updateState { copy(downloadingUrls = downloadingUrls - url) }
+                        sendEffect(MyInvitationCollectionSideEffect.DownloadFailed)
+                        updateState { copy(downloadState = DownloadState.Idle) }
+                    }
+
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    private fun disableNetworkDialogPermanently() {
+        updateState { copy(networkDialogDismissed = true) }
+
+        viewModelScope.launch {
+            userRepository.setWifiDialogDismissed()
+        }
+    }
+
+    companion object {
+        private const val FILE_NAME_PREFIX = "nacho_"
     }
 }

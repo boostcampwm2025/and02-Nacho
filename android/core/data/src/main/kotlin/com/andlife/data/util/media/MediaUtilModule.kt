@@ -1,5 +1,6 @@
 package com.andlife.data.util.media
 
+import com.andlife.data.util.media.download.MediaDownloaderImpl
 import com.andlife.domain.util.MediaDownloader
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader

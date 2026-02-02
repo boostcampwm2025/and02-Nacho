@@ -1,5 +1,6 @@
 package com.andlife.invitation.model.collection
 
+import com.andlife.domain.model.guestbook.DownloadState
 import com.andlife.model.collection.CollectionUiModel
 import com.andlife.ui.base.BaseUiState
 import kotlinx.collections.immutable.ImmutableList
@@ -12,4 +13,7 @@ data class InvitationCollectionUiState(
     val isDetailMode: Boolean = false,
     val selectedIndex: Int = 0,
     val isTextExpanded: Boolean = false,
+    val downloadState: DownloadState = DownloadState.Idle,
+    val downloadingUrls: Set<String> = emptySet(),
+    val networkDialogDismissed: Boolean = false
 ) : BaseUiState

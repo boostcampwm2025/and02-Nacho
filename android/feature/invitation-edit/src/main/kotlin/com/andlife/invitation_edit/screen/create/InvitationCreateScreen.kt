@@ -26,11 +26,10 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.andlife.designsystem.component.dialog.NachoDialog
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
-import com.andlife.invitation_edit.component.DeleteDialogContent
+import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.invitation_edit.model.address.AddressUiModel
 import com.andlife.invitation_edit.model.form.AnnouncementUiModel
 import com.andlife.invitation_edit.model.form.InvitationFormSideEffect
@@ -209,18 +208,20 @@ fun InvitationCreateRoute(
     }
 
     if (isShowDeleteAnnouncement) {
-        NachoDialog(onDismiss = { isShowDeleteAnnouncement = false }) {
-            DeleteDialogContent(
-                onConfirm = {
-                    selectedAnnouncement?.let {
-                        viewModel.onEvent(InvitationFormUiEvent.RemoveAnnouncement(it))
-                        selectedAnnouncement = null
-                    }
-                    isShowDeleteAnnouncement = false
-                },
-                onDismiss = { isShowDeleteAnnouncement = false }
-            )
-        }
+        NachoInfoDialog(
+            title = stringResource(R.string.txt_remove_announcement_title),
+            message = stringResource(R.string.txt_remove_announcement),
+            confirmText = stringResource(R.string.txt_remove),
+            dismissText = stringResource(R.string.txt_cancel),
+            onConfirm = {
+                selectedAnnouncement?.let {
+                    viewModel.onEvent(InvitationFormUiEvent.RemoveAnnouncement(it))
+                    selectedAnnouncement = null
+                }
+                isShowDeleteAnnouncement = false
+            },
+            onDismiss = { isShowDeleteAnnouncement = false },
+        )
     }
 }
 
