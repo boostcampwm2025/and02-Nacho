@@ -7,9 +7,11 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
 import com.andlife.domain.error.DataError
+import com.andlife.domain.model.auth.AuthState
 import com.andlife.domain.model.guestbook.GuestBook
 import com.andlife.domain.model.guestbook.GuestBookMedia
 import com.andlife.domain.model.guestbook.MediaType
+import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
@@ -53,6 +55,7 @@ constructor(
     private val mediaFileProvider: MediaFileProvider,
     private val thumbnailGenerator: ThumbnailGenerator,
     private val guestBookRepository: GuestBookRepository,
+    private val authStateManager: AuthStateManager,
     val audioPlayerManager: AudioPlayerManager,
     val videoPlayerPool: AutoVideoPlayerPool,
     savedStateHandle: SavedStateHandle,
@@ -75,7 +78,20 @@ constructor(
         }.cachedIn(viewModelScope)
 
     init {
+        observeAuthState()
         observeAudioPlayerState()
+    }
+
+    private fun observeAuthState() {
+        authStateManager.authState
+            .onEach { authState ->
+                val isStateChanged = uiState.value.isAuthStateChanged(authState)
+                updateState { copy( authState = authState ) }
+                if (isStateChanged) {
+                    sendEffect(MyInvitationGuestBookSideEffect.AuthStateChanged(authState) )
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     private fun observeAudioPlayerState() {
@@ -99,24 +115,14 @@ constructor(
             is MyInvitationGuestBookUiEvent.ClearError -> clearError()
             is MyInvitationGuestBookUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
             is MyInvitationGuestBookUiEvent.ClickVideoPlayButton -> clickVideoPlayButton(event.url, event.itemId)
-
-            is MyInvitationGuestBookUiEvent.ClickGuestBookMenu -> sendEffect(
-                MyInvitationGuestBookSideEffect.ShowSnackbar("방명록 메뉴 클릭됨: ${event.guestBookId}"),
-            )
-
-            is MyInvitationGuestBookUiEvent.ClickInvitationTitle -> sendEffect(
-                MyInvitationGuestBookSideEffect.ShowSnackbar("초대장 제목 클릭됨: ${event.invitationId}"),
-            )
-
-            is MyInvitationGuestBookUiEvent.ClickVisualMedia -> sendEffect(
-                MyInvitationGuestBookSideEffect.ShowSnackbar("비주얼 미디어 클릭됨: ${event.url}"),
-            )
-
+            is MyInvitationGuestBookUiEvent.ClickVisualMedia -> {}
             is MyInvitationGuestBookUiEvent.ClickEditMenu -> startEditing(event.guestBook)
             is MyInvitationGuestBookUiEvent.CancelEdit -> cancelEdit()
             is MyInvitationGuestBookUiEvent.ClickDeleteMenu -> deleteGuestBook(event.guestBookId)
             is MyInvitationGuestBookUiEvent.UpdateMediaPlayState -> updatePlayState(event.isPlaying)
             MyInvitationGuestBookUiEvent.Refresh -> refresh()
+            MyInvitationGuestBookUiEvent.CheckLogin -> checkLogin()
+            MyInvitationGuestBookUiEvent.DismissLoginDialog -> dismissLoginDialog()
         }
     }
 
@@ -255,6 +261,12 @@ constructor(
         thumbnailUrls: List<String?>,
         newSelectedMedias: List<SelectedMedia>
     ) {
+        if (authStateManager.authState.value !is AuthState.Authenticated) {
+            updateState { copy(isUploading = false) }
+            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("로그인이 필요합니다."))
+            return
+        }
+
         val guestBookMedias = uploadedUrls
             .mapIndexedNotNull { index, url ->
                 val urlValue = url ?: return@mapIndexedNotNull null
@@ -277,7 +289,6 @@ constructor(
 
         val result = guestBookRepository.createGuestBook(
             invitationId = invitationId,
-            userId = 1,
             textContent = uiState.value.textContent,
             medias = guestBookMedias,
         )
@@ -290,6 +301,12 @@ constructor(
         thumbnailUrls: List<String?>,
         allSelectedMedias: List<SelectedMedia>
     ) {
+        if (authStateManager.authState.value !is AuthState.Authenticated) {
+            updateState { copy(isUploading = false) }
+            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("로그인이 필요합니다."))
+            return
+        }
+
         val existingImageIds =
             allSelectedMedias.filter { it.id != null && it.type == UiMediaType.IMAGE }.mapNotNull { it.id }
         val existingAudioIds =
@@ -347,6 +364,12 @@ constructor(
     }
 
     private fun deleteGuestBook(guestBookId: Long) {
+        if (authStateManager.authState.value !is AuthState.Authenticated) {
+            updateState { copy(isUploading = false) }
+            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("로그인이 필요합니다."))
+            return
+        }
+
         viewModelScope.launch {
             guestBookRepository.deleteGuestBook(guestBookId)
                 .onSuccess { deletedId ->
@@ -424,5 +447,16 @@ constructor(
                 sendEffect(MyInvitationGuestBookSideEffect.ScrollToTop)
             }
         }
+    }
+
+    private fun checkLogin() {
+        val isAuthenticated = authStateManager.authState.value is AuthState.Authenticated
+        if (!isAuthenticated) {
+            updateState { copy(showLoginDialog = true) }
+        }
+    }
+
+    private fun dismissLoginDialog() {
+        updateState { copy(showLoginDialog = false) }
     }
 }

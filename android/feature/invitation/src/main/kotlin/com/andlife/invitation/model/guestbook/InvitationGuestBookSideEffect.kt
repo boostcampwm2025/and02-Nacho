@@ -1,5 +1,6 @@
 package com.andlife.invitation.model.guestbook
 
+import com.andlife.domain.model.auth.AuthState
 import com.andlife.ui.base.BaseSideEffect
 
 sealed interface InvitationGuestBookSideEffect : BaseSideEffect {
@@ -20,4 +21,8 @@ sealed interface InvitationGuestBookSideEffect : BaseSideEffect {
     data object ScrollToTop : InvitationGuestBookSideEffect
 
     data object RefreshFailure : InvitationGuestBookSideEffect
+
+    data class AuthStateChanged(
+        val authState: AuthState
+    ) : InvitationGuestBookSideEffect
 }

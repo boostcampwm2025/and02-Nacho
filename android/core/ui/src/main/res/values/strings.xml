@@ -147,6 +147,10 @@
     <string name="btn_open_map_app">지도 앱으로 열기</string>
     <!--  EmptyItemSection  -->
     <string name="desc_info">정보</string>
+    <string name="txt_label_login">로그인</string>
+    <string name="msg_guide_login">로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?</string>
+    <string name="txt_move">이동</string>
+    <string name="txt_label_cancel">취소</string>
 
     <!-- AudioRecording -->
     <string name="label_audio_recording">음성 녹음</string>

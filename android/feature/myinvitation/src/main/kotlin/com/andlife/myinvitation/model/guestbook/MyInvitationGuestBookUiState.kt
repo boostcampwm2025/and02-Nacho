@@ -1,5 +1,6 @@
 package com.andlife.myinvitation.model.guestbook
 
+import com.andlife.domain.model.auth.AuthState
 import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.ui.base.BaseUiState
 import com.andlife.ui.component.invitation.SelectedMedia
@@ -21,6 +22,8 @@ data class MyInvitationGuestBookUiState(
     val deleteTargetId: Long? = null,
     val guestBooksErrorMessage: String? = null,
     val audioRecordingDuration: Int = 0,
+    val showLoginDialog: Boolean = false,
+    val authState: AuthState = AuthState.Loading
 ) : BaseUiState {
 
     val isContentChanged: Boolean
@@ -40,4 +43,7 @@ data class MyInvitationGuestBookUiState(
 
     val canPlayVideo: Boolean
         get() = isMediaPlaying && !audioPlaybackState.isLoading && !audioPlaybackState.isPlaying
+
+    fun isAuthStateChanged(current: AuthState) =
+        authState::class != current::class && current !is AuthState.Loading
 }

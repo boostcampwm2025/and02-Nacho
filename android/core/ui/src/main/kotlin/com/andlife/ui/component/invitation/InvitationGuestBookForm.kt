@@ -6,6 +6,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,6 +50,7 @@ fun InvitationGuestBookForm(
     textContent: String,
     isUploading: Boolean,
     isSubmittable: Boolean,
+    isAuthenticated: Boolean,
     onMediasSelected: (ImmutableList<SelectedMedia>) -> Unit,
     onMediaRemove: (SelectedMedia) -> Unit,
     onTextContentChange: (String) -> Unit,
@@ -56,6 +58,7 @@ fun InvitationGuestBookForm(
     onMicrophoneClick: () -> Unit,
     onUploadClick: () -> Unit,
     onFocusChanged: (Boolean) -> Unit,
+    onTextFieldClick: () -> Unit,
     modifier: Modifier = Modifier,
     editingGuestBookId: Long? = null,
 ) {
@@ -118,35 +121,52 @@ fun InvitationGuestBookForm(
                 .padding(top = NachoSpacing.xSmall),
         )
 
-        Box {
-            NachoTextField(
-                value = textContent,
-                onValueChange = { newValue ->
-                    if (newValue.length <= MAX_LENGTH) {
-                        onTextContentChange(newValue)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(
+                    if (!isAuthenticated) {
+                        Modifier.clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = onTextFieldClick
+                        )
+                    } else {
+                        Modifier
                     }
-                },
-                placeholder = stringResource(R.string.txt_please_leave_a_message),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester)
-                    .onFocusChanged { focusState ->
-                        onFocusChanged(focusState.isFocused)
+                )
+        ) {
+            Box {
+                NachoTextField(
+                    value = textContent,
+                    onValueChange = { newValue ->
+                        if (newValue.length <= MAX_LENGTH) {
+                            onTextContentChange(newValue)
+                        }
                     },
-                singleLine = false,
-                minLines = 3,
-                maxLines = 3,
-            )
+                    placeholder = stringResource(R.string.txt_please_leave_a_message),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
+                        .onFocusChanged { focusState ->
+                            onFocusChanged(focusState.isFocused)
+                        },
+                    singleLine = false,
+                    minLines = 3,
+                    maxLines = 3,
+                    enabled = isAuthenticated,
+                )
 
-            Text(
-                text = "${textContent.length}/$MAX_LENGTH",
-                style = NachoTheme.typography.bodySmallRegular,
-                color = NachoTheme.colorScheme.textTertiary,
-                modifier =
-                    Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(NachoSpacing.small),
-            )
+                Text(
+                    text = "${textContent.length}/$MAX_LENGTH",
+                    style = NachoTheme.typography.bodySmallRegular,
+                    color = NachoTheme.colorScheme.textTertiary,
+                    modifier =
+                        Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(NachoSpacing.small),
+                )
+            }
         }
 
         Row(
@@ -155,7 +175,7 @@ fun InvitationGuestBookForm(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // 미디어 아이콘 표시
-            val isMediaAddEnabled = selectedMedias.size < MAX_MEDIAS_COUNT
+            val isMediaAddEnabled = isAuthenticated && selectedMedias.size < MAX_MEDIAS_COUNT
             val iconColor =
                 if (isMediaAddEnabled) {
                     NachoTheme.colorScheme.brandPrimary
@@ -241,7 +261,7 @@ fun InvitationGuestBookForm(
             }
             NachoButton(
                 onClick = onUploadClick,
-                enabled = isSubmittable,
+                enabled = isSubmittable && isAuthenticated,
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
@@ -276,6 +296,8 @@ private fun InvitationGuestBookFormPreview() {
             onMicrophoneClick = {},
             onUploadClick = {},
             onFocusChanged = {},
+            onTextFieldClick = {},
+            isAuthenticated = true,
         )
     }
 }

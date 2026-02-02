@@ -68,12 +68,14 @@ fun NavGraphBuilder.invitationNavGraph(
 fun NavGraphBuilder.invitationDetailNavGraph(
     deepLinks: NavDeepLink,
     onNavigateBack: () -> Unit,
+    onNavigateToLogin: () -> Unit,
 ) {
     composable<InvitationDetail>(
         deepLinks = persistentListOf(deepLinks),
     ) {
         InvitationDetailRoute(
             onNavigateBack = onNavigateBack,
+            onNavigateToLogin = onNavigateToLogin,
             modifier = Modifier.padding(),
         )
     }
