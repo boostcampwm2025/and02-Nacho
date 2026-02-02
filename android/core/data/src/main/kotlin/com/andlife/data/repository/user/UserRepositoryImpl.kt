@@ -49,6 +49,11 @@ internal class UserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun initializeAuth(): Result<AuthState, DataError> {
+        if (userStorage.isFirstLaunch()) {
+            userStorage.addInvitationId(UserStorage.SAMPLE_INVITATION_ID)
+            userStorage.setFirstLaunchDone()
+        }
+
         val accessToken = userStorage.getAccessToken()
 
         if (accessToken == null) {

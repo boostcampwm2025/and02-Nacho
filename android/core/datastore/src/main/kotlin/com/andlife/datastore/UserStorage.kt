@@ -29,7 +29,7 @@ class UserStorage @Inject constructor(
 
     fun getInvitationIds(): List<Long> = runBlocking {
         val ids = context.dataStore.data.first()[GUEST_INVITATION_IDS] ?: emptySet()
-        ids.mapNotNull { it.toLongOrNull() }
+        ids.mapNotNull { it.toLongOrNull() }.distinct()
     }
 
     suspend fun addInvitationId(invitationId: Long) {
