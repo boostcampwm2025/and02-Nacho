@@ -110,6 +110,17 @@ fun HomeRoute(
     val lazyListState = rememberLazyListState()
     val refreshFailMessage = stringResource(R.string.snack_refresh_failure)
 
+    val navigateToLoginWithCleanup: () -> Unit = {
+        isMediaActive = false
+        scope.launch {
+            viewModel.videoPlayerPool.pauseAllPlayers()
+            viewModel.onEvent(HomeUiEvent.ClickAudioMedia(""))
+
+            delay(50L)
+            onNavigateToLogin()
+        }
+    }
+
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is HomeSideEffect.ShowMessage -> {
@@ -221,7 +232,7 @@ fun HomeRoute(
             },
             onConfirm = {
                 viewModel.onEvent(HomeUiEvent.DismissLoginDialog)
-                onNavigateToLogin()
+                navigateToLoginWithCleanup()
             }
         )
     }

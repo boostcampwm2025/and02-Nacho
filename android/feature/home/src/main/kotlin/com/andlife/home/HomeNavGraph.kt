@@ -33,7 +33,6 @@ fun NavController.navigateToSetting(navOptions: NavOptions) {
     navigate(Setting, navOptions)
 }
 
-
 fun NavGraphBuilder.homeNavGraph(
     paddingValues: PaddingValues,
     snackbarHostState: SnackbarHostState,
