@@ -40,6 +40,7 @@ import com.andlife.ui.util.media.uriToSelectedMedia
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import com.andlife.ui.util.media.validateUriStringsByFileSize
 
 private const val MAX_LENGTH = 500
 private const val MAX_MEDIAS_COUNT = 5
@@ -51,7 +52,7 @@ fun InvitationGuestBookForm(
     isUploading: Boolean,
     isSubmittable: Boolean,
     isAuthenticated: Boolean,
-    onMediasSelected: (ImmutableList<SelectedMedia>) -> Unit,
+    onMediasSelected: (ImmutableList<SelectedMedia>, List<String>) -> Unit,
     onMediaRemove: (SelectedMedia) -> Unit,
     onTextContentChange: (String) -> Unit,
     onCameraClick: () -> Unit,
@@ -78,34 +79,38 @@ fun InvitationGuestBookForm(
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetMultipleContents(),
         ) { uris ->
+            val availableSlotsCnt = MAX_MEDIAS_COUNT - selectedMedias.size
+            if (availableSlotsCnt <= 0) return@rememberLauncherForActivityResult
+
             val uriStrings = uris.map { it.toString() }
-            val availableSlots = MAX_MEDIAS_COUNT - selectedMedias.size
-
-            if (availableSlots <= 0) return@rememberLauncherForActivityResult
-
-            val mediasToAdd =
-                uriStrings
-                    .take(availableSlots)
-                    .map { uriToSelectedMedia(context, it) }
-
-            onMediasSelected((selectedMedias + mediasToAdd).toImmutableList())
+            val (validUriStrings, rejectedUriStrings) = validateUriStringsByFileSize(
+                context = context,
+                uriStrings = uriStrings,
+                availableSlotsCnt = availableSlotsCnt
+            )
+            val mediasToAdd = selectedMedias + validUriStrings.map { uriString ->
+                uriToSelectedMedia(context, uriString)
+            }
+            onMediasSelected((selectedMedias + mediasToAdd).toImmutableList(), rejectedUriStrings)
         }
 
     val photoPickerLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.PickMultipleVisualMedia(MAX_MEDIAS_COUNT)
         ) { uris ->
+            val availableSlotsCnt = MAX_MEDIAS_COUNT - selectedMedias.size
+            if (availableSlotsCnt <= 0) return@rememberLauncherForActivityResult
+
             val uriStrings = uris.map { it.toString() }
-            val availableSlots = MAX_MEDIAS_COUNT - selectedMedias.size
-
-            if (availableSlots <= 0) return@rememberLauncherForActivityResult
-
-            val mediasToAdd =
-                uriStrings
-                    .take(availableSlots)
-                    .map { uriToSelectedMedia(context, it) }
-
-            onMediasSelected((selectedMedias + mediasToAdd).toImmutableList())
+            val (validUriStrings, rejectedUriStrings) = validateUriStringsByFileSize(
+                context = context,
+                uriStrings = uriStrings,
+                availableSlotsCnt = availableSlotsCnt
+            )
+            val mediasToAdd = selectedMedias + validUriStrings.map { uriString ->
+                uriToSelectedMedia(context, uriString)
+            }
+            onMediasSelected((selectedMedias + mediasToAdd).toImmutableList(), rejectedUriStrings)
         }
 
     Column(
@@ -289,7 +294,7 @@ private fun InvitationGuestBookFormPreview() {
             textContent = "",
             isUploading = false,
             isSubmittable = false,
-            onMediasSelected = {},
+            onMediasSelected = { _, _ -> },
             onMediaRemove = {},
             onTextContentChange = {},
             onCameraClick = {},

@@ -108,7 +108,11 @@ constructor(
 
     override fun onEvent(event: MyInvitationGuestBookUiEvent) {
         when (event) {
-            is MyInvitationGuestBookUiEvent.UpdateSelectedMedias -> updateSelectedMedias(event.medias)
+            is MyInvitationGuestBookUiEvent.UpdateSelectedMedias -> updateSelectedMedias(
+                event.medias,
+                event.rejectedUriStrings
+            )
+
             is MyInvitationGuestBookUiEvent.UpdateTextContent -> updateTextContent(event.textContent)
             is MyInvitationGuestBookUiEvent.RemoveMedia -> removeMedia(event.media)
             is MyInvitationGuestBookUiEvent.UploadMedias -> handleUploadMedias()
@@ -148,8 +152,19 @@ constructor(
         videoPlayerPool.playPlayer(url, itemId)
     }
 
-    private fun updateSelectedMedias(medias: List<SelectedMedia>) {
-        updateState { copy(selectedMedias = medias.toPersistentList()) }
+    private fun updateSelectedMedias(medias: List<SelectedMedia>, rejectedUriStrings: List<String> = emptyList()) {
+        updateState {
+            copy(selectedMedias = medias.toPersistentList())
+        }
+
+        // 거부된 파일이 있으면 스낵바로 알림
+        if (rejectedUriStrings.isNotEmpty()) {
+            sendEffect(
+                MyInvitationGuestBookSideEffect.ShowSnackbar(
+                    "파일 ${rejectedUriStrings.size}개가 200MB를 초과하여 제외되었습니다."
+                )
+            )
+        }
     }
 
     private fun updateTextContent(textContent: String) {
