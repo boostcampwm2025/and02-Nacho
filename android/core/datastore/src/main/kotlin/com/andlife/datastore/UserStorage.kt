@@ -22,6 +22,9 @@ class UserStorage @Inject constructor(
         private val ACCESS_TOKEN = stringPreferencesKey("access_token")
         private val REFRESH_TOKEN = stringPreferencesKey("refresh_token")
         private val WAS_LOGGED_IN = booleanPreferencesKey("was_logged_in")
+        private val IS_FIRST_LAUNCH = booleanPreferencesKey("is_first_launch")
+
+        const val SAMPLE_INVITATION_ID = 1L
     }
 
     fun getInvitationIds(): List<Long> = runBlocking {
@@ -100,5 +103,11 @@ class UserStorage @Inject constructor(
 
     suspend fun setFirstDownloadDone() {
         context.dataStore.edit { it[FIRST_DOWNLOAD_DONE] = true }
+    }
+
+    suspend fun isFirstLaunch(): Boolean = context.dataStore.data.first()[IS_FIRST_LAUNCH] ?: true
+
+    suspend fun setFirstLaunchDone() {
+        context.dataStore.edit { it[IS_FIRST_LAUNCH] = false }
     }
 }
