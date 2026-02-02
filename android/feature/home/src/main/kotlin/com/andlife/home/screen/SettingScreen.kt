@@ -433,10 +433,14 @@ private fun ProfileContent(
                     .fillMaxWidth()
                     .padding(NachoSpacing.large),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.spacedBy(NachoSpacing.small)
             ) {
-                Text(text = stringResource(R.string.txt_not_login_user))
-                Spacer(modifier = Modifier.width(NachoSpacing.large))
+                Text(
+                    text = stringResource(R.string.txt_not_login_user),
+                    style = NachoTheme.typography.bodyLargeMedium,
+                    color = NachoTheme.colorScheme.textSecondary,
+                )
+
                 NachoButton(
                     onClick = onNavigateToLogin,
                     elevation =
@@ -446,7 +450,7 @@ private fun ProfileContent(
                         ),
                     containerColor = NachoTheme.colorScheme.brandOnPrimary,
                     contentColor = NachoTheme.colorScheme.brandPrimary,
-                    contentPadding = PaddingValues(horizontal = NachoSpacing.small, vertical = NachoSpacing.xSmall),
+                    contentPadding = PaddingValues(NachoSpacing.small),
                 ) {
                     Text(
                         text = stringResource(R.string.txt_go_login),
