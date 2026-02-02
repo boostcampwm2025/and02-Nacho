@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,11 +36,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -68,6 +71,7 @@ import com.andlife.myinvitation.screen.guestbook.MyInvitationGuestBookRoute
 import com.andlife.myinvitation.screen.collection.MyInvitationCollectionRoute
 import com.andlife.myinvitation.viewmodel.MyInvitationDetailViewModel
 import com.andlife.ui.component.GenericTabRow
+import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.ui.component.loading.InvitationLoadingError
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.util.collectWithLifecycle
@@ -87,6 +91,7 @@ fun MyInvitationDetailRoute(
     onNavigateToEditCard: (Long) -> Unit,
     onNavigateToCreateCard: (Long) -> Unit,
     onNavigateToCreateThanksCard: (Long) -> Unit,
+    onNavigateToUpdateThanksCard: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MyInvitationDetailViewModel = hiltViewModel(),
 ) {
@@ -96,9 +101,11 @@ fun MyInvitationDetailRoute(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val mapErrorMessage = stringResource(R.string.snack_load_error_map)
     var isThanksCardVisible by remember { mutableStateOf(false) }
+    var isDeleteThanksCardVisible by remember { mutableStateOf(false) }
     val textPrimary = NachoTheme.colorScheme.textPrimary
     val thanksCard = uiState.invitationContentsUiModel.thanksCard
     val linkCopiedMessage = stringResource(R.string.snack_link_copied)
+    val res = LocalResources.current
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
@@ -139,19 +146,51 @@ fun MyInvitationDetailRoute(
             MyInvitationDetailSideEffect.ThanksCardOnBoarding -> {
                 isThanksCardVisible = true
             }
+
+            MyInvitationDetailSideEffect.FailRemoveThanksCard -> {
+                coroutineScope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(res.getString(R.string.fail_remove_thanks_card))
+                }
+            }
+
+            MyInvitationDetailSideEffect.SuccessRemoveThanksCard -> {
+                coroutineScope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(res.getString(R.string.success_remove_thanks_card))
+                }
+            }
+
+            is MyInvitationDetailSideEffect.NavigateToUpdateThanksCard -> {
+                onNavigateToUpdateThanksCard(effect.cardId)
+            }
         }
     }
 
-    MyInvitationDetailScreen(
-        uiState = uiState,
-        snackbarHostState = snackbarHostState,
-        scrollBehavior = scrollBehavior,
-        onEvent = viewModel::onEvent,
-        onSaveEditableCache = viewModel::saveEditableCache,
-        onNavigateBack = onNavigateBack,
-        onNavigateToLogin = onNavigateToLogin,
-        modifier = modifier,
-    )
+    Box {
+        MyInvitationDetailScreen(
+            uiState = uiState,
+            snackbarHostState = snackbarHostState,
+            scrollBehavior = scrollBehavior,
+            onEvent = viewModel::onEvent,
+            onSaveEditableCache = viewModel::saveEditableCache,
+            onNavigateBack = onNavigateBack,
+            onNavigateToLogin = onNavigateToLogin,
+            onDeleteThanksCard = { isDeleteThanksCardVisible = true },
+            onEditThanksCard = {
+                thanksCard?.id?.let { id ->
+                    viewModel.onEvent(MyInvitationDetailUiEvent.ClickUpdateThanksCard(id))
+                }
+            },
+            modifier = modifier,
+        )
+
+        if (uiState.isOverlayLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+    }
 
     if (isThanksCardVisible && thanksCard != null) {
         NachoDialog(
@@ -194,6 +233,20 @@ fun MyInvitationDetailRoute(
             }
         }
     }
+
+    if (isDeleteThanksCardVisible) {
+        NachoInfoDialog(
+            title = stringResource(R.string.txt_delete_thanks_card),
+            message = stringResource(R.string.desc_delete_thanks_card),
+            confirmText = stringResource(R.string.btn_label_delete),
+            dismissText = stringResource(R.string.btn_label_cancel),
+            onDismiss = { isDeleteThanksCardVisible = false },
+            onConfirm = {
+                viewModel.onEvent(MyInvitationDetailUiEvent.ClickDeleteThanksCard)
+                isDeleteThanksCardVisible = false
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -206,6 +259,8 @@ private fun MyInvitationDetailScreen(
     onSaveEditableCache: (Editable) -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onEditThanksCard: () -> Unit,
+    onDeleteThanksCard: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()
@@ -237,6 +292,8 @@ private fun MyInvitationDetailScreen(
                 showActions = !uiState.isLoading && !uiState.isError,
                 onBack = navigateBackWithMapCleanup,
                 onClickThanksCard = { onEvent(MyInvitationDetailUiEvent.ClickThanksCard) },
+                onEditThanksCard = { onEditThanksCard() },
+                onDeleteThanksCard = onDeleteThanksCard,
                 onShare = { onEvent(MyInvitationDetailUiEvent.ClickShare) },
                 onCopyLink = { onEvent(MyInvitationDetailUiEvent.CopyInvitationLink) },
                 onEdit = { onEvent(MyInvitationDetailUiEvent.ClickEdit) },
@@ -299,6 +356,7 @@ private fun MyInvitationDetailScreen(
                                 onNavigateBack = onNavigateBack,
                                 onNavigateToLogin = onNavigateToLogin
                             )
+
                             2 -> MyInvitationCollectionRoute()
                         }
                     },
@@ -315,6 +373,8 @@ private fun MyInvitationDetailTopBar(
     onBack: () -> Unit,
     onClickThanksCard: () -> Unit,
     onShare: () -> Unit,
+    onEditThanksCard: () -> Unit,
+    onDeleteThanksCard: () -> Unit,
     onCopyLink: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
@@ -350,9 +410,9 @@ private fun MyInvitationDetailTopBar(
                 ThanksCardMenu(
                     hasThanksCard = hasThanksCard,
                     onCreate = onCreateThanksCard,
-                    onEdit = {},
+                    onEdit = onEditThanksCard,
                     onConfirm = onClickThanksCard,
-                    onDelete = {},
+                    onDelete = onDeleteThanksCard,
                 )
 
                 ShareMenu(
@@ -618,7 +678,9 @@ private fun MyInvitationDetailScreenPreview() {
             onEvent = {},
             onNavigateBack = {},
             onNavigateToLogin = {},
-            onSaveEditableCache = {}
+            onSaveEditableCache = {},
+            onEditThanksCard = {},
+            onDeleteThanksCard = {}
         )
     }
 }
