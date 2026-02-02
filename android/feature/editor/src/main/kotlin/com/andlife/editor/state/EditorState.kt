@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.drawable.toDrawable
+import com.andlife.domain.util.Result
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.editor.model.EditTextStyle
@@ -110,6 +111,7 @@ class EditorState @Inject constructor(
 
     private val hasSelection: Boolean
         get() = editText?.let { it.selectionStart != it.selectionEnd } ?: false
+
     fun toggleBold() = applyTextStyle(
         type = StyleSpan::class.java,
         spanFactory = { StyleSpan(Typeface.BOLD) },
@@ -688,13 +690,13 @@ class EditorState @Inject constructor(
         }
     }
 
-    private fun saveSnapshot() {
+    private fun saveSnapshot(cursorPosition: Int? = null) {
         val editText = editText ?: return
         val editable = editText.text ?: return
 
         val snapshot = EditSnapshot(
             content = SpannableStringBuilder(editable),  // 복사본 생성
-            cursorPosition = editText.selectionStart
+            cursorPosition = cursorPosition ?: editText.selectionStart
         )
 
         history.saveState(snapshot)
@@ -734,6 +736,33 @@ class EditorState @Inject constructor(
 
         val snapshot = history.redo() ?: return
         restoreSnapshot(snapshot)
+    }
+
+    fun applyImageSpan(
+        bitmap: Bitmap,
+        imageUrl: String,
+        start: Int,
+        end: Int,
+        targetWidth: Int,
+        targetHeight: Int
+    ) {
+        val editText = editText ?: return
+        val editable = editText.text ?: return
+        val drawable = bitmap.toDrawable(editText.resources)
+        drawable.setBounds(0, 0, targetWidth, targetHeight)
+
+        val imageSpan = CenteredImageSpan(drawable, targetWidth, imageUrl)
+
+        if (start <= editable.length && end <= editable.length) {
+            editable.setSpan(
+                imageSpan,
+                start,
+                end,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+        history.clear()
+        saveSnapshot(cursorPosition = editable.length)
     }
 }
 
