@@ -50,7 +50,7 @@ interface InvitationRepository : JpaRepository<Invitation, Long> {
     )
     AND i.invitationDate <= :endDate
     ORDER BY i.invitationDate ASC, i.startTime ASC
-""")
+    """)
     fun findUpcomingByParticipantIdWithinDays(
         @Param("userId") userId: Long,
         @Param("startDate") startDate: LocalDate,
