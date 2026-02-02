@@ -25,7 +25,20 @@ internal class UserRepositoryImpl @Inject constructor(
             .map { authResponse ->
                 authStateManager.setAuthenticated(authResponse.user.toDomain())
                 saveToken(authResponse.accessToken, authResponse.refreshToken)
+                syncGuestInvitations()
             }
+    }
+
+    private suspend fun syncGuestInvitations() {
+        val invitationIds = userStorage.getInvitationIds()
+
+        if (invitationIds.isNotEmpty()) {
+            val syncResult = userRemoteDataSource.syncInvitations(invitationIds)
+
+            if (syncResult is Result.Success) {
+                userStorage.clearGuestData()
+            }
+        }
     }
 
     override suspend fun guestLogin(): Result<Unit, InvitationError> {
