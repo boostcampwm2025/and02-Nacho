@@ -18,15 +18,10 @@ class UserStorage @Inject constructor(
     @param:ApplicationContext private val context: Context
 ) {
     companion object {
-        private val USER_ID = longPreferencesKey("USER_ID")
         private val GUEST_INVITATION_IDS = stringSetPreferencesKey("GUEST_INVITATION_IDS")
         private val ACCESS_TOKEN = stringPreferencesKey("access_token")
         private val REFRESH_TOKEN = stringPreferencesKey("refresh_token")
         private val WAS_LOGGED_IN = booleanPreferencesKey("was_logged_in")
-    }
-
-    fun getUserId(): Long? = runBlocking {
-        context.dataStore.data.first()[USER_ID]
     }
 
     fun getInvitationIds(): List<Long> = runBlocking {
