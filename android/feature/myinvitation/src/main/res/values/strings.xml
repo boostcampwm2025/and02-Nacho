@@ -10,6 +10,8 @@
     <string name="txt_edit">수정하기</string>
     <string name="txt_delete">삭제하기</string>
     <string name="txt_confirm_thanks_card">감사카드 보기</string>
+    <string name="fail_remove_thanks_card">감사카드 삭제에 실패했습니다.</string>
+    <string name="success_remove_thanks_card">감사카드를 삭제했습니다.</string>
 
     <string name="txt_loading_invitation">초대장을 불러오는 중입니다.</string>
 
@@ -46,4 +48,7 @@
     <string name="txt_share_kakao">카카오톡 공유하기</string>
     <string name="txt_copy_invitation_link">초대장 링크 복사하기</string>
     <string name="snack_link_copied">초대장 링크가 복사되었습니다</string>
+
+    <string name="txt_delete_thanks_card">감사카드 삭제</string>
+    <string name="desc_delete_thanks_card">정말 감사카드를 삭제하시겠습니까?</string>
 </resources>

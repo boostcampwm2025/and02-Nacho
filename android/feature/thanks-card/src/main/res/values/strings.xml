@@ -2,4 +2,7 @@
 <resources>
     <string name="txt_create_thanks_card">감사카드 작성</string>
     <string name="txt_fail_create_thanks_card">감사카드 생성에 실패했습니다 다시 시도해 주세요.</string>
+    <string name="txt_update_thanks_card">감사카드 수정.</string>
+    <string name="txt_fail_update_thanks_card">감사카드 수정에 실패했습니다 다시 시도해 주세요.</string>
+
 </resources>
