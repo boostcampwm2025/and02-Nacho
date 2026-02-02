@@ -7,7 +7,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class GuestBookRequest(
-    val userId: Long,
     val textContent: String,
     val medias: List<GuestBookMediaRequest> = emptyList(),
 )

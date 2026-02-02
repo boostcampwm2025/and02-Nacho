@@ -69,6 +69,7 @@ import com.andlife.designsystem.R as designR
 @Composable
 fun MyInvitationDetailRoute(
     onNavigateBack: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     onNavigateToEditInvitation: (Long) -> Unit,
     onNavigateToEditCard: (Long) -> Unit,
     onNavigateToCreateCard: (Long) -> Unit,
@@ -117,6 +118,7 @@ fun MyInvitationDetailRoute(
         onEvent = viewModel::onEvent,
         onSaveEditableCache = viewModel::saveEditableCache,
         onNavigateBack = onNavigateBack,
+        onNavigateToLogin = onNavigateToLogin,
         modifier = modifier,
     )
 }
@@ -130,6 +132,7 @@ private fun MyInvitationDetailScreen(
     onEvent: (MyInvitationDetailUiEvent) -> Unit,
     onSaveEditableCache: (Editable) -> Unit,
     onNavigateBack: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()
@@ -218,7 +221,10 @@ private fun MyInvitationDetailScreen(
                                 )
                             }
 
-                            1 -> MyInvitationGuestBookRoute(onNavigateBack = onNavigateBack)
+                            1 -> MyInvitationGuestBookRoute(
+                                onNavigateBack = onNavigateBack,
+                                onNavigateToLogin = onNavigateToLogin
+                            )
                             2 -> MyInvitationCollectionRoute()
                         }
                     },
@@ -421,6 +427,7 @@ private fun MyInvitationDetailScreenPreview() {
             scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(),
             onEvent = {},
             onNavigateBack = {},
+            onNavigateToLogin = {},
             onSaveEditableCache = {}
         )
     }

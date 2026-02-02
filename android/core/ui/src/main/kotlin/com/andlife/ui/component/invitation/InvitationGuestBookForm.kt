@@ -1,8 +1,12 @@
 package com.andlife.ui.component.invitation
 
+import android.os.Build
+import android.os.ext.SdkExtensions
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,6 +50,7 @@ fun InvitationGuestBookForm(
     textContent: String,
     isUploading: Boolean,
     isSubmittable: Boolean,
+    isAuthenticated: Boolean,
     onMediasSelected: (ImmutableList<SelectedMedia>) -> Unit,
     onMediaRemove: (SelectedMedia) -> Unit,
     onTextContentChange: (String) -> Unit,
@@ -53,9 +58,9 @@ fun InvitationGuestBookForm(
     onMicrophoneClick: () -> Unit,
     onUploadClick: () -> Unit,
     onFocusChanged: (Boolean) -> Unit,
+    onTextFieldClick: () -> Unit,
     modifier: Modifier = Modifier,
     editingGuestBookId: Long? = null,
-    isAudioRecording: Boolean = false,
 ) {
     val context = LocalContext.current
     val focusRequester = remember { FocusRequester() }
@@ -66,9 +71,29 @@ fun InvitationGuestBookForm(
         }
     }
 
+    val usePhotoPickerAPI = Build.VERSION.SDK_INT >= 33 ||
+        (Build.VERSION.SDK_INT >= 30 && SdkExtensions.getExtensionVersion(Build.VERSION_CODES.R) >= 2)
+
     val launcher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetMultipleContents(),
+        ) { uris ->
+            val uriStrings = uris.map { it.toString() }
+            val availableSlots = MAX_MEDIAS_COUNT - selectedMedias.size
+
+            if (availableSlots <= 0) return@rememberLauncherForActivityResult
+
+            val mediasToAdd =
+                uriStrings
+                    .take(availableSlots)
+                    .map { uriToSelectedMedia(context, it) }
+
+            onMediasSelected((selectedMedias + mediasToAdd).toImmutableList())
+        }
+
+    val photoPickerLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.PickMultipleVisualMedia(MAX_MEDIAS_COUNT)
         ) { uris ->
             val uriStrings = uris.map { it.toString() }
             val availableSlots = MAX_MEDIAS_COUNT - selectedMedias.size
@@ -96,35 +121,52 @@ fun InvitationGuestBookForm(
                 .padding(top = NachoSpacing.xSmall),
         )
 
-        Box {
-            NachoTextField(
-                value = textContent,
-                onValueChange = { newValue ->
-                    if (newValue.length <= MAX_LENGTH) {
-                        onTextContentChange(newValue)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(
+                    if (!isAuthenticated) {
+                        Modifier.clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = onTextFieldClick
+                        )
+                    } else {
+                        Modifier
                     }
-                },
-                placeholder = stringResource(R.string.txt_please_leave_a_message),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester)
-                    .onFocusChanged { focusState ->
-                        onFocusChanged(focusState.isFocused)
+                )
+        ) {
+            Box {
+                NachoTextField(
+                    value = textContent,
+                    onValueChange = { newValue ->
+                        if (newValue.length <= MAX_LENGTH) {
+                            onTextContentChange(newValue)
+                        }
                     },
-                singleLine = false,
-                minLines = 3,
-                maxLines = 3,
-            )
+                    placeholder = stringResource(R.string.txt_please_leave_a_message),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
+                        .onFocusChanged { focusState ->
+                            onFocusChanged(focusState.isFocused)
+                        },
+                    singleLine = false,
+                    minLines = 3,
+                    maxLines = 3,
+                    enabled = isAuthenticated,
+                )
 
-            Text(
-                text = "${textContent.length}/$MAX_LENGTH",
-                style = NachoTheme.typography.bodySmallRegular,
-                color = NachoTheme.colorScheme.textTertiary,
-                modifier =
-                    Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(NachoSpacing.small),
-            )
+                Text(
+                    text = "${textContent.length}/$MAX_LENGTH",
+                    style = NachoTheme.typography.bodySmallRegular,
+                    color = NachoTheme.colorScheme.textTertiary,
+                    modifier =
+                        Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(NachoSpacing.small),
+                )
+            }
         }
 
         Row(
@@ -133,7 +175,7 @@ fun InvitationGuestBookForm(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // 미디어 아이콘 표시
-            val isMediaAddEnabled = selectedMedias.size < MAX_MEDIAS_COUNT
+            val isMediaAddEnabled = isAuthenticated && selectedMedias.size < MAX_MEDIAS_COUNT
             val iconColor =
                 if (isMediaAddEnabled) {
                     NachoTheme.colorScheme.brandPrimary
@@ -151,7 +193,14 @@ fun InvitationGuestBookForm(
                             .let {
                                 if (isMediaAddEnabled) {
                                     it.clickable {
-                                        launcher.launch("image/*")
+                                        if (usePhotoPickerAPI) {
+                                            photoPickerLauncher.launch(
+                                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
+                                            )
+                                        } else {
+                                            // Photo Picker API를 사용할 수 없으면 기존 파일 선택기 사용
+                                            launcher.launch("image/*")
+                                        }
                                     }
                                 } else {
                                     it
@@ -195,7 +244,7 @@ fun InvitationGuestBookForm(
                 Icon(
                     painter = painterResource(R.drawable.ic_mic_16),
                     contentDescription = null,
-                    tint = if (isAudioRecording) Color.Green else iconColor,
+                    tint = iconColor,
                     modifier =
                         Modifier
                             .size(NachoIconSize.semiLarge)
@@ -212,7 +261,7 @@ fun InvitationGuestBookForm(
             }
             NachoButton(
                 onClick = onUploadClick,
-                enabled = isSubmittable,
+                enabled = isSubmittable && isAuthenticated,
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
@@ -247,6 +296,8 @@ private fun InvitationGuestBookFormPreview() {
             onMicrophoneClick = {},
             onUploadClick = {},
             onFocusChanged = {},
+            onTextFieldClick = {},
+            isAuthenticated = true,
         )
     }
 }
