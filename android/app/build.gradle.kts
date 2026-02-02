@@ -104,6 +104,7 @@ dependencies {
     implementation(projects.feature.model)
     implementation(projects.feature.login)
     implementation(projects.domain)
+    implementation(projects.feature.thanksCard)
 
     // Hilt
     implementation(libs.hilt.android)

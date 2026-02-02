@@ -10,6 +10,7 @@ import com.andlife.nachoserver.repository.invitation.AnnouncementRepository
 import com.andlife.nachoserver.repository.invitation.InvitationCardRepository
 import com.andlife.nachoserver.repository.invitation.InvitationRepository
 import com.andlife.nachoserver.repository.participant.InvitationParticipantRepository
+import com.andlife.nachoserver.repository.thankscard.ThanksCardRepository
 import com.andlife.nachoserver.repository.user.UserRepository
 import com.andlife.nachoserver.request.invitation.AnnouncementRequest
 import com.andlife.nachoserver.request.invitation.CreateInvitationRequest
@@ -42,7 +43,9 @@ class InvitationService(
     private val announcementRepository: AnnouncementRepository,
     private val participantRepository: InvitationParticipantRepository,
     private val userRepository: UserRepository,
-    private val guestBookService: GuestBookService
+    private val guestBookRepository: GuestBookRepository,
+    private val guestBookService: GuestBookService,
+    private val thanksCardRepository: ThanksCardRepository
 ) {
     @Transactional
     fun joinInvitation(
@@ -265,10 +268,12 @@ class InvitationService(
             ?: throw NoSuchElementException("Invitation not found: $invitationId")
 
         val invitationCard = invitationCardRepository.findByInvitationIdWithDetails(invitationId)
+        val thanksCard = thanksCardRepository.findByInvitationIdWithDetails(invitationId)
         val announcements = announcementRepository.findAllByInvitationIdOrderByDisplayOrder(invitationId)
 
         return invitation.toInvitationResponse(
             card = invitationCard,
+            thanksCard = thanksCard,
             announcements = announcements
         )
     }
@@ -351,10 +356,12 @@ class InvitationService(
 
         val savedInvitation = invitationRepository.save(invitation)
         val existingCard = invitationCardRepository.findByInvitationIdWithDetails(invitationId)
+        val thanksCard = thanksCardRepository.findByInvitationIdWithDetails(invitationId)
         val savedAnnouncements = replaceAnnouncements(savedInvitation, request.announcements)
 
         return invitation.toInvitationResponse(
             card = existingCard,
+            thanksCard = thanksCard,
             announcements = savedAnnouncements
         )
     }
@@ -439,4 +446,5 @@ class InvitationService(
             content = contents
         )
     }
+
 }

@@ -37,9 +37,11 @@ import com.andlife.invitation_edit.invitationPreviewNavGraph
 import com.andlife.login.Login
 import com.andlife.login.loginNavGraph
 import com.andlife.model.util.NavigationKeyConstant.CREATE_CARD_BY_INVITATION_ID
+import com.andlife.model.util.NavigationKeyConstant.CREATE_THANKS_CARD
 import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
 import com.andlife.myinvitation.myInvitationDetailNavGraph
 import com.andlife.myinvitation.myInvitationNavGraph
+import com.andlife.thanks_card.createThanksCardNavGraph
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
@@ -143,7 +145,8 @@ fun NachoNavHost(
                 },
                 onNavigateToEditInvitation = navigator::navigateToMyInvitationEdit,
                 onNavigateToEditCard = navigator::navigateToUpdateCard,
-                onNavigateToCreateCard = navigator::navigateToCreateCardByInvitation
+                onNavigateToCreateCard = navigator::navigateToCreateCardByInvitation,
+                onNavigateToCreateThanksCard = navigator::navigateToCreateThanksCard
             )
 
             invitationCreateNavGraph(
@@ -192,6 +195,14 @@ fun NachoNavHost(
             )
 
             loginNavGraph()
+
+            createThanksCardNavGraph(
+                onSuccessfulCreate = {
+                    navigator.navController.previousBackStackEntry?.savedStateHandle[CREATE_THANKS_CARD] = true
+                    navigator.navigatePopBackStack()
+                },
+                onBackClick = navigator::navigatePopBackStack,
+            )
         }
     }
 }

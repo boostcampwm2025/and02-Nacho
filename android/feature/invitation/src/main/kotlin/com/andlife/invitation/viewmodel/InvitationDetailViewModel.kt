@@ -74,7 +74,6 @@ class InvitationDetailViewModel @Inject constructor(
                     copy(
                         isLoading = false,
                         isError = false,
-                        hasThanksCard = false, // TODO: 감사카드 존재 여부는 별도 API로 확인 필요
                         invitationContentsUiModel = invitation.toContentsUiModel(),
                     )
                 }
@@ -100,7 +99,9 @@ class InvitationDetailViewModel @Inject constructor(
 
     private fun deleteInvitation() { /* TODO: 초대장 삭제 로직 */ }
 
-    private fun showThanksCardOnboarding() { /* TODO: 감사카드 온보딩 */ }
+    private fun showThanksCardOnboarding() {
+        sendEffect(InvitationDetailSideEffect.ThanksCardOnBoarding)
+    }
 
     private fun navigateToFullScreenImage(imageList: ImmutableList<String>, index: Int) { /* TODO: 이미지 풀스크린*/ }
 
@@ -110,6 +111,10 @@ class InvitationDetailViewModel @Inject constructor(
 
     fun saveEditable(editable: Editable) {
         updateState { copy(editableCache = editable) }
+    }
+
+    fun saveThanksCardEditableCache(editable: Editable) {
+        updateState { copy(thanksCardEditableCache = editable) }
     }
 
     private fun retryLoad() {

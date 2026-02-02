@@ -1,13 +1,18 @@
 package com.andlife.invitation.screen.detail
 
 import android.text.Editable
+import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,15 +34,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.andlife.designsystem.component.dialog.NachoDialog
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.editor.screen.NachoTextView
 import com.andlife.invitation.R
 import com.andlife.invitation.model.detail.InvitationDetailSideEffect
 import com.andlife.invitation.model.detail.InvitationDetailUiEvent
@@ -66,8 +75,10 @@ fun InvitationDetailRoute(
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-
+    var isThanksCardVisible by remember { mutableStateOf(false) }
     val mapErrorMessage = stringResource(R.string.snack_load_error_map)
+    val thanksCard = uiState.invitationContentsUiModel.thanksCard
+    val textPrimary = NachoTheme.colorScheme.textPrimary
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
@@ -82,6 +93,10 @@ fun InvitationDetailRoute(
                     )
                 }
             }
+
+            InvitationDetailSideEffect.ThanksCardOnBoarding -> {
+                isThanksCardVisible = true
+            }
         }
     }
 
@@ -95,6 +110,48 @@ fun InvitationDetailRoute(
         onEditableSave = viewModel::saveEditable,
         modifier = modifier,
     )
+
+    if (isThanksCardVisible && thanksCard != null) {
+        NachoDialog(
+            onDismiss = { isThanksCardVisible = false },
+            shape = NachoTheme.shapes.small,
+            modifier = Modifier.fillMaxHeight(0.7f),
+            containerColor = Color(thanksCard.backgroundColor)
+        ) {
+            Box(modifier = Modifier.background(Color(thanksCard.backgroundColor))) {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState())
+                ) {
+
+                    AndroidView(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(NachoSpacing.medium),
+                        factory = { context ->
+                            NachoTextView(context).apply {
+                                layoutParams = ViewGroup.LayoutParams(
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.WRAP_CONTENT
+                                )
+                                setTextColor(textPrimary.toArgb())
+                                onEditableReady = { editable ->
+                                    viewModel.saveThanksCardEditableCache(editable)
+                                }
+                            }
+                        },
+                        update = { view ->
+                            val editableCache = uiState.thanksCardEditableCache
+                            if (editableCache != null) {
+                                view.bindWithCachedEditable(editableCache)
+                            } else {
+                                view.bind(uiState.invitationContentsUiModel.thanksCard)
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -112,7 +169,6 @@ private fun InvitationDetailScreen(
     val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()
     val coroutineScope = rememberCoroutineScope()
     var isMapVisible by remember { mutableStateOf(true) }
-
     val navigateBackWithMapCleanup: () -> Unit = {
         isMapVisible = false
         coroutineScope.launch {

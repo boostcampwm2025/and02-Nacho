@@ -1,5 +1,6 @@
 package com.andlife.invitation_edit.viewmodel
 
+import android.util.Log
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.viewModelScope
 import com.andlife.domain.util.Result
@@ -228,6 +229,7 @@ class InvitationCreateViewModel @Inject constructor(
                     sendEffect(InvitationFormSideEffect.SuccessSave(id))
                 }
                 .onFailure { error, msg ->
+                    Log.e("InvitationCreateViewModel", "에러 발생: $msg")
                     updateState { copy(isLoading = false) }
                     sendEffect(InvitationFormSideEffect.FailSave)
                 }

@@ -13,6 +13,7 @@ data class InvitationContentsUiModel(
     val location: LocationInfo = LocationInfo(),
     val announcement: ImmutableList<AnnouncementUiModel>? = null,
     val invitationCard: InvitationCardUiModel? = null,
+    val thanksCard: NachoUiCard? = null,
 )
 
 data class HostInfo(
