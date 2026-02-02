@@ -142,7 +142,7 @@ private fun LoginScreen(
                     .padding(top = NachoSpacing.large)
             )
 
-            Spacer(modifier = Modifier.weight(0.6f))
+            Spacer(modifier = Modifier.weight(0.7f))
 
             Column(
                 verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
@@ -158,7 +158,7 @@ private fun LoginScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.weight(0.8f))
+            Spacer(modifier = Modifier.weight(0.5f))
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -226,7 +226,7 @@ private fun KakaoLoginButton(
         onClick = onLoginClick,
         containerColor = KakaoButtonColor,
         contentColor = NachoTheme.colorScheme.textSecondary,
-        contentPadding = PaddingValues(NachoSpacing.xLarge)
+        contentPadding = PaddingValues(NachoSpacing.large)
     ) {
         Row(
             modifier = Modifier
@@ -268,7 +268,7 @@ private fun GuestLoginButton(
         onClick = onGuestLoginClick,
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
         contentColor = NachoTheme.colorScheme.textSecondary,
-        contentPadding = PaddingValues(NachoSpacing.xLarge)
+        contentPadding = PaddingValues(NachoSpacing.large)
     ) {
         Row(
             modifier = Modifier
