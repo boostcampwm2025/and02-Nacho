@@ -8,4 +8,5 @@ sealed interface MyInvitationSideEffect : BaseSideEffect {
     data object RefreshFailure : MyInvitationSideEffect
     data object DeleteSuccess : MyInvitationSideEffect
     data object DeleteFailure : MyInvitationSideEffect
+    data object NavigateToLogin : MyInvitationSideEffect
 }

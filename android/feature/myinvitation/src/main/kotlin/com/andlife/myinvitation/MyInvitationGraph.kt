@@ -45,12 +45,14 @@ fun NavGraphBuilder.myInvitationNavGraph(
     paddingValues: PaddingValues,
     onNavigateToCreate: () -> Unit,
     onNavigateToDetail: (Long) -> Unit,
+    onNavigateToLogin: () -> Unit,
 ) {
     composable<MyInvitation> {
         MyInvitationRoute(
             snackbarHostState = snackbarHostState,
             onNavigateToCreate = onNavigateToCreate,
             onNavigateToDetail = onNavigateToDetail,
+            onNavigateToLogin = onNavigateToLogin,
             modifier = Modifier.padding(paddingValues),
         )
     }
