@@ -4,7 +4,6 @@ import com.andlife.nachoserver.auth.AuthContext
 import com.andlife.nachoserver.entity.AnnouncementSection
 import com.andlife.nachoserver.entity.Invitation
 import com.andlife.nachoserver.entity.InvitationCard
-import com.andlife.nachoserver.entity.User
 import com.andlife.nachoserver.entity.InvitationParticipant
 import com.andlife.nachoserver.repository.guestbook.GuestBookRepository
 import com.andlife.nachoserver.repository.invitation.AnnouncementRepository
@@ -43,7 +42,6 @@ class InvitationService(
     private val announcementRepository: AnnouncementRepository,
     private val participantRepository: InvitationParticipantRepository,
     private val userRepository: UserRepository,
-    private val guestBookRepository: GuestBookRepository,
     private val guestBookService: GuestBookService
 ) {
     @Transactional
@@ -59,21 +57,27 @@ class InvitationService(
             println(">>> [초대장 조회 성공] ID: $invitationId")
 
             if (userId != null) {
-                println(">>> [멤버 로직 시작]")
+                val isHost = invitation.host.id == userId
+                if (isHost) {
+                    return JoinResponse(
+                        invitationId = invitationId,
+                        isMember = true,
+                        alreadyJoined = true
+                    )
+                }
+
                 val isAlreadyJoined = participantRepository.existsByInvitationIdAndUserId(invitationId, userId)
                 if (!isAlreadyJoined) {
                     val userProxy = userRepository.getReferenceById(userId)
                     participantRepository.save(InvitationParticipant(invitation = invitation, user = userProxy))
                 }
-                val response = JoinResponse(invitationId = invitationId, isMember = true, alreadyJoined = isAlreadyJoined)
-                println(">>> [Join 성공 직전] $response")
-                return response
+
+                return JoinResponse(invitationId = invitationId, isMember = true, alreadyJoined = isAlreadyJoined)
+
             }
 
-            println(">>> [게스트 로직 시작]")
             val alreadyHasAccess = guestInvitationIds.contains(invitationId)
             val response = JoinResponse(invitationId = invitationId, isMember = false, alreadyJoined = alreadyHasAccess)
-            println(">>> [Join 게스트 성공 직전] $response")
             response
         } catch (e: Exception) {
             println(">>> [서비스 에러] ${e.javaClass.simpleName}: ${e.message}")
@@ -379,17 +383,21 @@ class InvitationService(
         pageable: Pageable
     ): PagingResponse<UpcomingInvitationResponse> {
         val today = LocalDate.now()
+        val nowTime = LocalTime.now()
         val limitDate = today.plusDays(days)
+        println(">>> 날짜 및 시간 : ${today.toString() + nowTime.toString()}")
 
         val upcomingInvitationsPage: Page<Invitation> = when (authContext) {
             is AuthContext.Member -> {
                 invitationRepository.findUpcomingByParticipantIdWithinDays(
                     userId = authContext.userId,
                     startDate = today,
+                    nowTime = nowTime,
                     endDate = limitDate,
                     pageable = pageable
                 )
             }
+
             is AuthContext.Guest -> {
                 if (authContext.invitationIds.isEmpty()) {
                     Page.empty(pageable)
@@ -397,6 +405,7 @@ class InvitationService(
                     invitationRepository.findAllByIdInAndDateRange(
                         ids = authContext.invitationIds,
                         startDate = today,
+                        nowTime = nowTime,
                         endDate = limitDate,
                         pageable = pageable
                     )

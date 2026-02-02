@@ -13,6 +13,8 @@ import com.andlife.invitation.model.detail.InvitationDetailSideEffect
 import com.andlife.invitation.model.detail.InvitationDetailUiEvent
 import com.andlife.invitation.model.detail.InvitationDetailUiState
 import com.andlife.model.invitation.toContentsUiModel
+import com.andlife.domain.util.RefreshEventHub
+import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
@@ -31,14 +33,13 @@ class InvitationDetailViewModel @Inject constructor(
     initialState = InvitationDetailUiState(),
 ) {
     private val route = savedStateHandle.toRoute<InvitationDetail>()
-    private val invitationId: Long = route.id
-
     private val isFromDeepLink: Boolean = route.isFromDeepLink
-    private val savedState = savedStateHandle
+    private val invitationId: Long = route.id
 
     override val uiState: StateFlow<InvitationDetailUiState> =
         mutableUiState
             .onStart {
+                Log.d("DeepLink Debug", "[${this@InvitationDetailViewModel.hashCode()}] 딥링크 진입 : $isFromDeepLink")
                 if (isFromDeepLink) {
                     joinAndLoadInvitation()
                 } else {
@@ -52,21 +53,19 @@ class InvitationDetailViewModel @Inject constructor(
             )
 
     private suspend fun joinAndLoadInvitation() {
-        Log.d("InvitationDetailViewModel", "참여 요청")
         updateState { copy(isLoading = true, isError = false) }
 
         invitationRepository.joinInvitation(invitationId)
             .onSuccess {
+                RefreshEventHub.emit(RefreshTarget.ALL)
                 loadInvitation()
             }
             .onFailure { error, _ ->
                 updateState { copy(isLoading = false, isError = true) }
-                Log.e("InvitationDetailViewModel", "참여 실패: $error")
             }
     }
 
     private suspend fun loadInvitation() {
-        Log.d("InvitationDetailViewModel", "일반 데이터 조회")
         updateState { copy(isLoading = true, isError = false, editableCache = null) }
 
         invitationRepository.getInvitation(invitationId)
@@ -81,7 +80,6 @@ class InvitationDetailViewModel @Inject constructor(
                 }
             }.onFailure { it, msg ->
                 updateState { copy(isLoading = false, isError = true) }
-                Log.e("InvitationDetailViewModel", "에러 발생: $it")
             }
     }
 
@@ -97,9 +95,6 @@ class InvitationDetailViewModel @Inject constructor(
     }
 
     private fun clickClose() {
-        if (isFromDeepLink) {
-            savedState[KEY_SHOULD_REFRESH] = true
-        }
         sendEffect(InvitationDetailSideEffect.NavigateBack)
     }
 
@@ -121,10 +116,6 @@ class InvitationDetailViewModel @Inject constructor(
         viewModelScope.launch {
             loadInvitation()
         }
-    }
-
-    companion object {
-        const val KEY_SHOULD_REFRESH = "should_refresh"
     }
 
 }

@@ -91,7 +91,7 @@ fun InvitationRoute(
                     snackbarHostState.showSnackbar(leaveFailureMessage)
                 }
             }
-            is InvitationSideEffect.RefreshFromDeepLink -> {
+            is InvitationSideEffect.NeedRefresh -> {
                 upcomingItems.refresh()
                 pastItems.refresh()
             }

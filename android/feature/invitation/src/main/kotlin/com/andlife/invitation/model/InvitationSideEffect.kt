@@ -7,5 +7,5 @@ sealed interface InvitationSideEffect : BaseSideEffect {
     data object RefreshFailure : InvitationSideEffect
     data object LeaveSuccess : InvitationSideEffect
     data object LeaveFailure : InvitationSideEffect
-    data object RefreshFromDeepLink : InvitationSideEffect
+    data object NeedRefresh : InvitationSideEffect
 }

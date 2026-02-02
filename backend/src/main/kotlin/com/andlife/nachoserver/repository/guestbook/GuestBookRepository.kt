@@ -41,4 +41,6 @@ interface GuestBookRepository : JpaRepository<GuestBook, Long> {
         @Param("userId") userId: Long,
         pageable: Pageable
     ): Page<GuestBook>
+
+    fun findAllByInvitationIdIn(invitationIds: List<Long>, pageable: Pageable): Page<GuestBook>
 }

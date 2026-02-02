@@ -147,6 +147,11 @@ fun HomeRoute(
                     snackbarHostState.showSnackbar(refreshFailMessage)
                 }
             }
+
+            is HomeSideEffect.NeedRefresh -> {
+                upcomingInvitations.refresh()
+                guestBooks.refresh()
+            }
         }
     }
 

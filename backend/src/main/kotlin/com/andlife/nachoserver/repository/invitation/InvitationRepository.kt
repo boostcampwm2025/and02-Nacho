@@ -40,30 +40,40 @@ interface InvitationRepository : JpaRepository<Invitation, Long> {
     fun findPastByHostId(hostId: Long, nowDate: LocalDate, nowTime: LocalTime, pageable: Pageable): Page<Invitation>
 
     @Query("""
-        SELECT DISTINCT i FROM Invitation i
-        JOIN FETCH i.host
-        LEFT JOIN InvitationParticipant ip ON i.id = ip.invitation.id
-        WHERE (i.host.id = :userId OR ip.user.id = :userId)
-        AND i.invitationDate BETWEEN :startDate AND :endDate
-        ORDER BY i.invitationDate ASC, i.startTime ASC
+    SELECT DISTINCT i FROM Invitation i
+    JOIN FETCH i.host
+    LEFT JOIN InvitationParticipant ip ON i.id = ip.invitation.id
+    WHERE (i.host.id = :userId OR ip.user.id = :userId)
+    AND (
+        i.invitationDate > :startDate
+        OR (i.invitationDate = :startDate AND i.startTime >= :nowTime)
+    )
+    AND i.invitationDate <= :endDate
+    ORDER BY i.invitationDate ASC, i.startTime ASC
     """)
     fun findUpcomingByParticipantIdWithinDays(
         @Param("userId") userId: Long,
         @Param("startDate") startDate: LocalDate,
+        @Param("nowTime") nowTime: LocalTime,
         @Param("endDate") endDate: LocalDate,
         pageable: Pageable
     ): Page<Invitation>
 
     @Query("""
-        SELECT i FROM Invitation i
-        JOIN FETCH i.host
-        WHERE i.id IN :ids
-        AND i.invitationDate BETWEEN :startDate AND :endDate
-        ORDER BY i.invitationDate ASC, i.startTime ASC
+    SELECT i FROM Invitation i
+    JOIN FETCH i.host
+    WHERE i.id IN :ids
+    AND (
+        i.invitationDate > :startDate 
+        OR (i.invitationDate = :startDate AND i.startTime >= :nowTime)
+    )
+    AND i.invitationDate <= :endDate
+    ORDER BY i.invitationDate ASC, i.startTime ASC
     """)
     fun findAllByIdInAndDateRange(
         @Param("ids") ids: List<Long>,
         @Param("startDate") startDate: LocalDate,
+        @Param("nowTime") nowTime: LocalTime,
         @Param("endDate") endDate: LocalDate,
         pageable: Pageable
     ): Page<Invitation>

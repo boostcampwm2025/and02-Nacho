@@ -137,4 +137,8 @@ class HomeViewModel @Inject constructor(
     private fun updatePlayState(isPlaying: Boolean) {
         updateState { copy(isMediaPlaying = isPlaying) }
     }
+
+    fun handleRefresh() {
+        sendEffect(HomeSideEffect.NeedRefresh)
+    }
 }
