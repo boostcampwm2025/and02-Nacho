@@ -57,7 +57,8 @@ class InvitationDetailViewModel @Inject constructor(
 
         invitationRepository.joinInvitation(invitationId)
             .onSuccess {
-                RefreshEventHub.emit(RefreshTarget.ALL)
+                RefreshEventHub.emit(RefreshTarget.HOME)
+                RefreshEventHub.emit(RefreshTarget.INVITATION)
                 loadInvitation()
             }
             .onFailure { error, _ ->

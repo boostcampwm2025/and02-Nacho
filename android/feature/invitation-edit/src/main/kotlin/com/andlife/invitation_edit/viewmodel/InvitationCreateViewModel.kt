@@ -26,6 +26,7 @@ import com.andlife.model.editor.CardImage
 import com.andlife.model.editor.NachoUiCard
 import com.andlife.model.editor.toDomain
 import com.andlife.domain.util.RefreshEventHub
+import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toPersistentList
@@ -225,7 +226,8 @@ class InvitationCreateViewModel @Inject constructor(
                 .onSuccess { id ->
                     updateState { copy(isLoading = false) }
                     createCardSession.clear()
-                    RefreshEventHub.emit(RefreshEventHub.RefreshTarget.ALL)
+                    RefreshEventHub.emit(RefreshTarget.MY_INVITATION)
+                    RefreshEventHub.emit(RefreshTarget.HOME)
                     sendEffect(InvitationFormSideEffect.SuccessSave(id))
                 }
                 .onFailure { error, msg ->
