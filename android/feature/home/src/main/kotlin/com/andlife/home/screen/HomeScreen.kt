@@ -606,7 +606,6 @@ private fun LazyListScope.homeGuestBookSection(
                     },
                     onVisualMediaClick = { onVisualMediaClick(it.url) },
                     onAudioMediaClick = { onAudioMediaClick(it.url) },
-                    onMenuClick = { },
                     onPlayVideoClick = { url -> onPlayVideoClick(url, guestBook.id) },
                 )
             }

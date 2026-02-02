@@ -14,10 +14,9 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.andlife.designsystem.component.dialog.NachoDialog
 import com.andlife.editor.screen.EditorScreen
 import com.andlife.invitation_card.R
-import com.andlife.invitation_card.component.BackDialogContent
+import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.invitation_card.model.creaetbyinvitation.CreateByInvitationSideEffect
 import com.andlife.invitation_card.model.creaetbyinvitation.CreateByInvitationUiEvent
 import com.andlife.invitation_card.model.creaetbyinvitation.CreateByInvitationUiState
@@ -66,15 +65,17 @@ fun CreateCardByInvitationRoute(
     )
 
     if (showBackDialog) {
-        NachoDialog(onDismiss = { showBackDialog = false }) {
-            BackDialogContent(
-                onConfirm = {
-                    viewModel.onEvent(CreateByInvitationUiEvent.ClickBack)
-                    showBackDialog = false
-                },
-                onDismiss = { showBackDialog = false }
-            )
-        }
+        NachoInfoDialog(
+            title = stringResource(R.string.txt_exit_dialog_title),
+            message = stringResource(R.string.txt_exit_dialog_message),
+            confirmText = stringResource(R.string.btn_exit),
+            dismissText = stringResource(R.string.btn_continue),
+            onConfirm = {
+                viewModel.onEvent(CreateByInvitationUiEvent.ClickBack)
+                showBackDialog = false
+            },
+            onDismiss = { showBackDialog = false },
+        )
     }
 }
 

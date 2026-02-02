@@ -11,7 +11,12 @@
 
 ## Project Overview
 AndLife는 흩어지기 쉬운 모임의 기록을 '초대장'이라는 이벤트 단위로 통합 관리합니다.    
-단순한 정보 전달을 넘어 음성, 영상 등 풍부한 미디어를 활용한 방명록과 커스텀 에디터를 통한 초대장 제작 환경을 제공합니다.
+단순한 정보 전달을 넘어 음성, 영상 등 풍부한 미디어를 활용한 방명록과 커스텀 에디터를 통한 초대장 제작 환경을 제공합니다.    
+
+생일, 결혼, 졸업, 모임 등 다양한 이벤트에서 초대장을 작성하고 참여자들이 방명록으로 추억을 기록하며     
+호스트가 감사 카드로 감사의 마음을 전달합니다.    
+
+모든 과정이 하나의 앱에서 자연스럽게 연결되어, 이벤트가 끝난 후에도 소중한 기록으로 남습니다.    
 
 <br>
 
@@ -28,12 +33,89 @@ AndLife는 흩어지기 쉬운 모임의 기록을 '초대장'이라는 이벤�
 
 <br>
 
+
 ## Core Features
-- **초대 (Invitation)**: 이벤트 상세 정보를 정의하고, 커스텀 에디터를 통해 세상에 하나뿐인 나만의 초대 카드를 제작합니다.
-- **공유 (Sharing)**: 생성된 초대 카드를 딥링크(DeepLink) 기술로 배포하여 앱 설치 여부와 상관없이 모든 사용자를 이벤트로 연결합니다.
-- **참여 (Participation)**: 모든 모임의 소식을 담은 실시간 통합 피드와, 개별 초대장의 모아보기(Grid) 및 스토리 뷰로 참여 중인 모임의 추억을 감상합니다.
-- **기록 (Archiving)**: 사진, 영상, 음성이 결합된 멀티미디어 방명록을 남기며 이벤트의 생생한 순간을 아카이빙합니다.
-- **감사 (Thanks)**: 이벤트 종료 후 에디터로 제작한 감사 카드를 참여자들에게 전달함으로써 초대부터 기록까지 이어지는 모든 여정을 완성합니다.
+<table>
+  <tr>
+    <th align="left" width="35%">기능</th>
+    <th align="left">미리보기</th>
+  </tr>
+
+  <!-- 초대 -->
+  <tr>
+    <td valign="top">
+      <b>초대 (Invitation)</b>
+      <ul>
+        <li>이벤트 상세 정보를 정의하고, 커스텀 에디터로 나만의 초대 카드 제작</li>
+        <li>생성 전 미리보기 제공</li>
+      </ul>
+    </td>
+    <td>
+      <p align="center">
+        <img src="https://github.com/user-attachments/assets/7ebafbdb-7d12-4062-a392-f00be26a4316" width="31%" hspace="6" />
+        <img src="https://github.com/user-attachments/assets/cfd02fc7-8926-40e0-8a64-857d3ed7c524" width="31%" hspace="6" />
+        <img src="https://github.com/user-attachments/assets/42f4a0f7-8c9d-47d5-917b-956884a5c2b0" width="31%" />
+      </p>
+    </td>
+  </tr>
+
+  <!-- 공유 -->
+  <tr>
+    <td valign="top">
+      <b>공유 (Sharing)</b>
+      <ul>
+        <li>딥링크로 앱 설치 여부와 무관하게 이벤트 연결</li>
+        <li>카카오톡 공유 및 링크 복사 지원</li>
+      </ul>
+    </td>
+    <td>
+      <p align="center">
+        <img src="https://github.com/user-attachments/assets/f85584a0-b6b5-411b-a690-89a923290922" width="31%" hspace="6" />
+        <img src="https://github.com/user-attachments/assets/2727c218-087e-4540-8603-12181dd8e96a" width="31%" hspace="6" />
+        <img src="https://github.com/user-attachments/assets/ee5ce917-033b-42fb-b07b-dcc48ab46cef" width="31%" />
+      </p>
+    </td>
+  </tr>
+
+  <!-- 참여 -->
+  <tr>
+    <td valign="top">
+      <b>참여 (Participation)</b>
+      <ul>
+        <li>실시간 통합 피드 및 초대장 리스트 정렬</li>
+        <li>다가오는 초대와 최근 방명록 한눈에 확인</li>
+        <li>비로그인 사용자도 로컬 데이터로 참여 가능</li>
+      </ul>
+    </td>
+    <td>
+      <p align="center">
+        <img src="https://github.com/user-attachments/assets/1f05b7cd-ed32-4133-94e6-8d852d06d3ac" width="31%" hspace="6" />
+        <img src="https://github.com/user-attachments/assets/8baecbbb-98cf-4e41-88f6-025909b785c4" width="31%" hspace="6" />
+        <img src="https://github.com/user-attachments/assets/b8a81c21-8a8b-4136-8a8d-c62a5365c7fe" width="31%" />
+      </p>
+    </td>
+  </tr>
+
+  <!-- 기록 -->
+  <tr>
+    <td valign="top">
+      <b>기록 (Archiving)</b>
+      <ul>
+        <li>사진·영상·음성 멀티미디어 방명록 아카이빙</li>
+        <li>촬영한 사진과 녹음 음성 메시지 바로 등록</li>
+        <li>Grid / 스토리 뷰로 추억 모아보기</li>
+      </ul>
+    </td>
+    <td>
+      <p align="center">
+        <img src="https://github.com/user-attachments/assets/6ddda54a-feb3-4c55-a735-5ef6e7200e35" width="31%" hspace="6" />
+        <img src="https://github.com/user-attachments/assets/26d9a70f-7b3b-4ac7-841b-63f852950846" width="31%" hspace="6" />
+        <img src="https://github.com/user-attachments/assets/ca4b0523-03fc-448d-91f6-e2f406d9f811" width="31%" />
+      </p>
+    </td>
+  </tr>
+</table>
+
 
 <br>
 

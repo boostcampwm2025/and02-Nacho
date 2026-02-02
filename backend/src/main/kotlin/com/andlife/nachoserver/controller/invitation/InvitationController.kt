@@ -155,10 +155,11 @@ class InvitationController(
     @PostMapping("/{invitationId}/guestbooks")
     fun createGuestBook(
         @PathVariable invitationId: Long,
+        authContext: AuthContext,
         @RequestBody request: GuestBookRequest
     ): BaseResponse<*> {
         return try {
-            val guestBookResponse = guestBookService.createGuestBook(invitationId, request)
+            val guestBookResponse = guestBookService.createGuestBook(invitationId, request, authContext)
             BaseResponse.success(guestBookResponse)
         } catch (e: IllegalArgumentException) {
             BaseResponse.error(

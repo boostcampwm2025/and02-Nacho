@@ -15,7 +15,6 @@ interface GuestBookRepository {
 
     suspend fun createGuestBook(
         invitationId: Long,
-        userId: Long,
         textContent: String,
         medias: List<GuestBookMedia>,
     ): Result<GuestBook, DataError>

@@ -28,4 +28,6 @@ sealed interface MyInvitationDetailUiEvent : BaseUiEvent {
     data object MapError : MyInvitationDetailUiEvent
 
     data object RetryLoad : MyInvitationDetailUiEvent
+
+    data object CopyInvitationLink : MyInvitationDetailUiEvent
 }

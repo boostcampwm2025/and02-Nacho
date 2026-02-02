@@ -147,5 +147,24 @@
     <string name="btn_open_map_app">지도 앱으로 열기</string>
     <!--  EmptyItemSection  -->
     <string name="desc_info">정보</string>
+    <string name="txt_label_login">로그인</string>
+    <string name="msg_guide_login">로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?</string>
+    <string name="txt_move">이동</string>
+    <string name="txt_label_cancel">취소</string>
+
+    <!-- AudioRecording -->
+    <string name="label_audio_recording">음성 녹음</string>
+    <string name="txt_recording_guide">마이크 버튼을 눌러 녹음을 시작하세요</string>
+    <string name="txt_recording_in_progress">녹음 중...</string>
+    <string name="txt_recording_paused">녹음이 일시정지되었습니다</string>
+    <string name="desc_start_recording">녹음 시작</string>
+    <string name="desc_stop_recording">녹음 중지</string>
+    <string name="desc_pause_recording">녹음 일시정지</string>
+    <string name="desc_resume_recording">녹음 재개</string>
+
+    <!--  다이얼로그  -->
+    <string name="btn_label_cancel">취소</string>
+    <string name="btn_label_to_setting">설정으로 이동</string>
+    <string name="dialog_do_not_show_again">다시 보지 않기</string>
 
 </resources>

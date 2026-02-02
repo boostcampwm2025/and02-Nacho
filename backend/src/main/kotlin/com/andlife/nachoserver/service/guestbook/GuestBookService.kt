@@ -171,9 +171,16 @@ class GuestBookService(
     }
 
     @Transactional
-    fun createGuestBook(invitationId: Long, request: GuestBookRequest): GuestBookResponse {
-        val user = userRepository.findById(request.userId)
-            .orElseThrow { IllegalArgumentException("User not found with id: ${request.userId}") }
+    fun createGuestBook(invitationId: Long, request: GuestBookRequest, authContext: AuthContext): GuestBookResponse {
+        val user = when (authContext) {
+            is AuthContext.Member -> {
+                userRepository.findById(authContext.userId)
+                    .orElseThrow { IllegalArgumentException("유저를 찾을 수 없습니다. id: ${authContext.userId}") }
+            }
+            is AuthContext.Guest -> {
+                throw BusinessException(CommonResponseCode.FORBIDDEN, "비로그인 유저는 방명록을 작성할 수 없습니다.")
+            }
+        }
 
         val invitation = invitationRepository.findById(invitationId)
             .orElseThrow { IllegalArgumentException("Invitation not found with id: $invitationId") }
