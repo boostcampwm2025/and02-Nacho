@@ -1,4 +1,4 @@
-package com.andlife.data.util.media
+package com.andlife.data.util.media.download
 
 import android.content.Context
 import androidx.work.Constraints
@@ -17,7 +17,7 @@ import java.util.UUID
 import javax.inject.Inject
 
 class MediaDownloaderImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) : MediaDownloader {
     private val workManager = WorkManager.getInstance(context)
 
@@ -25,11 +25,11 @@ class MediaDownloaderImpl @Inject constructor(
         url: String,
         fileName: String,
         mediaType: MediaType
-    ): UUID {
+    ): String {
         val inputData = workDataOf(
-            DownloadWorker.KEY_URL to url,
-            DownloadWorker.KEY_FILE_NAME to fileName,
-            DownloadWorker.KEY_MEDIA_TYPE to mediaType.ordinal
+            DownloadKey.URL to url,
+            DownloadKey.FILE_NAME to fileName,
+            DownloadKey.MEDIA_TYPE to mediaType.ordinal
         )
 
         val constraints = Constraints.Builder()
@@ -39,29 +39,27 @@ class MediaDownloaderImpl @Inject constructor(
         val downloadRequest = OneTimeWorkRequestBuilder<DownloadWorker>()
             .setInputData(inputData)
             .setConstraints(constraints)
-            .addTag(DOWNLOAD_WORK_TAG)
+            .addTag(DownloadKey.TAG_MEDIA_DOWNLOAD)
             .build()
 
         workManager.enqueue(downloadRequest)
 
-        return downloadRequest.id
+        return downloadRequest.id.toString()
     }
 
-    override fun getDownloadStatus(workId: UUID): Flow<DownloadState> {
-        return workManager.getWorkInfoByIdFlow(workId)
+    override fun getDownloadStatus(workId: String): Flow<DownloadState> {
+        val uuid: UUID = UUID.fromString(workId)
+        return workManager.getWorkInfoByIdFlow(uuid)
             .map { workInfo -> workInfo.toDownloadState() }
     }
 
-    override fun cancelDownload(workId: UUID) {
-        workManager.cancelWorkById(workId)
+    override fun cancelDownload(workId: String) {
+        val uuid: UUID = UUID.fromString(workId)
+        workManager.cancelWorkById(uuid)
     }
 
     override fun cancelAllDownloads() {
-        workManager.cancelAllWorkByTag(DOWNLOAD_WORK_TAG)
-    }
-
-    companion object {
-        const val DOWNLOAD_WORK_TAG = "media_download"
+        workManager.cancelAllWorkByTag(DownloadKey.TAG_MEDIA_DOWNLOAD)
     }
 }
 
@@ -72,22 +70,22 @@ private fun WorkInfo?.toDownloadState(): DownloadState {
         WorkInfo.State.ENQUEUED -> DownloadState.Idle
 
         WorkInfo.State.RUNNING -> {
-            val progressValue = progress.getInt(DownloadWorker.KEY_PROGRESS, 0)
+            val progressValue = progress.getInt(DownloadKey.PROGRESS, 0)
             DownloadState.Downloading(progressValue)
         }
 
         WorkInfo.State.SUCCEEDED -> {
-            val resultUrl = outputData.getString(DownloadWorker.KEY_RESULT_URL) ?: ""
+            val resultUrl = outputData.getString(DownloadKey.RESULT_URL).orEmpty()
             DownloadState.Success(url = resultUrl)
         }
 
         WorkInfo.State.FAILED -> {
-            val errorMsg = outputData.getString(DownloadWorker.KEY_ERROR_MESSAGE) ?: "알 수 없는 오류"
+            val errorMsg = outputData.getString(DownloadKey.ERROR_MESSAGE) ?: DownloadError.UNKNOWN
             DownloadState.Error(message = errorMsg)
         }
 
         WorkInfo.State.CANCELLED -> {
-            DownloadState.Error(message = "다운로드가 취소되었습니다.")
+            DownloadState.Error(message = DownloadNoti.MSG_CANCELLED)
         }
 
         else -> DownloadState.Idle

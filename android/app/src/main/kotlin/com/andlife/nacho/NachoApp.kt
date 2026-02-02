@@ -4,9 +4,10 @@ import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.navOptions
 import com.andlife.invitation.InvitationDetail
+import com.andlife.login.Login
 import com.andlife.nacho.model.MainSideEffect
-import com.andlife.nacho.navigation.MainBottomTab
 import com.andlife.nacho.navigation.NachoNavHost
 import com.andlife.nacho.navigation.rememberInvitationNavigator
 import com.andlife.nacho.viewmodel.MainViewModel
@@ -24,13 +25,8 @@ fun NachoApp(
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
-            is MainSideEffect.HandleDeepLink -> {
-                Log.d("NachoApp", "Received deepLink intent: ${effect.intent.data}")
-                navigator.navController.handleDeepLink(effect.intent)
-            }
-
             is MainSideEffect.NavigateToDetail -> {
-                Log.d("NachoApp", "Received Deferred DeepLink invitationId: ${effect.invitationId}")
+                Log.d("DeepLink Debug", "Received Deferred DeepLink invitationId: ${effect.invitationId}")
                 navigator.navController.navigate(
                     InvitationDetail(
                         id = effect.invitationId,
@@ -43,11 +39,24 @@ fun NachoApp(
             }
 
             MainSideEffect.NavigateToHome -> {
-                navigator.navigate(MainBottomTab.HOME)
+                val navOptions = navOptions {
+                    popUpTo(Login) {
+                        inclusive = true
+                        saveState = false
+                    }
+                    launchSingleTop = true
+                }
+                navigator.navigateToHome(navOptions)
             }
 
             MainSideEffect.NavigateToLogin -> {
-                navigator.navigateToLogin()
+                val navOptions = navOptions {
+                    popUpTo(navigator.navController.graph.id) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
+                navigator.navigateToLogin(navOptions)
             }
         }
     }

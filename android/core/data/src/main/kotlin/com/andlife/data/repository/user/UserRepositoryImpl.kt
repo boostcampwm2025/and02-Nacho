@@ -62,7 +62,13 @@ internal class UserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun logout() {
-        TODO("Not yet implemented")
+        authStateManager.setLoading()
+        userStorage.clearTokens()
+        userStorage.setWasLoggedIn(false)
+    }
+
+    override suspend fun getUserInfo(): AuthState {
+        return authStateManager.authState.value
     }
 
     private suspend fun saveToken(accessToken: String, refreshToken: String): Result<Unit, DataError> {
@@ -78,4 +84,12 @@ internal class UserRepositoryImpl @Inject constructor(
             Result.Error(DataError.Local.UNKNOWN)
         }
     }
+
+    override suspend fun isWifiDialogDismissed(): Boolean = userStorage.isWifiDialogDismissed()
+
+    override suspend fun setWifiDialogDismissed() = userStorage.setWifiDialogDismissed()
+
+    override suspend fun isFirstDownloadDone(): Boolean = userStorage.isFirstDownloadDone()
+
+    override suspend fun setFirstDownloadDone() = userStorage.setFirstDownloadDone()
 }

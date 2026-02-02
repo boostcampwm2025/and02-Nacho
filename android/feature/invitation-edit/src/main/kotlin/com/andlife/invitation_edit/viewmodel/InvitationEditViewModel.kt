@@ -7,6 +7,7 @@ import com.andlife.domain.error.DataError
 import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
+import com.andlife.domain.util.RefreshEventHub
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
@@ -247,6 +248,7 @@ class InvitationEditViewModel @Inject constructor(
             invitationRepository.updateInvitation(invitationId, updateParam)
                 .onSuccess { id ->
                     updateState { copy(isLoading = false) }
+                    RefreshEventHub.emit(RefreshEventHub.RefreshTarget.ALL)
                     sendEffect(InvitationFormSideEffect.SuccessSave(id))
                 }
                 .onFailure { _, _ ->

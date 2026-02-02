@@ -6,12 +6,14 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import com.andlife.domain.model.invitation.InvitationStatus
 import com.andlife.domain.model.invitation.SortDirection
+import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.model.invitation.InvitationSummaryUiModel
 import com.andlife.model.invitation.toUiModel
 import com.andlife.myinvitation.model.MyInvitationSideEffect
+import com.andlife.myinvitation.model.MyInvitationSideEffect.*
 import com.andlife.myinvitation.model.MyInvitationUiEvent
 import com.andlife.myinvitation.model.MyInvitationUiState
 import com.andlife.ui.base.BaseViewModel
@@ -30,7 +32,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MyInvitationViewModel @Inject constructor(
-    private val invitationRepository: InvitationRepository
+    private val invitationRepository: InvitationRepository,
+    private val authStateManager: AuthStateManager
 ) : BaseViewModel<MyInvitationUiState, MyInvitationUiEvent, MyInvitationSideEffect>(
     initialState = MyInvitationUiState()
 ) {
@@ -75,11 +78,13 @@ class MyInvitationViewModel @Inject constructor(
             }
         }.cachedIn(viewModelScope)
 
+    val authState = authStateManager.authState
+
     override val uiState: StateFlow<MyInvitationUiState> =
         mutableUiState
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
+                started = SharingStarted.Lazily,
                 initialValue = MyInvitationUiState()
             )
 
@@ -92,7 +97,7 @@ class MyInvitationViewModel @Inject constructor(
                 updateState { copy(selectedTab = event.index) }
             }
             is MyInvitationUiEvent.ClickInvitation -> {
-                sendEffect(MyInvitationSideEffect.NavigateToDetail(event.id))
+                sendEffect(NavigateToDetail(event.id))
             }
             is MyInvitationUiEvent.ChangeSort -> {
                 if (event.isUpcoming) {
@@ -106,6 +111,10 @@ class MyInvitationViewModel @Inject constructor(
             }
             is MyInvitationUiEvent.ClickDeleteInvitation -> {
                 deleteInvitation(event.id)
+            }
+
+            MyInvitationUiEvent.ClickLogin -> {
+                sendEffect(NavigateToLogin)
             }
         }
     }
@@ -127,5 +136,9 @@ class MyInvitationViewModel @Inject constructor(
                 }
             updateState { copy(isRefreshing = false) }
         }
+    }
+
+    fun handleRefresh() {
+        sendEffect(MyInvitationSideEffect.NeedRefresh)
     }
 }

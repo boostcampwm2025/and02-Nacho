@@ -130,4 +130,8 @@ class InvitationViewModel @Inject constructor(
         if (hasError) sendEffect(InvitationSideEffect.RefreshFailure)
     }
 
+    fun handleRefresh() {
+        sendEffect(InvitationSideEffect.NeedRefresh)
+    }
+
 }

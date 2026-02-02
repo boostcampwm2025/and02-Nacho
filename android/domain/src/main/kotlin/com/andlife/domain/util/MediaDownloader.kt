@@ -3,7 +3,6 @@ package com.andlife.domain.util
 import com.andlife.domain.model.guestbook.DownloadState
 import com.andlife.domain.model.guestbook.MediaType
 import kotlinx.coroutines.flow.Flow
-import java.util.UUID
 
 interface MediaDownloader {
 
@@ -11,11 +10,11 @@ interface MediaDownloader {
         url: String,
         fileName: String,
         mediaType: MediaType,
-    ): UUID
+    ): String
 
-    fun getDownloadStatus(workId: UUID): Flow<DownloadState>
+    fun getDownloadStatus(workId: String): Flow<DownloadState>
 
-    fun cancelDownload(workId: UUID)
+    fun cancelDownload(workId: String)
 
     fun cancelAllDownloads()
 }

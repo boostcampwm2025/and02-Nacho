@@ -1,5 +1,6 @@
 package com.andlife.myinvitation
 
+import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHostState
@@ -12,6 +13,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import com.andlife.domain.util.RefreshEventHub
 import com.andlife.model.util.NavigationKeyConstant.CREATE_CARD_BY_INVITATION_ID
 import com.andlife.model.util.NavigationKeyConstant.CREATE_THANKS_CARD
 import com.andlife.model.util.NavigationKeyConstant.INVITATION_UPDATED
@@ -20,6 +22,7 @@ import com.andlife.myinvitation.model.detail.MyInvitationDetailUiEvent
 import com.andlife.myinvitation.screen.MyInvitationDetailRoute
 import com.andlife.myinvitation.screen.MyInvitationRoute
 import com.andlife.myinvitation.viewmodel.MyInvitationDetailViewModel
+import com.andlife.myinvitation.viewmodel.MyInvitationViewModel
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -46,19 +49,35 @@ fun NavGraphBuilder.myInvitationNavGraph(
     paddingValues: PaddingValues,
     onNavigateToCreate: () -> Unit,
     onNavigateToDetail: (Long) -> Unit,
+    onNavigateToLogin: () -> Unit,
 ) {
     composable<MyInvitation> {
+        val viewModel: MyInvitationViewModel = hiltViewModel()
+
+        val needsRefresh by RefreshEventHub.myInvitationRefresh.collectAsStateWithLifecycle()
+
+        LaunchedEffect(needsRefresh) {
+            Log.d("RefreshEventHub", "myInvitation needsRefresh: $needsRefresh")
+            if (needsRefresh) {
+                viewModel.handleRefresh()
+                RefreshEventHub.consumeMyInvitation()
+            }
+        }
+
         MyInvitationRoute(
+            viewModel = viewModel,
             snackbarHostState = snackbarHostState,
             onNavigateToCreate = onNavigateToCreate,
             onNavigateToDetail = onNavigateToDetail,
-            modifier = Modifier.padding(paddingValues),
+            onNavigateToLogin = onNavigateToLogin,
+            modifier = Modifier.padding(paddingValues)
         )
     }
 }
 
 fun NavGraphBuilder.myInvitationDetailNavGraph(
     onNavigateBack: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     onNavigateToEditInvitation: (Long) -> Unit,
     onNavigateToEditCard: (Long) -> Unit,
     onNavigateToCreateCard: (Long) -> Unit,
@@ -93,6 +112,7 @@ fun NavGraphBuilder.myInvitationDetailNavGraph(
 
         MyInvitationDetailRoute(
             onNavigateBack = onNavigateBack,
+            onNavigateToLogin = onNavigateToLogin,
             onNavigateToEditInvitation = onNavigateToEditInvitation,
             onNavigateToEditCard = onNavigateToEditCard,
             onNavigateToCreateCard = onNavigateToCreateCard,

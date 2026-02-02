@@ -1,4 +1,4 @@
-package com.andlife.home.model
+package com.andlife.home.model.home
 
 import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.model.invitation.UpcomingInvitationUiModel

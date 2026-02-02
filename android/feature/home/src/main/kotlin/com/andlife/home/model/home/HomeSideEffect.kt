@@ -1,4 +1,4 @@
-package com.andlife.home.model
+package com.andlife.home.model.home
 
 import com.andlife.ui.base.BaseSideEffect
 
@@ -22,4 +22,5 @@ sealed interface HomeSideEffect : BaseSideEffect {
     data object ScrollToTop : HomeSideEffect
 
     data object RefreshFailure : HomeSideEffect
+    data object NeedRefresh : HomeSideEffect
 }

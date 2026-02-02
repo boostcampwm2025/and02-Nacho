@@ -13,4 +13,9 @@ interface UserRepository {
     suspend fun guestLogin(): Result<Unit, InvitationError>
     suspend fun initializeAuth(): Result<AuthState, DataError>
     suspend fun logout()
+    suspend fun getUserInfo(): AuthState
+    suspend fun isWifiDialogDismissed(): Boolean
+    suspend fun setWifiDialogDismissed()
+    suspend fun isFirstDownloadDone(): Boolean
+    suspend fun setFirstDownloadDone()
 }

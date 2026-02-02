@@ -1,11 +1,14 @@
 package com.andlife.myinvitation.viewmodel
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.text.Editable
 import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.andlife.deeplink.DeepLinkManager
 import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.domain.repository.thankscard.ThanksCardRepository
 import com.andlife.domain.util.onFailure
@@ -34,6 +37,8 @@ class MyInvitationDetailViewModel @Inject constructor(
     private val kakaoShareManager: KakaoShareManager,
     private val invitationRepository: InvitationRepository,
     private val createCardSession: CreateCardSession,
+    private val deepLinkManager: DeepLinkManager,
+    private val clipboardManager: ClipboardManager,
 ) : BaseViewModel<MyInvitationDetailUiState, MyInvitationDetailUiEvent, MyInvitationDetailSideEffect>(
     initialState = MyInvitationDetailUiState(),
 ) {
@@ -81,6 +86,7 @@ class MyInvitationDetailViewModel @Inject constructor(
             is MyInvitationDetailUiEvent.MapError -> showMapErrorSnackbar()
             is MyInvitationDetailUiEvent.RetryLoad -> retryLoad()
             MyInvitationDetailUiEvent.ClickCreateCard -> navigateToCreateCard()
+            MyInvitationDetailUiEvent.CopyInvitationLink -> copyInvitationLink()
         }
     }
 
@@ -143,6 +149,13 @@ class MyInvitationDetailViewModel @Inject constructor(
 
     private fun navigateToFullScreenImage(imageList: ImmutableList<String>, index: Int) { /* TODO: 이미지 풀스크린*/ }
 
+    private fun copyInvitationLink() {
+        val url = deepLinkManager.buildAppsFlyerUrl(myInvitationId)
+        val clip = ClipData.newPlainText(CLIP_LABEL_INVITATION, url)
+        clipboardManager.setPrimaryClip(clip)
+        sendEffect(MyInvitationDetailSideEffect.LinkCopied)
+    }
+
     private fun showMapErrorSnackbar() {
         sendEffect(MyInvitationDetailSideEffect.ShowMapErrorSnackbar)
     }
@@ -157,5 +170,9 @@ class MyInvitationDetailViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         createCardSession.clear()
+    }
+
+    companion object {
+        private const val CLIP_LABEL_INVITATION = "invitation_link"
     }
 }

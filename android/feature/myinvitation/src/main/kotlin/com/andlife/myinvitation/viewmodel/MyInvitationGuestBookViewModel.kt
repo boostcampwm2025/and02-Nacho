@@ -7,12 +7,16 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
 import com.andlife.domain.error.DataError
+import com.andlife.domain.model.auth.AuthState
 import com.andlife.domain.model.guestbook.GuestBook
 import com.andlife.domain.model.guestbook.GuestBookMedia
 import com.andlife.domain.model.guestbook.MediaType
+import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
+import com.andlife.domain.util.RefreshEventHub
+import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.ThumbnailGenerator
 import com.andlife.domain.util.onFailure
@@ -53,6 +57,7 @@ constructor(
     private val mediaFileProvider: MediaFileProvider,
     private val thumbnailGenerator: ThumbnailGenerator,
     private val guestBookRepository: GuestBookRepository,
+    private val authStateManager: AuthStateManager,
     val audioPlayerManager: AudioPlayerManager,
     val videoPlayerPool: AutoVideoPlayerPool,
     savedStateHandle: SavedStateHandle,
@@ -75,14 +80,27 @@ constructor(
         }.cachedIn(viewModelScope)
 
     init {
+        observeAuthState()
         observeAudioPlayerState()
+    }
+
+    private fun observeAuthState() {
+        authStateManager.authState
+            .onEach { authState ->
+                val isStateChanged = uiState.value.isAuthStateChanged(authState)
+                updateState { copy( authState = authState ) }
+                if (isStateChanged) {
+                    sendEffect(MyInvitationGuestBookSideEffect.AuthStateChanged(authState) )
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     private fun observeAudioPlayerState() {
         audioPlayerManager.currentAudio
             .onEach { audioPlaybackState ->
                 updateState {
-                    copy( audioPlaybackState = audioPlaybackState ?: AudioPlaybackState())
+                    copy(audioPlaybackState = audioPlaybackState ?: AudioPlaybackState())
                 }
             }
             .launchIn(viewModelScope)
@@ -96,29 +114,17 @@ constructor(
             is MyInvitationGuestBookUiEvent.UploadMedias -> handleUploadMedias()
             is MyInvitationGuestBookUiEvent.ClickCamera -> handleCameraClick()
             is MyInvitationGuestBookUiEvent.ClickMicrophone -> handleMicrophoneClick()
-            is MyInvitationGuestBookUiEvent.StartAudioRecording -> handleStartAudioRecording()
-            is MyInvitationGuestBookUiEvent.StopAudioRecording -> handleStopAudioRecording()
             is MyInvitationGuestBookUiEvent.ClearError -> clearError()
             is MyInvitationGuestBookUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
             is MyInvitationGuestBookUiEvent.ClickVideoPlayButton -> clickVideoPlayButton(event.url, event.itemId)
-
-            is MyInvitationGuestBookUiEvent.ClickGuestBookMenu -> sendEffect(
-                MyInvitationGuestBookSideEffect.ShowSnackbar("방명록 메뉴 클릭됨: ${event.guestBookId}"),
-            )
-
-            is MyInvitationGuestBookUiEvent.ClickInvitationTitle -> sendEffect(
-                MyInvitationGuestBookSideEffect.ShowSnackbar("초대장 제목 클릭됨: ${event.invitationId}"),
-            )
-
-            is MyInvitationGuestBookUiEvent.ClickVisualMedia -> sendEffect(
-                MyInvitationGuestBookSideEffect.ShowSnackbar("비주얼 미디어 클릭됨: ${event.url}"),
-            )
-
+            is MyInvitationGuestBookUiEvent.ClickVisualMedia -> {}
             is MyInvitationGuestBookUiEvent.ClickEditMenu -> startEditing(event.guestBook)
             is MyInvitationGuestBookUiEvent.CancelEdit -> cancelEdit()
             is MyInvitationGuestBookUiEvent.ClickDeleteMenu -> deleteGuestBook(event.guestBookId)
             is MyInvitationGuestBookUiEvent.UpdateMediaPlayState -> updatePlayState(event.isPlaying)
             MyInvitationGuestBookUiEvent.Refresh -> refresh()
+            MyInvitationGuestBookUiEvent.CheckLogin -> checkLogin()
+            MyInvitationGuestBookUiEvent.DismissLoginDialog -> dismissLoginDialog()
         }
     }
 
@@ -257,6 +263,12 @@ constructor(
         thumbnailUrls: List<String?>,
         newSelectedMedias: List<SelectedMedia>
     ) {
+        if (authStateManager.authState.value !is AuthState.Authenticated) {
+            updateState { copy(isUploading = false) }
+            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("로그인이 필요합니다."))
+            return
+        }
+
         val guestBookMedias = uploadedUrls
             .mapIndexedNotNull { index, url ->
                 val urlValue = url ?: return@mapIndexedNotNull null
@@ -279,7 +291,6 @@ constructor(
 
         val result = guestBookRepository.createGuestBook(
             invitationId = invitationId,
-            userId = 1,
             textContent = uiState.value.textContent,
             medias = guestBookMedias,
         )
@@ -292,6 +303,12 @@ constructor(
         thumbnailUrls: List<String?>,
         allSelectedMedias: List<SelectedMedia>
     ) {
+        if (authStateManager.authState.value !is AuthState.Authenticated) {
+            updateState { copy(isUploading = false) }
+            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("로그인이 필요합니다."))
+            return
+        }
+
         val existingImageIds =
             allSelectedMedias.filter { it.id != null && it.type == UiMediaType.IMAGE }.mapNotNull { it.id }
         val existingAudioIds =
@@ -342,6 +359,7 @@ constructor(
                 } else {
                     sendEffect(MyInvitationGuestBookSideEffect.CreateGuestBookSuccess)
                 }
+                RefreshEventHub.emit(RefreshTarget.HOME)
             }
 
             is Result.Error -> sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("실패: ${result.message}"))
@@ -349,6 +367,12 @@ constructor(
     }
 
     private fun deleteGuestBook(guestBookId: Long) {
+        if (authStateManager.authState.value !is AuthState.Authenticated) {
+            updateState { copy(isUploading = false) }
+            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("로그인이 필요합니다."))
+            return
+        }
+
         viewModelScope.launch {
             guestBookRepository.deleteGuestBook(guestBookId)
                 .onSuccess { deletedId ->
@@ -398,26 +422,12 @@ constructor(
 
     private fun handleMicrophoneClick() {
         val state = uiState.value
-
-        if (state.isAudioRecording) {
-            onEvent(MyInvitationGuestBookUiEvent.StopAudioRecording)
-        } else {
-            if (state.selectedMedias.size >= 5) {
-                sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("최대 5개까지 미디어를 추가할 수 있습니다."))
-                return
-            }
-            onEvent(MyInvitationGuestBookUiEvent.StartAudioRecording)
+        if (state.selectedMedias.size >= 5) {
+            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("최대 5개까지 미디어를 추가할 수 있습니다."))
+            return
         }
-    }
-
-    private fun handleStartAudioRecording() {
-        updateState { copy(isAudioRecording = true, audioRecordingDuration = 0) }
-        sendEffect(MyInvitationGuestBookSideEffect.StartAudioRecording)
-    }
-
-    private fun handleStopAudioRecording() {
-        updateState { copy(isAudioRecording = false, audioRecordingDuration = 0) }
-        sendEffect(MyInvitationGuestBookSideEffect.StopAudioRecording)
+        updateState { copy(audioRecordingDuration = 0) }
+        sendEffect(MyInvitationGuestBookSideEffect.ShowAudioRecordingBottomSheet)
     }
 
     private fun updatePlayState(isPlaying: Boolean) {
@@ -440,5 +450,16 @@ constructor(
                 sendEffect(MyInvitationGuestBookSideEffect.ScrollToTop)
             }
         }
+    }
+
+    private fun checkLogin() {
+        val isAuthenticated = authStateManager.authState.value is AuthState.Authenticated
+        if (!isAuthenticated) {
+            updateState { copy(showLoginDialog = true) }
+        }
+    }
+
+    private fun dismissLoginDialog() {
+        updateState { copy(showLoginDialog = false) }
     }
 }

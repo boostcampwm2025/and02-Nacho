@@ -4,7 +4,6 @@ import com.andlife.nachoserver.auth.AuthContext
 import com.andlife.nachoserver.entity.AnnouncementSection
 import com.andlife.nachoserver.entity.Invitation
 import com.andlife.nachoserver.entity.InvitationCard
-import com.andlife.nachoserver.entity.User
 import com.andlife.nachoserver.entity.InvitationParticipant
 import com.andlife.nachoserver.repository.guestbook.GuestBookRepository
 import com.andlife.nachoserver.repository.invitation.AnnouncementRepository
@@ -54,22 +53,40 @@ class InvitationService(
         userId: Long?,
         guestInvitationIds: List<Long>
     ): JoinResponse {
-        val invitation = invitationRepository.findById(invitationId)
-            .orElseThrow { NoSuchElementException("초대장을 찾을 수 없습니다. ID: $invitationId") }
+        return try {
+            val invitation = invitationRepository.findById(invitationId)
+                .orElseThrow { NoSuchElementException("초대장을 찾을 수 없습니다. ID: $invitationId") }
 
-        if (userId != null) {
-            val isAlreadyJoined = participantRepository.existsByInvitationIdAndUserId(invitationId, userId)
-            if (!isAlreadyJoined) {
-                val userProxy = userRepository.getReferenceById(userId)
-                participantRepository.save(InvitationParticipant(invitation = invitation, user = userProxy))
+            println(">>> [초대장 조회 성공] ID: $invitationId")
+
+            if (userId != null) {
+                val isHost = invitation.host.id == userId
+                if (isHost) {
+                    return JoinResponse(
+                        invitationId = invitationId,
+                        isMember = true,
+                        alreadyJoined = true
+                    )
+                }
+
+                val isAlreadyJoined = participantRepository.existsByInvitationIdAndUserId(invitationId, userId)
+                if (!isAlreadyJoined) {
+                    val userProxy = userRepository.getReferenceById(userId)
+                    participantRepository.save(InvitationParticipant(invitation = invitation, user = userProxy))
+                }
+
+                return JoinResponse(invitationId = invitationId, isMember = true, alreadyJoined = isAlreadyJoined)
+
             }
-            val response = JoinResponse(invitationId = invitationId, isMember = true, alreadyJoined = isAlreadyJoined)
-            println(">>> [Join 성공 직전] $response")
-            return response
-        }
 
-        val alreadyHasAccess = guestInvitationIds.contains(invitationId)
-        return JoinResponse(invitationId = invitationId, isMember = false, alreadyJoined = alreadyHasAccess)
+            val alreadyHasAccess = guestInvitationIds.contains(invitationId)
+            val response = JoinResponse(invitationId = invitationId, isMember = false, alreadyJoined = alreadyHasAccess)
+            response
+        } catch (e: Exception) {
+            println(">>> [서비스 에러] ${e.javaClass.simpleName}: ${e.message}")
+            e.printStackTrace()
+            throw e
+        }
     }
 
     @Transactional
@@ -86,29 +103,50 @@ class InvitationService(
 
     @Transactional(readOnly = true)
     fun getParticipantInvitations(
-        userId: Long,
+        userId: Long?,
+        guestInvitationIds: List<Long>,
         status: String,
         sortType: String,
         pageable: Pageable
     ): PagingResponse<InvitationSummaryResponse> {
-        val now = LocalDateTime.now()
         val upperStatus = status.uppercase()
-
         val direction = if (sortType.uppercase() == "DESC") Sort.Direction.DESC else Sort.Direction.ASC
 
-        val sort = Sort.by(direction, "invitation.invitationDate")
-            .and(Sort.by(direction, "invitation.startTime"))
+        return if (userId != null) {
+            val sort = Sort.by(direction, "invitation.invitationDate")
+                .and(Sort.by(direction, "invitation.startTime"))
+            val adjustedPageable = PageRequest.of(pageable.pageNumber, pageable.pageSize, sort)
+            val now = LocalDateTime.now()
 
-        val adjustedPageable = PageRequest.of(pageable.pageNumber, pageable.pageSize, sort)
+            val participantPage = when (upperStatus) {
+                "UPCOMING" -> participantRepository.findUpcomingInvitations(userId, now.toLocalDate(), now.toLocalTime(), adjustedPageable)
+                "PAST" -> participantRepository.findPastInvitations(userId, now.toLocalDate(), now.toLocalTime(), adjustedPageable)
+                else -> participantRepository.findAllByUserIdWithInvitation(userId, adjustedPageable)
+            }
 
-        val participantPage: Page<InvitationParticipant> = when (upperStatus) {
-            "UPCOMING" -> participantRepository.findUpcomingInvitations(userId, now.toLocalDate(), now.toLocalTime(), adjustedPageable)
-            "PAST" -> participantRepository.findPastInvitations(userId, now.toLocalDate(), now.toLocalTime(), adjustedPageable)
-            else -> participantRepository.findAllByUserIdWithInvitation(userId, adjustedPageable)
+            convertToPagingResponse(participantPage.map { it.invitation }, userId)
+        } else {
+            val sort = Sort.by(direction, "invitationDate")
+                .and(Sort.by(direction, "startTime"))
+            val adjustedPageable = PageRequest.of(pageable.pageNumber, pageable.pageSize, sort)
+
+            if (guestInvitationIds.isEmpty()) {
+                return PagingResponse.empty()
+            }
+
+            val invitationPage = invitationRepository.findAllByIdInWithStatus(
+                guestInvitationIds, upperStatus, adjustedPageable
+            )
+
+            convertToPagingResponse(invitationPage, null)
         }
+    }
 
-        val contents = participantPage.content.map { participant ->
-            val invitation = participant.invitation
+    private fun convertToPagingResponse(
+        page: Page<Invitation>,
+        currentUserId: Long?
+    ): PagingResponse<InvitationSummaryResponse> {
+        val contents = page.content.map { invitation ->
             InvitationSummaryResponse(
                 id = invitation.id,
                 title = invitation.title,
@@ -117,16 +155,16 @@ class InvitationService(
                 address = invitation.address,
                 invitationDate = invitation.invitationDate.toString(),
                 startTime = invitation.startTime.toString(),
-                isOwner = invitation.host.id == userId
+                isOwner = invitation.host.id == currentUserId
             )
         }
 
         return PagingResponse(
             meta = PagingMetaResponse(
-                isEnd = participantPage.isLast,
-                pageableCount = participantPage.numberOfElements,
-                totalCount = participantPage.totalElements,
-                currentPage = participantPage.number
+                isEnd = page.isLast,
+                pageableCount = page.numberOfElements,
+                totalCount = page.totalElements,
+                currentPage = page.number
             ),
             content = contents
         )
@@ -351,53 +389,61 @@ class InvitationService(
         days: Long,
         pageable: Pageable
     ): PagingResponse<UpcomingInvitationResponse> {
-
         val today = LocalDate.now()
+        val nowTime = LocalTime.now()
         val limitDate = today.plusDays(days)
+        println(">>> 날짜 및 시간 : ${today.toString() + nowTime.toString()}")
 
-        val currentUserId = (authContext as? AuthContext.Member)?.userId
-
-        val upcomingInvitationsPage = when (authContext) {
+        val upcomingInvitationsPage: Page<Invitation> = when (authContext) {
             is AuthContext.Member -> {
-                invitationRepository.findUpcomingInvitationsWithinDays(
+                invitationRepository.findUpcomingByParticipantIdWithinDays(
                     userId = authContext.userId,
-                    today = today,
-                    limitDate = limitDate,
+                    startDate = today,
+                    nowTime = nowTime,
+                    endDate = limitDate,
                     pageable = pageable
                 )
             }
+
             is AuthContext.Guest -> {
-                Page.empty(pageable) //TODO: 비로그인 유저 임시 빈값 조회
+                if (authContext.invitationIds.isEmpty()) {
+                    Page.empty(pageable)
+                } else {
+                    invitationRepository.findAllByIdInAndDateRange(
+                        ids = authContext.invitationIds,
+                        startDate = today,
+                        nowTime = nowTime,
+                        endDate = limitDate,
+                        pageable = pageable
+                    )
+                }
             }
         }
 
-        val responsePage = upcomingInvitationsPage.map { invitation ->
-            try {
-                UpcomingInvitationResponse(
-                    id = invitation.id,
-                    hostId = invitation.host.id,
-                    isOwner = invitation.host.id == currentUserId,
-                    title = invitation.title,
-                    thumbnailUrl = invitation.thumbnailUrls.firstOrNull(),
-                    invitationDate = invitation.invitationDate.toString(),
-                    startTime = invitation.startTime.toString(),
-                    displayHostName = invitation.displayHostName,
-                    hostProfileUrl = invitation.host.profileImageUrl,
-                )
-            } catch (e: Exception) {
-                println("ERROR: Mapping failed for Invitation ID ${invitation.id}: ${e.message}")
-                throw e
-            }
+        val currentUserId = (authContext as? AuthContext.Member)?.userId
+
+        val contents = upcomingInvitationsPage.content.map { invitation ->
+            UpcomingInvitationResponse(
+                id = invitation.id,
+                hostId = invitation.host.id,
+                isOwner = invitation.host.id == currentUserId,
+                title = invitation.title,
+                thumbnailUrl = invitation.thumbnailUrls.firstOrNull(),
+                invitationDate = invitation.invitationDate.toString(),
+                startTime = invitation.startTime.toString(),
+                displayHostName = invitation.displayHostName,
+                hostProfileUrl = invitation.host.profileImageUrl,
+            )
         }
 
         return PagingResponse(
             meta = PagingMetaResponse(
-                isEnd = !responsePage.hasNext(),
-                pageableCount = responsePage.numberOfElements,
-                totalCount = responsePage.totalElements,
-                currentPage = responsePage.number + 1
+                isEnd = upcomingInvitationsPage.isLast,
+                pageableCount = upcomingInvitationsPage.numberOfElements,
+                totalCount = upcomingInvitationsPage.totalElements,
+                currentPage = upcomingInvitationsPage.number
             ),
-            content = responsePage.content
+            content = contents
         )
     }
 

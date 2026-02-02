@@ -59,9 +59,9 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.home.R
-import com.andlife.home.model.HomeSideEffect
-import com.andlife.home.model.HomeUiEvent
-import com.andlife.home.model.HomeUiState
+import com.andlife.home.model.home.HomeSideEffect
+import com.andlife.home.model.home.HomeUiEvent
+import com.andlife.home.model.home.HomeUiState
 import com.andlife.home.viewmodel.HomeViewModel
 import com.andlife.media.video.AutoVideoPlayer
 import com.andlife.media.video.AutoVideoPlayerPool
@@ -146,6 +146,11 @@ fun HomeRoute(
                     snackbarHostState.currentSnackbarData?.dismiss()
                     snackbarHostState.showSnackbar(refreshFailMessage)
                 }
+            }
+
+            is HomeSideEffect.NeedRefresh -> {
+                upcomingInvitations.refresh()
+                guestBooks.refresh()
             }
         }
     }
@@ -601,7 +606,6 @@ private fun LazyListScope.homeGuestBookSection(
                     },
                     onVisualMediaClick = { onVisualMediaClick(it.url) },
                     onAudioMediaClick = { onAudioMediaClick(it.url) },
-                    onMenuClick = { },
                     onPlayVideoClick = { url -> onPlayVideoClick(url, guestBook.id) },
                 )
             }
