@@ -34,6 +34,7 @@ class InvitationDetailViewModel @Inject constructor(
     private val invitationId: Long = route.id
 
     private val isFromDeepLink: Boolean = route.isFromDeepLink
+    private val savedState = savedStateHandle
 
     override val uiState: StateFlow<InvitationDetailUiState> =
         mutableUiState
@@ -96,6 +97,9 @@ class InvitationDetailViewModel @Inject constructor(
     }
 
     private fun clickClose() {
+        if (isFromDeepLink) {
+            savedState[KEY_SHOULD_REFRESH] = true
+        }
         sendEffect(InvitationDetailSideEffect.NavigateBack)
     }
 
@@ -117,6 +121,10 @@ class InvitationDetailViewModel @Inject constructor(
         viewModelScope.launch {
             loadInvitation()
         }
+    }
+
+    companion object {
+        const val KEY_SHOULD_REFRESH = "should_refresh"
     }
 
 }
