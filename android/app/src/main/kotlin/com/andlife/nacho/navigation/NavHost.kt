@@ -42,6 +42,7 @@ import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
 import com.andlife.myinvitation.myInvitationDetailNavGraph
 import com.andlife.myinvitation.myInvitationNavGraph
 import com.andlife.thanks_card.createThanksCardNavGraph
+import com.andlife.thanks_card.updateThanksCardNavGraph
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
@@ -146,7 +147,8 @@ fun NachoNavHost(
                 onNavigateToEditInvitation = navigator::navigateToMyInvitationEdit,
                 onNavigateToEditCard = navigator::navigateToUpdateCard,
                 onNavigateToCreateCard = navigator::navigateToCreateCardByInvitation,
-                onNavigateToCreateThanksCard = navigator::navigateToCreateThanksCard
+                onNavigateToCreateThanksCard = navigator::navigateToCreateThanksCard,
+                onNavigateToUpdateThanksCard = navigator::navigateToUpdateThanksCard
             )
 
             invitationCreateNavGraph(
@@ -202,6 +204,14 @@ fun NachoNavHost(
                     navigator.navigatePopBackStack()
                 },
                 onBackClick = navigator::navigatePopBackStack,
+            )
+
+            updateThanksCardNavGraph(
+                onSuccessfulUpdate = {
+                    navigator.navController.previousBackStackEntry?.savedStateHandle[UPDATE_CARD] = true
+                    navigator.navigatePopBackStack()
+                },
+                onBackClick = navigator::navigatePopBackStack
             )
         }
     }
