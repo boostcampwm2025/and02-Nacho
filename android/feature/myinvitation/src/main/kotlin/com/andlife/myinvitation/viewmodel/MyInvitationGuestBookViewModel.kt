@@ -15,6 +15,8 @@ import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
+import com.andlife.domain.util.RefreshEventHub
+import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.ThumbnailGenerator
 import com.andlife.domain.util.onFailure
@@ -357,6 +359,7 @@ constructor(
                 } else {
                     sendEffect(MyInvitationGuestBookSideEffect.CreateGuestBookSuccess)
                 }
+                RefreshEventHub.emit(RefreshTarget.HOME)
             }
 
             is Result.Error -> sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("실패: ${result.message}"))
