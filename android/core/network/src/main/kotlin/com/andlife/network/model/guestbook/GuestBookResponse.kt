@@ -17,6 +17,7 @@ data class GuestBookResponse(
     val audioMedias: List<GuestBookMediaResponse>,
     val totalVisualCount: Int,
     val isOwner: Boolean,
+    val isInvitationOwner: Boolean,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
 )
