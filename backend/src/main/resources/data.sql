@@ -100,7 +100,10 @@ INSERT IGNORE INTO guestbooks (id, invitation_id, user_id, text_content, created
 (47, 29, 4, '보드 강습 부탁해요 정우님', NOW(), NOW()),
 (48, 30, 3, '제주도 맛집 리스트 공유좀', NOW(), NOW()),
 (49, 30, 9, '흑돼지 꼭 먹어야해', NOW(), NOW()),
-(50, 31, 2, '안드라이프 포에버!', NOW(), NOW());
+(50, 31, 2, '안드라이프 포에버!', NOW(), NOW()),
+(51, 1, 1, '샘플 방명록 글입니다.', NOW(), NOW()),
+(52, 1, 2, '샘플 유저가 남긴 두번째 글입니다.', NOW(), NOW()),
+(53, 1, 3, '샘플 유저의 세번째 방명록 글입니다.', NOW(), NOW());
 
 -- 4. 방명록 미디어 데이터
 INSERT IGNORE INTO guestbook_images (guestbook_post_id, image_url, display_order) VALUES
@@ -121,23 +124,32 @@ INSERT IGNORE INTO guestbook_images (guestbook_post_id, image_url, display_order
 (31, 'https://picsum.photos/400/600?random=48', 0),
 (41, 'https://picsum.photos/400/600?random=49', 0),
 (43, 'https://picsum.photos/400/600?random=50', 0),
-(50, 'https://picsum.photos/400/600?random=51', 0);
+(50, 'https://picsum.photos/400/600?random=51', 0),
+(51, 'https://picsum.photos/400/600?random=52', 1),
+(52, 'https://picsum.photos/400/600?random=53', 1),
+(53, 'https://picsum.photos/400/600?random=54', 0);
 
 INSERT IGNORE INTO guestbook_audios (guestbook_post_id, audio_url, duration_seconds, display_order) VALUES
 (2, 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', 15, 0),
 (16, 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', 30, 0),
-(35, 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', 10, 0);
+(35, 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', 10, 0),
+(53, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/audios/000test05.mp3', 20, 1);
 
 INSERT IGNORE INTO guestbook_videos (id, guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order) VALUES
 (1, 3, 'https://www.w3schools.com/html/mov_bbb.mp4', 'https://picsum.photos/400/600?random=3', 10, 0),
 (2, 14, 'https://www.w3schools.com/html/movie.mp4', 'https://picsum.photos/400/600?random=60', 20, 0),
-(3, 47, 'https://www.w3schools.com/html/mov_bbb.mp4', 'https://picsum.photos/400/600?random=61', 15, 0);
+(3, 47, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4', 'https://picsum.photos/400/600?random=61', 15, 0),
+(4, 51, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', 'https://picsum.photos/400/600?random=64', 25, 0),
+(5, 52, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4', 'https://picsum.photos/400/600?random=65', 30, 0);
+
 
 INSERT IGNORE INTO video_preview_thumbnails (guestbook_video_id, thumbnail_url, time_seconds) VALUES
 (1, 'https://picsum.photos/200/300?random=4', 2.5),
 (1, 'https://picsum.photos/200/300?random=5', 5.0),
 (2, 'https://picsum.photos/200/300?random=62', 5.0),
-(3, 'https://picsum.photos/200/300?random=63', 7.0);
+(3, 'https://picsum.photos/200/300?random=63', 7.0),
+(4, 'https://picsum.photos/200/300?random=66', 10.0),
+(5, 'https://picsum.photos/200/300?random=67', 15.0);
 
 -- 5. 공지사항 데이터 (invitation_id를 1씩 증가)
 INSERT IGNORE INTO announcement_sections (invitation_id, title, content, display_order, created_at) VALUES
