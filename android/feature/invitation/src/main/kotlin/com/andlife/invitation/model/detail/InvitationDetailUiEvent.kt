@@ -8,7 +8,7 @@ sealed interface InvitationDetailUiEvent : BaseUiEvent {
 
     data object ClickThanksCard : InvitationDetailUiEvent
 
-    data object ClickDelete : InvitationDetailUiEvent
+    data object ClickLeaveInvitation : InvitationDetailUiEvent
 
     data class ClickImage(
         val imageList: ImmutableList<String>,

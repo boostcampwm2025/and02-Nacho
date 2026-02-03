@@ -160,11 +160,11 @@ fun MyInvitationDetailRoute(
                 onNavigateToUpdateThanksCard(effect.cardId)
             }
 
-            is MyInvitationDetailSideEffect.InvitationDeleted -> {
+            MyInvitationDetailSideEffect.InvitationDeleted -> {
                 onNavigateBack()
             }
 
-            is MyInvitationDetailSideEffect.InvitationDeleteFailed -> {
+            MyInvitationDetailSideEffect.InvitationDeleteFailed -> {
                 coroutineScope.launch {
                     snackbarHostState.currentSnackbarData?.dismiss()
                     snackbarHostState.showSnackbar(res.getString(R.string.msg_invitation_delete_failed))
