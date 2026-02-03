@@ -1,5 +1,7 @@
 package com.andlife.media.di
 
+import com.andlife.media.StoryMediaPlayerPool
+import com.andlife.media.StoryMediaPlayerPoolImpl
 import com.andlife.media.audio.AudioPlayerManager
 import com.andlife.media.audio.AudioPlayerManagerImpl
 import com.andlife.media.video.AutoVideoPlayerPool
@@ -20,4 +22,8 @@ internal abstract class PlayerModule {
     @Binds
     @Singleton
     abstract fun bindAudioPlayerManager(impl: AudioPlayerManagerImpl): AudioPlayerManager
+
+    @Binds
+    @Singleton
+    abstract fun bindStoryMediaPlayerPool(impl: StoryMediaPlayerPoolImpl): StoryMediaPlayerPool
 }
