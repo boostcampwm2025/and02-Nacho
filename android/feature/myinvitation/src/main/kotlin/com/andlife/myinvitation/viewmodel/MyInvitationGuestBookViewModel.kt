@@ -110,8 +110,8 @@ constructor(
         when (event) {
             is MyInvitationGuestBookUiEvent.UpdateSelectedMedias -> updateSelectedMedias(
                 event.medias,
-                event.rejectedUriStrings,
-                event.nonTakenUriStrings
+                event.exceededAvailableBytes,
+                event.exceededAvailableSlots
             )
 
             is MyInvitationGuestBookUiEvent.UpdateTextContent -> updateTextContent(event.textContent)
@@ -154,26 +154,30 @@ constructor(
     }
 
     private fun updateSelectedMedias(
-        medias: List<SelectedMedia>, 
-        rejectedUriStrings: List<String> = emptyList(),
-        nonTakenUriStrings: List<String> = emptyList()
+        medias: List<SelectedMedia>,
+        exceededAvailableBytes: Boolean,
+        exceededAvailableSlots: Boolean
     ) {
         updateState {
             copy(selectedMedias = medias.toPersistentList())
         }
 
         // 용량 초과로 거부된 파일이 있으면 스낵바로 알림
-        if (rejectedUriStrings.isNotEmpty()) {
-            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar(
-                "파일이 200MB를 초과하여 제외되었습니다."
-            ))
+        if (exceededAvailableBytes) {
+            sendEffect(
+                MyInvitationGuestBookSideEffect.ShowSnackbar(
+                    "파일이 500MB를 초과하여 제외되었습니다."
+                )
+            )
         }
 
         // 제외된 파일이 있으면 스낵바로 알림 (후순위)
-        else if (nonTakenUriStrings.isNotEmpty()) {
-            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar(
-                "파일은 5개까지만 추가 가능합니다."
-            ))
+        else if (exceededAvailableSlots) {
+            sendEffect(
+                MyInvitationGuestBookSideEffect.ShowSnackbar(
+                    "파일은 20개까지만 추가 가능합니다."
+                )
+            )
         }
         
     }

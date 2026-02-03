@@ -163,11 +163,12 @@ fun MyInvitationGuestBookRoute(
     ) { success ->
         if (success && cameraImageUri != null) {
             val currentMedias = uiState.selectedMedias
+            // TODO: 검증
             if (currentMedias.size < 5) {
                 // 촬영한 사진을 SelectedMedia로 변환하여 추가
                 val newMedia = uriToSelectedMedia(context, cameraImageUri.toString())
                 val updatedMedias = (currentMedias + newMedia).toImmutableList()
-                viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias))
+                viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias, false, false))
             }
         }
     }
@@ -375,10 +376,11 @@ fun MyInvitationGuestBookRoute(
             audioRecorder = audioRecorder,
             onRecordingComplete = { recordedFile ->
                 val currentMedias = uiState.selectedMedias
+                // TODO: 검증
                 if (currentMedias.size < 5) {
                     val newMedia = uriToSelectedMedia(context, recordedFile.toURI().toString())
                     val updatedMedias = (currentMedias + newMedia).toImmutableList()
-                    viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias))
+                    viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias, false, false))
                 }
                 showRecordingBottomSheet = false
             },
@@ -615,8 +617,14 @@ private fun GuestBookFormSection(
         isUploading = uiState.isUploading,
         isSubmittable = uiState.isSubmittable,
         editingGuestBookId = uiState.editingGuestBookId,
-        onMediasSelected = { medias, rejectedUriStrings, nonTakenUriStrings ->
-            onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(medias, rejectedUriStrings, nonTakenUriStrings))
+        onMediasSelected = { medias, exceededAvailableBytes, exceedAvailableSlots ->
+            onEvent(
+                MyInvitationGuestBookUiEvent.UpdateSelectedMedias(
+                    medias,
+                    exceededAvailableBytes,
+                    exceedAvailableSlots
+                )
+            )
         },
         onMediaRemove = { media ->
             onEvent(MyInvitationGuestBookUiEvent.RemoveMedia(media))

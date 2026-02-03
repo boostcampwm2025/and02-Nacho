@@ -40,10 +40,10 @@ import com.andlife.ui.util.media.uriToSelectedMedia
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import com.andlife.ui.util.media.validateUriStringsByFileSize
+import com.andlife.ui.util.media.validateUriStringsByRule
 
 private const val MAX_LENGTH = 500
-private const val MAX_MEDIAS_COUNT = 5
+private const val MAX_MEDIAS_COUNT = 20
 
 @Composable
 fun InvitationGuestBookForm(
@@ -52,7 +52,7 @@ fun InvitationGuestBookForm(
     isUploading: Boolean,
     isSubmittable: Boolean,
     isAuthenticated: Boolean,
-    onMediasSelected: (ImmutableList<SelectedMedia>, List<String>, List<String>) -> Unit,
+    onMediasSelected: (ImmutableList<SelectedMedia>, Boolean, Boolean) -> Unit,
     onMediaRemove: (SelectedMedia) -> Unit,
     onTextContentChange: (String) -> Unit,
     onCameraClick: () -> Unit,
@@ -81,27 +81,21 @@ fun InvitationGuestBookForm(
         ) { uris ->
             val availableSlotsCnt = MAX_MEDIAS_COUNT - selectedMedias.size
             val uriStrings = uris.map { it.toString() }
-            
+
             // 파일 크기 검증
-            val (validUriStrings, rejectedUriStrings) = validateUriStringsByFileSize(
+            val (validUriStrings, exceededAvailableBytes, exceededAvailableSlots) = validateUriStringsByRule(
                 context = context,
                 uriStrings = uriStrings,
+                availableSlotCnt = availableSlotsCnt,
             )
-            
-            // 유효한 파일들 중 availableSlotsCnt만큼만 take
-            val (takenUriStrings, nonTakenUriStrings) = if (availableSlotsCnt <= 0) {
-                emptyList<String>() to validUriStrings
-            } else {
-                validUriStrings.take(availableSlotsCnt) to validUriStrings.drop(availableSlotsCnt)
-            }
-            
-            val mediasToAdd = takenUriStrings.map { uriString ->
+
+            val mediasToAdd = validUriStrings.map { uriString ->
                 uriToSelectedMedia(context, uriString)
             }
             onMediasSelected(
                 (selectedMedias + mediasToAdd).toImmutableList(),
-                rejectedUriStrings,
-                nonTakenUriStrings
+                exceededAvailableBytes,
+                exceededAvailableSlots
             )
         }
 
@@ -113,25 +107,19 @@ fun InvitationGuestBookForm(
             val uriStrings = uris.map { it.toString() }
 
             // 파일 크기 검증
-            val (validUriStrings, rejectedUriStrings) = validateUriStringsByFileSize(
+            val (validUriStrings, exceededAvailableBytes, exceededAvailableSlots) = validateUriStringsByRule(
                 context = context,
                 uriStrings = uriStrings,
+                availableSlotCnt = availableSlotsCnt,
             )
 
-            // 유효한 파일들 중 availableSlotsCnt만큼만 take
-            val (takenUriStrings, nonTakenUriStrings) = if (availableSlotsCnt <= 0) {
-                emptyList<String>() to validUriStrings
-            } else {
-                validUriStrings.take(availableSlotsCnt) to validUriStrings.drop(availableSlotsCnt)
-            }
-            
-            val mediasToAdd = takenUriStrings.map { uriString ->
+            val mediasToAdd = validUriStrings.map { uriString ->
                 uriToSelectedMedia(context, uriString)
             }
             onMediasSelected(
                 (selectedMedias + mediasToAdd).toImmutableList(),
-                rejectedUriStrings,
-                nonTakenUriStrings
+                exceededAvailableBytes,
+                exceededAvailableSlots
             )
         }
 

@@ -165,9 +165,10 @@ fun InvitationGuestBookRoute(
             val currentMedias = uiState.selectedMedias
             if (currentMedias.size < 5) {
                 // 촬영한 사진을 SelectedMedia로 변환하여 추가
+                // TODO: 검증
                 val newMedia = uriToSelectedMedia(context, cameraImageUri.toString())
                 val updatedMedias = (currentMedias + newMedia).toImmutableList()
-                viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias))
+                viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias, false, false))
             }
         }
     }
@@ -377,7 +378,7 @@ fun InvitationGuestBookRoute(
                 if (currentMedias.size < 5) {
                     val newMedia = uriToSelectedMedia(context, recordedFile.toURI().toString())
                     val updatedMedias = (currentMedias + newMedia).toImmutableList()
-                    viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias))
+                    viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias, false, false))
                 }
                 showRecordingBottomSheet = false
             },
@@ -613,8 +614,14 @@ private fun GuestBookFormSection(
         isUploading = uiState.isUploading,
         isSubmittable = uiState.isSubmittable,
         editingGuestBookId = uiState.editingGuestBookId,
-        onMediasSelected = { medias, rejectedUriStrings, nonTakenUriStrings ->
-            onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(medias, rejectedUriStrings, nonTakenUriStrings))
+        onMediasSelected = { medias, exceededAvailableBytes, exceededAvailableSlots ->
+            onEvent(
+                InvitationGuestBookUiEvent.UpdateSelectedMedias(
+                    medias,
+                    exceededAvailableBytes,
+                    exceededAvailableSlots
+                )
+            )
         },
         onMediaRemove = { media ->
             onEvent(InvitationGuestBookUiEvent.RemoveMedia(media))
