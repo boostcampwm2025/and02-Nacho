@@ -77,15 +77,7 @@ fun NachoNavHost(
                 paddingValues = innerPadding,
                 snackbarHostState = snackbarHostState,
                 onNavigateToCreate = navigator::navigateToMyInvitationCreate,
-                onNavigateToLogin = {
-                    val navOptions = navOptions {
-                        popUpTo(navigator.navController.graph.id) {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
-                    }
-                    navigator.navigateToLogin(navOptions)
-                },
+                onNavigateToLogin = { navigator.navigateToLogin() },
                 onNavigateToInvitationDetail = navigator::navigateToInvitationDetail,
                 onNavigateToMyInvitationDetail = navigator::navigateToMyInvitationDetail,
                 onNavigateToSetting = navigator::navigateToSetting,
@@ -94,6 +86,9 @@ fun NachoNavHost(
             settingNavGraph(
                 onNavigateBack = navigator::navigatePopBackStack,
                 onNavigateToLogin = {
+                    navigator.navigateToLogin()
+                },
+                onLogout = {
                     val navOptions = navOptions {
                         popUpTo(navigator.navController.graph.id) {
                             inclusive = true
@@ -113,15 +108,7 @@ fun NachoNavHost(
             invitationDetailNavGraph(
                 deepLinks = navDeepLink { uriPattern = deepLinkManager.getKakaoDeepLinkPattern() },
                 onNavigateBack = navigator::navigatePopBackStack,
-                onNavigateToLogin = {
-                    val navOptions = navOptions {
-                        popUpTo(navigator.navController.graph.id) {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
-                    }
-                    navigator.navigateToLogin(navOptions)
-                }
+                onNavigateToLogin = { navigator.navigateToLogin() }
             )
 
             myInvitationNavGraph(
@@ -129,14 +116,7 @@ fun NachoNavHost(
                 paddingValues = innerPadding,
                 onNavigateToCreate = navigator::navigateToMyInvitationCreate,
                 onNavigateToDetail = navigator::navigateToMyInvitationDetail,
-                onNavigateToLogin = {
-                    val navOptions = navOptions {
-                        popUpTo(navigator.navController.graph.id) {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
-                    }
-                    navigator.navigateToLogin(navOptions)
+                onNavigateToLogin = { navigator.navigateToLogin()
                 }
             )
 

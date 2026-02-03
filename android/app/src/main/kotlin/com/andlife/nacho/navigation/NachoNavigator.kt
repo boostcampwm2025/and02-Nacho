@@ -147,7 +147,7 @@ class NachoNavigator(
         navController.navigateToUpdateCard(cardId)
     }
 
-    fun navigateToLogin(navOptions: NavOptions) {
+    fun navigateToLogin(navOptions: NavOptions? = null) {
         navController.navigateToLogin(navOptions)
     }
 
