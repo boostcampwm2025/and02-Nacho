@@ -97,6 +97,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 private const val CAMERA_IMAGES_DIR = "camera_images"
+private const val MAX_VIDEO_SIZE_BYTES = 500 * 1024 * 1024L // 500MB
 private const val MAX_MEDIAS_COUNT = 20
 
 @Composable
@@ -171,8 +172,12 @@ fun InvitationGuestBookRoute(
                 if (getFileSizeOrNull(context, cameraImageUri!!) == null) {
                     // TODO: 파일 크기를 읽을 수 없는 경우 별도의 스낵바 안내 필요
                     viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, true, false))
-                    // TODO: 남은 용량 계산해서 초과 여부 전달
-                } else if (getFileSizeOrNull(context, cameraImageUri!!)!! > 500 * 1024 * 1024L) {
+                    // 남은 용량 계산해서 초과 여부 전달
+                } else if (getFileSizeOrNull(
+                        context,
+                        cameraImageUri!!
+                    )!! + uiState.currentMediaSizeBytes > MAX_VIDEO_SIZE_BYTES
+                ) {
                     viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, true, false))
                 } else {
                     // 촬영한 사진을 SelectedMedia로 변환해 추가
@@ -389,8 +394,8 @@ fun InvitationGuestBookRoute(
                 if (currentMedias.size >= MAX_MEDIAS_COUNT) {
                     viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, false, true))
                 } else {
-                    // TODO: 남은 용량 계산해서 초과 여부 전달
-                    if (recordedFile.length() > 500 * 1024 * 1024L) {
+                    // 남은 용량 계산해서 초과 여부 전달
+                    if (recordedFile.length() + uiState.currentMediaSizeBytes > MAX_VIDEO_SIZE_BYTES) {
                         viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, true, false))
                     } else {
                         // 녹음을 SelectedMedia로 변환해 추가
