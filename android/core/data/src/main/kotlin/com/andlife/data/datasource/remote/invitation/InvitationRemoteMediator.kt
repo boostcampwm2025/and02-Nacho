@@ -28,61 +28,66 @@ class InvitationRemoteMediator(
         loadType: LoadType,
         state: PagingState<Int, InvitationSummaryEntity>
     ): MediatorResult {
-
-        val page = when (loadType) {
-            LoadType.REFRESH -> 0
-            LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
-            LoadType.APPEND -> {
-                val loadedItemCount = state.pages.sumOf { it.data.size }
-                if (loadedItemCount == 0) {
-                    return MediatorResult.Success(endOfPaginationReached = true)
+        return try {
+            val page = when (loadType) {
+                LoadType.REFRESH -> 0
+                LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
+                LoadType.APPEND -> {
+                    val loadedItemCount = state.pages.sumOf { it.data.size }
+                    if (loadedItemCount == 0) {
+                        return MediatorResult.Success(endOfPaginationReached = true)
+                    }
+                    loadedItemCount / state.config.pageSize
                 }
-                loadedItemCount / state.config.pageSize
             }
-        }
 
-        val result = if (isMyInvitation) {
-            remoteDataSource.getMyInvitations(
-                status = status,
-                sortType = sortType,
-                page = page,
-                size = state.config.pageSize
-            )
-        } else {
-            remoteDataSource.getParticipantInvitations(
-                status = status,
-                sortType = sortType,
-                page = page,
-                size = state.config.pageSize
-            )
-        }
-
-        return when (result) {
-            is Result.Success -> {
-                val response = result.data
-                onTotalCountLoaded(response.meta.totalCount)
-
-                database.withTransaction {
-                    if (loadType == LoadType.REFRESH) {
-                        dao.clearByQuery(status.name, isMyInvitation)
-                    }
-
-                    val entities = response.content.map { dto ->
-                        dto.toEntity(
-                            status = status.name,
-                            isMyInvitation = isMyInvitation,
-                        )
-                    }
-                    dao.upsertAll(entities)
-                }
-                MediatorResult.Success(
-                    endOfPaginationReached = response.meta.isEnd || response.content.isEmpty()
+            val result = if (isMyInvitation) {
+                remoteDataSource.getMyInvitations(
+                    status = status,
+                    sortType = sortType,
+                    page = page,
+                    size = state.config.pageSize
+                )
+            } else {
+                remoteDataSource.getParticipantInvitations(
+                    status = status,
+                    sortType = sortType,
+                    page = page,
+                    size = state.config.pageSize
                 )
             }
 
-            is Result.Error -> {
-                MediatorResult.Error(Exception("${result.error}: ${result.message}"))
+            when (result) {
+                is Result.Success -> {
+                    val response = result.data
+
+                    database.withTransaction {
+                        if (loadType == LoadType.REFRESH) {
+                            dao.clearByQuery(status.name, isMyInvitation)
+                        }
+
+                        val entities = response.content.map { dto ->
+                            dto.toEntity(
+                                status = status.name,
+                                isMyInvitation = isMyInvitation,
+                            )
+                        }
+                        dao.upsertAll(entities)
+                    }
+
+                    onTotalCountLoaded(response.meta.totalCount)
+
+                    MediatorResult.Success(
+                        endOfPaginationReached = response.meta.isEnd || response.content.isEmpty()
+                    )
+                }
+
+                is Result.Error -> {
+                    MediatorResult.Error(Exception("${result.error}: ${result.message}"))
+                }
             }
+        } catch (e: Exception) {
+            MediatorResult.Error(e)
         }
     }
 }
