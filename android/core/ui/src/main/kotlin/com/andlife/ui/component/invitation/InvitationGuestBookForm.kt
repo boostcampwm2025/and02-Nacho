@@ -44,6 +44,13 @@ import com.andlife.ui.util.media.validateUriStringsByRule
 
 private const val MAX_LENGTH = 500
 private const val MAX_MEDIAS_COUNT = 20
+private const val MAX_VIDEO_SIZE_BYTES = 500 * 1024 * 1024L // 500MB
+
+private fun formatSizeInMB(sizeBytes: Long): String {
+    val sizeMB = sizeBytes / (1024 * 1024)
+    val maxMB = MAX_VIDEO_SIZE_BYTES / (1024 * 1024)
+    return "${sizeMB}/${maxMB}MB"
+}
 
 @Composable
 fun InvitationGuestBookForm(
@@ -192,15 +199,17 @@ fun InvitationGuestBookForm(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // 미디어 아이콘 표시
-            val isMediaAddEnabled = isAuthenticated && selectedMedias.size < MAX_MEDIAS_COUNT
-            val iconColor =
-                if (isMediaAddEnabled) {
-                    NachoTheme.colorScheme.brandPrimary
-                } else {
-                    NachoTheme.colorScheme.iconDisabled
-                }
-            Row(horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium)) {
+            // 미디어 아이콘 및 용량 표시
+            Column {
+                // 미디어 아이콘 표시
+                val isMediaAddEnabled = isAuthenticated && selectedMedias.size < MAX_MEDIAS_COUNT
+                val iconColor =
+                    if (isMediaAddEnabled) {
+                        NachoTheme.colorScheme.brandPrimary
+                    } else {
+                        NachoTheme.colorScheme.iconDisabled
+                    }
+                Row(horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium)) {
                 Icon(
                     painter = painterResource(R.drawable.ic_image_16),
                     contentDescription = null,
@@ -276,6 +285,17 @@ fun InvitationGuestBookForm(
                                 }
                             },
                 )
+            }
+            
+                // 용량 표시 (미디어가 있을 때만)
+                if (selectedMedias.isNotEmpty()) {
+                    Text(
+                        text = formatSizeInMB(currentMediaSizeBytes),
+                        style = NachoTheme.typography.bodySmallRegular,
+                        color = NachoTheme.colorScheme.textTertiary,
+                        modifier = Modifier.padding(top = NachoSpacing.xSmall)
+                    )
+                }
             }
             NachoButton(
                 onClick = onUploadClick,
