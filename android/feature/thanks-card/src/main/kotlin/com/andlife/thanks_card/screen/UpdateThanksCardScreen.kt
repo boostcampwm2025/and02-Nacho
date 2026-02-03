@@ -6,14 +6,17 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.andlife.designsystem.component.dialog.NachoDialog
 import com.andlife.editor.screen.EditorScreen
 import com.andlife.editor.state.EditorState
 import com.andlife.thanks_card.R
@@ -21,6 +24,7 @@ import com.andlife.thanks_card.model.update.UpdateThanksCardSideEffect
 import com.andlife.thanks_card.model.update.UpdateThanksCardUiEvent
 import com.andlife.thanks_card.model.update.UpdateThanksCardUiState
 import com.andlife.thanks_card.viewmodel.UpdateThanksCardViewModel
+import com.andlife.ui.component.card.DiscardChangesDialogContent
 import com.andlife.ui.component.loading.InvitationLoadingError
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.coroutines.launch
@@ -37,11 +41,16 @@ fun UpdateThanksCardRoute(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val res = LocalResources.current
+    var showBackDialog by remember { mutableStateOf(false) }
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             UpdateThanksCardSideEffect.OnBack -> {
-                onBackClick()
+                if (editorState.currentText.isNotEmpty()) {
+                    showBackDialog = true
+                } else {
+                    onBackClick()
+                }
             }
             UpdateThanksCardSideEffect.OnFailUpdateThanksCard -> {
                 scope.launch {
@@ -62,6 +71,17 @@ fun UpdateThanksCardRoute(
         onEvent = viewModel::onEvent,
         modifier = modifier
     )
+    if (showBackDialog) {
+        NachoDialog(onDismiss = { showBackDialog = false }) {
+            DiscardChangesDialogContent(
+                onConfirm = {
+                    showBackDialog = false
+                    onBackClick()
+                },
+                onDismiss = { showBackDialog = false }
+            )
+        }
+    }
 }
 
 @Composable
