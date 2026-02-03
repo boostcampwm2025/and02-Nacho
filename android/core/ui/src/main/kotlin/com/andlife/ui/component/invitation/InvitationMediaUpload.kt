@@ -3,6 +3,7 @@ package com.andlife.ui.component.invitation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,6 +14,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,14 +34,17 @@ import kotlinx.collections.immutable.toImmutableList
 @Composable
 fun InvitationMediaUpload(
     selectedMedias: ImmutableList<SelectedMedia>,
+    currentMediaSizeBytes: Long,
+    maxMediasCount: Int,
+    maxMediaSizeBytes: Long,
     onMediaRemove: (SelectedMedia) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
-    ) {
-        if (selectedMedias.isNotEmpty()) {
+    if (selectedMedias.isNotEmpty()) {
+        Column(
+            modifier = modifier,
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
+        ) {
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
                 modifier = Modifier.fillMaxWidth(),
@@ -50,6 +55,23 @@ fun InvitationMediaUpload(
                         onRemove = { onMediaRemove(media) },
                     )
                 }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall)) {
+                // 미디어 개수 표시
+                Text(
+                    text = "${selectedMedias.size}/${maxMediasCount}",
+                    style = NachoTheme.typography.bodySmallRegular,
+                    color = NachoTheme.colorScheme.textTertiary,
+                    modifier = Modifier.padding(top = NachoSpacing.xSmall)
+                )
+
+                // 용량 표시
+                Text(
+                    text = "${currentMediaSizeBytes / (1024 * 1024)}/${maxMediaSizeBytes / (1024 * 1024)}MB",
+                    style = NachoTheme.typography.bodySmallRegular,
+                    color = NachoTheme.colorScheme.textTertiary,
+                    modifier = Modifier.padding(top = NachoSpacing.xSmall)
+                )
             }
         }
     }
@@ -117,6 +139,9 @@ private fun InvitationMediaUploadPreview() {
                     ),
                 ).toImmutableList(),
             onMediaRemove = {},
+            currentMediaSizeBytes = 120 * 1024 * 1024L,
+            maxMediasCount = 20,
+            maxMediaSizeBytes = 500 * 1024 * 1024L,
         )
     }
 }

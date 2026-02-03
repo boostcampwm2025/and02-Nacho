@@ -46,12 +46,6 @@ private const val MAX_LENGTH = 500
 private const val MAX_MEDIAS_COUNT = 20
 private const val MAX_MEDIA_SIZE_BYTES = 500 * 1024 * 1024L // 500MB
 
-private fun formatSizeInMB(sizeBytes: Long): String {
-    val sizeMB = sizeBytes / (1024 * 1024)
-    val maxMB = MAX_MEDIA_SIZE_BYTES / (1024 * 1024)
-    return "${sizeMB}/${maxMB}MB"
-}
-
 @Composable
 fun InvitationGuestBookForm(
     selectedMedias: ImmutableList<SelectedMedia>,
@@ -140,6 +134,9 @@ fun InvitationGuestBookForm(
         // 미디어 업로드 UI
         InvitationMediaUpload(
             selectedMedias = selectedMedias,
+            currentMediaSizeBytes = currentMediaSizeBytes,
+            maxMediasCount = MAX_MEDIAS_COUNT,
+            maxMediaSizeBytes = MAX_MEDIA_SIZE_BYTES,
             onMediaRemove = onMediaRemove,
             modifier = Modifier
                 .fillMaxWidth()
@@ -284,24 +281,6 @@ fun InvitationGuestBookForm(
                                         it
                                     }
                                 },
-                    )
-                }
-
-                Row(horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small)) {
-                    // 미디어 개수 표시
-                    Text(
-                        text = "${selectedMedias.size}/${MAX_MEDIAS_COUNT}",
-                        style = NachoTheme.typography.bodySmallRegular,
-                        color = NachoTheme.colorScheme.textTertiary,
-                        modifier = Modifier.padding(top = NachoSpacing.xSmall)
-                    )
-
-                    // 용량 표시
-                    Text(
-                        text = formatSizeInMB(currentMediaSizeBytes),
-                        style = NachoTheme.typography.bodySmallRegular,
-                        color = NachoTheme.colorScheme.textTertiary,
-                        modifier = Modifier.padding(top = NachoSpacing.xSmall)
                     )
                 }
             }
