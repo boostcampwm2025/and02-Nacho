@@ -85,6 +85,7 @@ import com.andlife.ui.component.paging.PagingStateContent
 import com.andlife.ui.util.audio.AudioRecorder
 import com.andlife.ui.util.collectWithLifecycle
 import com.andlife.ui.util.imeWithoutNavBars
+import com.andlife.ui.util.media.getFileSizeOrNull
 import com.andlife.ui.util.media.uriToSelectedMedia
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
@@ -163,12 +164,21 @@ fun InvitationGuestBookRoute(
     ) { success ->
         if (success && cameraImageUri != null) {
             val currentMedias = uiState.selectedMedias
-            if (currentMedias.size < 5) {
-                // 촬영한 사진을 SelectedMedia로 변환하여 추가
-                // TODO: 검증
-                val newMedia = uriToSelectedMedia(context, cameraImageUri.toString())
-                val updatedMedias = (currentMedias + newMedia).toImmutableList()
-                viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias, false, false))
+            if (currentMedias.size >= MAX_MEDIAS_COUNT) {
+                viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, false, true))
+            } else {
+                if (getFileSizeOrNull(context, cameraImageUri!!) == null) {
+                    // TODO: 파일 크기를 읽을 수 없는 경우 별도의 스낵바 안내 필요
+                    viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, true, false))
+                    // TODO: 남은 용량 계산해서 초과 여부 전달
+                } else if (getFileSizeOrNull(context, cameraImageUri!!)!! > 500 * 1024 * 1024L) {
+                    viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, true, false))
+                } else {
+                    // 촬영한 사진을 SelectedMedia로 변환해 추가
+                    val newMedia = uriToSelectedMedia(context, cameraImageUri.toString())
+                    val updatedMedias = (currentMedias + newMedia).toImmutableList()
+                    viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias, false, false))
+                }
             }
         }
     }
@@ -375,10 +385,18 @@ fun InvitationGuestBookRoute(
             audioRecorder = audioRecorder,
             onRecordingComplete = { recordedFile ->
                 val currentMedias = uiState.selectedMedias
-                if (currentMedias.size < 5) {
-                    val newMedia = uriToSelectedMedia(context, recordedFile.toURI().toString())
-                    val updatedMedias = (currentMedias + newMedia).toImmutableList()
-                    viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias, false, false))
+                if (currentMedias.size >= MAX_MEDIAS_COUNT) {
+                    viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, false, true))
+                } else {
+                    // TODO: 남은 용량 계산해서 초과 여부 전달
+                    if (recordedFile.length() > 500 * 1024 * 1024L) {
+                        viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, true, false))
+                    } else {
+                        // 녹음을 SelectedMedia로 변환해 추가
+                        val newMedia = uriToSelectedMedia(context, recordedFile.toURI().toString())
+                        val updatedMedias = (currentMedias + newMedia).toImmutableList()
+                        viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias, false, false))
+                    }
                 }
                 showRecordingBottomSheet = false
             },
