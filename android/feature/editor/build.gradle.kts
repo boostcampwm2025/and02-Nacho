@@ -7,6 +7,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.lottie.compose)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.exifinterface)
     implementation(libs.androidx.core.ktx)
