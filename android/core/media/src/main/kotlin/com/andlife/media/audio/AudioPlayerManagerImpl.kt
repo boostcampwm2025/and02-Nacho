@@ -120,9 +120,6 @@ class AudioPlayerManagerImpl @Inject constructor(
             }
 
             val mediaItem = MediaItem.fromUri(url)
-//            val mediaSource =
-//                ProgressiveMediaSource.Factory(DefaultDataSource.Factory(context))
-//                    .createMediaSource(mediaItem)
             val mediaSource = ProgressiveMediaSource.Factory(cacheDataSourceFactory).createMediaSource(mediaItem)
 
             player.setMediaSource(mediaSource)
