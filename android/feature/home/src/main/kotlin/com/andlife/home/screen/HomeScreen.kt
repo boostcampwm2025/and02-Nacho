@@ -625,7 +625,7 @@ private fun LazyListScope.homeGuestBookSection(
                     onInvitationTitleClick = {
                         onInvitationTitleClick(
                             guestBook.invitation?.id ?: -1L,
-                            guestBook.isOwner,
+                            guestBook.isInvitationOwner,
                         )
                     },
                     onVisualMediaClick = { onVisualMediaClick(it.url) },

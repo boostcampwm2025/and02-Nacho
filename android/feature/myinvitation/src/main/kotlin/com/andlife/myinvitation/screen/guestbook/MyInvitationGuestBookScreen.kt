@@ -708,6 +708,7 @@ private fun InvitationGuestBookResultPreview() {
             ).toImmutableList(),
             totalVisualCount = 0,
             isOwner = true,
+            isInvitationOwner = false,
             createdAt = LocalDateTime(2026, 1, 20, 10, 0),
             updatedAt = LocalDateTime(2026, 1, 20, 10, 0),
         ),
@@ -719,6 +720,7 @@ private fun InvitationGuestBookResultPreview() {
             audioMedias = emptyList<GuestBookMediaUiModel>().toImmutableList(),
             totalVisualCount = 0,
             isOwner = false,
+            isInvitationOwner = false,
             createdAt = LocalDateTime(2026, 1, 19, 15, 30),
             updatedAt = LocalDateTime(2026, 1, 19, 15, 30),
         )
