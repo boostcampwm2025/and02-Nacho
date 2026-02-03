@@ -97,7 +97,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 private const val CAMERA_IMAGES_DIR = "camera_images"
-private const val MAX_VIDEO_SIZE_BYTES = 500 * 1024 * 1024L // 500MB
+private const val MAX_MEDIA_SIZE_BYTES = 500 * 1024 * 1024L // 500MB
 private const val MAX_MEDIAS_COUNT = 20
 
 @Composable
@@ -176,7 +176,7 @@ fun MyInvitationGuestBookRoute(
                 } else if (getFileSizeOrNull(
                         context,
                         cameraImageUri!!
-                    )!! + uiState.currentMediaSizeBytes > MAX_VIDEO_SIZE_BYTES
+                    )!! + uiState.currentMediaSizeBytes > MAX_MEDIA_SIZE_BYTES
                 ) {
                     viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, true, false))
                 } else {
@@ -396,7 +396,7 @@ fun MyInvitationGuestBookRoute(
                     viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, false, true))
                 } else {
                     // 남은 용량 계산해서 초과 여부 전달
-                    if (recordedFile.length() + uiState.currentMediaSizeBytes > MAX_VIDEO_SIZE_BYTES) {
+                    if (recordedFile.length() + uiState.currentMediaSizeBytes > MAX_MEDIA_SIZE_BYTES) {
                         viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, true, false))
                     } else {
                         // 녹음을 SelectedMedia로 변환해 추가

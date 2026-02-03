@@ -44,11 +44,11 @@ import com.andlife.ui.util.media.validateUriStringsByRule
 
 private const val MAX_LENGTH = 500
 private const val MAX_MEDIAS_COUNT = 20
-private const val MAX_VIDEO_SIZE_BYTES = 500 * 1024 * 1024L // 500MB
+private const val MAX_MEDIA_SIZE_BYTES = 500 * 1024 * 1024L // 500MB
 
 private fun formatSizeInMB(sizeBytes: Long): String {
     val sizeMB = sizeBytes / (1024 * 1024)
-    val maxMB = MAX_VIDEO_SIZE_BYTES / (1024 * 1024)
+    val maxMB = MAX_MEDIA_SIZE_BYTES / (1024 * 1024)
     return "${sizeMB}/${maxMB}MB"
 }
 

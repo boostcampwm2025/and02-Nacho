@@ -18,7 +18,7 @@ import androidx.core.net.toUri
  * - 세 번째 값: 선택 가능 개수 초과로 인해 검사가 종료되었는지 여부
  */
 
-private const val MAX_VIDEO_SIZE_BYTES = 500 * 1024 * 1024L // 500MB
+private const val MAX_MEDIA_SIZE_BYTES = 500 * 1024 * 1024L // 500MB
 
 fun validateUriStringsByRule(
     context: Context,
@@ -40,7 +40,7 @@ fun validateUriStringsByRule(
                 if (validUriStrings.size >= availableSlotCnt) {
                     exceededAvailableSlots = true
                     return@forEach
-                } else if (currentBytes + fileSize > MAX_VIDEO_SIZE_BYTES) {
+                } else if (currentBytes + fileSize > MAX_MEDIA_SIZE_BYTES) {
                     exceededAvailableBytes = true
                 } else {
                     validUriStrings.add(uriString)
