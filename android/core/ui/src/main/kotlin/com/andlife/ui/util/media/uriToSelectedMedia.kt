@@ -68,9 +68,19 @@ fun uriToSelectedMedia(
             null
         }
 
+    val fileSizeBytes =
+        try {
+            context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
+                pfd.statSize
+            }
+        } catch (e: Exception) {
+            null
+        }
+
     return SelectedMedia(
         uri = uriString,
         type = mediaType,
         duration = duration,
+        sizeBytes = fileSizeBytes
     )
 }

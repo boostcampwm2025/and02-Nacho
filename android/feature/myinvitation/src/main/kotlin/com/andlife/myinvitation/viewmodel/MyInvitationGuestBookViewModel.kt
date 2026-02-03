@@ -184,8 +184,16 @@ constructor(
         }
         
     private fun calculateTotalMediaSize(medias: List<SelectedMedia>): Long {
-        // TODO: SelectedMedia file Size
-        return 0L
+        var totalMediaSize = 0L
+        medias.map { media ->
+            val fileSize = media.sizeBytes
+            if (fileSize != null) {
+                totalMediaSize += fileSize
+            } else {
+                Log.d("GuestBookViewModel", "Media size: size unknown")
+            }
+        }
+        return totalMediaSize
     }
 
     private fun updateTextContent(textContent: String) {
