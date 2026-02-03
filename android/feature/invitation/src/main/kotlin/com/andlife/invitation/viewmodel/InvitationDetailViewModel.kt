@@ -122,6 +122,7 @@ class InvitationDetailViewModel @Inject constructor(
     private fun retryLoad() {
         viewModelScope.launch {
             loadInvitation()
+            updateState { copy(hasShownLottie = false) }
         }
     }
 
