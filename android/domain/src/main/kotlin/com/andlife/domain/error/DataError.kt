@@ -22,5 +22,9 @@ sealed interface DataError : InvitationError {
         OutOfMemory,
         CompressFailed,
     }
+
+    enum class Validation : DataError {
+        FILE_TOO_LARGE,
+    }
 }
 
