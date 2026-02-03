@@ -43,7 +43,6 @@ fun InvitationMediaUpload(
     if (selectedMedias.isNotEmpty()) {
         Column(
             modifier = modifier,
-            verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
         ) {
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
@@ -56,7 +55,10 @@ fun InvitationMediaUpload(
                     )
                 }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall)) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
                 // 미디어 개수 표시
                 Text(
                     text = "${selectedMedias.size}/${maxMediasCount}",
