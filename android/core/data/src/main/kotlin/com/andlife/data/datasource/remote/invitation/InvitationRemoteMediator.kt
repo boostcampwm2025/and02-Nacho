@@ -60,6 +60,7 @@ class InvitationRemoteMediator(
             when (result) {
                 is Result.Success -> {
                     val response = result.data
+                    onTotalCountLoaded(response.meta.totalCount)
 
                     database.withTransaction {
                         if (loadType == LoadType.REFRESH) {
@@ -74,8 +75,6 @@ class InvitationRemoteMediator(
                         }
                         dao.upsertAll(entities)
                     }
-
-                    onTotalCountLoaded(response.meta.totalCount)
 
                     MediatorResult.Success(
                         endOfPaginationReached = response.meta.isEnd || response.content.isEmpty()
