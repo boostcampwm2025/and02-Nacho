@@ -5,14 +5,20 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.andlife.database.converter.Converters
 import com.andlife.database.dao.InvitationSummaryDao
+import com.andlife.database.dao.UpcomingInvitationDao
 import com.andlife.database.entity.InvitationSummaryEntity
+import com.andlife.database.entity.UpcomingInvitationEntity
 
 @Database(
-    entities = [InvitationSummaryEntity::class],
+    entities = [
+        InvitationSummaryEntity::class,
+        UpcomingInvitationEntity::class,
+    ],
     version = 1,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class InvitationDatabase : RoomDatabase() {
     abstract fun invitationSummaryDao(): InvitationSummaryDao
+    abstract fun upcomingInvitationDao(): UpcomingInvitationDao
 }

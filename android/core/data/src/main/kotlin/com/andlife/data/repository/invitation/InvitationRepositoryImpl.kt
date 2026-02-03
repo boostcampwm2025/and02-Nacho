@@ -8,7 +8,7 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import com.andlife.data.datasource.remote.invitation.InvitationRemoteDataSource
 import com.andlife.data.datasource.remote.invitation.InvitationRemoteMediator
-import com.andlife.data.datasource.remote.invitation.UpcomingInvitationPagingSource
+import com.andlife.data.datasource.remote.invitation.UpcomingInvitationRemoteMediator
 import com.andlife.data.repository.invitation.mapper.toDomain
 import com.andlife.data.repository.invitation.mapper.toRequest
 import com.andlife.database.InvitationDatabase
@@ -149,6 +149,7 @@ internal class InvitationRepositoryImpl @Inject constructor(
         }
     }
 
+    @OptIn(ExperimentalPagingApi::class)
     override fun getUpcomingInvitations(): Flow<PagingData<UpcomingInvitation>> =
         Pager(
             config = PagingConfig(
@@ -156,13 +157,17 @@ internal class InvitationRepositoryImpl @Inject constructor(
                 enablePlaceholders = false,
                 initialLoadSize = PAGE_SIZE,
             ),
+            remoteMediator = UpcomingInvitationRemoteMediator(
+                remoteDataSource = invitationRemoteDataSource,
+                database = database,
+                days = UPCOMING_DAYS_THRESHOLD,
+            ),
             pagingSourceFactory = {
-                UpcomingInvitationPagingSource(
-                    remoteDataSource = invitationRemoteDataSource,
-                    days = UPCOMING_DAYS_THRESHOLD,
-                )
+                database.upcomingInvitationDao().pagingSource()
             }
-        ).flow
+        ).flow.map { pagingData ->
+            pagingData.map { it.toDomain() }
+        }
 
     override suspend fun createInvitationCard(
         invitationId: Long,

@@ -7,26 +7,21 @@ import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.andlife.data.repository.invitation.mapper.toEntity
 import com.andlife.database.InvitationDatabase
-import com.andlife.database.entity.InvitationSummaryEntity
-import com.andlife.domain.model.invitation.InvitationStatus
-import com.andlife.domain.model.invitation.SortDirection
+import com.andlife.database.entity.UpcomingInvitationEntity
 import com.andlife.domain.util.Result
 
 @OptIn(ExperimentalPagingApi::class)
-class InvitationRemoteMediator(
+class UpcomingInvitationRemoteMediator(
     private val remoteDataSource: InvitationRemoteDataSource,
     private val database: InvitationDatabase,
-    private val status: InvitationStatus,
-    private val sortType: SortDirection,
-    private val isMyInvitation: Boolean,
-    private val onTotalCountLoaded: (Int) -> Unit
-) : RemoteMediator<Int, InvitationSummaryEntity>() {
+    private val days: Long,
+) : RemoteMediator<Int, UpcomingInvitationEntity>() {
 
-    private val dao = database.invitationSummaryDao()
+    private val dao = database.upcomingInvitationDao()
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, InvitationSummaryEntity>
+        state: PagingState<Int, UpcomingInvitationEntity>
     ): MediatorResult {
 
         val page = when (loadType) {
@@ -41,40 +36,24 @@ class InvitationRemoteMediator(
             }
         }
 
-        val result = if (isMyInvitation) {
-            remoteDataSource.getMyInvitations(
-                status = status,
-                sortType = sortType,
-                page = page,
-                size = state.config.pageSize
-            )
-        } else {
-            remoteDataSource.getParticipantInvitations(
-                status = status,
-                sortType = sortType,
-                page = page,
-                size = state.config.pageSize
-            )
-        }
+        val result = remoteDataSource.getUpcomingInvitations(
+            days = days,
+            page = page,
+            size = state.config.pageSize
+        )
 
         return when (result) {
             is Result.Success -> {
                 val response = result.data
-                onTotalCountLoaded(response.meta.totalCount)
 
                 database.withTransaction {
                     if (loadType == LoadType.REFRESH) {
-                        dao.clearByQuery(status.name, isMyInvitation)
+                        dao.clearAll()
                     }
-
-                    val entities = response.content.map { dto ->
-                        dto.toEntity(
-                            status = status.name,
-                            isMyInvitation = isMyInvitation,
-                        )
-                    }
+                    val entities = response.content.map { it.toEntity() }
                     dao.upsertAll(entities)
                 }
+
                 MediatorResult.Success(
                     endOfPaginationReached = response.meta.isEnd || response.content.isEmpty()
                 )
