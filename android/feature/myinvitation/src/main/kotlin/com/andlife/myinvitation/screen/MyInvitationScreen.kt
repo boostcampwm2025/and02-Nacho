@@ -9,9 +9,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -42,12 +43,9 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.component.dialog.NachoDialog
-import com.andlife.designsystem.theme.NachoElevation
-import com.andlife.designsystem.R as designR
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.auth.AuthState
-import com.andlife.domain.model.card.TextAlignment
 import com.andlife.domain.model.invitation.SortDirection
 import com.andlife.model.invitation.InvitationSummaryUiModel
 import com.andlife.myinvitation.model.MyInvitationSideEffect
@@ -66,6 +64,7 @@ import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
+import com.andlife.designsystem.R as designR
 
 @Composable
 fun MyInvitationRoute(
@@ -112,6 +111,11 @@ fun MyInvitationRoute(
                     snackbarHostState.currentSnackbarData?.dismiss()
                     snackbarHostState.showSnackbar(deleteFailureMessage)
                 }
+            }
+
+            is MyInvitationSideEffect.NeedRefresh -> {
+                upcomingItems.refresh()
+                pastItems.refresh()
             }
 
             MyInvitationSideEffect.NavigateToLogin -> onNavigateToLogin()
@@ -264,6 +268,7 @@ private fun MyInvitationScreen(
                             PagingStateContent(
                                 loadState = currentItems.loadState.refresh,
                                 itemCount = currentItems.itemCount,
+                                emptyComment = stringResource(R.string.label_myinvitation_empty),
                                 onRetry = { currentItems.retry() }
                             ) {
                                 LazyColumn(
@@ -354,27 +359,32 @@ private fun MyInvitationScreen(
                         verticalArrangement = Arrangement.spacedBy(NachoSpacing.large)
                     ) {
                         Text(
-                            text = stringResource(R.string.desc_not_logged),
-                            style = NachoTheme.typography.bodyLargeMedium,
+                            text = stringResource(R.string.desc_not_logged_title),
+                            style = NachoTheme.typography.headingSmallSemiBold,
+                            color = NachoTheme.colorScheme.textPrimary,
                             textAlign = TextAlign.Center
                         )
+
+                        Text(
+                            text = stringResource(R.string.desc_not_logged_content),
+                            style = NachoTheme.typography.bodyLargeMedium,
+                            color = NachoTheme.colorScheme.textSecondary,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(NachoSpacing.large))
+
                         NachoButton(
                             onClick = { onEvent(MyInvitationUiEvent.ClickLogin) },
-                            elevation =
-                                ButtonDefaults.buttonElevation(
-                                    defaultElevation = NachoElevation.none,
-                                    pressedElevation = NachoElevation.none,
-                                ),
-                            containerColor = NachoTheme.colorScheme.brandOnPrimary,
-                            contentColor = NachoTheme.colorScheme.brandPrimary,
-                            contentPadding = PaddingValues(
-                                horizontal = NachoSpacing.small,
-                                vertical = NachoSpacing.xSmall
-                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = NachoSpacing.twoXLarge),
+                            shape = RoundedCornerShape(NachoSpacing.medium),
+                            contentPadding = PaddingValues(vertical = NachoSpacing.medium),
                         ) {
                             Text(
-                                text = stringResource(R.string.txt_go_login),
-                                color = NachoTheme.colorScheme.brandPrimary
+                                text = stringResource(R.string.txt_start_login),
+                                style = NachoTheme.typography.bodyLargeSemiBold
                             )
                         }
                     }

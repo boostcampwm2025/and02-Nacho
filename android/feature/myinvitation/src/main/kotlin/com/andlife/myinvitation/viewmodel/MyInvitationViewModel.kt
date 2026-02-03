@@ -137,4 +137,8 @@ class MyInvitationViewModel @Inject constructor(
             updateState { copy(isRefreshing = false) }
         }
     }
+
+    fun handleRefresh() {
+        sendEffect(MyInvitationSideEffect.NeedRefresh)
+    }
 }

@@ -20,6 +20,7 @@ data class Invitation(
     val longitude: Double,
     val locationGuide: String?,
     val invitationCard: InvitationCard?,
+    val thanksCard: NachoCard?,
     val announcements: List<Announcement>,
 )
 

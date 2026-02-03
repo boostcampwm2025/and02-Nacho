@@ -29,7 +29,7 @@ class GlobalExceptionHandler {
     fun handleGeneral(e: Exception): BaseResponse<Nothing> {
         return BaseResponse.error(
             responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR,
-            customMessage = "서버 내부 오류가 발생했습니다."
+            customMessage = "서버 내부 오류가 발생했습니다. ${e.message}"
         )
     }
 

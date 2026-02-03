@@ -8,6 +8,8 @@ import androidx.paging.map
 import com.andlife.domain.model.invitation.InvitationStatus
 import com.andlife.domain.model.invitation.SortDirection
 import com.andlife.domain.repository.invitation.InvitationRepository
+import com.andlife.domain.util.RefreshEventHub
+import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.invitation.model.InvitationSideEffect
@@ -116,6 +118,7 @@ class InvitationViewModel @Inject constructor(
             invitationRepository.leaveInvitation(invitationId)
                 .onSuccess {
                     sendEffect(InvitationSideEffect.LeaveSuccess)
+                    RefreshEventHub.emit(RefreshTarget.HOME)
                 }
                 .onFailure { it, msg ->
                     sendEffect(InvitationSideEffect.LeaveFailure)
@@ -130,8 +133,8 @@ class InvitationViewModel @Inject constructor(
         if (hasError) sendEffect(InvitationSideEffect.RefreshFailure)
     }
 
-    fun handleDeepLinkRefresh() {
-        sendEffect(InvitationSideEffect.RefreshFromDeepLink)
+    fun handleRefresh() {
+        sendEffect(InvitationSideEffect.NeedRefresh)
     }
 
 }

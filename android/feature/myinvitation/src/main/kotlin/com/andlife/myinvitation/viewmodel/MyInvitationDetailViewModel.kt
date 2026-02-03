@@ -1,12 +1,16 @@
 package com.andlife.myinvitation.viewmodel
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.text.Editable
 import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.andlife.deeplink.DeepLinkManager
 import com.andlife.domain.repository.invitation.InvitationRepository
+import com.andlife.domain.repository.thankscard.ThanksCardRepository
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.editor.util.CreateCardSession
@@ -33,6 +37,9 @@ class MyInvitationDetailViewModel @Inject constructor(
     private val kakaoShareManager: KakaoShareManager,
     private val invitationRepository: InvitationRepository,
     private val createCardSession: CreateCardSession,
+    private val deepLinkManager: DeepLinkManager,
+    private val clipboardManager: ClipboardManager,
+    private val thanksCardRepository: ThanksCardRepository,
 ) : BaseViewModel<MyInvitationDetailUiState, MyInvitationDetailUiEvent, MyInvitationDetailSideEffect>(
     initialState = MyInvitationDetailUiState(),
 ) {
@@ -58,7 +65,6 @@ class MyInvitationDetailViewModel @Inject constructor(
                     copy(
                         isLoading = false,
                         isError = false,
-                        hasThanksCard = false, // TODO: 감사카드 존재 여부는 별도 API로 확인 필요
                         invitationContentsUiModel = invitation.toContentsUiModel(),
                     )
                 }
@@ -81,6 +87,9 @@ class MyInvitationDetailViewModel @Inject constructor(
             is MyInvitationDetailUiEvent.MapError -> showMapErrorSnackbar()
             is MyInvitationDetailUiEvent.RetryLoad -> retryLoad()
             MyInvitationDetailUiEvent.ClickCreateCard -> navigateToCreateCard()
+            MyInvitationDetailUiEvent.CopyInvitationLink -> copyInvitationLink()
+            MyInvitationDetailUiEvent.ClickDeleteThanksCard -> deleteThanksCard()
+            is MyInvitationDetailUiEvent.ClickUpdateThanksCard -> updateThanksCard(event.cardId)
         }
     }
 
@@ -104,20 +113,22 @@ class MyInvitationDetailViewModel @Inject constructor(
         )
     }
 
-    private fun deleteInvitation() { /* TODO: 초대장 삭제 로직 */
+    private fun deleteInvitation() {
     }
 
     private fun navigateToEditInvitation() {
         sendEffect(MyInvitationDetailSideEffect.NavigateToEditInvitation(myInvitationId))
     }
 
-    private fun showThanksCardOnboarding() { /* TODO: 감사카드 온보딩 */
+    private fun showThanksCardOnboarding() {
+        sendEffect(MyInvitationDetailSideEffect.ThanksCardOnBoarding)
     }
 
-    private fun navigateToCreateThanksCard() { /* TODO: 감사카드 작성 이동 */
+    private fun navigateToCreateThanksCard() {
+        sendEffect(MyInvitationDetailSideEffect.NavigateToCreateThanksCard(myInvitationId))
     }
 
-    private fun navigateToEditCard() { // TODO: 초대카드 편집 이동
+    private fun navigateToEditCard() {
         val card = uiState.value.invitationContentsUiModel.invitationCard
         if (card == null) return
         val cardId = card.card.id ?: return
@@ -135,21 +146,56 @@ class MyInvitationDetailViewModel @Inject constructor(
         updateState { copy(editCardEnabled = true, cachedCardEditable = editable) }
     }
 
+    fun saveThanksCardEditableCache(editable: Editable) {
+        updateState { copy(thanksCardEditableCache = editable) }
+    }
+
     private fun navigateToFullScreenImage(imageList: ImmutableList<String>, index: Int) { /* TODO: 이미지 풀스크린*/ }
+
+    private fun copyInvitationLink() {
+        val url = deepLinkManager.buildAppsFlyerUrl(myInvitationId)
+        val clip = ClipData.newPlainText(CLIP_LABEL_INVITATION, url)
+        clipboardManager.setPrimaryClip(clip)
+        sendEffect(MyInvitationDetailSideEffect.LinkCopied)
+    }
 
     private fun showMapErrorSnackbar() {
         sendEffect(MyInvitationDetailSideEffect.ShowMapErrorSnackbar)
     }
 
+    private fun updateThanksCard(cardId: Long) {
+        sendEffect(MyInvitationDetailSideEffect.NavigateToUpdateThanksCard(cardId))
+    }
+
+    private fun deleteThanksCard() {
+        viewModelScope.launch {
+            uiState.value.invitationContentsUiModel.thanksCard ?: return@launch
+            updateState { copy(isOverlayLoading = true) }
+            thanksCardRepository.deleteThanksCard(myInvitationId)
+                .onSuccess {
+                    updateState { copy(invitationContentsUiModel = invitationContentsUiModel.copy(thanksCard = null)) }
+                    sendEffect(MyInvitationDetailSideEffect.SuccessRemoveThanksCard)
+                }
+                .onFailure { error, msg ->
+                    sendEffect(MyInvitationDetailSideEffect.FailRemoveThanksCard)
+                }
+            updateState { copy(isOverlayLoading = false) }
+        }
+    }
+
     private fun retryLoad() {
         viewModelScope.launch {
             loadInvitation()
-            updateState { copy(editCardEnabled = false, cachedCardEditable = null) }
+            updateState { copy(editCardEnabled = false, cachedCardEditable = null, thanksCardEditableCache = null) }
         }
     }
 
     override fun onCleared() {
         super.onCleared()
         createCardSession.clear()
+    }
+
+    companion object {
+        private const val CLIP_LABEL_INVITATION = "invitation_link"
     }
 }

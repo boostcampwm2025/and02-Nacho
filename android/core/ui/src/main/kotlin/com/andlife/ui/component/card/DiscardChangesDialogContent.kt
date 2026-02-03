@@ -1,4 +1,4 @@
-package com.andlife.invitation_card.component
+package com.andlife.ui.component.card
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,10 +13,10 @@ import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
-import com.andlife.invitation_card.R
+import com.andlife.ui.R
 
 @Composable
-internal fun BackDialogContent(
+fun DiscardChangesDialogContent(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,

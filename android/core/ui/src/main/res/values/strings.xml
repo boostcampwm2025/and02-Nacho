@@ -5,7 +5,7 @@
 
     <string name="label_loading_fetch_failed">데이터를 불러오는 데 실패했습니다.</string>
     <string name="label_loading_retry">재시도</string>
-    <string name="label_paging_empty_result">결과가 없습니다.</string>
+    <string name="label_paging_empty_result">검색된 결과가 없습니다.</string>
 
     <string name="desc_schedule_list_image">다가오는 초대의 이미지</string>
     <string name="desc_invitation_list_image">초대장 리스트 카드의 이미지</string>
@@ -50,13 +50,17 @@
     <string name="txt_delete_invitation_message">초대장을 삭제하시겠습니까?\n삭제한 초대장은 복구할 수 없습니다.</string>
     <string name="txt_confirm">확인</string>
     <string name="txt_cancel">취소</string>
-    <string name="desc_not_logged">현재 비로그인 상태입니다\n로그인 하여 초대장을 작성해보세요</string>
-    <string name="txt_go_login">로그인하기</string>
+    <string name="desc_not_logged_title">나만의 초대장을 만들어볼까요?</string>
+    <string name="desc_not_logged_content">로그인하고 소중한 추억을 기록해보세요</string>
+    <string name="txt_start_login">로그인하고 시작하기</string>
 
     <string name="msg_leave_success">초대장에서 나갔습니다.</string>
     <string name="msg_leave_failure">나가기에 실패했습니다. 다시 시도해주세요.</string>
     <string name="msg_delete_success">초대장을 삭제했습니다.</string>
     <string name="msg_delete_failure">삭제에 실패했습니다. 다시 시도해주세요.</string>
+
+    <string name="label_invitation_empty">아직 참여한 초대장이 없어요.\n공유받은 초대장 링크를 확인해보세요.</string>
+    <string name="label_myinvitation_empty">아직 내가 만든 초대장이 없어요.\n나만의 초대장을 만들어보세요.</string>
 
     <!--  모아보기 Media  -->
     <string name="desc_media_image">방명록의 이미지</string>
@@ -161,5 +165,15 @@
     <string name="desc_stop_recording">녹음 중지</string>
     <string name="desc_pause_recording">녹음 일시정지</string>
     <string name="desc_resume_recording">녹음 재개</string>
+
+    <!--  다이얼로그  -->
+    <string name="btn_label_cancel">취소</string>
+    <string name="btn_label_to_setting">설정으로 이동</string>
+    <string name="dialog_do_not_show_again">다시 보지 않기</string>
+    <!--  CardDialog  -->
+    <string name="txt_exit_dialog_title">작성 취소</string>
+    <string name="txt_exit_dialog_message">작성을 취소하시겠습니까?\n작성 중인 내용은 저장되지 않습니다.</string>
+    <string name="btn_exit">나가기</string>
+    <string name="btn_continue">계속 작성</string>
 
 </resources>

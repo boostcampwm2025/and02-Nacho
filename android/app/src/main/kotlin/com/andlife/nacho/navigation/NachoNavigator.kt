@@ -11,7 +11,6 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
-import com.andlife.home.Home
 import com.andlife.home.navigateToHome
 import com.andlife.home.navigateToSetting
 import com.andlife.invitation.navigateToInvitation
@@ -28,6 +27,8 @@ import com.andlife.login.Login
 import com.andlife.login.navigateToLogin
 import com.andlife.myinvitation.navigateToMyInvitation
 import com.andlife.myinvitation.navigateToMyInvitationDetail
+import com.andlife.thanks_card.navigateToCreateThanksCard
+import com.andlife.thanks_card.navigateToUpdateThanksCard
 import kotlin.reflect.KClass
 
 @Stable
@@ -152,6 +153,14 @@ class NachoNavigator(
 
     fun navigatePopBackStack() {
         navController.popBackStack()
+    }
+
+    fun navigateToCreateThanksCard(invitationId: Long) {
+        navController.navigateToCreateThanksCard(invitationId)
+    }
+
+    fun navigateToUpdateThanksCard(cardId: Long) {
+        navController.navigateToUpdateThanksCard(cardId)
     }
 }
 

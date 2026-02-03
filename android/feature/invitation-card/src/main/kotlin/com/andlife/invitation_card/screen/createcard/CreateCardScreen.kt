@@ -14,8 +14,8 @@ import com.andlife.designsystem.component.dialog.NachoDialog
 import com.andlife.editor.screen.EditorScreen
 import com.andlife.editor.state.EditorState
 import com.andlife.invitation_card.R
-import com.andlife.invitation_card.component.BackDialogContent
 import com.andlife.invitation_card.viewmodel.CreateCardViewModel
+import com.andlife.ui.component.card.DiscardChangesDialogContent
 
 @Composable
 fun CreateCardRoute(
@@ -47,7 +47,7 @@ fun CreateCardRoute(
 
     if (showBackDialog) {
         NachoDialog(onDismiss = { showBackDialog = false }) {
-            BackDialogContent(
+            DiscardChangesDialogContent(
                 onConfirm = {
                     showBackDialog = false
                     onBackClick()

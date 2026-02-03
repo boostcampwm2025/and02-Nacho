@@ -80,6 +80,6 @@ class KakaoShareManager @Inject constructor(
     companion object {
         private const val TAG = "KakaoShare"
 
-        const val DEFAULT_IMG = "https://k.kakaocdn.net/14/dn/btsSIl5QT5D/QC5pAghSUkrPxCBL4vV4qk/o.jpg"
+        const val DEFAULT_IMG = "https://github.com/boostcampwm2025/and02-boostcamp/blob/dev/android/core/ui/src/main/res/drawable/bg_thumbnail.png?raw=true"
     }
 }

@@ -18,6 +18,11 @@ import retrofit2.http.Query
 
 interface InvitationService {
 
+    @POST("/api/invitations/sync")
+    suspend fun syncInvitations(
+        @Body invitationIds: List<Long>
+    ): BaseResponse<Unit>
+
     @POST("/api/invitations/{invitationId}/join")
     suspend fun joinInvitation(
         @Path("invitationId") invitationId: Long

@@ -1,18 +1,28 @@
 package com.andlife.myinvitation.screen
 
 import android.text.Editable
+import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -26,20 +36,26 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.component.NachoDivider
+import com.andlife.designsystem.component.dialog.NachoDialog
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.editor.screen.NachoTextView
 import com.andlife.model.invitation.DateTimeInfo
 import com.andlife.model.invitation.HostInfo
 import com.andlife.model.invitation.InvitationCardUiModel
@@ -55,6 +71,7 @@ import com.andlife.myinvitation.screen.guestbook.MyInvitationGuestBookRoute
 import com.andlife.myinvitation.screen.collection.MyInvitationCollectionRoute
 import com.andlife.myinvitation.viewmodel.MyInvitationDetailViewModel
 import com.andlife.ui.component.GenericTabRow
+import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.ui.component.loading.InvitationLoadingError
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.util.collectWithLifecycle
@@ -73,6 +90,8 @@ fun MyInvitationDetailRoute(
     onNavigateToEditInvitation: (Long) -> Unit,
     onNavigateToEditCard: (Long) -> Unit,
     onNavigateToCreateCard: (Long) -> Unit,
+    onNavigateToCreateThanksCard: (Long) -> Unit,
+    onNavigateToUpdateThanksCard: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MyInvitationDetailViewModel = hiltViewModel(),
 ) {
@@ -80,8 +99,13 @@ fun MyInvitationDetailRoute(
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-
     val mapErrorMessage = stringResource(R.string.snack_load_error_map)
+    var isThanksCardVisible by remember { mutableStateOf(false) }
+    var isDeleteThanksCardVisible by remember { mutableStateOf(false) }
+    val textPrimary = NachoTheme.colorScheme.textPrimary
+    val thanksCard = uiState.invitationContentsUiModel.thanksCard
+    val linkCopiedMessage = stringResource(R.string.snack_link_copied)
+    val res = LocalResources.current
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
@@ -95,9 +119,8 @@ fun MyInvitationDetailRoute(
 
             MyInvitationDetailSideEffect.ShowMapErrorSnackbar -> {
                 coroutineScope.launch {
-                    snackbarHostState.showSnackbar(
-                        message = mapErrorMessage
-                    )
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(message = mapErrorMessage)
                 }
             }
 
@@ -108,19 +131,122 @@ fun MyInvitationDetailRoute(
             is MyInvitationDetailSideEffect.NavigateToEditInvitation -> {
                 onNavigateToEditInvitation(effect.myInvitationId)
             }
+
+            MyInvitationDetailSideEffect.LinkCopied -> {
+                coroutineScope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(message = linkCopiedMessage)
+                }
+            }
+
+            is MyInvitationDetailSideEffect.NavigateToCreateThanksCard -> {
+                onNavigateToCreateThanksCard(effect.myInvitationId)
+            }
+
+            MyInvitationDetailSideEffect.ThanksCardOnBoarding -> {
+                isThanksCardVisible = true
+            }
+
+            MyInvitationDetailSideEffect.FailRemoveThanksCard -> {
+                coroutineScope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(res.getString(R.string.fail_remove_thanks_card))
+                }
+            }
+
+            MyInvitationDetailSideEffect.SuccessRemoveThanksCard -> {
+                coroutineScope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(res.getString(R.string.success_remove_thanks_card))
+                }
+            }
+
+            is MyInvitationDetailSideEffect.NavigateToUpdateThanksCard -> {
+                onNavigateToUpdateThanksCard(effect.cardId)
+            }
         }
     }
 
-    MyInvitationDetailScreen(
-        uiState = uiState,
-        snackbarHostState = snackbarHostState,
-        scrollBehavior = scrollBehavior,
-        onEvent = viewModel::onEvent,
-        onSaveEditableCache = viewModel::saveEditableCache,
-        onNavigateBack = onNavigateBack,
-        onNavigateToLogin = onNavigateToLogin,
-        modifier = modifier,
-    )
+    Box {
+        MyInvitationDetailScreen(
+            uiState = uiState,
+            snackbarHostState = snackbarHostState,
+            scrollBehavior = scrollBehavior,
+            onEvent = viewModel::onEvent,
+            onSaveEditableCache = viewModel::saveEditableCache,
+            onNavigateBack = onNavigateBack,
+            onNavigateToLogin = onNavigateToLogin,
+            onDeleteThanksCard = { isDeleteThanksCardVisible = true },
+            onEditThanksCard = {
+                thanksCard?.id?.let { id ->
+                    viewModel.onEvent(MyInvitationDetailUiEvent.ClickUpdateThanksCard(id))
+                }
+            },
+            modifier = modifier,
+        )
+
+        if (uiState.isOverlayLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+    }
+
+    if (isThanksCardVisible && thanksCard != null) {
+        NachoDialog(
+            onDismiss = { isThanksCardVisible = false },
+            shape = NachoTheme.shapes.small,
+            modifier = Modifier.fillMaxHeight(0.7f),
+            containerColor = Color(thanksCard.backgroundColor)
+        ) {
+            Box(modifier = Modifier.background(Color(thanksCard.backgroundColor))) {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState())
+                ) {
+
+                    AndroidView(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(NachoSpacing.medium),
+                        factory = { context ->
+                            NachoTextView(context).apply {
+                                layoutParams = ViewGroup.LayoutParams(
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.WRAP_CONTENT
+                                )
+                                setTextColor(textPrimary.toArgb())
+                                onEditableReady = { editable ->
+                                    viewModel.saveThanksCardEditableCache(editable)
+                                }
+                            }
+                        },
+                        update = { view ->
+                            val editableCache = uiState.thanksCardEditableCache
+                            if (editableCache != null) {
+                                view.bindWithCachedEditable(editableCache)
+                            } else {
+                                view.bind(uiState.invitationContentsUiModel.thanksCard)
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    if (isDeleteThanksCardVisible) {
+        NachoInfoDialog(
+            title = stringResource(R.string.txt_delete_thanks_card),
+            message = stringResource(R.string.desc_delete_thanks_card),
+            confirmText = stringResource(R.string.btn_label_delete),
+            dismissText = stringResource(R.string.btn_label_cancel),
+            onDismiss = { isDeleteThanksCardVisible = false },
+            onConfirm = {
+                viewModel.onEvent(MyInvitationDetailUiEvent.ClickDeleteThanksCard)
+                isDeleteThanksCardVisible = false
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -133,6 +259,8 @@ private fun MyInvitationDetailScreen(
     onSaveEditableCache: (Editable) -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onEditThanksCard: () -> Unit,
+    onDeleteThanksCard: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()
@@ -164,7 +292,10 @@ private fun MyInvitationDetailScreen(
                 showActions = !uiState.isLoading && !uiState.isError,
                 onBack = navigateBackWithMapCleanup,
                 onClickThanksCard = { onEvent(MyInvitationDetailUiEvent.ClickThanksCard) },
+                onEditThanksCard = { onEditThanksCard() },
+                onDeleteThanksCard = onDeleteThanksCard,
                 onShare = { onEvent(MyInvitationDetailUiEvent.ClickShare) },
+                onCopyLink = { onEvent(MyInvitationDetailUiEvent.CopyInvitationLink) },
                 onEdit = { onEvent(MyInvitationDetailUiEvent.ClickEdit) },
                 onDelete = { onEvent(MyInvitationDetailUiEvent.ClickDelete) },
                 onCreateThanksCard = { onEvent(MyInvitationDetailUiEvent.CreateThanksCard) },
@@ -225,6 +356,7 @@ private fun MyInvitationDetailScreen(
                                 onNavigateBack = onNavigateBack,
                                 onNavigateToLogin = onNavigateToLogin
                             )
+
                             2 -> MyInvitationCollectionRoute()
                         }
                     },
@@ -241,6 +373,9 @@ private fun MyInvitationDetailTopBar(
     onBack: () -> Unit,
     onClickThanksCard: () -> Unit,
     onShare: () -> Unit,
+    onEditThanksCard: () -> Unit,
+    onDeleteThanksCard: () -> Unit,
+    onCopyLink: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     onCreateThanksCard: () -> Unit,
@@ -272,28 +407,22 @@ private fun MyInvitationDetailTopBar(
         },
         actions = {
             if (showActions) {
-                if (hasThanksCard) {
-                    IconButton(onClick = onClickThanksCard) {
-                        Icon(
-                            painter = painterResource(designR.drawable.ic_thankscard),
-                            contentDescription = stringResource(R.string.desc_top_bar_thanks_card),
-                            tint = Color.Unspecified,
-                        )
-                    }
-                }
-                IconButton(onClick = onShare) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_share_24),
-                        contentDescription = stringResource(R.string.desc_top_bar_share),
-                        tint = NachoTheme.colorScheme.iconSecondary,
-                    )
-                }
+                ThanksCardMenu(
+                    hasThanksCard = hasThanksCard,
+                    onCreate = onCreateThanksCard,
+                    onEdit = onEditThanksCard,
+                    onConfirm = onClickThanksCard,
+                    onDelete = onDeleteThanksCard,
+                )
+
+                ShareMenu(
+                    onShare = onShare,
+                    onCopyLink = onCopyLink,
+                )
 
                 InvitationMoreMenu(
-                    hasThanksCard = hasThanksCard,
                     onEdit = onEdit,
                     onDelete = onDelete,
-                    onCreateThanksCard = onCreateThanksCard,
                 )
             }
         },
@@ -306,11 +435,154 @@ private fun MyInvitationDetailTopBar(
 }
 
 @Composable
-private fun InvitationMoreMenu(
+private fun ShareMenu(
+    onShare: () -> Unit,
+    onCopyLink: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var isMenuExpanded by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
+        IconButton(onClick = { isMenuExpanded = true }) {
+            Icon(
+                painter = painterResource(R.drawable.ic_share_24),
+                contentDescription = stringResource(R.string.desc_top_bar_share),
+                tint = NachoTheme.colorScheme.iconSecondary,
+            )
+        }
+
+        DropdownMenu(
+            expanded = isMenuExpanded,
+            onDismissRequest = { isMenuExpanded = false },
+            modifier = Modifier.background(NachoTheme.colorScheme.backgroundPrimary),
+            shape = RoundedCornerShape(NachoSpacing.medium),
+        ) {
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = stringResource(R.string.txt_share_kakao),
+                        style = NachoTheme.typography.bodyMediumMedium,
+                        color = NachoTheme.colorScheme.textPrimary,
+                    )
+                },
+                onClick = {
+                    isMenuExpanded = false
+                    onShare()
+                },
+            )
+
+            NachoDivider()
+
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = stringResource(R.string.txt_copy_invitation_link),
+                        style = NachoTheme.typography.bodyMediumMedium,
+                        color = NachoTheme.colorScheme.textPrimary,
+                    )
+                },
+                onClick = {
+                    isMenuExpanded = false
+                    onCopyLink()
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ThanksCardMenu(
     hasThanksCard: Boolean,
+    onCreate: () -> Unit,
+    onConfirm: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
-    onCreateThanksCard: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var isMenuExpanded by remember { mutableStateOf(false) }
+    Box(modifier = modifier) {
+        IconButton(onClick = { isMenuExpanded = true }) {
+            Icon(
+                painter = painterResource(designR.drawable.ic_thankscard),
+                contentDescription = stringResource(R.string.desc_top_bar_thanks_card),
+                tint = Color.Unspecified,
+            )
+        }
+
+        DropdownMenu(
+            expanded = isMenuExpanded,
+            onDismissRequest = { isMenuExpanded = false },
+            modifier = Modifier.background(NachoTheme.colorScheme.backgroundPrimary),
+            shape = RoundedCornerShape(NachoSpacing.medium),
+        ) {
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = stringResource(R.string.txt_create_thanks_card),
+                        style = NachoTheme.typography.bodyMediumMedium,
+                    )
+                },
+                onClick = {
+                    isMenuExpanded = false
+                    onCreate()
+                },
+                colors = MenuDefaults.itemColors(textColor = NachoTheme.colorScheme.textPrimary),
+                enabled = !hasThanksCard
+            )
+            NachoDivider()
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = stringResource(R.string.txt_confirm_thanks_card),
+                        style = NachoTheme.typography.bodyMediumMedium,
+                    )
+                },
+                onClick = {
+                    isMenuExpanded = false
+                    onConfirm()
+                },
+                colors = MenuDefaults.itemColors(textColor = NachoTheme.colorScheme.textPrimary),
+                enabled = hasThanksCard
+            )
+            NachoDivider()
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = stringResource(R.string.txt_edit),
+                        style = NachoTheme.typography.bodyMediumMedium,
+                    )
+                },
+                onClick = {
+                    isMenuExpanded = false
+                    onEdit()
+                },
+                colors = MenuDefaults.itemColors(textColor = NachoTheme.colorScheme.textPrimary),
+                enabled = hasThanksCard
+            )
+
+            NachoDivider()
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = stringResource(R.string.txt_delete),
+                        style = NachoTheme.typography.bodyMediumMedium,
+                    )
+                },
+                onClick = {
+                    isMenuExpanded = false
+                    onDelete()
+                },
+                colors = MenuDefaults.itemColors(textColor = NachoTheme.colorScheme.textPrimary),
+                enabled = hasThanksCard
+            )
+        }
+    }
+}
+
+@Composable
+private fun InvitationMoreMenu(
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var isMenuExpanded by remember { mutableStateOf(false) }
@@ -359,27 +631,6 @@ private fun InvitationMoreMenu(
                     onDelete()
                 },
             )
-
-            NachoDivider()
-
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        text =
-                            if (hasThanksCard) {
-                                stringResource(R.string.txt_send_thanks_card)
-                            } else {
-                                stringResource(R.string.txt_create_thanks_card)
-                            },
-                        style = NachoTheme.typography.bodyMediumMedium,
-                        color = NachoTheme.colorScheme.textPrimary,
-                    )
-                },
-                onClick = {
-                    isMenuExpanded = false
-                    onCreateThanksCard()
-                },
-            )
         }
     }
 }
@@ -393,7 +644,6 @@ private fun MyInvitationDetailScreenPreview() {
             uiState =
                 MyInvitationDetailUiState(
                     isLoading = false,
-                    hasThanksCard = true,
                     invitationContentsUiModel =
                         InvitationContentsUiModel(
                             title = "2026년 나초 개발 네트워킹 데이",
@@ -428,7 +678,9 @@ private fun MyInvitationDetailScreenPreview() {
             onEvent = {},
             onNavigateBack = {},
             onNavigateToLogin = {},
-            onSaveEditableCache = {}
+            onSaveEditableCache = {},
+            onEditThanksCard = {},
+            onDeleteThanksCard = {}
         )
     }
 }

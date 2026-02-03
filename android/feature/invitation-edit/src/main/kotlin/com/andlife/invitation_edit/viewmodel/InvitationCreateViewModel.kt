@@ -1,5 +1,6 @@
 package com.andlife.invitation_edit.viewmodel
 
+import android.util.Log
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.viewModelScope
 import com.andlife.domain.util.Result
@@ -24,6 +25,8 @@ import com.andlife.invitation_edit.model.form.toLocalTime
 import com.andlife.model.editor.CardImage
 import com.andlife.model.editor.NachoUiCard
 import com.andlife.model.editor.toDomain
+import com.andlife.domain.util.RefreshEventHub
+import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toPersistentList
@@ -223,9 +226,12 @@ class InvitationCreateViewModel @Inject constructor(
                 .onSuccess { id ->
                     updateState { copy(isLoading = false) }
                     createCardSession.clear()
+                    RefreshEventHub.emit(RefreshTarget.MY_INVITATION)
+                    RefreshEventHub.emit(RefreshTarget.HOME)
                     sendEffect(InvitationFormSideEffect.SuccessSave(id))
                 }
                 .onFailure { error, msg ->
+                    Log.e("InvitationCreateViewModel", "에러 발생: $msg")
                     updateState { copy(isLoading = false) }
                     sendEffect(InvitationFormSideEffect.FailSave)
                 }

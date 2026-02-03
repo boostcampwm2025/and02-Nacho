@@ -4,13 +4,13 @@ import com.andlife.nachoserver.auth.AuthContext
 import com.andlife.nachoserver.entity.AnnouncementSection
 import com.andlife.nachoserver.entity.Invitation
 import com.andlife.nachoserver.entity.InvitationCard
-import com.andlife.nachoserver.entity.User
 import com.andlife.nachoserver.entity.InvitationParticipant
 import com.andlife.nachoserver.repository.guestbook.GuestBookRepository
 import com.andlife.nachoserver.repository.invitation.AnnouncementRepository
 import com.andlife.nachoserver.repository.invitation.InvitationCardRepository
 import com.andlife.nachoserver.repository.invitation.InvitationRepository
 import com.andlife.nachoserver.repository.participant.InvitationParticipantRepository
+import com.andlife.nachoserver.repository.thankscard.ThanksCardRepository
 import com.andlife.nachoserver.repository.user.UserRepository
 import com.andlife.nachoserver.request.invitation.AnnouncementRequest
 import com.andlife.nachoserver.request.invitation.CreateInvitationRequest
@@ -43,9 +43,26 @@ class InvitationService(
     private val announcementRepository: AnnouncementRepository,
     private val participantRepository: InvitationParticipantRepository,
     private val userRepository: UserRepository,
-    private val guestBookRepository: GuestBookRepository,
-    private val guestBookService: GuestBookService
+    private val guestBookService: GuestBookService,
+    private val thanksCardRepository: ThanksCardRepository
 ) {
+    @Transactional
+    fun syncInvitations(userId: Long, invitationIds: List<Long>) {
+        val user = userRepository.findById(userId)
+            .orElseThrow { NoSuchElementException("사용자를 찾을 수 없습니다. ID: $userId") }
+
+        invitationIds.forEach { invitationId ->
+            if (!participantRepository.existsByInvitationIdAndUserId(invitationId, userId)) {
+                invitationRepository.findById(invitationId).ifPresent { invitation ->
+                    participantRepository.save(
+                        InvitationParticipant(user = user, invitation = invitation)
+                    )
+                    println(">>> [Sync 성공] User${userId} → Invitation ID: $invitationId")
+                }
+            }
+        }
+    }
+
     @Transactional
     fun joinInvitation(
         invitationId: Long,
@@ -59,21 +76,27 @@ class InvitationService(
             println(">>> [초대장 조회 성공] ID: $invitationId")
 
             if (userId != null) {
-                println(">>> [멤버 로직 시작]")
+                val isHost = invitation.host.id == userId
+                if (isHost) {
+                    return JoinResponse(
+                        invitationId = invitationId,
+                        isMember = true,
+                        alreadyJoined = true
+                    )
+                }
+
                 val isAlreadyJoined = participantRepository.existsByInvitationIdAndUserId(invitationId, userId)
                 if (!isAlreadyJoined) {
                     val userProxy = userRepository.getReferenceById(userId)
                     participantRepository.save(InvitationParticipant(invitation = invitation, user = userProxy))
                 }
-                val response = JoinResponse(invitationId = invitationId, isMember = true, alreadyJoined = isAlreadyJoined)
-                println(">>> [Join 성공 직전] $response")
-                return response
+
+                return JoinResponse(invitationId = invitationId, isMember = true, alreadyJoined = isAlreadyJoined)
+
             }
 
-            println(">>> [게스트 로직 시작]")
             val alreadyHasAccess = guestInvitationIds.contains(invitationId)
             val response = JoinResponse(invitationId = invitationId, isMember = false, alreadyJoined = alreadyHasAccess)
-            println(">>> [Join 게스트 성공 직전] $response")
             response
         } catch (e: Exception) {
             println(">>> [서비스 에러] ${e.javaClass.simpleName}: ${e.message}")
@@ -261,10 +284,12 @@ class InvitationService(
             ?: throw NoSuchElementException("Invitation not found: $invitationId")
 
         val invitationCard = invitationCardRepository.findByInvitationIdWithDetails(invitationId)
+        val thanksCard = thanksCardRepository.findByInvitationIdWithDetails(invitationId)
         val announcements = announcementRepository.findAllByInvitationIdOrderByDisplayOrder(invitationId)
 
         return invitation.toInvitationResponse(
             card = invitationCard,
+            thanksCard = thanksCard,
             announcements = announcements
         )
     }
@@ -347,10 +372,12 @@ class InvitationService(
 
         val savedInvitation = invitationRepository.save(invitation)
         val existingCard = invitationCardRepository.findByInvitationIdWithDetails(invitationId)
+        val thanksCard = thanksCardRepository.findByInvitationIdWithDetails(invitationId)
         val savedAnnouncements = replaceAnnouncements(savedInvitation, request.announcements)
 
         return invitation.toInvitationResponse(
             card = existingCard,
+            thanksCard = thanksCard,
             announcements = savedAnnouncements
         )
     }
@@ -379,17 +406,21 @@ class InvitationService(
         pageable: Pageable
     ): PagingResponse<UpcomingInvitationResponse> {
         val today = LocalDate.now()
+        val nowTime = LocalTime.now()
         val limitDate = today.plusDays(days)
+        println(">>> 날짜 및 시간 : ${today.toString() + nowTime.toString()}")
 
         val upcomingInvitationsPage: Page<Invitation> = when (authContext) {
             is AuthContext.Member -> {
                 invitationRepository.findUpcomingByParticipantIdWithinDays(
                     userId = authContext.userId,
                     startDate = today,
+                    nowTime = nowTime,
                     endDate = limitDate,
                     pageable = pageable
                 )
             }
+
             is AuthContext.Guest -> {
                 if (authContext.invitationIds.isEmpty()) {
                     Page.empty(pageable)
@@ -397,6 +428,7 @@ class InvitationService(
                     invitationRepository.findAllByIdInAndDateRange(
                         ids = authContext.invitationIds,
                         startDate = today,
+                        nowTime = nowTime,
                         endDate = limitDate,
                         pageable = pageable
                     )
@@ -430,4 +462,5 @@ class InvitationService(
             content = contents
         )
     }
+
 }

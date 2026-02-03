@@ -106,6 +106,7 @@ class GuestBookService(
                 is AuthContext.Member -> authContext.userId == guestBook.user.id
                 is AuthContext.Guest -> false
             }
+            val isInvitationOwner = (authContext is AuthContext.Member && guestBook.invitation.host.id == authContext.userId)
 
             val allMedia = mutableListOf<GuestBookMediaResponse>()
 
@@ -154,6 +155,7 @@ class GuestBookService(
                 audioMedias = audioMedias,
                 totalVisualCount = visualMedias.size,
                 isOwner = isOwner,
+                isInvitationOwner = isInvitationOwner,
                 createdAt = guestBook.createdAt,
                 updatedAt = guestBook.updatedAt
             )
@@ -321,7 +323,7 @@ class GuestBookService(
         val guestBook = guestBookRepository.findByIdOrNull(guestBookId)
             ?: throw EntityNotFoundException("방명록을 찾을 수 없습니다. id: $guestBookId")
 
-        validateOwner(guestBook.user.id, authContext)
+        validateOwnerOrInvitationHost(guestBook, authContext)
 
         val mediaKeys = getAllMediaKeys(guestBook)
         guestBookRepository.delete(guestBook)
@@ -339,6 +341,22 @@ class GuestBookService(
         allMediaKeys.forEach { key ->
             if (key.isNotBlank()) {
                 mediaService.deleteMedia(key)
+            }
+        }
+    }
+
+    private fun validateOwnerOrInvitationHost(guestBook: GuestBook, authContext: AuthContext) {
+        when (authContext) {
+            is AuthContext.Member -> {
+                val isGuestBookOwner = guestBook.user.id == authContext.userId
+                val isInvitationHost = guestBook.invitation.host.id == authContext.userId
+                if (!isGuestBookOwner && !isInvitationHost) {
+                    throw BusinessException(CommonResponseCode.FORBIDDEN)
+                }
+            }
+
+            is AuthContext.Guest -> {
+                throw BusinessException(CommonResponseCode.FORBIDDEN)
             }
         }
     }
@@ -378,7 +396,11 @@ class GuestBookService(
                 guestBookRepository.findAllByMyRelatedInvitations(authContext.userId, pageable)
             }
             is AuthContext.Guest -> {
-                Page.empty(pageable) //TODO: 비로그인 유저 임시 빈값 조회
+                if (authContext.invitationIds.isEmpty()) {
+                    Page.empty(pageable)
+                } else {
+                    guestBookRepository.findAllByInvitationIdIn(authContext.invitationIds, pageable)
+                }
             }
         }
 
@@ -391,6 +413,7 @@ class GuestBookService(
 
             val (audioMedias, visualMedias) = allMedia.partition { it.type == MediaType.AUDIO }
             val isOwner = (authContext is AuthContext.Member && guestBook.user.id == authContext.userId)
+            val isInvitationOwner = (authContext is AuthContext.Member && guestBook.invitation.host.id == authContext.userId)
 
             GuestBookResponse(
                 id = guestBook.id,
@@ -408,8 +431,9 @@ class GuestBookService(
                 audioMedias = audioMedias,
                 totalVisualCount = visualMedias.size,
                 isOwner = isOwner,
+                isInvitationOwner = isInvitationOwner,
                 createdAt = guestBook.createdAt,
-                updatedAt = guestBook.updatedAt
+                updatedAt = guestBook.updatedAt,
             )
         }
 

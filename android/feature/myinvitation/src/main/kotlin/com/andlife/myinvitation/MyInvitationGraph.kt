@@ -1,5 +1,6 @@
 package com.andlife.myinvitation
 
+import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHostState
@@ -12,13 +13,16 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import com.andlife.domain.util.RefreshEventHub
 import com.andlife.model.util.NavigationKeyConstant.CREATE_CARD_BY_INVITATION_ID
+import com.andlife.model.util.NavigationKeyConstant.CREATE_THANKS_CARD
 import com.andlife.model.util.NavigationKeyConstant.INVITATION_UPDATED
 import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiEvent
 import com.andlife.myinvitation.screen.MyInvitationDetailRoute
 import com.andlife.myinvitation.screen.MyInvitationRoute
 import com.andlife.myinvitation.viewmodel.MyInvitationDetailViewModel
+import com.andlife.myinvitation.viewmodel.MyInvitationViewModel
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -48,12 +52,25 @@ fun NavGraphBuilder.myInvitationNavGraph(
     onNavigateToLogin: () -> Unit,
 ) {
     composable<MyInvitation> {
+        val viewModel: MyInvitationViewModel = hiltViewModel()
+
+        val needsRefresh by RefreshEventHub.myInvitationRefresh.collectAsStateWithLifecycle()
+
+        LaunchedEffect(needsRefresh) {
+            Log.d("RefreshEventHub", "myInvitation needsRefresh: $needsRefresh")
+            if (needsRefresh) {
+                viewModel.handleRefresh()
+                RefreshEventHub.consumeMyInvitation()
+            }
+        }
+
         MyInvitationRoute(
+            viewModel = viewModel,
             snackbarHostState = snackbarHostState,
             onNavigateToCreate = onNavigateToCreate,
             onNavigateToDetail = onNavigateToDetail,
             onNavigateToLogin = onNavigateToLogin,
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier.padding(paddingValues)
         )
     }
 }
@@ -64,6 +81,8 @@ fun NavGraphBuilder.myInvitationDetailNavGraph(
     onNavigateToEditInvitation: (Long) -> Unit,
     onNavigateToEditCard: (Long) -> Unit,
     onNavigateToCreateCard: (Long) -> Unit,
+    onNavigateToCreateThanksCard: (Long) -> Unit,
+    onNavigateToUpdateThanksCard: (Long) -> Unit,
 ) {
     composable<MyInvitationDetail> { backStackEntry ->
         val viewModel: MyInvitationDetailViewModel = hiltViewModel()
@@ -79,12 +98,22 @@ fun NavGraphBuilder.myInvitationDetailNavGraph(
             INVITATION_UPDATED, false
         ).collectAsStateWithLifecycle()
 
-        LaunchedEffect(cardCreated, cardUpdated, invitationUpdated) {
-            if (cardCreated || cardUpdated || invitationUpdated) {
+        val thanksCardCreated by backStackEntry.savedStateHandle.getStateFlow<Boolean>(
+            CREATE_THANKS_CARD, false
+        ).collectAsStateWithLifecycle()
+
+        val thanksCardUpdated by backStackEntry.savedStateHandle.getStateFlow<Boolean>(
+            UPDATE_CARD, false
+        ).collectAsStateWithLifecycle()
+
+
+        LaunchedEffect(cardCreated, cardUpdated, invitationUpdated, thanksCardCreated, thanksCardUpdated) {
+            if (cardCreated || cardUpdated || invitationUpdated || thanksCardCreated || thanksCardUpdated) {
                 viewModel.onEvent(MyInvitationDetailUiEvent.RetryLoad)
                 backStackEntry.savedStateHandle.remove<Boolean>(CREATE_CARD_BY_INVITATION_ID)
                 backStackEntry.savedStateHandle.remove<Boolean>(UPDATE_CARD)
                 backStackEntry.savedStateHandle.remove<Boolean>(INVITATION_UPDATED)
+                backStackEntry.savedStateHandle.remove<Boolean>(CREATE_THANKS_CARD)
             }
         }
 
@@ -94,7 +123,9 @@ fun NavGraphBuilder.myInvitationDetailNavGraph(
             onNavigateToEditInvitation = onNavigateToEditInvitation,
             onNavigateToEditCard = onNavigateToEditCard,
             onNavigateToCreateCard = onNavigateToCreateCard,
+            onNavigateToCreateThanksCard = onNavigateToCreateThanksCard,
             modifier = Modifier.padding(),
+            onNavigateToUpdateThanksCard = onNavigateToUpdateThanksCard,
             viewModel = viewModel
         )
     }

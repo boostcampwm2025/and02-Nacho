@@ -25,5 +25,8 @@ class ThanksCard(
     var contentJson: String,
 
     @Column(name = "background_image_url")
-    var backgroundImageUrl: String? = null
+    var backgroundImageUrl: String? = null,
+
+    @Column(name = "background_color")
+    var backgroundColor: Long
 ): BaseTimeEntity()

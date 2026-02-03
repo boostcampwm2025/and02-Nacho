@@ -37,7 +37,7 @@ kakao-sdk = "2.23.2"
 naver-map = "3.23.0"
 naver-map-compose = "1.7.2"
 naver-map-location = "21.0.2"
-workManager = "2.10.0"
+workManager = "2.10.5"
 hiltWork = "1.2.0"
 
 [libraries]

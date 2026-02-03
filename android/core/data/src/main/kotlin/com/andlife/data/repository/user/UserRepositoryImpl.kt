@@ -20,16 +20,24 @@ internal class UserRepositoryImpl @Inject constructor(
     private val userRemoteDataSource: UserRemoteDataSource,
     private val authStateManager: AuthStateManager
 ) : UserRepository {
-    override fun getUserId(): Long? = userStorage.getUserId()
-
-    override suspend fun saveUserId(userId: Long) = userStorage.saveUserId(userId)
-
-    override suspend fun clearUserSession() = userStorage.clearUserSession()
     override suspend fun login(accessToken: String): Result<Unit, DataError> {
         return userRemoteDataSource.login(AuthRequest(accessToken))
             .map { authResponse ->
                 authStateManager.setAuthenticated(authResponse.user.toDomain())
                 saveToken(authResponse.accessToken, authResponse.refreshToken)
+                syncGuestInvitations()
+            }
+    }
+
+    private suspend fun syncGuestInvitations(): Result<Unit, DataError> {
+        val invitationIds = userStorage.getInvitationIds()
+
+        if (invitationIds.isEmpty()) {
+            return Result.Success(Unit)
+        }
+        return userRemoteDataSource.syncInvitations(invitationIds)
+            .map {
+                userStorage.clearGuestData()
             }
     }
 
@@ -41,6 +49,11 @@ internal class UserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun initializeAuth(): Result<AuthState, DataError> {
+        if (userStorage.isFirstLaunch()) {
+            userStorage.addInvitationId(UserStorage.SAMPLE_INVITATION_ID)
+            userStorage.setFirstLaunchDone()
+        }
+
         val accessToken = userStorage.getAccessToken()
 
         if (accessToken == null) {
@@ -84,4 +97,12 @@ internal class UserRepositoryImpl @Inject constructor(
             Result.Error(DataError.Local.UNKNOWN)
         }
     }
+
+    override suspend fun isWifiDialogDismissed(): Boolean = userStorage.isWifiDialogDismissed()
+
+    override suspend fun setWifiDialogDismissed() = userStorage.setWifiDialogDismissed()
+
+    override suspend fun isFirstDownloadDone(): Boolean = userStorage.isFirstDownloadDone()
+
+    override suspend fun setFirstDownloadDone() = userStorage.setFirstDownloadDone()
 }

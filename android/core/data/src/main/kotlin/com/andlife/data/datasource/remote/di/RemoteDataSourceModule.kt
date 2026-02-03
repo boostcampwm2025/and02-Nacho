@@ -6,6 +6,8 @@ import com.andlife.data.datasource.remote.invitation.InvitationRemoteDataSource
 import com.andlife.data.datasource.remote.invitation.InvitationRemoteDataSourceImpl
 import com.andlife.data.datasource.remote.guestbook.GuestBookRemoteDataSource
 import com.andlife.data.datasource.remote.guestbook.GuestBookRemoteDataSourceImpl
+import com.andlife.data.datasource.remote.thankscard.ThanksCardRemoteDataSource
+import com.andlife.data.datasource.remote.thankscard.ThanksCardRemoteDataSourceImpl
 import com.andlife.data.datasource.remote.user.UserRemoteDataSource
 import com.andlife.data.datasource.remote.user.UserRemoteDataSourceImpl
 import dagger.Binds
@@ -40,4 +42,10 @@ internal abstract class RemoteDataSourceModule {
     abstract fun bindUserRemoteDataSource(
         userRemoteDataSourceImpl: UserRemoteDataSourceImpl,
     ): UserRemoteDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindThanksCardRemoteDataSource(
+        thanksCardRemoteDataSourceImpl: ThanksCardRemoteDataSourceImpl,
+    ): ThanksCardRemoteDataSource
 }

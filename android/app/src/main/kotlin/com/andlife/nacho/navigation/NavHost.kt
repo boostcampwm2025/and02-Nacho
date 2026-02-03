@@ -22,7 +22,6 @@ import androidx.navigation.navOptions
 import com.andlife.deeplink.DeepLinkManager
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoTheme
-import com.andlife.home.Setting
 import com.andlife.home.homeNavGraph
 import com.andlife.home.settingNavGraph
 import com.andlife.invitation.invitationDetailNavGraph
@@ -34,12 +33,14 @@ import com.andlife.invitation_edit.addressSearchNavGraph
 import com.andlife.invitation_edit.invitationCreateNavGraph
 import com.andlife.invitation_edit.invitationEditNavGraph
 import com.andlife.invitation_edit.invitationPreviewNavGraph
-import com.andlife.login.Login
 import com.andlife.login.loginNavGraph
 import com.andlife.model.util.NavigationKeyConstant.CREATE_CARD_BY_INVITATION_ID
+import com.andlife.model.util.NavigationKeyConstant.CREATE_THANKS_CARD
 import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
 import com.andlife.myinvitation.myInvitationDetailNavGraph
 import com.andlife.myinvitation.myInvitationNavGraph
+import com.andlife.thanks_card.createThanksCardNavGraph
+import com.andlife.thanks_card.updateThanksCardNavGraph
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
@@ -76,6 +77,15 @@ fun NachoNavHost(
                 paddingValues = innerPadding,
                 snackbarHostState = snackbarHostState,
                 onNavigateToCreate = navigator::navigateToMyInvitationCreate,
+                onNavigateToLogin = {
+                    val navOptions = navOptions {
+                        popUpTo(navigator.navController.graph.id) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                    navigator.navigateToLogin(navOptions)
+                },
                 onNavigateToInvitationDetail = navigator::navigateToInvitationDetail,
                 onNavigateToMyInvitationDetail = navigator::navigateToMyInvitationDetail,
                 onNavigateToSetting = navigator::navigateToSetting,
@@ -143,7 +153,9 @@ fun NachoNavHost(
                 },
                 onNavigateToEditInvitation = navigator::navigateToMyInvitationEdit,
                 onNavigateToEditCard = navigator::navigateToUpdateCard,
-                onNavigateToCreateCard = navigator::navigateToCreateCardByInvitation
+                onNavigateToCreateCard = navigator::navigateToCreateCardByInvitation,
+                onNavigateToCreateThanksCard = navigator::navigateToCreateThanksCard,
+                onNavigateToUpdateThanksCard = navigator::navigateToUpdateThanksCard
             )
 
             invitationCreateNavGraph(
@@ -192,6 +204,22 @@ fun NachoNavHost(
             )
 
             loginNavGraph()
+
+            createThanksCardNavGraph(
+                onSuccessfulCreate = {
+                    navigator.navController.previousBackStackEntry?.savedStateHandle[CREATE_THANKS_CARD] = true
+                    navigator.navigatePopBackStack()
+                },
+                onBackClick = navigator::navigatePopBackStack,
+            )
+
+            updateThanksCardNavGraph(
+                onSuccessfulUpdate = {
+                    navigator.navController.previousBackStackEntry?.savedStateHandle[UPDATE_CARD] = true
+                    navigator.navigatePopBackStack()
+                },
+                onBackClick = navigator::navigatePopBackStack
+            )
         }
     }
 }

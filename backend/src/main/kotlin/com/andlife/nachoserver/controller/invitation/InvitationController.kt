@@ -35,6 +35,22 @@ class InvitationController(
     private val invitationService: InvitationService,
     private val guestBookService: GuestBookService,
 ) {
+    @PostMapping("/sync")
+    fun syncInvitations(
+        @RequestBody invitationIds: List<Long>,
+        authContext: AuthContext
+    ): BaseResponse<Unit> {
+        return when (authContext) {
+            is AuthContext.Member -> {
+                invitationService.syncInvitations(authContext.userId, invitationIds)
+                BaseResponse.success(Unit)
+            }
+            is AuthContext.Guest -> {
+                BaseResponse.error(CommonResponseCode.UNAUTHORIZED)
+            }
+        }
+    }
+
     @PostMapping("/{invitationId}/join")
     fun joinInvitation(
         @PathVariable invitationId: Long,
@@ -146,7 +162,7 @@ class InvitationController(
     fun getGuestBooks(
         @PathVariable invitationId: Long,
         authContext: AuthContext,
-        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
+        @PageableDefault(size = 10, sort = ["createdAt", "id"], direction = Sort.Direction.DESC) pageable: Pageable
     ): BaseResponse<PagingResponse<GuestBookResponse>> {
         val result = guestBookService.getGuestBooks(invitationId, pageable, authContext)
         return BaseResponse.success(result)
@@ -198,7 +214,7 @@ class InvitationController(
     @GetMapping("/guestbooks/all")
     fun getAllRelatedGuestBooks(
         authContext: AuthContext,
-        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
+        @PageableDefault(size = 10, sort = ["createdAt", "id"], direction = Sort.Direction.DESC) pageable: Pageable
     ): BaseResponse<PagingResponse<GuestBookResponse>> {
         val result = guestBookService.getAllRelatedGuestBooks(authContext, pageable)
         return BaseResponse.success(result)

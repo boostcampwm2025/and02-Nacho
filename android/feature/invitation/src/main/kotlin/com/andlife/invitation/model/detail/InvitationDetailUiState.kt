@@ -7,7 +7,9 @@ import com.andlife.ui.base.BaseUiState
 data class InvitationDetailUiState(
     val isLoading: Boolean = true,
     val isError: Boolean = false,
-    val hasThanksCard: Boolean = false,
     val invitationContentsUiModel: InvitationContentsUiModel = InvitationContentsUiModel(),
-    val editableCache: Editable? = null
-) : BaseUiState
+    val editableCache: Editable? = null,
+    val thanksCardEditableCache: Editable? = null
+) : BaseUiState {
+    val hasThanksCard = invitationContentsUiModel.thanksCard != null
+}
