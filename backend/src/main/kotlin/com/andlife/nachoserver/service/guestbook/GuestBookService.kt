@@ -106,6 +106,7 @@ class GuestBookService(
                 is AuthContext.Member -> authContext.userId == guestBook.user.id
                 is AuthContext.Guest -> false
             }
+            val isInvitationOwner = (authContext is AuthContext.Member && guestBook.invitation.host.id == authContext.userId)
 
             val allMedia = mutableListOf<GuestBookMediaResponse>()
 
@@ -154,6 +155,7 @@ class GuestBookService(
                 audioMedias = audioMedias,
                 totalVisualCount = visualMedias.size,
                 isOwner = isOwner,
+                isInvitationOwner = isInvitationOwner,
                 createdAt = guestBook.createdAt,
                 updatedAt = guestBook.updatedAt
             )
@@ -395,6 +397,7 @@ class GuestBookService(
 
             val (audioMedias, visualMedias) = allMedia.partition { it.type == MediaType.AUDIO }
             val isOwner = (authContext is AuthContext.Member && guestBook.user.id == authContext.userId)
+            val isInvitationOwner = (authContext is AuthContext.Member && guestBook.invitation.host.id == authContext.userId)
 
             GuestBookResponse(
                 id = guestBook.id,
@@ -412,8 +415,9 @@ class GuestBookService(
                 audioMedias = audioMedias,
                 totalVisualCount = visualMedias.size,
                 isOwner = isOwner,
+                isInvitationOwner = isInvitationOwner,
                 createdAt = guestBook.createdAt,
-                updatedAt = guestBook.updatedAt
+                updatedAt = guestBook.updatedAt,
             )
         }
 
