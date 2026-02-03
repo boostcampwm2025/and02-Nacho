@@ -120,7 +120,8 @@ fun GuestBookItem(
         GuestBookItemHeader(
             author = guestBook.author,
             createdAt = guestBook.createdAt,
-            isOwner = useMenuButton && guestBook.isOwner,
+            canEdit = useMenuButton && guestBook.isOwner,
+            canDelete = useMenuButton && (guestBook.isOwner || guestBook.isInvitationOwner),
             onEditClick = { onEditClick(guestBook) },
             onDeleteClick = { onDeleteClick(guestBook) },
         )
@@ -157,7 +158,8 @@ fun GuestBookItem(
 private fun GuestBookItemHeader(
     author: AuthorUiModel,
     createdAt: LocalDateTime,
-    isOwner: Boolean,
+    canEdit: Boolean,
+    canDelete: Boolean,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -201,7 +203,7 @@ private fun GuestBookItemHeader(
                 color = NachoTheme.colorScheme.textTertiary,
             )
         }
-        if (isOwner) {
+        if (canEdit || canDelete) {
             Box {
                 IconButton(onClick = { isMenuExpanded = true }) {
                     Icon(
@@ -217,32 +219,36 @@ private fun GuestBookItemHeader(
                     containerColor = NachoTheme.colorScheme.backgroundPrimary,
                     shape = NachoTheme.shapes.medium,
                 ) {
-                    Text(
-                        text = stringResource(R.string.txt_label_edit),
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    isMenuExpanded = false
-                                    onEditClick()
-                                }
-                                .padding(NachoSpacing.large),
-                        style = NachoTheme.typography.bodyMediumMedium,
-                        color = NachoTheme.colorScheme.textPrimary,
-                    )
-                    Text(
-                        text = stringResource(R.string.txt_label_delete),
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    isMenuExpanded = false
-                                    onDeleteClick()
-                                }
-                                .padding(NachoSpacing.large),
-                        style = NachoTheme.typography.bodyMediumMedium,
-                        color = NachoTheme.colorScheme.textPrimary,
-                    )
+                    if (canEdit) {
+                        Text(
+                            text = stringResource(R.string.txt_label_edit),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        isMenuExpanded = false
+                                        onEditClick()
+                                    }
+                                    .padding(NachoSpacing.large),
+                            style = NachoTheme.typography.bodyMediumMedium,
+                            color = NachoTheme.colorScheme.textPrimary,
+                        )
+                    }
+                    if (canDelete) {
+                        Text(
+                            text = stringResource(R.string.txt_label_delete),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        isMenuExpanded = false
+                                        onDeleteClick()
+                                    }
+                                    .padding(NachoSpacing.large),
+                            style = NachoTheme.typography.bodyMediumMedium,
+                            color = NachoTheme.colorScheme.textPrimary,
+                        )
+                    }
                 }
             }
         }
@@ -796,6 +802,7 @@ private fun GuestBookItemPreview() {
                                 ).toImmutableList(),
                             totalVisualCount = 2,
                             isOwner = true,
+                            isInvitationOwner = false,
                             createdAt = LocalDateTime(2025, 6, 1, 12, 0),
                             updatedAt = LocalDateTime(2025, 6, 1, 12, 0),
                         ),
@@ -858,6 +865,7 @@ private fun GuestBookItemPreview() {
                                 ).toImmutableList(),
                             totalVisualCount = 2,
                             isOwner = true,
+                            isInvitationOwner = false,
                             createdAt = LocalDateTime(2025, 6, 1, 12, 0),
                             updatedAt = LocalDateTime(2025, 6, 1, 12, 0),
                         ),
