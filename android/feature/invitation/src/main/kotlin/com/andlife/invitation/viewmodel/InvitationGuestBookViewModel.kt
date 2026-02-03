@@ -111,7 +111,8 @@ constructor(
         when (event) {
             is InvitationGuestBookUiEvent.UpdateSelectedMedias -> updateSelectedMedias(
                 event.medias,
-                event.rejectedUriStrings
+                event.rejectedUriStrings,
+                event.nonTakenUriStrings
             )
 
             is InvitationGuestBookUiEvent.UpdateTextContent -> updateTextContent(event.textContent)
@@ -153,15 +154,26 @@ constructor(
         videoPlayerPool.playPlayer(url, itemId)
     }
 
-    private fun updateSelectedMedias(medias: List<SelectedMedia>, rejectedUriStrings: List<String> = emptyList()) {
+    private fun updateSelectedMedias(
+        medias: List<SelectedMedia>, 
+        rejectedUriStrings: List<String> = emptyList(),
+        nonTakenUriStrings: List<String> = emptyList()
+    ) {
         updateState {
             copy(selectedMedias = medias.toPersistentList())
         }
-        
-        // 거부된 파일이 있으면 스낵바로 알림
+
+        // 용량 초과로 거부된 파일이 있으면 스낵바로 알림
         if (rejectedUriStrings.isNotEmpty()) {
             sendEffect(InvitationGuestBookSideEffect.ShowSnackbar(
-                "파일 ${rejectedUriStrings.size}개가 200MB를 초과하여 제외되었습니다."
+                "파일이 200MB를 초과하여 제외되었습니다."
+            ))
+        }
+        
+        // 제외된 파일이 있으면 스낵바로 알림(후순위) 
+        else if (nonTakenUriStrings.isNotEmpty()) {
+            sendEffect(InvitationGuestBookSideEffect.ShowSnackbar(
+                "파일은 5개까지만 추가 가능합니다."
             ))
         }
     }

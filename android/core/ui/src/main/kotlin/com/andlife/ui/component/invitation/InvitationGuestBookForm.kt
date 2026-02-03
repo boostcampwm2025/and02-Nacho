@@ -52,7 +52,7 @@ fun InvitationGuestBookForm(
     isUploading: Boolean,
     isSubmittable: Boolean,
     isAuthenticated: Boolean,
-    onMediasSelected: (ImmutableList<SelectedMedia>, List<String>) -> Unit,
+    onMediasSelected: (ImmutableList<SelectedMedia>, List<String>, List<String>) -> Unit,
     onMediaRemove: (SelectedMedia) -> Unit,
     onTextContentChange: (String) -> Unit,
     onCameraClick: () -> Unit,
@@ -80,18 +80,29 @@ fun InvitationGuestBookForm(
             contract = ActivityResultContracts.GetMultipleContents(),
         ) { uris ->
             val availableSlotsCnt = MAX_MEDIAS_COUNT - selectedMedias.size
-            if (availableSlotsCnt <= 0) return@rememberLauncherForActivityResult
-
             val uriStrings = uris.map { it.toString() }
+            
+            // 파일 크기 검증
             val (validUriStrings, rejectedUriStrings) = validateUriStringsByFileSize(
                 context = context,
                 uriStrings = uriStrings,
-                availableSlotsCnt = availableSlotsCnt
             )
-            val mediasToAdd = selectedMedias + validUriStrings.map { uriString ->
+            
+            // 유효한 파일들 중 availableSlotsCnt만큼만 take
+            val (takenUriStrings, nonTakenUriStrings) = if (availableSlotsCnt <= 0) {
+                emptyList<String>() to validUriStrings
+            } else {
+                validUriStrings.take(availableSlotsCnt) to validUriStrings.drop(availableSlotsCnt)
+            }
+            
+            val mediasToAdd = takenUriStrings.map { uriString ->
                 uriToSelectedMedia(context, uriString)
             }
-            onMediasSelected((selectedMedias + mediasToAdd).toImmutableList(), rejectedUriStrings)
+            onMediasSelected(
+                (selectedMedias + mediasToAdd).toImmutableList(),
+                rejectedUriStrings,
+                nonTakenUriStrings
+            )
         }
 
     val photoPickerLauncher =
@@ -99,18 +110,29 @@ fun InvitationGuestBookForm(
             contract = ActivityResultContracts.PickMultipleVisualMedia(MAX_MEDIAS_COUNT)
         ) { uris ->
             val availableSlotsCnt = MAX_MEDIAS_COUNT - selectedMedias.size
-            if (availableSlotsCnt <= 0) return@rememberLauncherForActivityResult
-
             val uriStrings = uris.map { it.toString() }
+
+            // 파일 크기 검증
             val (validUriStrings, rejectedUriStrings) = validateUriStringsByFileSize(
                 context = context,
                 uriStrings = uriStrings,
-                availableSlotsCnt = availableSlotsCnt
             )
-            val mediasToAdd = selectedMedias + validUriStrings.map { uriString ->
+
+            // 유효한 파일들 중 availableSlotsCnt만큼만 take
+            val (takenUriStrings, nonTakenUriStrings) = if (availableSlotsCnt <= 0) {
+                emptyList<String>() to validUriStrings
+            } else {
+                validUriStrings.take(availableSlotsCnt) to validUriStrings.drop(availableSlotsCnt)
+            }
+            
+            val mediasToAdd = takenUriStrings.map { uriString ->
                 uriToSelectedMedia(context, uriString)
             }
-            onMediasSelected((selectedMedias + mediasToAdd).toImmutableList(), rejectedUriStrings)
+            onMediasSelected(
+                (selectedMedias + mediasToAdd).toImmutableList(),
+                rejectedUriStrings,
+                nonTakenUriStrings
+            )
         }
 
     Column(
@@ -294,7 +316,7 @@ private fun InvitationGuestBookFormPreview() {
             textContent = "",
             isUploading = false,
             isSubmittable = false,
-            onMediasSelected = { _, _ -> },
+            onMediasSelected = { _, _, _ -> },
             onMediaRemove = {},
             onTextContentChange = {},
             onCameraClick = {},

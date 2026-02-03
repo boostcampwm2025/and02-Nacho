@@ -8,6 +8,7 @@ sealed interface MyInvitationGuestBookUiEvent : BaseUiEvent {
     data class UpdateSelectedMedias(
         val medias: List<SelectedMedia>,
         val rejectedUriStrings: List<String> = emptyList(),
+        val nonTakenUriStrings: List<String> = emptyList(),
     ) : MyInvitationGuestBookUiEvent
 
     data class UpdateTextContent(

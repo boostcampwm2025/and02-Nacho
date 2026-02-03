@@ -615,9 +615,8 @@ private fun GuestBookFormSection(
         isUploading = uiState.isUploading,
         isSubmittable = uiState.isSubmittable,
         editingGuestBookId = uiState.editingGuestBookId,
-        onMediasSelected = { medias, rejectedUriStrings ->
-            onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(medias, rejectedUriStrings))
-
+        onMediasSelected = { medias, rejectedUriStrings, nonTakenUriStrings ->
+            onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(medias, rejectedUriStrings, nonTakenUriStrings))
         },
         onMediaRemove = { media ->
             onEvent(MyInvitationGuestBookUiEvent.RemoveMedia(media))
