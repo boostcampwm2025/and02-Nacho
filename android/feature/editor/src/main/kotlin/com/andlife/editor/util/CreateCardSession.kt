@@ -14,18 +14,18 @@ class CreateCardSession @Inject constructor() {
     var backgroundColor: Color = Color.White
         private set
 
-    var backgroundImageUrl: String? = null
+    var backgroundEffect: String? = null
         private set
 
     fun save(editable: Editable?, backgroundColor: Color, backgroundImageUrl: String?) {
         this.editable = editable
         this.backgroundColor = backgroundColor
-        this.backgroundImageUrl = backgroundImageUrl
+        this.backgroundEffect = backgroundImageUrl
     }
 
     fun clear() {
         editable = null
         backgroundColor = Color.White
-        backgroundImageUrl = null
+        backgroundEffect = null
     }
 }

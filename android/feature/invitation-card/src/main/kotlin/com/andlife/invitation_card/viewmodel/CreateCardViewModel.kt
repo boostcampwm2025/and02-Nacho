@@ -30,7 +30,7 @@ class CreateCardViewModel @Inject constructor(
         createCardSession.save(
             state.editText?.text,
             state.currentTextStyle.backgroundColor,
-            state.currentBackgroundImageUrl
+            state.currentBackgroundEffect
         )
     }
 }
