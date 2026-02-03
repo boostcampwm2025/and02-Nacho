@@ -263,8 +263,6 @@ private fun GuestBookItemTextSection(
     onInvitationTitleClick: (Long) -> Unit?,
     modifier: Modifier = Modifier,
 ) {
-    if (textContent.isBlank()) return
-
     var isExpanded by remember { mutableStateOf(false) }
     var isOverflowed by remember { mutableStateOf(false) }
 
@@ -295,6 +293,9 @@ private fun GuestBookItemTextSection(
                 )
             }
         }
+
+        if (textContent.isBlank()) return@Column
+
         Column(
             modifier =
                 Modifier
