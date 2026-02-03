@@ -15,6 +15,6 @@ data class InvitationSummaryEntity(
     val address: String,
     val isOwner: Boolean,
     val status: String,
-    val isMyinvitation: Boolean,
+    val isMyInvitation: Boolean,
     val sortType: String,
 )

@@ -6,8 +6,8 @@ import com.andlife.network.model.invitation.InvitationSummaryResponse
 
 fun InvitationSummaryResponse.toEntity(
     status: String,
-    isMyinvitation: Boolean,
-    sortType: String,
+    isMyInvitation: Boolean,
+    sortType: String
 ): InvitationSummaryEntity {
     return InvitationSummaryEntity(
         id = id,
@@ -19,7 +19,7 @@ fun InvitationSummaryResponse.toEntity(
         address = address,
         isOwner = isOwner,
         status = status,
-        isMyinvitation = isMyinvitation,
+        isMyInvitation = isMyInvitation,
         sortType = sortType
     )
 }
