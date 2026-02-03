@@ -210,83 +210,83 @@ fun InvitationGuestBookForm(
                         NachoTheme.colorScheme.iconDisabled
                     }
                 Row(horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium)) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_image_16),
-                    contentDescription = null,
-                    tint = iconColor,
-                    modifier =
-                        Modifier
-                            .size(NachoIconSize.semiLarge)
-                            .let {
-                                if (isMediaAddEnabled) {
-                                    it.clickable {
-                                        if (usePhotoPickerAPI) {
-                                            photoPickerLauncher.launch(
-                                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
-                                            )
-                                        } else {
-                                            // Photo Picker API를 사용할 수 없으면 기존 파일 선택기 사용
-                                            launcher.launch("image/*")
+                    Icon(
+                        painter = painterResource(R.drawable.ic_image_16),
+                        contentDescription = null,
+                        tint = iconColor,
+                        modifier =
+                            Modifier
+                                .size(NachoIconSize.semiLarge)
+                                .let {
+                                    if (isMediaAddEnabled) {
+                                        it.clickable {
+                                            if (usePhotoPickerAPI) {
+                                                photoPickerLauncher.launch(
+                                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
+                                                )
+                                            } else {
+                                                // Photo Picker API를 사용할 수 없으면 기존 파일 선택기 사용
+                                                launcher.launch("image/*")
+                                            }
                                         }
+                                    } else {
+                                        it
                                     }
-                                } else {
-                                    it
-                                }
-                            },
-                )
-                Icon(
-                    painter = painterResource(R.drawable.ic_camera_16),
-                    contentDescription = null,
-                    tint = iconColor,
-                    modifier =
-                        Modifier
-                            .size(NachoIconSize.semiLarge)
-                            .let {
-                                if (isMediaAddEnabled) {
-                                    it.clickable {
-                                        onCameraClick()
+                                },
+                    )
+                    Icon(
+                        painter = painterResource(R.drawable.ic_camera_16),
+                        contentDescription = null,
+                        tint = iconColor,
+                        modifier =
+                            Modifier
+                                .size(NachoIconSize.semiLarge)
+                                .let {
+                                    if (isMediaAddEnabled) {
+                                        it.clickable {
+                                            onCameraClick()
+                                        }
+                                    } else {
+                                        it
                                     }
-                                } else {
-                                    it
-                                }
-                            },
-                )
-                Icon(
-                    painter = painterResource(R.drawable.ic_file_16),
-                    contentDescription = null,
-                    tint = iconColor,
-                    modifier =
-                        Modifier
-                            .size(NachoIconSize.semiLarge)
-                            .let {
-                                if (isMediaAddEnabled) {
-                                    it.clickable {
-                                        launcher.launch("*/*")
+                                },
+                    )
+                    Icon(
+                        painter = painterResource(R.drawable.ic_file_16),
+                        contentDescription = null,
+                        tint = iconColor,
+                        modifier =
+                            Modifier
+                                .size(NachoIconSize.semiLarge)
+                                .let {
+                                    if (isMediaAddEnabled) {
+                                        it.clickable {
+                                            launcher.launch("*/*")
+                                        }
+                                    } else {
+                                        it
                                     }
-                                } else {
-                                    it
-                                }
-                            },
-                )
-                Icon(
-                    painter = painterResource(R.drawable.ic_mic_16),
-                    contentDescription = null,
-                    tint = iconColor,
-                    modifier =
-                        Modifier
-                            .size(NachoIconSize.semiLarge)
-                            .let {
-                                if (isMediaAddEnabled) {
-                                    it.clickable {
-                                        onMicrophoneClick()
+                                },
+                    )
+                    Icon(
+                        painter = painterResource(R.drawable.ic_mic_16),
+                        contentDescription = null,
+                        tint = iconColor,
+                        modifier =
+                            Modifier
+                                .size(NachoIconSize.semiLarge)
+                                .let {
+                                    if (isMediaAddEnabled) {
+                                        it.clickable {
+                                            onMicrophoneClick()
+                                        }
+                                    } else {
+                                        it
                                     }
-                                } else {
-                                    it
-                                }
-                            },
-                )
-            }
-            
+                                },
+                    )
+                }
+
                 // 용량 표시 (미디어가 있을 때만)
                 if (selectedMedias.isNotEmpty()) {
                     Text(
