@@ -43,6 +43,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.KakaoButtonColor
+import com.andlife.designsystem.theme.KakaoTextColor
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.error.LoginError
@@ -236,7 +237,7 @@ private fun KakaoLoginButton(
             Icon(
                 painter = painterResource(R.drawable.ic_kakao_logo),
                 contentDescription = null,
-                tint = Color(0xFF000000)
+                tint = KakaoTextColor
 
             )
 
@@ -278,7 +279,7 @@ private fun GuestLoginButton(
             Icon(
                 painter = painterResource(R.drawable.ic_baseline_person_24),
                 contentDescription = null,
-                tint = Color(0xFF000000)
+                tint = KakaoTextColor
 
             )
 
