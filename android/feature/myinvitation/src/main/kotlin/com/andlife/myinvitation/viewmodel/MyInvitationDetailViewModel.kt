@@ -114,6 +114,17 @@ class MyInvitationDetailViewModel @Inject constructor(
     }
 
     private fun deleteInvitation() {
+        viewModelScope.launch {
+            updateState { copy(isOverlayLoading = true) }
+            invitationRepository.deleteInvitation(myInvitationId)
+                .onSuccess {
+                    sendEffect(MyInvitationDetailSideEffect.InvitationDeleted)
+                }
+                .onFailure { error, msg ->
+                    sendEffect(MyInvitationDetailSideEffect.InvitationDeleteFailed)
+                }
+            updateState { copy(isOverlayLoading = false) }
+        }
     }
 
     private fun navigateToEditInvitation() {
