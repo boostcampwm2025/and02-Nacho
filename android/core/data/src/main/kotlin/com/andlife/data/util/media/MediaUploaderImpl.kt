@@ -48,12 +48,14 @@ constructor(
     override suspend fun uploadMedias(files: List<MediaFile>): Result<List<String?>, DataError> =
         withContext(Dispatchers.IO) {
             // 파일 크기 체크
+            var totalFileSize = 0L
             files.forEach { file ->
-                if (file.fileSize > MAX_MEDIA_SIZE_BYTES) {
-                    Log.w("MediaUploaderImpl", "파일 크기 초과로 업로드 거부: ${file.fileName} (${file.fileSize} bytes)")
+                totalFileSize += file.fileSize
+                if (totalFileSize > MAX_MEDIA_SIZE_BYTES) {
+                    Log.w("MediaUploaderImpl", "파일 크기 초과로 업로드 거부됨")
                     return@withContext Result.Error(
                         DataError.Validation.FILE_TOO_LARGE,
-                        "파일 크기가 200MB를 초과합니다: ${file.fileName}"
+                        "파일 크기가 ${MAX_MEDIA_SIZE_BYTES / (1024 * 1024)}MB를 초과해 업로드에 실패했습니다."
                     )
                 }
             }
