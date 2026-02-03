@@ -27,4 +27,16 @@ class ThanksCardRepositoryImpl @Inject constructor(
         val response = thanksCardRemoteDataSource.getThanksCard(invitationId)
         return response.map { it.toDomain(json) }
     }
+
+    override suspend fun deleteThanksCard(invitationId: Long): Result<Unit, DataError> {
+        return thanksCardRemoteDataSource.deleteThanksCard(invitationId).map { Unit }
+    }
+
+    override suspend fun updateThanksCard(
+        cardId: Long,
+        card: NachoCard
+    ): Result<Long, DataError> {
+        val request = card.toThanksCardRequest(json)
+        return thanksCardRemoteDataSource.updateThanksCard(cardId, request).map { it.id }
+    }
 }

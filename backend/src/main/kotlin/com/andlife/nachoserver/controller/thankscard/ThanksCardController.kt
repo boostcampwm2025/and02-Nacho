@@ -49,12 +49,12 @@ class ThanksCardController(
         }
     }
 
-    @GetMapping("/{invitationId}/thanks-card")
+    @GetMapping("/thanks-card/{cardId}")
     fun getThanksCard(
-        @PathVariable invitationId: Long
+        @PathVariable cardId: Long
     ): BaseResponse<ThanksCardResponse> {
         return try {
-            val response = thanksCardService.getThanksCard(invitationId)
+            val response = thanksCardService.getThanksCard(cardId)
             BaseResponse.success(response)
         } catch (e: NoSuchElementException) {
             BaseResponse.error(
@@ -66,7 +66,7 @@ class ThanksCardController(
         }
     }
 
-    @PutMapping("/thanks-cards/{cardId}")
+    @PutMapping("/thanks-card/{cardId}")
     fun updateThanksCard(
         @PathVariable cardId: Long,
         @RequestBody request: ThanksCardRequest,
@@ -93,14 +93,14 @@ class ThanksCardController(
     fun deleteThanksCard(
         @PathVariable invitationId: Long,
         authContext: AuthContext
-    ): BaseResponse<Unit> {
+    ): BaseResponse<Long> {
         if (authContext !is AuthContext.Member) {
             return BaseResponse.error(CommonResponseCode.UNAUTHORIZED)
         }
 
         return try {
             thanksCardService.deleteThanksCard(invitationId)
-            BaseResponse.success(Unit)
+            BaseResponse.success(invitationId)
         } catch (e: Exception) {
             BaseResponse.error(responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR)
         }

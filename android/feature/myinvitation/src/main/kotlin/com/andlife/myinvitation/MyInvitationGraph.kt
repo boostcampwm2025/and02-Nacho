@@ -82,6 +82,7 @@ fun NavGraphBuilder.myInvitationDetailNavGraph(
     onNavigateToEditCard: (Long) -> Unit,
     onNavigateToCreateCard: (Long) -> Unit,
     onNavigateToCreateThanksCard: (Long) -> Unit,
+    onNavigateToUpdateThanksCard: (Long) -> Unit,
 ) {
     composable<MyInvitationDetail> { backStackEntry ->
         val viewModel: MyInvitationDetailViewModel = hiltViewModel()
@@ -97,16 +98,22 @@ fun NavGraphBuilder.myInvitationDetailNavGraph(
             INVITATION_UPDATED, false
         ).collectAsStateWithLifecycle()
 
-        val thanksCardUpdated by backStackEntry.savedStateHandle.getStateFlow<Boolean>(
+        val thanksCardCreated by backStackEntry.savedStateHandle.getStateFlow<Boolean>(
             CREATE_THANKS_CARD, false
         ).collectAsStateWithLifecycle()
 
-        LaunchedEffect(cardCreated, cardUpdated, invitationUpdated, thanksCardUpdated) {
-            if (cardCreated || cardUpdated || invitationUpdated || thanksCardUpdated) {
+        val thanksCardUpdated by backStackEntry.savedStateHandle.getStateFlow<Boolean>(
+            UPDATE_CARD, false
+        ).collectAsStateWithLifecycle()
+
+
+        LaunchedEffect(cardCreated, cardUpdated, invitationUpdated, thanksCardCreated, thanksCardUpdated) {
+            if (cardCreated || cardUpdated || invitationUpdated || thanksCardCreated || thanksCardUpdated) {
                 viewModel.onEvent(MyInvitationDetailUiEvent.RetryLoad)
                 backStackEntry.savedStateHandle.remove<Boolean>(CREATE_CARD_BY_INVITATION_ID)
                 backStackEntry.savedStateHandle.remove<Boolean>(UPDATE_CARD)
                 backStackEntry.savedStateHandle.remove<Boolean>(INVITATION_UPDATED)
+                backStackEntry.savedStateHandle.remove<Boolean>(CREATE_THANKS_CARD)
             }
         }
 
@@ -118,6 +125,7 @@ fun NavGraphBuilder.myInvitationDetailNavGraph(
             onNavigateToCreateCard = onNavigateToCreateCard,
             onNavigateToCreateThanksCard = onNavigateToCreateThanksCard,
             modifier = Modifier.padding(),
+            onNavigateToUpdateThanksCard = onNavigateToUpdateThanksCard,
             viewModel = viewModel
         )
     }

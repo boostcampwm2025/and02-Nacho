@@ -28,6 +28,7 @@ import com.andlife.login.navigateToLogin
 import com.andlife.myinvitation.navigateToMyInvitation
 import com.andlife.myinvitation.navigateToMyInvitationDetail
 import com.andlife.thanks_card.navigateToCreateThanksCard
+import com.andlife.thanks_card.navigateToUpdateThanksCard
 import kotlin.reflect.KClass
 
 @Stable
@@ -156,6 +157,10 @@ class NachoNavigator(
 
     fun navigateToCreateThanksCard(invitationId: Long) {
         navController.navigateToCreateThanksCard(invitationId)
+    }
+
+    fun navigateToUpdateThanksCard(cardId: Long) {
+        navController.navigateToUpdateThanksCard(cardId)
     }
 }
 
