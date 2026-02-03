@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.paging.LoadState
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoTheme
@@ -22,6 +23,7 @@ fun PagingStateContent(
     itemCount: Int,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
+    emptyComment: String = stringResource(R.string.label_paging_empty_result),
     content: @Composable () -> Unit,
 ) {
     Box(modifier = modifier.fillMaxSize()) {
@@ -42,7 +44,13 @@ fun PagingStateContent(
                             .verticalScroll(rememberScrollState()),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text(text = stringResource(R.string.label_paging_empty_result))
+                        Text(
+                            text = emptyComment,
+                            style = NachoTheme.typography.bodyLargeMedium,
+                            color = NachoTheme.colorScheme.textSecondary,
+                            textAlign = TextAlign.Center,
+                            lineHeight = NachoTheme.typography.bodyLargeMedium.lineHeight * 1.4f
+                        )
                     }
                 } else {
                     content()

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="txt_kakao_login">카카오 로그인</string>
-    <string name="txt_guest_login">비로그인으로 둘러보기</string>
+    <string name="txt_kakao_login">카카오로 시작하기</string>
+    <string name="txt_guest_login">로그인 없이 둘러보기</string>
     <string name="fail_kakao_login">카카오 로그인에 실패했습니다.</string>
     <string name="fail_guest_login">게스트 로그인에 실패했습니다.</string>
     <string name="whenloggingin">"로그인 시 "</string>
@@ -9,5 +9,9 @@
     <string name="and">" 및 "</string>
     <string name="privacypolicy">개인정보처리방침</string>
     <string name="agree">에\n동의하는 것으로 간주됩니다.</string>
+
+    <string name="txt_login_title">나에게로의 초대</string>
+    <string name="txt_login_content">나만의 초대장을 공유하고\n추억을 기록해보세요</string>
+    <string name="txt_login_copyright">Copyright ©ANDLIFE All rights reserved.</string>
 
 </resources>
