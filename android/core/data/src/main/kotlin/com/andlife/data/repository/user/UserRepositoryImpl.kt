@@ -29,16 +29,16 @@ internal class UserRepositoryImpl @Inject constructor(
             }
     }
 
-    private suspend fun syncGuestInvitations() {
+    private suspend fun syncGuestInvitations(): Result<Unit, DataError> {
         val invitationIds = userStorage.getInvitationIds()
 
-        if (invitationIds.isNotEmpty()) {
-            val syncResult = userRemoteDataSource.syncInvitations(invitationIds)
-
-            if (syncResult is Result.Success) {
+        if (invitationIds.isEmpty()) {
+            return Result.Success(Unit)
+        }
+        return userRemoteDataSource.syncInvitations(invitationIds)
+            .map {
                 userStorage.clearGuestData()
             }
-        }
     }
 
     override suspend fun guestLogin(): Result<Unit, InvitationError> {
