@@ -182,7 +182,8 @@ constructor(
                 )
             )
         }
-        
+    }
+
     private fun calculateTotalMediaSize(medias: List<SelectedMedia>): Long {
         var totalMediaSize = 0L
         medias.map { media ->
