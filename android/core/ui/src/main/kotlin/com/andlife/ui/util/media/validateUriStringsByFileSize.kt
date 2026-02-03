@@ -4,7 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.core.net.toUri
 
-private const val MAX_VIDEO_SIZE_BYTES = 2000 * 1024 * 1024L // 200MB
+private const val MAX_VIDEO_SIZE_BYTES = 200 * 1024 * 1024L // 200MB
 
 fun validateUriStringsByFileSize(
     context: Context,
