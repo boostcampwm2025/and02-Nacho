@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -69,6 +68,7 @@ import com.andlife.model.common.VideoCandidate
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.model.invitation.UpcomingInvitationUiModel
+import com.andlife.ui.component.dialog.LoginDialog
 import com.andlife.ui.component.guestbook.FakeAutoVideoPlayerPool
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItem
@@ -92,6 +92,7 @@ private const val SKELETON_ITEM_COUNT = 2
 fun HomeRoute(
     snackbarHostState: SnackbarHostState,
     onNavigateToCreate: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     onNavigateToInvitationDetail: (Long) -> Unit,
     onNavigateToMyInvitationDetail: (Long) -> Unit,
     onNavigateToSetting: () -> Unit,
@@ -107,6 +108,17 @@ fun HomeRoute(
     val lifecycleOwner = LocalLifecycleOwner.current
     val lazyListState = rememberLazyListState()
     val refreshFailMessage = stringResource(R.string.snack_refresh_failure)
+
+    val navigateToLoginWithCleanup: () -> Unit = {
+        isMediaActive = false
+        scope.launch {
+            viewModel.videoPlayerPool.pauseAllPlayers()
+            viewModel.onEvent(HomeUiEvent.ClickAudioMedia(""))
+
+            delay(50L)
+            onNavigateToLogin()
+        }
+    }
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
@@ -211,6 +223,18 @@ fun HomeRoute(
         videoPlayerPool = viewModel.videoPlayerPool,
         modifier = modifier,
     )
+
+    if (uiState.showLoginDialog) {
+        LoginDialog(
+            onDismiss = {
+                viewModel.onEvent(HomeUiEvent.DismissLoginDialog)
+            },
+            onConfirm = {
+                viewModel.onEvent(HomeUiEvent.DismissLoginDialog)
+                navigateToLoginWithCleanup()
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -351,7 +375,6 @@ fun HomeScreen(
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -522,7 +545,7 @@ private fun UpcomingStatusContent(
             )
             Text(
                 text = description,
-                style = NachoTheme.typography.bodyMediumRegular,
+                style = NachoTheme.typography.bodyLargeMedium,
                 color = NachoTheme.colorScheme.textSecondary,
                 textAlign = TextAlign.Center
             )
@@ -572,18 +595,19 @@ private fun LazyListScope.homeGuestBookSection(
 
     if (isInitialLoading || isInitialError || isEmpty) {
         item {
-            GuestBookStatusContent(
-                modifier = Modifier.padding(
-                    vertical = NachoSpacing.threeXLarge,
-                    horizontal = NachoSpacing.large
-                ),
-                isLoading = isInitialLoading,
-                title = when {
-                    isInitialError -> stringResource(R.string.error_msg_failed_load_post)
-                    isEmpty -> stringResource(R.string.txt_empty_new_post_desc)
-                    else -> null
-                },
-            )
+            Box(
+                modifier = Modifier.fillParentMaxHeight(0.3f),
+                contentAlignment = Alignment.Center
+            ) {
+                GuestBookStatusContent(
+                    isLoading = isInitialLoading,
+                    title = when {
+                        isInitialError -> stringResource(R.string.error_msg_failed_load_post)
+                        isEmpty -> stringResource(R.string.txt_empty_new_post_desc)
+                        else -> null
+                    },
+                )
+            }
         }
     } else {
         items(
@@ -630,16 +654,10 @@ private fun LazyListScope.homeGuestBookSection(
 private fun GuestBookStatusContent(
     modifier: Modifier = Modifier,
     title: String? = null,
-    description: String? = null,
-    buttonText: String? = null,
-    onButtonClick: (() -> Unit)? = null,
     isLoading: Boolean = false,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(vertical = NachoSpacing.threeXLarge),
+        modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -649,27 +667,11 @@ private fun GuestBookStatusContent(
             title?.let {
                 Text(
                     text = it,
-                    style = NachoTheme.typography.bodyMediumRegular,
-                    color = NachoTheme.colorScheme.textPrimary,
-                    textAlign = TextAlign.Center
-                )
-            }
-
-            description?.let {
-                Spacer(Modifier.height(NachoSpacing.small))
-                Text(
-                    text = it,
-                    style = NachoTheme.typography.bodyMediumRegular,
+                    style = NachoTheme.typography.bodyLargeMedium,
                     color = NachoTheme.colorScheme.textSecondary,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    lineHeight = NachoTheme.typography.bodyLargeMedium.lineHeight * 1.4f
                 )
-            }
-
-            if (buttonText != null && onButtonClick != null) {
-                Spacer(Modifier.height(NachoSpacing.large))
-                NachoButton(onClick = onButtonClick) {
-                    Text(text = buttonText)
-                }
             }
         }
     }

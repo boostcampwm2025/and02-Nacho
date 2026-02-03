@@ -1,23 +1,22 @@
 package com.andlife.login.screen
 
 import android.util.Log
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -28,11 +27,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -40,14 +38,13 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withLink
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.KakaoButtonColor
 import com.andlife.designsystem.theme.KakaoTextColor
 import com.andlife.designsystem.theme.NachoSpacing
-import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.error.LoginError
 import com.andlife.domain.util.onFailure
@@ -55,12 +52,14 @@ import com.andlife.domain.util.onSuccess
 import com.andlife.login.LocalLoginManager
 import com.andlife.login.R
 import com.andlife.login.model.LoginSideEffect
-import com.andlife.login.model.LoginUiState
 import com.andlife.login.model.LoginUiEvent
+import com.andlife.login.model.LoginUiState
 import com.andlife.login.social.SocialType
 import com.andlife.login.viewmodel.LoginViewModel
+import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.coroutines.launch
+import com.andlife.designsystem.R as designR
 
 @Composable
 fun LoginRoute(
@@ -80,6 +79,7 @@ fun LoginRoute(
                 snackbarHostState.currentSnackbarData?.dismiss()
                 snackbarHostState.showSnackbar(res.getString(R.string.fail_guest_login))
             }
+
             LoginSideEffect.FailSocialLogin -> {
                 snackbarHostState.currentSnackbarData?.dismiss()
                 snackbarHostState.showSnackbar(res.getString(R.string.fail_kakao_login))
@@ -127,43 +127,88 @@ private fun LoginScreen(
             SnackbarHost(snackbarHostState)
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(NachoSpacing.large)
-            ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = NachoSpacing.large),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Spacer(modifier = Modifier.weight(1f))
 
-                Spacer(modifier = Modifier.fillMaxHeight(0.7f))
+            logoSection(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = NachoSpacing.large)
+            )
+
+            Spacer(modifier = Modifier.weight(0.7f))
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 KakaoLoginButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = NachoSpacing.large),
+                    modifier = Modifier.fillMaxWidth(),
                     onLoginClick = { onSocialLogin(SocialType.KAKAO) }
                 )
                 GuestLoginButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = NachoSpacing.large),
+                    modifier = Modifier.fillMaxWidth(),
                     onGuestLoginClick = { onEvent(LoginUiEvent.GuestLogin) }
                 )
-
-                PolicyAndTermsText(
-                    modifier = Modifier.padding(top = NachoSpacing.large),
-                    onPrivacyPolicyClick = {
-                        Log.d("Login", "onPrivacyPolicyClick")
-                    },
-                    onTermsOfServiceClick = {
-                        Log.d("Login", "onTermsOfServiceClick")
-                    }
-                )
-                Spacer(modifier = Modifier.fillMaxHeight(0.05f))
             }
-            if (uiState.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
+
+            Spacer(modifier = Modifier.weight(0.5f))
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
+            ) {
+                PolicyAndTermsText(
+                    onPrivacyPolicyClick = { Log.d("Login", "onPrivacyPolicyClick") },
+                    onTermsOfServiceClick = { Log.d("Login", "onTermsOfServiceClick") }
+                )
+
+                CopyrightText(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = NachoSpacing.large),
                 )
             }
         }
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                InvitationLoadingIndicator()
+            }
+        }
+    }
+}
+
+@Composable
+private fun logoSection(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(NachoSpacing.twoXLarge)
+    ) {
+        Text(
+            text = stringResource(R.string.txt_login_title),
+            style = NachoTheme.typography.headingLarge,
+            color = NachoTheme.colorScheme.textSecondary,
+        )
+        Text(
+            text = stringResource(R.string.txt_login_content),
+            style = NachoTheme.typography.bodyLargeSemiBold,
+            color = NachoTheme.colorScheme.textTertiary,
+            textAlign = TextAlign.Center,
+        )
+
+        Image(
+            painter = painterResource(designR.drawable.ic_home_logo),
+            contentDescription = null,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 
@@ -174,30 +219,36 @@ private fun KakaoLoginButton(
     shape: Shape = RoundedCornerShape(NachoSpacing.medium),
     isLoading: Boolean = false
 ) {
-    Surface(
+
+    NachoButton(
         modifier = modifier,
         shape = shape,
-        color = KakaoButtonColor,
         enabled = !isLoading,
-        onClick = onLoginClick
+        onClick = onLoginClick,
+        containerColor = KakaoButtonColor,
+        contentColor = NachoTheme.colorScheme.textSecondary,
+        contentPadding = PaddingValues(NachoSpacing.large)
     ) {
         Row(
-            modifier = Modifier.padding(
-                vertical = NachoSpacing.medium,
-                horizontal = NachoSpacing.large
-            ),
-            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.ic_kakao_logo),
+                painter = painterResource(R.drawable.ic_kakao_logo),
                 contentDescription = null,
-                tint = Color(0xFF000000)
+                tint = KakaoTextColor
+
             )
+
             Spacer(modifier = Modifier.weight(1f))
+
             Text(
                 text = stringResource(R.string.txt_kakao_login),
-                color = KakaoTextColor,
+                style = NachoTheme.typography.bodyLargeMedium,
+                color = NachoTheme.colorScheme.textSecondary,
             )
+
             Spacer(modifier = Modifier.weight(1f))
         }
     }
@@ -210,32 +261,35 @@ private fun GuestLoginButton(
     shape: Shape = RoundedCornerShape(NachoSpacing.medium),
     isLoading: Boolean = false
 ) {
-    Surface(
+
+    NachoButton(
         modifier = modifier,
         shape = shape,
-        shadowElevation = 1.dp,
-        border = BorderStroke(
-            width = NachoStroke.small,
-            color = NachoTheme.colorScheme.backgroundBorder
-        ),
         enabled = !isLoading,
-        color = NachoTheme.colorScheme.backgroundPrimary,
-        onClick = onGuestLoginClick
+        onClick = onGuestLoginClick,
+        containerColor = NachoTheme.colorScheme.backgroundPrimary,
+        contentColor = NachoTheme.colorScheme.textSecondary,
+        contentPadding = PaddingValues(NachoSpacing.large)
     ) {
         Row(
-            modifier = Modifier.padding(
-                vertical = NachoSpacing.medium,
-                horizontal = NachoSpacing.large
-            ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.ic_baseline_person_24),
+                painter = painterResource(R.drawable.ic_baseline_person_24),
                 contentDescription = null,
+                tint = KakaoTextColor
+
             )
+
             Spacer(modifier = Modifier.weight(1f))
-            Text(stringResource(R.string.txt_guest_login))
+
+            Text(
+                text = stringResource(R.string.txt_guest_login),
+                style = NachoTheme.typography.bodyLargeMedium,
+                color = NachoTheme.colorScheme.textSecondary,
+            )
             Spacer(modifier = Modifier.weight(1f))
         }
     }
@@ -292,6 +346,19 @@ private fun PolicyAndTermsText(
             textAlign = TextAlign.Center
         )
     }
+}
+
+@Composable
+private fun CopyrightText(
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = stringResource(R.string.txt_login_copyright),
+        modifier = modifier.fillMaxWidth(),
+        style = NachoTheme.typography.bodySmallRegular,
+        color = NachoTheme.colorScheme.textTertiary,
+        textAlign = TextAlign.Center,
+    )
 }
 
 @Composable

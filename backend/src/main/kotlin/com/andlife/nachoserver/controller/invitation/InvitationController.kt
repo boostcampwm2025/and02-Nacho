@@ -35,6 +35,22 @@ class InvitationController(
     private val invitationService: InvitationService,
     private val guestBookService: GuestBookService,
 ) {
+    @PostMapping("/sync")
+    fun syncInvitations(
+        @RequestBody invitationIds: List<Long>,
+        authContext: AuthContext
+    ): BaseResponse<Unit> {
+        return when (authContext) {
+            is AuthContext.Member -> {
+                invitationService.syncInvitations(authContext.userId, invitationIds)
+                BaseResponse.success(Unit)
+            }
+            is AuthContext.Guest -> {
+                BaseResponse.error(CommonResponseCode.UNAUTHORIZED)
+            }
+        }
+    }
+
     @PostMapping("/{invitationId}/join")
     fun joinInvitation(
         @PathVariable invitationId: Long,

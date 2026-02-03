@@ -7,7 +7,6 @@ import javax.inject.Inject
 class AuthTokenProviderImpl @Inject constructor(
     private val userStorage: UserStorage
 ) : AuthTokenProvider {
-    override fun getUserId(): Long? = userStorage.getUserId()
     override fun getInvitationIds(): List<Long> = userStorage.getInvitationIds()
     override suspend fun getAccessToken(): String? = userStorage.getAccessToken()
     override suspend fun getRefreshToken(): String? = userStorage.getRefreshToken()
