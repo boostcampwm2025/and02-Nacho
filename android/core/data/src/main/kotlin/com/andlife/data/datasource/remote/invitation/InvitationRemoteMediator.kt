@@ -64,14 +64,13 @@ class InvitationRemoteMediator(
 
                 database.withTransaction {
                     if (loadType == LoadType.REFRESH) {
-                        dao.clearByQuery(status.name, isMyInvitation, sortType.name)
+                        dao.clearByQuery(status.name, isMyInvitation)
                     }
 
                     val entities = response.content.map { dto ->
                         dto.toEntity(
                             status = status.name,
                             isMyInvitation = isMyInvitation,
-                            sortType = sortType.name
                         )
                     }
                     dao.upsertAll(entities)

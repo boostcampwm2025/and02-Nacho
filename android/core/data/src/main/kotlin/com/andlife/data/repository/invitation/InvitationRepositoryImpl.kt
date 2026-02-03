@@ -104,9 +104,9 @@ internal class InvitationRepositoryImpl @Inject constructor(
             ),
             pagingSourceFactory = {
                 if (sortType == SortDirection.ASC) {
-                    dao.pagingSourceAsc(status.name, isMyInvitation, sortType.name)
+                    dao.pagingSourceAsc(status.name, isMyInvitation)
                 } else {
-                    dao.pagingSourceDesc(status.name, isMyInvitation, sortType.name)
+                    dao.pagingSourceDesc(status.name, isMyInvitation)
                 }
             }
         ).flow.map { pagingData ->
@@ -139,9 +139,9 @@ internal class InvitationRepositoryImpl @Inject constructor(
             ),
             pagingSourceFactory = {
                 if (sortType == SortDirection.ASC) {
-                    dao.pagingSourceAsc(status.name, isMyInvitation, sortType.name)
+                    dao.pagingSourceAsc(status.name, isMyInvitation)
                 } else {
-                    dao.pagingSourceDesc(status.name, isMyInvitation, sortType.name)
+                    dao.pagingSourceDesc(status.name, isMyInvitation)
                 }
             }
         ).flow.map { pagingData ->

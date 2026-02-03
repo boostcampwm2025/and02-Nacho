@@ -12,31 +12,25 @@ interface InvitationSummaryDao {
     @Query(
         """
           SELECT * FROM invitation_summary
-          WHERE status = :status
-          AND isMyInvitation = :isMyInvitation
-          AND sortType = :sortType
+          WHERE status = :status AND isMyInvitation = :isMyInvitation
           ORDER BY invitationDate ASC, startTime ASC
       """
     )
     fun pagingSourceAsc(
         status: String,
         isMyInvitation: Boolean,
-        sortType: String
     ): PagingSource<Int, InvitationSummaryEntity>
 
     @Query(
         """
           SELECT * FROM invitation_summary
-          WHERE status = :status
-          AND isMyInvitation = :isMyInvitation
-          AND sortType = :sortType
+          WHERE status = :status AND isMyInvitation = :isMyInvitation
           ORDER BY invitationDate DESC, startTime DESC
       """
     )
     fun pagingSourceDesc(
         status: String,
         isMyInvitation: Boolean,
-        sortType: String
     ): PagingSource<Int, InvitationSummaryEntity>
 
     @Upsert
@@ -45,10 +39,8 @@ interface InvitationSummaryDao {
     @Query(
         """
           DELETE FROM invitation_summary
-          WHERE status = :status
-          AND isMyInvitation = :isMyInvitation
-          AND sortType = :sortType
+          WHERE status = :status AND isMyInvitation = :isMyInvitation
       """
     )
-    suspend fun clearByQuery(status: String, isMyInvitation: Boolean, sortType: String)
+    suspend fun clearByQuery(status: String, isMyInvitation: Boolean)
 }
