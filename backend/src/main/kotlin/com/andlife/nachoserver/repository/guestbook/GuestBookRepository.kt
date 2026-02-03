@@ -35,7 +35,7 @@ interface GuestBookRepository : JpaRepository<GuestBook, Long> {
             JOIN FETCH i.host h
             LEFT JOIN InvitationParticipant ip ON i.id = ip.invitation.id
             WHERE (h.id = :userId OR ip.user.id = :userId)
-            ORDER BY gb.createdAt DESC
+            ORDER BY gb.createdAt DESC, gb.id DESC
     """)
     fun findAllByMyRelatedInvitations(
         @Param("userId") userId: Long,
