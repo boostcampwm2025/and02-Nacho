@@ -47,6 +47,16 @@ constructor(
 ) : MediaUploader {
     override suspend fun uploadMedias(files: List<MediaFile>): Result<List<String?>, DataError> =
         withContext(Dispatchers.IO) {
+            // 파일 크기 체크
+            files.forEach { file ->
+                if (file.fileSize > MAX_VIDEO_SIZE_BYTES) {
+                    Log.w("MediaUploaderImpl", "파일 크기 초과로 업로드 거부: ${file.fileName} (${file.fileSize} bytes)")
+                    return@withContext Result.Error(
+                        DataError.Validation.FILE_TOO_LARGE,
+                        "파일 크기가 200MB를 초과합니다: ${file.fileName}"
+                    )
+                }
+            }
             val compressedDataList = files.map { file ->
                 if (file.mediaType == MediaType.IMAGE) {
                     imageCompressor.compressImage(uri = file.uriString.toUri())
@@ -331,5 +341,6 @@ constructor(
 
     companion object {
         private const val MAX_CONCURRENT_CHUNKS = 3
+        private const val MAX_VIDEO_SIZE_BYTES = 200 * 1024 * 1024L // 200MB
     }
 }
