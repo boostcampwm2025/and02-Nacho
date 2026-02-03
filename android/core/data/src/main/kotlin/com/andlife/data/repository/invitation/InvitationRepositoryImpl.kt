@@ -89,11 +89,7 @@ internal class InvitationRepositoryImpl @Inject constructor(
         val dao = database.invitationSummaryDao()
 
         return Pager(
-            config = PagingConfig(
-                pageSize = PAGE_SIZE,
-                enablePlaceholders = false,
-                initialLoadSize = PAGE_SIZE
-            ),
+            config = createPagingConfig(),
             remoteMediator = InvitationRemoteMediator(
                 remoteDataSource = invitationRemoteDataSource,
                 database = database,
@@ -124,11 +120,7 @@ internal class InvitationRepositoryImpl @Inject constructor(
         val dao = database.invitationSummaryDao()
 
         return Pager(
-            config = PagingConfig(
-                pageSize = PAGE_SIZE,
-                enablePlaceholders = false,
-                initialLoadSize = PAGE_SIZE
-            ),
+            config = createPagingConfig(),
             remoteMediator = InvitationRemoteMediator(
                 remoteDataSource = invitationRemoteDataSource,
                 database = database,
@@ -152,11 +144,7 @@ internal class InvitationRepositoryImpl @Inject constructor(
     @OptIn(ExperimentalPagingApi::class)
     override fun getUpcomingInvitations(): Flow<PagingData<UpcomingInvitation>> =
         Pager(
-            config = PagingConfig(
-                pageSize = PAGE_SIZE,
-                enablePlaceholders = false,
-                initialLoadSize = PAGE_SIZE,
-            ),
+            config = createPagingConfig(),
             remoteMediator = UpcomingInvitationRemoteMediator(
                 remoteDataSource = invitationRemoteDataSource,
                 database = database,
@@ -184,6 +172,12 @@ internal class InvitationRepositoryImpl @Inject constructor(
         val cardRequest = card.toRequest(json)
         return invitationRemoteDataSource.updateInvitationCard(cardId, cardRequest)
     }
+
+    private fun createPagingConfig() = PagingConfig(
+        pageSize = PAGE_SIZE,
+        enablePlaceholders = false,
+        initialLoadSize = PAGE_SIZE
+    )
 
     companion object {
         private const val PAGE_SIZE = 10
