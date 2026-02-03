@@ -90,6 +90,7 @@ class MyInvitationDetailViewModel @Inject constructor(
             MyInvitationDetailUiEvent.CopyInvitationLink -> copyInvitationLink()
             MyInvitationDetailUiEvent.ClickDeleteThanksCard -> deleteThanksCard()
             is MyInvitationDetailUiEvent.ClickUpdateThanksCard -> updateThanksCard(event.cardId)
+            MyInvitationDetailUiEvent.LottieStarted -> updateLottieStarted()
         }
     }
 
@@ -188,6 +189,10 @@ class MyInvitationDetailViewModel @Inject constructor(
             loadInvitation()
             updateState { copy(editCardEnabled = false, cachedCardEditable = null, thanksCardEditableCache = null) }
         }
+    }
+
+    private fun updateLottieStarted() {
+        updateState { copy(hasShownLottie = true) }
     }
 
     override fun onCleared() {

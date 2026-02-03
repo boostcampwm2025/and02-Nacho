@@ -12,6 +12,7 @@ data class MyInvitationDetailUiState(
     val cachedCardEditable: Editable? = null,
     val thanksCardEditableCache: Editable? = null,
     val editCardEnabled: Boolean = false,
+    val hasShownLottie: Boolean = false,
 ) : BaseUiState {
     val hasThanksCard = invitationContentsUiModel.thanksCard != null
 }
