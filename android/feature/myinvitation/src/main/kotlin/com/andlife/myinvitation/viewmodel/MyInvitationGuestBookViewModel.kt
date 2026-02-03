@@ -159,7 +159,10 @@ constructor(
         exceededAvailableSlots: Boolean
     ) {
         updateState {
-            copy(selectedMedias = medias.toPersistentList())
+            copy(
+                selectedMedias = medias.toPersistentList(),
+                currentMediaSizeBytes = calculateTotalMediaSize(medias)
+            )
         }
 
         // 용량 초과로 거부된 파일이 있으면 스낵바로 알림
@@ -180,6 +183,9 @@ constructor(
             )
         }
         
+    private fun calculateTotalMediaSize(medias: List<SelectedMedia>): Long {
+        // TODO: SelectedMedia file Size
+        return 0L
     }
 
     private fun updateTextContent(textContent: String) {
@@ -187,8 +193,13 @@ constructor(
     }
 
     private fun removeMedia(media: SelectedMedia) {
+        val state = uiState.value
+        val updatedMedias = state.selectedMedias.toPersistentList().remove(media)
         updateState {
-            copy(selectedMedias = selectedMedias.toPersistentList().remove(media))
+            copy(
+                selectedMedias = updatedMedias,
+                currentMediaSizeBytes = calculateTotalMediaSize(updatedMedias)
+            )
         }
     }
 
@@ -437,6 +448,7 @@ constructor(
                 editingGuestBookId = null,
                 originalTextContent = "",
                 originalMediaIds = emptySet(),
+                currentMediaSizeBytes = 0L,
             )
         }
     }

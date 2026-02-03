@@ -97,6 +97,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 private const val CAMERA_IMAGES_DIR = "camera_images"
+private const val MAX_MEDIAS_COUNT = 20
 
 @Composable
 fun InvitationGuestBookRoute(
@@ -632,6 +633,7 @@ private fun GuestBookFormSection(
         isUploading = uiState.isUploading,
         isSubmittable = uiState.isSubmittable,
         editingGuestBookId = uiState.editingGuestBookId,
+        currentMediaSizeBytes = uiState.currentMediaSizeBytes,
         onMediasSelected = { medias, exceededAvailableBytes, exceededAvailableSlots ->
             onEvent(
                 InvitationGuestBookUiEvent.UpdateSelectedMedias(

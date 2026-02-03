@@ -24,11 +24,12 @@ fun validateUriStringsByRule(
     context: Context,
     uriStrings: List<String>,
     availableSlotCnt: Int,
+    currentMediaSizeBytes: Long = 0L,
 ): Triple<List<String>, Boolean, Boolean> {
     val validUriStrings = mutableListOf<String>()
     var exceededAvailableBytes = false
     var exceededAvailableSlots = false
-    var currentBytes = 0L
+    var currentBytes = currentMediaSizeBytes
 
     uriStrings
         .forEach { uriString ->

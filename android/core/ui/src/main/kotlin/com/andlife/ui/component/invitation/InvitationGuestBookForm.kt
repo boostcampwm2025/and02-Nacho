@@ -52,6 +52,7 @@ fun InvitationGuestBookForm(
     isUploading: Boolean,
     isSubmittable: Boolean,
     isAuthenticated: Boolean,
+    currentMediaSizeBytes: Long,
     onMediasSelected: (ImmutableList<SelectedMedia>, Boolean, Boolean) -> Unit,
     onMediaRemove: (SelectedMedia) -> Unit,
     onTextContentChange: (String) -> Unit,
@@ -87,6 +88,7 @@ fun InvitationGuestBookForm(
                 context = context,
                 uriStrings = uriStrings,
                 availableSlotCnt = availableSlotsCnt,
+                currentMediaSizeBytes = currentMediaSizeBytes,
             )
 
             val mediasToAdd = validUriStrings.map { uriString ->
@@ -111,6 +113,7 @@ fun InvitationGuestBookForm(
                 context = context,
                 uriStrings = uriStrings,
                 availableSlotCnt = availableSlotsCnt,
+                currentMediaSizeBytes = currentMediaSizeBytes,
             )
 
             val mediasToAdd = validUriStrings.map { uriString ->
@@ -304,6 +307,7 @@ private fun InvitationGuestBookFormPreview() {
             textContent = "",
             isUploading = false,
             isSubmittable = false,
+            currentMediaSizeBytes = 0L,
             onMediasSelected = { _, _, _ -> },
             onMediaRemove = {},
             onTextContentChange = {},
