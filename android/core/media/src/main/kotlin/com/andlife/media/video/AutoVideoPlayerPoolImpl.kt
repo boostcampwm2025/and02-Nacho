@@ -20,9 +20,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
     @param:ApplicationContext private val context: Context,
@@ -183,9 +185,12 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
                     val cacheWriter = CacheWriter(
                         cacheDataSourceFactory.createDataSourceForDownloading(),
                         dataSpec,
-                        null,
                         null
-                    )
+                    ) { requestLength, bytesCached, newBytesCached ->
+                        if (!coroutineContext.isActive) {
+                            throw CancellationException("프리캐싱 작업이 취소됨")
+                        }
+                    }
                     cacheWriter.cache()
                 } catch (e: Exception) {
                     e.printStackTrace()
