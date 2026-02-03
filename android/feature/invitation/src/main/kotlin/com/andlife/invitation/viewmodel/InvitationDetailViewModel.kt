@@ -91,6 +91,7 @@ class InvitationDetailViewModel @Inject constructor(
             is InvitationDetailUiEvent.ClickImage -> navigateToFullScreenImage(event.imageList, event.index)
             is InvitationDetailUiEvent.MapError -> showMapErrorSnackbar()
             is InvitationDetailUiEvent.RetryLoad -> retryLoad()
+            InvitationDetailUiEvent.LottieStarted -> updateLottieStarted()
         }
     }
 
@@ -122,6 +123,10 @@ class InvitationDetailViewModel @Inject constructor(
         viewModelScope.launch {
             loadInvitation()
         }
+    }
+
+    private fun updateLottieStarted() {
+        updateState { copy(hasShownLottie = true) }
     }
 
 }
