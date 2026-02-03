@@ -26,6 +26,7 @@ import com.andlife.thanks_card.model.update.UpdateThanksCardUiState
 import com.andlife.thanks_card.viewmodel.UpdateThanksCardViewModel
 import com.andlife.ui.component.card.DiscardChangesDialogContent
 import com.andlife.ui.component.loading.InvitationLoadingError
+import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.coroutines.launch
 
@@ -110,7 +111,7 @@ fun UpdateThanksCardScreen(
             isLoading = uiState.isLoading,
         )
         if (uiState.isLoading) {
-            CircularProgressIndicator(
+            InvitationLoadingIndicator(
                 modifier = Modifier.align(Alignment.Center)
             )
         }
