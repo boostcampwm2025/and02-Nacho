@@ -343,6 +343,6 @@ constructor(
 
     companion object {
         private const val MAX_CONCURRENT_CHUNKS = 3
-        private const val MAX_MEDIA_SIZE_BYTES = 200 * 1024 * 1024L // 200MB
+        private const val MAX_MEDIA_SIZE_BYTES = 500 * 1024 * 1024L // 200MB
     }
 }
