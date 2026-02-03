@@ -287,8 +287,16 @@ fun InvitationGuestBookForm(
                     )
                 }
 
-                // 용량 표시 (미디어가 있을 때만)
-                if (selectedMedias.isNotEmpty()) {
+                Row(horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small)) {
+                    // 미디어 개수 표시
+                    Text(
+                        text = "${selectedMedias.size}/${MAX_MEDIAS_COUNT}",
+                        style = NachoTheme.typography.bodySmallRegular,
+                        color = NachoTheme.colorScheme.textTertiary,
+                        modifier = Modifier.padding(top = NachoSpacing.xSmall)
+                    )
+
+                    // 용량 표시
                     Text(
                         text = formatSizeInMB(currentMediaSizeBytes),
                         style = NachoTheme.typography.bodySmallRegular,
