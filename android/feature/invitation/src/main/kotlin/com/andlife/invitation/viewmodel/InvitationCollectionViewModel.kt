@@ -4,9 +4,6 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.toRoute
 import com.andlife.domain.model.guestbook.DownloadState
 import com.andlife.domain.model.guestbook.MediaType
@@ -19,6 +16,7 @@ import com.andlife.invitation.InvitationDetail
 import com.andlife.invitation.model.collection.InvitationCollectionSideEffect
 import com.andlife.invitation.model.collection.InvitationCollectionUiEvent
 import com.andlife.invitation.model.collection.InvitationCollectionUiState
+import com.andlife.media.StoryMediaPlayerPool
 import com.andlife.model.collection.toUiModel
 import com.andlife.model.guestbook.UiMediaType
 import com.andlife.ui.base.BaseViewModel
@@ -37,6 +35,7 @@ class InvitationCollectionViewModel @Inject constructor(
     private val guestBookRepository: GuestBookRepository,
     private val mediaDownloader: MediaDownloader,
     private val userRepository: UserRepository,
+    private val playerPool: StoryMediaPlayerPool,
     @param:ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<InvitationCollectionUiState, InvitationCollectionUiEvent, InvitationCollectionSideEffect>(
@@ -61,27 +60,6 @@ class InvitationCollectionViewModel @Inject constructor(
     private var preparationStartTime = 0L
     private var currentMeasuringUrl = ""
 
-    val exoPlayer: ExoPlayer = ExoPlayer.Builder(context).build().apply {
-        repeatMode = Player.REPEAT_MODE_ONE
-        playWhenReady = true
-    }
-
-    init {
-        exoPlayer.addListener(object : Player.Listener {
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                if (playbackState == Player.STATE_READY) {
-                    val duration = System.currentTimeMillis() - preparationStartTime
-                    Log.d(TAG, "STATE_READY | 준비 완료 시간: ${duration}ms | URL: $currentMeasuringUrl")
-                }
-            }
-
-            override fun onRenderedFirstFrame() {
-                val totalDuration = System.currentTimeMillis() - preparationStartTime
-                Log.d(TAG, "첫 프레임 렌더링 완료 | 총 소요 시간: ${totalDuration}ms | URL: $currentMeasuringUrl")
-            }
-        })
-    }
-
     override fun onEvent(event: InvitationCollectionUiEvent) {
         when (event) {
             is InvitationCollectionUiEvent.OpenStory -> openStory(event.index)
@@ -95,7 +73,7 @@ class InvitationCollectionViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        exoPlayer.release()
+        playerPool.releaseAll()
     }
 
     private fun loadMediaCollection() {
@@ -111,6 +89,9 @@ class InvitationCollectionViewModel @Inject constructor(
                             mediaItems = mediaList.map { it.toUiModel() }.toImmutableList(),
                         )
                     }
+
+                    // 미디어 로드 후 프리캐싱 시작
+                    precacheUpcomingMedia()
                 }.onFailure { _, _ ->
                     updateState { copy(isLoading = false) }
                 }
@@ -127,7 +108,8 @@ class InvitationCollectionViewModel @Inject constructor(
         val selectedMedia = uiState.value.mediaItems.getOrNull(index)
 
         if (selectedMedia?.type == UiMediaType.VIDEO || selectedMedia?.type == UiMediaType.AUDIO) {
-            prepareMedia(selectedMedia.mediaUrl)
+            prepareMedia(index, selectedMedia.mediaUrl)
+            precacheUpcomingMedia()
         }
     }
 
@@ -138,7 +120,7 @@ class InvitationCollectionViewModel @Inject constructor(
                 selectedIndex = -1,
             )
         }
-        exoPlayer.pause()
+        playerPool.pauseAll()
     }
 
     private fun pageChanged(index: Int) {
@@ -150,40 +132,74 @@ class InvitationCollectionViewModel @Inject constructor(
         }
 
         val selectedMedia = uiState.value.mediaItems.getOrNull(index)
-        Log.d(TAG, "페이지 변경: $index")
+        Log.d(TAG, "📄 페이지 변경: $index")
         Log.d(TAG, "선택된 미디어 타입: ${selectedMedia?.type}")
 
         when (selectedMedia?.type) {
             UiMediaType.VIDEO, UiMediaType.AUDIO -> {
-                prepareMedia(selectedMedia.mediaUrl)
+                prepareMedia(index, selectedMedia.mediaUrl)
+                precacheUpcomingMedia()
             }
             else -> {
-                exoPlayer.pause()
+                playerPool.pauseAll()
             }
         }
     }
 
-    private fun prepareMedia(url: String) {
+    private fun prepareMedia(index: Int, url: String) {
         if (url.isEmpty()) return
-
-        val currentUri = exoPlayer.currentMediaItem?.localConfiguration?.uri?.toString()
-
-        if (currentUri == url) {
-            exoPlayer.seekTo(0)
-            exoPlayer.play()
-            return
-        }
 
         preparationStartTime = System.currentTimeMillis()
         currentMeasuringUrl = url
 
-        exoPlayer.stop()
-        exoPlayer.clearMediaItems()
+        // 플레이어 풀에서 플레이어 획득 및 재생
+        val player = playerPool.acquirePlayer(index, url)
 
-        val mediaItem = MediaItem.fromUri(url)
-        exoPlayer.setMediaItem(mediaItem)
-        exoPlayer.prepare()
-        exoPlayer.play()
+        // 성능 측정을 위한 리스너 추가
+        player.addListener(object : androidx.media3.common.Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (playbackState == androidx.media3.common.Player.STATE_READY) {
+                    val duration = System.currentTimeMillis() - preparationStartTime
+                    Log.d(TAG, "✅ STATE_READY | 준비 완료 시간: ${duration}ms | URL: $currentMeasuringUrl")
+                }
+            }
+
+            override fun onRenderedFirstFrame() {
+                val totalDuration = System.currentTimeMillis() - preparationStartTime
+                Log.d(TAG, "🎬 첫 프레임 렌더링 완료 | 총 소요 시간: ${totalDuration}ms | URL: $currentMeasuringUrl")
+            }
+        })
+
+        playerPool.play(index)
+    }
+
+    private fun precacheUpcomingMedia() {
+        val currentIndex = uiState.value.selectedIndex
+        val mediaItems = uiState.value.mediaItems
+
+        // 현재 인덱스 기준 앞뒤 2개씩 비디오/오디오 URL 수집
+        val urlsToPrecache = mutableListOf<String>()
+
+        for (offset in -2..2) {
+            val targetIndex = currentIndex + offset
+            if (targetIndex in mediaItems.indices && targetIndex != currentIndex) {
+                val item = mediaItems[targetIndex]
+                if (item.type == UiMediaType.VIDEO || item.type == UiMediaType.AUDIO) {
+                    urlsToPrecache.add(item.mediaUrl)
+                }
+            }
+        }
+
+        if (urlsToPrecache.isNotEmpty()) {
+            playerPool.precacheVideos(urlsToPrecache)
+        }
+    }
+
+    fun getPlayerForIndex(index: Int): androidx.media3.common.Player? {
+        val item = uiState.value.mediaItems.getOrNull(index) ?: return null
+        if (item.type != UiMediaType.VIDEO && item.type != UiMediaType.AUDIO) return null
+
+        return playerPool.acquirePlayer(index, item.mediaUrl).getExoPlayer()
     }
 
     private fun toggleExpand() {
@@ -251,7 +267,7 @@ class InvitationCollectionViewModel @Inject constructor(
     }
 
     companion object {
-        private const val TAG = "Performance_Before"
+        private const val TAG = "Performance_After"
         private const val FILE_NAME_PREFIX = "nacho_"
     }
 }

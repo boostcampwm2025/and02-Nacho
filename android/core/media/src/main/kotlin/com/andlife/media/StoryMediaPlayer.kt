@@ -1,20 +1,40 @@
 package com.andlife.media
 
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 
 class StoryMediaPlayer(
-    val exoPlayer: ExoPlayer,
-    initialState: StoryPlayerState = StoryStoppedState()
+    internal val exoPlayer: ExoPlayer
 ) {
-    private var currentState: StoryPlayerState = initialState
+    private var state: StoryPlayerState = StoryStoppedState()
 
-    fun setState(state: StoryPlayerState) {
-        this.currentState = state
+    fun play() {
+        state.play(this)
     }
 
-    fun play() = currentState.play(this)
-    fun pause() = currentState.pause(this)
-    fun stop() = currentState.stop(this)
+    fun pause() {
+        state.pause(this)
+    }
 
-    fun release() = exoPlayer.release()
+    fun stop() {
+        state.stop(this)
+    }
+
+    fun release() {
+        exoPlayer.release()
+    }
+
+    internal fun setState(newState: StoryPlayerState) {
+        state = newState
+    }
+
+    fun getExoPlayer(): ExoPlayer = exoPlayer
+
+    fun addListener(listener: Player.Listener) {
+        exoPlayer.addListener(listener)
+    }
+
+    fun removeListener(listener: Player.Listener) {
+        exoPlayer.removeListener(listener)
+    }
 }
