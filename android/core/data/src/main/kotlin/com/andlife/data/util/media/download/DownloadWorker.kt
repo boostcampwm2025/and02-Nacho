@@ -3,6 +3,8 @@ package com.andlife.data.util.media.download
 import android.app.Notification
 import android.content.Context
 import android.content.pm.ServiceInfo
+import android.media.MediaScannerConnection
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.hilt.work.HiltWorker
@@ -17,10 +19,12 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.job
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.coroutines.resume
 
 @HiltWorker
 class DownloadWorker @AssistedInject constructor(
@@ -74,7 +78,13 @@ class DownloadWorker @AssistedInject constructor(
                     isStopped = { isStopped },
                 )
 
-                notificationManager.notifyComplete(fileName, mediaType, uri)
+                val contentUri = if (uri.startsWith(FileConstants.FILE_SCHEMA)) {
+                    scanToContentUri(Uri.parse(uri).path ?: "") ?: uri
+                } else {
+                    uri
+                }
+                notificationManager.notifyComplete(fileName, mediaType, contentUri)
+
                 Result.success(workDataOf(DownloadKey.RESULT_URL to uri))
             }
         } catch (e: Exception) {
@@ -112,6 +122,17 @@ class DownloadWorker @AssistedInject constructor(
     fun errorData(message: String): Data {
         return workDataOf(DownloadKey.ERROR_MESSAGE to message)
     }
+
+    private suspend fun scanToContentUri(filePath: String): String? =
+        suspendCancellableCoroutine { cont ->
+            MediaScannerConnection.scanFile(
+                context,
+                arrayOf(filePath),
+                null
+            ) { _, contentUri ->
+                cont.resume(contentUri?.toString())
+            }
+        }
 
     companion object {
         private const val TAG = "DownloadWorker"

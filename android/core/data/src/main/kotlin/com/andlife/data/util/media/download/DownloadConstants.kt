@@ -56,8 +56,6 @@ object DownloadFile {
     const val MIME_IMAGE = "image/*"
     const val MIME_VIDEO = "video/*"
     const val MIME_AUDIO = "audio/*"
-    const val MIME_FOLDER_Q = "vnd.android.document/root"
-    const val URI_STORAGE_ROOT = "content://com.android.externalstorage.documents/root/primary"
 }
 
 object DownloadError {
@@ -67,4 +65,8 @@ object DownloadError {
     const val MISSING_BODY = "응답 본문이 없습니다."
     const val FAILED = "다운로드 실패: "
     const val UNKNOWN = "알 수 없는 오류"
+}
+
+object FileConstants {
+    const val FILE_SCHEMA = "file://"
 }
