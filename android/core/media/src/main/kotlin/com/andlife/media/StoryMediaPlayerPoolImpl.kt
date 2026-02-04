@@ -13,17 +13,18 @@ import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.CacheWriter
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
-import com.andlife.media.di.StoryPlayer
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import javax.inject.Inject
 import androidx.core.net.toUri
+import com.andlife.media.di.StoryCacheDataSourceFactory
+import com.andlife.media.di.StorySimpleCache
 
 @OptIn(UnstableApi::class)
 class StoryMediaPlayerPoolImpl @Inject constructor(
     @ApplicationContext private val context: Context,
-    @StoryPlayer private val storyCache: Cache,
-    @StoryPlayer private val cacheDataSourceFactory: CacheDataSource.Factory
+    @StorySimpleCache private val storyCache: Cache,
+    @StoryCacheDataSourceFactory private val cacheDataSourceFactory: CacheDataSource.Factory
 ) : StoryMediaPlayerPool {
 
     private val precacheScope = CoroutineScope(Dispatchers.IO + SupervisorJob())

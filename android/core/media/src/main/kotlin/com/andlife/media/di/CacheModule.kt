@@ -17,18 +17,20 @@ import dagger.hilt.components.SingletonComponent
 import java.io.File
 import javax.inject.Singleton
 
+@UnstableApi
 @Module
 @InstallIn(SingletonComponent::class)
 object CacheModule {
     const val DIR_VIDEO_CACHE = "video_cache"
+    const val DIR_AUDIO_CACHE = "audio_cache"
     const val DIR_STORY_CACHE = "story_cache"
     const val VIDEO_CACHE_SIZE = 300 * 1024 * 1024L
+    const val AUDIO_CACHE_SIZE = 50 * 1024 * 1024L
     const val STORY_CACHE_SIZE = 100 * 1024 * 1024L
 
-    @OptIn(UnstableApi::class)
     @Provides
     @Singleton
-    @AutoPlayer
+    @VideoSimpleCache
     fun provideSimpleVideoCache(
         @ApplicationContext context: Context,
     ): Cache {
@@ -38,13 +40,12 @@ object CacheModule {
         return SimpleCache(cacheDir, evictor, databaseProvider)
     }
 
-    @OptIn(UnstableApi::class)
     @Provides
     @Singleton
-    @AutoPlayer
-    fun provideCacheDataSourceFactory(
+    @VideoCacheDataSourceFactory
+    fun provideVideoCacheDataSourceFactory(
         @ApplicationContext context: Context,
-        @AutoPlayer simpleCache: Cache,
+        @VideoSimpleCache simpleCache: Cache,
     ): CacheDataSource.Factory =
         CacheDataSource
             .Factory()
@@ -52,10 +53,34 @@ object CacheModule {
             .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())
             .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
 
-    @OptIn(UnstableApi::class)
     @Provides
     @Singleton
-    @StoryPlayer
+    @AudioSimpleCache
+    fun provideSimpleAudioCache(
+        @ApplicationContext context: Context,
+    ): Cache {
+        val cacheDir = File(context.cacheDir, DIR_AUDIO_CACHE)
+        val databaseProvider = StandaloneDatabaseProvider(context)
+        val evictor = LeastRecentlyUsedCacheEvictor(AUDIO_CACHE_SIZE)
+        return SimpleCache(cacheDir, evictor, databaseProvider)
+    }
+
+    @Provides
+    @Singleton
+    @AudioCacheDataSourceFactory
+    fun provideAudioCacheDataSourceFactory(
+        @ApplicationContext context: Context,
+        @AudioSimpleCache simpleCache: Cache,
+    ): CacheDataSource.Factory =
+        CacheDataSource
+            .Factory()
+            .setCache(simpleCache)
+            .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())
+            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+
+    @Provides
+    @Singleton
+    @StorySimpleCache
     fun provideStoryVideoCache(
         @ApplicationContext context: Context,
     ): Cache {
@@ -65,13 +90,12 @@ object CacheModule {
         return SimpleCache(cacheDir, evictor, databaseProvider)
     }
 
-    @OptIn(UnstableApi::class)
     @Provides
     @Singleton
-    @StoryPlayer
+    @StoryCacheDataSourceFactory
     fun provideStoryCacheDataSourceFactory(
         @ApplicationContext context: Context,
-        @StoryPlayer storyCache: Cache,
+        @StorySimpleCache storyCache: Cache,
     ): CacheDataSource.Factory =
         CacheDataSource.Factory()
             .setCache(storyCache)

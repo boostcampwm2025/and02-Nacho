@@ -8,8 +8,24 @@ annotation class ApplicationMainScope
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class AutoPlayer
+annotation class VideoSimpleCache
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class StoryPlayer
+annotation class VideoCacheDataSourceFactory
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class AudioSimpleCache
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class AudioCacheDataSourceFactory
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class StorySimpleCache
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class StoryCacheDataSourceFactory

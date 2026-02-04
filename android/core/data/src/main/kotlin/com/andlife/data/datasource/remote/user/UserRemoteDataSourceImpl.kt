@@ -21,6 +21,9 @@ class UserRemoteDataSourceImpl @Inject constructor(
     override suspend fun login(request: AuthRequest): Result<AuthResponse, DataError> =
         apiCall { authService.login(request) }
 
+    override suspend fun loginWithTestUser(): Result<AuthResponse, DataError> =
+        apiCall { authService.loginWithTestUser() }
+
     override suspend fun getUserInfo(): Result<UserResponse, DataError> =
         apiCall { userService.getUserInfo() }
 

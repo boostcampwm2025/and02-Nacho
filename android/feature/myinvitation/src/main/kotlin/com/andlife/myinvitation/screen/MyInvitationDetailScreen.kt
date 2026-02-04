@@ -6,8 +6,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,11 +13,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MenuDefaults
@@ -36,7 +32,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -67,13 +62,14 @@ import com.andlife.myinvitation.R
 import com.andlife.myinvitation.model.detail.MyInvitationDetailSideEffect
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiEvent
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiState
-import com.andlife.myinvitation.screen.guestbook.MyInvitationGuestBookRoute
 import com.andlife.myinvitation.screen.collection.MyInvitationCollectionRoute
+import com.andlife.myinvitation.screen.guestbook.MyInvitationGuestBookRoute
 import com.andlife.myinvitation.viewmodel.MyInvitationDetailViewModel
 import com.andlife.ui.component.GenericTabRow
 import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.ui.component.loading.InvitationLoadingError
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
+import com.andlife.ui.component.lottie.LottieEffect
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -164,6 +160,17 @@ fun MyInvitationDetailRoute(
             is MyInvitationDetailSideEffect.NavigateToUpdateThanksCard -> {
                 onNavigateToUpdateThanksCard(effect.cardId)
             }
+
+            MyInvitationDetailSideEffect.InvitationDeleted -> {
+                onNavigateBack()
+            }
+
+            MyInvitationDetailSideEffect.InvitationDeleteFailed -> {
+                coroutineScope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(res.getString(R.string.msg_invitation_delete_failed))
+                }
+            }
         }
     }
 
@@ -186,9 +193,7 @@ fun MyInvitationDetailRoute(
         )
 
         if (uiState.isOverlayLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center)
-            )
+            InvitationLoadingIndicator()
         }
     }
 
@@ -200,6 +205,9 @@ fun MyInvitationDetailRoute(
             containerColor = Color(thanksCard.backgroundColor)
         ) {
             Box(modifier = Modifier.background(Color(thanksCard.backgroundColor))) {
+                LottieEffect(
+                    selectEffect = thanksCard.backgroundImageUrl
+                )
                 Column(
                     modifier = Modifier.verticalScroll(rememberScrollState())
                 ) {
@@ -345,6 +353,7 @@ private fun MyInvitationDetailScreen(
                                     onClickEditCard = { onEvent(MyInvitationDetailUiEvent.ClickEditCard) },
                                     onClickCreateCard = { onEvent(MyInvitationDetailUiEvent.ClickCreateCard) },
                                     onMapError = { onEvent(MyInvitationDetailUiEvent.MapError) },
+                                    onLottieStarted = { onEvent(MyInvitationDetailUiEvent.LottieStarted) },
                                     onSaveEditableCache = onSaveEditableCache,
                                     isMapVisible = isMapVisible,
                                     editCardEnabled = uiState.editCardEnabled,

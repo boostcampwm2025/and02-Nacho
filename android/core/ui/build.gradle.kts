@@ -8,6 +8,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.lottie.compose)
     implementation(projects.feature.model)
     implementation(projects.core.media)
     // designSystem

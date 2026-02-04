@@ -6,7 +6,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.andlife.domain.error.DataError
-import com.andlife.domain.model.card.RichTextContent
 import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
@@ -91,7 +90,7 @@ class CreateByInvitationViewModel @Inject constructor(
 
     private suspend fun uploadImages(card: RichTextUiContent): Result<NachoUiCard, DataError> {
         val backgroundColor = uiState.value.editorState.currentTextStyle.backgroundColor
-        val backgroundImageUrl = uiState.value.editorState.currentBackgroundImageUrl
+        val backgroundImageUrl = uiState.value.editorState.currentBackgroundEffect
         val localImagesToUpload = card.images.filterIsInstance<CardImage.Local>()
 
         if (localImagesToUpload.isEmpty()) {

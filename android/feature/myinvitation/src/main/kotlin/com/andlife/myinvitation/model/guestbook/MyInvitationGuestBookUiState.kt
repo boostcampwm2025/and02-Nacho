@@ -23,7 +23,8 @@ data class MyInvitationGuestBookUiState(
     val guestBooksErrorMessage: String? = null,
     val audioRecordingDuration: Int = 0,
     val showLoginDialog: Boolean = false,
-    val authState: AuthState = AuthState.Loading
+    val authState: AuthState = AuthState.Loading,
+    val currentMediaSizeBytes: Long = 0L
 ) : BaseUiState {
 
     val isContentChanged: Boolean

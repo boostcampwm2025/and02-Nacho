@@ -184,6 +184,7 @@ private fun InvitationScreen(
                     PagingStateContent(
                         loadState = currentItems.loadState.refresh,
                         itemCount = currentItems.itemCount,
+                        mediatorLoadState = currentItems.loadState.mediator?.refresh,
                         emptyComment = stringResource(R.string.label_invitation_empty),
                         onRetry = { currentItems.retry() }
                     ) {

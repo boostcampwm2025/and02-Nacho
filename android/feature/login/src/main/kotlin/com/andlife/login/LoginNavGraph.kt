@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object Login
 
-fun NavController.navigateToLogin(navOptions: NavOptions) {
+fun NavController.navigateToLogin(navOptions: NavOptions?) {
     navigate(Login, navOptions)
 }
 

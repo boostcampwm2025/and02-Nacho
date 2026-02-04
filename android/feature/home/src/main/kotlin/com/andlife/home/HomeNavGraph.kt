@@ -69,12 +69,14 @@ fun NavGraphBuilder.homeNavGraph(
 fun NavGraphBuilder.settingNavGraph(
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onLogout: () -> Unit,
 ) {
     composable<Setting> {
         SettingRoute(
             onNavigateBack = onNavigateBack,
             modifier = Modifier.padding(),
-            onNavigateToLogin = onNavigateToLogin
+            onNavigateToLogin = onNavigateToLogin,
+            onLogout = onLogout
         )
     }
 }

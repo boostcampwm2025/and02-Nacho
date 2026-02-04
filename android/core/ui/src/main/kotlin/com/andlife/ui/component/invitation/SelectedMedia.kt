@@ -10,4 +10,5 @@ data class SelectedMedia(
     val type: UiMediaType,
     val duration: Int? = null,
     val thumbnailUrl: String? = null,
+    val sizeBytes: Long? = null,
 )

@@ -18,6 +18,7 @@ data class GuestBookUiModel(
     val audioMedias: ImmutableList<GuestBookMediaUiModel>,
     val totalVisualCount: Int,
     val isOwner: Boolean,
+    val isInvitationOwner: Boolean,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
 )
@@ -31,6 +32,7 @@ fun GuestBook.toUiModel(): GuestBookUiModel = GuestBookUiModel(
     audioMedias = audioMedias.map { it.toUiModel() }.toImmutableList(),
     totalVisualCount = totalVisualCount,
     isOwner = isOwner,
+    isInvitationOwner = isInvitationOwner,
     createdAt = createdAt,
     updatedAt = updatedAt,
 )

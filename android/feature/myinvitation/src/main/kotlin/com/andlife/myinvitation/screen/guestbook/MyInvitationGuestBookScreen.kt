@@ -63,7 +63,7 @@ import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.auth.AuthState
 import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.media.video.AutoVideoPlayerPool
-import com.andlife.media.video.FakeVideoPlayerPool
+import com.andlife.media.video.FakeAutoVideoPlayerPool
 import com.andlife.model.common.AuthorUiModel
 import com.andlife.model.common.VideoCandidate
 import com.andlife.model.guestbook.GuestBookInvitationUiModel
@@ -85,6 +85,7 @@ import com.andlife.ui.component.paging.PagingStateContent
 import com.andlife.ui.util.audio.AudioRecorder
 import com.andlife.ui.util.collectWithLifecycle
 import com.andlife.ui.util.imeWithoutNavBars
+import com.andlife.ui.util.media.getFileSizeOrNull
 import com.andlife.ui.util.media.uriToSelectedMedia
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
@@ -96,6 +97,8 @@ import kotlin.math.max
 import kotlin.math.min
 
 private const val CAMERA_IMAGES_DIR = "camera_images"
+private const val MAX_MEDIA_SIZE_BYTES = 500 * 1024 * 1024L // 500MB
+private const val MAX_MEDIAS_COUNT = 20
 
 @Composable
 fun MyInvitationGuestBookRoute(
@@ -119,6 +122,7 @@ fun MyInvitationGuestBookRoute(
     var showPermissionDialog by remember { mutableStateOf<String?>(null) }
     var scrollToTop by remember { mutableStateOf(false) }
     var showRecordingBottomSheet by remember { mutableStateOf(false) }
+    var lastPrecachedCount by remember { mutableIntStateOf(0) }
 
     var isMediaActive by remember { mutableStateOf(true) }
     val navigateBackWithCleanup: () -> Unit = {
@@ -163,11 +167,25 @@ fun MyInvitationGuestBookRoute(
     ) { success ->
         if (success && cameraImageUri != null) {
             val currentMedias = uiState.selectedMedias
-            if (currentMedias.size < 5) {
-                // 촬영한 사진을 SelectedMedia로 변환하여 추가
-                val newMedia = uriToSelectedMedia(context, cameraImageUri.toString())
-                val updatedMedias = (currentMedias + newMedia).toImmutableList()
-                viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias))
+            if (currentMedias.size >= MAX_MEDIAS_COUNT) {
+                viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, false, true))
+            } else {
+                if (getFileSizeOrNull(context, cameraImageUri!!) == null) {
+                    // TODO: 파일 크기를 읽을 수 없는 경우 별도의 스낵바 안내 필요
+                    viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, true, false))
+                    // 남은 용량 계산해서 초과 여부 전달
+                } else if (getFileSizeOrNull(
+                        context,
+                        cameraImageUri!!
+                    )!! + uiState.currentMediaSizeBytes > MAX_MEDIA_SIZE_BYTES
+                ) {
+                    viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, true, false))
+                } else {
+                    // 촬영한 사진을 SelectedMedia로 변환해 추가
+                    val newMedia = uriToSelectedMedia(context, cameraImageUri.toString())
+                    val updatedMedias = (currentMedias + newMedia).toImmutableList()
+                    viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias, false, false))
+                }
             }
         }
     }
@@ -260,6 +278,25 @@ fun MyInvitationGuestBookRoute(
         }
     }
 
+    LaunchedEffect(guestBooks.itemCount) {
+        val currentCount = guestBooks.itemCount
+        if (currentCount < lastPrecachedCount) lastPrecachedCount = 0
+        if (currentCount <= lastPrecachedCount) return@LaunchedEffect
+
+        val videoUrls = (lastPrecachedCount until currentCount).mapNotNull { index ->
+            val item = guestBooks.peek(index)
+            item?.visualMedias?.firstOrNull { it.type == MediaUiType.VIDEO }?.url
+        }.distinct()
+
+        lastPrecachedCount = currentCount
+
+        if (videoUrls.isNotEmpty()) {
+            viewModel.videoPlayerPool.preparePlayers(videoUrls.size)
+            viewModel.videoPlayerPool.precacheVideos(videoUrls)
+        }
+    }
+
+
     LaunchedEffect(guestBooks.loadState.refresh, scrollToTop) {
         if (scrollToTop && guestBooks.loadState.refresh is LoadState.NotLoading) {
             if (guestBooks.itemCount > 0) {
@@ -278,7 +315,6 @@ fun MyInvitationGuestBookRoute(
     }
 
     DisposableEffect(Unit) {
-        viewModel.videoPlayerPool.preparePlayers()
         onDispose {
             viewModel.videoPlayerPool.releaseAllPlayers()
             viewModel.audioPlayerManager.release()
@@ -375,10 +411,24 @@ fun MyInvitationGuestBookRoute(
             audioRecorder = audioRecorder,
             onRecordingComplete = { recordedFile ->
                 val currentMedias = uiState.selectedMedias
-                if (currentMedias.size < 5) {
-                    val newMedia = uriToSelectedMedia(context, recordedFile.toURI().toString())
-                    val updatedMedias = (currentMedias + newMedia).toImmutableList()
-                    viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias))
+                if (currentMedias.size >= MAX_MEDIAS_COUNT) {
+                    viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, false, true))
+                } else {
+                    // 남은 용량 계산해서 초과 여부 전달
+                    if (recordedFile.length() + uiState.currentMediaSizeBytes > MAX_MEDIA_SIZE_BYTES) {
+                        viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, true, false))
+                    } else {
+                        // 녹음을 SelectedMedia로 변환해 추가
+                        val newMedia = uriToSelectedMedia(context, recordedFile.toURI().toString())
+                        val updatedMedias = (currentMedias + newMedia).toImmutableList()
+                        viewModel.onEvent(
+                            MyInvitationGuestBookUiEvent.UpdateSelectedMedias(
+                                updatedMedias,
+                                false,
+                                false
+                            )
+                        )
+                    }
                 }
                 showRecordingBottomSheet = false
             },
@@ -616,8 +666,15 @@ private fun GuestBookFormSection(
         isUploading = uiState.isUploading,
         isSubmittable = uiState.isSubmittable,
         editingGuestBookId = uiState.editingGuestBookId,
-        onMediasSelected = { medias ->
-            onEvent(MyInvitationGuestBookUiEvent.UpdateSelectedMedias(medias))
+        currentMediaSizeBytes = uiState.currentMediaSizeBytes,
+        onMediasSelected = { medias, exceededAvailableBytes, exceedAvailableSlots ->
+            onEvent(
+                MyInvitationGuestBookUiEvent.UpdateSelectedMedias(
+                    medias,
+                    exceededAvailableBytes,
+                    exceedAvailableSlots
+                )
+            )
         },
         onMediaRemove = { media ->
             onEvent(MyInvitationGuestBookUiEvent.RemoveMedia(media))
@@ -672,7 +729,7 @@ private fun InvitationGuestBookEmptyPreview() {
             isMediaActive = true,
             navigateBackWithCleanup = {},
             focusManager = LocalFocusManager.current,
-            videoPlayerPool = FakeVideoPlayerPool(),
+            videoPlayerPool = FakeAutoVideoPlayerPool(),
             snackbarHostState = SnackbarHostState(),
             lazyListState = rememberLazyListState(),
             onDeleteMenuClick = {},
@@ -708,6 +765,7 @@ private fun InvitationGuestBookResultPreview() {
             ).toImmutableList(),
             totalVisualCount = 0,
             isOwner = true,
+            isInvitationOwner = false,
             createdAt = LocalDateTime(2026, 1, 20, 10, 0),
             updatedAt = LocalDateTime(2026, 1, 20, 10, 0),
         ),
@@ -719,6 +777,7 @@ private fun InvitationGuestBookResultPreview() {
             audioMedias = emptyList<GuestBookMediaUiModel>().toImmutableList(),
             totalVisualCount = 0,
             isOwner = false,
+            isInvitationOwner = false,
             createdAt = LocalDateTime(2026, 1, 19, 15, 30),
             updatedAt = LocalDateTime(2026, 1, 19, 15, 30),
         )
@@ -734,7 +793,7 @@ private fun InvitationGuestBookResultPreview() {
             items(fakeGuestBooks.size) { index ->
                 GuestBookItem(
                     guestBook = fakeGuestBooks[index],
-                    videoPlayerPool = FakeVideoPlayerPool(),
+                    videoPlayerPool = FakeAutoVideoPlayerPool(),
                     shouldPlayVideo = false,
                     audioPlaybackState = AudioPlaybackState(),
                     onInvitationTitleClick = {},

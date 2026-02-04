@@ -23,37 +23,40 @@ fun PagingStateContent(
     itemCount: Int,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
+    mediatorLoadState: LoadState? = null,
     emptyComment: String = stringResource(R.string.label_paging_empty_result),
     content: @Composable () -> Unit,
 ) {
     Box(modifier = modifier.fillMaxSize()) {
-        when (loadState) {
-            is LoadState.Loading -> {
+        when {
+            itemCount > 0 -> content()
+
+            loadState is LoadState.Loading || mediatorLoadState is LoadState.Loading -> {
                 InvitationLoadingIndicator()
             }
 
-            is LoadState.Error -> {
+            loadState is LoadState.Error -> {
                 InvitationLoadingError(onRetry = onRetry)
             }
 
-            is LoadState.NotLoading -> {
-                if (itemCount == 0) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState()),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = emptyComment,
-                            style = NachoTheme.typography.bodyLargeMedium,
-                            color = NachoTheme.colorScheme.textSecondary,
-                            textAlign = TextAlign.Center,
-                            lineHeight = NachoTheme.typography.bodyLargeMedium.lineHeight * 1.4f
-                        )
-                    }
-                } else {
-                    content()
+            mediatorLoadState is LoadState.Error -> {
+                InvitationLoadingError(onRetry = onRetry)
+            }
+
+            loadState is LoadState.NotLoading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = emptyComment,
+                        style = NachoTheme.typography.bodyLargeMedium,
+                        color = NachoTheme.colorScheme.textSecondary,
+                        textAlign = TextAlign.Center,
+                        lineHeight = NachoTheme.typography.bodyLargeMedium.lineHeight * 1.4f
+                    )
                 }
             }
         }

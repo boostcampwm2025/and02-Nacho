@@ -11,6 +11,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
+import com.andlife.home.Home
 import com.andlife.home.navigateToHome
 import com.andlife.home.navigateToSetting
 import com.andlife.invitation.navigateToInvitation
@@ -56,7 +57,7 @@ class NachoNavigator(
     fun navigate(tab: MainBottomTab) {
         val navOptions =
             navOptions {
-                popUpTo(navController.graph.findStartDestination().id) {
+                popUpTo(Home) {
                     saveState = true
                 }
                 launchSingleTop = true
@@ -147,7 +148,7 @@ class NachoNavigator(
         navController.navigateToUpdateCard(cardId)
     }
 
-    fun navigateToLogin(navOptions: NavOptions) {
+    fun navigateToLogin(navOptions: NavOptions? = null) {
         navController.navigateToLogin(navOptions)
     }
 

@@ -109,7 +109,12 @@ constructor(
 
     override fun onEvent(event: InvitationGuestBookUiEvent) {
         when (event) {
-            is InvitationGuestBookUiEvent.UpdateSelectedMedias -> updateSelectedMedias(event.medias)
+            is InvitationGuestBookUiEvent.UpdateSelectedMedias -> updateSelectedMedias(
+                event.medias,
+                event.exceededAvailableBytes,
+                event.exceededAvailableSlots
+            )
+
             is InvitationGuestBookUiEvent.UpdateTextContent -> updateTextContent(event.textContent)
             is InvitationGuestBookUiEvent.RemoveMedia -> removeMedia(event.media)
             is InvitationGuestBookUiEvent.UploadMedias -> handleUploadMedias()
@@ -149,8 +154,48 @@ constructor(
         videoPlayerPool.playPlayer(url, itemId)
     }
 
-    private fun updateSelectedMedias(medias: List<SelectedMedia>) {
-        updateState { copy(selectedMedias = medias.toPersistentList()) }
+    private fun updateSelectedMedias(
+        medias: List<SelectedMedia>,
+        exceededAvailableBytes: Boolean,
+        exceededAvailableSlots: Boolean,
+    ) {
+        updateState {
+            copy(
+                selectedMedias = medias.toPersistentList(),
+                currentMediaSizeBytes = calculateTotalMediaSize(medias)
+            )
+        }
+
+        // 용량 초과로 거부된 파일이 있으면 스낵바로 알림
+        if (exceededAvailableBytes) {
+            sendEffect(
+                InvitationGuestBookSideEffect.ShowSnackbar(
+                    "파일이 500MB를 초과하여 제외되었습니다."
+                )
+            )
+        }
+
+        // 제외된 파일이 있으면 스낵바로 알림(후순위)
+        else if (exceededAvailableSlots) {
+            sendEffect(
+                InvitationGuestBookSideEffect.ShowSnackbar(
+                    "파일은 20개까지만 추가 가능합니다."
+                )
+            )
+        }
+    }
+
+    private fun calculateTotalMediaSize(medias: List<SelectedMedia>): Long {
+        var totalMediaSize = 0L
+        medias.map { media ->
+            val fileSize = media.sizeBytes
+            if (fileSize != null) {
+                totalMediaSize += fileSize
+            } else {
+                Log.d("GuestBookViewModel", "Media size: size unknown")
+            }
+        }
+        return totalMediaSize
     }
 
     private fun updateTextContent(textContent: String) {
@@ -158,8 +203,13 @@ constructor(
     }
 
     private fun removeMedia(media: SelectedMedia) {
+        val state = uiState.value
+        val updatedMedias = state.selectedMedias.toPersistentList().remove(media)
         updateState {
-            copy(selectedMedias = selectedMedias.toPersistentList().remove(media))
+            copy(
+                selectedMedias = updatedMedias,
+                currentMediaSizeBytes = calculateTotalMediaSize(updatedMedias)
+            )
         }
     }
 
@@ -427,6 +477,7 @@ constructor(
                 editingGuestBookId = null,
                 originalTextContent = "",
                 originalMediaIds = emptySet(),
+                currentMediaSizeBytes = 0L,
             )
         }
     }

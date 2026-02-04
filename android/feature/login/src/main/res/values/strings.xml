@@ -2,8 +2,10 @@
 <resources>
     <string name="txt_kakao_login">카카오로 시작하기</string>
     <string name="txt_guest_login">로그인 없이 둘러보기</string>
+    <string name="txt_test_user_login">테스트 유저로 로그인</string>
     <string name="fail_kakao_login">카카오 로그인에 실패했습니다.</string>
     <string name="fail_guest_login">게스트 로그인에 실패했습니다.</string>
+    <string name="fail_test_login">테스트 로그인에 실패했습니다.</string>
     <string name="whenloggingin">"로그인 시 "</string>
     <string name="termsofuse">이용약관</string>
     <string name="and">" 및 "</string>

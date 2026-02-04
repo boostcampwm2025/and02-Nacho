@@ -16,6 +16,12 @@ class AuthController(
     private val authService: AuthService
 ) {
 
+    @PostMapping("/test-user")
+    fun loginTestUser(): BaseResponse<AuthResponse> {
+        val response = authService.loginWithTest()
+        return BaseResponse.success(response)
+    }
+
     @PostMapping("/login")
     fun loginWithKakao(
         @RequestBody request: KakaoLoginRequest

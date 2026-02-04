@@ -29,6 +29,15 @@ internal class UserRepositoryImpl @Inject constructor(
             }
     }
 
+    override suspend fun loginWithTestUser(): Result<Unit, DataError> {
+        return userRemoteDataSource.loginWithTestUser()
+            .map {  authResponse ->
+                authStateManager.setAuthenticated(authResponse.user.toDomain())
+                saveToken(authResponse.accessToken, authResponse.refreshToken)
+                syncGuestInvitations()
+            }
+    }
+
     private suspend fun syncGuestInvitations(): Result<Unit, DataError> {
         val invitationIds = userStorage.getInvitationIds()
 

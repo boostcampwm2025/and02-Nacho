@@ -5,6 +5,7 @@
     <string name="desc_top_bar_more">초대장 상세 더보기 아이콘 버튼</string>
 
     <string name="txt_delete">삭제하기</string>
+    <string name="txt_leave_invitation">초대장 나가기</string>
 
     <string name="txt_loading_invitation">초대장을 불러오는 중입니다.</string>
 
@@ -36,5 +37,6 @@
     <string name="dialog_cancel">취소</string>
 
     <string name="label_guestbook_empty">작성된 방명록이 없습니다.\n첫 인사를 남겨보세요!</string>
+    <string name="msg_leave_invitation_error">초대장 나가기에 실패하였습니다.</string>
 </resources>
 

@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -62,14 +63,13 @@ import com.andlife.home.model.home.HomeSideEffect
 import com.andlife.home.model.home.HomeUiEvent
 import com.andlife.home.model.home.HomeUiState
 import com.andlife.home.viewmodel.HomeViewModel
-import com.andlife.media.video.AutoVideoPlayer
 import com.andlife.media.video.AutoVideoPlayerPool
+import com.andlife.media.video.FakeAutoVideoPlayerPool
 import com.andlife.model.common.VideoCandidate
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.model.invitation.UpcomingInvitationUiModel
 import com.andlife.ui.component.dialog.LoginDialog
-import com.andlife.ui.component.guestbook.FakeAutoVideoPlayerPool
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItemSkeleton
@@ -103,6 +103,7 @@ fun HomeRoute(
     var isMediaActive by remember { mutableStateOf(true) }
     val upcomingInvitations = viewModel.upcomingInvitationsPagingFlow.collectAsLazyPagingItems()
     val guestBooks = viewModel.guestBooksPagingFlow.collectAsLazyPagingItems()
+    var lastPrecachedCount by remember { mutableIntStateOf(0) }
 
     val scope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -167,6 +168,24 @@ fun HomeRoute(
         }
     }
 
+    LaunchedEffect(guestBooks.itemCount) {
+        val currentCount = guestBooks.itemCount
+        if (currentCount < lastPrecachedCount) lastPrecachedCount = 0
+        if (currentCount <= lastPrecachedCount) return@LaunchedEffect
+
+        val videoUrls = (lastPrecachedCount until currentCount).mapNotNull { index ->
+            val item = guestBooks.peek(index)
+            item?.visualMedias?.firstOrNull { it.type == MediaUiType.VIDEO }?.url
+        }.distinct()
+
+        lastPrecachedCount = currentCount
+
+        if (videoUrls.isNotEmpty()) {
+            viewModel.videoPlayerPool.preparePlayers(videoUrls.size)
+            viewModel.videoPlayerPool.precacheVideos(videoUrls)
+        }
+    }
+
     LaunchedEffect(upcomingInvitations.loadState.refresh, guestBooks.loadState.refresh) {
         val upcomingState = upcomingInvitations.loadState.refresh
         val guestBookState = guestBooks.loadState.refresh
@@ -179,7 +198,6 @@ fun HomeRoute(
     }
 
     DisposableEffect(Unit) {
-        viewModel.videoPlayerPool.preparePlayers()
         onDispose {
             viewModel.videoPlayerPool.releaseAllPlayers()
             viewModel.audioPlayerManager.release()
@@ -625,7 +643,7 @@ private fun LazyListScope.homeGuestBookSection(
                     onInvitationTitleClick = {
                         onInvitationTitleClick(
                             guestBook.invitation?.id ?: -1L,
-                            guestBook.isOwner,
+                            guestBook.isInvitationOwner,
                         )
                     },
                     onVisualMediaClick = { onVisualMediaClick(it.url) },
@@ -680,22 +698,6 @@ private fun GuestBookStatusContent(
 @PreviewTheme
 @Composable
 private fun HomeScreenPreview() {
-    val fakeVideoPlayerPool = remember {
-        object : AutoVideoPlayerPool {
-            override fun preparePlayers() {}
-            override fun getPlayer(url: String): AutoVideoPlayer {
-                throw UnsupportedOperationException("Preview 전용")
-            }
-
-            override fun playPlayer(url: String, itemId: Long) {}
-            override fun pausePlayer(url: String) {}
-            override fun pauseAllPlayers() {}
-            override fun resumeLastPlayed() {}
-            override fun clearCacheById(itemId: Long?) {}
-            override fun resetPool() {}
-            override fun releaseAllPlayers() {}
-        }
-    }
     val emptyUpcomingInvitations = flowOf(PagingData.empty<UpcomingInvitationUiModel>()).collectAsLazyPagingItems()
     val emptyGuestBooks = flowOf(PagingData.empty<GuestBookUiModel>()).collectAsLazyPagingItems()
     val lazyListState = rememberLazyListState()
