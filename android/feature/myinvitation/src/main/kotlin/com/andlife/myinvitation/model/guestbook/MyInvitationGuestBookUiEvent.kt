@@ -7,6 +7,8 @@ import com.andlife.ui.component.invitation.SelectedMedia
 sealed interface MyInvitationGuestBookUiEvent : BaseUiEvent {
     data class UpdateSelectedMedias(
         val medias: List<SelectedMedia>,
+        val exceededAvailableBytes: Boolean,
+        val exceededAvailableSlots: Boolean,
     ) : MyInvitationGuestBookUiEvent
 
     data class UpdateTextContent(

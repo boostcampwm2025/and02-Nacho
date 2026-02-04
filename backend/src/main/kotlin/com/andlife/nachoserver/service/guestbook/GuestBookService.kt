@@ -228,7 +228,7 @@ class GuestBookService(
                         val previewThumbnail = VideoPreviewThumbnail(
                             video = video,
                             thumbnailUrl = mediaReq.thumbnailUrl,
-                            timeSeconds = 1.0 // 1초 지점의 썸네일: 이후 규칙이 변경되면 해당 부분도 수정 필요
+                            timeSeconds = if (mediaReq.durationSeconds != null) mediaReq.durationSeconds.toDouble() else 0.0,
                         )
                         video.previewThumbnails.add(previewThumbnail)
                     }
