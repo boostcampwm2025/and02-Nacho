@@ -16,6 +16,7 @@ import com.andlife.network.di.NachoMedia
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -56,7 +57,10 @@ class DownloadWorker @AssistedInject constructor(
             setProgress(workDataOf(DownloadKey.PROGRESS to 0))
 
             val request = Request.Builder().url(url).build()
-            okHttpClient.newCall(request).execute().use { response ->
+            val call = okHttpClient.newCall(request)
+            coroutineContext.job.invokeOnCompletion { call.cancel() }
+            call.execute().use { response ->
+
                 if (!response.isSuccessful) throw Exception("${DownloadError.FAILED}${response.code}")
 
                 val body = checkNotNull(response.body) { DownloadError.MISSING_BODY }
