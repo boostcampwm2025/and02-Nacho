@@ -7,6 +7,7 @@ import com.andlife.domain.util.Result
 
 interface UserRepository {
     suspend fun login(accessToken: String): Result<Unit, DataError>
+    suspend fun loginWithTestUser(): Result<Unit, DataError>
     suspend fun guestLogin(): Result<Unit, InvitationError>
     suspend fun initializeAuth(): Result<AuthState, DataError>
     suspend fun logout()
