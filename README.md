@@ -1,6 +1,6 @@
 
 
-<img width="80%" alt="미리보기 2026-02-04 21 10 13" src="https://github.com/user-attachments/assets/da61f0d4-23f3-4c93-92da-41a0adc681b6" />
+<img width="100%" alt="미리보기 2026-02-04 21 10 13" src="https://github.com/user-attachments/assets/da61f0d4-23f3-4c93-92da-41a0adc681b6" />
 
 
 # 나에게로의 초대
