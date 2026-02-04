@@ -68,15 +68,15 @@ import com.andlife.invitation.model.guestbook.InvitationGuestBookUiState
 import com.andlife.invitation.viewmodel.InvitationGuestBookViewModel
 import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.media.video.AutoVideoPlayerPool
-import com.andlife.media.video.FakeVideoPlayerPool
+import com.andlife.media.video.FakeAutoVideoPlayerPool
 import com.andlife.model.common.AuthorUiModel
 import com.andlife.model.common.VideoCandidate
 import com.andlife.model.guestbook.GuestBookInvitationUiModel
 import com.andlife.model.guestbook.GuestBookMediaUiModel
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
-import com.andlife.ui.component.dialog.LoginDialog
 import com.andlife.ui.component.AudioRecordingBottomSheet
+import com.andlife.ui.component.dialog.LoginDialog
 import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.ui.component.dialog.NachoPermissionDialog
 import com.andlife.ui.component.guestbook.GuestBookItem
@@ -122,6 +122,7 @@ fun InvitationGuestBookRoute(
     var showPermissionDialog by remember { mutableStateOf<String?>(null) }
     var scrollToTop by remember { mutableStateOf(false) }
     var showRecordingBottomSheet by remember { mutableStateOf(false) }
+    var lastPrecachedCount by remember { mutableIntStateOf(0) }
 
     var isMediaActive by remember { mutableStateOf(true) }
     val navigateBackWithCleanup: () -> Unit = {
@@ -275,6 +276,24 @@ fun InvitationGuestBookRoute(
         }
     }
 
+    LaunchedEffect(guestBooks.itemCount) {
+        val currentCount = guestBooks.itemCount
+        if (currentCount < lastPrecachedCount) lastPrecachedCount = 0
+        if (currentCount <= lastPrecachedCount) return@LaunchedEffect
+
+        val videoUrls = (lastPrecachedCount until currentCount).mapNotNull { index ->
+            val item = guestBooks.peek(index)
+            item?.visualMedias?.firstOrNull { it.type == MediaUiType.VIDEO }?.url
+        }.distinct()
+
+        lastPrecachedCount = currentCount
+
+        if (videoUrls.isNotEmpty()) {
+            viewModel.videoPlayerPool.preparePlayers(videoUrls.size)
+            viewModel.videoPlayerPool.precacheVideos(videoUrls)
+        }
+    }
+
     LaunchedEffect(guestBooks.loadState.refresh, scrollToTop) {
         if (scrollToTop && guestBooks.loadState.refresh is LoadState.NotLoading) {
             if (guestBooks.itemCount > 0) {
@@ -293,7 +312,6 @@ fun InvitationGuestBookRoute(
     }
 
     DisposableEffect(Unit) {
-        viewModel.videoPlayerPool.preparePlayers()
         onDispose {
             viewModel.videoPlayerPool.releaseAllPlayers()
             viewModel.audioPlayerManager.release()
@@ -701,7 +719,7 @@ private fun InvitationGuestBookEmptyPreview() {
             onEvent = {},
             isMediaActive = true,
             navigateBackWithCleanup = {},
-            videoPlayerPool = FakeVideoPlayerPool(),
+            videoPlayerPool = FakeAutoVideoPlayerPool(),
             snackbarHostState = SnackbarHostState(),
             lazyListState = rememberLazyListState(),
             onDeleteMenuClick = {},
@@ -766,7 +784,7 @@ private fun InvitationGuestBookResultPreview() {
             items(fakeGuestBooks.size) { index ->
                 GuestBookItem(
                     guestBook = fakeGuestBooks[index],
-                    videoPlayerPool = FakeVideoPlayerPool(),
+                    videoPlayerPool = FakeAutoVideoPlayerPool(),
                     shouldPlayVideo = false,
                     audioPlaybackState = AudioPlaybackState(),
                     onInvitationTitleClick = {},
