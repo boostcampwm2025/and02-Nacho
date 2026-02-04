@@ -39,15 +39,15 @@ internal class UserRepositoryImpl @Inject constructor(
     }
 
     private suspend fun syncGuestInvitations(): Result<Unit, DataError> {
-        val invitationIds = userStorage.getInvitationIds()
+        val authState = authStateManager.authState.value
 
-        if (invitationIds.isEmpty()) {
-            return Result.Success(Unit)
-        }
+        val invitationIds = userStorage.getInvitationIds()
+        val idsWithoutSample = invitationIds.filter { it != UserStorage.SAMPLE_INVITATION_ID }
+
+        if (idsWithoutSample.isEmpty() && authState !is AuthState.Authenticated) return Result.Success(Unit) // 실제 초대장이 없고, 인증 상태가 아니면 동기화할 필요 없음
+
         return userRemoteDataSource.syncInvitations(invitationIds)
-            .map {
-                userStorage.clearGuestData()
-            }
+            .map { userStorage.clearGuestData() }
     }
 
     override suspend fun guestLogin(): Result<Unit, InvitationError> {

@@ -49,7 +49,7 @@ class UserStorage @Inject constructor(
 
     suspend fun clearGuestData() {
         dataStore.edit { prefs ->
-            prefs.remove(GUEST_INVITATION_IDS)
+            prefs[GUEST_INVITATION_IDS] = setOf(SAMPLE_INVITATION_ID.toString())
         }
     }
 
