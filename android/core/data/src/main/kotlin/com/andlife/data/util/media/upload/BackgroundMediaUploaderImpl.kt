@@ -20,9 +20,19 @@ class BackgroundMediaUploaderImpl @Inject constructor(
 ) : BackgroundMediaUploader {
     private val workManager = WorkManager.getInstance(context)
 
-    override fun uploadMediasInBackground(uriStrings: List<String>): String {
+    override fun uploadMediasInBackground(
+        uriStrings: List<String>,
+        invitationId: String,
+        guestBookText: String,
+        isEditing: Boolean,
+        editingGuestBookId: String?
+    ): String {
         val workData = workDataOf(
-            UploadKey.MEDIA_URIS to uriStrings.toTypedArray()
+            UploadKey.MEDIA_URIS to uriStrings.toTypedArray(),
+            UploadKey.INVITATION_ID to invitationId,
+            UploadKey.GUEST_BOOK_TEXT to guestBookText,
+            UploadKey.IS_EDITING to isEditing,
+            UploadKey.EDITING_GUEST_BOOK_ID to editingGuestBookId
         )
 
         val constraints = Constraints.Builder()
