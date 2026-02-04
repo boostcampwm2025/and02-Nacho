@@ -215,7 +215,9 @@ fun InvitationStoryScreen(
             ) { pageIndex ->
                 val item = uiState.mediaItems[pageIndex]
                 val isCurrentPage = pagerState.currentPage == pageIndex
-                val currentPlayer = if (isCurrentPage) getPlayerForIndex(pageIndex) else null
+                val currentPlayer = remember(pagerState.currentPage, isCurrentPage) {
+                    if (isCurrentPage) getPlayerForIndex(pageIndex) else null
+                }
 
                 Box(modifier = Modifier.fillMaxSize()) {
                     StoryContent(
