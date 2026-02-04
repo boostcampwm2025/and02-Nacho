@@ -9,7 +9,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.provider.MediaStore
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.andlife.domain.model.guestbook.MediaType
@@ -47,7 +46,7 @@ class DownloadNotificationManager @Inject constructor(
         }
     }
 
-    fun createProgressNotification(workId: UUID, progress: Int): Notification {
+    fun createProgressNotification(workId: UUID, fileName: String, progress: Int): Notification {
         val cancelIntent = Intent(context, DownloadCancelReceiver::class.java).apply {
             putExtra(DownloadKey.EXTRA_WORK_ID, workId.toString())
         }
@@ -63,6 +62,7 @@ class DownloadNotificationManager @Inject constructor(
             .setSmallIcon(R.drawable.stat_sys_download)
             .setContentTitle(DownloadNoti.TITLE_DOWNLOADING)
             .setContentText(if (progress > 0) "$progress%" else DownloadNoti.MSG_PREPARING)
+            .setSubText(fileName)
             .setProgress(100, progress, progress <= 0)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
@@ -74,7 +74,7 @@ class DownloadNotificationManager @Inject constructor(
             .build()
     }
 
-    fun notifyComplete(fileName: String, mediaType: MediaType) {
+    fun notifyComplete(fileName: String, mediaType: MediaType, savedUri: String) {
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val prefs = context.getSharedPreferences(DownloadFile.PREF_NAME, Context.MODE_PRIVATE)
@@ -97,7 +97,7 @@ class DownloadNotificationManager @Inject constructor(
             newCount
         }
 
-        val viewIntent = createFolderViewIntent(mediaType, fileName)
+        val viewIntent = createViewIntent(mediaType, fileName, savedUri)
         val pendingIntent = PendingIntent.getActivity(
             context,
             notificationId,
@@ -123,35 +123,26 @@ class DownloadNotificationManager @Inject constructor(
         Log.d("DownloadNotificationManager", "알림 전송 완료: ID=$notificationId, 현재 카운트=$currentCount")
     }
 
-    private fun createFolderViewIntent(mediaType: MediaType, fileName: String): Intent {
+    private fun createViewIntent(mediaType: MediaType, fileName: String, savedUri: String): Intent {
         val mimeType = resolveMimeType(fileName, mediaType)
 
         return when (mediaType) {
             MediaType.IMAGE, MediaType.VIDEO -> {
                 Intent(Intent.ACTION_VIEW).apply {
-                    val uri = if (mediaType == MediaType.IMAGE) {
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                    } else {
-                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-                    }
-                    val folderMimeType =
-                        if (mediaType == MediaType.IMAGE) DownloadFile.MIME_IMAGE else DownloadFile.MIME_VIDEO
-                    setDataAndType(uri, folderMimeType)
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    setDataAndType(Uri.parse(savedUri), mimeType)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
             }
 
             MediaType.AUDIO -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     Intent(Intent.ACTION_VIEW).apply {
-                        val rootUri = Uri.parse(DownloadFile.URI_STORAGE_ROOT)
-                        setDataAndType(rootUri, DownloadFile.MIME_FOLDER_Q)
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        setDataAndType(Uri.parse(savedUri), mimeType)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     }
                 } else {
-                    Intent(Intent.ACTION_GET_CONTENT).apply {
-                        type = mimeType
-                        addCategory(Intent.CATEGORY_OPENABLE)
+                    Intent(Intent.ACTION_VIEW).apply {
+                        setDataAndType(Uri.parse(savedUri), mimeType)
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
                 }

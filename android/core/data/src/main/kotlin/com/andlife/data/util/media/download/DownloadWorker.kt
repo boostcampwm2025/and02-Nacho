@@ -33,7 +33,8 @@ class DownloadWorker @AssistedInject constructor(
     private val uniqueNotificationId: Int by lazy { id.hashCode() }
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
-        val notification = notificationManager.createProgressNotification(id, 0)
+        val fileName = inputData.getString(DownloadKey.FILE_NAME) ?: ""
+        val notification = notificationManager.createProgressNotification(id, fileName, 0)
         return buildForegroundInfo(notification)
     }
 
@@ -65,11 +66,11 @@ class DownloadWorker @AssistedInject constructor(
                     fileName = fileName,
                     mediaType = mediaType,
                     contentLength = body.contentLength(),
-                    onProgress = { progress -> updateProgress(progress) },
+                    onProgress = { progress -> updateProgress(fileName, progress) },
                     isStopped = { isStopped },
                 )
 
-                notificationManager.notifyComplete(fileName, mediaType)
+                notificationManager.notifyComplete(fileName, mediaType, uri)
                 Result.success(workDataOf(DownloadKey.RESULT_URL to uri))
             }
         } catch (e: Exception) {
@@ -82,13 +83,13 @@ class DownloadWorker @AssistedInject constructor(
         }
     }
 
-    private suspend fun updateProgress(progress: Int) {
+    private suspend fun updateProgress(fileName: String, progress: Int) {
         val progressData = workDataOf(
             DownloadKey.PROGRESS to progress,
         )
         setProgress(progressData)
 
-        val notification = notificationManager.createProgressNotification(id, progress)
+        val notification = notificationManager.createProgressNotification(id, fileName, progress)
         try {
             setForeground(buildForegroundInfo(notification))
         } catch (e: Exception) {
