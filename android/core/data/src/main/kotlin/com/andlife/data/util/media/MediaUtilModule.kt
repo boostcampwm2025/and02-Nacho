@@ -1,6 +1,8 @@
 package com.andlife.data.util.media
 
 import com.andlife.data.util.media.download.MediaDownloaderImpl
+import com.andlife.data.util.media.upload.BackgroundMediaUploaderImpl
+import com.andlife.domain.util.BackgroundMediaUploader
 import com.andlife.domain.util.MediaDownloader
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
@@ -29,4 +31,8 @@ abstract class MediaUtilModule {
     @Binds
     @Singleton
     abstract fun bindMediaFileProvider(mediaFileProviderImpl: MediaFileProviderImpl): MediaFileProvider
+
+    @Binds
+    @Singleton
+    abstract fun bindBackgroundMediaUploader(impl: BackgroundMediaUploaderImpl): BackgroundMediaUploader
 }
