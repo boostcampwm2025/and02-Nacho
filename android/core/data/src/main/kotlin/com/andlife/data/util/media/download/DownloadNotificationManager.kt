@@ -126,16 +126,17 @@ class DownloadNotificationManager @Inject constructor(
             }
 
             MediaType.AUDIO -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    Intent(Intent.ACTION_VIEW).apply {
-                        setDataAndType(Uri.parse(savedUri), mimeType)
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    }
-                } else {
-                    Intent(Intent.ACTION_VIEW).apply {
-                        setDataAndType(Uri.parse(savedUri), mimeType)
+                val baseIntent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(Uri.parse(savedUri), mimeType)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                    Intent.createChooser(baseIntent, null).apply {
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
+                } else {
+                    baseIntent
                 }
             }
         }
