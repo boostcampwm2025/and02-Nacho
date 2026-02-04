@@ -17,8 +17,10 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import javax.inject.Inject
 import androidx.core.net.toUri
+import androidx.media3.exoplayer.DefaultLoadControl
 import com.andlife.media.di.StoryCacheDataSourceFactory
 import com.andlife.media.di.StorySimpleCache
+import java.util.concurrent.ConcurrentHashMap
 
 @OptIn(UnstableApi::class)
 class StoryMediaPlayerPoolImpl @Inject constructor(
@@ -28,14 +30,20 @@ class StoryMediaPlayerPoolImpl @Inject constructor(
 ) : StoryMediaPlayerPool {
 
     private val precacheScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private val activePrecacheJobs = mutableMapOf<String, Job>()
+    private val activePrecacheJobs = ConcurrentHashMap<String, Job>()
 
     private val playerMap = object : LinkedHashMap<Int, StoryMediaPlayer>(
         getDynamicPoolSize(), 0.75f, true
     ) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Int, StoryMediaPlayer>?): Boolean {
             if (size > getDynamicPoolSize()) {
-                eldest?.value?.release() // 풀 사이즈 초과 시 가장 오래된 플레이어 해제
+                eldest?.value?.let { player ->
+                    try {
+                        player.release()
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Release failed during eviction: ${e.message}")
+                    }
+                }
                 return true
             }
             return false
@@ -47,53 +55,46 @@ class StoryMediaPlayerPoolImpl @Inject constructor(
         val info = ActivityManager.MemoryInfo()
         am.getMemoryInfo(info)
         val totalGb = info.totalMem.toDouble() / (1024 * 1024 * 1024)
-        return if (totalGb >= 8.0) 5 else 3
+        return if (totalGb >= 8.0) 3 else 2
     }
 
     override fun acquirePlayer(index: Int, url: String): StoryMediaPlayer {
         playerMap[index]?.let { return it }
 
-        // 새 플레이어 생성
-        val exoPlayer = ExoPlayer.Builder(context).build().apply {
-            val mediaSource = ProgressiveMediaSource.Factory(cacheDataSourceFactory)
-                .createMediaSource(MediaItem.fromUri(url))
-            setMediaSource(mediaSource)
-            repeatMode = Player.REPEAT_MODE_ONE
-            prepare()
-        }
+        // 최대 버퍼 사이즈 2초로 제한
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(
+                1000,
+                2000,
+                1000,
+                1000
+            )
+            .build()
 
-        val storyPlayer = StoryMediaPlayer(exoPlayer)
-        playerMap[index] = storyPlayer
-        return storyPlayer
-    }
-
-    override fun precacheVideos(urls: List<String>) {
-        urls.forEach { url ->
-            if (activePrecacheJobs.containsKey(url)) return@forEach
-
-            // 이미 1MB 이상 캐싱되었는지 확인
-            val cached = storyCache.getCachedBytes(url, 0, PRECACHE_SIZE)
-            if (cached >= PRECACHE_SIZE) return@forEach
-
-            activePrecacheJobs[url] = precacheScope.launch {
-                try {
-                    CacheWriter(
-                        cacheDataSourceFactory.createDataSourceForDownloading(),
-                        DataSpec.Builder().setUri(url.toUri()).setLength(PRECACHE_SIZE).build(),
-                        null, null
-                    ).cache()
-                } catch (e: Exception) {
-                    Log.d("StoryMediaPlayerPool", "Error precaching video: $url")
-                } finally {
-                    activePrecacheJobs.remove(url)
-                }
+        val exoPlayer = ExoPlayer.Builder(context)
+            .setLoadControl(loadControl)
+            .build().apply {
+                val mediaSource = ProgressiveMediaSource.Factory(cacheDataSourceFactory)
+                    .createMediaSource(MediaItem.fromUri(url))
+                setMediaSource(mediaSource)
+                repeatMode = Player.REPEAT_MODE_ONE
             }
+
+        return StoryMediaPlayer(exoPlayer).also {
+            playerMap[index] = it
         }
     }
 
     override fun play(index: Int) {
         playerMap.forEach { (idx, player) ->
-            if (idx == index) player.play() else player.pause()
+            if (idx == index) {
+                if (player.playbackState == Player.STATE_IDLE) {
+                    player.prepare()
+                }
+                player.play()
+            } else {
+                player.pause()
+            }
         }
     }
 
@@ -106,7 +107,12 @@ class StoryMediaPlayerPoolImpl @Inject constructor(
     }
 
     override fun resumeLastPlayed(index: Int) {
-        playerMap[index]?.play()
+        playerMap[index]?.let { player ->
+            if (player.playbackState == Player.STATE_IDLE) {
+                player.prepare()
+            }
+            player.play()
+        }
     }
 
     override fun resetPool() {
@@ -116,11 +122,49 @@ class StoryMediaPlayerPoolImpl @Inject constructor(
 
     override fun releaseAll() {
         precacheScope.cancel()
+        activePrecacheJobs.clear()
         playerMap.values.forEach { it.release() }
         playerMap.clear()
     }
 
+    @OptIn(UnstableApi::class)
+    override fun precacheVideos(urls: List<String>) {
+        urls.forEach { url ->
+            if (activePrecacheJobs.containsKey(url)) return@forEach
+
+            // 이미 캐시가 존재하는지 체크하여 불필요한 요청 방지
+            val cached = storyCache.getCachedBytes(url, 0, PRECACHE_SIZE)
+            if (cached >= PRECACHE_SIZE) return@forEach
+
+            activePrecacheJobs[url] = precacheScope.launch {
+                try {
+                    val dataSpec = DataSpec.Builder()
+                        .setUri(url.toUri())
+                        .setLength(PRECACHE_SIZE)
+                        .setFlags(DataSpec.FLAG_ALLOW_CACHE_FRAGMENTATION)
+                        .build()
+
+                    CacheWriter(
+                        cacheDataSourceFactory.createDataSourceForDownloading(),
+                        dataSpec,
+                        null
+                    ) { _, _, _ ->
+                        if (!isActive) throw CancellationException()
+                    }.cache()
+
+                } catch (e: Exception) {
+                    if (e !is CancellationException) {
+                        Log.e(TAG, "Precache failed: ${url.takeLast(20)} | ${e.message}")
+                    }
+                } finally {
+                    activePrecacheJobs.remove(url)
+                }
+            }
+        }
+    }
+
     companion object {
+        private const val TAG = "StoryPlayerPool"
         const val PRECACHE_SIZE = 1 * 1024 * 1024L // 1MB
     }
 }

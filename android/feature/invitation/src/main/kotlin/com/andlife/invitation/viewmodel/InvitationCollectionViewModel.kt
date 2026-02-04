@@ -1,7 +1,6 @@
 package com.andlife.invitation.viewmodel
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
@@ -29,13 +28,14 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import androidx.media3.common.Player
 
 @HiltViewModel
 class InvitationCollectionViewModel @Inject constructor(
     private val guestBookRepository: GuestBookRepository,
     private val mediaDownloader: MediaDownloader,
     private val userRepository: UserRepository,
-    private val playerPool: StoryMediaPlayerPool,
+    val playerPool: StoryMediaPlayerPool,
     @param:ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<InvitationCollectionUiState, InvitationCollectionUiEvent, InvitationCollectionSideEffect>(
@@ -48,7 +48,6 @@ class InvitationCollectionViewModel @Inject constructor(
         mutableUiState
             .onStart {
                 loadMediaCollection()
-
                 val dismissed = userRepository.isWifiDialogDismissed()
                 updateState { copy(networkDialogDismissed = dismissed) }
             }.stateIn(
@@ -56,9 +55,6 @@ class InvitationCollectionViewModel @Inject constructor(
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = InvitationCollectionUiState(isLoading = true),
             )
-
-    private var preparationStartTime = 0L
-    private var currentMeasuringUrl = ""
 
     override fun onEvent(event: InvitationCollectionUiEvent) {
         when (event) {
@@ -79,7 +75,6 @@ class InvitationCollectionViewModel @Inject constructor(
     private fun loadMediaCollection() {
         viewModelScope.launch {
             updateState { copy(isLoading = true) }
-
             guestBookRepository
                 .getMediaCollection(invitationId)
                 .onSuccess { mediaList ->
@@ -89,8 +84,7 @@ class InvitationCollectionViewModel @Inject constructor(
                             mediaItems = mediaList.map { it.toUiModel() }.toImmutableList(),
                         )
                     }
-
-                    // 미디어 로드 후 프리캐싱 시작
+                    // 리스트 로드 직후 인접 미디어 사전 캐싱
                     precacheUpcomingMedia()
                 }.onFailure { _, _ ->
                     updateState { copy(isLoading = false) }
@@ -106,9 +100,8 @@ class InvitationCollectionViewModel @Inject constructor(
             )
         }
         val selectedMedia = uiState.value.mediaItems.getOrNull(index)
-
         if (selectedMedia?.type == UiMediaType.VIDEO || selectedMedia?.type == UiMediaType.AUDIO) {
-            prepareMedia(index, selectedMedia.mediaUrl)
+            playMediaWithStrategy(index, selectedMedia.mediaUrl)
             precacheUpcomingMedia()
         }
     }
@@ -132,12 +125,9 @@ class InvitationCollectionViewModel @Inject constructor(
         }
 
         val selectedMedia = uiState.value.mediaItems.getOrNull(index)
-        Log.d(TAG, "📄 페이지 변경: $index")
-        Log.d(TAG, "선택된 미디어 타입: ${selectedMedia?.type}")
-
         when (selectedMedia?.type) {
             UiMediaType.VIDEO, UiMediaType.AUDIO -> {
-                prepareMedia(index, selectedMedia.mediaUrl)
+                playMediaWithStrategy(index, selectedMedia.mediaUrl)
                 precacheUpcomingMedia()
             }
             else -> {
@@ -146,40 +136,22 @@ class InvitationCollectionViewModel @Inject constructor(
         }
     }
 
-    private fun prepareMedia(index: Int, url: String) {
+    private fun playMediaWithStrategy(index: Int, url: String) {
         if (url.isEmpty()) return
 
-        preparationStartTime = System.currentTimeMillis()
-        currentMeasuringUrl = url
-
-        // 플레이어 풀에서 플레이어 획득 및 재생
-        val player = playerPool.acquirePlayer(index, url)
-
-        // 성능 측정을 위한 리스너 추가
-        player.addListener(object : androidx.media3.common.Player.Listener {
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                if (playbackState == androidx.media3.common.Player.STATE_READY) {
-                    val duration = System.currentTimeMillis() - preparationStartTime
-                    Log.d(TAG, "✅ STATE_READY | 준비 완료 시간: ${duration}ms | URL: $currentMeasuringUrl")
-                }
-            }
-
-            override fun onRenderedFirstFrame() {
-                val totalDuration = System.currentTimeMillis() - preparationStartTime
-                Log.d(TAG, "🎬 첫 프레임 렌더링 완료 | 총 소요 시간: ${totalDuration}ms | URL: $currentMeasuringUrl")
-            }
-        })
-
+        // 스토리 플레이어풀에서 인스턴스 획득 및 재생 요청
+        playerPool.acquirePlayer(index, url)
         playerPool.play(index)
     }
 
     private fun precacheUpcomingMedia() {
         val currentIndex = uiState.value.selectedIndex
-        val mediaItems = uiState.value.mediaItems
+        if (currentIndex == -1) return
 
-        // 현재 인덱스 기준 앞뒤 2개씩 비디오/오디오 URL 수집
+        val mediaItems = uiState.value.mediaItems
         val urlsToPrecache = mutableListOf<String>()
 
+        // 현재 페이지 기준 전후 2페이지 범위를 캐싱 대상으로 선정
         for (offset in -2..2) {
             val targetIndex = currentIndex + offset
             if (targetIndex in mediaItems.indices && targetIndex != currentIndex) {
@@ -195,31 +167,29 @@ class InvitationCollectionViewModel @Inject constructor(
         }
     }
 
-    fun getPlayerForIndex(index: Int): androidx.media3.common.Player? {
+    fun getPlayerForIndex(index: Int): Player? {
         val item = uiState.value.mediaItems.getOrNull(index) ?: return null
         if (item.type != UiMediaType.VIDEO && item.type != UiMediaType.AUDIO) return null
 
-        return playerPool.acquirePlayer(index, item.mediaUrl).getExoPlayer()
+        return try {
+            playerPool.acquirePlayer(index, item.mediaUrl).getExoPlayer()
+        } catch (e: Exception) {
+            null
+        }
     }
 
     private fun toggleExpand() {
-        updateState {
-            copy(
-                isTextExpanded = !isTextExpanded,
-            )
-        }
+        updateState { copy(isTextExpanded = !isTextExpanded) }
     }
 
     private fun downloadCurrentMedia() {
         val item = uiState.value.mediaItems.getOrNull(uiState.value.selectedIndex) ?: return
-
         viewModelScope.launch {
             if (!userRepository.isFirstDownloadDone()) {
                 userRepository.setFirstDownloadDone()
                 sendEffect(InvitationCollectionSideEffect.ShowDownloadGuide)
             }
         }
-
         downloadMedia(item.mediaUrl, item.type)
     }
 
@@ -234,7 +204,6 @@ class InvitationCollectionViewModel @Inject constructor(
         val fileName = "$FILE_NAME_PREFIX${System.currentTimeMillis()}${domainType.getExtension()}"
 
         updateState { copy(downloadingUrls = downloadingUrls + url) }
-
         val workId = mediaDownloader.enqueueDownload(url, fileName, domainType)
 
         viewModelScope.launch {
@@ -245,13 +214,11 @@ class InvitationCollectionViewModel @Inject constructor(
                         updateState { copy(downloadingUrls = downloadingUrls - url) }
                         updateState { copy(downloadState = DownloadState.Idle) }
                     }
-
                     is DownloadState.Error -> {
                         updateState { copy(downloadingUrls = downloadingUrls - url) }
                         sendEffect(InvitationCollectionSideEffect.DownloadFailed)
                         updateState { copy(downloadState = DownloadState.Idle) }
                     }
-
                     else -> {}
                 }
             }
@@ -260,14 +227,10 @@ class InvitationCollectionViewModel @Inject constructor(
 
     private fun disableNetworkDialogPermanently() {
         updateState { copy(networkDialogDismissed = true) }
-
-        viewModelScope.launch {
-            userRepository.setWifiDialogDismissed()
-        }
+        viewModelScope.launch { userRepository.setWifiDialogDismissed() }
     }
 
     companion object {
-        private const val TAG = "Performance_After"
         private const val FILE_NAME_PREFIX = "nacho_"
     }
 }

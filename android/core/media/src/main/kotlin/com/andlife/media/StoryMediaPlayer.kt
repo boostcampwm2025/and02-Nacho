@@ -8,6 +8,8 @@ class StoryMediaPlayer(
 ) {
     private var state: StoryPlayerState = StoryStoppedState()
 
+    val playbackState: Int get() = exoPlayer.playbackState
+
     fun play() {
         state.play(this)
     }
@@ -18,6 +20,10 @@ class StoryMediaPlayer(
 
     fun stop() {
         state.stop(this)
+    }
+
+    fun prepare() {
+        exoPlayer.prepare()
     }
 
     fun release() {
