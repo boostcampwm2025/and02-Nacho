@@ -87,7 +87,7 @@ class InvitationDetailViewModel @Inject constructor(
         when (event) {
             is InvitationDetailUiEvent.ClickBack -> clickClose()
             is InvitationDetailUiEvent.ClickThanksCard -> showThanksCardOnboarding()
-            is InvitationDetailUiEvent.ClickDelete -> deleteInvitation()
+            is InvitationDetailUiEvent.ClickLeaveInvitation -> leaveInvitation()
             is InvitationDetailUiEvent.ClickImage -> navigateToFullScreenImage(event.imageList, event.index)
             is InvitationDetailUiEvent.MapError -> showMapErrorSnackbar()
             is InvitationDetailUiEvent.RetryLoad -> retryLoad()
@@ -99,7 +99,21 @@ class InvitationDetailViewModel @Inject constructor(
         sendEffect(InvitationDetailSideEffect.NavigateBack)
     }
 
-    private fun deleteInvitation() { /* TODO: 초대장 삭제 로직 */ }
+    private fun leaveInvitation() {
+        viewModelScope.launch {
+            updateState { copy(isOverlayLoading = true) }
+            invitationRepository.leaveInvitation(invitationId)
+                .onSuccess {
+                    sendEffect(InvitationDetailSideEffect.NavigateBack)
+                    RefreshEventHub.emit(RefreshTarget.INVITATION)
+                    RefreshEventHub.emit(RefreshTarget.HOME)
+                }
+                .onFailure { error, _ ->
+                    sendEffect(InvitationDetailSideEffect.ShowLeaveInvitationErrorSnackbar)
+                }
+            updateState { copy(isOverlayLoading = false) }
+        }
+    }
 
     private fun showThanksCardOnboarding() {
         sendEffect(InvitationDetailSideEffect.ThanksCardOnBoarding)

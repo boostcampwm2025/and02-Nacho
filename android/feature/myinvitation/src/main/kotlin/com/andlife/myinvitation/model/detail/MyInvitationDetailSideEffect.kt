@@ -35,4 +35,7 @@ sealed interface MyInvitationDetailSideEffect : BaseSideEffect {
     data class NavigateToUpdateThanksCard(
         val cardId: Long
     ) : MyInvitationDetailSideEffect
+
+    data object InvitationDeleted : MyInvitationDetailSideEffect
+    data object InvitationDeleteFailed : MyInvitationDetailSideEffect
 }

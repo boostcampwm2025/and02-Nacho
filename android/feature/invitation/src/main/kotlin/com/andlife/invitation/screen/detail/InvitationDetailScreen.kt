@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -76,6 +77,7 @@ fun InvitationDetailRoute(
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val res = LocalResources.current
     var isThanksCardVisible by remember { mutableStateOf(false) }
     val mapErrorMessage = stringResource(R.string.snack_load_error_map)
     val thanksCard = uiState.invitationContentsUiModel.thanksCard
@@ -95,22 +97,35 @@ fun InvitationDetailRoute(
                 }
             }
 
+            InvitationDetailSideEffect.ShowLeaveInvitationErrorSnackbar -> {
+                coroutineScope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(res.getString(R.string.msg_leave_invitation_error))
+                }
+            }
+
             InvitationDetailSideEffect.ThanksCardOnBoarding -> {
                 isThanksCardVisible = true
             }
         }
     }
 
-    InvitationDetailScreen(
-        uiState = uiState,
-        snackbarHostState = snackbarHostState,
-        scrollBehavior = scrollBehavior,
-        onEvent = viewModel::onEvent,
-        onNavigateBack = onNavigateBack,
-        onNavigateToLogin = onNavigateToLogin,
-        onEditableSave = viewModel::saveEditable,
-        modifier = modifier,
-    )
+    Box {
+        InvitationDetailScreen(
+            uiState = uiState,
+            snackbarHostState = snackbarHostState,
+            scrollBehavior = scrollBehavior,
+            onEvent = viewModel::onEvent,
+            onNavigateBack = onNavigateBack,
+            onNavigateToLogin = onNavigateToLogin,
+            onEditableSave = viewModel::saveEditable,
+            modifier = modifier,
+        )
+
+        if (uiState.isOverlayLoading) {
+            InvitationLoadingIndicator()
+        }
+    }
 
     if (isThanksCardVisible && thanksCard != null) {
         NachoDialog(
@@ -197,7 +212,7 @@ private fun InvitationDetailScreen(
                 showActions = !uiState.isLoading && !uiState.isError,
                 onBack = navigateBackWithMapCleanup,
                 onClickThanksCard = { onEvent(InvitationDetailUiEvent.ClickThanksCard) },
-                onDelete = { onEvent(InvitationDetailUiEvent.ClickDelete) },
+                onLeave = { onEvent(InvitationDetailUiEvent.ClickLeaveInvitation) },
             )
         },
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
@@ -265,7 +280,7 @@ private fun InvitationDetailTopBar(
     title: String,
     onBack: () -> Unit,
     onClickThanksCard: () -> Unit,
-    onDelete: () -> Unit,
+    onLeave: () -> Unit,
     modifier: Modifier = Modifier,
     showActions: Boolean = true,
     hasThanksCard: Boolean = false,
@@ -304,7 +319,7 @@ private fun InvitationDetailTopBar(
                     }
                 }
                 InvitationMoreMenu(
-                    onDelete = onDelete,
+                    onLeave = onLeave,
                 )
             }
         },
@@ -319,7 +334,7 @@ private fun InvitationDetailTopBar(
 
 @Composable
 private fun InvitationMoreMenu(
-    onDelete: () -> Unit,
+    onLeave: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var isMenuExpanded by remember { mutableStateOf(false) }
@@ -343,14 +358,14 @@ private fun InvitationMoreMenu(
             DropdownMenuItem(
                 text = {
                     Text(
-                        text = stringResource(R.string.txt_delete),
+                        text = stringResource(R.string.txt_leave_invitation),
                         style = NachoTheme.typography.bodyMediumMedium,
                         color = NachoTheme.colorScheme.textPrimary,
                     )
                 },
                 onClick = {
                     isMenuExpanded = false
-                    onDelete()
+                    onLeave()
                 },
             )
         }
