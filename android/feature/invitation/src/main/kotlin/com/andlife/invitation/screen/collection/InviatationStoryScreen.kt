@@ -13,6 +13,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -37,6 +39,7 @@ import com.andlife.invitation.model.collection.InvitationCollectionUiEvent
 import com.andlife.invitation.model.collection.InvitationCollectionUiState
 import com.andlife.invitation.viewmodel.InvitationCollectionViewModel
 import com.andlife.model.collection.CollectionUiModel
+import com.andlife.model.guestbook.UiMediaType
 import com.andlife.model.util.toUiType
 import com.andlife.ui.component.collection.StoryContent
 import com.andlife.ui.component.collection.StoryTopHeader
@@ -61,6 +64,8 @@ fun InvitationStoryRoute(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val res = LocalResources.current
+
 
     var showPermissionDeniedDialog by remember { mutableStateOf(false) }
     var showNetworkInfoDialog by remember { mutableStateOf(false) }
@@ -81,17 +86,23 @@ fun InvitationStoryRoute(
                 is InvitationCollectionSideEffect.DownloadFailed -> {
                     scope.launch {
                         snackbarHostState.currentSnackbarData?.dismiss()
-                        snackbarHostState.showSnackbar(context.getString(R.string.snack_download_fail))
+                        snackbarHostState.showSnackbar(res.getString(R.string.snack_download_fail))
                     }
                 }
 
                 is InvitationCollectionSideEffect.ShowDownloadGuide -> {
                     scope.launch {
                         snackbarHostState.currentSnackbarData?.dismiss()
-                        snackbarHostState.showSnackbar(context.getString(R.string.snack_download_guide))
+                        snackbarHostState.showSnackbar(res.getString(R.string.snack_download_guide))
                     }
                 }
             }
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.playerPool.releaseAll()
         }
     }
 
@@ -156,6 +167,15 @@ fun InvitationStoryScreen(
             pageCount = { uiState.mediaItems.size },
         )
 
+    // 다음 페이지가 이미지라면 미리 로딩
+    val beyondViewportPageCount = remember(pagerState.currentPage, uiState.mediaItems) {
+        val nextIndex = pagerState.currentPage + 1
+        if (nextIndex in uiState.mediaItems.indices) {
+            val nextItem = uiState.mediaItems[nextIndex]
+            if (nextItem.type == UiMediaType.IMAGE) 1 else 0
+        } else 0
+    }
+
     val currentItem = uiState.mediaItems.getOrNull(pagerState.currentPage)
     val isDownloading = currentItem?.let {
         uiState.downloadingUrls.contains(it.mediaUrl)
@@ -191,9 +211,11 @@ fun InvitationStoryScreen(
                 modifier = Modifier.fillMaxSize(),
                 pageSpacing = NachoSpacing.none,
                 userScrollEnabled = true,
+                beyondViewportPageCount = beyondViewportPageCount,
             ) { pageIndex ->
                 val item = uiState.mediaItems[pageIndex]
-                val currentPlayer = getPlayerForIndex(pageIndex)
+                val isCurrentPage = pagerState.currentPage == pageIndex
+                val currentPlayer = if (isCurrentPage) getPlayerForIndex(pageIndex) else null
 
                 Box(modifier = Modifier.fillMaxSize()) {
                     StoryContent(
