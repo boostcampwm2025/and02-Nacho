@@ -17,4 +17,7 @@ interface AuthService {
     suspend fun reissue(
         @Body request: RefreshTokenRequest
     ) : BaseResponse<AuthResponse>
+
+    @POST("api/auth/test-user")
+    suspend fun loginWithTestUser(): BaseResponse<AuthResponse>
 }
