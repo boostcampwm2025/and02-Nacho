@@ -40,9 +40,11 @@ import com.andlife.ui.util.media.uriToSelectedMedia
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import com.andlife.ui.util.media.validateUriStringsByRule
 
 private const val MAX_LENGTH = 500
-private const val MAX_MEDIAS_COUNT = 5
+private const val MAX_MEDIAS_COUNT = 20
+private const val MAX_MEDIA_SIZE_BYTES = 500 * 1024 * 1024L // 500MB
 
 @Composable
 fun InvitationGuestBookForm(
@@ -51,7 +53,8 @@ fun InvitationGuestBookForm(
     isUploading: Boolean,
     isSubmittable: Boolean,
     isAuthenticated: Boolean,
-    onMediasSelected: (ImmutableList<SelectedMedia>) -> Unit,
+    currentMediaSizeBytes: Long,
+    onMediasSelected: (ImmutableList<SelectedMedia>, Boolean, Boolean) -> Unit,
     onMediaRemove: (SelectedMedia) -> Unit,
     onTextContentChange: (String) -> Unit,
     onCameraClick: () -> Unit,
@@ -78,34 +81,50 @@ fun InvitationGuestBookForm(
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetMultipleContents(),
         ) { uris ->
+            val availableSlotsCnt = MAX_MEDIAS_COUNT - selectedMedias.size
             val uriStrings = uris.map { it.toString() }
-            val availableSlots = MAX_MEDIAS_COUNT - selectedMedias.size
 
-            if (availableSlots <= 0) return@rememberLauncherForActivityResult
+            // 파일 크기 검증
+            val (validUriStrings, exceededAvailableBytes, exceededAvailableSlots) = validateUriStringsByRule(
+                context = context,
+                uriStrings = uriStrings,
+                availableSlotCnt = availableSlotsCnt,
+                currentMediaSizeBytes = currentMediaSizeBytes,
+            )
 
-            val mediasToAdd =
-                uriStrings
-                    .take(availableSlots)
-                    .map { uriToSelectedMedia(context, it) }
-
-            onMediasSelected((selectedMedias + mediasToAdd).toImmutableList())
+            val mediasToAdd = validUriStrings.map { uriString ->
+                uriToSelectedMedia(context, uriString)
+            }
+            onMediasSelected(
+                (selectedMedias + mediasToAdd).toImmutableList(),
+                exceededAvailableBytes,
+                exceededAvailableSlots
+            )
         }
 
     val photoPickerLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.PickMultipleVisualMedia(MAX_MEDIAS_COUNT)
         ) { uris ->
+            val availableSlotsCnt = MAX_MEDIAS_COUNT - selectedMedias.size
             val uriStrings = uris.map { it.toString() }
-            val availableSlots = MAX_MEDIAS_COUNT - selectedMedias.size
 
-            if (availableSlots <= 0) return@rememberLauncherForActivityResult
+            // 파일 크기 검증
+            val (validUriStrings, exceededAvailableBytes, exceededAvailableSlots) = validateUriStringsByRule(
+                context = context,
+                uriStrings = uriStrings,
+                availableSlotCnt = availableSlotsCnt,
+                currentMediaSizeBytes = currentMediaSizeBytes,
+            )
 
-            val mediasToAdd =
-                uriStrings
-                    .take(availableSlots)
-                    .map { uriToSelectedMedia(context, it) }
-
-            onMediasSelected((selectedMedias + mediasToAdd).toImmutableList())
+            val mediasToAdd = validUriStrings.map { uriString ->
+                uriToSelectedMedia(context, uriString)
+            }
+            onMediasSelected(
+                (selectedMedias + mediasToAdd).toImmutableList(),
+                exceededAvailableBytes,
+                exceededAvailableSlots
+            )
         }
 
     Column(
@@ -115,6 +134,9 @@ fun InvitationGuestBookForm(
         // 미디어 업로드 UI
         InvitationMediaUpload(
             selectedMedias = selectedMedias,
+            currentMediaSizeBytes = currentMediaSizeBytes,
+            maxMediasCount = MAX_MEDIAS_COUNT,
+            maxMediaSizeBytes = MAX_MEDIA_SIZE_BYTES,
             onMediaRemove = onMediaRemove,
             modifier = Modifier
                 .fillMaxWidth()
@@ -174,90 +196,93 @@ fun InvitationGuestBookForm(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // 미디어 아이콘 표시
-            val isMediaAddEnabled = isAuthenticated && selectedMedias.size < MAX_MEDIAS_COUNT
-            val iconColor =
-                if (isMediaAddEnabled) {
-                    NachoTheme.colorScheme.brandPrimary
-                } else {
-                    NachoTheme.colorScheme.iconDisabled
-                }
-            Row(horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium)) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_image_16),
-                    contentDescription = null,
-                    tint = iconColor,
-                    modifier =
-                        Modifier
-                            .size(NachoIconSize.semiLarge)
-                            .let {
-                                if (isMediaAddEnabled) {
-                                    it.clickable {
-                                        if (usePhotoPickerAPI) {
-                                            photoPickerLauncher.launch(
-                                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
-                                            )
-                                        } else {
-                                            // Photo Picker API를 사용할 수 없으면 기존 파일 선택기 사용
-                                            launcher.launch("image/*")
+            // 미디어 아이콘 및 용량 표시
+            Column {
+                // 미디어 아이콘 표시
+                val isMediaAddEnabled = isAuthenticated && selectedMedias.size < MAX_MEDIAS_COUNT
+                val iconColor =
+                    if (isMediaAddEnabled) {
+                        NachoTheme.colorScheme.brandPrimary
+                    } else {
+                        NachoTheme.colorScheme.iconDisabled
+                    }
+                Row(horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium)) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_image_16),
+                        contentDescription = null,
+                        tint = iconColor,
+                        modifier =
+                            Modifier
+                                .size(NachoIconSize.semiLarge)
+                                .let {
+                                    if (isMediaAddEnabled) {
+                                        it.clickable {
+                                            if (usePhotoPickerAPI) {
+                                                photoPickerLauncher.launch(
+                                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
+                                                )
+                                            } else {
+                                                // Photo Picker API를 사용할 수 없으면 기존 파일 선택기 사용
+                                                launcher.launch("image/*")
+                                            }
                                         }
+                                    } else {
+                                        it
                                     }
-                                } else {
-                                    it
-                                }
-                            },
-                )
-                Icon(
-                    painter = painterResource(R.drawable.ic_camera_16),
-                    contentDescription = null,
-                    tint = iconColor,
-                    modifier =
-                        Modifier
-                            .size(NachoIconSize.semiLarge)
-                            .let {
-                                if (isMediaAddEnabled) {
-                                    it.clickable {
-                                        onCameraClick()
+                                },
+                    )
+                    Icon(
+                        painter = painterResource(R.drawable.ic_camera_16),
+                        contentDescription = null,
+                        tint = iconColor,
+                        modifier =
+                            Modifier
+                                .size(NachoIconSize.semiLarge)
+                                .let {
+                                    if (isMediaAddEnabled) {
+                                        it.clickable {
+                                            onCameraClick()
+                                        }
+                                    } else {
+                                        it
                                     }
-                                } else {
-                                    it
-                                }
-                            },
-                )
-                Icon(
-                    painter = painterResource(R.drawable.ic_file_16),
-                    contentDescription = null,
-                    tint = iconColor,
-                    modifier =
-                        Modifier
-                            .size(NachoIconSize.semiLarge)
-                            .let {
-                                if (isMediaAddEnabled) {
-                                    it.clickable {
-                                        launcher.launch("*/*")
+                                },
+                    )
+                    Icon(
+                        painter = painterResource(R.drawable.ic_file_16),
+                        contentDescription = null,
+                        tint = iconColor,
+                        modifier =
+                            Modifier
+                                .size(NachoIconSize.semiLarge)
+                                .let {
+                                    if (isMediaAddEnabled) {
+                                        it.clickable {
+                                            launcher.launch("*/*")
+                                        }
+                                    } else {
+                                        it
                                     }
-                                } else {
-                                    it
-                                }
-                            },
-                )
-                Icon(
-                    painter = painterResource(R.drawable.ic_mic_16),
-                    contentDescription = null,
-                    tint = iconColor,
-                    modifier =
-                        Modifier
-                            .size(NachoIconSize.semiLarge)
-                            .let {
-                                if (isMediaAddEnabled) {
-                                    it.clickable {
-                                        onMicrophoneClick()
+                                },
+                    )
+                    Icon(
+                        painter = painterResource(R.drawable.ic_mic_16),
+                        contentDescription = null,
+                        tint = iconColor,
+                        modifier =
+                            Modifier
+                                .size(NachoIconSize.semiLarge)
+                                .let {
+                                    if (isMediaAddEnabled) {
+                                        it.clickable {
+                                            onMicrophoneClick()
+                                        }
+                                    } else {
+                                        it
                                     }
-                                } else {
-                                    it
-                                }
-                            },
-                )
+                                },
+                    )
+                }
             }
             NachoButton(
                 onClick = onUploadClick,
@@ -289,7 +314,8 @@ private fun InvitationGuestBookFormPreview() {
             textContent = "",
             isUploading = false,
             isSubmittable = false,
-            onMediasSelected = {},
+            currentMediaSizeBytes = 0L,
+            onMediasSelected = { _, _, _ -> },
             onMediaRemove = {},
             onTextContentChange = {},
             onCameraClick = {},
