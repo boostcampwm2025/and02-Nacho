@@ -27,16 +27,18 @@ fun PagingStateContent(
     content: @Composable () -> Unit,
 ) {
     Box(modifier = modifier.fillMaxSize()) {
-        when (loadState) {
-            is LoadState.Loading -> {
+        when {
+            itemCount > 0 -> content()
+
+            loadState is LoadState.Loading -> {
                 InvitationLoadingIndicator()
             }
 
-            is LoadState.Error -> {
+            loadState is LoadState.Error -> {
                 InvitationLoadingError(onRetry = onRetry)
             }
 
-            is LoadState.NotLoading -> {
+            loadState is LoadState.NotLoading -> {
                 if (itemCount == 0) {
                     Box(
                         modifier = Modifier
