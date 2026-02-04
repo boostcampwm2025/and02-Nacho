@@ -570,7 +570,7 @@ private fun InvitationGuestBookScreen(
 
                     if (isInitialLoading || guestBooks.itemCount == 0) {
                         PagingStateContent(
-                            loadState = guestBooks.loadState.refresh,
+                            sourceLoadState = guestBooks.loadState.refresh,
                             itemCount = guestBooks.itemCount,
                             modifier = Modifier.fillMaxSize(),
                             emptyComment = stringResource(R.string.label_guestbook_empty),

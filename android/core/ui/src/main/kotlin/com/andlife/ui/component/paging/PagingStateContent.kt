@@ -19,7 +19,7 @@ import com.andlife.ui.component.loading.InvitationLoadingIndicator
 
 @Composable
 fun PagingStateContent(
-    loadState: LoadState,
+    sourceLoadState: LoadState,
     itemCount: Int,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
@@ -27,23 +27,23 @@ fun PagingStateContent(
     emptyComment: String = stringResource(R.string.label_paging_empty_result),
     content: @Composable () -> Unit,
 ) {
+    val isRefreshing = sourceLoadState is LoadState.Loading || mediatorLoadState is LoadState.Loading
+    val isError = sourceLoadState is LoadState.Error || mediatorLoadState is LoadState.Error
+    val isEmpty = !isRefreshing && !isError && itemCount == 0
+
     Box(modifier = modifier.fillMaxSize()) {
         when {
             itemCount > 0 -> content()
 
-            loadState is LoadState.Loading || mediatorLoadState is LoadState.Loading -> {
+            isRefreshing -> {
                 InvitationLoadingIndicator()
             }
 
-            loadState is LoadState.Error -> {
+            isError -> {
                 InvitationLoadingError(onRetry = onRetry)
             }
 
-            mediatorLoadState is LoadState.Error -> {
-                InvitationLoadingError(onRetry = onRetry)
-            }
-
-            loadState is LoadState.NotLoading -> {
+            isEmpty -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -68,7 +68,7 @@ fun PagingStateContent(
 private fun PagingStateContentPreview_Loading() {
     NachoTheme {
         PagingStateContent(
-            loadState = LoadState.Loading,
+            sourceLoadState = LoadState.Loading,
             itemCount = 0,
             onRetry = {},
             content = { Text("데이터 로드 완료") },
@@ -81,7 +81,7 @@ private fun PagingStateContentPreview_Loading() {
 private fun PagingStateContentPreview_Error() {
     NachoTheme {
         PagingStateContent(
-            loadState = LoadState.Error(Throwable("네트워크 오류 발생")),
+            sourceLoadState = LoadState.Error(Throwable("네트워크 오류 발생")),
             itemCount = 0,
             onRetry = {},
             content = { Text("데이터 로드 완료") },
@@ -94,7 +94,7 @@ private fun PagingStateContentPreview_Error() {
 private fun PagingStateContentPreview_Empty() {
     NachoTheme {
         PagingStateContent(
-            loadState = LoadState.NotLoading(endOfPaginationReached = true),
+            sourceLoadState = LoadState.NotLoading(endOfPaginationReached = true),
             itemCount = 0,
             onRetry = {},
             content = { Text("데이터 로드 완료") },
