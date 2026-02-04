@@ -160,16 +160,10 @@ fun MyInvitationStoryRoute(
     }
 
     if (showNotificationPermissionDeniedDialog) {
+
         NachoPermissionDialog(
             message = stringResource(R.string.snack_notification_permission_denied),
-            onDismiss = {
-                showNotificationPermissionDeniedDialog = false
-                if (!uiState.networkDialogDismissed) {
-                    showNetworkInfoDialog = true
-                } else {
-                    viewModel.onEvent(MyInvitationCollectionUiEvent.DownloadMedia)
-                }
-            },
+            onDismiss = { showNotificationPermissionDeniedDialog = false },
         )
     }
 }
