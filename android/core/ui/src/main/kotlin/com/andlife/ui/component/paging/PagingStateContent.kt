@@ -23,6 +23,7 @@ fun PagingStateContent(
     itemCount: Int,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
+    mediatorLoadState: LoadState? = null,
     emptyComment: String = stringResource(R.string.label_paging_empty_result),
     content: @Composable () -> Unit,
 ) {
@@ -30,7 +31,7 @@ fun PagingStateContent(
         when {
             itemCount > 0 -> content()
 
-            loadState is LoadState.Loading -> {
+            loadState is LoadState.Loading || mediatorLoadState is LoadState.Loading -> {
                 InvitationLoadingIndicator()
             }
 
@@ -38,24 +39,24 @@ fun PagingStateContent(
                 InvitationLoadingError(onRetry = onRetry)
             }
 
+            mediatorLoadState is LoadState.Error -> {
+                InvitationLoadingError(onRetry = onRetry)
+            }
+
             loadState is LoadState.NotLoading -> {
-                if (itemCount == 0) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState()),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = emptyComment,
-                            style = NachoTheme.typography.bodyLargeMedium,
-                            color = NachoTheme.colorScheme.textSecondary,
-                            textAlign = TextAlign.Center,
-                            lineHeight = NachoTheme.typography.bodyLargeMedium.lineHeight * 1.4f
-                        )
-                    }
-                } else {
-                    content()
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = emptyComment,
+                        style = NachoTheme.typography.bodyLargeMedium,
+                        color = NachoTheme.colorScheme.textSecondary,
+                        textAlign = TextAlign.Center,
+                        lineHeight = NachoTheme.typography.bodyLargeMedium.lineHeight * 1.4f
+                    )
                 }
             }
         }
