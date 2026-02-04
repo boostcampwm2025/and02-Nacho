@@ -37,6 +37,8 @@ fun NachoButton(
         ),
     containerColor: Color = NachoTheme.colorScheme.brandPrimary,
     contentColor: Color = NachoTheme.colorScheme.brandOnPrimary,
+    disabledContainerColor: Color = Color.Unspecified,
+    disabledContentColor: Color = Color.Unspecified,
     content: @Composable RowScope.() -> Unit,
 ) {
     Button(
@@ -48,6 +50,8 @@ fun NachoButton(
             ButtonDefaults.buttonColors(
                 containerColor = containerColor,
                 contentColor = contentColor,
+                disabledContainerColor = disabledContainerColor,
+                disabledContentColor = disabledContentColor,
             ),
         elevation = elevation,
         contentPadding = contentPadding,

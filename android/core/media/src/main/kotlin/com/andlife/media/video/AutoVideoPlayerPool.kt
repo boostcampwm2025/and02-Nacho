@@ -1,7 +1,7 @@
 package com.andlife.media.video
 
 interface AutoVideoPlayerPool {
-    fun preparePlayers()
+    fun preparePlayers(neededCount: Int)
 
     fun getPlayer(url: String): AutoVideoPlayer
 
@@ -18,13 +18,15 @@ interface AutoVideoPlayerPool {
 
     fun clearCacheById(itemId: Long?)
 
+    fun precacheVideos(urls: List<String>)
+
     fun resetPool()
 
     fun releaseAllPlayers()
 }
 
-class FakeVideoPlayerPool : AutoVideoPlayerPool {
-    override fun preparePlayers() {}
+class FakeAutoVideoPlayerPool : AutoVideoPlayerPool {
+    override fun preparePlayers(neededCount: Int) {}
     override fun getPlayer(url: String): AutoVideoPlayer {
         throw NotImplementedError()
     }
@@ -34,6 +36,7 @@ class FakeVideoPlayerPool : AutoVideoPlayerPool {
     override fun pauseAllPlayers() {}
     override fun resumeLastPlayed() {}
     override fun clearCacheById(itemId: Long?) {}
+    override fun precacheVideos(urls: List<String>) {}
     override fun resetPool() {}
     override fun releaseAllPlayers() {}
 }

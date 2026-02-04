@@ -1,5 +1,6 @@
 package com.andlife.ui.component.guestbook
 
+import android.view.ViewGroup
 import androidx.annotation.OptIn
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -54,9 +55,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.AspectRatioFrameLayout
-import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
 import coil3.compose.SubcomposeAsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
@@ -67,6 +65,7 @@ import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.media.video.AutoVideoPlayer
 import com.andlife.media.video.AutoVideoPlayerPool
+import com.andlife.media.video.FakeAutoVideoPlayerPool
 import com.andlife.model.common.AuthorUiModel
 import com.andlife.model.guestbook.GuestBookInvitationUiModel
 import com.andlife.model.guestbook.GuestBookMediaUiModel
@@ -263,8 +262,6 @@ private fun GuestBookItemTextSection(
     onInvitationTitleClick: (Long) -> Unit?,
     modifier: Modifier = Modifier,
 ) {
-    if (textContent.isBlank()) return
-
     var isExpanded by remember { mutableStateOf(false) }
     var isOverflowed by remember { mutableStateOf(false) }
 
@@ -295,6 +292,9 @@ private fun GuestBookItemTextSection(
                 )
             }
         }
+
+        if (textContent.isBlank()) return@Column
+
         Column(
             modifier =
                 Modifier
@@ -522,7 +522,7 @@ private fun VideoPlayerContainer(
             }
 
             VideoPlayerView(
-                player = currentPlayer.exoPlayer,
+                autoPlayer = currentPlayer,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -548,23 +548,17 @@ private fun VideoPlayerContainer(
     }
 }
 
+
 @OptIn(UnstableApi::class)
 @Composable
 private fun VideoPlayerView(
-    player: ExoPlayer,
+    autoPlayer: AutoVideoPlayer,
     modifier: Modifier = Modifier,
 ) {
     AndroidView(
-        factory = { context ->
-            PlayerView(context).apply {
-                useController = false
-                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-                this.player = player
-            }
-        },
-        update = { playerView ->
-            if (playerView.player != player) {
-                playerView.player = player
+        factory = {
+            autoPlayer.playerView.apply {
+                (parent as? ViewGroup)?.removeView(this)
             }
         },
         modifier = modifier,
@@ -883,19 +877,4 @@ private fun GuestBookItemPreview() {
             }
         }
     }
-}
-
-class FakeAutoVideoPlayerPool : AutoVideoPlayerPool {
-    override fun preparePlayers() {}
-    override fun getPlayer(url: String): AutoVideoPlayer {
-        throw NotImplementedError("Not yet implemented")
-    }
-
-    override fun playPlayer(url: String, itemId: Long) {}
-    override fun pausePlayer(url: String) {}
-    override fun pauseAllPlayers() {}
-    override fun resumeLastPlayed() {}
-    override fun clearCacheById(itemId: Long?) {}
-    override fun resetPool() {}
-    override fun releaseAllPlayers() {}
 }

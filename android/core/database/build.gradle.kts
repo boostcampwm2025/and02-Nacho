@@ -2,6 +2,7 @@ plugins {
     id("invitation.android.library")
     id("invitation.android.room")
     id("invitation.android.hilt")
+    id("invitation.kotlin.serialization")
 }
 
 android {

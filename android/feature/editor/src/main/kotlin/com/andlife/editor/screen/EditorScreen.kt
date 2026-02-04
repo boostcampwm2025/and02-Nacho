@@ -77,6 +77,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.Role
@@ -90,6 +91,7 @@ import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.editor.R
+import com.andlife.editor.component.EffectBottomSheet
 import com.andlife.editor.model.ColorPaletteMode
 import com.andlife.editor.model.EditorDefaults
 import com.andlife.editor.util.contrastColor
@@ -109,6 +111,7 @@ fun EditorScreen(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     isLoading: Boolean = false,
 ) {
+    var isShowEffectDialog by remember { mutableStateOf(false) }
     var colorPaletteMode by remember { mutableStateOf<ColorPaletteMode?>(null) }
     val scope = rememberCoroutineScope()
     val pickMedia =
@@ -125,6 +128,7 @@ fun EditorScreen(
         ColorPaletteMode.Background -> state.currentTextStyle.backgroundColor
         null -> null
     }
+    val res = LocalResources.current
 
     Scaffold(
         topBar = {
@@ -203,6 +207,7 @@ fun EditorScreen(
                         ),
                     )
                 },
+                onClickEffect = { isShowEffectDialog = true },
                 modifier = Modifier.fillMaxWidth(),
             )
             HorizontalDivider()
@@ -213,6 +218,13 @@ fun EditorScreen(
                     .padding(NachoSpacing.large),
             )
         }
+    }
+    if (isShowEffectDialog) {
+        EffectBottomSheet(
+            selectedEffect = state.currentBackgroundEffect,
+            onConfirm = { state.updateBackgroundEffect(it) },
+            onDismiss = { isShowEffectDialog = false },
+        )
     }
 }
 
@@ -345,6 +357,7 @@ private fun EditorToolbar(
     onClickTextColor: () -> Unit,
     onClickBackgroundColor: () -> Unit,
     onClickAddImage: () -> Unit,
+    onClickEffect: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
@@ -447,7 +460,7 @@ private fun EditorToolbar(
                 modifier = Modifier.padding(end = NachoSpacing.small),
                 icon = Icons.Default.Celebration,
                 isActive = false,
-                onClick = { }, // todo: State 연결
+                onClick = onClickEffect,
             )
         }
     }

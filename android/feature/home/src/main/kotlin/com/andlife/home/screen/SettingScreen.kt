@@ -68,6 +68,7 @@ import com.andlife.designsystem.R as designR
 fun SettingRoute(
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onLogout: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingViewModel = hiltViewModel()
 ) {
@@ -87,7 +88,7 @@ fun SettingRoute(
         when (effect) {
             SettingSideEffect.NavigateToLogin -> {
                 isLogoutDialogVisible = false
-                onNavigateToLogin()
+                onLogout()
             }
 
             SettingSideEffect.PopBackStack -> {
@@ -193,7 +194,7 @@ fun SettingScreen(
                     .fillMaxWidth()
                     .padding(paddingValues)
                     .verticalScroll(scrollState)
-                    .padding(vertical = NachoSpacing.twoXLarge, horizontal = NachoSpacing.medium),
+                    .padding(vertical = NachoSpacing.twoXLarge),
                 verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
             ) {
 
@@ -206,7 +207,7 @@ fun SettingScreen(
                         onNameChange = { nameState = it },
                         onClickImage = {},
                         onClickEdit = {},
-                        modifier = Modifier.padding(vertical = NachoSpacing.medium),
+                        modifier = Modifier.padding(vertical = NachoSpacing.medium, horizontal = NachoSpacing.large),
                     )
                 }
 
@@ -241,6 +242,7 @@ fun SettingScreen(
                     showDivider = false
                 ) { modifier ->
                     AccountContent(
+                        authState = uiState.authState,
                         onClickLogout = onClickLogout,
                         onClickQuit = onClickQuit,
                         modifier = modifier,
@@ -309,13 +311,12 @@ private fun SettingSection(
                 color = NachoTheme.colorScheme.textSecondary,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(NachoSpacing.small),
+                    .padding(vertical = NachoSpacing.small, horizontal = NachoSpacing.large),
             )
         }
 
         val contentModifier = Modifier.padding(
             vertical = NachoSpacing.medium,
-            horizontal = NachoSpacing.medium,
         )
         content(contentModifier)
 
@@ -469,7 +470,9 @@ private fun NotificationContent(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = NachoSpacing.large),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -499,7 +502,9 @@ private fun PolicyContent(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = NachoSpacing.large),
     ) {
         Row(
             modifier = Modifier
@@ -556,7 +561,9 @@ private fun AppInfoContent(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = NachoSpacing.large),
     ) {
         Row(
             modifier = Modifier
@@ -602,18 +609,20 @@ private fun AppInfoContent(
 
 @Composable
 private fun AccountContent(
+    authState: AuthState,
     onClickLogout: () -> Unit,
     onClickQuit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-    ) {
+    Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { onClickLogout() }
-                .padding(vertical = NachoSpacing.medium),
+                .clickable(
+                    onClick = onClickLogout,
+                    enabled = authState is AuthState.Authenticated
+                )
+                .padding(horizontal = NachoSpacing.large, vertical = NachoSpacing.medium),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
@@ -635,8 +644,9 @@ private fun AccountContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(vertical = NachoSpacing.medium)
                 .clickable { onClickQuit() }
-                .padding(vertical = NachoSpacing.medium),
+                .padding(horizontal = NachoSpacing.large, vertical = NachoSpacing.medium),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(

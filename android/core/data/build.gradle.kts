@@ -19,6 +19,7 @@ dependencies {
 
     // paging
     implementation(libs.androidx.paging.runtime)
+    implementation(libs.room.runtime)
 
     // retrofit
     implementation(libs.retrofit)

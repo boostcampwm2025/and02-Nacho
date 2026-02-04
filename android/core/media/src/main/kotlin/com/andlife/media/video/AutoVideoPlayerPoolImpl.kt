@@ -1,47 +1,75 @@
 package com.andlife.media.video
 
+import android.app.ActivityManager
 import android.content.Context
 import androidx.annotation.OptIn
+import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.cache.CacheDataSource
+import androidx.media3.datasource.cache.CacheKeyFactory
+import androidx.media3.datasource.cache.CacheWriter
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
+import com.andlife.media.di.VideoCacheDataSourceFactory
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    private val cacheDataSourceFactory: CacheDataSource.Factory,
+    @param:VideoCacheDataSourceFactory private val cacheDataSourceFactory: CacheDataSource.Factory,
 ) : AutoVideoPlayerPool {
 
+    private val maxPoolSize: Int by lazy { getDynamicPoolSize() }
     private val playerInstances = mutableListOf<AutoVideoPlayer>() // 재사용 가능한 플레이어 인스턴스 풀
     private val activePlayers = mutableMapOf<String, AutoVideoPlayer>() // 현재 사용 중인 플레이어 매핑
     private val lastPlayedUrlByGuestBookId =
-        LinkedHashMap<Long, String>(MAX_POOL_SIZE, 0.75f, true) // 방명록 ID별 마지막 재생 URL 추적
+        LinkedHashMap<Long, String>(maxPoolSize, 0.75f, true) // 방명록 ID별 마지막 재생 URL 추적
 
     private var currentPlayingUrl: String? = null
 
-    init {
-        preparePlayers()
-    }
+    private val precacheScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val activePrecacheJobs = ConcurrentHashMap<String, Job>()
 
-    override fun preparePlayers() {
-        if (playerInstances.isNotEmpty()) return
-        repeat(MAX_POOL_SIZE) {
-            val exoPlayer =
-                ExoPlayer.Builder(context).build().apply {
-                    repeatMode = ExoPlayer.REPEAT_MODE_ONE
-                }
-            playerInstances.add(AutoVideoPlayer(exoPlayer, ""))
+    @OptIn(UnstableApi::class)
+    override fun preparePlayers(neededCount: Int) {
+        val targetSize = minOf(playerInstances.size + neededCount, maxPoolSize)
+        while (playerInstances.size < targetSize) {
+            playerInstances.add(createNewPlayer())
         }
     }
 
     @OptIn(UnstableApi::class)
-    override fun getPlayer(url: String): AutoVideoPlayer {
-        if (playerInstances.isEmpty()) {
-            preparePlayers()
+    private fun createNewPlayer(): AutoVideoPlayer {
+        val exoPlayer =
+            ExoPlayer.Builder(context).build().apply {
+                repeatMode = ExoPlayer.REPEAT_MODE_ONE
+            }
+
+        val playerView = PlayerView(context).apply {
+            useController = false
+            resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+            player = exoPlayer
+            setBackgroundColor(android.graphics.Color.BLACK)
         }
+
+        return AutoVideoPlayer(exoPlayer, playerView, "")
+    }
+
+    @OptIn(UnstableApi::class)
+    override fun getPlayer(url: String): AutoVideoPlayer {
+        if (playerInstances.isEmpty()) preparePlayers(maxPoolSize)
         activePlayers[url]?.let { existingPlayer ->
             if (existingPlayer.exoPlayer.currentMediaItem?.localConfiguration?.uri.toString() == url) {
                 return existingPlayer
@@ -49,7 +77,7 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
             return existingPlayer
         }
         if (playerInstances.isEmpty()) {
-            preparePlayers()
+            preparePlayers(maxPoolSize)
         }
 
         val playerToUse =
@@ -77,7 +105,8 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
                 .Factory(cacheDataSourceFactory)
                 .createMediaSource(MediaItem.fromUri(url))
 
-        playerToUse.exoPlayer.setMediaSource(mediaSource)
+        playerToUse.setMediaSource(mediaSource)
+        playerToUse.prepare()
         activePlayers[url] = playerToUse
         return playerToUse
     }
@@ -89,7 +118,7 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
         currentPlayingUrl = url
         lastPlayedUrlByGuestBookId[itemId] = url
 
-        if (lastPlayedUrlByGuestBookId.size > MAX_POOL_SIZE) {
+        if (lastPlayedUrlByGuestBookId.size > maxPoolSize) {
             lastPlayedUrlByGuestBookId.remove(lastPlayedUrlByGuestBookId.keys.first())
         }
 
@@ -128,6 +157,50 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
         lastPlayedUrlByGuestBookId.remove(itemId)
     }
 
+    @OptIn(UnstableApi::class)
+    override fun precacheVideos(urls: List<String>) {
+        val cache = cacheDataSourceFactory.cache ?: return
+
+        urls.forEach { url ->
+            val uri = url.toUri()
+
+            if (activePrecacheJobs.contains(url)) return@forEach
+
+            val cacheBytes = cache.getCachedBytes(
+                CacheKeyFactory.DEFAULT.buildCacheKey(DataSpec(uri)),
+                0,
+                PRECACHE_SIZE_BYTES
+            )
+
+            if (cacheBytes >= PRECACHE_SIZE_BYTES) return@forEach
+
+            activePrecacheJobs[url] = precacheScope.launch {
+                try {
+                    val dataSpec = DataSpec.Builder()
+                        .setUri(uri)
+                        .setLength(PRECACHE_SIZE_BYTES)
+                        .setFlags(DataSpec.FLAG_ALLOW_CACHE_FRAGMENTATION)
+                        .build()
+
+                    val cacheWriter = CacheWriter(
+                        cacheDataSourceFactory.createDataSourceForDownloading(),
+                        dataSpec,
+                        null
+                    ) { requestLength, bytesCached, newBytesCached ->
+                        if (!coroutineContext.isActive) {
+                            throw CancellationException("프리캐싱 작업이 취소됨")
+                        }
+                    }
+                    cacheWriter.cache()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                } finally {
+                    activePrecacheJobs.remove(url)
+                }
+            }
+        }
+    }
+
     override fun resetPool() {
         activePlayers.values.forEach { it.stop() }
         activePlayers.clear()
@@ -144,7 +217,20 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
         currentPlayingUrl = null
     }
 
+    private fun getDynamicPoolSize(): Int {
+        val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val memoryInfo = ActivityManager.MemoryInfo()
+        activityManager.getMemoryInfo(memoryInfo)
+        val totalMemoryGb = memoryInfo.totalMem.toDouble() / (1024 * 1024 * 1024)
+
+        return when {
+            totalMemoryGb >= 7.0 -> 4
+            totalMemoryGb >= 5.0 -> 3
+            else -> 2
+        }
+    }
+
     companion object {
-        private const val MAX_POOL_SIZE = 5
+        private const val PRECACHE_SIZE_BYTES = 1 * 1024 * 1024L
     }
 }

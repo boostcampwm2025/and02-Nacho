@@ -2,7 +2,7 @@
 -- 1. 유저 데이터 (ID를 1씩 증가: 1-10 → 2-11)
 -- 샘플 유저 추가 (ID = 1)
 INSERT IGNORE INTO users (id, kakao_id, email, name, profile_image_url, created_at, updated_at) VALUES
-(1, 0, 'sample@example.com', '샘플 유저', 'https://picsum.photos/200/200?random=0', NOW(), NOW()),
+(1, 0, 'sample@example.com', '나에게로의 초대 팀', 'https://picsum.photos/200/200?random=0', NOW(), NOW()),
 (2, 1000000001, 'donghyun@boostcamp.com', '동현', 'https://picsum.photos/200/200?random=10', NOW(), NOW()),
 (3, 1000000002, 'ant@boostcamp.com', '미오', 'https://picsum.photos/200/200?random=11', NOW(), NOW()),
 (4, 1000000003, 'dk0000@boostcamp.com', '동경', 'https://picsum.photos/200/200?random=12', NOW(), NOW()),
@@ -17,7 +17,7 @@ INSERT IGNORE INTO users (id, kakao_id, email, name, profile_image_url, created_
 -- 2. 초대장 데이터 (ID를 1씩 증가: 0-30 → 1-31)
 -- 기존 ID 0 (샘플)을 ID 1로 변경
 INSERT IGNORE INTO invitations (id, host_id, title, display_host_name, thumbnail_urls, invitation_date, start_time, end_time, place_name, address, lat, lng, location_guide, created_at, updated_at) VALUES
-(1, 1, '샘플 초대장', '샘플 호스트', 'https://picsum.photos/800/400?random=0', '2026-02-06', '12:00:00', '15:00:00', '샘플 장소', '샘플 주소', 0.0, 0.0, '샘플 위치 안내', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(1, 1, '우리 앱에 오신 것을 환영합니다!', '나에게로의 초대 팀', null, '2026-02-06', '14:00:00', '15:00:00', '나에게로의 초대', '샘플 주소', 0.0, 0.0, '이 초대장은 샘플입니다.\n실제 초대를 만들면 위치와 길 안내를 자유롭게 입력할 수 있어요.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (2, 2, '2026 부스트캠프 송년 파티', '최동현', 'https://picsum.photos/800/400?random=1,https://picsum.photos/800/400?random=2', '2026-12-31', '18:00:00', '23:00:00', '강남역 어느 카페', '서울특별시 강남구 테헤란로', 37.4979, 127.0276, '강남역 10번 출구에서 직진하세요!', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (3, 7, '2026년 안드라이프 신년회', '안드라이프', 'https://picsum.photos/800/600?random=3', '2026-01-31', '13:30:00', NULL, '코드스쿼드', '서울특별시 강남구 강남대로62길 23, 4층 역삼빌딩', 37.4936874, 127.0302304, '양재역 3번 출구에서 801m', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (4, 3, '미오의 자취방 집들이', '집주인 미오', 'https://picsum.photos/400/400?random=10,https://picsum.photos/400/400?random=11', '2025-11-20', '14:00:00', '20:00:00', '우리집', '서울 관악구 관악로 1', 37.478, 126.952, '서울대입구역 2번 출구', '2025-11-01 10:00:00', NOW()),
@@ -102,8 +102,8 @@ INSERT IGNORE INTO guestbooks (id, invitation_id, user_id, text_content, created
 (49, 30, 9, '흑돼지 꼭 먹어야해', NOW(), NOW()),
 (50, 31, 2, '안드라이프 포에버!', NOW(), NOW()),
 (51, 1, 1, '샘플 방명록 글입니다.', NOW(), NOW()),
-(52, 1, 2, '샘플 유저가 남긴 두번째 글입니다.', NOW(), NOW()),
-(53, 1, 3, '샘플 유저의 세번째 방명록 글입니다.', NOW(), NOW());
+(52, 1, 1, '샘플 유저가 남긴 두번째 글입니다.', NOW(), NOW()),
+(53, 1, 1, '샘플 유저의 세번째 방명록 글입니다.', NOW(), NOW());
 
 -- 4. 방명록 미디어 데이터
 INSERT IGNORE INTO guestbook_images (guestbook_post_id, image_url, display_order) VALUES
@@ -153,6 +153,11 @@ INSERT IGNORE INTO video_preview_thumbnails (guestbook_video_id, thumbnail_url, 
 
 -- 5. 공지사항 데이터 (invitation_id를 1씩 증가)
 INSERT IGNORE INTO announcement_sections (invitation_id, title, content, display_order, created_at) VALUES
+(1, '📌 안내사항', ' - 이 초대장은 샘플 초대장입니다.\n - 실제 초대를 만들면 이 내용을 자유롭게 수정할 수 있어요.', 1, CURRENT_TIMESTAMP),
+(1, '📸 방명록 작성 안내', ' - 사진, 영상, 음성으로 마음을 남길 수 있어요.\n - 참여한 사람들의 기록은 하나의 타임라인으로 정리됩니다.', 2, CURRENT_TIMESTAMP),
+(1, '💌 초대장 꾸미기', ' - 초대 카드와 감사카드를 활용하여 사람들과 특별한 추억을 만들어보세요!\n - 다양한 테마와 함께 순간을 위한 초대장을 꾸며보세요.', 3, CURRENT_TIMESTAMP),
+(1, '🎁 이렇게 활용해보세요',' - 결혼식, 돌잔치, 졸업식 같은 큰 행사부터\n - 생일, 집들이, 송년회 같은 일상의 모임\n - 동호회, 스터디, 회사 행사\n - 번개 약속, 여행 기록, 소소한 만남까지\n - 감사 인사와 추억 아카이빙',4, CURRENT_TIMESTAMP),
+(1, '❓ 문의사항', ' - 궁금한 점이 있으면 언제든지 고객센터로 연락주세요!\n - 이메일:nacho@example.com', 5, CURRENT_TIMESTAMP),
 (2, '주차 안내', '건물 지하 주차장을 이용해 주세요. 3시간 무료 주차가 가능합니다.', 1, CURRENT_TIMESTAMP),
 (2, '준비물', '만원 이하의 소소한 선물을 준비해 주세요. 랜덤 선물 교환식이 있습니다!', 2, CURRENT_TIMESTAMP),
 (3, '준비물', ' - 건강한 마음 \n - 건강한 정신', 1, CURRENT_TIMESTAMP),

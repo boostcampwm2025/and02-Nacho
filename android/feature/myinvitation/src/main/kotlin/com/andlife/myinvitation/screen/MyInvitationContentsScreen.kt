@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -21,6 +22,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,6 +41,7 @@ import com.andlife.editor.screen.NachoTextView
 import com.andlife.model.invitation.InvitationCardUiModel
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiState
 import com.andlife.ui.R
+import com.andlife.ui.component.lottie.LottieEffect
 import com.andlife.ui.section.detail.AddressSection
 import com.andlife.ui.section.detail.AnnouncementSection
 import com.andlife.ui.section.detail.AuthorSection
@@ -55,6 +59,7 @@ fun MyInvitationContentsScreen(
     onClickCreateCard: () -> Unit,
     onClickEditCard: () -> Unit,
     onMapError: () -> Unit,
+    onLottieStarted: () -> Unit,
     isMapVisible: Boolean,
     onSaveEditableCache: (Editable) -> Unit,
     modifier: Modifier = Modifier,
@@ -62,56 +67,68 @@ fun MyInvitationContentsScreen(
 ) {
     val model = uiState.invitationContentsUiModel
     val scrollState = rememberScrollState()
+    val showLottie = remember { !uiState.hasShownLottie }
 
-    Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .background(NachoTheme.colorScheme.backgroundTertiary)
-                .verticalScroll(scrollState),
+    LaunchedEffect(showLottie) {
+        if (showLottie) {
+            onLottieStarted()
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(NachoTheme.colorScheme.backgroundTertiary)
     ) {
-        ImageSection(
-            imageUrls = model.imageList,
-            onImageClick = onClickImage,
-        )
+        Column(modifier = modifier.verticalScroll(scrollState)) {
+            ImageSection(
+                imageUrls = model.imageList,
+                onImageClick = onClickImage,
+            )
 
-        TitleSection(
-            title = model.title,
-        )
+            TitleSection(
+                title = model.title,
+            )
 
-        AuthorSection(
-            profileUrl = model.hostInfo.profileUrl,
-            author = model.hostInfo.name,
-        )
+            AuthorSection(
+                profileUrl = model.hostInfo.profileUrl,
+                author = model.hostInfo.name,
+            )
 
-        DateSection(
-            dateTime = model.dateTime,
-        )
+            DateSection(
+                dateTime = model.dateTime,
+            )
 
-        AddressSection(
-            placeName = model.location.name,
-            placeAddress = model.location.address,
-        )
+            AddressSection(
+                placeName = model.location.name,
+                placeAddress = model.location.address,
+            )
 
-        MyInvitationCardSection(
-            invitationCardModel = model.invitationCard,
-            cachedCardEditable = uiState.cachedCardEditable,
-            onCreateCard = onClickCreateCard,
-            onEditCard = onClickEditCard,
-            onSaveEditableCache = onSaveEditableCache,
-            editCardEnabled = editCardEnabled,
-            modifier = Modifier
-        )
+            MyInvitationCardSection(
+                invitationCardModel = model.invitationCard,
+                cachedCardEditable = uiState.cachedCardEditable,
+                onCreateCard = onClickCreateCard,
+                onEditCard = onClickEditCard,
+                onSaveEditableCache = onSaveEditableCache,
+                editCardEnabled = editCardEnabled,
+                modifier = Modifier
+            )
 
-        AnnouncementSection(
-            announcements = model.announcement,
-        )
+            AnnouncementSection(
+                announcements = model.announcement,
+            )
 
-        PlaceGuideSection(
-            location = model.location,
-            onMapError = onMapError,
-            isMapVisible = isMapVisible,
-        )
+            PlaceGuideSection(
+                location = model.location,
+                onMapError = onMapError,
+                isMapVisible = isMapVisible,
+            )
+        }
+        if (showLottie) {
+            LottieEffect(
+                selectEffect = uiState.invitationContentsUiModel.invitationCard?.card?.backgroundImageUrl
+            )
+        }
     }
 }
 
@@ -266,6 +283,7 @@ private fun MyInvitationContentsScreenPreview() {
             onClickEditCard = {},
             onClickCreateCard = {},
             onMapError = {},
+            onLottieStarted = {},
             isMapVisible = true,
             onSaveEditableCache = {},
         )

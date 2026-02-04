@@ -175,8 +175,8 @@ class InvitationCreateViewModel @Inject constructor(
     fun getCardEditorResult() {
         val editable = createCardSession.editable ?: return
         val backgroundColor = createCardSession.backgroundColor
-        val backgroundImageUrl = createCardSession.backgroundImageUrl
-        val card = CardUiModel(editable, backgroundColor.toArgb(), backgroundImageUrl)
+        val backgroundEffect = createCardSession.backgroundEffect
+        val card = CardUiModel(editable, backgroundColor.toArgb(), backgroundEffect)
         updateState {
             copy(invitationFormUiModel = invitationFormUiModel.copy(card = card))
         }
@@ -213,7 +213,6 @@ class InvitationCreateViewModel @Inject constructor(
             }
 
             val nachoCard = cardResult.data?.toDomain()
-
             val createParam = uiModel.toSaveParam(
                 thumbnails = uploadedThumbnailsResult.data,
                 date = date,
@@ -251,7 +250,8 @@ class InvitationCreateViewModel @Inject constructor(
             return Result.Success(
                 NachoUiCard(
                     content = richTextContent,
-                    backgroundColor = cardUiModel.backgroundColor.toLong()
+                    backgroundColor = cardUiModel.backgroundColor.toLong(),
+                    backgroundImageUrl = cardUiModel.backgroundImageUrl
                 )
             )
         }
