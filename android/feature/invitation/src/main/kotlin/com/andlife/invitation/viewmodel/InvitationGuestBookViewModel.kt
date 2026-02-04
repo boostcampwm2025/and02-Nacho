@@ -252,6 +252,8 @@ constructor(
         val state = uiState.value
         if (!state.isSubmittable) return
 
+        updateState { copy(isUploading = true) }
+
         val newMedias = state.selectedMedias.filter { it.id == null }
 
         // 백그라운드 업로드 시작
@@ -408,7 +410,7 @@ constructor(
             is UploadState.Success -> {
                 Log.d("BackgroundUpload", "업로드 및 방명록 처리 완료: ${uploadState.urls}")
 
-                // UI 상태 업데이트
+                updateState { copy(isUploading = false) }
                 clearFormInput()
 
                 val isUpdate = originalState.editingGuestBookId != null
@@ -426,11 +428,13 @@ constructor(
 
             is UploadState.Failure -> {
                 Log.e("BackgroundUpload", "업로드 실패: ${uploadState.message}")
+                updateState { copy(isUploading = false) }
                 sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("업로드 실패: ${uploadState.message}"))
             }
 
             is UploadState.Cancelled -> {
                 Log.d("BackgroundUpload", "업로드 취소됨")
+                updateState { copy(isUploading = false) }
                 sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("업로드가 취소되었습니다"))
             }
         }
