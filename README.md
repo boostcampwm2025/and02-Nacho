@@ -1,40 +1,46 @@
 
 
-<img src="https://github.com/user-attachments/assets/09d55d61-3c3a-42a3-9e55-63cdef98e3eb" alt="AndLife Logo" width="200"/>
-
-# AndLife: 나에게로의 초대
-
-**이벤트의 시작부터 끝까지 초대, 기록, 감사를 연결하는 미디어 기반 아카이빙 플랫폼**
-
-<br>
+<img width="80%" alt="미리보기 2026-02-04 21 10 13" src="https://github.com/user-attachments/assets/da61f0d4-23f3-4c93-92da-41a0adc681b6" />
 
 
-## Project Overview
-AndLife는 흩어지기 쉬운 모임의 기록을 '초대장'이라는 이벤트 단위로 통합 관리합니다.    
-단순한 정보 전달을 넘어 음성, 영상 등 풍부한 미디어를 활용한 방명록과 커스텀 에디터를 통한 초대장 제작 환경을 제공합니다.    
+# 나에게로의 초대
 
-생일, 결혼, 졸업, 모임 등 다양한 이벤트에서 초대장을 작성하고 참여자들이 방명록으로 추억을 기록하며     
-호스트가 감사 카드로 감사의 마음을 전달합니다.    
-
-모든 과정이 하나의 앱에서 자연스럽게 연결되어, 이벤트가 끝난 후에도 소중한 기록으로 남습니다.    
-
-<br>
-
-## Tech Stack
-| Category | Stack |
-| :--- | :--- |
-| **Core & UI** | ![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white) ![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white) ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) |
-| **Architecture** | ![Clean Architecture](https://img.shields.io/badge/Clean%20Architecture-000000?style=for-the-badge) ![MVI](https://img.shields.io/badge/MVI-4CAF50?style=for-the-badge) ![Hilt](https://img.shields.io/badge/Hilt-2196F3?style=for-the-badge) |
-| **Async & Reactive** | ![Coroutines](https://img.shields.io/badge/Coroutines-1565C0?style=for-the-badge&logo=kotlin&logoColor=white) ![Flow](https://img.shields.io/badge/Flow-00BCD4?style=for-the-badge&logo=kotlin&logoColor=white) |
-| **Network & Storage** | ![Retrofit2](https://img.shields.io/badge/Retrofit2-424242?style=for-the-badge) ![OkHttp3](https://img.shields.io/badge/OkHttp3-212121?style=for-the-badge) ![Room](https://img.shields.io/badge/Room-3DDC84?style=for-the-badge&logo=android&logoColor=white) ![DataStore](https://img.shields.io/badge/DataStore-4285F4?style=for-the-badge&logo=android&logoColor=white) |
-| **Media** | ![ExoPlayer](https://img.shields.io/badge/ExoPlayer-FF5722?style=for-the-badge&logo=google&logoColor=white) ![Media3](https://img.shields.io/badge/Media3-673AB7?style=for-the-badge&logo=android&logoColor=white) |
-
-</div>
+**이벤트의 시작부터 끝까지 초대, 참여, 기록, 감사를 연결하는 미디어 기반 아카이빙 플랫폼**
 
 <br>
 
 
-## Core Features
+## 서비스 배경
+> 모임이 끝나면 경험은 남지만, 기록은 남지 않습니다.
+> 
+
+사진과 영상은 갤러리 어딘가에, 메시지는 채팅방 기록 속에, 감사 인사는 개별 메시지로 흩어집니다.<br>
+초대장을 보냈던 순간부터 마지막 인사까지, 각 단계가 서로 다른 도구에서 일어나다 보니 이벤트 전체를 하나의 완결된 이야기로 보존하기 어렵습니다.
+
+AndLife는 이러한 문제에서 출발했습니다.<br>
+이벤트의 시작부터 끝까지를 하나의 흐름으로 담아낼 수 있는 구조를 만들고자 '초대장'이라는 이벤트 단위를 중심으로 서비스를 기획했습니다.
+
+<br>
+
+## 서비스 대상
+
+- 생일, 결혼, 졸업 등 특별한 순간을 함께 나누고 싶은 분
+- 흩어진 추억을 한곳에 모아 소장하고 싶은 분
+- 참여해준 사람들에게 감사의 마음을 전하고 싶은 분
+
+## 기술 스택
+
+### Android
+![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white) ![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white) ![Clean Architecture](https://img.shields.io/badge/Clean%20Architecture-000000?style=for-the-badge) ![MVI](https://img.shields.io/badge/MVI-4CAF50?style=for-the-badge) ![Hilt](https://img.shields.io/badge/Hilt-2196F3?style=for-the-badge) ![Coroutines](https://img.shields.io/badge/Coroutines-1565C0?style=for-the-badge&logo=kotlin&logoColor=white) ![Flow](https://img.shields.io/badge/Flow-00BCD4?style=for-the-badge&logo=kotlin&logoColor=white) ![Retrofit2](https://img.shields.io/badge/Retrofit2-424242?style=for-the-badge) ![Room](https://img.shields.io/badge/Room-3DDC84?style=for-the-badge&logo=android&logoColor=white) ![DataStore](https://img.shields.io/badge/DataStore-4285F4?style=for-the-badge&logo=android&logoColor=white)  ![ExoPlayer](https://img.shields.io/badge/ExoPlayer-FF5722?style=for-the-badge&logo=google&logoColor=white) 
+
+### Backend
+![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white) ![MVC](https://img.shields.io/badge/MVC-4CAF50?style=for-the-badge) ![JPA](https://img.shields.io/badge/JPA-F43F5E?style=for-the-badge) ![MySQL](https://img.shields.io/badge/MySQL-2196F3?style=for-the-badge) 
+
+
+<br>
+
+
+## 주요 기능
 <table>
   <tr>
     <th align="left" width="35%">기능</th>
@@ -119,7 +125,7 @@ AndLife는 흩어지기 쉬운 모임의 기록을 '초대장'이라는 이벤�
 
 <br>
 
-## Module Dependency
+## 프로젝트 구조
 <img width="5442" height="3488" alt="image" src="https://github.com/user-attachments/assets/54643434-9c76-46df-aaac-cba46b4cae37" />
 
 <br>
