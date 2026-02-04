@@ -253,7 +253,7 @@ private fun NachoBottomBar(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .weight(1f)
-                        .padding(vertical = NachoSpacing.medium)
+                        .padding(vertical = NachoSpacing.small)
                         .noRippleClickable { onTabSelect(tab) }
                 ) {
                     val isSelected = currentTab == tab
