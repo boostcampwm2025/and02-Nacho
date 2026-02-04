@@ -14,7 +14,7 @@ import com.andlife.database.entity.UpcomingInvitationEntity
         InvitationSummaryEntity::class,
         UpcomingInvitationEntity::class,
     ],
-    version = 1,
+    version = DatabaseConstants.DATABASE_VERSION,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
