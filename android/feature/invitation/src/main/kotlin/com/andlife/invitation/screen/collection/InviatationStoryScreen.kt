@@ -97,7 +97,7 @@ fun InvitationStoryRoute(
 
     InvitationStoryScreen(
         uiState = uiState,
-        exoPlayer = viewModel.exoPlayer,
+        getPlayerForIndex = { index -> viewModel.getPlayerForIndex(index) },
         initialIndex = initialIndex,
         onPageChanged = onPageChanged,
         onToggleExpand = onToggleExpand,
@@ -141,7 +141,7 @@ fun InvitationStoryRoute(
 @Composable
 fun InvitationStoryScreen(
     uiState: InvitationCollectionUiState,
-    exoPlayer: Player,
+    getPlayerForIndex: (Int) -> Player?,
     initialIndex: Int,
     onPageChanged: (Int) -> Unit,
     onToggleExpand: () -> Unit,
@@ -193,14 +193,14 @@ fun InvitationStoryScreen(
                 userScrollEnabled = true,
             ) { pageIndex ->
                 val item = uiState.mediaItems[pageIndex]
-                val isCurrentPage = pagerState.currentPage == pageIndex
+                val currentPlayer = getPlayerForIndex(pageIndex)
 
                 Box(modifier = Modifier.fillMaxSize()) {
                     StoryContent(
                         item = item,
                         isExpanded = uiState.isTextExpanded,
                         onToggleExpand = onToggleExpand,
-                        exoPlayer = if (isCurrentPage) exoPlayer else null,
+                        exoPlayer = currentPlayer,
                         modifier = Modifier.align(Alignment.BottomCenter),
                     )
                 }
@@ -215,58 +215,44 @@ fun InvitationStoryScreen(
 private fun InvitationStoryScreenPreview() {
     NachoTheme {
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        val mockState =
-            InvitationCollectionUiState(
-                mediaItems =
-                    persistentListOf(
-                        CollectionUiModel(
-                            id = 1L,
-                            mediaUrl = "https://picsum.photos/400/600?random=1",
-                            type = MediaType.IMAGE.toUiType(),
-                            content = "방명록 내용 1",
-                            authorName = "사용자1",
-                            authorProfileUrl = null,
-                            createdAt = now,
-                            durationSeconds = null,
-                        ),
-                        CollectionUiModel(
-                            id = 2L,
-                            mediaUrl = "https://picsum.photos/400/600?random=2",
-                            type = MediaType.VIDEO.toUiType(),
-                            content = "방명록 내용 2",
-                            authorName = "사용자2",
-                            authorProfileUrl = null,
-                            createdAt = now,
-                            durationSeconds = 120,
-                        ),
-                        CollectionUiModel(
-                            id = 3L,
-                            mediaUrl = "https://picsum.photos/400/600?random=3",
-                            type = MediaType.AUDIO.toUiType(),
-                            content = "방명록 내용 3",
-                            authorName = "사용자3",
-                            authorProfileUrl = null,
-                            createdAt = now,
-                            durationSeconds = 300,
-                        ),
-                    ),
-                isTextExpanded = false,
-            )
+        val mockState = InvitationCollectionUiState(
+            mediaItems = persistentListOf(
+                CollectionUiModel(
+                    id = 1L,
+                    mediaUrl = "https://picsum.photos/400/600?random=1",
+                    type = MediaType.IMAGE.toUiType(),
+                    content = "방명록 내용 1",
+                    authorName = "사용자1",
+                    authorProfileUrl = null,
+                    createdAt = now,
+                    durationSeconds = null,
+                ),
+                CollectionUiModel(
+                    id = 2L,
+                    mediaUrl = "https://picsum.photos/400/600?random=2",
+                    type = MediaType.VIDEO.toUiType(),
+                    content = "방명록 내용 2",
+                    authorName = "사용자2",
+                    authorProfileUrl = null,
+                    createdAt = now,
+                    durationSeconds = 120,
+                ),
+            ),
+            isTextExpanded = false,
+        )
 
         val context = LocalContext.current
-        val dummyPlayer = remember {
-            ExoPlayer.Builder(context).build()
-        }
+        val dummyPlayer = remember { ExoPlayer.Builder(context).build() }
 
         InvitationStoryScreen(
             uiState = mockState,
+            getPlayerForIndex = { index -> dummyPlayer },
             initialIndex = 0,
             onPageChanged = {},
             onToggleExpand = {},
-            exoPlayer = dummyPlayer,
-            onDownloadClick = {},
             onClose = {},
-            snackbarHostState = SnackbarHostState(),
+            onDownloadClick = {},
+            snackbarHostState = remember { SnackbarHostState() },
         )
     }
 }
