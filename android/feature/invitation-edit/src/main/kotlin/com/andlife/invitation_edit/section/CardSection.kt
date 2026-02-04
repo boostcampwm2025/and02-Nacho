@@ -75,17 +75,17 @@ fun CardSection(
                     containerColor = NachoTheme.colorScheme.brandOnPrimary,
                     contentColor = NachoTheme.colorScheme.brandPrimary,
                     contentPadding = PaddingValues(horizontal = NachoSpacing.small, vertical = NachoSpacing.xSmall),
+                    disabledContainerColor = Color.Transparent,
+                    disabledContentColor = NachoTheme.colorScheme.textTertiary
                 ) {
                     Icon(
                         painter = painterResource(iconRes),
                         contentDescription = stringResource(buttonDescRes),
-                        tint = NachoTheme.colorScheme.brandPrimary,
                     )
                     Spacer(Modifier.width(NachoSpacing.small))
                     Text(
                         text = stringResource(buttonText),
                         style = NachoTheme.typography.bodyMediumMedium,
-                        color = NachoTheme.colorScheme.brandPrimary,
                     )
                 }
             }

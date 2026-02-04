@@ -11,6 +11,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.component.NachoButton
@@ -66,6 +67,8 @@ internal fun TopBarSection(
                     ),
                     containerColor = NachoTheme.colorScheme.brandOnPrimary,
                     contentColor = NachoTheme.colorScheme.brandPrimary,
+                    disabledContainerColor = Color.Transparent,
+                    disabledContentColor = NachoTheme.colorScheme.textTertiary
                 ) {
                     Text(
                         text = stringResource(R.string.txt_preview),
