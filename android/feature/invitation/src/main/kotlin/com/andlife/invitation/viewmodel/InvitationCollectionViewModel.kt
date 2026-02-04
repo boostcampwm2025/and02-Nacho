@@ -58,9 +58,28 @@ class InvitationCollectionViewModel @Inject constructor(
                 initialValue = InvitationCollectionUiState(isLoading = true),
             )
 
+    private var preparationStartTime = 0L
+    private var currentMeasuringUrl = ""
+
     val exoPlayer: ExoPlayer = ExoPlayer.Builder(context).build().apply {
         repeatMode = Player.REPEAT_MODE_ONE
         playWhenReady = true
+    }
+
+    init {
+        exoPlayer.addListener(object : Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (playbackState == Player.STATE_READY) {
+                    val duration = System.currentTimeMillis() - preparationStartTime
+                    Log.d(TAG, "STATE_READY | 준비 완료 시간: ${duration}ms | URL: $currentMeasuringUrl")
+                }
+            }
+
+            override fun onRenderedFirstFrame() {
+                val totalDuration = System.currentTimeMillis() - preparationStartTime
+                Log.d(TAG, "첫 프레임 렌더링 완료 | 총 소요 시간: ${totalDuration}ms | URL: $currentMeasuringUrl")
+            }
+        })
     }
 
     override fun onEvent(event: InvitationCollectionUiEvent) {
@@ -81,7 +100,6 @@ class InvitationCollectionViewModel @Inject constructor(
 
     private fun loadMediaCollection() {
         viewModelScope.launch {
-            Log.d("ViewModel", "id:$invitationId")
             updateState { copy(isLoading = true) }
 
             guestBookRepository
@@ -93,10 +111,8 @@ class InvitationCollectionViewModel @Inject constructor(
                             mediaItems = mediaList.map { it.toUiModel() }.toImmutableList(),
                         )
                     }
-                    Log.d("ViewModel", "미디어 리스트: $mediaList")
-                }.onFailure { it, _ ->
+                }.onFailure { _, _ ->
                     updateState { copy(isLoading = false) }
-                    Log.e("ViewModel", "에러 발생: $it")
                 }
         }
     }
@@ -134,12 +150,13 @@ class InvitationCollectionViewModel @Inject constructor(
         }
 
         val selectedMedia = uiState.value.mediaItems.getOrNull(index)
+        Log.d(TAG, "페이지 변경: $index")
+        Log.d(TAG, "선택된 미디어 타입: ${selectedMedia?.type}")
 
         when (selectedMedia?.type) {
             UiMediaType.VIDEO, UiMediaType.AUDIO -> {
                 prepareMedia(selectedMedia.mediaUrl)
             }
-
             else -> {
                 exoPlayer.pause()
             }
@@ -156,6 +173,9 @@ class InvitationCollectionViewModel @Inject constructor(
             exoPlayer.play()
             return
         }
+
+        preparationStartTime = System.currentTimeMillis()
+        currentMeasuringUrl = url
 
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
@@ -231,6 +251,7 @@ class InvitationCollectionViewModel @Inject constructor(
     }
 
     companion object {
+        private const val TAG = "Performance_Before"
         private const val FILE_NAME_PREFIX = "nacho_"
     }
 }

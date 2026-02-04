@@ -51,10 +51,9 @@ class StoryMediaPlayerPoolImpl @Inject constructor(
     }
 
     override fun acquirePlayer(index: Int, url: String): StoryMediaPlayer {
-        // 이미 있다면 반환 (LinkedHashMap의 get에 의해 순서 갱신됨)
         playerMap[index]?.let { return it }
 
-        // 새 플레이어 생성 (전용 캐시 팩토리 적용)
+        // 새 플레이어 생성
         val exoPlayer = ExoPlayer.Builder(context).build().apply {
             val mediaSource = ProgressiveMediaSource.Factory(cacheDataSourceFactory)
                 .createMediaSource(MediaItem.fromUri(url))
