@@ -95,8 +95,7 @@ class BackgroundMediaUploaderImpl @Inject constructor(
                 }
             }
     }
-
-
+    
     override fun cancelUpload(workId: String) {
         val uuid = UUID.fromString(workId)
         workManager.cancelWorkById(uuid)

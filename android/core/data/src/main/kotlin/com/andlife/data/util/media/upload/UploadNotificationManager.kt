@@ -112,6 +112,4 @@ class UploadNotificationManager @Inject constructor(
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(workId.hashCode(), notification)
     }
-
-
 }
