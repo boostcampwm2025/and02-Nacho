@@ -104,6 +104,8 @@ class InvitationDetailViewModel @Inject constructor(
             invitationRepository.leaveInvitation(invitationId)
                 .onSuccess {
                     sendEffect(InvitationDetailSideEffect.NavigateBack)
+                    RefreshEventHub.emit(RefreshTarget.INVITATION)
+                    RefreshEventHub.emit(RefreshTarget.HOME)
                 }
                 .onFailure { error, _ ->
                     sendEffect(InvitationDetailSideEffect.ShowLeaveInvitationErrorSnackbar)

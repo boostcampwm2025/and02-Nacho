@@ -11,6 +11,8 @@ import androidx.navigation.toRoute
 import com.andlife.deeplink.DeepLinkManager
 import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.domain.repository.thankscard.ThanksCardRepository
+import com.andlife.domain.util.RefreshEventHub
+import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.editor.util.CreateCardSession
@@ -119,6 +121,8 @@ class MyInvitationDetailViewModel @Inject constructor(
             invitationRepository.deleteInvitation(myInvitationId)
                 .onSuccess {
                     sendEffect(MyInvitationDetailSideEffect.InvitationDeleted)
+                    RefreshEventHub.emit(RefreshTarget.MY_INVITATION)
+                    RefreshEventHub.emit(RefreshTarget.HOME)
                 }
                 .onFailure { error, msg ->
                     sendEffect(MyInvitationDetailSideEffect.InvitationDeleteFailed)
