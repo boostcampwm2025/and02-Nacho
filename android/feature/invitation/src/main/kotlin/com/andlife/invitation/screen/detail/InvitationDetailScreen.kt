@@ -57,6 +57,7 @@ import com.andlife.invitation.viewmodel.InvitationDetailViewModel
 import com.andlife.ui.component.GenericTabRow
 import com.andlife.ui.component.loading.InvitationLoadingError
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
+import com.andlife.ui.component.lottie.LottieEffect
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
@@ -119,10 +120,12 @@ fun InvitationDetailRoute(
             containerColor = Color(thanksCard.backgroundColor)
         ) {
             Box(modifier = Modifier.background(Color(thanksCard.backgroundColor))) {
+                LottieEffect(
+                    selectEffect = thanksCard.backgroundImageUrl
+                )
                 Column(
                     modifier = Modifier.verticalScroll(rememberScrollState())
                 ) {
-
                     AndroidView(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -237,6 +240,7 @@ private fun InvitationDetailScreen(
                                 },
                                 onMapError = { onEvent(InvitationDetailUiEvent.MapError) },
                                 isMapVisible = isMapVisible,
+                                onLottieStarted = { onEvent(InvitationDetailUiEvent.LottieStarted) },
                                 onEditableSave = onEditableSave,
                                 modifier = Modifier.fillMaxSize(),
                             )

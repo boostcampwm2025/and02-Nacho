@@ -30,6 +30,7 @@ import com.andlife.model.invitation.AnnouncementUiModel
 import com.andlife.model.invitation.DateTimeInfo
 import com.andlife.model.invitation.LocationInfo
 import com.andlife.model.invitation.TimeUiModel
+import com.andlife.ui.component.lottie.LottieEffect
 import com.andlife.ui.section.detail.AddressSection
 import com.andlife.ui.section.detail.AnnouncementSection
 import com.andlife.ui.section.detail.AuthorSection
@@ -105,6 +106,9 @@ private fun InvitationPreviewScreen(
                     style = NachoTheme.typography.bodyMediumRegular,
                 )
             }
+            LottieEffect(
+                selectEffect = uiState.invitationFormUiModel.card?.backgroundImageUrl
+            )
         }
     }
 }

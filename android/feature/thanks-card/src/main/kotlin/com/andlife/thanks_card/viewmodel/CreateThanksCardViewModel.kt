@@ -71,7 +71,7 @@ class CreateThanksCardViewModel @Inject constructor(
                 id = invitationId,
                 content = textContent.data,
                 backgroundColor = textEditor.currentTextStyle.backgroundColor.toArgb().toLong(),
-                backgroundImageUrl = null
+                backgroundImageUrl = textEditor.currentBackgroundEffect
 
             ).toDomain()
             thanksCardRepository.createThanksCard(invitationId, nachoCard)

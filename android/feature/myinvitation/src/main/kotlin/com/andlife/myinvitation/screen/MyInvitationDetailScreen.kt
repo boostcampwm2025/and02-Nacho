@@ -74,6 +74,7 @@ import com.andlife.ui.component.GenericTabRow
 import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.ui.component.loading.InvitationLoadingError
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
+import com.andlife.ui.component.lottie.LottieEffect
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -200,6 +201,9 @@ fun MyInvitationDetailRoute(
             containerColor = Color(thanksCard.backgroundColor)
         ) {
             Box(modifier = Modifier.background(Color(thanksCard.backgroundColor))) {
+                LottieEffect(
+                    selectEffect = thanksCard.backgroundImageUrl
+                )
                 Column(
                     modifier = Modifier.verticalScroll(rememberScrollState())
                 ) {
@@ -345,6 +349,7 @@ private fun MyInvitationDetailScreen(
                                     onClickEditCard = { onEvent(MyInvitationDetailUiEvent.ClickEditCard) },
                                     onClickCreateCard = { onEvent(MyInvitationDetailUiEvent.ClickCreateCard) },
                                     onMapError = { onEvent(MyInvitationDetailUiEvent.MapError) },
+                                    onLottieStarted = { onEvent(MyInvitationDetailUiEvent.LottieStarted) },
                                     onSaveEditableCache = onSaveEditableCache,
                                     isMapVisible = isMapVisible,
                                     editCardEnabled = uiState.editCardEnabled,

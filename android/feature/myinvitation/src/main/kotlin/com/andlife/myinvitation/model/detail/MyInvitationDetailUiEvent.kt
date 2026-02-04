@@ -36,4 +36,6 @@ sealed interface MyInvitationDetailUiEvent : BaseUiEvent {
     data class ClickUpdateThanksCard(
         val cardId: Long,
     ): MyInvitationDetailUiEvent
+
+    data object LottieStarted : MyInvitationDetailUiEvent
 }

@@ -1,7 +1,6 @@
 package com.andlife.thanks_card.viewmodel
 
 import android.graphics.Bitmap
-import android.util.Log
 import android.widget.EditText
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -98,6 +97,7 @@ class UpdateThanksCardViewModel @Inject constructor(
         val editText = editorState.editText ?: return
         val spannable = cardConverter.toSpannable(nachoUiCard.content)
         editorState.setBackground(Color(nachoUiCard.backgroundColor))
+        editorState.updateBackgroundEffect(nachoUiCard.backgroundImageUrl)
         editorState.setEditable(spannable)
         loadImagesAndInsert(nachoUiCard, editText)
         updateState { copy(isLoading = false, isError = false) }
@@ -170,7 +170,7 @@ class UpdateThanksCardViewModel @Inject constructor(
 
     private suspend fun uploadImages(card: RichTextUiContent): Result<NachoUiCard, DataError> {
         val backgroundColor = editorState.currentTextStyle.backgroundColor
-        val backgroundImageUrl = editorState.currentBackgroundImageUrl
+        val backgroundImageUrl = editorState.currentBackgroundEffect
         val localImagesToUpload = card.images.filterIsInstance<CardImage.Local>()
 
         if (localImagesToUpload.isEmpty()) {

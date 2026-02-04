@@ -90,6 +90,7 @@ class MyInvitationDetailViewModel @Inject constructor(
             MyInvitationDetailUiEvent.CopyInvitationLink -> copyInvitationLink()
             MyInvitationDetailUiEvent.ClickDeleteThanksCard -> deleteThanksCard()
             is MyInvitationDetailUiEvent.ClickUpdateThanksCard -> updateThanksCard(event.cardId)
+            MyInvitationDetailUiEvent.LottieStarted -> updateLottieStarted()
         }
     }
 
@@ -150,7 +151,8 @@ class MyInvitationDetailViewModel @Inject constructor(
         updateState { copy(thanksCardEditableCache = editable) }
     }
 
-    private fun navigateToFullScreenImage(imageList: ImmutableList<String>, index: Int) { /* TODO: 이미지 풀스크린*/ }
+    private fun navigateToFullScreenImage(imageList: ImmutableList<String>, index: Int) { /* TODO: 이미지 풀스크린*/
+    }
 
     private fun copyInvitationLink() {
         val url = deepLinkManager.buildAppsFlyerUrl(myInvitationId)
@@ -186,8 +188,19 @@ class MyInvitationDetailViewModel @Inject constructor(
     private fun retryLoad() {
         viewModelScope.launch {
             loadInvitation()
-            updateState { copy(editCardEnabled = false, cachedCardEditable = null, thanksCardEditableCache = null) }
+            updateState {
+                copy(
+                    editCardEnabled = false,
+                    cachedCardEditable = null,
+                    thanksCardEditableCache = null,
+                    hasShownLottie = false
+                )
+            }
         }
+    }
+
+    private fun updateLottieStarted() {
+        updateState { copy(hasShownLottie = true) }
     }
 
     override fun onCleared() {

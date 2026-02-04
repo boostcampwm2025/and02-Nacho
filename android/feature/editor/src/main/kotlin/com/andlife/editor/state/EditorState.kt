@@ -28,7 +28,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.drawable.toDrawable
-import com.andlife.domain.util.Result
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.editor.model.EditTextStyle
@@ -68,7 +67,7 @@ class EditorState @Inject constructor(
     var currentTextStyle by mutableStateOf(EditTextStyle())
         private set
 
-    var currentBackgroundImageUrl by mutableStateOf("")
+    var currentBackgroundEffect by mutableStateOf<String?>(null)
         private set
     private var isRestoring = false
 
@@ -226,6 +225,10 @@ class EditorState @Inject constructor(
 
     fun updateBackgroundColor(color: Color) {
         currentTextStyle = currentTextStyle.copy(backgroundColor = color)
+    }
+
+    fun updateBackgroundEffect(effectName: String?) {
+        currentBackgroundEffect = effectName
     }
 
     fun updateFontSize(size: Float) {
@@ -668,7 +671,7 @@ class EditorState @Inject constructor(
         this.editText = null
         currentText = ""
         currentTextStyle = EditTextStyle()
-        currentBackgroundImageUrl = ""
+        currentBackgroundEffect = ""
         history.clear()
         canUndo = false
         canRedo = false

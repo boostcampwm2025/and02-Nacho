@@ -18,4 +18,6 @@ sealed interface InvitationDetailUiEvent : BaseUiEvent {
     data object MapError : InvitationDetailUiEvent
 
     data object RetryLoad : InvitationDetailUiEvent
+
+    data object LottieStarted : InvitationDetailUiEvent
 }

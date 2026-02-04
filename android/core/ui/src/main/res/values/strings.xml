@@ -176,4 +176,9 @@
     <string name="btn_exit">나가기</string>
     <string name="btn_continue">계속 작성</string>
 
+    <string name="effect_snow">눈</string>
+    <string name="effect_party">파티</string>
+    <string name="effect_cherry_blossom">벚꽃</string>
+    <string name="effect_none">없음</string>
+    <string name="btn_select">선택</string>
 </resources>

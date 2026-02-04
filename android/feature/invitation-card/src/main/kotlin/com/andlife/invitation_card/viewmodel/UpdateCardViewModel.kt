@@ -61,9 +61,10 @@ class UpdateCardViewModel @Inject constructor(
         val loadEditable = createCardSession.editable
         if (loadEditable == null) return
         val backgroundColor = createCardSession.backgroundColor
-        val backgroundImageUrl = createCardSession.backgroundImageUrl
+        val backgroundEffect = createCardSession.backgroundEffect
         textEditor.updateBackgroundColor(backgroundColor)
         textEditor.setEditable(loadEditable)
+        textEditor.updateBackgroundEffect(backgroundEffect)
     }
 
     override fun onEvent(event: UpdateCardUiEvent) {
@@ -103,7 +104,7 @@ class UpdateCardViewModel @Inject constructor(
 
     private suspend fun uploadImages(card: RichTextUiContent): Result<NachoUiCard, DataError> {
         val backgroundColor = uiState.value.editorState.currentTextStyle.backgroundColor
-        val backgroundImageUrl = uiState.value.editorState.currentBackgroundImageUrl
+        val backgroundImageUrl = uiState.value.editorState.currentBackgroundEffect
         val localImagesToUpload = card.images.filterIsInstance<CardImage.Local>()
 
         if (localImagesToUpload.isEmpty()) {
