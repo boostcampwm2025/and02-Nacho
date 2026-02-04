@@ -38,4 +38,6 @@ sealed interface MyInvitationDetailSideEffect : BaseSideEffect {
 
     data object InvitationDeleted : MyInvitationDetailSideEffect
     data object InvitationDeleteFailed : MyInvitationDetailSideEffect
+
+    data object KakaoTalkNotAvailable : MyInvitationDetailSideEffect
 }
