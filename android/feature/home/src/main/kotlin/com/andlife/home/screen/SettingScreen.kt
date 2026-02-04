@@ -614,6 +614,18 @@ private fun AccountContent(
     onClickQuit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val isLoggedIn = authState is AuthState.Authenticated
+    val textColor = if (isLoggedIn) {
+        NachoTheme.colorScheme.textPrimary
+    } else {
+        NachoTheme.colorScheme.textTertiary
+    }
+    val iconTint = if (isLoggedIn) {
+        NachoTheme.colorScheme.iconOnSecondary
+    } else {
+        NachoTheme.colorScheme.iconDisabled
+    }
+
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -628,16 +640,17 @@ private fun AccountContent(
             Text(
                 text = stringResource(R.string.txt_logout),
                 style = NachoTheme.typography.bodyLargeRegular,
-                color = NachoTheme.colorScheme.textPrimary,
+                color = textColor,
             )
             IconButton(
                 onClick = onClickLogout,
                 modifier = Modifier.size(NachoIconSize.medium),
+                enabled = isLoggedIn,
             ) {
                 Icon(
                     painter = painterResource(designR.drawable.ic_chevron_right_24),
                     contentDescription = stringResource(R.string.desc_logout),
-                    tint = NachoTheme.colorScheme.iconOnSecondary,
+                    tint = iconTint,
                 )
             }
         }
@@ -661,7 +674,7 @@ private fun AccountContent(
                 Icon(
                     painter = painterResource(designR.drawable.ic_chevron_right_24),
                     contentDescription = stringResource(R.string.desc_quit),
-                    tint = NachoTheme.colorScheme.iconOnSecondary,
+                    tint = NachoTheme.colorScheme.iconDisabled,
                 )
             }
         }
