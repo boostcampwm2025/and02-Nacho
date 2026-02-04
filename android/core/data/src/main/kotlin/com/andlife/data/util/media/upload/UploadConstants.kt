@@ -10,6 +10,11 @@ object UploadKey {
     const val TOTAL_FILES = "total_files"
     const val CURRENT_FILE_NAME = "current_file_name"
     const val EXTRA_WORK_ID = "extra_work_id"
+    
+    const val INVITATION_ID = "invitation_id"
+    const val GUEST_BOOK_TEXT = "guest_book_text"
+    const val IS_EDITING = "is_editing"
+    const val EDITING_GUEST_BOOK_ID = "editing_guest_book_id"
 
     const val TAG_MEDIA_UPLOAD = "tag_media_upload"
 }
