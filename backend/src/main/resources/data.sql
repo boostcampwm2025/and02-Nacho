@@ -4,10 +4,6 @@
 INSERT IGNORE INTO users (id, kakao_id, email, name, profile_image_url, created_at, updated_at) VALUES
 (1, 0, 'sample@example.com', '나에게로의 초대 팀', 'https://picsum.photos/200/200?random=0', NOW(), NOW());
 
--- 초대카드 데이터
-INSERT IGNORE INTO invitation_cards (id, invitation_id, content_json, background_image_url, background_color) VALUES
-(1, 1, "{\"content\":{\"text\":\"나에게로의 초대\\n​나만의 초대장을 공유하고 \\n추억을 기록해 보세요\\n​\\n￼​\\n​소중한 순간은\\n​함께할 때 더 오래 기억됩니다.\\n​\\n​초대카드를 작성하여 \\n​마음을 전달해보세요\",\"spans\":[{\"start\":0,\"end\":8,\"style\":{\"type\":\"bold\"}},{\"start\":0,\"end\":10,\"style\":{\"type\":\"fontSize\",\"size\":24.0}},{\"start\":10,\"end\":96,\"style\":{\"type\":\"fontSize\",\"size\":16.0}},{\"start\":0,\"end\":9,\"style\":{\"type\":\"alignment\",\"alignment\":\"CENTER\"}},{\"start\":96,\"end\":96,\"style\":{\"type\":\"alignment\",\"alignment\":\"CENTER\"}},{\"start\":25,\"end\":96,\"style\":{\"type\":\"alignment\",\"alignment\":\"CENTER\"}},{\"start\":9,\"end\":25,\"style\":{\"type\":\"alignment\",\"alignment\":\"CENTER\"}}],\"images\":[\"https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/1770273904821-2a7857ad-2227-40bd-86a3-ff4c638b4b2a.webp\"]},\"backgroundColor\":-1,\"backgroundImageUrl\":\"파티\"}', "파티", -1);
-
 -- 2. 초대장 데이터 (ID를 1씩 증가: 0-30 → 1-31)
 -- 기존 ID 0 (샘플)을 ID 1로 변경
 INSERT IGNORE INTO invitations (id, host_id, title, display_host_name, thumbnail_urls, invitation_date, start_time, end_time, place_name, address, lat, lng, location_guide, created_at, updated_at) VALUES
