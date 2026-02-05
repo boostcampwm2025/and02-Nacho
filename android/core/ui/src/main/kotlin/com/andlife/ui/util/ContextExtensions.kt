@@ -31,3 +31,11 @@ fun Context.shouldRequestStoragePermission(): Boolean {
     return Build.VERSION.SDK_INT <= Build.VERSION_CODES.P &&
         ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
 }
+
+fun Context.shouldRequestNotificationPermission(): Boolean {
+    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+        ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.POST_NOTIFICATIONS
+        ) != PackageManager.PERMISSION_GRANTED
+}
