@@ -9,16 +9,16 @@
 
 <br>
 
-
 ## 서비스 배경
 > 모임이 끝나면 경험은 남지만, 기록은 남지 않습니다.
 > 
 
-사진과 영상은 갤러리 어딘가에, 메시지는 채팅방 기록 속에, 감사 인사는 개별 메시지로 흩어집니다.<br>
-초대장을 보냈던 순간부터 마지막 인사까지, 각 단계가 서로 다른 도구에서 일어나다 보니 이벤트 전체를 하나의 완결된 이야기로 보존하기 어렵습니다.
+사진과 영상은 갤러리 어딘가에, 대화는 채팅방 속에, 감사 인사는 개별 메시지로 흩어져버립니다. <br>
+초대장을 보낸 순간부터 마지막 인사까지, 모든 과정이 서로 다른 플랫폼에서 이루어지다 보니 이벤트를 하나의 온전한 이야기로 남기기는 어렵습니다.
 
-AndLife는 이러한 문제에서 출발했습니다.<br>
-이벤트의 시작부터 끝까지를 하나의 흐름으로 담아낼 수 있는 구조를 만들고자 '초대장'이라는 이벤트 단위를 중심으로 서비스를 기획했습니다.
+AndLife는 바로 이 지점에서 출발했습니다. <br>
+이벤트의 처음부터 끝까지를 자연스러운 하나의 흐름으로 담아내기 위해, <br> 
+'초대장'을 중심으로 모든 순간을 연결하는 서비스를 기획해보았습니다.
 
 <br>
 
@@ -27,15 +27,6 @@ AndLife는 이러한 문제에서 출발했습니다.<br>
 - 생일, 결혼, 졸업 등 특별한 순간을 함께 나누고 싶은 분
 - 흩어진 추억을 한곳에 모아 소장하고 싶은 분
 - 참여해준 사람들에게 감사의 마음을 전하고 싶은 분
-
-## 기술 스택
-
-### Android
-![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white) ![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white) ![Clean Architecture](https://img.shields.io/badge/Clean%20Architecture-000000?style=for-the-badge) ![MVI](https://img.shields.io/badge/MVI-4CAF50?style=for-the-badge) ![Hilt](https://img.shields.io/badge/Hilt-2196F3?style=for-the-badge) ![Coroutines](https://img.shields.io/badge/Coroutines-1565C0?style=for-the-badge&logo=kotlin&logoColor=white) ![Flow](https://img.shields.io/badge/Flow-00BCD4?style=for-the-badge&logo=kotlin&logoColor=white) ![Retrofit2](https://img.shields.io/badge/Retrofit2-424242?style=for-the-badge) ![Room](https://img.shields.io/badge/Room-3DDC84?style=for-the-badge&logo=android&logoColor=white) ![DataStore](https://img.shields.io/badge/DataStore-4285F4?style=for-the-badge&logo=android&logoColor=white)  ![ExoPlayer](https://img.shields.io/badge/ExoPlayer-FF5722?style=for-the-badge&logo=google&logoColor=white) 
-
-### Backend
-![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white) ![MVC](https://img.shields.io/badge/MVC-4CAF50?style=for-the-badge) ![JPA](https://img.shields.io/badge/JPA-F43F5E?style=for-the-badge) ![MySQL](https://img.shields.io/badge/MySQL-2196F3?style=for-the-badge) 
-
 
 <br>
 
@@ -121,6 +112,18 @@ AndLife는 이러한 문제에서 출발했습니다.<br>
     </td>
   </tr>
 </table>
+
+
+<br>
+
+
+## 기술 스택
+
+### Android
+![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white) ![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white) ![Clean Architecture](https://img.shields.io/badge/Clean%20Architecture-000000?style=for-the-badge) ![MVI](https://img.shields.io/badge/MVI-4CAF50?style=for-the-badge) ![Hilt](https://img.shields.io/badge/Hilt-2196F3?style=for-the-badge) ![Coroutines](https://img.shields.io/badge/Coroutines-1565C0?style=for-the-badge&logo=kotlin&logoColor=white) ![Flow](https://img.shields.io/badge/Flow-00BCD4?style=for-the-badge&logo=kotlin&logoColor=white) ![Retrofit2](https://img.shields.io/badge/Retrofit2-424242?style=for-the-badge) ![Room](https://img.shields.io/badge/Room-3DDC84?style=for-the-badge&logo=android&logoColor=white) ![DataStore](https://img.shields.io/badge/DataStore-4285F4?style=for-the-badge&logo=android&logoColor=white)  ![ExoPlayer](https://img.shields.io/badge/ExoPlayer-FF5722?style=for-the-badge&logo=google&logoColor=white) 
+
+### Backend
+![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white) ![MVC](https://img.shields.io/badge/MVC-4CAF50?style=for-the-badge) ![JPA](https://img.shields.io/badge/JPA-F43F5E?style=for-the-badge) ![MySQL](https://img.shields.io/badge/MySQL-2196F3?style=for-the-badge) 
 
 
 <br>
