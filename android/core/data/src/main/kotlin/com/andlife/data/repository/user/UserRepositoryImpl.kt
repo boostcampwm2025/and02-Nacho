@@ -2,6 +2,7 @@ package com.andlife.data.repository.user
 
 import com.andlife.data.datasource.remote.user.UserRemoteDataSource
 import com.andlife.data.repository.user.mapper.toDomain
+import com.andlife.database.InvitationDatabase
 import com.andlife.datastore.UserStorage
 import com.andlife.domain.error.DataError
 import com.andlife.domain.error.InvitationError
@@ -18,11 +19,13 @@ import javax.inject.Inject
 internal class UserRepositoryImpl @Inject constructor(
     private val userStorage: UserStorage,
     private val userRemoteDataSource: UserRemoteDataSource,
-    private val authStateManager: AuthStateManager
+    private val authStateManager: AuthStateManager,
+    private val invitationDatabase: InvitationDatabase
 ) : UserRepository {
     override suspend fun login(accessToken: String): Result<Unit, DataError> {
         return userRemoteDataSource.login(AuthRequest(accessToken))
             .map { authResponse ->
+                clearInvitationCache()
                 authStateManager.setAuthenticated(authResponse.user.toDomain())
                 saveToken(authResponse.accessToken, authResponse.refreshToken)
                 syncGuestInvitations()
@@ -32,6 +35,7 @@ internal class UserRepositoryImpl @Inject constructor(
     override suspend fun loginWithTestUser(): Result<Unit, DataError> {
         return userRemoteDataSource.loginWithTestUser()
             .map {  authResponse ->
+                clearInvitationCache()
                 authStateManager.setAuthenticated(authResponse.user.toDomain())
                 saveToken(authResponse.accessToken, authResponse.refreshToken)
                 syncGuestInvitations()
@@ -52,6 +56,7 @@ internal class UserRepositoryImpl @Inject constructor(
 
     override suspend fun guestLogin(): Result<Unit, InvitationError> {
         return runResultCatching {
+            clearInvitationCache()
             userStorage.setWasLoggedIn(true)
             authStateManager.setGuest()
         }
@@ -87,6 +92,12 @@ internal class UserRepositoryImpl @Inject constructor(
         authStateManager.setLoading()
         userStorage.clearTokens()
         userStorage.setWasLoggedIn(false)
+        clearInvitationCache()
+    }
+
+    private suspend fun clearInvitationCache() {
+        invitationDatabase.invitationSummaryDao().clearAll()
+        invitationDatabase.upcomingInvitationDao().clearAll()
     }
 
     override suspend fun getUserInfo(): AuthState {
