@@ -44,7 +44,7 @@ internal class UserRepositoryImpl @Inject constructor(
         val invitationIds = userStorage.getInvitationIds()
         val idsWithoutSample = invitationIds.filter { it != UserStorage.SAMPLE_INVITATION_ID }
 
-        if (idsWithoutSample.isEmpty() && authState !is AuthState.Authenticated) return Result.Success(Unit) // 실제 초대장이 없고, 인증 상태가 아니면 동기화할 필요 없음
+        if (idsWithoutSample.isEmpty() && authState !is AuthState.Authenticated) return Result.Success(Unit)
 
         return userRemoteDataSource.syncInvitations(invitationIds)
             .map { userStorage.clearGuestData() }
