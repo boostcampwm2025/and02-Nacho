@@ -3,10 +3,10 @@ package com.andlife.myinvitation.screen.collection
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Scaffold
@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -32,6 +33,7 @@ import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.model.collection.CollectionUiModel
+import com.andlife.model.guestbook.UiMediaType
 import com.andlife.model.util.toUiType
 import com.andlife.myinvitation.R
 import com.andlife.myinvitation.model.collection.MyInvitationCollectionSideEffect
@@ -62,6 +64,7 @@ fun MyInvitationStoryRoute(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val res = LocalResources.current
 
     var showPermissionDeniedDialog by remember { mutableStateOf(false) }
     var showNotificationPermissionDeniedDialog by remember { mutableStateOf(false) }
@@ -101,23 +104,23 @@ fun MyInvitationStoryRoute(
                 is MyInvitationCollectionSideEffect.DownloadFailed -> {
                     scope.launch {
                         snackbarHostState.currentSnackbarData?.dismiss()
-                        snackbarHostState.showSnackbar(context.getString(R.string.snack_download_fail))
+                        snackbarHostState.showSnackbar(res.getString(R.string.snack_download_fail))
                     }
                 }
 
                 is MyInvitationCollectionSideEffect.ShowDownloadGuide -> {
                     scope.launch {
                         snackbarHostState.currentSnackbarData?.dismiss()
-                        snackbarHostState.showSnackbar(context.getString(R.string.snack_download_guide))
+                        snackbarHostState.showSnackbar(res.getString(R.string.snack_download_guide))
                     }
                 }
             }
         }
     }
 
-    InvitationStoryScreen(
+    MyInvitationStoryScreen(
         uiState = uiState,
-        exoPlayer = viewModel.exoPlayer,
+        getPlayerForIndex = { index -> viewModel.getPlayerForIndex(index) },
         initialIndex = initialIndex,
         onPageChanged = onPageChanged,
         onToggleExpand = onToggleExpand,
@@ -169,9 +172,9 @@ fun MyInvitationStoryRoute(
 }
 
 @Composable
-fun InvitationStoryScreen(
+fun MyInvitationStoryScreen(
     uiState: MyInvitationCollectionUiState,
-    exoPlayer: Player,
+    getPlayerForIndex: (Int) -> Player?,
     initialIndex: Int,
     onPageChanged: (Int) -> Unit,
     onToggleExpand: () -> Unit,
@@ -185,6 +188,14 @@ fun InvitationStoryScreen(
             initialPage = initialIndex,
             pageCount = { uiState.mediaItems.size },
         )
+
+    val beyondViewportPageCount = remember(pagerState.currentPage, uiState.mediaItems) {
+        val nextIndex = pagerState.currentPage + 1
+        if (nextIndex in uiState.mediaItems.indices) {
+            val nextItem = uiState.mediaItems[nextIndex]
+            if (nextItem.type == UiMediaType.IMAGE) 1 else 0
+        } else 0
+    }
 
     val currentItem = uiState.mediaItems.getOrNull(pagerState.currentPage)
     val isDownloading = currentItem?.let {
@@ -201,10 +212,9 @@ fun InvitationStoryScreen(
         modifier = modifier,
     ) { paddingValues ->
         Column(
-            modifier =
-                modifier
-                    .fillMaxSize()
-                    .background(NachoTheme.colorScheme.backgroundInverse),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
             currentItem?.let { item ->
                 StoryTopHeader(
@@ -222,16 +232,20 @@ fun InvitationStoryScreen(
                 modifier = Modifier.fillMaxSize(),
                 pageSpacing = NachoSpacing.none,
                 userScrollEnabled = true,
+                beyondViewportPageCount = beyondViewportPageCount
             ) { pageIndex ->
                 val item = uiState.mediaItems[pageIndex]
                 val isCurrentPage = pagerState.currentPage == pageIndex
+                val currentPlayer = remember(pagerState.currentPage, isCurrentPage) {
+                    if (isCurrentPage) getPlayerForIndex(pageIndex) else null
+                }
 
                 Box(modifier = Modifier.fillMaxSize()) {
                     StoryContent(
                         item = item,
                         isExpanded = uiState.isTextExpanded,
                         onToggleExpand = onToggleExpand,
-                        exoPlayer = if (isCurrentPage) exoPlayer else null,
+                        exoPlayer = currentPlayer,
                         modifier = Modifier.align(Alignment.BottomCenter),
                     )
                 }
@@ -242,7 +256,7 @@ fun InvitationStoryScreen(
 
 @PreviewTheme
 @Composable
-private fun MyInvitationStoryScreenPreview() {
+private fun MyMyInvitationStoryScreenPreview() {
     NachoTheme {
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         val mockState =
@@ -288,15 +302,15 @@ private fun MyInvitationStoryScreenPreview() {
             ExoPlayer.Builder(context).build()
         }
 
-        InvitationStoryScreen(
+        MyInvitationStoryScreen(
             uiState = mockState,
+            getPlayerForIndex = { index -> dummyPlayer },
             initialIndex = 0,
             onPageChanged = {},
             onToggleExpand = {},
-            exoPlayer = dummyPlayer,
-            onDownloadClick = {},
             onClose = {},
-            snackbarHostState = SnackbarHostState(),
+            onDownloadClick = {},
+            snackbarHostState = remember { SnackbarHostState() },
         )
     }
 }

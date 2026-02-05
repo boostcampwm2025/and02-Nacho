@@ -1,6 +1,7 @@
 package com.andlife.media.di
 
 import android.content.Context
+import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DefaultHttpDataSource
@@ -22,9 +23,10 @@ import javax.inject.Singleton
 object CacheModule {
     const val DIR_VIDEO_CACHE = "video_cache"
     const val DIR_AUDIO_CACHE = "audio_cache"
-
+    const val DIR_STORY_CACHE = "story_cache"
     const val VIDEO_CACHE_SIZE = 300 * 1024 * 1024L
     const val AUDIO_CACHE_SIZE = 50 * 1024 * 1024L
+    const val STORY_CACHE_SIZE = 100 * 1024 * 1024L
 
     @Provides
     @Singleton
@@ -73,6 +75,30 @@ object CacheModule {
         CacheDataSource
             .Factory()
             .setCache(simpleCache)
+            .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())
+            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+
+    @Provides
+    @Singleton
+    @StorySimpleCache
+    fun provideStoryVideoCache(
+        @ApplicationContext context: Context,
+    ): Cache {
+        val cacheDir = File(context.cacheDir, DIR_STORY_CACHE)
+        val evictor = LeastRecentlyUsedCacheEvictor(STORY_CACHE_SIZE)
+        val databaseProvider = StandaloneDatabaseProvider(context)
+        return SimpleCache(cacheDir, evictor, databaseProvider)
+    }
+
+    @Provides
+    @Singleton
+    @StoryCacheDataSourceFactory
+    fun provideStoryCacheDataSourceFactory(
+        @ApplicationContext context: Context,
+        @StorySimpleCache storyCache: Cache,
+    ): CacheDataSource.Factory =
+        CacheDataSource.Factory()
+            .setCache(storyCache)
             .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())
             .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
 }

@@ -1,12 +1,9 @@
 package com.andlife.myinvitation.viewmodel
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.toRoute
 import com.andlife.domain.model.guestbook.DownloadState
 import com.andlife.domain.model.guestbook.MediaType
@@ -21,6 +18,7 @@ import com.andlife.myinvitation.MyInvitationDetail
 import com.andlife.myinvitation.model.collection.MyInvitationCollectionSideEffect
 import com.andlife.myinvitation.model.collection.MyInvitationCollectionUiEvent
 import com.andlife.myinvitation.model.collection.MyInvitationCollectionUiState
+import com.andlife.media.StoryMediaPlayerPool
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -37,6 +35,7 @@ class MyInvitationCollectionViewModel @Inject constructor(
     private val guestBookRepository: GuestBookRepository,
     private val mediaDownloader: MediaDownloader,
     private val userRepository: UserRepository,
+    val playerPool: StoryMediaPlayerPool,
     @param:ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<MyInvitationCollectionUiState, MyInvitationCollectionUiEvent, MyInvitationCollectionSideEffect>(
@@ -48,7 +47,6 @@ class MyInvitationCollectionViewModel @Inject constructor(
         mutableUiState
             .onStart {
                 loadMediaCollection()
-
                 val dismissed = userRepository.isWifiDialogDismissed()
                 updateState { copy(networkDialogDismissed = dismissed) }
             }.stateIn(
@@ -56,11 +54,6 @@ class MyInvitationCollectionViewModel @Inject constructor(
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = MyInvitationCollectionUiState(isLoading = true),
             )
-
-    val exoPlayer: ExoPlayer = ExoPlayer.Builder(context).build().apply {
-        repeatMode = Player.REPEAT_MODE_ONE
-        playWhenReady = true
-    }
 
     override fun onEvent(event: MyInvitationCollectionUiEvent) {
         when (event) {
@@ -75,14 +68,12 @@ class MyInvitationCollectionViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        exoPlayer.release()
+        playerPool.releaseAll()
     }
 
     private fun loadMediaCollection() {
         viewModelScope.launch {
-            Log.d("ViewModel", "id:$invitationId")
             updateState { copy(isLoading = true) }
-
             guestBookRepository
                 .getMediaCollection(invitationId)
                 .onSuccess { mediaList ->
@@ -92,77 +83,76 @@ class MyInvitationCollectionViewModel @Inject constructor(
                             mediaItems = mediaList.map { it.toUiModel() }.toImmutableList(),
                         )
                     }
-                    Log.d("ViewModel", "미디어 리스트: $mediaList")
-                }.onFailure { it, msg ->
+                    precacheUpcomingMedia()
+                }.onFailure { _, _ ->
                     updateState { copy(isLoading = false) }
-                    Log.e("ViewModel", "에러 발생: $it")
                 }
         }
     }
 
     private fun openStory(index: Int) {
-        updateState {
-            copy(
-                isDetailMode = true,
-                selectedIndex = index,
-            )
-        }
+        updateState { copy(isDetailMode = true, selectedIndex = index) }
         val selectedMedia = uiState.value.mediaItems.getOrNull(index)
-
         if (selectedMedia?.type == UiMediaType.VIDEO || selectedMedia?.type == UiMediaType.AUDIO) {
-            prepareMedia(selectedMedia.mediaUrl)
+            playMediaWithStrategy(index, selectedMedia.mediaUrl)
+            precacheUpcomingMedia()
         }
     }
 
     private fun closeStory() {
-        updateState {
-            copy(
-                isDetailMode = false,
-                selectedIndex = -1,
-            )
-        }
-        exoPlayer.pause()
+        updateState { copy(isDetailMode = false, selectedIndex = -1) }
+        playerPool.pauseAll()
     }
 
     private fun pageChanged(index: Int) {
-        updateState {
-            copy(
-                selectedIndex = index,
-                isTextExpanded = false
-            )
-        }
-
+        updateState { copy(selectedIndex = index, isTextExpanded = false) }
         val selectedMedia = uiState.value.mediaItems.getOrNull(index)
 
         when (selectedMedia?.type) {
             UiMediaType.VIDEO, UiMediaType.AUDIO -> {
-                prepareMedia(selectedMedia.mediaUrl)
+                playMediaWithStrategy(index, selectedMedia.mediaUrl)
+                precacheUpcomingMedia()
             }
-
-            else -> {
-                exoPlayer.pause()
-            }
+            else -> playerPool.pauseAll()
         }
     }
 
-    private fun prepareMedia(url: String) {
+    private fun playMediaWithStrategy(index: Int, url: String) {
         if (url.isEmpty()) return
+        playerPool.acquirePlayer(index, url)
+        playerPool.play(index)
+    }
 
-        val currentUri = exoPlayer.currentMediaItem?.localConfiguration?.uri?.toString()
+    private fun precacheUpcomingMedia() {
+        val currentIndex = uiState.value.selectedIndex
+        if (currentIndex == -1) return
 
-        if (currentUri == url) {
-            exoPlayer.seekTo(0)
-            exoPlayer.play()
-            return
+        val mediaItems = uiState.value.mediaItems
+        val urlsToPrecache = mutableListOf<String>()
+
+        for (offset in -2..2) {
+            val targetIndex = currentIndex + offset
+            if (targetIndex in mediaItems.indices && targetIndex != currentIndex) {
+                val item = mediaItems[targetIndex]
+                if (item.type == UiMediaType.VIDEO || item.type == UiMediaType.AUDIO) {
+                    urlsToPrecache.add(item.mediaUrl)
+                }
+            }
         }
+        if (urlsToPrecache.isNotEmpty()) {
+            playerPool.precacheVideos(urlsToPrecache)
+        }
+    }
 
-        exoPlayer.stop()
-        exoPlayer.clearMediaItems()
+    fun getPlayerForIndex(index: Int): Player? {
+        val item = uiState.value.mediaItems.getOrNull(index) ?: return null
+        if (item.type != UiMediaType.VIDEO && item.type != UiMediaType.AUDIO) return null
 
-        val mediaItem = MediaItem.fromUri(url)
-        exoPlayer.setMediaItem(mediaItem)
-        exoPlayer.prepare()
-        exoPlayer.play()
+        return try {
+            playerPool.acquirePlayer(index, item.mediaUrl).getExoPlayer()
+        } catch (e: Exception) {
+            null
+        }
     }
 
     private fun toggleExpand() {

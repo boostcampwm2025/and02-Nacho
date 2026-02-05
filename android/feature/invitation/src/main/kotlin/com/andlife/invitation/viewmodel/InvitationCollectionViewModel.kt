@@ -1,12 +1,8 @@
 package com.andlife.invitation.viewmodel
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.toRoute
 import com.andlife.domain.model.guestbook.DownloadState
 import com.andlife.domain.model.guestbook.MediaType
@@ -19,6 +15,7 @@ import com.andlife.invitation.InvitationDetail
 import com.andlife.invitation.model.collection.InvitationCollectionSideEffect
 import com.andlife.invitation.model.collection.InvitationCollectionUiEvent
 import com.andlife.invitation.model.collection.InvitationCollectionUiState
+import com.andlife.media.StoryMediaPlayerPool
 import com.andlife.model.collection.toUiModel
 import com.andlife.model.guestbook.UiMediaType
 import com.andlife.ui.base.BaseViewModel
@@ -31,12 +28,14 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import androidx.media3.common.Player
 
 @HiltViewModel
 class InvitationCollectionViewModel @Inject constructor(
     private val guestBookRepository: GuestBookRepository,
     private val mediaDownloader: MediaDownloader,
     private val userRepository: UserRepository,
+    val playerPool: StoryMediaPlayerPool,
     @param:ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<InvitationCollectionUiState, InvitationCollectionUiEvent, InvitationCollectionSideEffect>(
@@ -49,7 +48,6 @@ class InvitationCollectionViewModel @Inject constructor(
         mutableUiState
             .onStart {
                 loadMediaCollection()
-
                 val dismissed = userRepository.isWifiDialogDismissed()
                 updateState { copy(networkDialogDismissed = dismissed) }
             }.stateIn(
@@ -57,11 +55,6 @@ class InvitationCollectionViewModel @Inject constructor(
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = InvitationCollectionUiState(isLoading = true),
             )
-
-    val exoPlayer: ExoPlayer = ExoPlayer.Builder(context).build().apply {
-        repeatMode = Player.REPEAT_MODE_ONE
-        playWhenReady = true
-    }
 
     override fun onEvent(event: InvitationCollectionUiEvent) {
         when (event) {
@@ -76,14 +69,12 @@ class InvitationCollectionViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        exoPlayer.release()
+        playerPool.releaseAll()
     }
 
     private fun loadMediaCollection() {
         viewModelScope.launch {
-            Log.d("ViewModel", "id:$invitationId")
             updateState { copy(isLoading = true) }
-
             guestBookRepository
                 .getMediaCollection(invitationId)
                 .onSuccess { mediaList ->
@@ -93,10 +84,10 @@ class InvitationCollectionViewModel @Inject constructor(
                             mediaItems = mediaList.map { it.toUiModel() }.toImmutableList(),
                         )
                     }
-                    Log.d("ViewModel", "미디어 리스트: $mediaList")
-                }.onFailure { it, _ ->
+                    // 리스트 로드 직후 인접 미디어 사전 캐싱
+                    precacheUpcomingMedia()
+                }.onFailure { _, _ ->
                     updateState { copy(isLoading = false) }
-                    Log.e("ViewModel", "에러 발생: $it")
                 }
         }
     }
@@ -109,9 +100,9 @@ class InvitationCollectionViewModel @Inject constructor(
             )
         }
         val selectedMedia = uiState.value.mediaItems.getOrNull(index)
-
         if (selectedMedia?.type == UiMediaType.VIDEO || selectedMedia?.type == UiMediaType.AUDIO) {
-            prepareMedia(selectedMedia.mediaUrl)
+            playMediaWithStrategy(index, selectedMedia.mediaUrl)
+            precacheUpcomingMedia()
         }
     }
 
@@ -122,7 +113,7 @@ class InvitationCollectionViewModel @Inject constructor(
                 selectedIndex = -1,
             )
         }
-        exoPlayer.pause()
+        playerPool.pauseAll()
     }
 
     private fun pageChanged(index: Int) {
@@ -134,56 +125,71 @@ class InvitationCollectionViewModel @Inject constructor(
         }
 
         val selectedMedia = uiState.value.mediaItems.getOrNull(index)
-
         when (selectedMedia?.type) {
             UiMediaType.VIDEO, UiMediaType.AUDIO -> {
-                prepareMedia(selectedMedia.mediaUrl)
+                playMediaWithStrategy(index, selectedMedia.mediaUrl)
+                precacheUpcomingMedia()
             }
-
             else -> {
-                exoPlayer.pause()
+                playerPool.pauseAll()
             }
         }
     }
 
-    private fun prepareMedia(url: String) {
+    private fun playMediaWithStrategy(index: Int, url: String) {
         if (url.isEmpty()) return
 
-        val currentUri = exoPlayer.currentMediaItem?.localConfiguration?.uri?.toString()
+        // 스토리 플레이어풀에서 인스턴스 획득 및 재생 요청
+        playerPool.acquirePlayer(index, url)
+        playerPool.play(index)
+    }
 
-        if (currentUri == url) {
-            exoPlayer.seekTo(0)
-            exoPlayer.play()
-            return
+    private fun precacheUpcomingMedia() {
+        val currentIndex = uiState.value.selectedIndex
+        if (currentIndex == -1) return
+
+        val mediaItems = uiState.value.mediaItems
+        val urlsToPrecache = mutableListOf<String>()
+
+        // 현재 페이지 기준 전후 2페이지 범위를 캐싱 대상으로 선정
+        for (offset in -2..2) {
+            val targetIndex = currentIndex + offset
+            if (targetIndex in mediaItems.indices && targetIndex != currentIndex) {
+                val item = mediaItems[targetIndex]
+                if (item.type == UiMediaType.VIDEO || item.type == UiMediaType.AUDIO) {
+                    urlsToPrecache.add(item.mediaUrl)
+                }
+            }
         }
 
-        exoPlayer.stop()
-        exoPlayer.clearMediaItems()
+        if (urlsToPrecache.isNotEmpty()) {
+            playerPool.precacheVideos(urlsToPrecache)
+        }
+    }
 
-        val mediaItem = MediaItem.fromUri(url)
-        exoPlayer.setMediaItem(mediaItem)
-        exoPlayer.prepare()
-        exoPlayer.play()
+    fun getPlayerForIndex(index: Int): Player? {
+        val item = uiState.value.mediaItems.getOrNull(index) ?: return null
+        if (item.type != UiMediaType.VIDEO && item.type != UiMediaType.AUDIO) return null
+
+        return try {
+            playerPool.acquirePlayer(index, item.mediaUrl).getExoPlayer()
+        } catch (e: Exception) {
+            null
+        }
     }
 
     private fun toggleExpand() {
-        updateState {
-            copy(
-                isTextExpanded = !isTextExpanded,
-            )
-        }
+        updateState { copy(isTextExpanded = !isTextExpanded) }
     }
 
     private fun downloadCurrentMedia() {
         val item = uiState.value.mediaItems.getOrNull(uiState.value.selectedIndex) ?: return
-
         viewModelScope.launch {
             if (!userRepository.isFirstDownloadDone()) {
                 userRepository.setFirstDownloadDone()
                 sendEffect(InvitationCollectionSideEffect.ShowDownloadGuide)
             }
         }
-
         downloadMedia(item.mediaUrl, item.type)
     }
 
@@ -198,7 +204,6 @@ class InvitationCollectionViewModel @Inject constructor(
         val fileName = "$FILE_NAME_PREFIX${System.currentTimeMillis()}${domainType.getExtension()}"
 
         updateState { copy(downloadingUrls = downloadingUrls + url) }
-
         val workId = mediaDownloader.enqueueDownload(url, fileName, domainType)
 
         viewModelScope.launch {
@@ -209,13 +214,11 @@ class InvitationCollectionViewModel @Inject constructor(
                         updateState { copy(downloadingUrls = downloadingUrls - url) }
                         updateState { copy(downloadState = DownloadState.Idle) }
                     }
-
                     is DownloadState.Error -> {
                         updateState { copy(downloadingUrls = downloadingUrls - url) }
                         sendEffect(InvitationCollectionSideEffect.DownloadFailed)
                         updateState { copy(downloadState = DownloadState.Idle) }
                     }
-
                     else -> {}
                 }
             }
@@ -224,10 +227,7 @@ class InvitationCollectionViewModel @Inject constructor(
 
     private fun disableNetworkDialogPermanently() {
         updateState { copy(networkDialogDismissed = true) }
-
-        viewModelScope.launch {
-            userRepository.setWifiDialogDismissed()
-        }
+        viewModelScope.launch { userRepository.setWifiDialogDismissed() }
     }
 
     companion object {

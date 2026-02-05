@@ -21,3 +21,11 @@ annotation class AudioSimpleCache
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class AudioCacheDataSourceFactory
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class StorySimpleCache
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class StoryCacheDataSourceFactory
