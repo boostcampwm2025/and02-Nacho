@@ -83,27 +83,13 @@ fun VideoPlayer(
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(NachoSpacing.twoXLarge)
-                .align(Alignment.BottomCenter),
+                .align(Alignment.BottomCenter)
+                .padding(bottom = NachoSpacing.medium),
             contentAlignment = Alignment.BottomCenter
         ) {
             val maxWidth = maxWidth
             val progress = if (isDragging) sliderPosition else {
                 if (duration > 0) currentPosition.toFloat() / duration.toFloat() else 0f
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(if (isDragging) NachoStroke.large else NachoStroke.medium)
-                    .background(NachoTheme.colorScheme.textTertiary.copy(alpha = 0.3f))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(progress.coerceIn(0f, 1f))
-                        .fillMaxHeight()
-                        .background(NachoTheme.colorScheme.brandPrimary)
-                )
             }
 
             if (isDragging) {
@@ -112,20 +98,19 @@ fun VideoPlayer(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.BottomStart)
+                        .padding(bottom = NachoSpacing.twoXLarge)
                 ) {
                     Box(
                         modifier = Modifier
-                            .offset(x = (maxWidth * progress))
+                            .offset(x = (maxWidth * progress.coerceIn(0f, 1f)))
                             .layout { measurable, constraints ->
                                 val placeable = measurable.measure(constraints)
                                 layout(placeable.width, placeable.height) {
                                     placeable.placeRelative(-(placeable.width / 2), 0)
                                 }
                             }
-                            .padding(bottom = NachoSpacing.large)
                             .background(
-                                color = NachoTheme.colorScheme.iconSecondary.copy(alpha = 0.8f),
+                                color = NachoTheme.colorScheme.iconSecondary.copy(alpha = 0.9f),
                                 shape = RoundedCornerShape(NachoSpacing.xSmall)
                             )
                             .padding(horizontal = NachoSpacing.small, vertical = NachoSpacing.xSmall)
@@ -137,6 +122,28 @@ fun VideoPlayer(
                         )
                     }
                 }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = NachoSpacing.medium)
+                    .height(if (isDragging) NachoSpacing.xSmall else NachoStroke.medium)
+                    .background(
+                        color = NachoTheme.colorScheme.textTertiary.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(NachoSpacing.small)
+                    )
+                    .align(Alignment.BottomCenter)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(progress.coerceIn(0f, 1f))
+                        .fillMaxHeight()
+                        .background(
+                            color = NachoTheme.colorScheme.brandPrimary,
+                            shape = RoundedCornerShape(NachoSpacing.small)
+                        )
+                )
             }
 
             Slider(
