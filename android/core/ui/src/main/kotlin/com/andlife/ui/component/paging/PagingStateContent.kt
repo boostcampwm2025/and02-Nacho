@@ -19,7 +19,7 @@ import com.andlife.ui.component.loading.InvitationLoadingIndicator
 
 @Composable
 fun PagingStateContent(
-    sourceLoadState: LoadState,
+    loadState: LoadState,
     itemCount: Int,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
@@ -27,8 +27,8 @@ fun PagingStateContent(
     emptyComment: String = stringResource(R.string.label_paging_empty_result),
     content: @Composable () -> Unit,
 ) {
-    val isRefreshing = sourceLoadState is LoadState.Loading || mediatorLoadState is LoadState.Loading
-    val isError = sourceLoadState is LoadState.Error || mediatorLoadState is LoadState.Error
+    val isRefreshing = loadState is LoadState.Loading || mediatorLoadState is LoadState.Loading
+    val isError = loadState is LoadState.Error || mediatorLoadState is LoadState.Error
     val isEmpty = !isRefreshing && !isError && itemCount == 0
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -68,7 +68,7 @@ fun PagingStateContent(
 private fun PagingStateContentPreview_Loading() {
     NachoTheme {
         PagingStateContent(
-            sourceLoadState = LoadState.Loading,
+            loadState = LoadState.Loading,
             itemCount = 0,
             onRetry = {},
             content = { Text("데이터 로드 완료") },
@@ -81,7 +81,7 @@ private fun PagingStateContentPreview_Loading() {
 private fun PagingStateContentPreview_Error() {
     NachoTheme {
         PagingStateContent(
-            sourceLoadState = LoadState.Error(Throwable("네트워크 오류 발생")),
+            loadState = LoadState.Error(Throwable("네트워크 오류 발생")),
             itemCount = 0,
             onRetry = {},
             content = { Text("데이터 로드 완료") },
@@ -94,7 +94,7 @@ private fun PagingStateContentPreview_Error() {
 private fun PagingStateContentPreview_Empty() {
     NachoTheme {
         PagingStateContent(
-            sourceLoadState = LoadState.NotLoading(endOfPaginationReached = true),
+            loadState = LoadState.NotLoading(endOfPaginationReached = true),
             itemCount = 0,
             onRetry = {},
             content = { Text("데이터 로드 완료") },
