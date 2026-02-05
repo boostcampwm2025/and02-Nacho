@@ -245,6 +245,10 @@ private fun InvitationDatePickerCalendar(
     modifier: Modifier = Modifier,
 ) {
     val firstDayOfWeek = state.displayedMonth.getFirstDayOfWeek()
+    val leadingEmptyCnt = firstDayOfWeek % 7
+    val totalCellCnt = 42  // 행을 6개로 고정
+    val trailingEmptyCnt =
+        totalCellCnt - leadingEmptyCnt - state.dateCells.size
 
     Column(modifier = modifier.padding(horizontal = NachoSpacing.large)) {
         // 요일 헤더
@@ -253,9 +257,12 @@ private fun InvitationDatePickerCalendar(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             val dayOfWeeks =
-                DayOfWeek.entries.map {
-                    it.getDisplayName(TextStyle.NARROW, locale)
-                }
+                // 일요일부터 시작
+                listOf(DayOfWeek.SUNDAY.getDisplayName(TextStyle.NARROW, locale)) +
+                    DayOfWeek.entries.filter { it != DayOfWeek.SUNDAY }
+                        .map {
+                            it.getDisplayName(TextStyle.NARROW, locale)
+                        }
             dayOfWeeks.forEach { dayOfWeek ->
                 Text(
                     text = dayOfWeek,
@@ -291,6 +298,11 @@ private fun InvitationDatePickerCalendar(
                     onClick = onDateClick,
                     colors = colors,
                 )
+            }
+
+            // 빈 공간 (월의 마지막 날 이후)
+            items(trailingEmptyCnt) {
+                Box(modifier = Modifier.aspectRatio(1f))
             }
         }
     }
