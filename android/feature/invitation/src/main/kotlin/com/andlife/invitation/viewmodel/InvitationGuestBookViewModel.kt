@@ -254,23 +254,31 @@ constructor(
 
         updateState { copy(isUploading = true) }
 
-        val newMedias = state.selectedMedias.filter { it.id == null }
+        val newMediaIndexs = mutableListOf<Int>()
+
+        state.selectedMedias.mapIndexed { index, selectedMedia ->
+            if (selectedMedia.id == null) {
+                newMediaIndexs.add(index)
+            }
+        }
+        val existingMediaTypes = state.selectedMedias
+            .mapNotNull { media ->
+                if (media.id != null) media.type.name else null
+            }
 
         // 백그라운드 업로드 시작
         val workId = backgroundMediaUploader.uploadMediasInBackground(
-            newMedias.map { it.uri },
+            state.selectedMedias.map { it.uri },
+            thumbnailUrlStrings = state.selectedMedias.map { it.thumbnailUrl ?: "" },
+            existingMediaTypes = existingMediaTypes,
+            newMediaIndexs = newMediaIndexs,
             invitationId = invitationId.toString(),
             guestBookText = state.textContent,
             isEditing = state.editingGuestBookId != null,
             editingGuestBookId = state.editingGuestBookId?.toString()
         )
 
-        val logMessage = if (newMedias.isNotEmpty()) {
-            "백그라운드 업로드 시작 (미디어 ${newMedias.size}개)"
-        } else {
-            "백그라운드 방명록 처리 시작 (미디어 없음)"
-        }
-        Log.d("BackgroundUpload", "$logMessage - WorkID: $workId")
+        Log.d("BackgroundUpload", "WorkID: $workId")
 
         // 업로드 진행상황 관찰
         viewModelScope.launch {

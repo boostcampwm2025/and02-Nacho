@@ -3,6 +3,9 @@ package com.andlife.data.util.media.upload
 object UploadKey {
     const val MEDIA_FILES = "media_files"
     const val MEDIA_URIS = "media_uris"
+    const val THUMBNAIL_URLS = "thumbnail_urls"
+    const val EXISTING_MEDIA_TYPES = "existing_media_types"
+    const val NEW_MEDIA_INDEXS = "new_media_indexs"
     const val RESULT_URLS = "result_urls"
     const val ERROR_MESSAGE = "error_message"
     const val PROGRESS = "progress"
@@ -10,7 +13,7 @@ object UploadKey {
     const val TOTAL_FILES = "total_files"
     const val CURRENT_FILE_NAME = "current_file_name"
     const val EXTRA_WORK_ID = "extra_work_id"
-    
+
     const val INVITATION_ID = "invitation_id"
     const val GUEST_BOOK_TEXT = "guest_book_text"
     const val IS_EDITING = "is_editing"

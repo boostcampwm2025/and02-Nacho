@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.util.Log
+import androidx.core.net.toUri
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.Data
@@ -12,7 +13,6 @@ import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.andlife.domain.model.guestbook.GuestBookMedia
-import com.andlife.domain.model.guestbook.MediaFile
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.domain.model.guestbook.UploadState
 import com.andlife.domain.repository.guestbook.GuestBookRepository
@@ -21,7 +21,6 @@ import com.andlife.domain.util.MediaUploader
 import com.andlife.domain.util.ThumbnailGenerator
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.catch
 import kotlin.coroutines.cancellation.CancellationException
 import com.andlife.domain.util.Result as DomainResult
 
@@ -49,6 +48,45 @@ class UploadWorker @AssistedInject constructor(
 
         // URI 리스트 가져오기
         val uriStrings = inputData.getStringArray(UploadKey.MEDIA_URIS)?.toList() ?: emptyList()
+        // 썸네일 URL 리스트 가져오기
+        val thumbnailUrlStrings = inputData.getStringArray(UploadKey.THUMBNAIL_URLS)?.toList() ?: emptyList()
+        // 기존 미디어 타입 리스트 가져오기
+        val existingMediaTypes = inputData
+            .getStringArray(UploadKey.EXISTING_MEDIA_TYPES)
+            ?.map { MediaType.valueOf(it) }
+            ?: emptyList()
+        // 신규 미디어 여부 리스트 가져오기
+        val newMediaIndexs = inputData.getIntArray(UploadKey.NEW_MEDIA_INDEXS)
+        val newMediaIndexSet = newMediaIndexs?.toSet() ?: emptySet()
+
+        val workMedias = uriStrings.mapIndexed { index, uri ->
+
+            val isNew = index in newMediaIndexSet
+
+            val mediaType = if (isNew) {
+                context.contentResolver
+                    .getType(uri.toUri())
+                    ?.let { type ->
+                        when {
+                            type.startsWith("image/") -> MediaType.IMAGE
+                            type.startsWith("video/") -> MediaType.VIDEO
+                            type.startsWith("audio/") -> MediaType.AUDIO
+                            else -> null
+                        }
+                    }
+                    ?: throw IllegalArgumentException("지원하지 않는 로컬 미디어 타입: $uri")
+            } else {
+                existingMediaTypes[index]
+            }
+
+            WorkMedia(
+                uri = uri,
+                existingThumbnailUrl = thumbnailUrlStrings.getOrNull(index),
+                isNew = isNew,
+                mediaType = mediaType
+            )
+        }
+
 
         // 방명록 관련 정보 가져오기
         val invitationIdString = inputData.getString(UploadKey.INVITATION_ID)
@@ -64,176 +102,150 @@ class UploadWorker @AssistedInject constructor(
             // Foreground Service 시작
             setForeground(getForegroundInfo())
 
-            // MediaFile 객체 생성
-            val mediaFiles = mediaFileProvider.createFromUris(uriStrings)
-            var uploadUrls: List<String> = emptyList()
+            // 새로운 미디어에 대해 MediaFile 객체 생성
+            val newWorkMedias = workMedias.filter { it.isNew }
 
             // 1단계: 미디어 업로드 (0-60%)
-            if (mediaFiles.isNotEmpty()) {
-                mediaUploader.uploadMediasWithProgress(mediaFiles)
-                    .catch { throwable ->
-                        Log.e(TAG, "업로드 Flow 오류", throwable)
-                        throw throwable
-                    }
-                    .collect { uploadState ->
-                        when (uploadState) {
-                            is UploadState.Progress -> {
-                                // 업로드 진행률을 0-60% 구간으로 매핑
-                                val mappedProgress = (uploadState.percent * 0.6).toInt()
-                                updateProgress(
-                                    progress = mappedProgress,
-                                    currentIndex = uploadState.currentIndex,
-                                    totalFiles = uploadState.totalFiles,
-                                    currentFileName = uploadState.currentFileName
-                                )
-                            }
 
-                            is UploadState.Success -> {
-                                uploadUrls = uploadState.urls
-                            }
-
-                            is UploadState.Failure -> {
-                                Log.e(TAG, "업로드 실패: ${uploadState.message}")
-                                throw Exception(uploadState.message)
-                            }
-
-                            is UploadState.Cancelled -> {
-                                Log.d(TAG, "업로드 취소됨")
-                                throw CancellationException(UploadNoti.MSG_CANCELLED)
-                            }
-
-                            else -> { /* Enqueued 등 기타 상태 */
-                            }
-                        }
-                    }
-            } else {
-                // 미디어가 없는 경우 업로드 단계 건너뛰기
-                Log.d(TAG, "미디어가 없어 업로드 단계를 건너뜁니다")
-                updateProgress(progress = 60, currentIndex = 0, totalFiles = 0, currentFileName = "업로드 단계 완료")
-            }
-
-            // 2단계: 썸네일 생성 (60-70%)
-            val thumbnailFiles = mutableListOf<MediaFile?>()
-
-            if (mediaFiles.isNotEmpty()) {
-                updateProgress(
-                    progress = 60,
-                    currentIndex = 0,
-                    totalFiles = mediaFiles.size,
-                    currentFileName = "썸네일 생성 중..."
+            if (newWorkMedias.isNotEmpty()) {
+                val mediaFiles = mediaFileProvider.createFromUris(
+                    newWorkMedias.map { it.uri }
                 )
 
-                mediaFiles.forEachIndexed { index, mediaFile ->
-                    if (mediaFile.mediaType == MediaType.VIDEO) {
-                        val thumbnailFile = thumbnailGenerator.generateVideoThumbnail(mediaFile.uriString)
-                        if (thumbnailFile != null) {
-                            val thumbnailMediaFile = mediaFileProvider.createFromFile(thumbnailFile)
-                            thumbnailFiles.add(thumbnailMediaFile)
-                        } else {
-                            thumbnailFiles.add(null) // 실패한 경우 null 추가 (인덱스 맞추기)
-                        }
-                    } else {
-                        thumbnailFiles.add(null) // 비디오가 아닌 경우 null
-                    }
-
-                    val thumbnailProgress = 60 + ((index + 1) * 10 / mediaFiles.size)
-                    updateProgress(
-                        progress = thumbnailProgress,
-                        currentIndex = index + 1,
-                        totalFiles = mediaFiles.size,
-                        currentFileName = "썸네일 생성: ${mediaFile.fileName}"
-                    )
+                newWorkMedias.forEachIndexed { index, workMedia ->
+                    workMedia.mediaFile = mediaFiles.getOrNull(index)
                 }
-            }
 
-            // 3단계: 썸네일 업로드 (70-80%)
-            var thumbnailUrls: List<String> = emptyList()
-
-            val validThumbnailFiles = thumbnailFiles.filterNotNull()
-            if (validThumbnailFiles.isNotEmpty()) {
-                updateProgress(
-                    progress = 70,
-                    currentIndex = 0,
-                    totalFiles = validThumbnailFiles.size,
-                    currentFileName = "썸네일 업로드 중..."
-                )
-
-                mediaUploader.uploadMediasWithProgress(validThumbnailFiles)
-                    .catch { throwable ->
-                        Log.e(TAG, "썸네일 업로드 Flow 오류", throwable)
-                        throw throwable
-                    }
-                    .collect { uploadState ->
-                        when (uploadState) {
+                mediaUploader.uploadMediasWithProgress(mediaFiles)
+                    .collect { state ->
+                        when (state) {
                             is UploadState.Progress -> {
-                                // 썸네일 업로드 진행률을 70-80% 구간으로 매핑
-                                val mappedProgress = 70 + (uploadState.percent * 0.1).toInt()
                                 updateProgress(
-                                    progress = mappedProgress,
-                                    currentIndex = uploadState.currentIndex,
-                                    totalFiles = uploadState.totalFiles,
-                                    currentFileName = uploadState.currentFileName
+                                    progress = (state.percent * 0.6).toInt(),
+                                    currentIndex = state.currentIndex,
+                                    totalFiles = state.totalFiles,
+                                    currentFileName = state.currentFileName
                                 )
                             }
 
                             is UploadState.Success -> {
-                                thumbnailUrls = uploadState.urls
+                                state.urls.forEachIndexed { index, url ->
+                                    newWorkMedias.getOrNull(index)?.uploadedUrl = url
+                                }
                             }
 
-                            is UploadState.Failure -> {
-                                Log.e(TAG, "썸네일 업로드 실패: ${uploadState.message}")
-                                throw Exception(uploadState.message)
-                            }
-
-                            is UploadState.Cancelled -> {
-                                Log.d(TAG, "썸네일 업로드 취소됨")
-                                throw CancellationException(UploadNoti.MSG_CANCELLED)
-                            }
-
+                            is UploadState.Failure -> throw Exception(state.message)
+                            is UploadState.Cancelled -> throw CancellationException(UploadNoti.MSG_CANCELLED)
                             else -> {}
                         }
                     }
-            } else {
-                updateProgress(progress = 80, currentIndex = 0, totalFiles = 0, currentFileName = "썸네일 없음")
+            }
+
+            // 2단계: 썸네일 생성 (60-70%)
+            val videoWorkMedias = newWorkMedias.filter {
+                it.mediaType == MediaType.VIDEO
+            }
+
+            videoWorkMedias.forEachIndexed { index, workMedia ->
+                val thumbnailFile = thumbnailGenerator.generateVideoThumbnail(workMedia.uri)
+                if (thumbnailFile != null) {
+                    workMedia.thumbnailFile = mediaFileProvider.createFromFile(thumbnailFile)
+                }
+
+                updateProgress(
+                    progress = 60 + ((index + 1) * 10 / videoWorkMedias.size),
+                    currentIndex = index + 1,
+                    totalFiles = videoWorkMedias.size,
+                    currentFileName = "썸네일 생성 중"
+                )
+            }
+
+            // 3단계: 썸네일 업로드 (70-80%)
+            val thumbnailTargets = videoWorkMedias.filter { it.thumbnailFile != null }
+            val thumbnailFiles = thumbnailTargets.mapNotNull { it.thumbnailFile }
+
+            if (thumbnailFiles.isNotEmpty()) {
+                mediaUploader.uploadMediasWithProgress(thumbnailFiles)
+                    .collect { state ->
+                        when (state) {
+                            is UploadState.Progress -> {
+                                updateProgress(
+                                    progress = 70 + (state.percent * 0.1).toInt(),
+                                    currentIndex = state.currentIndex,
+                                    totalFiles = state.totalFiles,
+                                    currentFileName = state.currentFileName
+                                )
+                            }
+
+                            is UploadState.Success -> {
+                                state.urls.forEachIndexed { index, url ->
+                                    thumbnailTargets.getOrNull(index)?.uploadedThumbnailUrl = url
+                                }
+                            }
+
+                            is UploadState.Failure -> throw Exception(state.message)
+                            is UploadState.Cancelled -> throw CancellationException(UploadNoti.MSG_CANCELLED)
+                            else -> {}
+                        }
+                    }
             }
 
             // 4단계: GuestBookMedia 리스트 생성 (80-85%)
-            val guestBookMediaList = mutableListOf<GuestBookMedia>()
-            var thumbnailUrlIndex = 0
-
-            mediaFiles.forEachIndexed { index, mediaFile ->
-                val url = uploadUrls.getOrNull(index)
-                if (url != null) {
-                    val thumbnailUrl = if (mediaFile.mediaType == MediaType.VIDEO && thumbnailFiles[index] != null) {
-                        thumbnailUrls.getOrNull(thumbnailUrlIndex++)
-                    } else {
-                        null
-                    }
-
-                    guestBookMediaList.add(
-                        GuestBookMedia(
-                            id = 0,
-                            type = mediaFile.mediaType,
-                            url = url,
-                            thumbnailUrl = thumbnailUrl,
-                            durationSeconds = null,
-                            displayOrder = index
-                        )
+            val guestBookMediaList = workMedias.mapIndexed { displayOrder, workMedia ->
+                if (workMedia.isNew) {
+                    GuestBookMedia(
+                        id = 0,
+                        type = workMedia.mediaType,
+                        url = workMedia.uploadedUrl ?: "",
+                        thumbnailUrl = if (workMedia.mediaType == MediaType.VIDEO)
+                            workMedia.uploadedThumbnailUrl
+                        else null,
+                        durationSeconds = null,
+                        displayOrder = displayOrder
+                    )
+                } else {
+                    GuestBookMedia(
+                        id = 0,
+                        type = workMedia.mediaType,
+                        url = workMedia.uri,
+                        thumbnailUrl = workMedia.existingThumbnailUrl,
+                        durationSeconds = null,
+                        displayOrder = displayOrder
                     )
                 }
             }
+
 
             // 5단계: 방명록 생성/수정 (85-100%)
             updateProgress(progress = 85, currentIndex = 0, totalFiles = 1, currentFileName = "방명록 처리 중...")
             val result = if (isEditing && editingGuestBookId != null) {
+
+                val newMedias = guestBookMediaList.filter {
+                    workMedias[it.displayOrder].isNew
+                }
+
+                val existingMedias = guestBookMediaList.filter {
+                    !workMedias[it.displayOrder].isNew
+                }
+
                 guestBookRepository.updateGuestBook(
                     guestBookId = editingGuestBookId,
                     textContent = guestBookText,
-                    existingImageIds = emptyList(),
-                    existingVideoIds = emptyList(),
-                    existingAudioIds = emptyList(),
-                    newMedias = guestBookMediaList
+                    existingImageIds = existingMedias.mapNotNull { media ->
+                        // 기존 미디어의 ID는 URI에 담겨옴
+                        media.url.toLongOrNull()
+                    },
+                    existingAudioIds = existingMedias.filter { it.type == MediaType.AUDIO }
+                        .mapNotNull { media ->
+                            media.url.toLongOrNull()
+                        },
+                    existingVideoIds = existingMedias.filter { it.type == MediaType.VIDEO }
+                        .mapNotNull { media ->
+                            media.url.toLongOrNull()
+                        },
+                    newMedias = newMedias
                 )
+
             } else {
                 guestBookRepository.createGuestBook(
                     invitationId = invitationId,
@@ -242,13 +254,14 @@ class UploadWorker @AssistedInject constructor(
                 )
             }
 
+
             when (result) {
                 is DomainResult.Success -> {
                     updateProgress(progress = 100, currentIndex = 1, totalFiles = 1, currentFileName = "완료")
                     notificationManager.notifyComplete(id)
                     Result.success(
                         workDataOf(
-                            UploadKey.RESULT_URLS to uploadUrls.toTypedArray(),
+                            UploadKey.RESULT_URLS to guestBookMediaList.map { it.url }.toTypedArray(),
                             UploadKey.PROGRESS to 100
                         )
                     )
@@ -314,3 +327,14 @@ class UploadWorker @AssistedInject constructor(
         private const val TAG = "UploadWorker"
     }
 }
+
+private data class WorkMedia(
+    val uri: String,
+    val existingThumbnailUrl: String?,
+    val isNew: Boolean,
+    val mediaType: MediaType,
+    var mediaFile: com.andlife.domain.model.guestbook.MediaFile? = null,
+    var uploadedUrl: String? = null,
+    var thumbnailFile: com.andlife.domain.model.guestbook.MediaFile? = null,
+    var uploadedThumbnailUrl: String? = null
+)

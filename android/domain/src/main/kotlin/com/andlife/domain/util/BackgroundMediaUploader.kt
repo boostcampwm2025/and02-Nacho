@@ -15,6 +15,9 @@ interface BackgroundMediaUploader {
      */
     fun uploadMediasInBackground(
         uriStrings: List<String>,
+        thumbnailUrlStrings: List<String>,
+        existingMediaTypes: List<String>,
+        newMediaIndexs: List<Int>,
         invitationId: String,
         guestBookText: String,
         isEditing: Boolean = false,

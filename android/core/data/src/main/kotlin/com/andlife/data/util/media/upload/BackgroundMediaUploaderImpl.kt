@@ -22,6 +22,9 @@ class BackgroundMediaUploaderImpl @Inject constructor(
 
     override fun uploadMediasInBackground(
         uriStrings: List<String>,
+        thumbnailUrlStrings: List<String>,
+        existingMediaTypes: List<String>,
+        newMediaIndexs: List<Int>,
         invitationId: String,
         guestBookText: String,
         isEditing: Boolean,
@@ -29,6 +32,9 @@ class BackgroundMediaUploaderImpl @Inject constructor(
     ): String {
         val workData = workDataOf(
             UploadKey.MEDIA_URIS to uriStrings.toTypedArray(),
+            UploadKey.THUMBNAIL_URLS to thumbnailUrlStrings.toTypedArray(),
+            UploadKey.EXISTING_MEDIA_TYPES to existingMediaTypes.toTypedArray(),
+            UploadKey.NEW_MEDIA_INDEXS to newMediaIndexs.toTypedArray(),
             UploadKey.INVITATION_ID to invitationId,
             UploadKey.GUEST_BOOK_TEXT to guestBookText,
             UploadKey.IS_EDITING to isEditing,
