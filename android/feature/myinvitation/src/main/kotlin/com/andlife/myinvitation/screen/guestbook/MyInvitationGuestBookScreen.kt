@@ -431,9 +431,11 @@ fun MyInvitationGuestBookRoute(
                     }
                 }
                 showRecordingBottomSheet = false
+                viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateMediaPlayState(true))
             },
             onDismiss = {
                 showRecordingBottomSheet = false
+                viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateMediaPlayState(true))
             }
         )
     }

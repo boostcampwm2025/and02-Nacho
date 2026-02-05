@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.TextSelectionColors
@@ -41,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -62,6 +62,7 @@ import com.andlife.home.model.setting.SettingUiEvent
 import com.andlife.home.model.setting.SettingUiState
 import com.andlife.home.viewmodel.SettingViewModel
 import com.andlife.ui.util.collectWithLifecycle
+import com.andlife.ui.util.getAppVersion
 import com.andlife.designsystem.R as designR
 
 @Composable
@@ -169,6 +170,7 @@ fun SettingScreen(
     onEvent: (SettingUiEvent) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -231,7 +233,7 @@ fun SettingScreen(
 
                 SettingSection(headerTitle = stringResource(R.string.txt_header_app_info)) { modifier ->
                     AppInfoContent(
-                        appVersion = "1.0.0",
+                        appVersion = context.getAppVersion(),
                         onClickInfo = {},
                         modifier = modifier,
                     )
@@ -614,6 +616,18 @@ private fun AccountContent(
     onClickQuit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val isLoggedIn = authState is AuthState.Authenticated
+    val textColor = if (isLoggedIn) {
+        NachoTheme.colorScheme.textPrimary
+    } else {
+        NachoTheme.colorScheme.textTertiary
+    }
+    val iconTint = if (isLoggedIn) {
+        NachoTheme.colorScheme.iconOnSecondary
+    } else {
+        NachoTheme.colorScheme.iconDisabled
+    }
+
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -628,16 +642,17 @@ private fun AccountContent(
             Text(
                 text = stringResource(R.string.txt_logout),
                 style = NachoTheme.typography.bodyLargeRegular,
-                color = NachoTheme.colorScheme.textPrimary,
+                color = textColor,
             )
             IconButton(
                 onClick = onClickLogout,
                 modifier = Modifier.size(NachoIconSize.medium),
+                enabled = isLoggedIn,
             ) {
                 Icon(
                     painter = painterResource(designR.drawable.ic_chevron_right_24),
                     contentDescription = stringResource(R.string.desc_logout),
-                    tint = NachoTheme.colorScheme.iconOnSecondary,
+                    tint = iconTint,
                 )
             }
         }
@@ -661,7 +676,7 @@ private fun AccountContent(
                 Icon(
                     painter = painterResource(designR.drawable.ic_chevron_right_24),
                     contentDescription = stringResource(R.string.desc_quit),
-                    tint = NachoTheme.colorScheme.iconOnSecondary,
+                    tint = NachoTheme.colorScheme.iconDisabled,
                 )
             }
         }

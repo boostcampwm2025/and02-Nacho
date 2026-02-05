@@ -2,6 +2,7 @@ package com.andlife.media.video
 
 import android.app.ActivityManager
 import android.content.Context
+import android.graphics.Color
 import androidx.annotation.OptIn
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
@@ -10,6 +11,7 @@ import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.CacheKeyFactory
 import androidx.media3.datasource.cache.CacheWriter
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
@@ -52,8 +54,18 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
 
     @OptIn(UnstableApi::class)
     private fun createNewPlayer(): AutoVideoPlayer {
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(
+                15_000,
+                30_000,
+                1_500,
+                2_500
+            )
+            .setPrioritizeTimeOverSizeThresholds(true)
+            .build()
+
         val exoPlayer =
-            ExoPlayer.Builder(context).build().apply {
+            ExoPlayer.Builder(context).setLoadControl(loadControl).build().apply {
                 repeatMode = ExoPlayer.REPEAT_MODE_ONE
             }
 
@@ -61,7 +73,7 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
             useController = false
             resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
             player = exoPlayer
-            setBackgroundColor(android.graphics.Color.BLACK)
+            setBackgroundColor(Color.BLACK)
         }
 
         return AutoVideoPlayer(exoPlayer, playerView, "")
