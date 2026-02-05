@@ -37,6 +37,7 @@ fun InvitationMediaUpload(
     currentMediaSizeBytes: Long,
     maxMediasCount: Int,
     maxMediaSizeBytes: Long,
+    isUploading: Boolean,
     onMediaRemove: (SelectedMedia) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -51,6 +52,7 @@ fun InvitationMediaUpload(
                 items(selectedMedias) { media ->
                     SelectedMediaCard(
                         media = media,
+                        isUploading = isUploading,
                         onRemove = { onMediaRemove(media) },
                     )
                 }
@@ -82,6 +84,7 @@ fun InvitationMediaUpload(
 @Composable
 private fun SelectedMediaCard(
     media: SelectedMedia,
+    isUploading: Boolean,
     onRemove: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -97,6 +100,7 @@ private fun SelectedMediaCard(
 
         IconButton(
             onClick = onRemove,
+            enabled = !isUploading,
             modifier =
                 Modifier
                     .padding(NachoSpacing.xSmall)
@@ -140,6 +144,7 @@ private fun InvitationMediaUploadPreview() {
                         type = UiMediaType.AUDIO,
                     ),
                 ).toImmutableList(),
+            isUploading = false,
             onMediaRemove = {},
             currentMediaSizeBytes = 120 * 1024 * 1024L,
             maxMediasCount = 20,
