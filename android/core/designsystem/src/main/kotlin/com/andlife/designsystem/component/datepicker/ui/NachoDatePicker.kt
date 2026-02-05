@@ -245,6 +245,10 @@ private fun InvitationDatePickerCalendar(
     modifier: Modifier = Modifier,
 ) {
     val firstDayOfWeek = state.displayedMonth.getFirstDayOfWeek()
+    val leadingEmptyCnt = firstDayOfWeek % 7
+    val totalCellCnt = 42  // 행을 6개로 고정
+    val trailingEmptyCnt =
+        totalCellCnt - leadingEmptyCnt - state.dateCells.size
 
     Column(modifier = modifier.padding(horizontal = NachoSpacing.large)) {
         // 요일 헤더
@@ -294,6 +298,11 @@ private fun InvitationDatePickerCalendar(
                     onClick = onDateClick,
                     colors = colors,
                 )
+            }
+
+            // 빈 공간 (월의 마지막 날 이후)
+            items(trailingEmptyCnt) {
+                Box(modifier = Modifier.aspectRatio(1f))
             }
         }
     }
