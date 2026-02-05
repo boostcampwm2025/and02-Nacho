@@ -83,7 +83,7 @@ AndLife는 바로 이 지점에서 출발했습니다. <br>
 <br>
 
 ## 프로젝트 구조
-<img width="5442" height="3488" alt="image" src="https://github.com/user-attachments/assets/54643434-9c76-46df-aaac-cba46b4cae37" />
+<img width="5442" height="3488" alt="image" src="https://github.com/user-attachments/assets/8b1a174a-f9fd-4f5f-a028-9499deecc10b" />
 
 <br>
 <br>
