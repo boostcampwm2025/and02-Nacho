@@ -122,7 +122,7 @@ private fun AddressSearchScreen(
                         )
 
                         PagingStateContent(
-                            sourceLoadState = addressItems.loadState.refresh,
+                            loadState = addressItems.loadState.refresh,
                             itemCount = addressItems.itemCount,
                             onRetry = { addressItems.retry() },
                         ) {

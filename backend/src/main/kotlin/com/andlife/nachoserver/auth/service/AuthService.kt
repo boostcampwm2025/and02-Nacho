@@ -11,6 +11,7 @@ import com.andlife.nachoserver.entity.User
 import com.andlife.nachoserver.repository.user.UserRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import kotlin.random.Random
 
 @Service
 class AuthService(
@@ -30,6 +31,22 @@ class AuthService(
         updateUserProfileIfNeeded(user, kakaoUser)
 
         return generateAuthResponse(user)
+    }
+
+    @Transactional
+    fun loginWithTest(): AuthResponse {
+        val testKakaoId = -System.currentTimeMillis()  // 거의 유일함
+
+        val newUser = User(
+            kakaoId = testKakaoId,
+            email = "testUser${-testKakaoId}@test.com",
+            profileImageUrl = "http://img1.kakaocdn.net/thumb/R640x640.q70/?fname=http://t1.kakaocdn.net/account_images/default_profile.jpeg",
+            name = "임시"
+        )
+        val saved = userRepository.save(newUser)
+        saved.name = "테스트유저${saved.id}"
+
+        return generateAuthResponse(saved)
     }
 
     @Transactional(readOnly = true)

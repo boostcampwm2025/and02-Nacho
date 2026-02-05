@@ -40,9 +40,8 @@ fun NachoApp(
 
             MainSideEffect.NavigateToHome -> {
                 val navOptions = navOptions {
-                    popUpTo(Login) {
+                    popUpTo(navigator.navController.graph.id) {
                         inclusive = true
-                        saveState = false
                     }
                     launchSingleTop = true
                 }
