@@ -24,7 +24,7 @@ class KakaoShareManager @Inject constructor(
         imageUrl: String?,
         date: String,
         location: String,
-    ) {
+    ): Boolean {
         val appsFlyerUrl = deepLinkManager.buildAppsFlyerUrl(invitationId)
         Log.d(TAG, "invitationId: $invitationId, appsFlyerUrl: $appsFlyerUrl")
 
@@ -72,8 +72,10 @@ class KakaoShareManager @Inject constructor(
                     context.startActivity(result.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                 }
             }
+            return true
         } else {
             Log.e(TAG, "KakaoTalk not available")
+            return false
         }
     }
 

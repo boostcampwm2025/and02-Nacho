@@ -42,6 +42,7 @@ import com.andlife.ui.component.collection.StoryContent
 import com.andlife.ui.component.collection.StoryTopHeader
 import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.ui.component.dialog.NachoPermissionDialog
+import com.andlife.ui.util.shouldRequestNotificationPermission
 import com.andlife.ui.util.shouldRequestStoragePermission
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
@@ -63,13 +64,32 @@ fun MyInvitationStoryRoute(
     val context = LocalContext.current
 
     var showPermissionDeniedDialog by remember { mutableStateOf(false) }
+    var showNotificationPermissionDeniedDialog by remember { mutableStateOf(false) }
     var showNetworkInfoDialog by remember { mutableStateOf(false) }
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (!isGranted) {
+            showNotificationPermissionDeniedDialog = true
+        } else if (!uiState.networkDialogDismissed) {
+            showNetworkInfoDialog = true
+        } else {
+            viewModel.onEvent(MyInvitationCollectionUiEvent.DownloadMedia)
+        }
+    }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            viewModel.onEvent(MyInvitationCollectionUiEvent.DownloadMedia)
+            if (context.shouldRequestNotificationPermission()) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else if (!uiState.networkDialogDismissed) {
+                showNetworkInfoDialog = true
+            } else {
+                viewModel.onEvent(MyInvitationCollectionUiEvent.DownloadMedia)
+            }
         } else {
             showPermissionDeniedDialog = true
         }
@@ -105,6 +125,8 @@ fun MyInvitationStoryRoute(
         onDownloadClick = {
             if (context.shouldRequestStoragePermission()) {
                 permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            } else if (context.shouldRequestNotificationPermission()) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             } else if (!uiState.networkDialogDismissed) {
                 showNetworkInfoDialog = true
             } else {
@@ -134,6 +156,14 @@ fun MyInvitationStoryRoute(
         NachoPermissionDialog(
             message = stringResource(R.string.snack_permission_denied),
             onDismiss = { showPermissionDeniedDialog = false },
+        )
+    }
+
+    if (showNotificationPermissionDeniedDialog) {
+
+        NachoPermissionDialog(
+            message = stringResource(R.string.snack_notification_permission_denied),
+            onDismiss = { showNotificationPermissionDeniedDialog = false },
         )
     }
 }
