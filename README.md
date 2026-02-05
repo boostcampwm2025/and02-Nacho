@@ -47,15 +47,15 @@ AndLife는 바로 이 지점에서 출발했습니다. <br>
     <tr>
       <td>
          <img
-          src="https://github.com/user-attachments/assets/830c90db-8361-48a9-a956-1ee8ec2ccc96" />
+          src="https://github.com/user-attachments/assets/830c90db-8361-48a9-a956-1ee8ec2ccc96" width="85%" />
       </td>
       <td>
         <img
-          src="https://github.com/user-attachments/assets/d52a9903-7833-4488-953c-effc4acb30a4" />
+          src="https://github.com/user-attachments/assets/d52a9903-7833-4488-953c-effc4acb30a4" width="85%" />
       </td>
       <td>
         <img
-          src="https://github.com/user-attachments/assets/b030ba45-970b-4970-8ace-61f67362f406" />
+          src="https://github.com/user-attachments/assets/b030ba45-970b-4970-8ace-61f67362f406" width="85%" />
       </td>
     </tr>
   </tbody>
@@ -74,11 +74,11 @@ AndLife는 바로 이 지점에서 출발했습니다. <br>
     <tr>
       <td>
         <img
-          src="https://github.com/user-attachments/assets/8c4adecd-b9cd-496d-9a69-306ae56e72e6" width="66%" />
+          src="https://github.com/user-attachments/assets/8c4adecd-b9cd-496d-9a69-306ae56e72e6" width="85%" />
       </td>
       <td>
         <img
-          src="https://github.com/user-attachments/assets/361cdcd3-9b33-4249-88d5-30b385106f0c" width="66%" />
+          src="https://github.com/user-attachments/assets/361cdcd3-9b33-4249-88d5-30b385106f0c" width="85%" />
       </td>
     </tr>
   </tbody>
@@ -97,11 +97,11 @@ AndLife는 바로 이 지점에서 출발했습니다. <br>
     <tr>
       <td>
         <img
-          src="https://github.com/user-attachments/assets/9e74610e-8974-41f8-8d8f-08608c2ca261" width="66%" />
+          src="https://github.com/user-attachments/assets/9e74610e-8974-41f8-8d8f-08608c2ca261" width="85%" />
       </td>
       <td>
         <img
-          src="https://github.com/user-attachments/assets/f5347567-75f2-49d2-a41e-03741a1c951d" width="66%" />
+          src="https://github.com/user-attachments/assets/f5347567-75f2-49d2-a41e-03741a1c951d" width="85%" />
       </td>
     </tr>
   </tbody>
@@ -121,15 +121,15 @@ AndLife는 바로 이 지점에서 출발했습니다. <br>
     <tr>
       <td>
         <img
-          src="https://github.com/user-attachments/assets/e2479a5d-8fa8-4bab-813e-83a47a7a32a7" />
+          src="https://github.com/user-attachments/assets/e2479a5d-8fa8-4bab-813e-83a47a7a32a7" width="85%" />
       </td>
       <td>
         <img
-          src="https://github.com/user-attachments/assets/b51179de-afd1-40f3-a4ac-2514022a2ab1" />
+          src="https://github.com/user-attachments/assets/b51179de-afd1-40f3-a4ac-2514022a2ab1" width="85%" />
       </td>
       <td>
         <img
-          src="https://github.com/user-attachments/assets/d09037d7-5b24-4c8f-8936-8cde1710b4f9" />
+          src="https://github.com/user-attachments/assets/d09037d7-5b24-4c8f-8936-8cde1710b4f9" width="85%" />
       </td>
     </tr>
   </tbody>
@@ -147,7 +147,7 @@ AndLife는 바로 이 지점에서 출발했습니다. <br>
     <tr>
       <td>
         <img
-          src="https://github.com/user-attachments/assets/0cb9715f-4bde-47c4-aec7-7e9c0da85907" width="33%"/>
+          src="https://github.com/user-attachments/assets/0cb9715f-4bde-47c4-aec7-7e9c0da85907" width="85%" />
       </td>
     </tr>
   </tbody>
