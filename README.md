@@ -1,6 +1,6 @@
 
+<img width="100%" alt="image" src="https://github.com/user-attachments/assets/084a84cd-7d8b-43e5-a3a8-98838848903c" />
 
-<img width="100%" alt="Frame 31" src="https://github.com/user-attachments/assets/a9594abd-f779-4d28-aee7-30047a933a4f" />
 
 # 나에게로의 초대
 
