@@ -29,7 +29,13 @@ fun PagingStateContent(
 ) {
     val isRefreshing = loadState is LoadState.Loading || mediatorLoadState is LoadState.Loading
     val isError = loadState is LoadState.Error || mediatorLoadState is LoadState.Error
-    val isEmpty = !isRefreshing && !isError && itemCount == 0
+
+    val isMediatorNotLoading = mediatorLoadState == null ||
+        mediatorLoadState is LoadState.NotLoading
+
+    val isSourceNotLoading = loadState is LoadState.NotLoading
+
+    val isEmpty = isMediatorNotLoading && isSourceNotLoading && itemCount == 0
 
     Box(modifier = modifier.fillMaxSize()) {
         when {
