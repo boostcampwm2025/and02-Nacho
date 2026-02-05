@@ -35,123 +35,38 @@ AndLife는 바로 이 지점에서 출발했습니다. <br>
 
 <!-- 홈 -->
 ### 홈
-<table style="table-layout: fixed; width: 100%;">
-  <thead>
-    <tr>
-      <th align="left">스플래시 및 로그인</th>
-      <th align="left">홈 화면</th>
-      <th align="left">초대 관리</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="center" style="padding: 8px;">
-         <img
-          src="https://github.com/user-attachments/assets/830c90db-8361-48a9-a956-1ee8ec2ccc96" width="100%" />
-      </td>
-      <td align="center" style="padding: 8px;">
-        <img
-          src="https://github.com/user-attachments/assets/d52a9903-7833-4488-953c-effc4acb30a4" width="100%" />
-      </td>
-      <td align="center" style="padding: 8px;">
-        <img
-          src="https://github.com/user-attachments/assets/b030ba45-970b-4970-8ace-61f67362f406" width="100%" />
-      </td>
-    </tr>
-  </tbody>
-</table>
+|스플래시 및 로그인|홈 화면|초대 관리|
+|:-----:|:-----:|:-----:|
+| <img width="250" src="https://github.com/user-attachments/assets/830c90db-8361-48a9-a956-1ee8ec2ccc96" /> | <img width="250" src="https://github.com/user-attachments/assets/d52a9903-7833-4488-953c-effc4acb30a4" /> | <img width="250" src="https://github.com/user-attachments/assets/b030ba45-970b-4970-8ace-61f67362f406" /> |
+
 
 <!-- 초대 -->
 ### 초대
-<table style="table-layout: fixed; width: 100%;">
-  <thead>
-    <tr>
-      <th align="left">초대 생성</th>
-      <th align="left">초대카드</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="center" style="padding: 8px;">
-        <img
-          src="https://github.com/user-attachments/assets/8c4adecd-b9cd-496d-9a69-306ae56e72e6" width="100%" />
-      </td>
-      <td align="center" style="padding: 8px;">
-        <img
-          src="https://github.com/user-attachments/assets/361cdcd3-9b33-4249-88d5-30b385106f0c" width="100%" />
-      </td>
-    </tr>
-  </tbody>
-</table>
+|초대 생성|초대 카드|
+|:-----:|:-----:|
+| <img width="250" src="https://github.com/user-attachments/assets/8c4adecd-b9cd-496d-9a69-306ae56e72e6" /> | <img width="250" src="https://github.com/user-attachments/assets/361cdcd3-9b33-4249-88d5-30b385106f0c" /> |
+
 
 <!-- 공유 및 참여 -->
 ### 공유 및 참여
-<table style="table-layout: fixed; width: 100%;">
-  <thead>
-    <tr>
-      <th align="left">딥링크 공유(카카오톡/링크 복사)</th>
-      <th align="left">공유받은 초대장 참여</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="center" style="padding: 8px;">
-        <img
-          src="https://github.com/user-attachments/assets/9e74610e-8974-41f8-8d8f-08608c2ca261" width="100%" />
-      </td>
-      <td align="center" style="padding: 8px;">
-        <img
-          src="https://github.com/user-attachments/assets/f5347567-75f2-49d2-a41e-03741a1c951d" width="100%" />
-      </td>
-    </tr>
-  </tbody>
-</table>
+|딥링크 공유 (카카오톡 / 링크 복사)|공유받은 초대장 참여|
+|:-----:|:-----:|                                              
+| <img width="250" src="https://github.com/user-attachments/assets/9e74610e-8974-41f8-8d8f-08608c2ca261" /> | <img width="250" src="https://github.com/user-attachments/assets/f5347567-75f2-49d2-a41e-03741a1c951d" /> |
+
 
 <!-- 기록 -->
 ### 기록
-<table style="table-layout: fixed; width: 100%;">
-  <thead>
-    <tr>
-      <th align="left">방명록 작성</th>
-      <th align="left">미디어(이미지, 영상, 오디오) 확인</th>
-      <th align="left">모아보기/스토리 다운로드</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="center" style="padding: 8px;">
-        <img
-          src="https://github.com/user-attachments/assets/e2479a5d-8fa8-4bab-813e-83a47a7a32a7" width="100%" />
-      </td>
-      <td align="center" style="padding: 8px;">
-        <img
-          src="https://github.com/user-attachments/assets/b51179de-afd1-40f3-a4ac-2514022a2ab1" width="100%" />
-      </td>
-      <td align="center" style="padding: 8px;">
-        <img
-          src="https://github.com/user-attachments/assets/d09037d7-5b24-4c8f-8936-8cde1710b4f9" width="100%" />
-      </td>
-    </tr>
-  </tbody>
-</table>
+|방명록 작성|미디어 확인(이미지/영상/오디오)|모아보기 / 스토리 다운로드|
+|:-----:|:-----:|:-----:|
+| <img width="250" src="https://github.com/user-attachments/assets/e2479a5d-8fa8-4bab-813e-83a47a7a32a7" /> | <img width="250" src="https://github.com/user-attachments/assets/b51179de-afd1-40f3-a4ac-2514022a2ab1" /> | <img width="250" src="https://github.com/user-attachments/assets/d09037d7-5b24-4c8f-8936-8cde1710b4f9" /> |
+
 
 <!-- 감사 -->
 ### 감사
-<table style="table-layout: fixed; width: 100%;">
-  <thead>
-    <tr>
-      <th align="left">감사카드</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="center" style="padding: 8px;">
-        <img
-          src="https://github.com/user-attachments/assets/0cb9715f-4bde-47c4-aec7-7e9c0da85907" width="100%" />
-      </td>
-    </tr>
-  </tbody>
-</table>
+|감사 카드|
+|:-----:|
+| <img width="250" src="https://github.com/user-attachments/assets/0cb9715f-4bde-47c4-aec7-7e9c0da85907" /> |
+
 
 <br>
 
