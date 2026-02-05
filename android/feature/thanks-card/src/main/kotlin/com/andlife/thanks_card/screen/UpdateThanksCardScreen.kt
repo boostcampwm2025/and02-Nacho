@@ -1,8 +1,6 @@
 package com.andlife.thanks_card.screen
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -16,7 +14,6 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.andlife.designsystem.component.dialog.NachoDialog
 import com.andlife.editor.screen.EditorScreen
 import com.andlife.editor.state.EditorState
 import com.andlife.thanks_card.R
@@ -24,7 +21,7 @@ import com.andlife.thanks_card.model.update.UpdateThanksCardSideEffect
 import com.andlife.thanks_card.model.update.UpdateThanksCardUiEvent
 import com.andlife.thanks_card.model.update.UpdateThanksCardUiState
 import com.andlife.thanks_card.viewmodel.UpdateThanksCardViewModel
-import com.andlife.ui.component.card.DiscardChangesDialogContent
+import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.ui.component.loading.InvitationLoadingError
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.util.collectWithLifecycle
@@ -53,12 +50,14 @@ fun UpdateThanksCardRoute(
                     onBackClick()
                 }
             }
+
             UpdateThanksCardSideEffect.OnFailUpdateThanksCard -> {
                 scope.launch {
                     snackbarHostState.currentSnackbarData?.dismiss()
                     snackbarHostState.showSnackbar(res.getString(R.string.txt_fail_update_thanks_card))
                 }
             }
+
             UpdateThanksCardSideEffect.OnSuccessUpdateThanksCard -> {
                 onSuccessfulUpdate()
             }
@@ -73,15 +72,17 @@ fun UpdateThanksCardRoute(
         modifier = modifier
     )
     if (showBackDialog) {
-        NachoDialog(onDismiss = { showBackDialog = false }) {
-            DiscardChangesDialogContent(
-                onConfirm = {
-                    showBackDialog = false
-                    onBackClick()
-                },
-                onDismiss = { showBackDialog = false }
-            )
-        }
+        NachoInfoDialog(
+            title = stringResource(R.string.txt_exit_dialog_title),
+            message = stringResource(R.string.txt_exit_dialog_message),
+            confirmText = stringResource(R.string.btn_exit),
+            dismissText = stringResource(R.string.btn_continue),
+            onConfirm = {
+                showBackDialog = false
+                onBackClick()
+            },
+            onDismiss = { showBackDialog = false },
+        )
     }
 }
 
