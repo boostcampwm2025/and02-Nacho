@@ -10,12 +10,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.andlife.designsystem.component.dialog.NachoDialog
 import com.andlife.editor.screen.EditorScreen
 import com.andlife.editor.state.EditorState
 import com.andlife.invitation_card.R
 import com.andlife.invitation_card.viewmodel.CreateCardViewModel
-import com.andlife.ui.component.card.DiscardChangesDialogContent
+import com.andlife.ui.component.dialog.NachoInfoDialog
 
 @Composable
 fun CreateCardRoute(
@@ -46,15 +45,17 @@ fun CreateCardRoute(
     )
 
     if (showBackDialog) {
-        NachoDialog(onDismiss = { showBackDialog = false }) {
-            DiscardChangesDialogContent(
-                onConfirm = {
-                    showBackDialog = false
-                    onBackClick()
-                },
-                onDismiss = { showBackDialog = false }
-            )
-        }
+        NachoInfoDialog(
+            title = stringResource(R.string.txt_exit_dialog_title),
+            message = stringResource(R.string.txt_exit_dialog_message),
+            confirmText = stringResource(R.string.btn_exit),
+            dismissText = stringResource(R.string.btn_continue),
+            onConfirm = {
+                showBackDialog = false
+                onBackClick()
+            },
+            onDismiss = { showBackDialog = false },
+        )
     }
 }
 
