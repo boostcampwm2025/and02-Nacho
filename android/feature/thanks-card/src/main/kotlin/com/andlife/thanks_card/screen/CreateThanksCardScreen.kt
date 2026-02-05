@@ -1,5 +1,6 @@
 package com.andlife.thanks_card.screen
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -61,6 +62,10 @@ fun ThanksCardRoute(
                 }
             }
         }
+    }
+
+    BackHandler {
+        showBackDialog = true
     }
 
     ThanksCardScreen(
