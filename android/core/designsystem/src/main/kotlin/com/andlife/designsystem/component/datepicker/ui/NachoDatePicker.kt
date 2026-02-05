@@ -253,9 +253,12 @@ private fun InvitationDatePickerCalendar(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             val dayOfWeeks =
-                DayOfWeek.entries.map {
-                    it.getDisplayName(TextStyle.NARROW, locale)
-                }
+                // 일요일부터 시작
+                listOf(DayOfWeek.SUNDAY.getDisplayName(TextStyle.NARROW, locale)) +
+                    DayOfWeek.entries.filter { it != DayOfWeek.SUNDAY }
+                        .map {
+                            it.getDisplayName(TextStyle.NARROW, locale)
+                        }
             dayOfWeeks.forEach { dayOfWeek ->
                 Text(
                     text = dayOfWeek,
