@@ -1,7 +1,6 @@
 
 
-<img width="100%" alt="미리보기 2026-02-04 21 10 13" src="https://github.com/user-attachments/assets/da61f0d4-23f3-4c93-92da-41a0adc681b6" />
-
+<img width="100%" alt="Frame 31" src="https://github.com/user-attachments/assets/a9594abd-f779-4d28-aee7-30047a933a4f" />
 
 # 나에게로의 초대
 
@@ -32,86 +31,40 @@ AndLife는 바로 이 지점에서 출발했습니다. <br>
 
 
 ## 주요 기능
-<table>
-  <tr>
-    <th align="left" width="35%">기능</th>
-    <th align="left">미리보기</th>
-  </tr>
 
-  <!-- 초대 -->
-  <tr>
-    <td valign="top">
-      <b>초대 (Invitation)</b>
-      <ul>
-        <li>이벤트 상세 정보를 정의하고, 커스텀 에디터로 나만의 초대 카드 제작</li>
-        <li>생성 전 미리보기 제공</li>
-      </ul>
-    </td>
-    <td>
-      <p align="center">
-        <img src="https://github.com/user-attachments/assets/7ebafbdb-7d12-4062-a392-f00be26a4316" width="31%" hspace="6" />
-        <img src="https://github.com/user-attachments/assets/cfd02fc7-8926-40e0-8a64-857d3ed7c524" width="31%" hspace="6" />
-        <img src="https://github.com/user-attachments/assets/42f4a0f7-8c9d-47d5-917b-956884a5c2b0" width="31%" />
-      </p>
-    </td>
-  </tr>
+<!-- 홈 -->
+### 홈
+|스플래시 및 로그인|홈 화면|초대 관리|
+|:-----:|:-----:|:-----:|
+| <img width="220" src="https://github.com/user-attachments/assets/830c90db-8361-48a9-a956-1ee8ec2ccc96" /> | <img width="220" src="https://github.com/user-attachments/assets/d52a9903-7833-4488-953c-effc4acb30a4" /> | <img width="220" src="https://github.com/user-attachments/assets/b030ba45-970b-4970-8ace-61f67362f406" /> |
 
-  <!-- 공유 -->
-  <tr>
-    <td valign="top">
-      <b>공유 (Sharing)</b>
-      <ul>
-        <li>딥링크로 앱 설치 여부와 무관하게 이벤트 연결</li>
-        <li>카카오톡 공유 및 링크 복사 지원</li>
-      </ul>
-    </td>
-    <td>
-      <p align="center">
-        <img src="https://github.com/user-attachments/assets/f85584a0-b6b5-411b-a690-89a923290922" width="31%" hspace="6" />
-        <img src="https://github.com/user-attachments/assets/2727c218-087e-4540-8603-12181dd8e96a" width="31%" hspace="6" />
-        <img src="https://github.com/user-attachments/assets/ee5ce917-033b-42fb-b07b-dcc48ab46cef" width="31%" />
-      </p>
-    </td>
-  </tr>
 
-  <!-- 참여 -->
-  <tr>
-    <td valign="top">
-      <b>참여 (Participation)</b>
-      <ul>
-        <li>실시간 통합 피드 및 초대장 리스트 정렬</li>
-        <li>다가오는 초대와 최근 방명록 한눈에 확인</li>
-        <li>비로그인 사용자도 로컬 데이터로 참여 가능</li>
-      </ul>
-    </td>
-    <td>
-      <p align="center">
-        <img src="https://github.com/user-attachments/assets/1f05b7cd-ed32-4133-94e6-8d852d06d3ac" width="31%" hspace="6" />
-        <img src="https://github.com/user-attachments/assets/8baecbbb-98cf-4e41-88f6-025909b785c4" width="31%" hspace="6" />
-        <img src="https://github.com/user-attachments/assets/b8a81c21-8a8b-4136-8a8d-c62a5365c7fe" width="31%" />
-      </p>
-    </td>
-  </tr>
+<!-- 초대 -->
+### 초대
+|초대 생성|초대 카드|
+|:-----:|:-----:|
+| <img width="220" src="https://github.com/user-attachments/assets/8c4adecd-b9cd-496d-9a69-306ae56e72e6" /> | <img width="220" src="https://github.com/user-attachments/assets/361cdcd3-9b33-4249-88d5-30b385106f0c" /> |
 
-  <!-- 기록 -->
-  <tr>
-    <td valign="top">
-      <b>기록 (Archiving)</b>
-      <ul>
-        <li>사진·영상·음성 멀티미디어 방명록 아카이빙</li>
-        <li>촬영한 사진과 녹음 음성 메시지 바로 등록</li>
-        <li>Grid / 스토리 뷰로 추억 모아보기</li>
-      </ul>
-    </td>
-    <td>
-      <p align="center">
-        <img src="https://github.com/user-attachments/assets/6ddda54a-feb3-4c55-a735-5ef6e7200e35" width="31%" hspace="6" />
-        <img src="https://github.com/user-attachments/assets/26d9a70f-7b3b-4ac7-841b-63f852950846" width="31%" hspace="6" />
-        <img src="https://github.com/user-attachments/assets/ca4b0523-03fc-448d-91f6-e2f406d9f811" width="31%" />
-      </p>
-    </td>
-  </tr>
-</table>
+
+<!-- 공유 및 참여 -->
+### 공유 및 참여
+|딥링크 공유 (카카오톡 / 링크 복사)|공유받은 초대장 참여|
+|:-----:|:-----:|                                              
+| <img width="220" src="https://github.com/user-attachments/assets/9e74610e-8974-41f8-8d8f-08608c2ca261" /> | <img width="220" src="https://github.com/user-attachments/assets/f5347567-75f2-49d2-a41e-03741a1c951d" /> |
+
+
+<!-- 기록 -->
+### 기록
+|방명록 작성|미디어 확인(이미지/영상/오디오)|모아보기 / 스토리 다운로드|
+|:-----:|:-----:|:-----:|
+| <img width="220" src="https://github.com/user-attachments/assets/e2479a5d-8fa8-4bab-813e-83a47a7a32a7" /> | <img width="220" src="https://github.com/user-attachments/assets/b51179de-afd1-40f3-a4ac-2514022a2ab1" /> | <img width="220" src="https://github.com/user-attachments/assets/d09037d7-5b24-4c8f-8936-8cde1710b4f9" /> |
+
+
+<!-- 감사 -->
+### 감사
+|감사 카드|
+|:-----:|
+| <img width="220" src="https://github.com/user-attachments/assets/0cb9715f-4bde-47c4-aec7-7e9c0da85907" /> |
 
 
 <br>
@@ -129,7 +82,7 @@ AndLife는 바로 이 지점에서 출발했습니다. <br>
 <br>
 
 ## 프로젝트 구조
-<img width="5442" height="3488" alt="image" src="https://github.com/user-attachments/assets/54643434-9c76-46df-aaac-cba46b4cae37" />
+<img width="5442" height="3488" alt="image" src="https://github.com/user-attachments/assets/8b1a174a-f9fd-4f5f-a028-9499deecc10b" />
 
 <br>
 <br>

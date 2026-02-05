@@ -20,7 +20,14 @@ class KakaoHandler @Inject constructor() : SocialHandler {
         try {
             val oauthToken: OAuthToken =
                 if (UserApiClient.instance.isKakaoTalkLoginAvailable(context)) {
-                    loginWithKakaoTalk(context)
+                    try {
+                        loginWithKakaoTalk(context)
+                    } catch (e: Exception) {
+                        if (e is ClientError && e.reason == ClientErrorCause.Cancelled) {
+                            return Result.Error(error = LoginError.Cancel, message = e.message)
+                        }
+                        loginWithKakaoAccount(context)
+                    }
                 } else {
                     loginWithKakaoAccount(context)
                 }
