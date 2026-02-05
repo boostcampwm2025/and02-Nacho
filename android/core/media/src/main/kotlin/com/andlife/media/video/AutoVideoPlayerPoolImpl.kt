@@ -236,7 +236,7 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
         val totalMemoryGb = memoryInfo.totalMem.toDouble() / (1024 * 1024 * 1024)
 
         return when {
-            totalMemoryGb >= 7.0 -> 4
+            totalMemoryGb >= 7.0 -> 3
             totalMemoryGb >= 5.0 -> 3
             else -> 2
         }
