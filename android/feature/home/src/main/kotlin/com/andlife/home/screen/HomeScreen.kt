@@ -443,10 +443,12 @@ private fun LazyListScope.homeUpcomingSection(
     onInvitationClick: (invitationId: Long, isOwner: Boolean) -> Unit,
     onNavigateToCreate: () -> Unit,
 ) {
-    val refreshState = upcomingInvitations.loadState.refresh
-    val isInitialLoading = refreshState is LoadState.Loading && upcomingInvitations.itemCount == 0
-    val isInitialError = refreshState is LoadState.Error && upcomingInvitations.itemCount == 0
-    val isEmpty = refreshState is LoadState.NotLoading && upcomingInvitations.itemCount == 0
+    val sourceLoadState = upcomingInvitations.loadState.source.refresh
+    val mediatorLoadState = upcomingInvitations.loadState.mediator?.refresh
+
+    val isRefreshing = sourceLoadState is LoadState.Loading || mediatorLoadState is LoadState.Loading
+    val isError = sourceLoadState is LoadState.Error || mediatorLoadState is LoadState.Error
+    val isEmpty = !isRefreshing && upcomingInvitations.itemCount == 0
 
     item {
         Text(
@@ -465,46 +467,8 @@ private fun LazyListScope.homeUpcomingSection(
                 .wrapContentHeight(),
             contentAlignment = Alignment.Center
         ) {
-            if (isInitialLoading || isInitialError || isEmpty) {
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
-                    contentPadding = PaddingValues(horizontal = NachoSpacing.large),
-                    userScrollEnabled = false
-                ) {
-                    items(SKELETON_ITEM_COUNT) {
-                        InvitationScheduleListItemSkeleton(
-                            modifier = Modifier
-                                .fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO)
-                                .alpha(0.5f),
-                        )
-                    }
-                }
-            }
-
             when {
-                isInitialError -> {
-                    UpcomingStatusContent(
-                        title = stringResource(R.string.txt_error_upcoming_title),
-                        description = stringResource(R.string.txt_error_upcoming_desc),
-                    )
-                }
-
-                isEmpty -> {
-                    UpcomingStatusContent(
-                        title = stringResource(R.string.txt_empty_upcoming_title),
-                        description = stringResource(R.string.txt_empty_upcoming_desc),
-                        buttonText = stringResource(R.string.txt_action_create_invitation),
-                        onButtonClick = onNavigateToCreate,
-                        buttonIconRes = designR.drawable.ic_add_24
-                    )
-                }
-
-                isInitialLoading -> {
-                    InvitationLoadingIndicator()
-                }
-
-                else -> {
+                upcomingInvitations.itemCount > 0 -> {
                     LazyRow(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
@@ -531,7 +495,57 @@ private fun LazyListScope.homeUpcomingSection(
                         }
                     }
                 }
+
+                isRefreshing -> {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
+                        contentPadding = PaddingValues(horizontal = NachoSpacing.large),
+                        userScrollEnabled = false
+                    ) {
+                        items(SKELETON_ITEM_COUNT) {
+                            InvitationScheduleListItemSkeleton(
+                                modifier = Modifier
+                                    .fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO)
+                                    .alpha(0.5f),
+                            )
+                        }
+                    }
+                    InvitationLoadingIndicator()
+                }
+
+                isError -> {
+                    UpcomingStatusContent(
+                        title = stringResource(R.string.txt_error_upcoming_title),
+                        description = stringResource(R.string.txt_error_upcoming_desc),
+                    )
+                }
+
+                isEmpty -> {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
+                        contentPadding = PaddingValues(horizontal = NachoSpacing.large),
+                        userScrollEnabled = false
+                    ) {
+                        items(SKELETON_ITEM_COUNT) {
+                            InvitationScheduleListItemSkeleton(
+                                modifier = Modifier
+                                    .fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO)
+                                    .alpha(0.5f),
+                            )
+                        }
+                    }
+                    UpcomingStatusContent(
+                        title = stringResource(R.string.txt_empty_upcoming_title),
+                        description = stringResource(R.string.txt_empty_upcoming_desc),
+                        buttonText = stringResource(R.string.txt_action_create_invitation),
+                        onButtonClick = onNavigateToCreate,
+                        buttonIconRes = designR.drawable.ic_add_24
+                    )
+                }
             }
+
         }
     }
 }

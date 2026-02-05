@@ -266,7 +266,7 @@ private fun MyInvitationScreen(
                             modifier = Modifier.fillMaxSize()
                         ) {
                             PagingStateContent(
-                                loadState = currentItems.loadState.refresh,
+                                loadState = currentItems.loadState.source.refresh,
                                 itemCount = currentItems.itemCount,
                                 mediatorLoadState = currentItems.loadState.mediator?.refresh,
                                 emptyComment = stringResource(R.string.label_myinvitation_empty),

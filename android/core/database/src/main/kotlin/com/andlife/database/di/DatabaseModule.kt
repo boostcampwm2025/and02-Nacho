@@ -2,6 +2,7 @@ package com.andlife.database.di
 
 import android.content.Context
 import androidx.room.Room
+import com.andlife.database.DatabaseConstants
 import com.andlife.database.InvitationDatabase
 import com.andlife.database.dao.InvitationSummaryDao
 import dagger.Module
@@ -15,8 +16,6 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
 
-    private const val DATABASE_NAME = "invitation.db"
-
     @Provides
     @Singleton
     fun provideDatabase(
@@ -25,7 +24,7 @@ object DatabaseModule {
         return Room.databaseBuilder(
             context,
             InvitationDatabase::class.java,
-            DATABASE_NAME
+            DatabaseConstants.DATABASE_NAME
         ).build()
     }
 
