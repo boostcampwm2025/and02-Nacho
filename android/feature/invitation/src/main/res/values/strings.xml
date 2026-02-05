@@ -29,6 +29,7 @@
 
     <string name="snack_download_fail">저장에 실패하였습니다</string>
     <string name="snack_permission_denied">파일을 저장하려면 저장공간 접근 권한이 필요합니다</string>
+    <string name="snack_notification_permission_denied">다운로드 진행 상태를 알림으로 받으려면 알림 권한이 필요합니다</string>
     <string name="snack_download_guide">다운로드 상태는 상단 알림창에서 확인 가능합니다</string>
 
     <string name="dialog_network_title">안내</string>

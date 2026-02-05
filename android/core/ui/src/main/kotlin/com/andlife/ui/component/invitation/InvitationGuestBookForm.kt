@@ -128,7 +128,7 @@ fun InvitationGuestBookForm(
         }
 
     Column(
-        modifier = modifier,
+        modifier = modifier.padding(top = NachoSpacing.small),
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
     ) {
         // 미디어 업로드 UI
@@ -138,9 +138,7 @@ fun InvitationGuestBookForm(
             maxMediasCount = MAX_MEDIAS_COUNT,
             maxMediaSizeBytes = MAX_MEDIA_SIZE_BYTES,
             onMediaRemove = onMediaRemove,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = NachoSpacing.xSmall),
+            modifier = Modifier.fillMaxWidth()
         )
 
         Box(

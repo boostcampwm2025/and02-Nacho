@@ -171,6 +171,12 @@ fun MyInvitationDetailRoute(
                     snackbarHostState.showSnackbar(res.getString(R.string.msg_invitation_delete_failed))
                 }
             }
+            is MyInvitationDetailSideEffect.KakaoTalkNotAvailable -> {
+                coroutineScope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(res.getString(R.string.msg_kakaotalk_available_failed))
+                }
+            }
         }
     }
 

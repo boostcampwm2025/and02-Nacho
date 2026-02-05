@@ -27,23 +27,23 @@ fun PagingStateContent(
     emptyComment: String = stringResource(R.string.label_paging_empty_result),
     content: @Composable () -> Unit,
 ) {
+    val isRefreshing = loadState is LoadState.Loading || mediatorLoadState is LoadState.Loading
+    val isError = loadState is LoadState.Error || mediatorLoadState is LoadState.Error
+    val isEmpty = !isRefreshing && !isError && itemCount == 0
+
     Box(modifier = modifier.fillMaxSize()) {
         when {
             itemCount > 0 -> content()
 
-            loadState is LoadState.Loading || mediatorLoadState is LoadState.Loading -> {
+            isRefreshing -> {
                 InvitationLoadingIndicator()
             }
 
-            loadState is LoadState.Error -> {
+            isError -> {
                 InvitationLoadingError(onRetry = onRetry)
             }
 
-            mediatorLoadState is LoadState.Error -> {
-                InvitationLoadingError(onRetry = onRetry)
-            }
-
-            loadState is LoadState.NotLoading -> {
+            isEmpty -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()

@@ -478,7 +478,8 @@ constructor(
             sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("최대 5개까지 미디어를 추가할 수 있습니다."))
             return
         }
-        updateState { copy(audioRecordingDuration = 0) }
+        updateState { copy(isMediaPlaying = false, audioRecordingDuration = 0) }
+        audioPlayerManager.pause()
         sendEffect(MyInvitationGuestBookSideEffect.ShowAudioRecordingBottomSheet)
     }
 
