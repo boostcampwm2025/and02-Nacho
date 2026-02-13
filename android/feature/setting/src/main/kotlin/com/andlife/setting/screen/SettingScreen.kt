@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
@@ -22,6 +24,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -410,6 +413,8 @@ private fun ProfileContent(
                     }
                 }
 
+                Spacer(modifier = Modifier.width(NachoSpacing.medium))
+
                 Column(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.Center,
@@ -436,10 +441,6 @@ private fun ProfileContent(
                         }
                     }
 
-                    NachoDivider(
-                        color = NachoTheme.colorScheme.backgroundSecondary,
-                        modifier = Modifier.fillMaxWidth()
-                    )
                 }
             }
         }
@@ -726,19 +727,28 @@ fun EditNicknameDialogContent(
             value = uiState.nicknameInput,
             onValueChange = onNicknameChanged,
             isError = uiState.nicknameError != NicknameError.NONE,
+            placeholder =  {
+                Text(
+                    text = stringResource(R.string.msg_nickname_empty),
+                    style = NachoTheme.typography.bodyLargeRegular,
+                    color = NachoTheme.colorScheme.textTertiary,
+                )
+            },
             supportingText = {
                 if (errorMessage.isNotEmpty()) {
-                    Text(errorMessage, color = NachoTheme.colorScheme.brandPrimary)
+                    Text(errorMessage, color = NachoTheme.colorScheme.error)
                 }
             },
             modifier = Modifier.fillMaxWidth(),
             textStyle = NachoTheme.typography.headingSmallSemiBold,
             singleLine = true,
-            colors = TextFieldDefaults.colors(
+            shape = RoundedCornerShape(NachoSpacing.small),
+            colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
+                focusedBorderColor = NachoTheme.colorScheme.brandPrimary,
+                unfocusedBorderColor = NachoTheme.colorScheme.backgroundBorder,
+                errorBorderColor = NachoTheme.colorScheme.error,
                 cursorColor = NachoTheme.colorScheme.brandPrimary,
                 selectionColors = TextSelectionColors(
                     handleColor = NachoTheme.colorScheme.brandPrimary,
