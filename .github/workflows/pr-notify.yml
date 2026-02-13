@@ -15,11 +15,11 @@
           run: |
             # GitHub 유저명 → Slack 유저 ID 매핑
             declare -A SLACK_MAP
-            SLACK_MAP["팀원1-github"]="U09B4MJDFC0"
-            SLACK_MAP["팀원2-github"]="U099ZJVV70X"
-            SLACK_MAP["팀원3-github"]="U09AC0P6M8A"
-            SLACK_MAP["팀원4-github"]="U09ABTA2KU2"
-            SLACK_MAP["팀원5-github"]="U09B4QC003A"
+            SLACK_MAP["dongykung"]="U09B4MJDFC0"
+            SLACK_MAP["jm3789"]="U09AC0P6M8A"
+            SLACK_MAP["seojw0124"]="U09B4QC003A"
+            SLACK_MAP["CDHyun"]="U099ZJVV70X"
+            SLACK_MAP["ant5555"]="U09ABTA2KU2"
 
             PR_NUMBER=${{ github.event.pull_request.number }}
             PR_TITLE="${{ github.event.pull_request.title }}"
