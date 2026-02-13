@@ -5,6 +5,7 @@ import com.andlife.network.model.auth.AuthRequest
 import com.andlife.network.model.auth.AuthResponse
 import com.andlife.network.model.auth.RefreshTokenRequest
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.POST
 
 interface AuthService {

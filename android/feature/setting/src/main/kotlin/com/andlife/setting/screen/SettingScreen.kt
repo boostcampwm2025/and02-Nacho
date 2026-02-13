@@ -1,4 +1,4 @@
-package com.andlife.home.screen
+package com.andlife.setting.screen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +21,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -34,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -56,13 +60,16 @@ import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.auth.AuthState
-import com.andlife.home.R
-import com.andlife.home.model.setting.SettingSideEffect
-import com.andlife.home.model.setting.SettingUiEvent
-import com.andlife.home.model.setting.SettingUiState
-import com.andlife.home.viewmodel.SettingViewModel
+import com.andlife.login.LocalLoginManager
+import com.andlife.login.social.SocialType
+import com.andlife.setting.R
+import com.andlife.setting.model.SettingSideEffect
+import com.andlife.setting.model.SettingUiEvent
+import com.andlife.setting.model.SettingUiState
+import com.andlife.setting.viewmodel.SettingViewModel
 import com.andlife.ui.util.collectWithLifecycle
 import com.andlife.ui.util.getAppVersion
+import kotlinx.coroutines.launch
 import com.andlife.designsystem.R as designR
 
 @Composable
@@ -70,18 +77,25 @@ fun SettingRoute(
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
     onLogout: () -> Unit,
+    onSignedOut: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var isLogoutDialogVisible by remember { mutableStateOf(false) }
+    var isSignedOutDialogVisible by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val loginManager = LocalLoginManager.current
+    val res = LocalResources.current
 
     SettingScreen(
         uiState = uiState,
+        snackbarHostState = snackbarHostState,
         onNavigateToLogin = onNavigateToLogin,
         onEvent = viewModel::onEvent,
         modifier = modifier,
-        onClickQuit = { },
+        onClickQuit = { isSignedOutDialogVisible = true },
         onClickLogout = { isLogoutDialogVisible = true }
     )
 
@@ -95,6 +109,23 @@ fun SettingRoute(
             SettingSideEffect.PopBackStack -> {
                 onNavigateBack()
             }
+
+            SettingSideEffect.FailSignOut -> {
+                scope.launch {
+                    snackbarHostState.showSnackbar(res.getString(R.string.fail_sign_out))
+                }
+            }
+
+            SettingSideEffect.SuccessSignOutWithServer -> {
+                scope.launch {
+                    val result = loginManager.logout(SocialType.KAKAO)
+                    if (result) {
+                        onSignedOut()
+                    } else {
+                        snackbarHostState.showSnackbar(res.getString(R.string.fail_sign_out))
+                    }
+                }
+            }
         }
     }
 
@@ -102,61 +133,23 @@ fun SettingRoute(
         NachoDialog(
             onDismiss = { isLogoutDialogVisible = false }
         ) {
-            Column(
+            LogoutDialogContent(
+                onDismiss = { isLogoutDialogVisible = false },
+                onConfirm = { viewModel.onEvent(SettingUiEvent.ClickLogout) },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(NachoSpacing.xLarge)
-            ) {
-                Text(
-                    text = stringResource(R.string.txt_logout),
-                    style = NachoTheme.typography.headingSmallSemiBold,
-                    color = NachoTheme.colorScheme.textPrimary
-                )
+            )
+        }
+    }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TextButton(
-                        onClick = { isLogoutDialogVisible = false }
-                    ) {
-                        Text(
-                            text = stringResource(R.string.txt_question_logout),
-                            color = NachoTheme.colorScheme.textSecondary
-                        )
-                    }
+    if (isSignedOutDialogVisible) {
+        NachoDialog(onDismiss = { isSignedOutDialogVisible = false }) {
+            SignedOutDialogContent(
+                onDismiss = { isSignedOutDialogVisible = false },
+                onConfirm = {
+                    viewModel.onEvent(SettingUiEvent.ClickSignOut)
+                    isSignedOutDialogVisible = false
                 }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TextButton(
-                        onClick = {
-                            isLogoutDialogVisible = false
-                        },
-                        shape = NachoTheme.shapes.small
-                    ) {
-                        Text(
-                            text = stringResource(com.andlife.ui.R.string.txt_cancel),
-                            color = NachoTheme.colorScheme.textSecondary
-                        )
-                    }
-                    Spacer(modifier = Modifier.padding(horizontal = NachoSpacing.small))
-                    TextButton(
-                        onClick = {
-                            viewModel.onEvent(SettingUiEvent.ClickLogout)
-                        },
-                        shape = NachoTheme.shapes.small
-                    ) {
-                        Text(
-                            text = stringResource(com.andlife.ui.R.string.txt_confirm),
-                            color = NachoTheme.colorScheme.brandPrimary
-                        )
-                    }
-                }
-            }
+            )
         }
     }
 }
@@ -164,6 +157,7 @@ fun SettingRoute(
 @Composable
 fun SettingScreen(
     uiState: SettingUiState,
+    snackbarHostState: SnackbarHostState,
     onNavigateToLogin: () -> Unit,
     onClickLogout: () -> Unit,
     onClickQuit: () -> Unit,
@@ -179,6 +173,7 @@ fun SettingScreen(
                 onBack = { onEvent(SettingUiEvent.ClickBack) },
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
     ) { paddingValues ->
 
@@ -191,63 +186,75 @@ fun SettingScreen(
                 CircularProgressIndicator()
             }
         } else {
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(paddingValues)
-                    .verticalScroll(scrollState)
-                    .padding(vertical = NachoSpacing.twoXLarge),
-                verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
             ) {
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(scrollState)
+                        .padding(vertical = NachoSpacing.twoXLarge),
+                    verticalArrangement = Arrangement.spacedBy(NachoSpacing.large),
+                ) {
 
-                var nameState by remember { mutableStateOf("안드라이프") } // TODO: 임시
+                    var nameState by remember { mutableStateOf("안드라이프") } // TODO: 임시
 
-                SettingSection {
-                    ProfileContent(
-                        authState = uiState.authState,
-                        onNavigateToLogin = onNavigateToLogin,
-                        onNameChange = { nameState = it },
-                        onClickImage = {},
-                        onClickEdit = {},
-                        modifier = Modifier.padding(vertical = NachoSpacing.medium, horizontal = NachoSpacing.large),
-                    )
+                    SettingSection {
+                        ProfileContent(
+                            authState = uiState.authState,
+                            onNavigateToLogin = onNavigateToLogin,
+                            onNameChange = { nameState = it },
+                            onClickImage = {},
+                            onClickEdit = {},
+                            modifier = Modifier.padding(
+                                vertical = NachoSpacing.medium,
+                                horizontal = NachoSpacing.large
+                            ),
+                        )
+                    }
+
+                    var checked by remember { mutableStateOf(true) } // TODO: 임시
+
+                    SettingSection(headerTitle = stringResource(R.string.txt_header_notification)) { modifier ->
+                        NotificationContent(
+                            isNotificationEnabled = checked,
+                            onCheckedChange = { checked = it },
+                            modifier = modifier,
+                        )
+                    }
+
+                    SettingSection(headerTitle = stringResource(R.string.txt_header_policy)) { modifier ->
+                        PolicyContent(
+                            onClickService = {},
+                            onClickPrivacy = {},
+                            modifier = modifier,
+                        )
+                    }
+
+                    SettingSection(headerTitle = stringResource(R.string.txt_header_app_info)) { modifier ->
+                        AppInfoContent(
+                            appVersion = context.getAppVersion(),
+                            onClickInfo = {},
+                            modifier = modifier,
+                        )
+                    }
+
+                    SettingSection(
+                        headerTitle = stringResource(R.string.txt_header_account),
+                        showDivider = false
+                    ) { modifier ->
+                        AccountContent(
+                            authState = uiState.authState,
+                            onClickLogout = onClickLogout,
+                            onClickQuit = onClickQuit,
+                            modifier = modifier,
+                        )
+                    }
                 }
-
-                var checked by remember { mutableStateOf(true) } // TODO: 임시
-
-                SettingSection(headerTitle = stringResource(R.string.txt_header_notification)) { modifier ->
-                    NotificationContent(
-                        isNotificationEnabled = checked,
-                        onCheckedChange = { checked = it },
-                        modifier = modifier,
-                    )
-                }
-
-                SettingSection(headerTitle = stringResource(R.string.txt_header_policy)) { modifier ->
-                    PolicyContent(
-                        onClickService = {},
-                        onClickPrivacy = {},
-                        modifier = modifier,
-                    )
-                }
-
-                SettingSection(headerTitle = stringResource(R.string.txt_header_app_info)) { modifier ->
-                    AppInfoContent(
-                        appVersion = context.getAppVersion(),
-                        onClickInfo = {},
-                        modifier = modifier,
-                    )
-                }
-
-                SettingSection(
-                    headerTitle = stringResource(R.string.txt_header_account),
-                    showDivider = false
-                ) { modifier ->
-                    AccountContent(
-                        authState = uiState.authState,
-                        onClickLogout = onClickLogout,
-                        onClickQuit = onClickQuit,
-                        modifier = modifier,
+                if (uiState.isOverlayLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
                     )
                 }
             }
@@ -660,7 +667,10 @@ private fun AccountContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = NachoSpacing.medium)
-                .clickable { onClickQuit() }
+                .clickable(
+                    onClick = onClickQuit,
+                    enabled = isLoggedIn
+                )
                 .padding(horizontal = NachoSpacing.large, vertical = NachoSpacing.medium),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -683,12 +693,115 @@ private fun AccountContent(
     }
 }
 
+@Composable
+private fun LogoutDialogContent(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(NachoSpacing.xLarge)
+    ) {
+        Text(
+            text = stringResource(R.string.txt_logout),
+            style = NachoTheme.typography.headingSmallSemiBold,
+            color = NachoTheme.colorScheme.textPrimary
+        )
+
+        Text(
+            modifier = Modifier.padding(top = NachoSpacing.medium),
+            text = stringResource(R.string.txt_question_logout),
+            color = NachoTheme.colorScheme.textSecondary
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextButton(
+                onClick = { onDismiss() },
+                shape = NachoTheme.shapes.small
+            ) {
+                Text(
+                    text = stringResource(R.string.txt_cancel),
+                    color = NachoTheme.colorScheme.textSecondary
+                )
+            }
+            Spacer(modifier = Modifier.padding(horizontal = NachoSpacing.small))
+            TextButton(
+                onClick = { onConfirm() },
+                shape = NachoTheme.shapes.small
+            ) {
+                Text(
+                    text = stringResource(R.string.txt_confirm),
+                    color = NachoTheme.colorScheme.brandPrimary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SignedOutDialogContent(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(NachoSpacing.xLarge)
+    ) {
+        Text(
+            text = stringResource(R.string.txt_quit),
+            style = NachoTheme.typography.headingSmallSemiBold,
+            color = NachoTheme.colorScheme.textPrimary
+        )
+
+        Text(
+            modifier = Modifier.padding(top = NachoSpacing.medium),
+            text = stringResource(R.string.txt_sign_out),
+            color = NachoTheme.colorScheme.textPrimary
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextButton(
+                onClick = { onDismiss() },
+                shape = NachoTheme.shapes.small
+            ) {
+                Text(
+                    text = stringResource(R.string.txt_cancel),
+                    color = NachoTheme.colorScheme.textSecondary
+                )
+            }
+            Spacer(modifier = Modifier.padding(horizontal = NachoSpacing.small))
+            TextButton(
+                onClick = { onConfirm() },
+                shape = NachoTheme.shapes.small
+            ) {
+                Text(
+                    text = stringResource(R.string.txt_confirm),
+                    color = NachoTheme.colorScheme.brandPrimary
+                )
+            }
+        }
+    }
+}
+
 @PreviewTheme
 @Composable
 private fun SettingScreenPreview() {
     NachoTheme {
         SettingScreen(
             uiState = SettingUiState(isLoading = false),
+            snackbarHostState = remember { SnackbarHostState() },
             onNavigateToLogin = {},
             onClickQuit = {},
             onClickLogout = {}

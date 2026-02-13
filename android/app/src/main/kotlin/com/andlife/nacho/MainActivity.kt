@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.theme.NachoTheme
@@ -51,4 +52,8 @@ class MainActivity : ComponentActivity() {
         setIntent(intent)
         viewModel.handleDeepLink(intent)
     }
+}
+
+val LocalLoginManager = staticCompositionLocalOf<LoginManager> {
+    error("LoginManager가 설정되지 않았습니다.")
 }

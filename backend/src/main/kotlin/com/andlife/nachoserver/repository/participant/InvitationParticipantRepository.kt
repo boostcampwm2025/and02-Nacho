@@ -78,4 +78,9 @@ interface InvitationParticipantRepository : JpaRepository<InvitationParticipant,
     @Transactional
     @Query("DELETE FROM InvitationParticipant p WHERE p.invitation.id = :invitationId")
     fun deleteAllByInvitationId(@Param("invitationId") invitationId: Long)
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM InvitationParticipant p WHERE p.user.id = :userId")
+    fun deleteAllByUserId(@Param("userId") userId: Long)
 }

@@ -1,10 +1,12 @@
-package com.andlife.home.viewmodel
+package com.andlife.setting.viewmodel
 
 import androidx.lifecycle.viewModelScope
 import com.andlife.domain.repository.user.UserRepository
-import com.andlife.home.model.setting.SettingSideEffect
-import com.andlife.home.model.setting.SettingUiEvent
-import com.andlife.home.model.setting.SettingUiState
+import com.andlife.domain.util.onFailure
+import com.andlife.domain.util.onSuccess
+import com.andlife.setting.model.SettingSideEffect
+import com.andlife.setting.model.SettingUiEvent
+import com.andlife.setting.model.SettingUiState
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,7 +27,7 @@ class SettingViewModel @Inject constructor(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Lazily,
+            started = SharingStarted.Companion.Lazily,
             initialValue = SettingUiState()
         )
 
@@ -33,6 +35,7 @@ class SettingViewModel @Inject constructor(
         when (event) {
             SettingUiEvent.ClickBack -> sendEffect(SettingSideEffect.PopBackStack)
             SettingUiEvent.ClickLogout -> logout()
+            SettingUiEvent.ClickSignOut -> signOut()
         }
     }
 
@@ -42,6 +45,21 @@ class SettingViewModel @Inject constructor(
             sendEffect(SettingSideEffect.NavigateToLogin)
         }
     }
+
+    private fun signOut() {
+        viewModelScope.launch {
+            updateState { copy(isOverlayLoading = true) }
+            userRepository.signOut()
+                .onSuccess {
+                    sendEffect(SettingSideEffect.SuccessSignOutWithServer)
+                }
+                .onFailure { error, msg ->
+                    sendEffect(SettingSideEffect.FailSignOut)
+                }
+            updateState { copy(isOverlayLoading = false) }
+        }
+    }
+
 
     private fun loadUserInfo() {
         viewModelScope.launch {
