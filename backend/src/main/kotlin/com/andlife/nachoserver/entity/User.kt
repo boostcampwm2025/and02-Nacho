@@ -25,4 +25,12 @@ class User(
 
     @Column(name = "profile_image_url")
     var profileImageUrl: String? = null,
-): BaseTimeEntity()
+): BaseTimeEntity() {
+    fun updateNickname(newName: String) {
+        this.name
+    }
+
+    fun updateProfileImage(newUrl: String) {
+        this.profileImageUrl = newUrl
+    }
+}
