@@ -2,6 +2,7 @@ package com.andlife.setting.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
+import com.andlife.domain.model.auth.AuthState
 import com.andlife.domain.repository.user.UserRepository
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
@@ -66,7 +67,12 @@ class SettingViewModel @Inject constructor(
             userRepository.updateProfile(nickname, imageUri)
                 .onSuccess { updatedUser ->
                     Log.d("Nickname", "수정 성공: ${updatedUser.name}")
-                    loadUserInfo()
+                    updateState {
+                        copy(
+                            authState = AuthState.Authenticated(updatedUser),
+                            isOverlayLoading = false
+                        )
+                    }
                     // Todo : 스낵바 처리
                 }
                 .onFailure { error, msg ->
