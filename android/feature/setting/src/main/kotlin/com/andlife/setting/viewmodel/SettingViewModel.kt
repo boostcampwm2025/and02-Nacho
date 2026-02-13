@@ -35,7 +35,7 @@ class SettingViewModel @Inject constructor(
     override fun onEvent(event: SettingUiEvent) {
         when (event) {
             is SettingUiEvent.OnNicknameChanged -> validateNickname(event.nickname)
-            is SettingUiEvent.ClickConfirmNickname -> updateNickname(event.nickname)
+            is SettingUiEvent.ClickConfirmNickname -> updateProfile(event.nickname)
             SettingUiEvent.ClickBack -> sendEffect(SettingSideEffect.PopBackStack)
             SettingUiEvent.ClickLogout -> logout()
             SettingUiEvent.ClickSignOut -> signOut()
@@ -58,11 +58,19 @@ class SettingViewModel @Inject constructor(
         }
     }
 
-    private fun updateNickname(name: String) {
+    private fun updateProfile(nickname: String? = null, imageUri: String? = null) {
         viewModelScope.launch {
             updateState { copy(isOverlayLoading = true) }
-            // Todo: 서버에 닉네임 업데이트 요청
-            loadUserInfo()
+
+            userRepository.updateProfile(nickname, imageUri)
+                .onSuccess {
+                    loadUserInfo()
+                    // Todo : 스낵바 처리
+                }
+                .onFailure { error, msg ->
+                    // Todo : 스낵바 처리
+                }
+
             updateState { copy(isOverlayLoading = false) }
         }
     }
