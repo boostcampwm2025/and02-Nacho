@@ -1,5 +1,6 @@
 package com.andlife.setting.screen
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -144,6 +145,7 @@ fun SettingRoute(
                 uiState = uiState,
                 onNicknameChanged = { viewModel.onEvent(SettingUiEvent.OnNicknameChanged(it)) },
                 onConfirm = {
+                    Log.d("Nickname", "Confirm clicked: ${uiState.nicknameInput}")
                     viewModel.onEvent(SettingUiEvent.ClickConfirmNickname(uiState.nicknameInput))
                     isNicknameDialogVisible = false
                 },

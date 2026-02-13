@@ -1,5 +1,6 @@
 package com.andlife.setting.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.andlife.domain.repository.user.UserRepository
 import com.andlife.domain.util.onFailure
@@ -63,12 +64,14 @@ class SettingViewModel @Inject constructor(
             updateState { copy(isOverlayLoading = true) }
 
             userRepository.updateProfile(nickname, imageUri)
-                .onSuccess {
+                .onSuccess { updatedUser ->
+                    Log.d("Nickname", "수정 성공: ${updatedUser.name}")
                     loadUserInfo()
                     // Todo : 스낵바 처리
                 }
                 .onFailure { error, msg ->
                     // Todo : 스낵바 처리
+                    Log.d("SettingViewModel", "수정 실패 : $msg")
                 }
 
             updateState { copy(isOverlayLoading = false) }

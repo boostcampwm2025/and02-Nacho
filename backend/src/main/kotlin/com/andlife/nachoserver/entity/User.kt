@@ -27,7 +27,7 @@ class User(
     var profileImageUrl: String? = null,
 ): BaseTimeEntity() {
     fun updateNickname(newName: String) {
-        this.name
+        this.name = newName
     }
 
     fun updateProfileImage(newUrl: String) {
