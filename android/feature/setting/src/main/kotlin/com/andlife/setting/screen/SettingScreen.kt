@@ -146,7 +146,13 @@ fun SettingRoute(
         onNavigateToLogin = onNavigateToLogin,
         onEvent = viewModel::onEvent,
         modifier = modifier,
-        onClickEditNickname = { isNicknameDialogVisible = true },
+        onClickEditNickname = {
+            val currentUser = (uiState.authState as? AuthState.Authenticated)?.user
+            currentUser?.let {
+                viewModel.onEvent(SettingUiEvent.OnNicknameChanged(it.name))
+            }
+            isNicknameDialogVisible = true
+        },
         onClickEditImage = { isImageActionDialogVisible = true },
         onClickQuit = { isSignedOutDialogVisible = true },
         onClickLogout = { isLogoutDialogVisible = true }
@@ -793,8 +799,11 @@ fun EditNicknameDialogContent(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val currentNickname = (uiState.authState as? AuthState.Authenticated)?.user?.name ?: ""
+
     val isConfirmEnabled = uiState.nicknameInput.isNotBlank() &&
-        uiState.nicknameError == NicknameError.NONE
+        uiState.nicknameError == NicknameError.NONE &&
+        uiState.nicknameInput != currentNickname
 
     val errorMessage = when (uiState.nicknameError) {
         NicknameError.EMPTY -> stringResource(R.string.msg_nickname_empty)
