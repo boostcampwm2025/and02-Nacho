@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -20,6 +21,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -63,6 +65,7 @@ import com.andlife.domain.model.auth.AuthState
 import com.andlife.login.LocalLoginManager
 import com.andlife.login.social.SocialType
 import com.andlife.setting.R
+import com.andlife.setting.model.NicknameError
 import com.andlife.setting.model.SettingSideEffect
 import com.andlife.setting.model.SettingUiEvent
 import com.andlife.setting.model.SettingUiState
@@ -84,6 +87,7 @@ fun SettingRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var isLogoutDialogVisible by remember { mutableStateOf(false) }
     var isSignedOutDialogVisible by remember { mutableStateOf(false) }
+    var isNicknameDialogVisible by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val loginManager = LocalLoginManager.current
@@ -95,6 +99,8 @@ fun SettingRoute(
         onNavigateToLogin = onNavigateToLogin,
         onEvent = viewModel::onEvent,
         modifier = modifier,
+        onClickEditNickname = { isNicknameDialogVisible = true },
+        onClickEditImage = {},
         onClickQuit = { isSignedOutDialogVisible = true },
         onClickLogout = { isLogoutDialogVisible = true }
     )
@@ -129,6 +135,20 @@ fun SettingRoute(
         }
     }
 
+    if (isNicknameDialogVisible) {
+        NachoDialog(onDismiss = { isNicknameDialogVisible = false }) {
+            EditNicknameDialogContent(
+                uiState = uiState,
+                onNicknameChanged = { viewModel.onEvent(SettingUiEvent.OnNicknameChanged(it)) },
+                onConfirm = {
+                    viewModel.onEvent(SettingUiEvent.ClickConfirmNickname(uiState.nicknameInput))
+                    isNicknameDialogVisible = false
+                },
+                onDismiss = { isNicknameDialogVisible = false }
+            )
+        }
+    }
+
     if (isLogoutDialogVisible) {
         NachoDialog(
             onDismiss = { isLogoutDialogVisible = false }
@@ -159,6 +179,8 @@ fun SettingScreen(
     uiState: SettingUiState,
     snackbarHostState: SnackbarHostState,
     onNavigateToLogin: () -> Unit,
+    onClickEditNickname: () -> Unit,
+    onClickEditImage: () -> Unit,
     onClickLogout: () -> Unit,
     onClickQuit: () -> Unit,
     onEvent: (SettingUiEvent) -> Unit = {},
@@ -204,9 +226,8 @@ fun SettingScreen(
                         ProfileContent(
                             authState = uiState.authState,
                             onNavigateToLogin = onNavigateToLogin,
-                            onNameChange = { nameState = it },
-                            onClickImage = {},
-                            onClickEdit = {},
+                            onClickImage = onClickEditImage,     // 카메라/프로필 클릭 시
+                            onClickEdit = onClickEditNickname,   // 연필 아이콘 클릭 시
                             modifier = Modifier.padding(
                                 vertical = NachoSpacing.medium,
                                 horizontal = NachoSpacing.large
@@ -345,9 +366,8 @@ private fun SettingSection(
 private fun ProfileContent(
     authState: AuthState,
     onNavigateToLogin: () -> Unit,
-    onNameChange: (String) -> Unit,
-    onClickImage: () -> Unit = {},
-    onClickEdit: () -> Unit = {},
+    onClickImage: () -> Unit,
+    onClickEdit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (authState) {
@@ -358,15 +378,16 @@ private fun ProfileContent(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
-                    modifier = Modifier.size(80.dp),
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clickable(onClick = onClickImage),
                 ) {
                     AsyncImage(
                         model = user.profileImageUrl,
                         contentDescription = stringResource(R.string.desc_profile_image),
                         modifier = Modifier
                             .fillMaxSize()
-                            .clip(CircleShape)
-                            .clickable(onClick = onClickImage),
+                            .clip(CircleShape),
                         contentScale = ContentScale.Crop,
                         placeholder = painterResource(designR.drawable.ic_person_24),
                         error = painterResource(designR.drawable.ic_person_24),
@@ -397,25 +418,11 @@ private fun ProfileContent(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        TextField(
-                            value = user.name,
-                            onValueChange = onNameChange,
-                            enabled = true,
-                            readOnly = false,
-                            modifier = Modifier.weight(1f),
-                            textStyle = NachoTheme.typography.headingSmallSemiBold,
-                            singleLine = true,
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                cursorColor = NachoTheme.colorScheme.brandPrimary,
-                                selectionColors = TextSelectionColors(
-                                    handleColor = NachoTheme.colorScheme.brandPrimary,
-                                    backgroundColor = NachoTheme.colorScheme.brandPrimary.copy(alpha = 0.4f)
-                                )
-                            ),
+                        Text(
+                            text = user.name,
+                            style = NachoTheme.typography.headingSmallSemiBold,
+                            color = NachoTheme.colorScheme.textPrimary,
+                            modifier = Modifier.weight(1f)
                         )
                         IconButton(
                             onClick = onClickEdit,
@@ -694,6 +701,107 @@ private fun AccountContent(
 }
 
 @Composable
+fun EditNicknameDialogContent(
+    uiState: SettingUiState,
+    onNicknameChanged: (String) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val errorMessage = when (uiState.nicknameError) {
+        NicknameError.EMPTY -> stringResource(R.string.msg_nickname_empty)
+        NicknameError.TOO_LONG -> stringResource(R.string.msg_nickname_too_long)
+        NicknameError.INVALID_CHAR -> stringResource(R.string.msg_nickname_invalid_char)
+        NicknameError.NONE -> ""
+    }
+
+    Column(modifier = Modifier.padding(NachoSpacing.large)) {
+        Text(
+            text = stringResource(R.string.txt_nickname_edit_title),
+            style = NachoTheme.typography.headingSmallSemiBold,
+        )
+
+        Spacer(modifier = Modifier.height(NachoSpacing.medium))
+
+        OutlinedTextField(
+            value = uiState.nicknameInput,
+            onValueChange = onNicknameChanged,
+            isError = uiState.nicknameError != NicknameError.NONE,
+            supportingText = {
+                if (errorMessage.isNotEmpty()) {
+                    Text(errorMessage, color = NachoTheme.colorScheme.brandPrimary)
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = NachoTheme.typography.headingSmallSemiBold,
+            singleLine = true,
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                cursorColor = NachoTheme.colorScheme.brandPrimary,
+                selectionColors = TextSelectionColors(
+                    handleColor = NachoTheme.colorScheme.brandPrimary,
+                    backgroundColor = NachoTheme.colorScheme.brandPrimary.copy(alpha = 0.4f)
+                )
+            ),
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextButton(
+                onClick = { onDismiss() },
+                shape = NachoTheme.shapes.small
+            ) {
+                Text(
+                    text = stringResource(R.string.txt_cancel),
+                    color = NachoTheme.colorScheme.textSecondary
+                )
+            }
+            Spacer(modifier = Modifier.padding(horizontal = NachoSpacing.small))
+            TextButton(
+                onClick = { onConfirm() },
+                shape = NachoTheme.shapes.small
+            ) {
+                Text(
+                    text = stringResource(R.string.txt_confirm),
+                    color = NachoTheme.colorScheme.brandPrimary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ProfileImageActionDialog(
+    onTakePhoto: () -> Unit,
+    onPickAlbum: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Column(modifier = Modifier.padding(NachoSpacing.medium)) {
+        TextItem("카메라 촬영", onClick = { onTakePhoto(); onDismiss() })
+        TextItem("앨범에서 사진 선택", onClick = { onPickAlbum(); onDismiss() })
+        TextItem("취소", onClick = onDismiss, color = NachoTheme.colorScheme.textSecondary)
+    }
+}
+
+@Composable
+private fun TextItem(text: String, onClick: () -> Unit, color: Color = Color.Unspecified) {
+    Text(
+        text = text,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(NachoSpacing.medium),
+        style = NachoTheme.typography.bodyLargeMedium,
+        color = color
+    )
+}
+
+@Composable
 private fun LogoutDialogContent(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
@@ -803,6 +911,8 @@ private fun SettingScreenPreview() {
             uiState = SettingUiState(isLoading = false),
             snackbarHostState = remember { SnackbarHostState() },
             onNavigateToLogin = {},
+            onClickEditNickname = {},
+            onClickEditImage = {},
             onClickQuit = {},
             onClickLogout = {}
         )

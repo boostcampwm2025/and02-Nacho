@@ -34,6 +34,8 @@ class SettingViewModel @Inject constructor(
 
     override fun onEvent(event: SettingUiEvent) {
         when (event) {
+            is SettingUiEvent.OnNicknameChanged -> validateNickname(event.nickname)
+            is SettingUiEvent.ClickConfirmNickname -> updateNickname(event.nickname)
             SettingUiEvent.ClickBack -> sendEffect(SettingSideEffect.PopBackStack)
             SettingUiEvent.ClickLogout -> logout()
             SettingUiEvent.ClickSignOut -> signOut()

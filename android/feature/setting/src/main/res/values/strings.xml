@@ -14,6 +14,15 @@
     <string name="desc_profile_camera">프로필 이미지 수정 사진 아이콘</string>
     <string name="desc_profile_edit">수정된 닉네임을 저장하는 아이콘</string>
 
+    <string name="msg_nickname_empty">닉네임을 입력해 주세요.</string>
+    <string name="msg_nickname_too_long">최대 12자까지 입력 가능합니다.</string>
+    <string name="msg_nickname_invalid_char">공백이나 특수문자는 포함할 수 없습니다.</string>
+
+    <string name="txt_nickname_edit_title">닉네임 수정</string>
+    <string name="txt_profile_image_edit_title">프로필 사진 수정</string>
+    <string name="txt_take_photo">카메라 촬영</string>
+    <string name="txt_pick_album">앨범에서 사진 선택</string>
+
     <string name="txt_push_notification">푸시 알림</string>
 
     <string name="txt_policy_service">서비스 이용약관</string>
