@@ -7,6 +7,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,8 +43,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -53,8 +54,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
@@ -776,6 +780,9 @@ fun EditNicknameDialogContent(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val isConfirmEnabled = uiState.nicknameInput.isNotBlank() &&
+        uiState.nicknameError == NicknameError.NONE
+
     val errorMessage = when (uiState.nicknameError) {
         NicknameError.EMPTY -> stringResource(R.string.msg_nickname_empty)
         NicknameError.TOO_LONG -> stringResource(R.string.msg_nickname_too_long)
@@ -797,7 +804,7 @@ fun EditNicknameDialogContent(
             isError = uiState.nicknameError != NicknameError.NONE,
             placeholder =  {
                 Text(
-                    text = stringResource(R.string.msg_nickname_empty),
+                    text = stringResource(R.string.txt_nickname_placeholder),
                     style = NachoTheme.typography.bodyLargeRegular,
                     color = NachoTheme.colorScheme.textTertiary,
                 )
@@ -842,11 +849,16 @@ fun EditNicknameDialogContent(
             Spacer(modifier = Modifier.padding(horizontal = NachoSpacing.small))
             TextButton(
                 onClick = { onConfirm() },
+                enabled = isConfirmEnabled,
                 shape = NachoTheme.shapes.small
             ) {
                 Text(
                     text = stringResource(R.string.txt_confirm),
-                    color = NachoTheme.colorScheme.brandPrimary
+                    color = if (isConfirmEnabled) {
+                        NachoTheme.colorScheme.brandPrimary
+                    } else {
+                        NachoTheme.colorScheme.textDisabled
+                    }
                 )
             }
         }
@@ -1005,14 +1017,28 @@ fun ProfileImageDetailDialog(
 ) {
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false
-        )
+        properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
+        var scale by remember { mutableStateOf(1f) }
+        var offset by remember { mutableStateOf(Offset.Zero) }
+
+        val state = rememberTransformableState { zoomChange, offsetChange, _ ->
+            scale = (scale * zoomChange).coerceIn(1f, 5f)
+
+            offset = if (scale <= 1f) {
+                Offset.Zero
+            } else {
+                offset + offsetChange
+            }
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(NachoTheme.colorScheme.backgroundInverse),
+                .background(NachoTheme.colorScheme.backgroundInverse)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = { onDismiss() })
+                },
             contentAlignment = Alignment.Center
         ) {
             AsyncImage(
@@ -1020,7 +1046,14 @@ fun ProfileImageDetailDialog(
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f),
+                    .aspectRatio(1f)
+                    .graphicsLayer(
+                        scaleX = scale,
+                        scaleY = scale,
+                        translationX = offset.x,
+                        translationY = offset.y
+                    )
+                    .transformable(state = state),
                 contentScale = ContentScale.Fit,
                 placeholder = painterResource(designR.drawable.ic_person_24),
                 error = painterResource(designR.drawable.ic_person_24),
@@ -1030,7 +1063,7 @@ fun ProfileImageDetailDialog(
                 onClick = onDismiss,
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(top = 16.dp, start = NachoSpacing.medium)
+                    .padding(top = NachoSpacing.large, start = NachoSpacing.medium)
             ) {
                 Icon(
                     painter = painterResource(designR.drawable.ic_close_24),

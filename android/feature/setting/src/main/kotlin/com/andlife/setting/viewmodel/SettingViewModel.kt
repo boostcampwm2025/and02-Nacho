@@ -30,7 +30,7 @@ class SettingViewModel @Inject constructor(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Companion.Lazily,
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 0),
             initialValue = SettingUiState()
         )
 
@@ -70,9 +70,11 @@ class SettingViewModel @Inject constructor(
                     updateState {
                         copy(
                             authState = AuthState.Authenticated(updatedUser),
-                            isOverlayLoading = false
+                            isOverlayLoading = false,
+                            nicknameInput = ""
                         )
                     }
+                    Log.d("SettingViewModel", "수정 성공 : ${updatedUser.name}")
                     // Todo : 스낵바 처리
                 }
                 .onFailure { error, msg ->

@@ -159,7 +159,11 @@ internal class UserRepositoryImpl @Inject constructor(
             userRemoteDataSource.updateProfile(
                 nickname = nickname,
                 profileImageUrl = finalProfileImageUrl
-            ).map { it.toDomain() }
+            ).map { userResponse ->
+                val updatedUser = userResponse.toDomain()
+                authStateManager.setAuthenticated(updatedUser)
+                updatedUser
+            }
 
         } catch (e: IOException) {
             Result.Error(DataError.Local.IOEXCEPTION)
