@@ -21,6 +21,8 @@
     <string name="txt_nickname_edit_title">닉네임 수정</string>
     <string name="txt_profile_image_edit_title">프로필 사진 수정</string>
     <string name="txt_take_photo">카메라 촬영</string>
+    <string name="txt_view_profile_detail">사진 보기</string>
+    <string name="desc_btn_view_detail_close">사진 보기 화면 닫기 아이콘 버튼</string>
     <string name="txt_pick_album">앨범에서 사진 선택</string>
 
     <string name="txt_push_notification">푸시 알림</string>

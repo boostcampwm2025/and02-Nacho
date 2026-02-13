@@ -5,6 +5,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -59,6 +61,8 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
@@ -99,6 +103,7 @@ fun SettingRoute(
     var isSignedOutDialogVisible by remember { mutableStateOf(false) }
     var isNicknameDialogVisible by remember { mutableStateOf(false) }
     var isImageActionDialogVisible by remember { mutableStateOf(false) }
+    var isProfileDetailVisible by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val loginManager = LocalLoginManager.current
@@ -172,6 +177,14 @@ fun SettingRoute(
         }
     }
 
+    if (isProfileDetailVisible) {
+        val user = (uiState.authState as? AuthState.Authenticated)?.user
+        ProfileImageDetailDialog(
+            imageUrl = user?.profileImageUrl,
+            onDismiss = { isProfileDetailVisible = false }
+        )
+    }
+
     if (isNicknameDialogVisible) {
         NachoDialog(onDismiss = { isNicknameDialogVisible = false }) {
             EditNicknameDialogContent(
@@ -190,7 +203,12 @@ fun SettingRoute(
     if (isImageActionDialogVisible) {
         NachoDialog(onDismiss = { isImageActionDialogVisible = false }) {
             ProfileImageActionDialog(
+                onViewDetail = {
+                    isImageActionDialogVisible = false
+                    isProfileDetailVisible = true
+                },
                 onPickAlbum = {
+                    isImageActionDialogVisible = false
                     pickProfileMedia.launch(
                         androidx.activity.result.PickVisualMediaRequest(
                             ActivityResultContracts.PickVisualMedia.ImageOnly
@@ -837,10 +855,20 @@ fun EditNicknameDialogContent(
 
 @Composable
 fun ProfileImageActionDialog(
+    onViewDetail: () -> Unit,
     onPickAlbum: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    Column(modifier = Modifier.padding(NachoSpacing.medium)) {
+    Column(
+        modifier = Modifier.padding(NachoSpacing.medium)
+    ) {
+        TextItem(
+            text = stringResource(R.string.txt_view_profile_detail),
+            onClick = {
+                onViewDetail()
+                onDismiss()
+            }
+        )
         TextItem(
             text = stringResource(R.string.txt_pick_album),
             onClick = {
@@ -964,6 +992,50 @@ private fun SignedOutDialogContent(
                 Text(
                     text = stringResource(R.string.txt_confirm),
                     color = NachoTheme.colorScheme.brandPrimary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ProfileImageDetailDialog(
+    imageUrl: String?,
+    onDismiss: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(NachoTheme.colorScheme.backgroundInverse),
+            contentAlignment = Alignment.Center
+        ) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f),
+                contentScale = ContentScale.Fit,
+                placeholder = painterResource(designR.drawable.ic_person_24),
+                error = painterResource(designR.drawable.ic_person_24),
+            )
+
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(top = 16.dp, start = NachoSpacing.medium)
+            ) {
+                Icon(
+                    painter = painterResource(designR.drawable.ic_close_24),
+                    contentDescription = stringResource(R.string.desc_btn_view_detail_close),
+                    tint = Color.White
                 )
             }
         }
