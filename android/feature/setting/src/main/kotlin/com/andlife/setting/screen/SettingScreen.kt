@@ -62,6 +62,7 @@ import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.auth.AuthState
 import com.andlife.login.LocalLoginManager
 import com.andlife.login.social.SocialType
+import com.andlife.setting.PolicyUrl
 import com.andlife.setting.R
 import com.andlife.setting.model.SettingSideEffect
 import com.andlife.setting.model.SettingUiEvent
@@ -76,6 +77,7 @@ import com.andlife.designsystem.R as designR
 fun SettingRoute(
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onNavigateToWebView: (String, String) -> Unit,
     onLogout: () -> Unit,
     onSignedOut: () -> Unit,
     modifier: Modifier = Modifier,
@@ -93,6 +95,7 @@ fun SettingRoute(
         uiState = uiState,
         snackbarHostState = snackbarHostState,
         onNavigateToLogin = onNavigateToLogin,
+        onNavigateToWebView = onNavigateToWebView,
         onEvent = viewModel::onEvent,
         modifier = modifier,
         onClickQuit = { isSignedOutDialogVisible = true },
@@ -159,6 +162,7 @@ fun SettingScreen(
     uiState: SettingUiState,
     snackbarHostState: SnackbarHostState,
     onNavigateToLogin: () -> Unit,
+    onNavigateToWebView: (String, String) -> Unit = { _, _ -> },
     onClickLogout: () -> Unit,
     onClickQuit: () -> Unit,
     onEvent: (SettingUiEvent) -> Unit = {},
@@ -225,9 +229,16 @@ fun SettingScreen(
                     }
 
                     SettingSection(headerTitle = stringResource(R.string.txt_header_policy)) { modifier ->
+                        val serviceTitle = stringResource(R.string.txt_policy_service)
+                        val privacyTitle = stringResource(R.string.txt_policy_privacy)
+
                         PolicyContent(
-                            onClickService = {},
-                            onClickPrivacy = {},
+                            onClickService = {
+                                onNavigateToWebView(PolicyUrl.SERVICE, serviceTitle)
+                            },
+                            onClickPrivacy = {
+                                onNavigateToWebView(PolicyUrl.PRIVACY, privacyTitle)
+                            },
                             modifier = modifier,
                         )
                     }
@@ -518,6 +529,7 @@ private fun PolicyContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable(onClick = onClickService)
                 .padding(vertical = NachoSpacing.medium),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -540,6 +552,7 @@ private fun PolicyContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable(onClick = onClickPrivacy)
                 .padding(vertical = NachoSpacing.medium),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
