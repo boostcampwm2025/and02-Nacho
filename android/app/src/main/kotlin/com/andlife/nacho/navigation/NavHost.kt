@@ -44,7 +44,9 @@ import com.andlife.model.util.NavigationKeyConstant.CREATE_THANKS_CARD
 import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
 import com.andlife.myinvitation.myInvitationDetailNavGraph
 import com.andlife.myinvitation.myInvitationNavGraph
+import com.andlife.setting.navigateToWebView
 import com.andlife.setting.settingNavGraph
+import com.andlife.setting.webViewNavGraph
 import com.andlife.thanks_card.createThanksCardNavGraph
 import com.andlife.thanks_card.updateThanksCardNavGraph
 import com.andlife.ui.util.noRippleClickable
@@ -92,6 +94,13 @@ fun NachoNavHost(
 
             settingNavGraph(
                 onNavigateBack = navigator::navigatePopBackStack,
+                onNavigateToWebView = { url, title ->
+                    navigator.navController.navigateToWebView(
+                        url = url,
+                        title = title,
+                        navOptions = navOptions { launchSingleTop = true }
+                    )
+                },
                 onNavigateToLogin = {
                     navigator.navigateToLogin()
                 },
@@ -115,6 +124,10 @@ fun NachoNavHost(
                 }
             )
 
+            webViewNavGraph(
+                onNavigateBack = navigator::navigatePopBackStack,
+            )
+
             invitationNavGraph(
                 paddingValues = innerPadding,
                 onNavigateToDetail = navigator::navigateToInvitationDetail,
@@ -128,11 +141,12 @@ fun NachoNavHost(
             )
 
             myInvitationNavGraph(
-                 snackbarHostState = snackbarHostState,
+                snackbarHostState = snackbarHostState,
                 paddingValues = innerPadding,
                 onNavigateToCreate = navigator::navigateToMyInvitationCreate,
                 onNavigateToDetail = navigator::navigateToMyInvitationDetail,
-                onNavigateToLogin = { navigator.navigateToLogin()
+                onNavigateToLogin = {
+                    navigator.navigateToLogin()
                 }
             )
 
