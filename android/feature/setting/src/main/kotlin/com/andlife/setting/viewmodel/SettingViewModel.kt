@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.andlife.domain.repository.user.UserRepository
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
+import com.andlife.setting.model.NicknameError
 import com.andlife.setting.model.SettingSideEffect
 import com.andlife.setting.model.SettingUiEvent
 import com.andlife.setting.model.SettingUiState
@@ -36,6 +37,22 @@ class SettingViewModel @Inject constructor(
             SettingUiEvent.ClickBack -> sendEffect(SettingSideEffect.PopBackStack)
             SettingUiEvent.ClickLogout -> logout()
             SettingUiEvent.ClickSignOut -> signOut()
+        }
+    }
+
+    private fun validateNickname(name:String) {
+        val specialChars = Regex("[^a-zA-Z0-9가-힣]")
+        val error = when {
+            name.isBlank() -> NicknameError.EMPTY
+            name.length > 12 -> NicknameError.TOO_LONG
+            specialChars.containsMatchIn(name) -> NicknameError.INVALID_CHAR
+            else -> NicknameError.NONE
+        }
+        updateState {
+            copy(
+                nicknameInput = name,
+                nicknameError = error
+            )
         }
     }
 
