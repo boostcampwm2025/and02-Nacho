@@ -1,26 +1,33 @@
-name: PR Slack 알림
+  name: PR Slack 알림
 
-on:
-  pull_request:
-    types: [opened, review_requested]
+  on:
+    pull_request:
+      types: [opened]
 
-jobs:
- notify:                      
+  jobs:
+    notify:
       runs-on: ubuntu-latest
 
       steps:
         - name: Send to Slack
+          env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           run: |
             PR_NUMBER=${{ github.event.pull_request.number }}
             PR_TITLE="${{ github.event.pull_request.title }}"
             PR_URL="${{ github.event.pull_request.html_url }}"
-            REQUESTED_REVIEWER="${{ github.event.requested_reviewer.login }}"
             PR_AUTHOR="${{ github.event.pull_request.user.login }}"
 
-                      # Slack Webhook 호출
+            # GitHub API로 리뷰어 목록 한번에 가져오기
+            REVIEWERS=$(gh pr view $PR_NUMBER --repo ${{ github.repository }} --json reviewRequests --jq '[.reviewRequests[].login] | join(", ")')
+
+            if [ -z "$REVIEWERS" ]; then
+              REVIEWERS="없음"
+            fi
+
             curl -X POST \
-               -H 'Content-type: application/json' \
-               --data '{
-                 "text": "📢 *리뷰 요청 알림*\n*PR 제목:* '"${PR_TITLE}"' (#'"${PR_NUMBER}"')\n*작성자:* '"${PR_AUTHOR}"'\n*리뷰어:* '"${REQUESTED_REVIEWER}"'\n*링크:* '"${PR_URL}"'"
-               }' \
-               ${{ secrets.SLACK_WEBHOOK_URL }}
+              -H 'Content-type: application/json' \
+              --data '{
+                "text": "📢 *PR 알림*\n*제목:* '"${PR_TITLE}"' (#'"${PR_NUMBER}"')\n*작성자:* '"${PR_AUTHOR}"'\n*리뷰어:* '"${REVIEWERS}"'\n*링크:* '"${PR_URL}"'"
+              }' \
+              ${{ secrets.SLACK_WEBHOOK_URL }}
