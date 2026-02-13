@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.andlife.designsystem.preview.PreviewTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -158,5 +159,47 @@ private fun WebViewTopBar(
             horizontalPadding = NachoSpacing.none,
             modifier = Modifier.fillMaxWidth()
         )
+    }
+}
+
+@PreviewTheme
+@Composable
+private fun WebViewScreenPreview() {
+    NachoTheme {
+        WebViewScreen(
+            url = "",
+            title = "서비스 이용약관",
+            onNavigateBack = {},
+        )
+    }
+}
+
+@PreviewTheme
+@Composable
+private fun WebViewScreenErrorPreview() {
+    NachoTheme {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                WebViewTopBar(
+                    title = "개인정보 처리방침",
+                    onBack = {},
+                )
+            },
+            containerColor = NachoTheme.colorScheme.backgroundPrimary,
+        ) { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = stringResource(R.string.txt_error_network),
+                    style = NachoTheme.typography.bodyLargeRegular,
+                    color = NachoTheme.colorScheme.textSecondary,
+                )
+            }
+        }
     }
 }
