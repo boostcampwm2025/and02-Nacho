@@ -83,6 +83,7 @@ import com.andlife.login.LocalLoginManager
 import com.andlife.login.social.SocialType
 import com.andlife.setting.R
 import com.andlife.setting.model.NicknameError
+import com.andlife.setting.model.SettingMessage
 import com.andlife.setting.model.SettingSideEffect
 import com.andlife.setting.model.SettingUiEvent
 import com.andlife.setting.model.SettingUiState
@@ -176,6 +177,18 @@ fun SettingRoute(
                     } else {
                         snackbarHostState.showSnackbar(res.getString(R.string.fail_sign_out))
                     }
+                }
+            }
+
+            is SettingSideEffect.ShowSnackbar -> {
+                val message = when (effect.messageType) {
+                    SettingMessage.PROFILE_UPDATE_SUCCESS -> res.getString(R.string.msg_profile_update_success)
+                    SettingMessage.PROFILE_UPDATE_FAIL -> res.getString(R.string.msg_profile_update_fail)
+                    SettingMessage.NICKNAME_INVALID -> res.getString(R.string.msg_nickname_invalid)
+                }
+
+                scope.launch {
+                    snackbarHostState.showSnackbar(message)
                 }
             }
         }

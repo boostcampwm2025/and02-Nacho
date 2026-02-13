@@ -1,12 +1,12 @@
 package com.andlife.setting.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.andlife.domain.model.auth.AuthState
 import com.andlife.domain.repository.user.UserRepository
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.setting.model.NicknameError
+import com.andlife.setting.model.SettingMessage
 import com.andlife.setting.model.SettingSideEffect
 import com.andlife.setting.model.SettingUiEvent
 import com.andlife.setting.model.SettingUiState
@@ -74,15 +74,12 @@ class SettingViewModel @Inject constructor(
                             nicknameInput = ""
                         )
                     }
-                    Log.d("SettingViewModel", "수정 성공 : ${updatedUser.name}")
-                    // Todo : 스낵바 처리
-                }
+                    sendEffect(SettingSideEffect.ShowSnackbar(SettingMessage.PROFILE_UPDATE_SUCCESS))                }
                 .onFailure { error, msg ->
-                    // Todo : 스낵바 처리
-                    Log.d("SettingViewModel", "수정 실패 : $msg")
+                    updateState { copy(isOverlayLoading = false) }
+                    sendEffect(SettingSideEffect.ShowSnackbar(SettingMessage.PROFILE_UPDATE_FAIL))
                 }
 
-            updateState { copy(isOverlayLoading = false) }
         }
     }
 

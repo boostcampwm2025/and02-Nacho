@@ -17,7 +17,9 @@
     <string name="msg_nickname_empty">닉네임을 입력해 주세요.</string>
     <string name="msg_nickname_too_long">최대 12자까지 입력 가능합니다.</string>
     <string name="msg_nickname_invalid_char">공백이나 특수문자는 포함할 수 없습니다.</string>
-
+    <string name="msg_profile_update_success">프로필 정보가 수정되었습니다.</string>
+    <string name="msg_profile_update_fail">프로필 수정에 실패했습니다. 다시 시도해주세요.</string>
+    <string name="msg_nickname_invalid">유효한 닉네임을 입력해주세요.</string>
     <string name="txt_nickname_placeholder">변경하실 닉네임을 입력해 주세요.</string>
     <string name="txt_nickname_edit_title">닉네임 수정</string>
     <string name="txt_profile_image_edit_title">프로필 사진 수정</string>
