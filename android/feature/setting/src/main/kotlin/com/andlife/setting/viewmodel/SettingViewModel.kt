@@ -56,6 +56,15 @@ class SettingViewModel @Inject constructor(
         }
     }
 
+    private fun updateNickname(name: String) {
+        viewModelScope.launch {
+            updateState { copy(isOverlayLoading = true) }
+            // Todo: 서버에 닉네임 업데이트 요청
+            loadUserInfo()
+            updateState { copy(isOverlayLoading = false) }
+        }
+    }
+
     private fun logout() {
         viewModelScope.launch {
             userRepository.logout()
