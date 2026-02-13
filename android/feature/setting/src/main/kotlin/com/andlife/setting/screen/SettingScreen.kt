@@ -1,6 +1,10 @@
 package com.andlife.setting.screen
 
+import android.app.Activity
+import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
@@ -76,6 +81,7 @@ import com.andlife.setting.model.SettingUiState
 import com.andlife.setting.viewmodel.SettingViewModel
 import com.andlife.ui.util.collectWithLifecycle
 import com.andlife.ui.util.getAppVersion
+import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.launch
 import com.andlife.designsystem.R as designR
 
@@ -92,10 +98,37 @@ fun SettingRoute(
     var isLogoutDialogVisible by remember { mutableStateOf(false) }
     var isSignedOutDialogVisible by remember { mutableStateOf(false) }
     var isNicknameDialogVisible by remember { mutableStateOf(false) }
+    var isImageActionDialogVisible by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val loginManager = LocalLoginManager.current
+    val context = LocalContext.current
     val res = LocalResources.current
+
+    val cropLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val croppedUri = result.data?.let { UCrop.getOutput(it) }
+            croppedUri?.let {
+                viewModel.onEvent(SettingUiEvent.ClickConfirmProfileImage(it.toString()))
+            }
+        }
+    }
+
+    val brandColor = NachoTheme.colorScheme.brandPrimary.toArgb()
+    val pickProfileMedia = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let { sourceUri ->
+            startCrop(
+                context = context,
+                sourceUri = sourceUri,
+                launcher = cropLauncher,
+                brandColor = brandColor
+            )
+        }
+    }
 
     SettingScreen(
         uiState = uiState,
@@ -104,7 +137,7 @@ fun SettingRoute(
         onEvent = viewModel::onEvent,
         modifier = modifier,
         onClickEditNickname = { isNicknameDialogVisible = true },
-        onClickEditImage = {},
+        onClickEditImage = { isImageActionDialogVisible = true },
         onClickQuit = { isSignedOutDialogVisible = true },
         onClickLogout = { isLogoutDialogVisible = true }
     )
@@ -150,6 +183,21 @@ fun SettingRoute(
                     isNicknameDialogVisible = false
                 },
                 onDismiss = { isNicknameDialogVisible = false }
+            )
+        }
+    }
+
+    if (isImageActionDialogVisible) {
+        NachoDialog(onDismiss = { isImageActionDialogVisible = false }) {
+            ProfileImageActionDialog(
+                onPickAlbum = {
+                    pickProfileMedia.launch(
+                        androidx.activity.result.PickVisualMediaRequest(
+                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                        )
+                    )
+                },
+                onDismiss = { isImageActionDialogVisible = false }
             )
         }
     }
@@ -231,8 +279,8 @@ fun SettingScreen(
                         ProfileContent(
                             authState = uiState.authState,
                             onNavigateToLogin = onNavigateToLogin,
-                            onClickImage = onClickEditImage,     // 카메라/프로필 클릭 시
-                            onClickEdit = onClickEditNickname,   // 연필 아이콘 클릭 시
+                            onClickImage = onClickEditImage,
+                            onClickEdit = onClickEditNickname,
                             modifier = Modifier.padding(
                                 vertical = NachoSpacing.medium,
                                 horizontal = NachoSpacing.large
@@ -789,14 +837,21 @@ fun EditNicknameDialogContent(
 
 @Composable
 fun ProfileImageActionDialog(
-    onTakePhoto: () -> Unit,
     onPickAlbum: () -> Unit,
     onDismiss: () -> Unit
 ) {
     Column(modifier = Modifier.padding(NachoSpacing.medium)) {
-        TextItem("카메라 촬영", onClick = { onTakePhoto(); onDismiss() })
-        TextItem("앨범에서 사진 선택", onClick = { onPickAlbum(); onDismiss() })
-        TextItem("취소", onClick = onDismiss, color = NachoTheme.colorScheme.textSecondary)
+        TextItem(
+            text = stringResource(R.string.txt_pick_album),
+            onClick = {
+                onPickAlbum()
+                onDismiss()
+            },
+        )
+        TextItem(
+            text = stringResource(R.string.txt_cancel),
+            onClick = onDismiss, color = NachoTheme.colorScheme.textSecondary,
+        )
     }
 }
 
@@ -929,4 +984,32 @@ private fun SettingScreenPreview() {
             onClickLogout = {}
         )
     }
+}
+
+private fun startCrop(
+    context: android.content.Context,
+    sourceUri: Uri,
+    launcher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>,
+    brandColor: Int
+) {
+    val destinationUri = Uri.fromFile(
+        java.io.File(context.cacheDir, "profile_crop_${System.currentTimeMillis()}.jpg")
+    )
+
+    val options = UCrop.Options().apply {
+        setCompressionFormat(android.graphics.Bitmap.CompressFormat.JPEG)
+        setCompressionQuality(90)
+        setToolbarColor(android.graphics.Color.WHITE)
+        setStatusBarColor(android.graphics.Color.WHITE)
+        setToolbarWidgetColor(android.graphics.Color.BLACK)
+        setActiveControlsWidgetColor(brandColor)
+    }
+
+    val uCropIntent = UCrop.of(sourceUri, destinationUri)
+        .withAspectRatio(1f, 1f)
+        .withMaxResultSize(1000, 1000)
+        .withOptions(options)
+        .getIntent(context)
+
+    launcher.launch(uCropIntent)
 }

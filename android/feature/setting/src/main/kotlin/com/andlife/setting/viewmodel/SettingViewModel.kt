@@ -38,6 +38,7 @@ class SettingViewModel @Inject constructor(
         when (event) {
             is SettingUiEvent.OnNicknameChanged -> validateNickname(event.nickname)
             is SettingUiEvent.ClickConfirmNickname -> updateProfile(event.nickname)
+            is SettingUiEvent.ClickConfirmProfileImage -> updateProfile(imageUri = event.uri)
             SettingUiEvent.ClickBack -> sendEffect(SettingSideEffect.PopBackStack)
             SettingUiEvent.ClickLogout -> logout()
             SettingUiEvent.ClickSignOut -> signOut()
@@ -66,7 +67,6 @@ class SettingViewModel @Inject constructor(
 
             userRepository.updateProfile(nickname, imageUri)
                 .onSuccess { updatedUser ->
-                    Log.d("Nickname", "수정 성공: ${updatedUser.name}")
                     updateState {
                         copy(
                             authState = AuthState.Authenticated(updatedUser),
