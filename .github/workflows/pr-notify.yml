@@ -13,21 +13,48 @@
           env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           run: |
+            # GitHub 유저명 → Slack 유저 ID 매핑
+            declare -A SLACK_MAP
+            SLACK_MAP["팀원1-github"]="U09B4MJDFC0"
+            SLACK_MAP["팀원2-github"]="U099ZJVV70X"
+            SLACK_MAP["팀원3-github"]="U09AC0P6M8A"
+            SLACK_MAP["팀원4-github"]="U09ABTA2KU2"
+            SLACK_MAP["팀원5-github"]="U09B4QC003A"
+
             PR_NUMBER=${{ github.event.pull_request.number }}
             PR_TITLE="${{ github.event.pull_request.title }}"
             PR_URL="${{ github.event.pull_request.html_url }}"
             PR_AUTHOR="${{ github.event.pull_request.user.login }}"
 
-            # GitHub API로 리뷰어 목록 한번에 가져오기
-            REVIEWERS=$(gh pr view $PR_NUMBER --repo ${{ github.repository }} --json reviewRequests --jq '[.reviewRequests[].login] | join(", ")')
+            # 작성자 멘션
+            AUTHOR_SLACK="${SLACK_MAP[$PR_AUTHOR]}"
+            if [ -n "$AUTHOR_SLACK" ]; then
+              AUTHOR_MENTION="<@$AUTHOR_SLACK>"
+            else
+              AUTHOR_MENTION="$PR_AUTHOR"
+            fi
 
-            if [ -z "$REVIEWERS" ]; then
-              REVIEWERS="없음"
+            # 리뷰어 목록 가져오기
+            REVIEWER_LOGINS=$(gh pr view $PR_NUMBER --repo ${{ github.repository }} --json reviewRequests --jq '[.reviewRequests[].login] | .[]')
+
+            # 리뷰어 멘션 변환
+            MENTIONS=""
+            for LOGIN in $REVIEWER_LOGINS; do
+              SLACK_ID="${SLACK_MAP[$LOGIN]}"
+              if [ -n "$SLACK_ID" ]; then
+                MENTIONS="$MENTIONS <@$SLACK_ID>"
+              else
+                MENTIONS="$MENTIONS $LOGIN"
+              fi
+            done
+
+            if [ -z "$MENTIONS" ]; then
+              MENTIONS="없음"
             fi
 
             curl -X POST \
               -H 'Content-type: application/json' \
               --data '{
-                "text": "📢 *PR 알림*\n*제목:* '"${PR_TITLE}"' (#'"${PR_NUMBER}"')\n*작성자:* '"${PR_AUTHOR}"'\n*리뷰어:* '"${REVIEWERS}"'\n*링크:* '"${PR_URL}"'"
+                "text": "📢 *PR 알림*\n*제목:* '"${PR_TITLE}"' (#'"${PR_NUMBER}"')\n*작성자:* '"${AUTHOR_MENTION}"'\n*리뷰어:* '"${MENTIONS}"'\n*링크:* '"${PR_URL}"'"
               }' \
               ${{ secrets.SLACK_WEBHOOK_URL }}
