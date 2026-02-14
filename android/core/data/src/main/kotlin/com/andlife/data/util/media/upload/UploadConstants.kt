@@ -2,8 +2,11 @@ package com.andlife.data.util.media.upload
 
 object UploadKey {
     const val MEDIA_FILES = "media_files"
+    const val MEDIA_IDS = "media_ids"
     const val MEDIA_URIS = "media_uris"
-    const val THUMBNAIL_URLS = "thumbnail_urls"
+    const val MEDIA_TYPES = "media_types"
+    const val MEDIA_DURATIONS = "media_durations"
+    const val MEDIA_THUMBNAIL_URLS = "media_thumbnail_urls"
     const val EXISTING_MEDIA_TYPES = "existing_media_types"
     const val NEW_MEDIA_INDEXS = "new_media_indexs"
     const val RESULT_URLS = "result_urls"
