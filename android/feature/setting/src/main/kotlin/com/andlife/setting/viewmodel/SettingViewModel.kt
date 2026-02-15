@@ -30,7 +30,7 @@ class SettingViewModel @Inject constructor(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 0),
+            started = SharingStarted.Lazily,
             initialValue = SettingUiState()
         )
 
