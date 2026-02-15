@@ -7,10 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -32,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.component.NachoButton
 import com.andlife.designsystem.component.NachoTextField
 import com.andlife.designsystem.preview.PreviewTheme
@@ -79,12 +75,13 @@ fun ReportBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = NachoSpacing.large)
-                .padding(bottom = NachoSpacing.large)
+                .padding(bottom = NachoSpacing.large),
+            verticalArrangement = Arrangement.spacedBy(NachoSpacing.large)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = NachoSpacing.large)
                     .padding(top = NachoSpacing.twoXLarge)
             ) {
                 Text(
@@ -102,78 +99,68 @@ fun ReportBottomSheet(
                         .clickable { dismiss() }
                 )
             }
-
-            Spacer(modifier = Modifier.height(NachoSpacing.large))
-
             Text(
                 text = stringResource(R.string.txt_report_reason_title),
                 style = NachoTheme.typography.bodyLargeSemiBold,
-                color = NachoTheme.colorScheme.textPrimary
+                color = NachoTheme.colorScheme.textPrimary,
+                modifier = Modifier.padding(horizontal = NachoSpacing.large)
             )
-
-            Spacer(modifier = Modifier.height(NachoSpacing.medium))
-
-            ReportReason.entries.forEach { reason ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { selectedReason = reason }
-                        .padding(vertical = NachoSpacing.twoXSmall),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
-                ) {
-                    RadioButton(
-                        selected = reason == selectedReason,
-                        onClick = { selectedReason = reason },
-                        colors = RadioButtonDefaults.colors(
-                            selectedColor = NachoTheme.colorScheme.iconPrimary,
-                            unselectedColor = NachoTheme.colorScheme.iconSecondary
+            Column(modifier = Modifier.fillMaxWidth()) {
+                ReportReason.entries.forEach { reason ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = NachoSpacing.twoXSmall)
+                            .clickable { selectedReason = reason },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
+                    ) {
+                        RadioButton(
+                            selected = reason == selectedReason,
+                            onClick = { selectedReason = reason },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = NachoTheme.colorScheme.iconPrimary,
+                                unselectedColor = NachoTheme.colorScheme.iconSecondary
+                            )
                         )
-                    )
-                    Text(
-                        text = stringResource(reason.stringResId),
-                        style = NachoTheme.typography.bodyMediumRegular,
-                        color = NachoTheme.colorScheme.textPrimary
-                    )
+                        Text(
+                            text = stringResource(reason.stringResId),
+                            style = NachoTheme.typography.bodyMediumRegular,
+                            color = NachoTheme.colorScheme.textPrimary
+                        )
+                    }
                 }
             }
-
-            Spacer(modifier = Modifier.height(NachoSpacing.large))
-
             Text(
-                text = if (selectedReason == ReportReason.ETC) {
-//                    stringResource(R.string.txt_report_description_required)
-                    "설명 (필수)"
-                } else {
-//                    stringResource(R.string.txt_report_description_optional)
-                    "설명 (선택)"
-                },
+                text = stringResource(R.string.txt_report_description_title),
                 style = NachoTheme.typography.bodyLargeSemiBold,
-                color = NachoTheme.colorScheme.textPrimary
+                color = NachoTheme.colorScheme.textPrimary,
+                modifier = Modifier.padding(horizontal = NachoSpacing.large)
             )
-
-            Spacer(modifier = Modifier.height(NachoSpacing.medium))
-
             NachoTextField(
                 value = description,
-                onValueChange = { description = it },
-                //placeholder = stringResource(R.string.txt_report_description_hint),
-                placeholder = "사유를 자세히 입력해주세요.",
+                onValueChange = {
+                    if (it.length <= 300) {
+                        description = it
+                    }
+                },
+                placeholder = stringResource(R.string.txt_report_description_hint),
+                minLines = 5,
+                maxLines = 5,
+                singleLine = false,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 120.dp),
-                singleLine = false,
+                    .padding(horizontal = NachoSpacing.large)
             )
-
-            Spacer(modifier = Modifier.height(NachoSpacing.large))
-
             NachoButton(
                 onClick = {
                     onSubmit(selectedReason!!, description.takeIf { it.isNotBlank() })
                     dismiss()
                 },
                 enabled = isSubmitEnabled,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = NachoSpacing.large),
                 contentPadding = PaddingValues(vertical = NachoSpacing.medium),
                 elevation = ButtonDefaults.buttonElevation(
                     defaultElevation = NachoElevation.none,
