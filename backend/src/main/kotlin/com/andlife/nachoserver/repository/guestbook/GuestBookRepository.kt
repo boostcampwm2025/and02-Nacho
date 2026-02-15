@@ -26,6 +26,7 @@ interface GuestBookRepository : JpaRepository<GuestBook, Long> {
     fun findAllByInvitationId(invitationId: Long, pageable: Pageable): Page<GuestBook>
 
     fun findAllByInvitationId(invitationId: Long): List<GuestBook>
+    fun findAllByUserId(userId: Long): List<GuestBook>
 
     @Query("""
             SELECT DISTINCT gb FROM GuestBook gb

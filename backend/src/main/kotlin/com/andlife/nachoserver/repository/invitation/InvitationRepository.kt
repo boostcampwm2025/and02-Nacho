@@ -20,6 +20,7 @@ interface InvitationRepository : JpaRepository<Invitation, Long> {
     fun findByInvitationIdWithHost(@Param("invitationId") invitationId: Long): Invitation?
 
     fun findAllByHostId(hostId: Long, pageable: Pageable): Page<Invitation>
+    fun findAllByHostId(hostId: Long): List<Invitation>
 
     // 다가오는 초대
     @Query("""

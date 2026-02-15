@@ -29,7 +29,6 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.home.homeNavGraph
-import com.andlife.home.settingNavGraph
 import com.andlife.invitation.invitationDetailNavGraph
 import com.andlife.invitation.invitationNavGraph
 import com.andlife.invitation_card.createCardByInvitationNavGraph
@@ -45,6 +44,7 @@ import com.andlife.model.util.NavigationKeyConstant.CREATE_THANKS_CARD
 import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
 import com.andlife.myinvitation.myInvitationDetailNavGraph
 import com.andlife.myinvitation.myInvitationNavGraph
+import com.andlife.setting.settingNavGraph
 import com.andlife.thanks_card.createThanksCardNavGraph
 import com.andlife.thanks_card.updateThanksCardNavGraph
 import com.andlife.ui.util.noRippleClickable
@@ -94,6 +94,15 @@ fun NachoNavHost(
                 onNavigateBack = navigator::navigatePopBackStack,
                 onNavigateToLogin = {
                     navigator.navigateToLogin()
+                },
+                onSignedOut = {
+                    val navOptions = navOptions {
+                        popUpTo(navigator.navController.graph.id) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                    navigator.navigateToLogin(navOptions)
                 },
                 onLogout = {
                     val navOptions = navOptions {

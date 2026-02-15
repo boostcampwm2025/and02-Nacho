@@ -12,4 +12,5 @@ interface UserRemoteDataSource {
     suspend fun getUserInfo(): Result<UserResponse, DataError>
     suspend fun reissue(refreshToken: String): Result<AuthResponse, DataError>
     suspend fun syncInvitations(invitationIds: List<Long>): Result<Unit, DataError>
+    suspend fun signedOut(): Result<UserResponse, DataError>
 }

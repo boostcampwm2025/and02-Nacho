@@ -348,6 +348,18 @@ class GuestBookService(
         }
     }
 
+    @Transactional
+    fun deleteAllByUserId(userId: Long) {
+        val guestBooks = guestBookRepository.findAllByUserId(userId)
+        val allMediaKeys = guestBooks.flatMap { getAllMediaKeys(it) }
+        guestBookRepository.deleteAll(guestBooks)
+        allMediaKeys.forEach { key ->
+            if (key.isNotBlank()) {
+                mediaService.deleteMedia(key)
+            }
+        }
+    }
+
     private fun validateOwnerOrInvitationHost(guestBook: GuestBook, authContext: AuthContext) {
         when (authContext) {
             is AuthContext.Member -> {
