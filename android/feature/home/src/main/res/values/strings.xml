@@ -19,33 +19,4 @@
     <string name="txt_title_setting">설정</string>
     <string name="desc_top_bar_back">설정 뒤로가기 아이콘 버튼</string>
 
-    <string name="txt_header_notification">알림</string>
-    <string name="txt_header_policy">약관 및 정책</string>
-    <string name="txt_header_app_info">앱 정보</string>
-    <string name="txt_header_account">계정</string>
-
-    <string name="desc_profile_image">프로필 이미지</string>
-    <string name="desc_profile_camera">프로필 이미지 수정 사진 아이콘</string>
-    <string name="desc_profile_edit">수정된 닉네임을 저장하는 아이콘</string>
-
-    <string name="txt_push_notification">푸시 알림</string>
-
-    <string name="txt_policy_service">서비스 이용약관</string>
-    <string name="desc_policy_service">서비스 이용약관 상세 보기 아이콘 버튼</string>
-    <string name="txt_policy_privacy">개인정보 처리방침</string>
-    <string name="desc_policy_privacy">개인정보 처리방침 상세 보기 아이콘 버튼</string>
-
-    <string name="txt_app_notice">공지사항</string>
-    <string name="desc_app_notice">공지사항 상세 보기 아이콘 버튼</string>
-    <string name="txt_app_version">앱 버전</string>
-
-    <string name="txt_logout">로그아웃</string>
-    <string name="txt_not_login_user">로그인 후 더 많은 기능을 이용해 보세요!</string>
-    <string name="txt_go_login">로그인하기</string>
-    <string name="txt_question_logout">정말 로그아웃 하시겠습니까?</string>
-    <string name="desc_logout">로그아웃 상세 아이콘 버튼</string>
-    <string name="txt_quit">회원탈퇴</string>
-    <string name="desc_quit">회원탈퇴 상세 아이콘 버튼</string>
-
-
 </resources>

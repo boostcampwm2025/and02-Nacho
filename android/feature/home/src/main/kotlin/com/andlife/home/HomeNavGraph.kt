@@ -14,7 +14,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.andlife.home.screen.HomeRoute
-import com.andlife.home.screen.SettingRoute
 import com.andlife.home.viewmodel.HomeViewModel
 import com.andlife.domain.util.RefreshEventHub
 import kotlinx.serialization.Serializable
@@ -27,10 +26,6 @@ data object Setting
 
 fun NavController.navigateToHome(navOptions: NavOptions) {
     navigate(Home, navOptions)
-}
-
-fun NavController.navigateToSetting(navOptions: NavOptions) {
-    navigate(Setting, navOptions)
 }
 
 fun NavGraphBuilder.homeNavGraph(
@@ -62,21 +57,6 @@ fun NavGraphBuilder.homeNavGraph(
             onNavigateToMyInvitationDetail = onNavigateToMyInvitationDetail,
             onNavigateToSetting = onNavigateToSetting,
             modifier = Modifier.padding(paddingValues),
-        )
-    }
-}
-
-fun NavGraphBuilder.settingNavGraph(
-    onNavigateBack: () -> Unit,
-    onNavigateToLogin: () -> Unit,
-    onLogout: () -> Unit,
-) {
-    composable<Setting> {
-        SettingRoute(
-            onNavigateBack = onNavigateBack,
-            modifier = Modifier.padding(),
-            onNavigateToLogin = onNavigateToLogin,
-            onLogout = onLogout
         )
     }
 }

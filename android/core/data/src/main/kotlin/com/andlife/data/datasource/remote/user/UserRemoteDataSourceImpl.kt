@@ -32,4 +32,7 @@ class UserRemoteDataSourceImpl @Inject constructor(
 
     override suspend fun syncInvitations(invitationIds: List<Long>): Result<Unit, DataError> =
         apiCall { invitationService.syncInvitations(invitationIds) }.map { Unit }
+
+    override suspend fun signedOut(): Result<UserResponse, DataError> =
+        apiCall { userService.signOut() }
 }
