@@ -2,6 +2,7 @@ package com.andlife.setting.screen
 
 import android.app.Activity
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -1124,7 +1125,12 @@ private fun startCrop(
     )
 
     val options = UCrop.Options().apply {
-        setCompressionFormat(android.graphics.Bitmap.CompressFormat.JPEG)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            setCompressionFormat(android.graphics.Bitmap.CompressFormat.WEBP_LOSSY)
+        } else {
+            @Suppress("DEPRECATION")
+            setCompressionFormat(android.graphics.Bitmap.CompressFormat.WEBP)
+        }
         setCompressionQuality(90)
         setToolbarColor(android.graphics.Color.WHITE)
         setStatusBarColor(android.graphics.Color.WHITE)
