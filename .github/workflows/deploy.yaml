@@ -29,7 +29,7 @@ jobs:
         id: set-env
         run: |
           if [[ "${{ github.ref_name }}" == "dev" ]]; then
-            echo "target_dir=/home/ubuntu/andlife-demo" >> $GITHUB_OUTPUT
+            echo "target_dir=/home/ubuntu/andlife-dev" >> $GITHUB_OUTPUT
             echo "server_port=8081" >> $GITHUB_OUTPUT
             echo "db_port=3307" >> $GITHUB_OUTPUT
           else
