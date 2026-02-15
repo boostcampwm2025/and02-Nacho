@@ -3,11 +3,13 @@ package com.andlife.data.repository.di
 import com.andlife.data.repository.address.AddressRepositoryImpl
 import com.andlife.data.repository.guestbook.GuestBookRepositoryImpl
 import com.andlife.data.repository.invitation.InvitationRepositoryImpl
+import com.andlife.data.repository.report.ReportRepositoryImpl
 import com.andlife.data.repository.thankscard.ThanksCardRepositoryImpl
 import com.andlife.data.repository.user.UserRepositoryImpl
 import com.andlife.domain.repository.address.AddressRepository
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.repository.invitation.InvitationRepository
+import com.andlife.domain.repository.report.ReportRepository
 import com.andlife.domain.repository.thankscard.ThanksCardRepository
 import com.andlife.domain.repository.user.UserRepository
 import dagger.Binds
@@ -38,4 +40,8 @@ internal abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindThanksCardRepository(thanksCardRepositoryImpl: ThanksCardRepositoryImpl): ThanksCardRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindReportRepository(reportRepositoryImpl: ReportRepositoryImpl): ReportRepository
 }
