@@ -5,17 +5,27 @@ enum class ReportTargetType {
 }
 
 enum class ReportReason {
-    SPAM,                   // 스팸
-    VIOLENT_HATE,          // 폭력적, 혐오스러운 콘텐츠
-    SEXUAL_CONTENT,        // 성적인 콘텐츠
-    FRAUD_FALSE_INFO,      // 사기, 거짓 정보 유포
-    HARASSMENT_PROFANITY,  // 괴롭힘, 욕설
-    COPYRIGHT_INFRINGEMENT, // 저작권 침해
-    ETC                     // 기타
+    SPAM,
+    VIOLENT_HATE,
+    SEXUAL_CONTENT,
+    FRAUD_FALSE_INFO,
+    HARASSMENT_PROFANITY,
+    COPYRIGHT_INFRINGEMENT,
+    ETC;
+
+    companion object {
+        fun safeValueOf(type: String, default: ReportReason = ETC): ReportReason {
+            return try {
+                valueOf(type)
+            } catch (e: IllegalArgumentException) {
+                default
+            }
+        }
+    }
 }
 
 enum class ReportStatus {
-    PENDING,    // 검토 대기
-    REVIEWED,   // 검토 완료
-    DISMISSED   // 반려
+    PENDING,
+    REVIEWED,
+    DISMISSED
 }

@@ -1,6 +1,7 @@
 package com.andlife.nachoserver.service.report
 
 import com.andlife.nachoserver.auth.AuthContext
+import com.andlife.nachoserver.constant.ReportReason
 import com.andlife.nachoserver.constant.ReportTargetType
 import com.andlife.nachoserver.entity.Report
 import com.andlife.nachoserver.error.BusinessException
@@ -43,7 +44,7 @@ class ReportService(
             reporter = reporter,
             targetType = request.targetType,
             targetId = request.targetId,
-            reason = request.reason,
+            reason = ReportReason.safeValueOf(request.reason),
             description = request.description
         )
 
