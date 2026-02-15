@@ -176,4 +176,10 @@
     <string name="effect_cherry_blossom">벚꽃</string>
     <string name="effect_none">없음</string>
     <string name="btn_select">선택</string>
+    <string name="txt_report">신고하기</string>
+    <string name="txt_report_reason_title">사유 선택</string>
+    <string name="txt_report_submit">제출하기</string>
+    <string name="msg_report_success">신고처리 되었습니다.</string>
+    <string name="msg_report_failure">서버 에러로 신고처리에 실패하였습니다.</string>
+    <string name="txt_label_report">신고</string>
 </resources>
