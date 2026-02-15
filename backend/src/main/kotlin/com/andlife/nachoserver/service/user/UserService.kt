@@ -8,9 +8,11 @@ import com.andlife.nachoserver.repository.participant.InvitationParticipantRepos
 import com.andlife.nachoserver.repository.user.UserRepository
 import com.andlife.nachoserver.service.guestbook.GuestBookService
 import com.andlife.nachoserver.service.invitation.InvitationService
+import com.andlife.nachoserver.service.media.MediaService
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.multipart.MultipartFile
 
 @Service
 class UserService(
@@ -18,7 +20,8 @@ class UserService(
     private val invitationRepository: InvitationRepository,
     private val participantRepository: InvitationParticipantRepository,
     private val guestBookService: GuestBookService,
-    private val invitationService: InvitationService
+    private val invitationService: InvitationService,
+    private val mediaService: MediaService
 ) {
 
     fun getMe(authContext: AuthContext): UserResponse {
@@ -70,5 +73,33 @@ class UserService(
                 throw TokenExpiredException()
             }
         }
+    }
+
+    @Transactional
+    fun updateProfile(
+        authContext: AuthContext,
+        nickname: String?,
+        newProfileImageUrl: String?
+    ): UserResponse {
+        val userId = (authContext as? AuthContext.Member)?.userId ?: throw TokenExpiredException()
+        val user = userRepository.findById(userId).orElseThrow { EntityNotFoundException() }
+
+        nickname?.let { if (it.isNotBlank()) user.updateNickname(it) }
+
+        newProfileImageUrl?.let { newUrl ->
+            user.profileImageUrl?.let { oldUrl ->
+                val oldKey = mediaService.extractKey(oldUrl)
+                mediaService.deleteMedia(oldKey)
+            }
+
+            user.updateProfileImage(newUrl)
+        }
+
+        return UserResponse(
+            id = user.id,
+            email = user.email,
+            name = user.name,
+            profileImageUrl = user.profileImageUrl
+        )
     }
 }

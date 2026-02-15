@@ -14,6 +14,20 @@
     <string name="desc_profile_camera">프로필 이미지 수정 사진 아이콘</string>
     <string name="desc_profile_edit">수정된 닉네임을 저장하는 아이콘</string>
 
+    <string name="msg_nickname_empty">닉네임을 입력해 주세요.</string>
+    <string name="msg_nickname_too_long">최대 12자까지 입력 가능합니다.</string>
+    <string name="msg_nickname_invalid_char">공백이나 특수문자는 포함할 수 없습니다.</string>
+    <string name="msg_profile_update_success">프로필 정보가 수정되었습니다.</string>
+    <string name="msg_profile_update_fail">프로필 수정에 실패했습니다. 다시 시도해주세요.</string>
+    <string name="msg_nickname_invalid">유효한 닉네임을 입력해주세요.</string>
+    <string name="txt_nickname_placeholder">변경하실 닉네임을 입력해 주세요.</string>
+    <string name="txt_nickname_edit_title">닉네임 수정</string>
+    <string name="txt_profile_image_edit_title">프로필 사진 수정</string>
+    <string name="txt_take_photo">카메라 촬영</string>
+    <string name="txt_view_profile_detail">사진 보기</string>
+    <string name="desc_btn_view_detail_close">사진 보기 화면 닫기 아이콘 버튼</string>
+    <string name="txt_pick_album">앨범에서 사진 선택</string>
+
     <string name="txt_push_notification">푸시 알림</string>
 
     <string name="txt_policy_service">서비스 이용약관</string>

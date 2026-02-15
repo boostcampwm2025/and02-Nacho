@@ -3,6 +3,7 @@ package com.andlife.domain.repository.user
 import com.andlife.domain.error.DataError
 import com.andlife.domain.error.InvitationError
 import com.andlife.domain.model.auth.AuthState
+import com.andlife.domain.model.auth.User
 import com.andlife.domain.util.Result
 
 interface UserRepository {
@@ -17,4 +18,5 @@ interface UserRepository {
     suspend fun setWifiDialogDismissed()
     suspend fun isFirstDownloadDone(): Boolean
     suspend fun setFirstDownloadDone()
+    suspend fun updateProfile(nickname: String?, newImageUri: String?): Result<User, DataError>
 }

@@ -7,8 +7,11 @@ import com.andlife.datastore.UserStorage
 import com.andlife.domain.error.DataError
 import com.andlife.domain.error.InvitationError
 import com.andlife.domain.model.auth.AuthState
+import com.andlife.domain.model.auth.User
 import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.user.UserRepository
+import com.andlife.domain.util.MediaFileProvider
+import com.andlife.domain.util.MediaUploader
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.map
 import com.andlife.domain.util.runResultCatching
@@ -20,7 +23,9 @@ internal class UserRepositoryImpl @Inject constructor(
     private val userStorage: UserStorage,
     private val userRemoteDataSource: UserRemoteDataSource,
     private val authStateManager: AuthStateManager,
-    private val invitationDatabase: InvitationDatabase
+    private val invitationDatabase: InvitationDatabase,
+    private val mediaUploader: MediaUploader,
+    private val mediaFileProvider: MediaFileProvider
 ) : UserRepository {
     override suspend fun login(accessToken: String): Result<Unit, DataError> {
         return userRemoteDataSource.login(AuthRequest(accessToken))
@@ -129,4 +134,41 @@ internal class UserRepositoryImpl @Inject constructor(
     override suspend fun isFirstDownloadDone(): Boolean = userStorage.isFirstDownloadDone()
 
     override suspend fun setFirstDownloadDone() = userStorage.setFirstDownloadDone()
+
+    override suspend fun updateProfile(
+        nickname: String?,
+        newImageUri: String?
+    ): Result<User, DataError> {
+        return try {
+            var finalProfileImageUrl: String? = null
+
+            if (newImageUri != null) {
+                val mediaFile = mediaFileProvider.createFromUri(newImageUri)
+                    ?: return Result.Error(DataError.LocalImage.NotFound)
+
+                val uploadResult = mediaUploader.uploadMedias(listOf(mediaFile))
+
+                when (uploadResult) {
+                    is Result.Success -> {
+                        finalProfileImageUrl = uploadResult.data.firstOrNull()
+                    }
+                    is Result.Error -> return Result.Error(uploadResult.error)
+                }
+            }
+
+            userRemoteDataSource.updateProfile(
+                nickname = nickname,
+                profileImageUrl = finalProfileImageUrl
+            ).map { userResponse ->
+                val updatedUser = userResponse.toDomain()
+                authStateManager.setAuthenticated(updatedUser)
+                updatedUser
+            }
+
+        } catch (e: IOException) {
+            Result.Error(DataError.Local.IOEXCEPTION)
+        } catch (e: Exception) {
+            Result.Error(DataError.Network.UNKNOWN)
+        }
+    }
 }

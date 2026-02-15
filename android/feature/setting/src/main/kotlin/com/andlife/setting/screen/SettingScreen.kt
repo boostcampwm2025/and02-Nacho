@@ -1,18 +1,32 @@
 package com.andlife.setting.screen
 
+import android.app.Activity
+import android.net.Uri
+import android.os.Build
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
@@ -20,6 +34,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -28,8 +44,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -41,13 +55,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
@@ -63,12 +83,15 @@ import com.andlife.domain.model.auth.AuthState
 import com.andlife.login.LocalLoginManager
 import com.andlife.login.social.SocialType
 import com.andlife.setting.R
+import com.andlife.setting.model.NicknameError
+import com.andlife.setting.model.SettingMessage
 import com.andlife.setting.model.SettingSideEffect
 import com.andlife.setting.model.SettingUiEvent
 import com.andlife.setting.model.SettingUiState
 import com.andlife.setting.viewmodel.SettingViewModel
 import com.andlife.ui.util.collectWithLifecycle
 import com.andlife.ui.util.getAppVersion
+import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.launch
 import com.andlife.designsystem.R as designR
 
@@ -84,10 +107,39 @@ fun SettingRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var isLogoutDialogVisible by remember { mutableStateOf(false) }
     var isSignedOutDialogVisible by remember { mutableStateOf(false) }
+    var isNicknameDialogVisible by remember { mutableStateOf(false) }
+    var isImageActionDialogVisible by remember { mutableStateOf(false) }
+    var isProfileDetailVisible by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val loginManager = LocalLoginManager.current
+    val context = LocalContext.current
     val res = LocalResources.current
+
+    val cropLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val croppedUri = result.data?.let { UCrop.getOutput(it) }
+            croppedUri?.let {
+                viewModel.onEvent(SettingUiEvent.ClickConfirmProfileImage(it.toString()))
+            }
+        }
+    }
+
+    val brandColor = NachoTheme.colorScheme.brandPrimary.toArgb()
+    val pickProfileMedia = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let { sourceUri ->
+            startCrop(
+                context = context,
+                sourceUri = sourceUri,
+                launcher = cropLauncher,
+                brandColor = brandColor
+            )
+        }
+    }
 
     SettingScreen(
         uiState = uiState,
@@ -95,6 +147,14 @@ fun SettingRoute(
         onNavigateToLogin = onNavigateToLogin,
         onEvent = viewModel::onEvent,
         modifier = modifier,
+        onClickEditNickname = {
+            val currentUser = (uiState.authState as? AuthState.Authenticated)?.user
+            currentUser?.let {
+                viewModel.onEvent(SettingUiEvent.OnNicknameChanged(it.name))
+            }
+            isNicknameDialogVisible = true
+        },
+        onClickEditImage = { isImageActionDialogVisible = true },
         onClickQuit = { isSignedOutDialogVisible = true },
         onClickLogout = { isLogoutDialogVisible = true }
     )
@@ -126,6 +186,61 @@ fun SettingRoute(
                     }
                 }
             }
+
+            is SettingSideEffect.ShowSnackbar -> {
+                val message = when (effect.messageType) {
+                    SettingMessage.PROFILE_UPDATE_SUCCESS -> res.getString(R.string.msg_profile_update_success)
+                    SettingMessage.PROFILE_UPDATE_FAIL -> res.getString(R.string.msg_profile_update_fail)
+                    SettingMessage.NICKNAME_INVALID -> res.getString(R.string.msg_nickname_invalid)
+                }
+
+                scope.launch {
+                    snackbarHostState.showSnackbar(message)
+                }
+            }
+        }
+    }
+
+    if (isProfileDetailVisible) {
+        val user = (uiState.authState as? AuthState.Authenticated)?.user
+        ProfileImageDetailDialog(
+            imageUrl = user?.profileImageUrl,
+            onDismiss = { isProfileDetailVisible = false }
+        )
+    }
+
+    if (isNicknameDialogVisible) {
+        NachoDialog(onDismiss = { isNicknameDialogVisible = false }) {
+            EditNicknameDialogContent(
+                uiState = uiState,
+                onNicknameChanged = { viewModel.onEvent(SettingUiEvent.OnNicknameChanged(it)) },
+                onConfirm = {
+                    Log.d("Nickname", "Confirm clicked: ${uiState.nicknameInput}")
+                    viewModel.onEvent(SettingUiEvent.ClickConfirmNickname(uiState.nicknameInput))
+                    isNicknameDialogVisible = false
+                },
+                onDismiss = { isNicknameDialogVisible = false }
+            )
+        }
+    }
+
+    if (isImageActionDialogVisible) {
+        NachoDialog(onDismiss = { isImageActionDialogVisible = false }) {
+            ProfileImageActionDialog(
+                onViewDetail = {
+                    isImageActionDialogVisible = false
+                    isProfileDetailVisible = true
+                },
+                onPickAlbum = {
+                    isImageActionDialogVisible = false
+                    pickProfileMedia.launch(
+                        androidx.activity.result.PickVisualMediaRequest(
+                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                        )
+                    )
+                },
+                onDismiss = { isImageActionDialogVisible = false }
+            )
         }
     }
 
@@ -159,6 +274,8 @@ fun SettingScreen(
     uiState: SettingUiState,
     snackbarHostState: SnackbarHostState,
     onNavigateToLogin: () -> Unit,
+    onClickEditNickname: () -> Unit,
+    onClickEditImage: () -> Unit,
     onClickLogout: () -> Unit,
     onClickQuit: () -> Unit,
     onEvent: (SettingUiEvent) -> Unit = {},
@@ -204,9 +321,8 @@ fun SettingScreen(
                         ProfileContent(
                             authState = uiState.authState,
                             onNavigateToLogin = onNavigateToLogin,
-                            onNameChange = { nameState = it },
-                            onClickImage = {},
-                            onClickEdit = {},
+                            onClickImage = onClickEditImage,
+                            onClickEdit = onClickEditNickname,
                             modifier = Modifier.padding(
                                 vertical = NachoSpacing.medium,
                                 horizontal = NachoSpacing.large
@@ -345,9 +461,8 @@ private fun SettingSection(
 private fun ProfileContent(
     authState: AuthState,
     onNavigateToLogin: () -> Unit,
-    onNameChange: (String) -> Unit,
-    onClickImage: () -> Unit = {},
-    onClickEdit: () -> Unit = {},
+    onClickImage: () -> Unit,
+    onClickEdit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (authState) {
@@ -358,15 +473,16 @@ private fun ProfileContent(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
-                    modifier = Modifier.size(80.dp),
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clickable(onClick = onClickImage),
                 ) {
                     AsyncImage(
                         model = user.profileImageUrl,
                         contentDescription = stringResource(R.string.desc_profile_image),
                         modifier = Modifier
                             .fillMaxSize()
-                            .clip(CircleShape)
-                            .clickable(onClick = onClickImage),
+                            .clip(CircleShape),
                         contentScale = ContentScale.Crop,
                         placeholder = painterResource(designR.drawable.ic_person_24),
                         error = painterResource(designR.drawable.ic_person_24),
@@ -389,6 +505,8 @@ private fun ProfileContent(
                     }
                 }
 
+                Spacer(modifier = Modifier.width(NachoSpacing.medium))
+
                 Column(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.Center,
@@ -397,25 +515,11 @@ private fun ProfileContent(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        TextField(
-                            value = user.name,
-                            onValueChange = onNameChange,
-                            enabled = true,
-                            readOnly = false,
-                            modifier = Modifier.weight(1f),
-                            textStyle = NachoTheme.typography.headingSmallSemiBold,
-                            singleLine = true,
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                cursorColor = NachoTheme.colorScheme.brandPrimary,
-                                selectionColors = TextSelectionColors(
-                                    handleColor = NachoTheme.colorScheme.brandPrimary,
-                                    backgroundColor = NachoTheme.colorScheme.brandPrimary.copy(alpha = 0.4f)
-                                )
-                            ),
+                        Text(
+                            text = user.name,
+                            style = NachoTheme.typography.headingSmallSemiBold,
+                            color = NachoTheme.colorScheme.textPrimary,
+                            modifier = Modifier.weight(1f)
                         )
                         IconButton(
                             onClick = onClickEdit,
@@ -429,10 +533,6 @@ private fun ProfileContent(
                         }
                     }
 
-                    NachoDivider(
-                        color = NachoTheme.colorScheme.backgroundSecondary,
-                        modifier = Modifier.fillMaxWidth()
-                    )
                 }
             }
         }
@@ -694,6 +794,144 @@ private fun AccountContent(
 }
 
 @Composable
+fun EditNicknameDialogContent(
+    uiState: SettingUiState,
+    onNicknameChanged: (String) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val currentNickname = (uiState.authState as? AuthState.Authenticated)?.user?.name ?: ""
+
+    val isConfirmEnabled = uiState.nicknameInput.isNotBlank() &&
+        uiState.nicknameError == NicknameError.NONE &&
+        uiState.nicknameInput != currentNickname
+
+    val errorMessage = when (uiState.nicknameError) {
+        NicknameError.EMPTY -> stringResource(R.string.msg_nickname_empty)
+        NicknameError.TOO_LONG -> stringResource(R.string.msg_nickname_too_long)
+        NicknameError.INVALID_CHAR -> stringResource(R.string.msg_nickname_invalid_char)
+        NicknameError.NONE -> ""
+    }
+
+    Column(modifier = Modifier.padding(NachoSpacing.large)) {
+        Text(
+            text = stringResource(R.string.txt_nickname_edit_title),
+            style = NachoTheme.typography.headingSmallSemiBold,
+        )
+
+        Spacer(modifier = Modifier.height(NachoSpacing.medium))
+
+        OutlinedTextField(
+            value = uiState.nicknameInput,
+            onValueChange = onNicknameChanged,
+            isError = uiState.nicknameError != NicknameError.NONE,
+            placeholder =  {
+                Text(
+                    text = stringResource(R.string.txt_nickname_placeholder),
+                    style = NachoTheme.typography.bodyLargeRegular,
+                    color = NachoTheme.colorScheme.textTertiary,
+                )
+            },
+            supportingText = {
+                if (errorMessage.isNotEmpty()) {
+                    Text(errorMessage, color = NachoTheme.colorScheme.error)
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = NachoTheme.typography.headingSmallSemiBold,
+            singleLine = true,
+            shape = RoundedCornerShape(NachoSpacing.small),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                focusedBorderColor = NachoTheme.colorScheme.brandPrimary,
+                unfocusedBorderColor = NachoTheme.colorScheme.backgroundBorder,
+                errorBorderColor = NachoTheme.colorScheme.error,
+                cursorColor = NachoTheme.colorScheme.brandPrimary,
+                selectionColors = TextSelectionColors(
+                    handleColor = NachoTheme.colorScheme.brandPrimary,
+                    backgroundColor = NachoTheme.colorScheme.brandPrimary.copy(alpha = 0.4f)
+                )
+            ),
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextButton(
+                onClick = { onDismiss() },
+                shape = NachoTheme.shapes.small
+            ) {
+                Text(
+                    text = stringResource(R.string.txt_cancel),
+                    color = NachoTheme.colorScheme.textSecondary
+                )
+            }
+            Spacer(modifier = Modifier.padding(horizontal = NachoSpacing.small))
+            TextButton(
+                onClick = { onConfirm() },
+                enabled = isConfirmEnabled,
+                shape = NachoTheme.shapes.small
+            ) {
+                Text(
+                    text = stringResource(R.string.txt_confirm),
+                    color = if (isConfirmEnabled) {
+                        NachoTheme.colorScheme.brandPrimary
+                    } else {
+                        NachoTheme.colorScheme.textDisabled
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ProfileImageActionDialog(
+    onViewDetail: () -> Unit,
+    onPickAlbum: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Column(
+        modifier = Modifier.padding(NachoSpacing.medium)
+    ) {
+        TextItem(
+            text = stringResource(R.string.txt_view_profile_detail),
+            onClick = {
+                onViewDetail()
+                onDismiss()
+            }
+        )
+        TextItem(
+            text = stringResource(R.string.txt_pick_album),
+            onClick = {
+                onPickAlbum()
+                onDismiss()
+            },
+        )
+        TextItem(
+            text = stringResource(R.string.txt_cancel),
+            onClick = onDismiss, color = NachoTheme.colorScheme.textSecondary,
+        )
+    }
+}
+
+@Composable
+private fun TextItem(text: String, onClick: () -> Unit, color: Color = Color.Unspecified) {
+    Text(
+        text = text,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(NachoSpacing.medium),
+        style = NachoTheme.typography.bodyLargeMedium,
+        color = color
+    )
+}
+
+@Composable
 private fun LogoutDialogContent(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
@@ -795,6 +1033,71 @@ private fun SignedOutDialogContent(
     }
 }
 
+@Composable
+fun ProfileImageDetailDialog(
+    imageUrl: String?,
+    onDismiss: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        var scale by remember { mutableStateOf(1f) }
+        var offset by remember { mutableStateOf(Offset.Zero) }
+
+        val state = rememberTransformableState { zoomChange, offsetChange, _ ->
+            scale = (scale * zoomChange).coerceIn(1f, 5f)
+
+            offset = if (scale <= 1f) {
+                Offset.Zero
+            } else {
+                offset + offsetChange
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(NachoTheme.colorScheme.backgroundInverse)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = { onDismiss() })
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .graphicsLayer(
+                        scaleX = scale,
+                        scaleY = scale,
+                        translationX = offset.x,
+                        translationY = offset.y
+                    )
+                    .transformable(state = state),
+                contentScale = ContentScale.Fit,
+                placeholder = painterResource(designR.drawable.ic_person_24),
+                error = painterResource(designR.drawable.ic_person_24),
+            )
+
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(top = NachoSpacing.large, start = NachoSpacing.medium)
+            ) {
+                Icon(
+                    painter = painterResource(designR.drawable.ic_close_24),
+                    contentDescription = stringResource(R.string.desc_btn_view_detail_close),
+                    tint = Color.White
+                )
+            }
+        }
+    }
+}
+
 @PreviewTheme
 @Composable
 private fun SettingScreenPreview() {
@@ -803,8 +1106,36 @@ private fun SettingScreenPreview() {
             uiState = SettingUiState(isLoading = false),
             snackbarHostState = remember { SnackbarHostState() },
             onNavigateToLogin = {},
+            onClickEditNickname = {},
+            onClickEditImage = {},
             onClickQuit = {},
             onClickLogout = {}
         )
     }
+}
+
+private fun startCrop(
+    context: android.content.Context,
+    sourceUri: Uri,
+    launcher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>,
+    brandColor: Int
+) {
+    val destinationUri = Uri.fromFile(
+        java.io.File(context.cacheDir, "temp_profile_crop.webp")
+    )
+
+    val options = UCrop.Options().apply {
+        setToolbarColor(android.graphics.Color.WHITE)
+        setStatusBarColor(android.graphics.Color.WHITE)
+        setToolbarWidgetColor(android.graphics.Color.BLACK)
+        setActiveControlsWidgetColor(brandColor)
+    }
+
+    val uCropIntent = UCrop.of(sourceUri, destinationUri)
+        .withAspectRatio(1f, 1f)
+        .withMaxResultSize(1000, 1000)
+        .withOptions(options)
+        .getIntent(context)
+
+    launcher.launch(uCropIntent)
 }

@@ -25,9 +25,9 @@ import com.andlife.designsystem.theme.NachoTheme
 @Composable
 fun NachoDialog(
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
     shape: Shape = NachoTheme.shapes.medium,
     containerColor: Color = NachoTheme.colorScheme.backgroundTertiary,
-    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     Dialog(
