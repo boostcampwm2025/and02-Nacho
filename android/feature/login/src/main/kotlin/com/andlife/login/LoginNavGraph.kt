@@ -16,9 +16,12 @@ fun NavController.navigateToLogin(navOptions: NavOptions?) {
 }
 
 fun NavGraphBuilder.loginNavGraph(
-    modifier: Modifier = Modifier
+    onNavigateToWebView: (String, String) -> Unit = { _, _ -> },
+    modifier: Modifier = Modifier,
 ) {
     composable<Login> {
-        LoginRoute()
+        LoginRoute(
+            onNavigateToWebView = onNavigateToWebView,
+        )
     }
 }

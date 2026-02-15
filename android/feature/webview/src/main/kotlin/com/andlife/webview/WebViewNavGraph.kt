@@ -8,6 +8,11 @@ import androidx.navigation.toRoute
 import com.andlife.webview.screen.WebViewScreen
 import kotlinx.serialization.Serializable
 
+object PolicyUrl {
+    const val SERVICE = "https://adventurous-pyramid-33a.notion.site/305507e6a51280b5b325e368dff9b81c"
+    const val PRIVACY = "https://adventurous-pyramid-33a.notion.site/305507e6a512804da1aacbb2180d3be9"
+}
+
 @Serializable
 data class WebViewRoute(val url: String, val title: String)
 

@@ -176,7 +176,4 @@
     <string name="effect_cherry_blossom">벚꽃</string>
     <string name="effect_none">없음</string>
     <string name="btn_select">선택</string>
-
-    <string name="txt_error_network">네트워크 연결을 확인해주세요</string>
-    <string name="desc_top_bar_back">설정 뒤로가기 아이콘 버튼</string>
 </resources>

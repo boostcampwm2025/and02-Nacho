@@ -213,7 +213,15 @@ fun NachoNavHost(
                 }
             )
 
-            loginNavGraph()
+            loginNavGraph(
+                onNavigateToWebView = { url, title ->
+                    navigator.navController.navigateToWebView(
+                        url = url,
+                        title = title,
+                        navOptions = navOptions { launchSingleTop = true }
+                    )
+                },
+            )
 
             createThanksCardNavGraph(
                 onSuccessfulCreate = {

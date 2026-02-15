@@ -1,6 +1,5 @@
 package com.andlife.login.screen
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -58,13 +57,15 @@ import com.andlife.login.social.SocialType
 import com.andlife.login.viewmodel.LoginViewModel
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.util.collectWithLifecycle
+import com.andlife.webview.PolicyUrl
 import kotlinx.coroutines.launch
 import com.andlife.designsystem.R as designR
 
 @Composable
 fun LoginRoute(
+    onNavigateToWebView: (String, String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: LoginViewModel = hiltViewModel()
+    viewModel: LoginViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val loginManager = LocalLoginManager.current
@@ -97,6 +98,7 @@ fun LoginRoute(
         modifier = modifier,
         snackbarHostState = snackbarHostState,
         onEvent = viewModel::onEvent,
+        onNavigateToWebView = onNavigateToWebView,
         onSocialLogin = { socialType ->
             scope.launch {
                 loginManager.login(
@@ -123,7 +125,8 @@ private fun LoginScreen(
     snackbarHostState: SnackbarHostState,
     onSocialLogin: (SocialType) -> Unit,
     onEvent: (LoginUiEvent) -> Unit,
-    modifier: Modifier = Modifier
+    onNavigateToWebView: (String, String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier,
@@ -176,9 +179,16 @@ private fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
             ) {
+                val serviceTitle = stringResource(R.string.termsofuse)
+                val privacyTitle = stringResource(R.string.privacypolicy)
+
                 PolicyAndTermsText(
-                    onPrivacyPolicyClick = { Log.d("Login", "onPrivacyPolicyClick") },
-                    onTermsOfServiceClick = { Log.d("Login", "onTermsOfServiceClick") }
+                    onTermsOfServiceClick = {
+                        onNavigateToWebView(PolicyUrl.SERVICE, serviceTitle)
+                    },
+                    onPrivacyPolicyClick = {
+                        onNavigateToWebView(PolicyUrl.PRIVACY, privacyTitle)
+                    },
                 )
 
                 CopyrightText(
@@ -421,7 +431,8 @@ private fun LoginScreenPreview() {
             uiState = LoginUiState(),
             snackbarHostState = remember { SnackbarHostState() },
             onSocialLogin = {},
-            onEvent = {}
+            onEvent = {},
+            onNavigateToWebView = { _, _ -> },
         )
     }
 }

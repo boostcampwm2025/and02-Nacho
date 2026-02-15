@@ -7,6 +7,7 @@ android {
 }
 
 dependencies {
+    implementation(projects.feature.webview)
     implementation(libs.kakao.user)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

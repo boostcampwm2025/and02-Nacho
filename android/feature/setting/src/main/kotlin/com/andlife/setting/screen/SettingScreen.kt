@@ -62,7 +62,7 @@ import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.auth.AuthState
 import com.andlife.login.LocalLoginManager
 import com.andlife.login.social.SocialType
-import com.andlife.setting.PolicyUrl
+import com.andlife.webview.PolicyUrl
 import com.andlife.setting.R
 import com.andlife.setting.model.SettingSideEffect
 import com.andlife.setting.model.SettingUiEvent
