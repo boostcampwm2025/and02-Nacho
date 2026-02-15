@@ -1,5 +1,6 @@
 package com.andlife.invitation.model.guestbook
 
+import com.andlife.model.common.ReportReason
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.ui.base.BaseUiEvent
 import com.andlife.ui.component.invitation.SelectedMedia
@@ -24,7 +25,7 @@ sealed interface InvitationGuestBookUiEvent : BaseUiEvent {
     data object ClickCamera : InvitationGuestBookUiEvent
 
     data object ClickMicrophone : InvitationGuestBookUiEvent
-    
+
     data object ClearError : InvitationGuestBookUiEvent
 
     data class ClickVisualMedia(
@@ -59,4 +60,15 @@ sealed interface InvitationGuestBookUiEvent : BaseUiEvent {
     data object CheckLogin : InvitationGuestBookUiEvent
 
     data object DismissLoginDialog : InvitationGuestBookUiEvent
+
+    data class ShowReport(
+        val targetId: Long
+    ) : InvitationGuestBookUiEvent
+
+     data object DismissReport : InvitationGuestBookUiEvent
+
+     data class SubmitReport(
+         val reason: ReportReason,
+         val description: String?
+     ) : InvitationGuestBookUiEvent
 }

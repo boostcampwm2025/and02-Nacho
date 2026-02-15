@@ -25,4 +25,8 @@ sealed interface InvitationGuestBookSideEffect : BaseSideEffect {
     data class AuthStateChanged(
         val authState: AuthState
     ) : InvitationGuestBookSideEffect
+
+    data object ReportSuccess : InvitationGuestBookSideEffect
+
+    data object ReportFailure : InvitationGuestBookSideEffect
 }

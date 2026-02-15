@@ -75,6 +75,7 @@ import com.andlife.model.guestbook.GuestBookInvitationUiModel
 import com.andlife.model.guestbook.GuestBookMediaUiModel
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
+import com.andlife.ui.R as uiR
 import com.andlife.ui.component.AudioRecordingBottomSheet
 import com.andlife.ui.component.dialog.LoginDialog
 import com.andlife.ui.component.dialog.NachoInfoDialog
@@ -82,6 +83,7 @@ import com.andlife.ui.component.dialog.NachoPermissionDialog
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.invitation.InvitationGuestBookForm
 import com.andlife.ui.component.paging.PagingStateContent
+import com.andlife.ui.component.report.ReportBottomSheet
 import com.andlife.ui.util.audio.AudioRecorder
 import com.andlife.ui.util.collectWithLifecycle
 import com.andlife.ui.util.imeWithoutNavBars
@@ -273,6 +275,20 @@ fun InvitationGuestBookRoute(
             is InvitationGuestBookSideEffect.AuthStateChanged -> {
                 guestBooks.refresh()
             }
+
+            InvitationGuestBookSideEffect.ReportSuccess -> {
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(res.getString(uiR.string.msg_report_success))
+                }
+            }
+
+            InvitationGuestBookSideEffect.ReportFailure -> {
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(res.getString(uiR.string.msg_report_failure))
+                }
+            }
         }
     }
 
@@ -383,6 +399,17 @@ fun InvitationGuestBookRoute(
             onConfirm = {
                 viewModel.onEvent(InvitationGuestBookUiEvent.DismissLoginDialog)
                 navigateToLoginWithCleanup()
+            }
+        )
+    }
+
+    if (uiState.reportTargetId != null) {
+        ReportBottomSheet(
+            onSubmit = { reason, description ->
+                viewModel.onEvent(InvitationGuestBookUiEvent.SubmitReport(reason, description))
+            },
+            onDismiss = {
+                viewModel.onEvent(InvitationGuestBookUiEvent.DismissReport)
             }
         )
     }
@@ -588,6 +615,7 @@ private fun InvitationGuestBookScreen(
                                         isEditing = uiState.editingGuestBookId == guestBook.id,
                                         onEditClick = { onEvent(InvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
                                         onDeleteClick = { onDeleteMenuClick(guestBook.id) },
+                                        onReportClick = { targetId -> onEvent(InvitationGuestBookUiEvent.ShowReport(targetId)) },
                                         onVisualMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
                                         onAudioMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
                                         onPlayVideoClick = { url -> onEvent(InvitationGuestBookUiEvent.ClickVideoPlayButton(url, guestBook.id))}
@@ -764,6 +792,7 @@ private fun InvitationGuestBookResultPreview() {
         ),
         GuestBookUiModel(
             id = 2L,
+            invitation = GuestBookInvitationUiModel(id = 222L),
             author = AuthorUiModel(id = 112L, name = "이순신", profileImageUrl = null),
             textContent = "직접 가서 축하해주고 싶었는데 아쉽네요. 멀리서나마 응원합니다!",
             visualMedias = emptyList<GuestBookMediaUiModel>().toImmutableList(),
