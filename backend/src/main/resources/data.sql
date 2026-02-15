@@ -7,7 +7,7 @@ INSERT IGNORE INTO users (id, kakao_id, email, name, profile_image_url, created_
 -- 2. 초대장 데이터 (ID를 1씩 증가: 0-30 → 1-31)
 -- 기존 ID 0 (샘플)을 ID 1로 변경
 INSERT IGNORE INTO invitations (id, host_id, title, display_host_name, thumbnail_urls, invitation_date, start_time, end_time, place_name, address, lat, lng, location_guide, created_at, updated_at) VALUES
-(1, 1, '우리 앱에 오신 것을 환영합니다!', '나에게로의 초대 팀', null, '2026-02-06', '14:00:00', '15:00:00', '나에게로의 초대', '샘플 주소', 0.0, 0.0, '이 초대장은 샘플입니다.\n실제 초대를 만들면 위치와 길 안내를 자유롭게 입력할 수 있어요.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+(1, 1, '우리 앱에 오신 것을 환영합니다!', '나에게로의 초대 팀', null, '2030-02-06', '14:00:00', '15:00:00', '나에게로의 초대', '샘플 주소', 0.0, 0.0, '이 초대장은 샘플입니다.\n실제 초대를 만들면 위치와 길 안내를 자유롭게 입력할 수 있어요.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- 3. 방명록 게시글 (invitation_id와 user_id를 1씩 증가)
 INSERT IGNORE INTO guestbooks (id, invitation_id, user_id, text_content, created_at, updated_at) VALUES

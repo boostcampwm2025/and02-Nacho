@@ -2,7 +2,7 @@ name: 서버 배포 자동화
 
 on:
   push:
-    branches: [ "dev", "demo" ]
+    branches: [ "dev", "release" ]
     paths:
       - 'backend/**'
 
@@ -28,7 +28,7 @@ jobs:
       - name: 배포 환경 설정 (브랜치별 분기)
         id: set-env
         run: |
-          if [[ "${{ github.ref_name }}" == "demo" ]]; then
+          if [[ "${{ github.ref_name }}" == "dev" ]]; then
             echo "target_dir=/home/ubuntu/andlife-demo" >> $GITHUB_OUTPUT
             echo "server_port=8081" >> $GITHUB_OUTPUT
             echo "db_port=3307" >> $GITHUB_OUTPUT
