@@ -87,6 +87,8 @@ import kotlinx.coroutines.delay
 import kotlinx.datetime.LocalDateTime
 import com.andlife.designsystem.R as designR
 
+private const val SAMPLE_INVITATION_ID = 1L
+
 @Composable
 fun GuestBookItem(
     guestBook: GuestBookUiModel,
@@ -98,9 +100,9 @@ fun GuestBookItem(
     modifier: Modifier = Modifier,
     shouldPlayVideo: Boolean = false,
     isEditing: Boolean = false,
-    useMenuButton: Boolean = true,
     onEditClick: (GuestBookUiModel) -> Unit = {},
     onDeleteClick: (GuestBookUiModel) -> Unit = {},
+    onReportClick: (Long) -> Unit = {},
     onInvitationTitleClick: (Long) -> Unit? = {},
 ) {
     val backgroundColor = if (isEditing) {
@@ -115,6 +117,8 @@ fun GuestBookItem(
         else -> 6
     }
 
+    val canShowMenuButton = guestBook.invitation.id != SAMPLE_INVITATION_ID
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -124,10 +128,13 @@ fun GuestBookItem(
         GuestBookItemHeader(
             author = guestBook.author,
             createdAt = guestBook.createdAt,
-            canEdit = useMenuButton && guestBook.isOwner,
-            canDelete = useMenuButton && (guestBook.isOwner || guestBook.isInvitationOwner),
+            canShowMenuButton = canShowMenuButton,
+            canEdit = guestBook.isOwner,
+            canDelete = (guestBook.isOwner || guestBook.isInvitationOwner),
+            canReport = !guestBook.isOwner,
             onEditClick = { onEditClick(guestBook) },
             onDeleteClick = { onDeleteClick(guestBook) },
+            onReportClick = { onReportClick(guestBook.id) },
         )
         GuestBookItemTextSection(
             invitation = guestBook.invitation,
@@ -162,10 +169,13 @@ fun GuestBookItem(
 private fun GuestBookItemHeader(
     author: AuthorUiModel,
     createdAt: LocalDateTime,
+    canShowMenuButton: Boolean,
     canEdit: Boolean,
     canDelete: Boolean,
+    canReport: Boolean,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
+    onReportClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var isMenuExpanded by remember { mutableStateOf(false) }
@@ -207,7 +217,7 @@ private fun GuestBookItemHeader(
                 color = NachoTheme.colorScheme.textTertiary,
             )
         }
-        if (canEdit || canDelete) {
+        if (canShowMenuButton) {
             Box {
                 IconButton(onClick = { isMenuExpanded = true }) {
                     Icon(
@@ -253,6 +263,21 @@ private fun GuestBookItemHeader(
                             color = NachoTheme.colorScheme.textPrimary,
                         )
                     }
+                    if (canReport) {
+                        Text(
+                            text = stringResource(R.string.txt_label_report),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        isMenuExpanded = false
+                                        onReportClick(author.id)
+                                    }
+                                    .padding(NachoSpacing.large),
+                            style = NachoTheme.typography.bodyMediumMedium,
+                            color = NachoTheme.colorScheme.textPrimary,
+                        )
+                    }
                 }
             }
         }
@@ -276,7 +301,7 @@ private fun GuestBookItemTextSection(
             .padding(horizontal = NachoSpacing.large),
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
-        invitation?.let {
+        invitation?.title?.let { title ->
             Row(
                 modifier =
                     Modifier
@@ -286,7 +311,7 @@ private fun GuestBookItemTextSection(
                 horizontalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
             ) {
                 Text(
-                    text = invitation.title,
+                    text = title,
                     style = NachoTheme.typography.bodyLargeMedium,
                     color = NachoTheme.colorScheme.textPrimary,
                 )

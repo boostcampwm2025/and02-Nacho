@@ -118,6 +118,7 @@ fun NachoNavHost(
             invitationNavGraph(
                 paddingValues = innerPadding,
                 onNavigateToDetail = navigator::navigateToInvitationDetail,
+                onNavigateToLogin = { navigator.navigateToLogin() },
                 snackbarHostState = snackbarHostState
             )
 

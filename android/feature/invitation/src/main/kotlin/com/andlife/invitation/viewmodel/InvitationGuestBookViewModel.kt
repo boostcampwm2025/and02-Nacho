@@ -14,8 +14,11 @@ import com.andlife.domain.model.guestbook.GuestBookMedia
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.guestbook.GuestBookRepository
+import com.andlife.domain.repository.report.ReportRepository
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
+import com.andlife.domain.util.RefreshEventHub
+import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.ThumbnailGenerator
 import com.andlife.domain.util.onFailure
@@ -27,12 +30,12 @@ import com.andlife.invitation.model.guestbook.InvitationGuestBookUiState
 import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.media.audio.AudioPlayerManager
 import com.andlife.media.video.AutoVideoPlayerPool
+import com.andlife.model.common.ReportReason
+import com.andlife.model.common.ReportTargetType
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.model.guestbook.UiMediaType
 import com.andlife.model.guestbook.toUiModel
-import com.andlife.domain.util.RefreshEventHub
-import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -58,6 +61,7 @@ constructor(
     private val mediaFileProvider: MediaFileProvider,
     private val thumbnailGenerator: ThumbnailGenerator,
     private val guestBookRepository: GuestBookRepository,
+    private val reportRepository: ReportRepository,
     private val authStateManager: AuthStateManager,
     val audioPlayerManager: AudioPlayerManager,
     val videoPlayerPool: AutoVideoPlayerPool,
@@ -131,6 +135,9 @@ constructor(
             InvitationGuestBookUiEvent.Refresh -> refresh()
             InvitationGuestBookUiEvent.CheckLogin -> checkLogin()
             InvitationGuestBookUiEvent.DismissLoginDialog -> dismissLoginDialog()
+            is InvitationGuestBookUiEvent.ShowReport -> updateReportTargetId(event.targetId)
+            InvitationGuestBookUiEvent.DismissReport -> updateReportTargetId(null)
+            is InvitationGuestBookUiEvent.SubmitReport -> submitReport(event.reason, event.description)
         }
     }
 
@@ -524,5 +531,36 @@ constructor(
 
     private fun dismissLoginDialog() {
         updateState { copy(showLoginDialog = false) }
+    }
+
+    private fun updateReportTargetId(targetId: Long?) {
+        val authState = authStateManager.authState.value
+        if (authState !is AuthState.Authenticated) {
+            updateState { copy(showLoginDialog = true) }
+            return
+        }
+        updateState { copy(reportTargetId = targetId) }
+    }
+
+    private fun submitReport(reason: ReportReason, description: String?) {
+        val targetId = uiState.value.reportTargetId ?: return
+        viewModelScope.launch {
+            reportRepository.sendReport(
+                targetType = ReportTargetType.GUESTBOOK.name,
+                targetId = targetId,
+                reason = reason.name,
+                description = description
+            ).onSuccess {
+                updateState { copy(reportTargetId = null) }
+                sendEffect(InvitationGuestBookSideEffect.ReportSuccess)
+            }.onFailure { error, message ->
+                val messageToShow = if (error == DataError.Network.CONFLICT) {
+                    message
+                } else {
+                    null
+                }
+                sendEffect(InvitationGuestBookSideEffect.ReportFailure(messageToShow))
+            }
+        }
     }
 }

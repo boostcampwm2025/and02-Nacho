@@ -25,8 +25,8 @@ INSERT IGNORE INTO guestbook_audios (guestbook_post_id, audio_url, duration_seco
 (53, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/audios/000test05.mp3', 20, 1);
 
 INSERT IGNORE INTO guestbook_videos (id, guestbook_post_id, video_url, thumbnail_url, duration_seconds, display_order) VALUES
-(4, 51, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', 'https://picsum.photos/400/600?random=64', 25, 0),
-(5, 52, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4', 'https://picsum.photos/400/600?random=65', 30, 0);
+(4, 51, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/1771159747246-14786431-593c-48a0-bf1c-5c60ad8bf582.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/1771159749336-42e0f2c1-ce2a-4c14-b9e8-fa22c3a87800.webp', 17, 0),
+(5, 52, 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/videos/1771159747602-17924525-7573-4456-a8b6-04812ccb5133.mp4', 'https://pub-a78ca76ec21b4920a70cb63c4a63236a.r2.dev/images/1771159750121-6c267cc5-14ab-4040-a4f1-1de7729a42e1.webp', 42, 0);
 
 
 INSERT IGNORE INTO video_preview_thumbnails (guestbook_video_id, thumbnail_url, time_seconds) VALUES
@@ -43,4 +43,4 @@ INSERT IGNORE INTO announcement_sections (invitation_id, title, content, display
 (1, '📸 방명록 작성 안내', ' - 사진, 영상, 음성으로 마음을 남길 수 있어요.\n - 참여한 사람들의 기록은 하나의 타임라인으로 정리됩니다.', 2, CURRENT_TIMESTAMP),
 (1, '💌 초대장 꾸미기', ' - 초대 카드와 감사카드를 활용하여 사람들과 특별한 추억을 만들어보세요!\n - 다양한 테마와 함께 순간을 위한 초대장을 꾸며보세요.', 3, CURRENT_TIMESTAMP),
 (1, '🎁 이렇게 활용해보세요',' - 결혼식, 돌잔치, 졸업식 같은 큰 행사부터\n - 생일, 집들이, 송년회 같은 일상의 모임\n - 동호회, 스터디, 회사 행사\n - 번개 약속, 여행 기록, 소소한 만남까지\n - 감사 인사와 추억 아카이빙',4, CURRENT_TIMESTAMP),
-(1, '❓ 문의사항', ' - 궁금한 점이 있으면 언제든지 고객센터로 연락주세요!\n - 이메일:nacho@example.com', 5, CURRENT_TIMESTAMP);
+(1, '❓ 문의사항', ' - 궁금한 점이 있으면 언제든지 고객센터로 연락주세요!\n - 이메일: ymo6886@gmail.com', 5, CURRENT_TIMESTAMP);

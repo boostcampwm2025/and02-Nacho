@@ -1,5 +1,6 @@
 package com.andlife.home.model.home
 
+import com.andlife.model.common.ReportReason
 import com.andlife.ui.base.BaseUiEvent
 
 sealed interface HomeUiEvent : BaseUiEvent {
@@ -38,4 +39,15 @@ sealed interface HomeUiEvent : BaseUiEvent {
     ) : HomeUiEvent
 
     data object DismissLoginDialog : HomeUiEvent
+
+    data class ShowReport(
+        val targetId: Long
+    ) : HomeUiEvent
+
+     data object DismissReport : HomeUiEvent
+
+     data class SubmitReport(
+         val reason: ReportReason,
+         val description: String?
+     ) : HomeUiEvent
 }

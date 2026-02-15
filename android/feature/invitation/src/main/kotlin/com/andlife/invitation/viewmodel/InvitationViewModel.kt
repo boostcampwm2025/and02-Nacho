@@ -5,10 +5,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
+import com.andlife.domain.error.DataError
+import com.andlife.domain.model.auth.AuthState
 import com.andlife.domain.model.invitation.InvitationStatus
 import com.andlife.domain.model.invitation.SortDirection
 import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.invitation.InvitationRepository
+import com.andlife.domain.repository.report.ReportRepository
 import com.andlife.domain.util.RefreshEventHub
 import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.domain.util.onFailure
@@ -16,6 +19,8 @@ import com.andlife.domain.util.onSuccess
 import com.andlife.invitation.model.InvitationSideEffect
 import com.andlife.invitation.model.InvitationUiEvent
 import com.andlife.invitation.model.InvitationUiState
+import com.andlife.model.common.ReportReason
+import com.andlife.model.common.ReportTargetType
 import com.andlife.model.invitation.InvitationSummaryUiModel
 import com.andlife.model.invitation.toUiModel
 import com.andlife.ui.base.BaseViewModel
@@ -36,6 +41,7 @@ import javax.inject.Inject
 @HiltViewModel
 class InvitationViewModel @Inject constructor(
     private val invitationRepository: InvitationRepository,
+    private val reportRepository: ReportRepository,
     private val authStateManager: AuthStateManager
 ) : BaseViewModel<InvitationUiState, InvitationUiEvent, InvitationSideEffect>(
     initialState = InvitationUiState()
@@ -114,6 +120,24 @@ class InvitationViewModel @Inject constructor(
             is InvitationUiEvent.ClickLeaveInvitation -> {
                 leaveInvitation(event.id)
             }
+            is InvitationUiEvent.ShowReport -> {
+                val authState = authStateManager.authState.value
+                if (authState !is AuthState.Authenticated) {
+                    //sendEffect(InvitationSideEffect.NavigateToLogin)
+                    updateState { copy(showLoginDialog = true) }
+                } else {
+                    updateState { copy(reportTargetId = event.invitationId) }
+                }
+            }
+            is InvitationUiEvent.DismissReport -> {
+                updateState { copy(reportTargetId = null) }
+            }
+            is InvitationUiEvent.SubmitReport -> {
+                submitReport(event.reason, event.description)
+            }
+            is InvitationUiEvent.DismissLoginDialog -> {
+                updateState { copy(showLoginDialog = false) }
+            }
         }
     }
 
@@ -142,4 +166,25 @@ class InvitationViewModel @Inject constructor(
         sendEffect(InvitationSideEffect.NeedRefresh)
     }
 
+    private fun submitReport(reason: ReportReason, description: String?) {
+        val targetId = mutableUiState.value.reportTargetId ?: return
+        viewModelScope.launch {
+            reportRepository.sendReport(
+                targetType = ReportTargetType.INVITATION.name,
+                targetId = targetId,
+                reason = reason.name,
+                description = description
+            ).onSuccess {
+                updateState { copy(reportTargetId = null) }
+                sendEffect(InvitationSideEffect.ReportSuccess)
+            }.onFailure { error, message ->
+                val messageToShow = if (error == DataError.Network.CONFLICT) {
+                    message
+                } else {
+                    null
+                }
+                sendEffect(InvitationSideEffect.ReportFailure(messageToShow))
+            }
+        }
+    }
 }

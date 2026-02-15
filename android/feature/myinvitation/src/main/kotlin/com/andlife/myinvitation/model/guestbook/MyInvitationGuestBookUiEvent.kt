@@ -1,5 +1,6 @@
 package com.andlife.myinvitation.model.guestbook
 
+import com.andlife.model.common.ReportReason
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.ui.base.BaseUiEvent
 import com.andlife.ui.component.invitation.SelectedMedia
@@ -59,4 +60,15 @@ sealed interface MyInvitationGuestBookUiEvent : BaseUiEvent {
     data object CheckLogin : MyInvitationGuestBookUiEvent
 
     data object DismissLoginDialog : MyInvitationGuestBookUiEvent
+
+    data class ShowReport(
+        val guestBookId: Long,
+    ) : MyInvitationGuestBookUiEvent
+
+    data object DismissReport : MyInvitationGuestBookUiEvent
+
+    data class SubmitReport(
+        val reason: ReportReason,
+        val description: String?
+    ) : MyInvitationGuestBookUiEvent
 }

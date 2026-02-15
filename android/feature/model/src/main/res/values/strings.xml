@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="txt_spam">스팸</string>
+    <string name="txt_violent_hate">폭력적, 혐오스러운 콘텐츠</string>
+    <string name="txt_sexual_content">성적인 콘텐츠</string>
+    <string name="txt_fraud_false_info">사기, 거짓 정보 유포</string>
+    <string name="txt_harassment_profanity">괴롭힘, 욕설</string>
+    <string name="txt_copyright_infringement">저작권 침해</string>
+    <string name="txt_etc">기타</string>
+</resources>
