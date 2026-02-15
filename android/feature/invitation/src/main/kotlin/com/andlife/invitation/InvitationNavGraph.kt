@@ -44,6 +44,7 @@ fun NavController.navigateToInvitationDetail(
 fun NavGraphBuilder.invitationNavGraph(
     paddingValues: PaddingValues,
     onNavigateToDetail: (Long) -> Unit,
+    onNavigateToLogin: () -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
     composable<Invitation> {
@@ -62,6 +63,7 @@ fun NavGraphBuilder.invitationNavGraph(
         InvitationRoute(
             viewModel = viewModel,
             onNavigateToDetail = onNavigateToDetail,
+            onNavigateToLogin = onNavigateToLogin,
             snackbarHostState = snackbarHostState,
             modifier = Modifier.padding(paddingValues)
         )

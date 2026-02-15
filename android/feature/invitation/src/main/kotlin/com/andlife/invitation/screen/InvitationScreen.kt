@@ -38,21 +38,26 @@ import com.andlife.invitation.viewmodel.InvitationViewModel
 import com.andlife.model.invitation.InvitationSummaryUiModel
 import com.andlife.ui.R
 import com.andlife.ui.component.GenericTabRow
+import com.andlife.ui.component.dialog.LoginDialog
 import com.andlife.ui.component.invitation.InvitationListHeader
 import com.andlife.ui.component.invitation.InvitationTopBar
 import com.andlife.ui.component.listitem.InvitationListItem
 import com.andlife.ui.component.listitem.MenuItem
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.component.paging.PagingStateContent
+import com.andlife.ui.component.report.ReportBottomSheet
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 
+private const val SAMPLE_INVITATION_ID = 1L
+
 @Composable
 fun InvitationRoute(
     snackbarHostState: SnackbarHostState,
     onNavigateToDetail: (Long) -> Unit,
+    onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: InvitationViewModel = hiltViewModel(),
 ) {
@@ -67,6 +72,8 @@ fun InvitationRoute(
     val refreshFailureMessage = stringResource(R.string.msg_refresh_failure)
     val leaveSuccessMessage = stringResource(R.string.msg_leave_success)
     val leaveFailureMessage = stringResource(R.string.msg_leave_failure)
+    val reportSuccessMessage = stringResource(R.string.msg_report_success)
+    val reportFailureMessage = stringResource(R.string.msg_report_failure)
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
@@ -95,6 +102,18 @@ fun InvitationRoute(
                 upcomingItems.refresh()
                 pastItems.refresh()
             }
+            InvitationSideEffect.ReportSuccess -> {
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(reportSuccessMessage)
+                }
+            }
+            InvitationSideEffect.ReportFailure -> {
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(reportFailureMessage)
+                }
+            }
         }
     }
 
@@ -121,6 +140,29 @@ fun InvitationRoute(
                 invitationIdToLeave = null
             },
             onDismiss = { invitationIdToLeave = null },
+        )
+    }
+
+    if (uiState.reportTargetId != null) {
+        ReportBottomSheet(
+            onSubmit = { reason, description ->
+                viewModel.onEvent(InvitationUiEvent.SubmitReport(reason, description))
+            },
+            onDismiss = {
+                viewModel.onEvent(InvitationUiEvent.DismissReport)
+            }
+        )
+    }
+
+    if (uiState.showLoginDialog) {
+        LoginDialog(
+            onDismiss = {
+                viewModel.onEvent(InvitationUiEvent.DismissLoginDialog)
+            },
+            onConfirm = {
+                viewModel.onEvent(InvitationUiEvent.DismissLoginDialog)
+                onNavigateToLogin()
+            }
         )
     }
 
@@ -232,6 +274,26 @@ private fun InvitationScreen(
                                         else -> stringResource(R.string.format_invitation_d_day, count)
                                     }
 
+                                    val menuItems = if (invitation.id != SAMPLE_INVITATION_ID) {
+                                        persistentListOf(
+                                            MenuItem(
+                                                title = stringResource(R.string.txt_leave_invitation_title),
+                                                onClick = { onLeaveClick(invitation.id) }
+                                            ),
+                                            MenuItem(
+                                                title = stringResource(R.string.txt_report),
+                                                onClick = { onEvent(InvitationUiEvent.ShowReport(invitation.id)) }
+                                            )
+                                        )
+                                    } else {
+                                        persistentListOf(
+                                            MenuItem(
+                                                title = stringResource(R.string.txt_leave_invitation_title),
+                                                onClick = { onLeaveClick(invitation.id) }
+                                            )
+                                        )
+                                    }
+
                                     InvitationListItem(
                                         imageUrl = invitation.thumbnailUrls.firstOrNull() ?: "",
                                         title = invitation.title,
@@ -240,12 +302,7 @@ private fun InvitationScreen(
                                         address = invitation.address,
                                         dDayText = dDayLabel,
                                         onClick = { onEvent(InvitationUiEvent.ClickInvitation(invitation.id)) },
-                                        menuItems = persistentListOf(
-                                            MenuItem(
-                                                title = stringResource(R.string.txt_leave_invitation_title),
-                                                onClick = { onLeaveClick(invitation.id) }
-                                            )
-                                        )
+                                        menuItems = menuItems
                                     )
                                 }
                             }
