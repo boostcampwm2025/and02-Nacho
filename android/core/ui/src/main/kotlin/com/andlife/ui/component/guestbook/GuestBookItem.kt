@@ -100,7 +100,6 @@ fun GuestBookItem(
     modifier: Modifier = Modifier,
     shouldPlayVideo: Boolean = false,
     isEditing: Boolean = false,
-    useMenuButton: Boolean = true,
     onEditClick: (GuestBookUiModel) -> Unit = {},
     onDeleteClick: (GuestBookUiModel) -> Unit = {},
     onReportClick: (Long) -> Unit = {},

@@ -681,7 +681,6 @@ private fun LazyListScope.homeGuestBookSection(
                 GuestBookItem(
                     modifier = Modifier.animateItem(),
                     guestBook = guestBook,
-                    //useMenuButton = false,
                     videoPlayerPool = videoPlayerPool,
                     shouldPlayVideo = uiState.canPlayVideo && (index == playVideoIndex),
                     audioPlaybackState = uiState.audioPlaybackState,
