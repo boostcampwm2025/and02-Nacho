@@ -1125,13 +1125,6 @@ private fun startCrop(
     )
 
     val options = UCrop.Options().apply {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            setCompressionFormat(android.graphics.Bitmap.CompressFormat.WEBP_LOSSY)
-        } else {
-            @Suppress("DEPRECATION")
-            setCompressionFormat(android.graphics.Bitmap.CompressFormat.WEBP)
-        }
-        setCompressionQuality(90)
         setToolbarColor(android.graphics.Color.WHITE)
         setStatusBarColor(android.graphics.Color.WHITE)
         setToolbarWidgetColor(android.graphics.Color.BLACK)
