@@ -69,11 +69,13 @@ import com.andlife.model.common.VideoCandidate
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.model.invitation.UpcomingInvitationUiModel
+import com.andlife.ui.R as uiR
 import com.andlife.ui.component.dialog.LoginDialog
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItemSkeleton
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
+import com.andlife.ui.component.report.ReportBottomSheet
 import com.andlife.ui.util.collectWithLifecycle
 import com.andlife.ui.util.toDDayText
 import com.andlife.ui.util.toDateTimeSingleLine
@@ -109,6 +111,8 @@ fun HomeRoute(
     val lifecycleOwner = LocalLifecycleOwner.current
     val lazyListState = rememberLazyListState()
     val refreshFailMessage = stringResource(R.string.snack_refresh_failure)
+    val reportSuccessMessage = stringResource(uiR.string.msg_report_success)
+    val reportFailureMessage = stringResource(uiR.string.msg_report_failure)
 
     val navigateToLoginWithCleanup: () -> Unit = {
         isMediaActive = false
@@ -164,6 +168,20 @@ fun HomeRoute(
             is HomeSideEffect.NeedRefresh -> {
                 upcomingInvitations.refresh()
                 guestBooks.refresh()
+            }
+
+            HomeSideEffect.ReportSuccess -> {
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(reportSuccessMessage)
+                }
+            }
+
+            HomeSideEffect.ReportFailure -> {
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(reportFailureMessage)
+                }
             }
         }
     }
@@ -229,6 +247,17 @@ fun HomeRoute(
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    if (uiState.reportTargetId != null) {
+        ReportBottomSheet(
+            onSubmit = { reason, description ->
+                viewModel.onEvent(HomeUiEvent.SubmitReport(reason, description))
+            },
+            onDismiss = {
+                viewModel.onEvent(HomeUiEvent.DismissReport)
+            }
+        )
     }
 
     HomeScreen(
@@ -388,6 +417,7 @@ fun HomeScreen(
                     onPlayVideoClick = { url, itemId ->
                         onEvent(HomeUiEvent.ClickVideoPlayButton(url, itemId))
                     },
+                    onReportClick = { targetId -> onEvent(HomeUiEvent.ShowReport(targetId)) },
                 )
             }
         }
@@ -608,6 +638,7 @@ private fun LazyListScope.homeGuestBookSection(
     onVisualMediaClick: (String) -> Unit,
     onAudioMediaClick: (String) -> Unit,
     onPlayVideoClick: (String, Long) -> Unit,
+    onReportClick: (Long) -> Unit,
 ) {
     item {
         Text(
@@ -650,7 +681,7 @@ private fun LazyListScope.homeGuestBookSection(
                 GuestBookItem(
                     modifier = Modifier.animateItem(),
                     guestBook = guestBook,
-                    useMenuButton = false,
+                    //useMenuButton = false,
                     videoPlayerPool = videoPlayerPool,
                     shouldPlayVideo = uiState.canPlayVideo && (index == playVideoIndex),
                     audioPlaybackState = uiState.audioPlaybackState,
@@ -663,6 +694,7 @@ private fun LazyListScope.homeGuestBookSection(
                     onVisualMediaClick = { onVisualMediaClick(it.url) },
                     onAudioMediaClick = { onAudioMediaClick(it.url) },
                     onPlayVideoClick = { url -> onPlayVideoClick(url, guestBook.id) },
+                    onReportClick = { onReportClick(guestBook.id) },
                 )
             }
         }

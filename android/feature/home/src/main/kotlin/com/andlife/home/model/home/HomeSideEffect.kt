@@ -23,4 +23,7 @@ sealed interface HomeSideEffect : BaseSideEffect {
 
     data object RefreshFailure : HomeSideEffect
     data object NeedRefresh : HomeSideEffect
+
+    data object ReportSuccess : HomeSideEffect
+    data object ReportFailure : HomeSideEffect
 }
