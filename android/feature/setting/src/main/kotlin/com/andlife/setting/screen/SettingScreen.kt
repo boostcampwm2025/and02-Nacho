@@ -1121,7 +1121,7 @@ private fun startCrop(
     brandColor: Int
 ) {
     val destinationUri = Uri.fromFile(
-        java.io.File(context.cacheDir, "profile_crop_${System.currentTimeMillis()}.jpg")
+        java.io.File(context.cacheDir, "temp_profile_crop.webp")
     )
 
     val options = UCrop.Options().apply {
