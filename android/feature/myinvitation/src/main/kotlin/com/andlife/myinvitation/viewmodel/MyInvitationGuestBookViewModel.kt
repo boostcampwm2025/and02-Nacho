@@ -544,7 +544,12 @@ constructor(
                 updateState { copy(reportTargetId = null) }
                 sendEffect(MyInvitationGuestBookSideEffect.ReportSuccess)
             }.onFailure { error, message ->
-                sendEffect(MyInvitationGuestBookSideEffect.ReportFailure)
+                val messageToShow = if (error == DataError.Network.CONFLICT) {
+                    message
+                } else {
+                    null
+                }
+                sendEffect(MyInvitationGuestBookSideEffect.ReportFailure(messageToShow))
             }
         }
     }

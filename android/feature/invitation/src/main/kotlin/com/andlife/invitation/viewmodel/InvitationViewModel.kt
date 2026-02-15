@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
+import com.andlife.domain.error.DataError
 import com.andlife.domain.model.auth.AuthState
 import com.andlife.domain.model.invitation.InvitationStatus
 import com.andlife.domain.model.invitation.SortDirection
@@ -176,8 +177,13 @@ class InvitationViewModel @Inject constructor(
             ).onSuccess {
                 updateState { copy(reportTargetId = null) }
                 sendEffect(InvitationSideEffect.ReportSuccess)
-            }.onFailure { _, msg ->
-                sendEffect(InvitationSideEffect.ReportFailure)
+            }.onFailure { error, message ->
+                val messageToShow = if (error == DataError.Network.CONFLICT) {
+                    message
+                } else {
+                    null
+                }
+                sendEffect(InvitationSideEffect.ReportFailure(messageToShow))
             }
         }
     }

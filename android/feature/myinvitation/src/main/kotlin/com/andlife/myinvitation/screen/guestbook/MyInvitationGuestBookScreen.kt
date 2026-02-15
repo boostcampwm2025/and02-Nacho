@@ -283,10 +283,10 @@ fun MyInvitationGuestBookRoute(
                 }
             }
 
-            MyInvitationGuestBookSideEffect.ReportFailure -> {
+            is MyInvitationGuestBookSideEffect.ReportFailure -> {
                 scope.launch {
                     snackbarHostState.currentSnackbarData?.dismiss()
-                    snackbarHostState.showSnackbar(res.getString(uiR.string.msg_report_failure))
+                    snackbarHostState.showSnackbar(effect.message ?: res.getString(uiR.string.msg_report_failure))
                 }
             }
         }

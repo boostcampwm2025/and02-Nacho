@@ -28,5 +28,5 @@ sealed interface InvitationGuestBookSideEffect : BaseSideEffect {
 
     data object ReportSuccess : InvitationGuestBookSideEffect
 
-    data object ReportFailure : InvitationGuestBookSideEffect
+    data class ReportFailure(val message: String? = null) : InvitationGuestBookSideEffect
 }

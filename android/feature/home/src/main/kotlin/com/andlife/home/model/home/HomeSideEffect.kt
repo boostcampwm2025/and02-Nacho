@@ -25,5 +25,5 @@ sealed interface HomeSideEffect : BaseSideEffect {
     data object NeedRefresh : HomeSideEffect
 
     data object ReportSuccess : HomeSideEffect
-    data object ReportFailure : HomeSideEffect
+    data class ReportFailure(val message: String? = null) : HomeSideEffect
 }

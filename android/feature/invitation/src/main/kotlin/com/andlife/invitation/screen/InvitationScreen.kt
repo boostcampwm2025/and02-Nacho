@@ -108,10 +108,10 @@ fun InvitationRoute(
                     snackbarHostState.showSnackbar(reportSuccessMessage)
                 }
             }
-            InvitationSideEffect.ReportFailure -> {
+            is InvitationSideEffect.ReportFailure -> {
                 scope.launch {
                     snackbarHostState.currentSnackbarData?.dismiss()
-                    snackbarHostState.showSnackbar(reportFailureMessage)
+                    snackbarHostState.showSnackbar(effect.message ?: reportFailureMessage)
                 }
             }
         }

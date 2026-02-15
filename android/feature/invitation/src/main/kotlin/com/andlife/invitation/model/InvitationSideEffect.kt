@@ -9,5 +9,5 @@ sealed interface InvitationSideEffect : BaseSideEffect {
     data object LeaveFailure : InvitationSideEffect
     data object NeedRefresh : InvitationSideEffect
     data object ReportSuccess : InvitationSideEffect
-    data object ReportFailure : InvitationSideEffect
+    data class ReportFailure(val message: String? = null) : InvitationSideEffect
 }

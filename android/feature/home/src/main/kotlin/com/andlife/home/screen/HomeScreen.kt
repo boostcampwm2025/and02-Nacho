@@ -177,10 +177,10 @@ fun HomeRoute(
                 }
             }
 
-            HomeSideEffect.ReportFailure -> {
+            is HomeSideEffect.ReportFailure -> {
                 scope.launch {
                     snackbarHostState.currentSnackbarData?.dismiss()
-                    snackbarHostState.showSnackbar(reportFailureMessage)
+                    snackbarHostState.showSnackbar(effect.message ?: reportFailureMessage)
                 }
             }
         }

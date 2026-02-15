@@ -17,6 +17,8 @@ import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.repository.report.ReportRepository
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
+import com.andlife.domain.util.RefreshEventHub
+import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.ThumbnailGenerator
 import com.andlife.domain.util.onFailure
@@ -28,14 +30,12 @@ import com.andlife.invitation.model.guestbook.InvitationGuestBookUiState
 import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.media.audio.AudioPlayerManager
 import com.andlife.media.video.AutoVideoPlayerPool
+import com.andlife.model.common.ReportReason
+import com.andlife.model.common.ReportTargetType
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.model.guestbook.UiMediaType
 import com.andlife.model.guestbook.toUiModel
-import com.andlife.domain.util.RefreshEventHub
-import com.andlife.domain.util.RefreshEventHub.RefreshTarget
-import com.andlife.model.common.ReportReason
-import com.andlife.model.common.ReportTargetType
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -554,7 +554,12 @@ constructor(
                 updateState { copy(reportTargetId = null) }
                 sendEffect(InvitationGuestBookSideEffect.ReportSuccess)
             }.onFailure { error, message ->
-                sendEffect(InvitationGuestBookSideEffect.ReportFailure)
+                val messageToShow = if (error == DataError.Network.CONFLICT) {
+                    message
+                } else {
+                    null
+                }
+                sendEffect(InvitationGuestBookSideEffect.ReportFailure(messageToShow))
             }
         }
     }

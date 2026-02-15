@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
+import com.andlife.domain.error.DataError
 import com.andlife.domain.model.auth.AuthState
 import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.guestbook.GuestBookRepository
@@ -186,7 +187,12 @@ class HomeViewModel @Inject constructor(
                 updateState { copy(reportTargetId = null) }
                 sendEffect(HomeSideEffect.ReportSuccess)
             }.onFailure { error, message ->
-                sendEffect(HomeSideEffect.ReportFailure)
+                val messageToShow = if (error == DataError.Network.CONFLICT) {
+                    message
+                } else {
+                    null
+                }
+                sendEffect(HomeSideEffect.ReportFailure(messageToShow))
             }
         }
     }
