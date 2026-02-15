@@ -44,9 +44,9 @@ import com.andlife.model.util.NavigationKeyConstant.CREATE_THANKS_CARD
 import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
 import com.andlife.myinvitation.myInvitationDetailNavGraph
 import com.andlife.myinvitation.myInvitationNavGraph
-import com.andlife.setting.navigateToWebView
 import com.andlife.setting.settingNavGraph
-import com.andlife.setting.webViewNavGraph
+import com.andlife.webview.navigateToWebView
+import com.andlife.webview.webViewNavGraph
 import com.andlife.thanks_card.createThanksCardNavGraph
 import com.andlife.thanks_card.updateThanksCardNavGraph
 import com.andlife.ui.util.noRippleClickable

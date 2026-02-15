@@ -106,6 +106,7 @@ dependencies {
     implementation(projects.domain)
     implementation(projects.feature.thanksCard)
     implementation(projects.feature.setting)
+    implementation(projects.feature.webview)
 
     // Hilt
     implementation(libs.hilt.android)

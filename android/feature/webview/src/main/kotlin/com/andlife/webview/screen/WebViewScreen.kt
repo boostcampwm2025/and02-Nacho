@@ -1,4 +1,4 @@
-package com.andlife.setting.screen
+package com.andlife.webview.screen
 
 import android.view.ViewGroup
 import android.webkit.WebChromeClient
@@ -23,7 +23,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.andlife.designsystem.preview.PreviewTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -31,10 +30,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import com.andlife.designsystem.component.NachoDivider
+import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
-import com.andlife.setting.R
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
+import com.andlife.webview.R
 import com.andlife.designsystem.R as designR
 
 @OptIn(ExperimentalMaterial3Api::class)
