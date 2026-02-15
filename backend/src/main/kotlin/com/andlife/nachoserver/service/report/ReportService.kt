@@ -22,7 +22,7 @@ class ReportService(
     private val guestBookRepository: GuestBookRepository,
     private val userRepository: UserRepository
 ) {
-    fun createReport(authContext: AuthContext, request: CreateReportRequest): CreateReportResponse {
+    fun createReport(authContext: AuthContext, request: CreateReportRequest) {
         val reporterId = when (authContext) {
             is AuthContext.Member -> authContext.userId
             is AuthContext.Guest -> throw BusinessException(CommonResponseCode.FORBIDDEN)
@@ -47,7 +47,7 @@ class ReportService(
             description = request.description
         )
 
-        return CreateReportResponse(reportRepository.save(report).id)
+        reportRepository.save(report)
     }
 
     private fun validateTargetExists(targetType: ReportTargetType, targetId: Long) {

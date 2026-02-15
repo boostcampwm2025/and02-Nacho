@@ -3,7 +3,6 @@ package com.andlife.nachoserver.controller.report
 import com.andlife.nachoserver.auth.AuthContext
 import com.andlife.nachoserver.request.report.CreateReportRequest
 import com.andlife.nachoserver.response.BaseResponse
-import com.andlife.nachoserver.response.report.CreateReportResponse
 import com.andlife.nachoserver.service.report.ReportService
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -19,7 +18,7 @@ class ReportController(
     fun createReport(
         authContext: AuthContext,
         @RequestBody request: CreateReportRequest
-    ): BaseResponse<CreateReportResponse> {
+    ): BaseResponse<Unit> {
         val result = reportService.createReport(authContext, request)
         return BaseResponse.success(result)
     }

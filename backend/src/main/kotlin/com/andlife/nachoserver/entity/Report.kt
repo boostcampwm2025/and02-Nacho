@@ -42,10 +42,10 @@ class Report(
     val targetId: Long,
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     val reason: ReportReason,
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "VARCHAR(500)")
     val description: String? = null,
 
     @Enumerated(EnumType.STRING)
