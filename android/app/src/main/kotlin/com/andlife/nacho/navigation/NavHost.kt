@@ -45,8 +45,6 @@ import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
 import com.andlife.myinvitation.myInvitationDetailNavGraph
 import com.andlife.myinvitation.myInvitationNavGraph
 import com.andlife.setting.settingNavGraph
-import com.andlife.webview.navigateToWebView
-import com.andlife.webview.webViewNavGraph
 import com.andlife.thanks_card.createThanksCardNavGraph
 import com.andlife.thanks_card.updateThanksCardNavGraph
 import com.andlife.ui.util.noRippleClickable
@@ -94,13 +92,6 @@ fun NachoNavHost(
 
             settingNavGraph(
                 onNavigateBack = navigator::navigatePopBackStack,
-                onNavigateToWebView = { url, title ->
-                    navigator.navController.navigateToWebView(
-                        url = url,
-                        title = title,
-                        navOptions = navOptions { launchSingleTop = true }
-                    )
-                },
                 onNavigateToLogin = {
                     navigator.navigateToLogin()
                 },
@@ -122,10 +113,6 @@ fun NachoNavHost(
                     }
                     navigator.navigateToLogin(navOptions)
                 }
-            )
-
-            webViewNavGraph(
-                onNavigateBack = navigator::navigatePopBackStack,
             )
 
             invitationNavGraph(
@@ -214,15 +201,7 @@ fun NachoNavHost(
                 }
             )
 
-            loginNavGraph(
-                onNavigateToWebView = { url, title ->
-                    navigator.navController.navigateToWebView(
-                        url = url,
-                        title = title,
-                        navOptions = navOptions { launchSingleTop = true }
-                    )
-                },
-            )
+            loginNavGraph()
 
             createThanksCardNavGraph(
                 onSuccessfulCreate = {
