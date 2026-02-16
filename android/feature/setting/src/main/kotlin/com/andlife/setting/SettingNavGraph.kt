@@ -19,7 +19,6 @@ fun NavController.navigateToSetting(navOptions: NavOptions) {
 fun NavGraphBuilder.settingNavGraph(
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
-    onNavigateToWebView: (String, String) -> Unit,
     onSignedOut: () -> Unit,
     onLogout: () -> Unit,
 ) {
@@ -28,7 +27,6 @@ fun NavGraphBuilder.settingNavGraph(
             onNavigateBack = onNavigateBack,
             modifier = Modifier.padding(),
             onNavigateToLogin = onNavigateToLogin,
-            onNavigateToWebView = onNavigateToWebView,
             onSignedOut = onSignedOut,
             onLogout = onLogout
         )

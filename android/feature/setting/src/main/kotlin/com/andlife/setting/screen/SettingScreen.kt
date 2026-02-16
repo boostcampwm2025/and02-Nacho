@@ -82,7 +82,8 @@ import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.auth.AuthState
 import com.andlife.login.LocalLoginManager
 import com.andlife.login.social.SocialType
-import com.andlife.webview.PolicyUrl
+import com.andlife.ui.component.webview.PolicyUrl
+import com.andlife.ui.component.webview.WebViewBottomSheet
 import com.andlife.setting.R
 import com.andlife.setting.model.NicknameError
 import com.andlife.setting.model.SettingMessage
@@ -100,7 +101,6 @@ import com.andlife.designsystem.R as designR
 fun SettingRoute(
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
-    onNavigateToWebView: (String, String) -> Unit,
     onLogout: () -> Unit,
     onSignedOut: () -> Unit,
     modifier: Modifier = Modifier,
@@ -112,6 +112,7 @@ fun SettingRoute(
     var isNicknameDialogVisible by remember { mutableStateOf(false) }
     var isImageActionDialogVisible by remember { mutableStateOf(false) }
     var isProfileDetailVisible by remember { mutableStateOf(false) }
+    var webViewState by remember { mutableStateOf<Pair<String, String>?>(null) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val loginManager = LocalLoginManager.current
@@ -147,7 +148,7 @@ fun SettingRoute(
         uiState = uiState,
         snackbarHostState = snackbarHostState,
         onNavigateToLogin = onNavigateToLogin,
-        onNavigateToWebView = onNavigateToWebView,
+        onWebViewClick = { url, title -> webViewState = url to title },
         onEvent = viewModel::onEvent,
         modifier = modifier,
         onClickEditNickname = {
@@ -270,6 +271,14 @@ fun SettingRoute(
             )
         }
     }
+
+    webViewState?.let { (url, title) ->
+        WebViewBottomSheet(
+            url = url,
+            title = title,
+            onDismiss = { webViewState = null },
+        )
+    }
 }
 
 @Composable
@@ -279,7 +288,7 @@ fun SettingScreen(
     onNavigateToLogin: () -> Unit,
     onClickEditNickname: () -> Unit,
     onClickEditImage: () -> Unit,
-    onNavigateToWebView: (String, String) -> Unit = { _, _ -> },
+    onWebViewClick: (String, String) -> Unit = { _, _ -> },
     onClickLogout: () -> Unit,
     onClickQuit: () -> Unit,
     onEvent: (SettingUiEvent) -> Unit = {},
@@ -350,10 +359,10 @@ fun SettingScreen(
 
                         PolicyContent(
                             onClickService = {
-                                onNavigateToWebView(PolicyUrl.SERVICE, serviceTitle)
+                                onWebViewClick(PolicyUrl.SERVICE, serviceTitle)
                             },
                             onClickPrivacy = {
-                                onNavigateToWebView(PolicyUrl.PRIVACY, privacyTitle)
+                                onWebViewClick(PolicyUrl.PRIVACY, privacyTitle)
                             },
                             modifier = modifier,
                         )

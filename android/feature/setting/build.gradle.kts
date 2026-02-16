@@ -8,7 +8,6 @@ android {
 
 dependencies {
     implementation(projects.feature.login)
-    implementation(projects.feature.webview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
