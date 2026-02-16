@@ -20,8 +20,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -57,16 +59,17 @@ import com.andlife.login.social.SocialType
 import com.andlife.login.viewmodel.LoginViewModel
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.util.collectWithLifecycle
-import com.andlife.webview.PolicyUrl
+import com.andlife.ui.component.webview.PolicyUrl
+import com.andlife.ui.component.webview.WebViewBottomSheet
 import kotlinx.coroutines.launch
 import com.andlife.designsystem.R as designR
 
 @Composable
 fun LoginRoute(
-    onNavigateToWebView: (String, String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = hiltViewModel(),
 ) {
+    var webViewState by remember { mutableStateOf<Pair<String, String>?>(null) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val loginManager = LocalLoginManager.current
     val scope = rememberCoroutineScope()
@@ -98,7 +101,7 @@ fun LoginRoute(
         modifier = modifier,
         snackbarHostState = snackbarHostState,
         onEvent = viewModel::onEvent,
-        onNavigateToWebView = onNavigateToWebView,
+        onWebViewClick = { url, title -> webViewState = url to title },
         onSocialLogin = { socialType ->
             scope.launch {
                 loginManager.login(
@@ -117,6 +120,14 @@ fun LoginRoute(
             }
         }
     )
+
+    webViewState?.let { (url, title) ->
+        WebViewBottomSheet(
+            url = url,
+            title = title,
+            onDismiss = { webViewState = null },
+        )
+    }
 }
 
 @Composable
@@ -125,7 +136,7 @@ private fun LoginScreen(
     snackbarHostState: SnackbarHostState,
     onSocialLogin: (SocialType) -> Unit,
     onEvent: (LoginUiEvent) -> Unit,
-    onNavigateToWebView: (String, String) -> Unit,
+    onWebViewClick: (String, String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -184,10 +195,10 @@ private fun LoginScreen(
 
                 PolicyAndTermsText(
                     onTermsOfServiceClick = {
-                        onNavigateToWebView(PolicyUrl.SERVICE, serviceTitle)
+                        onWebViewClick(PolicyUrl.SERVICE, serviceTitle)
                     },
                     onPrivacyPolicyClick = {
-                        onNavigateToWebView(PolicyUrl.PRIVACY, privacyTitle)
+                        onWebViewClick(PolicyUrl.PRIVACY, privacyTitle)
                     },
                 )
 
@@ -432,7 +443,7 @@ private fun LoginScreenPreview() {
             snackbarHostState = remember { SnackbarHostState() },
             onSocialLogin = {},
             onEvent = {},
-            onNavigateToWebView = { _, _ -> },
+            onWebViewClick = { _, _ -> },
         )
     }
 }
