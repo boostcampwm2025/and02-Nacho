@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="txt_error_network">네트워크 연결을 확인해주세요</string>
-    <string name="desc_top_bar_back">뒤로가기 아이콘 버튼</string>
-</resources>
