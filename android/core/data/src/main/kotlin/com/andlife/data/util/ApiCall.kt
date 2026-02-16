@@ -1,5 +1,6 @@
 package com.andlife.data.util
 
+import android.util.Log
 import com.andlife.domain.error.DataError
 import com.andlife.domain.util.Result
 import com.andlife.network.model.BaseResponse
@@ -21,7 +22,13 @@ suspend fun <T> apiCall(call: suspend () -> BaseResponse<T>): Result<T, DataErro
                 Result.Error(DataError.Network.UNAUTHORIZED, response.message)
             }
 
+            409 -> {
+                Log.e("ApiCall", "Conflict: ${response.message}")
+                Result.Error(DataError.Network.CONFLICT, response.message)
+            }
+
             else -> {
+                Log.e("ApiCall", "Unknown error: ${response.code} - ${response.message}")
                 Result.Error(DataError.Network.UNKNOWN, response.message)
             }
         }

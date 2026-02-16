@@ -6,6 +6,7 @@ sealed interface DataError : InvitationError {
         SERVER_ERROR,
         UNAUTHORIZED,
         NOT_FOUND,
+        CONFLICT,
         SERIALIZATION,
         UNKNOWN,
     }

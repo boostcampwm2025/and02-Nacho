@@ -149,7 +149,10 @@ class GuestBookService(
                     name = guestBook.user.name,
                     profileImageUrl = guestBook.user.profileImageUrl
                 ),
-                invitation = null,
+                invitation = GuestBookInvitationResponse(
+                    id = guestBook.invitation.id,
+                    title = null
+                ),
                 textContent = guestBook.textContent,
                 visualMedias = visualMedias,
                 audioMedias = audioMedias,

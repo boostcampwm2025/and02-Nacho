@@ -4,16 +4,22 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
+import com.andlife.domain.error.DataError
 import com.andlife.domain.model.auth.AuthState
 import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.repository.invitation.InvitationRepository
+import com.andlife.domain.repository.report.ReportRepository
+import com.andlife.domain.util.onFailure
+import com.andlife.domain.util.onSuccess
 import com.andlife.home.model.home.HomeSideEffect
 import com.andlife.home.model.home.HomeUiEvent
 import com.andlife.home.model.home.HomeUiState
 import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.media.audio.AudioPlayerManager
 import com.andlife.media.video.AutoVideoPlayerPool
+import com.andlife.model.common.ReportReason
+import com.andlife.model.common.ReportTargetType
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.toUiModel
 import com.andlife.model.invitation.UpcomingInvitationUiModel
@@ -26,12 +32,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val guestBookRepository: GuestBookRepository,
     private val invitationRepository: InvitationRepository,
+    private val reportRepository: ReportRepository,
     private val authStateManager: AuthStateManager,
     val audioPlayerManager: AudioPlayerManager,
     val videoPlayerPool: AutoVideoPlayerPool,
@@ -60,7 +68,7 @@ class HomeViewModel @Inject constructor(
         audioPlayerManager.currentAudio
             .onEach { audioPlaybackState ->
                 updateState {
-                    copy( audioPlaybackState = audioPlaybackState ?: AudioPlaybackState())
+                    copy(audioPlaybackState = audioPlaybackState ?: AudioPlaybackState())
                 }
             }
             .launchIn(viewModelScope)
@@ -78,7 +86,9 @@ class HomeViewModel @Inject constructor(
             is HomeUiEvent.Refresh -> refresh()
             is HomeUiEvent.UpdateMediaPlayState -> updatePlayState(event.isPlaying)
             HomeUiEvent.DismissLoginDialog -> dismissLoginDialog()
-
+            is HomeUiEvent.ShowReport -> updateReportTargetId(event.targetId)
+            HomeUiEvent.DismissReport -> updateReportTargetId(null)
+            is HomeUiEvent.SubmitReport -> submitReport(event.reason, event.description)
         }
     }
 
@@ -154,5 +164,36 @@ class HomeViewModel @Inject constructor(
 
     private fun dismissLoginDialog() {
         updateState { copy(showLoginDialog = false) }
+    }
+
+    private fun updateReportTargetId(targetId: Long?) {
+        val authState = authStateManager.authState.value
+        if (authState !is AuthState.Authenticated) {
+            updateState { copy(showLoginDialog = true) }
+            return
+        }
+        updateState { copy(reportTargetId = targetId) }
+    }
+
+    private fun submitReport(reason: ReportReason, description: String?) {
+        val targetId = uiState.value.reportTargetId ?: return
+        viewModelScope.launch {
+            reportRepository.sendReport(
+                targetType = ReportTargetType.GUESTBOOK.name,
+                targetId = targetId,
+                reason = reason.name,
+                description = description
+            ).onSuccess {
+                updateState { copy(reportTargetId = null) }
+                sendEffect(HomeSideEffect.ReportSuccess)
+            }.onFailure { error, message ->
+                val messageToShow = if (error == DataError.Network.CONFLICT) {
+                    message
+                } else {
+                    null
+                }
+                sendEffect(HomeSideEffect.ReportFailure(messageToShow))
+            }
+        }
     }
 }

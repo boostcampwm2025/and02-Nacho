@@ -25,4 +25,8 @@ sealed interface MyInvitationGuestBookSideEffect : BaseSideEffect {
     ) : MyInvitationGuestBookSideEffect
 
     data object ShowAudioRecordingBottomSheet : MyInvitationGuestBookSideEffect
+
+    data object ReportSuccess : MyInvitationGuestBookSideEffect
+
+    data class ReportFailure(val message: String? = null) : MyInvitationGuestBookSideEffect
 }

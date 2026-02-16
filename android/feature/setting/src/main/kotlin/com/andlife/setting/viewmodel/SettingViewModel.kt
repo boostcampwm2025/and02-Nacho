@@ -1,9 +1,12 @@
 package com.andlife.setting.viewmodel
 
 import androidx.lifecycle.viewModelScope
+import com.andlife.domain.model.auth.AuthState
 import com.andlife.domain.repository.user.UserRepository
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
+import com.andlife.setting.model.NicknameError
+import com.andlife.setting.model.SettingMessage
 import com.andlife.setting.model.SettingSideEffect
 import com.andlife.setting.model.SettingUiEvent
 import com.andlife.setting.model.SettingUiState
@@ -27,15 +30,56 @@ class SettingViewModel @Inject constructor(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Companion.Lazily,
+            started = SharingStarted.Lazily,
             initialValue = SettingUiState()
         )
 
     override fun onEvent(event: SettingUiEvent) {
         when (event) {
+            is SettingUiEvent.OnNicknameChanged -> validateNickname(event.nickname)
+            is SettingUiEvent.ClickConfirmNickname -> updateProfile(event.nickname)
+            is SettingUiEvent.ClickConfirmProfileImage -> updateProfile(imageUri = event.uri)
             SettingUiEvent.ClickBack -> sendEffect(SettingSideEffect.PopBackStack)
             SettingUiEvent.ClickLogout -> logout()
             SettingUiEvent.ClickSignOut -> signOut()
+        }
+    }
+
+    private fun validateNickname(name:String) {
+        val specialChars = Regex("[^a-zA-Z0-9가-힣]")
+        val error = when {
+            name.isBlank() -> NicknameError.EMPTY
+            name.length > 12 -> NicknameError.TOO_LONG
+            specialChars.containsMatchIn(name) -> NicknameError.INVALID_CHAR
+            else -> NicknameError.NONE
+        }
+        updateState {
+            copy(
+                nicknameInput = name,
+                nicknameError = error
+            )
+        }
+    }
+
+    private fun updateProfile(nickname: String? = null, imageUri: String? = null) {
+        viewModelScope.launch {
+            updateState { copy(isOverlayLoading = true) }
+
+            userRepository.updateProfile(nickname, imageUri)
+                .onSuccess { updatedUser ->
+                    updateState {
+                        copy(
+                            authState = AuthState.Authenticated(updatedUser),
+                            isOverlayLoading = false,
+                            nicknameInput = ""
+                        )
+                    }
+                    sendEffect(SettingSideEffect.ShowSnackbar(SettingMessage.PROFILE_UPDATE_SUCCESS))                }
+                .onFailure { error, msg ->
+                    updateState { copy(isOverlayLoading = false) }
+                    sendEffect(SettingSideEffect.ShowSnackbar(SettingMessage.PROFILE_UPDATE_FAIL))
+                }
+
         }
     }
 
