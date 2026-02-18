@@ -156,6 +156,7 @@ constructor(
                 is Result.Success -> {
                     val completedData = completeResult.data.files
 
+                    // 업로드 요청 순서대로 결과 매핑 (실패한 경우 null)
                     val finalUrls = uploadInfos.map { info ->
                         completedData
                             .find {
@@ -330,7 +331,7 @@ constructor(
 
                 is Result.Success -> {
                     val completedData = completeResult.data.files
-                    val finalUrls = uploadInfos.mapNotNull { info ->
+                    val finalUrls = uploadInfos.map { info ->
                         completedData
                             .find { it.mediaKey == info.mediaKey && it.success }
                             ?.mediaUrl
