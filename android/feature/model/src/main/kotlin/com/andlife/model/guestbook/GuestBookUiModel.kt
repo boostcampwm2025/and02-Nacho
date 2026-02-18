@@ -57,7 +57,7 @@ data class GuestBookMediaUiModel(
 )
 
 fun GuestBookMedia.toUiModel(): GuestBookMediaUiModel = GuestBookMediaUiModel(
-    id = id,
+    id = id ?: -1L, // TODO: 새 미디어인 경우 id가 null이므로 임시로 -1L로 대체함
     type = MediaUiType.safeValueOf(type.name),
     url = url,
     thumbnailUrl = thumbnailUrl,
