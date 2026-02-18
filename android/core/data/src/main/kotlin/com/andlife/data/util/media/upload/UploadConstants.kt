@@ -2,25 +2,25 @@ package com.andlife.data.util.media.upload
 
 object UploadKey {
     const val MEDIA_FILES = "media_files"
+
+    const val INVITATION_ID = "invitation_id"
+    const val GUEST_BOOK_TEXT = "guest_book_text"
+    const val EDITING_GUEST_BOOK_ID = "editing_guest_book_id"
+
     const val MEDIA_IDS = "media_ids"
     const val MEDIA_URIS = "media_uris"
     const val MEDIA_TYPES = "media_types"
     const val MEDIA_DURATIONS = "media_durations"
     const val MEDIA_THUMBNAIL_URLS = "media_thumbnail_urls"
-    const val EXISTING_MEDIA_TYPES = "existing_media_types"
-    const val NEW_MEDIA_INDEXS = "new_media_indexs"
+    
     const val RESULT_URLS = "result_urls"
     const val ERROR_MESSAGE = "error_message"
     const val PROGRESS = "progress"
-    const val CURRENT_FILE_INDEX = "current_file_index"
-    const val TOTAL_FILES = "total_files"
-    const val CURRENT_FILE_NAME = "current_file_name"
-    const val EXTRA_WORK_ID = "extra_work_id"
 
-    const val INVITATION_ID = "invitation_id"
-    const val GUEST_BOOK_TEXT = "guest_book_text"
-    const val IS_EDITING = "is_editing"
-    const val EDITING_GUEST_BOOK_ID = "editing_guest_book_id"
+    const val CURRENT_FILE_NAME = "current_file_name"
+    const val CURRENT_ORDER = "current_order"
+    const val TOTAL_COUNT = "total_count"
+    const val EXTRA_WORK_ID = "extra_work_id"
 
     const val TAG_MEDIA_UPLOAD = "tag_media_upload"
 }
