@@ -6,22 +6,25 @@ import kotlinx.coroutines.flow.Flow
 interface BackgroundMediaUploader {
     /**
      * 미디어 파일들을 백그라운드에서 업로드하고 방명록을 생성/수정
-     * @param uriStrings 업로드할 파일들의 URI 문자열 리스트
-     * @param invitationId 초대장 ID
-     * @param guestBookText 방명록 내용
-     * @param isEditing 수정 모드 여부
-     * @param editingGuestBookId 수정할 방명록 ID (수정 모드일 때만)
-     * @return 업로드 작업의 ID
+     * @param invitationId 초대 ID
+     * @param guestBookText 방명록 텍스트
+     * @param editingGuestBookId 편집 중인 방명록 ID (null이면 새 방명록 생성)
+     * @param selectedMediasId 선택된 미디어 ID들
+     * @param selectedMediasUri 선택된 미디어 URI들
+     * @param selectedMediasType 선택된 미디어 타입들
+     * @param selectedMediasDuration 선택된 미디어 길이들 (영상인 경우)
+     * @param selectedMediasThumbnailUrl 선택된 미디어 썸네일 URL들 (영상인 경우)
+     * @return 업로드 작업 ID
      */
     fun uploadMediasInBackground(
-        uriStrings: List<String>,
-        thumbnailUrlStrings: List<String>,
-        existingMediaTypes: List<String>,
-        newMediaIndexs: List<Int>,
-        invitationId: String,
+        invitationId: Long,
         guestBookText: String,
-        isEditing: Boolean = false,
-        editingGuestBookId: String? = null
+        editingGuestBookId: Long?,
+        selectedMediasId: String, // List<Long?>
+        selectedMediasUri: String, // List<String>
+        selectedMediasType: String, // List<String>
+        selectedMediasDuration: String, // List<Int?>
+        selectedMediasThumbnailUrl: String, // List<String?>
     ): String
 
     /**

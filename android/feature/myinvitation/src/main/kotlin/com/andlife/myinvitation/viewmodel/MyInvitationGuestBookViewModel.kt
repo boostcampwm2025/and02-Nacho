@@ -45,6 +45,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 @HiltViewModel
@@ -84,9 +85,9 @@ constructor(
         authStateManager.authState
             .onEach { authState ->
                 val isStateChanged = uiState.value.isAuthStateChanged(authState)
-                updateState { copy( authState = authState ) }
+                updateState { copy(authState = authState) }
                 if (isStateChanged) {
-                    sendEffect(MyInvitationGuestBookSideEffect.AuthStateChanged(authState) )
+                    sendEffect(MyInvitationGuestBookSideEffect.AuthStateChanged(authState))
                 }
             }
             .launchIn(viewModelScope)
@@ -218,7 +219,7 @@ constructor(
             .map { media ->
                 SelectedMedia(
                     id = media.id,
-                    uri = media.url,
+                    uri = media.url,  // 기존 미디어의 URL이 들어감
                     type = when (media.type) {
                         MediaUiType.IMAGE -> UiMediaType.IMAGE
                         MediaUiType.VIDEO -> UiMediaType.VIDEO
@@ -239,34 +240,30 @@ constructor(
         }
     }
 
+    // TODO: handleSubmit으로 이름 변경
     private fun handleUploadMedias() {
         val state = uiState.value
         if (!state.isSubmittable) return
 
         updateState { copy(isUploading = true) }
 
-        val newMediaIndexs = mutableListOf<Int>()
-
-        state.selectedMedias.mapIndexed { index, selectedMedia ->
-            if (selectedMedia.id == null) {
-                newMediaIndexs.add(index)
-            }
-        }
-        val existingMediaTypes = state.selectedMedias
-            .mapNotNull { media ->
-                if (media.id != null) media.type.name else null
-            }
+        // 각 필드를 json으로 직렬화 -> worker에서 역직렬화해서 GuestBookMedia 리스트로 만들어 사용
+        val selectedMediasId = state.selectedMedias.map { it.id } // 기존 미디어는 ID, 새 미디어는 null이므로 구분 가능
+        val selectedMediasUri = state.selectedMedias.map { it.uri } // 기존 미디어는 URI 대신 URL을 사용
+        val selectedMediasType = state.selectedMedias.map { it.type.name }
+        val selectedMediasDuration = state.selectedMedias.map { it.duration }
+        val selectedMediasThumbnailUrl = state.selectedMedias.map { it.thumbnailUrl }
 
         // 백그라운드 업로드 시작
         val workId = backgroundMediaUploader.uploadMediasInBackground(
-            state.selectedMedias.map { it.uri },
-            thumbnailUrlStrings = state.selectedMedias.map { it.thumbnailUrl ?: "" },
-            existingMediaTypes = existingMediaTypes,
-            newMediaIndexs = newMediaIndexs,
-            invitationId = invitationId.toString(),
+            invitationId = invitationId,
             guestBookText = state.textContent,
-            isEditing = state.editingGuestBookId != null,
-            editingGuestBookId = state.editingGuestBookId?.toString()
+            editingGuestBookId = state.editingGuestBookId,
+            selectedMediasId = Json.encodeToString(selectedMediasId),
+            selectedMediasUri = Json.encodeToString(selectedMediasUri),
+            selectedMediasType = Json.encodeToString(selectedMediasType),
+            selectedMediasDuration = Json.encodeToString(selectedMediasDuration),
+            selectedMediasThumbnailUrl = Json.encodeToString(selectedMediasThumbnailUrl),
         )
 
         Log.d("BackgroundUpload", "WorkID: $workId")
@@ -279,6 +276,7 @@ constructor(
         }
     }
 
+    // TODO: 해당 메소드 제거하기, 백그라운드 업로드 완료 시 refresh되도록 수정
     private fun handleResult(result: Result<GuestBook, DataError>, isUpdate: Boolean = false) = viewModelScope.launch {
         updateState { copy(isUploading = false) }
         when (result) {
@@ -409,7 +407,7 @@ constructor(
             is UploadState.Progress -> {
                 Log.d(
                     "BackgroundUpload",
-                    "업로드 진행: ${uploadState.percent}% (${uploadState.currentIndex + 1}/${uploadState.totalFiles})"
+                    "업로드 진행: ${uploadState.percent}% (${uploadState.currentOrder}/${uploadState.totalCount})"
                 )
             }
 

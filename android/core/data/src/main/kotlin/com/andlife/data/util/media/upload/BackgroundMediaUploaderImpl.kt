@@ -21,24 +21,24 @@ class BackgroundMediaUploaderImpl @Inject constructor(
     private val workManager = WorkManager.getInstance(context)
 
     override fun uploadMediasInBackground(
-        uriStrings: List<String>,
-        thumbnailUrlStrings: List<String>,
-        existingMediaTypes: List<String>,
-        newMediaIndexs: List<Int>,
-        invitationId: String,
+        invitationId: Long,
         guestBookText: String,
-        isEditing: Boolean,
-        editingGuestBookId: String?
+        editingGuestBookId: Long?,
+        selectedMediasId: String, // List<Long?>
+        selectedMediasUri: String, // List<String>
+        selectedMediasType: String, // List<String>
+        selectedMediasDuration: String, // List<Int?>
+        selectedMediasThumbnailUrl: String, // List<String?>
     ): String {
         val workData = workDataOf(
-            UploadKey.MEDIA_URIS to uriStrings.toTypedArray(),
-            UploadKey.THUMBNAIL_URLS to thumbnailUrlStrings.toTypedArray(),
-            UploadKey.EXISTING_MEDIA_TYPES to existingMediaTypes.toTypedArray(),
-            UploadKey.NEW_MEDIA_INDEXS to newMediaIndexs.toTypedArray(),
             UploadKey.INVITATION_ID to invitationId,
             UploadKey.GUEST_BOOK_TEXT to guestBookText,
-            UploadKey.IS_EDITING to isEditing,
-            UploadKey.EDITING_GUEST_BOOK_ID to editingGuestBookId
+            UploadKey.EDITING_GUEST_BOOK_ID to editingGuestBookId,
+            UploadKey.MEDIA_IDS to selectedMediasId,
+            UploadKey.MEDIA_URIS to selectedMediasUri,
+            UploadKey.MEDIA_TYPES to selectedMediasType,
+            UploadKey.MEDIA_DURATIONS to selectedMediasDuration,
+            UploadKey.MEDIA_THUMBNAIL_URLS to selectedMediasThumbnailUrl,
         )
 
         val constraints = Constraints.Builder()
@@ -101,7 +101,7 @@ class BackgroundMediaUploaderImpl @Inject constructor(
                 }
             }
     }
-    
+
     override fun cancelUpload(workId: String) {
         val uuid = UUID.fromString(workId)
         workManager.cancelWorkById(uuid)
