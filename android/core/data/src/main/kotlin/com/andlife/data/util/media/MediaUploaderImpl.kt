@@ -172,9 +172,7 @@ constructor(
             emit(
                 UploadState.Progress(
                     percent = 0,
-                    currentIndex = 0,
-                    totalFiles = files.size,
-                    currentFileName = files.firstOrNull()?.fileName
+                    currentFileName = "파일 크기 체크 중...",
                 )
             )
 
@@ -191,9 +189,7 @@ constructor(
             emit(
                 UploadState.Progress(
                     percent = 10,
-                    currentIndex = 0,
-                    totalFiles = files.size,
-                    currentFileName = files.firstOrNull()?.fileName
+                    currentFileName = "이미지 압축 중...",
                 )
             )
 
@@ -209,9 +205,7 @@ constructor(
             emit(
                 UploadState.Progress(
                     percent = 20,
-                    currentIndex = 0,
-                    totalFiles = files.size,
-                    currentFileName = files.firstOrNull()?.fileName
+                    currentFileName = "업로드 중...",
                 )
             )
 
@@ -241,9 +235,7 @@ constructor(
             emit(
                 UploadState.Progress(
                     percent = 30,
-                    currentIndex = 0,
-                    totalFiles = files.size,
-                    currentFileName = files.firstOrNull()?.fileName
+                    currentFileName = "업로드 정보 수신 완료. 파일 개수: ${uploadInfos.size}"
                 )
             )
 
@@ -254,13 +246,13 @@ constructor(
                 val data = compressedDataList[index]
 
                 try {
-                    val baseProgress = 30 + (index * 60) / files.size
+                    val baseProgress = 30 + (index / files.size) * 60
                     emit(
                         UploadState.Progress(
                             percent = baseProgress,
-                            currentIndex = index,
-                            totalFiles = files.size,
-                            currentFileName = file.fileName
+                            currentFileName = file.fileName,
+                            currentOrder = index + 1,
+                            totalCount = files.size,
                         )
                     )
 
@@ -308,16 +300,6 @@ constructor(
 
                     uploadResults.add(result)
 
-                    // 파일 완료 진행률
-                    val fileCompleteProgress = 30 + ((index + 1) * 60) / files.size
-                    emit(
-                        UploadState.Progress(
-                            percent = fileCompleteProgress,
-                            currentIndex = index,
-                            totalFiles = files.size,
-                            currentFileName = file.fileName
-                        )
-                    )
                 } catch (e: Exception) {
                     Log.e("MediaUploaderImpl", "업로드 중 오류: ${file.fileName}", e)
                     uploadResults.add(null)
@@ -327,9 +309,7 @@ constructor(
             emit(
                 UploadState.Progress(
                     percent = 90,
-                    currentIndex = files.size - 1,
-                    totalFiles = files.size,
-                    currentFileName = files.lastOrNull()?.fileName
+                    currentFileName = "업로드 완료 요청 중..."
                 )
             )
 

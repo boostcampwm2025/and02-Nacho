@@ -70,9 +70,9 @@ class BackgroundMediaUploaderImpl @Inject constructor(
                         val progress = workInfo.progress
                         UploadState.Progress(
                             percent = progress.getInt(UploadKey.PROGRESS, 0),
-                            currentIndex = progress.getInt(UploadKey.CURRENT_FILE_INDEX, 0),
-                            totalFiles = progress.getInt(UploadKey.TOTAL_FILES, 1),
-                            currentFileName = progress.getString(UploadKey.CURRENT_FILE_NAME)
+                            currentFileName = progress.getString(UploadKey.CURRENT_FILE_NAME),
+                            currentOrder = progress.getInt(UploadKey.CURRENT_ORDER, 0),
+                            totalCount = progress.getInt(UploadKey.TOTAL_COUNT, 1),
                         )
                     }
 

@@ -47,8 +47,8 @@ class UploadNotificationManager @Inject constructor(
         workId: UUID,
         progress: Int,
         currentFileName: String? = null,
-        currentIndex: Int = 0,
-        totalFiles: Int = 1
+        currentOrder: Int? = null,
+        totalCount: Int? = null,
     ): Notification {
         val cancelIntent = Intent(context, UploadCancelReceiver::class.java).apply {
             putExtra(UploadKey.EXTRA_WORK_ID, workId.toString())
@@ -63,8 +63,8 @@ class UploadNotificationManager @Inject constructor(
 
         val contentText = when {
             progress <= 0 -> UploadNoti.MSG_PREPARING
-            currentFileName != null && totalFiles > 1 ->
-                "$currentFileName (${currentIndex + 1}/$totalFiles) - $progress%"
+            currentFileName != null && (currentOrder != null && totalCount != null) ->
+                "$currentFileName ($currentOrder/$totalCount) - $progress%"
 
             currentFileName != null ->
                 "$currentFileName - $progress%"
