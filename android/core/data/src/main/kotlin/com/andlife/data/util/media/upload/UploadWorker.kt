@@ -133,9 +133,11 @@ class UploadWorker @AssistedInject constructor(
             // 2단계: 썸네일 생성 (60-70%)
             val indexAndThumbnailFiles = mutableListOf<Pair<Int, MediaFile>>()
             guestBookMedias.forEachIndexed { index, media ->
-                    val thumbnailFile = thumbnailGenerator.generateVideoThumbnail(media.url)
                 // 새로 추가된 영상인 경우만 썸네일 생성
                 if (media.type == MediaType.VIDEO && media.id == null) {
+                    val localUriString = indexAndFiles.first { it.first == index }.second.uriString
+                    val thumbnailFile =
+                        thumbnailGenerator.generateVideoThumbnail(localUriString)
                     if (thumbnailFile != null) {
                         indexAndThumbnailFiles.add(index to mediaFileProvider.createFromFile(thumbnailFile))
                     }
