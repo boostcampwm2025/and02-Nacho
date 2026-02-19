@@ -95,36 +95,40 @@ class UploadWorker @AssistedInject constructor(
                 }
             }
 
-            mediaUploader.uploadMediasWithProgress(indexAndFiles.map { it.second })
-                .collect { state ->
-                    when (state) {
-                        is UploadState.Progress -> {
-                            updateProgress(
-                                progress = (state.percent * 0.6).toInt(),
-                                currentFileName = state.currentFileName,
-                                // TODO: 수정하기
-                                currentOrder = state.currentOrder,
-                                totalCount = state.totalCount,
-                            )
-                        }
-
-                        is UploadState.Success -> {
-                            // state.urls에는 업로드된 미디어들의 URL이 순서대로 담겨있음(null 허용)
-                            // 업로드된 URL을 guestBookMedias에 반영
-                            indexAndFiles.forEachIndexed { uploadedIndex, pair ->
-                                val originalIndex = pair.first
-                                guestBookMedias[originalIndex].copy(
-                                    url = state.urls.getOrNull(uploadedIndex)
-                                        ?: "" // TODO: 업로드된 URL이 null인 경우 빈 문자열이 저장되고 있음
+            // 새 미디어가 있는 경우만 업로드 수행
+            if (indexAndFiles.isNotEmpty()) {
+                mediaUploader.uploadMediasWithProgress(indexAndFiles.map { it.second })
+                    .collect { state ->
+                        when (state) {
+                            is UploadState.Progress -> {
+                                updateProgress(
+                                    progress = (state.percent * 0.6).toInt(),
+                                    currentFileName = state.currentFileName,
+                                    currentOrder = state.currentOrder,
+                                    totalCount = state.totalCount,
                                 )
                             }
-                        }
 
-                        is UploadState.Failure -> throw Exception(state.message)
-                        is UploadState.Cancelled -> throw CancellationException(UploadNoti.MSG_CANCELLED)
-                        else -> {}
+                            is UploadState.Success -> {
+                                // state.urls에는 업로드된 미디어들의 URL이 순서대로 담겨있음(null 허용)
+                                // 업로드된 URL을 guestBookMedias에 반영
+                                indexAndFiles.forEachIndexed { uploadedIndex, pair ->
+                                    val originalIndex = pair.first
+                                    guestBookMedias[originalIndex] = guestBookMedias[originalIndex].copy(
+                                        url = state.urls.getOrNull(uploadedIndex)
+                                            ?: "" // TODO: 업로드된 URL이 null인 경우 빈 문자열이 저장되고 있음
+                                    )
+                                }
+                            }
+
+                            is UploadState.Failure -> throw Exception(state.message)
+                            is UploadState.Cancelled -> throw CancellationException(UploadNoti.MSG_CANCELLED)
+                            else -> {}
+                        }
                     }
-                }
+            } else {
+                // 새 미디어가 없는 경우 업로드 단계 건너뛰기
+            }
 
             // 2단계: 썸네일 생성 (60-70%)
             val indexAndThumbnailFiles = mutableListOf<Pair<Int, MediaFile>>()
@@ -145,33 +149,37 @@ class UploadWorker @AssistedInject constructor(
             }
 
             // 3단계: 썸네일 업로드 (70-80%)
-            mediaUploader.uploadMediasWithProgress(indexAndThumbnailFiles.map { it.second })
-                .collect { state ->
-                    when (state) {
-                        is UploadState.Progress -> {
-                            updateProgress(
-                                progress = 70 + (state.percent * 0.1).toInt(),
-                                currentFileName = state.currentFileName,
-                                currentOrder = state.currentOrder,
-                                totalCount = state.totalCount,
-                            )
-                        }
-
-                        is UploadState.Success -> {
-                            // 업로드된 썸네일 URL을 guestBookMedias에 반영
-                            indexAndThumbnailFiles.forEachIndexed { uploadedIndex, pair ->
-                                val originalIndex = pair.first
-                                guestBookMedias[originalIndex].copy(
-                                    thumbnailUrl = state.urls.getOrNull(uploadedIndex)
+            if (indexAndThumbnailFiles.isNotEmpty()) {
+                mediaUploader.uploadMediasWithProgress(indexAndThumbnailFiles.map { it.second })
+                    .collect { state ->
+                        when (state) {
+                            is UploadState.Progress -> {
+                                updateProgress(
+                                    progress = 70 + (state.percent * 0.1).toInt(),
+                                    currentFileName = state.currentFileName,
+                                    currentOrder = state.currentOrder,
+                                    totalCount = state.totalCount,
                                 )
                             }
-                        }
 
-                        is UploadState.Failure -> throw Exception(state.message)
-                        is UploadState.Cancelled -> throw CancellationException(UploadNoti.MSG_CANCELLED)
-                        else -> {}
+                            is UploadState.Success -> {
+                                // 업로드된 썸네일 URL을 guestBookMedias에 반영
+                                indexAndThumbnailFiles.forEachIndexed { uploadedIndex, pair ->
+                                    val originalIndex = pair.first
+                                    guestBookMedias[originalIndex] = guestBookMedias[originalIndex].copy(
+                                        thumbnailUrl = state.urls.getOrNull(uploadedIndex)
+                                    )
+                                }
+                            }
+
+                            is UploadState.Failure -> throw Exception(state.message)
+                            is UploadState.Cancelled -> throw CancellationException(UploadNoti.MSG_CANCELLED)
+                            else -> {}
+                        }
                     }
-                }
+            } else {
+                // 썸네일이 없는 경우 썸네일 업로드 단계 건너뛰기
+            }
 
             // 4단계: 방명록 생성/수정 (80-100%)
             updateProgress(progress = 80, currentFileName = "방명록 처리 중...", currentOrder = 0, totalCount = 1)
