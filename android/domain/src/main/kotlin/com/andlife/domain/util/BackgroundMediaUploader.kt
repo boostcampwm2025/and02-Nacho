@@ -19,7 +19,7 @@ interface BackgroundMediaUploader {
     fun uploadMediasInBackground(
         invitationId: Long,
         guestBookText: String,
-        editingGuestBookId: Long?,
+        editingGuestBookId: Long, // 새 방명록인 경우 -1L
         selectedMediasId: String, // List<Long?>
         selectedMediasUri: String, // List<String>
         selectedMediasType: String, // List<String>

@@ -23,7 +23,7 @@ class BackgroundMediaUploaderImpl @Inject constructor(
     override fun uploadMediasInBackground(
         invitationId: Long,
         guestBookText: String,
-        editingGuestBookId: Long?,
+        editingGuestBookId: Long,
         selectedMediasId: String, // List<Long?>
         selectedMediasUri: String, // List<String>
         selectedMediasType: String, // List<String>

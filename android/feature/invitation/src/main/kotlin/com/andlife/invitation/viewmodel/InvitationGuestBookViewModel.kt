@@ -267,7 +267,7 @@ constructor(
         val workId = backgroundMediaUploader.uploadMediasInBackground(
             invitationId = invitationId,
             guestBookText = state.textContent,
-            editingGuestBookId = state.editingGuestBookId,
+            editingGuestBookId = state.editingGuestBookId ?: -1L, // 새 방명록인 경우 -1로 전달
             selectedMediasId = Json.encodeToString(selectedMediasId),
             selectedMediasUri = Json.encodeToString(selectedMediasUri),
             selectedMediasType = Json.encodeToString(selectedMediasType),
