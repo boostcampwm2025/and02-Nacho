@@ -19,6 +19,7 @@ dependencyResolutionManagement {
         mavenCentral()
         maven(url = "https://devrepo.kakao.com/nexus/content/groups/public/")
         maven(url = "https://repository.map.naver.com/archive/maven")
+        maven(url = "https://jitpack.io")
     }
 }
 
@@ -44,3 +45,4 @@ include(":feature:model")
 include(":core:media")
 include(":feature:editor")
 include(":feature:login")
+include(":feature:setting")

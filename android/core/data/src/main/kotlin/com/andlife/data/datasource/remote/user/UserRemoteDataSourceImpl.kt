@@ -11,6 +11,7 @@ import com.andlife.network.model.auth.AuthRequest
 import com.andlife.network.model.auth.AuthResponse
 import com.andlife.network.model.auth.RefreshTokenRequest
 import com.andlife.network.model.auth.UserResponse
+import com.andlife.network.model.user.UpdateProfileRequest
 import javax.inject.Inject
 
 class UserRemoteDataSourceImpl @Inject constructor(
@@ -21,6 +22,9 @@ class UserRemoteDataSourceImpl @Inject constructor(
     override suspend fun login(request: AuthRequest): Result<AuthResponse, DataError> =
         apiCall { authService.login(request) }
 
+    override suspend fun loginWithTestUser(): Result<AuthResponse, DataError> =
+        apiCall { authService.loginWithTestUser() }
+
     override suspend fun getUserInfo(): Result<UserResponse, DataError> =
         apiCall { userService.getUserInfo() }
 
@@ -29,4 +33,16 @@ class UserRemoteDataSourceImpl @Inject constructor(
 
     override suspend fun syncInvitations(invitationIds: List<Long>): Result<Unit, DataError> =
         apiCall { invitationService.syncInvitations(invitationIds) }.map { Unit }
+
+    override suspend fun signedOut(): Result<UserResponse, DataError> =
+        apiCall { userService.signOut() }
+
+    override suspend fun updateProfile(
+        nickname: String?,
+        profileImageUrl: String?
+    ): Result<UserResponse, DataError> = apiCall {
+        userService.updateProfile(
+            UpdateProfileRequest(nickname, profileImageUrl)
+        )
+    }
 }

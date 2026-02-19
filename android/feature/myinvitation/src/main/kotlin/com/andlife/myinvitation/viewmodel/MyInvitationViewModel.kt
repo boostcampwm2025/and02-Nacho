@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -42,41 +43,43 @@ class MyInvitationViewModel @Inject constructor(
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val upcomingMyInvitationPagingFlow: Flow<PagingData<InvitationSummaryUiModel>> =
-        _upcomingSort.flatMapLatest { sort ->
-            invitationRepository.getMyInvitations(
-                status = InvitationStatus.UPCOMING,
-                sortType = sort,
-                isMyInvitation = true,
-                onTotalCountLoaded = { totalCount ->
-                    updateState { copy(upcomingTotalCount = totalCount) }
-                }
-            ).map { pagingData ->
-                pagingData.map { summary ->
-                    summary.toUiModel { date, time ->
-                        LocalDateTime(date, time).toFullDisplayString()
+        combine(_upcomingSort, authStateManager.authState) { sort, _ -> sort }
+            .flatMapLatest { sort ->
+                invitationRepository.getMyInvitations(
+                    status = InvitationStatus.UPCOMING,
+                    sortType = sort,
+                    isMyInvitation = true,
+                    onTotalCountLoaded = { totalCount ->
+                        updateState { copy(upcomingTotalCount = totalCount) }
+                    }
+                ).map { pagingData ->
+                    pagingData.map { summary ->
+                        summary.toUiModel { date, time ->
+                            LocalDateTime(date, time).toFullDisplayString()
+                        }
                     }
                 }
-            }
-        }.cachedIn(viewModelScope)
+            }.cachedIn(viewModelScope)
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val pastMyInvitationPagingFlow: Flow<PagingData<InvitationSummaryUiModel>> =
-        _pastSort.flatMapLatest { sort ->
-            invitationRepository.getMyInvitations(
-                status = InvitationStatus.PAST,
-                sortType = sort,
-                isMyInvitation = true,
-                onTotalCountLoaded = { totalCount ->
-                    updateState { copy(pastTotalCount = totalCount) }
-                }
-            ).map { pagingData ->
-                pagingData.map { summary ->
-                    summary.toUiModel { date, time ->
-                        LocalDateTime(date, time).toFullDisplayString()
+        combine(_pastSort, authStateManager.authState) { sort, _ -> sort }
+            .flatMapLatest { sort ->
+                invitationRepository.getMyInvitations(
+                    status = InvitationStatus.PAST,
+                    sortType = sort,
+                    isMyInvitation = true,
+                    onTotalCountLoaded = { totalCount ->
+                        updateState { copy(pastTotalCount = totalCount) }
+                    }
+                ).map { pagingData ->
+                    pagingData.map { summary ->
+                        summary.toUiModel { date, time ->
+                            LocalDateTime(date, time).toFullDisplayString()
+                        }
                     }
                 }
-            }
-        }.cachedIn(viewModelScope)
+            }.cachedIn(viewModelScope)
 
     val authState = authStateManager.authState
 

@@ -5,6 +5,7 @@ import com.andlife.network.api.auth.AuthService
 import com.andlife.network.api.guestbook.GuestBookService
 import com.andlife.network.api.invitation.InvitationService
 import com.andlife.network.api.media.MediaService
+import com.andlife.network.api.report.ReportService
 import com.andlife.network.api.thankscard.ThanksCardService
 import com.andlife.network.api.user.UserService
 import com.andlife.network.interceptor.AuthInterceptor
@@ -162,4 +163,9 @@ object InvitationNetworkModule {
         @AuthInvitation retrofit: Retrofit,
     ): ThanksCardService = retrofit.create(ThanksCardService::class.java)
 
+    @Provides
+    @Singleton
+    fun provideReportService(
+        @AuthInvitation retrofit: Retrofit,
+    ): ReportService = retrofit.create(ReportService::class.java)
 }

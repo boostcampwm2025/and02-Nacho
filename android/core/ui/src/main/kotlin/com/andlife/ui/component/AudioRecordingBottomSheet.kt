@@ -33,7 +33,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.NachoCardSize
 import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
@@ -284,7 +283,7 @@ private fun WaveformVisualization(
             .coerceIn(0.05f, 1f)
 
         waveformHeights.add(normalized)
-        waveformHeights.removeFirst()
+        waveformHeights.removeFirstOrNull()
     }
 
     Row(

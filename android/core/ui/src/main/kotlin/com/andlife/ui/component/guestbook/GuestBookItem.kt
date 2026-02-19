@@ -48,13 +48,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
 import coil3.compose.SubcomposeAsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
@@ -82,6 +87,8 @@ import kotlinx.coroutines.delay
 import kotlinx.datetime.LocalDateTime
 import com.andlife.designsystem.R as designR
 
+private const val SAMPLE_INVITATION_ID = 1L
+
 @Composable
 fun GuestBookItem(
     guestBook: GuestBookUiModel,
@@ -93,9 +100,9 @@ fun GuestBookItem(
     modifier: Modifier = Modifier,
     shouldPlayVideo: Boolean = false,
     isEditing: Boolean = false,
-    useMenuButton: Boolean = true,
     onEditClick: (GuestBookUiModel) -> Unit = {},
     onDeleteClick: (GuestBookUiModel) -> Unit = {},
+    onReportClick: (Long) -> Unit = {},
     onInvitationTitleClick: (Long) -> Unit? = {},
 ) {
     val backgroundColor = if (isEditing) {
@@ -110,6 +117,8 @@ fun GuestBookItem(
         else -> 6
     }
 
+    val canShowMenuButton = guestBook.invitation.id != SAMPLE_INVITATION_ID
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -119,10 +128,13 @@ fun GuestBookItem(
         GuestBookItemHeader(
             author = guestBook.author,
             createdAt = guestBook.createdAt,
-            canEdit = useMenuButton && guestBook.isOwner,
-            canDelete = useMenuButton && (guestBook.isOwner || guestBook.isInvitationOwner),
+            canShowMenuButton = canShowMenuButton,
+            canEdit = guestBook.isOwner,
+            canDelete = (guestBook.isOwner || guestBook.isInvitationOwner),
+            canReport = !guestBook.isOwner,
             onEditClick = { onEditClick(guestBook) },
             onDeleteClick = { onDeleteClick(guestBook) },
+            onReportClick = { onReportClick(guestBook.id) },
         )
         GuestBookItemTextSection(
             invitation = guestBook.invitation,
@@ -157,10 +169,13 @@ fun GuestBookItem(
 private fun GuestBookItemHeader(
     author: AuthorUiModel,
     createdAt: LocalDateTime,
+    canShowMenuButton: Boolean,
     canEdit: Boolean,
     canDelete: Boolean,
+    canReport: Boolean,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
+    onReportClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var isMenuExpanded by remember { mutableStateOf(false) }
@@ -202,7 +217,7 @@ private fun GuestBookItemHeader(
                 color = NachoTheme.colorScheme.textTertiary,
             )
         }
-        if (canEdit || canDelete) {
+        if (canShowMenuButton) {
             Box {
                 IconButton(onClick = { isMenuExpanded = true }) {
                     Icon(
@@ -248,6 +263,21 @@ private fun GuestBookItemHeader(
                             color = NachoTheme.colorScheme.textPrimary,
                         )
                     }
+                    if (canReport) {
+                        Text(
+                            text = stringResource(R.string.txt_label_report),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        isMenuExpanded = false
+                                        onReportClick(author.id)
+                                    }
+                                    .padding(NachoSpacing.large),
+                            style = NachoTheme.typography.bodyMediumMedium,
+                            color = NachoTheme.colorScheme.textPrimary,
+                        )
+                    }
                 }
             }
         }
@@ -271,7 +301,7 @@ private fun GuestBookItemTextSection(
             .padding(horizontal = NachoSpacing.large),
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
-        invitation?.let {
+        invitation?.title?.let { title ->
             Row(
                 modifier =
                     Modifier
@@ -281,7 +311,7 @@ private fun GuestBookItemTextSection(
                 horizontalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
             ) {
                 Text(
-                    text = invitation.title,
+                    text = title,
                     style = NachoTheme.typography.bodyLargeMedium,
                     color = NachoTheme.colorScheme.textPrimary,
                 )
@@ -391,7 +421,6 @@ private fun GuestBookItemVisualMediaSection(
                             thumbnailUrl = media.thumbnailUrl,
                             totalDurationSeconds = media.durationSeconds,
                             shouldPlay = shouldPlayVideo && pagerState.currentPage == page,
-                            videoPlayerPool = videoPlayerPool,
                             onPlayVideoClick = onPlayVideoClick,
                         )
                     }
@@ -452,14 +481,24 @@ private fun VideoPlayerContainer(
     videoUrl: String,
     thumbnailUrl: String?,
     totalDurationSeconds: Int?,
-    shouldPlay: Boolean,
-    videoPlayerPool: AutoVideoPlayerPool,
+    shouldPlay: Boolean, // 현재 화면 포커스 여부
     onPlayVideoClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     var isVideoReady by remember(videoUrl) { mutableStateOf(false) }
     var remainingDurationMs by remember(videoUrl) {
         mutableLongStateOf((totalDurationSeconds?.times(1000))?.toLong() ?: 0L)
+    }
+
+    // [핵심 변화] Pool을 거치지 않고 직접 생성
+    // remember(videoUrl)에 의해 URL이 바뀌면 이전 플레이어는 버려짐(onDispose 실행)
+    val exoPlayer = remember(videoUrl) {
+        ExoPlayer.Builder(context).build().apply {
+            setMediaItem(MediaItem.fromUri(videoUrl))
+            prepare()
+            repeatMode = Player.REPEAT_MODE_ONE
+        }
     }
 
     val thumbnailAlpha by animateFloatAsState(
@@ -467,11 +506,46 @@ private fun VideoPlayerContainer(
         animationSpec = tween(durationMillis = 200),
     )
 
-    LaunchedEffect(shouldPlay, videoUrl) {
+    // 재생 제어
+    LaunchedEffect(shouldPlay) {
         if (shouldPlay) {
-            videoPlayerPool.playPlayer(videoUrl, guestBookId)
+            exoPlayer.play()
         } else {
-            videoPlayerPool.pausePlayer(videoUrl)
+            exoPlayer.pause()
+        }
+    }
+
+    // 리소스 해제 (중요: 여기서 직접 release를 호출함)
+    DisposableEffect(videoUrl) {
+        val listener = object : Player.Listener {
+            override fun onRenderedFirstFrame() {
+                isVideoReady = true
+            }
+            override fun onPlaybackStateChanged(state: Int) {
+                if (state == Player.STATE_READY) {
+                    isVideoReady = true
+                }
+            }
+        }
+        exoPlayer.addListener(listener)
+
+        onDispose {
+            exoPlayer.removeListener(listener)
+            exoPlayer.release() // 자원을 즉시 반납
+        }
+    }
+
+    // 재생 시간 업데이트 루프
+    LaunchedEffect(shouldPlay, isVideoReady) {
+        if (shouldPlay && isVideoReady) {
+            while (true) {
+                val duration = exoPlayer.duration
+                val position = exoPlayer.currentPosition
+                if (duration > 0) {
+                    remainingDurationMs = (duration - position).coerceAtLeast(0L)
+                }
+                delay(1000L)
+            }
         }
     }
 
@@ -480,53 +554,19 @@ private fun VideoPlayerContainer(
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        if (shouldPlay) {
-            val currentPlayer = remember(videoUrl) { videoPlayerPool.getPlayer(videoUrl) }
-
-            LaunchedEffect(isVideoReady) {
-                if (isVideoReady && totalDurationSeconds != null) {
-                    while (true) {
-                        val duration = currentPlayer.exoPlayer.duration
-                        val position = currentPlayer.exoPlayer.currentPosition
-
-                        remainingDurationMs = (duration - position).coerceAtLeast(0L)
-                        delay(1000L)
-                    }
-                } else {
-                    remainingDurationMs = (totalDurationSeconds?.times(1000))?.toLong() ?: 0L
+        // PlayerView 직접 연결
+        AndroidView(
+            factory = { ctx ->
+                PlayerView(ctx).apply {
+                    useController = false
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                    player = exoPlayer
                 }
-            }
+            },
+            modifier = Modifier.fillMaxSize()
+        )
 
-            DisposableEffect(currentPlayer, videoUrl) {
-                val listener = object : Player.Listener {
-                    override fun onRenderedFirstFrame() {
-                        isVideoReady = true
-                    }
-
-                    override fun onPlaybackStateChanged(state: Int) {
-                        if (state == Player.STATE_READY && currentPlayer.exoPlayer.playWhenReady) {
-                            isVideoReady = true
-                        }
-                    }
-                }
-
-                currentPlayer.exoPlayer.addListener(listener)
-
-                if (currentPlayer.exoPlayer.playbackState == Player.STATE_READY) {
-                    isVideoReady = true
-                }
-
-                onDispose {
-                    currentPlayer.exoPlayer.removeListener(listener)
-                }
-            }
-
-            VideoPlayerView(
-                autoPlayer = currentPlayer,
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
-
+        // 썸네일 레이어
         if (thumbnailUrl != null && thumbnailAlpha > 0f) {
             ThumbnailWrapper(
                 thumbnailUrl = thumbnailUrl,
@@ -537,12 +577,13 @@ private fun VideoPlayerContainer(
             )
         }
 
+        // 시간 오버레이
         if (totalDurationSeconds != null) {
             VideoDurationOverlay(
                 duration = (remainingDurationMs / 1000).toInt().toFormatDuration(),
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(NachoSpacing.small),
+                    .padding(8.dp), // 임시 Spacing
             )
         }
     }

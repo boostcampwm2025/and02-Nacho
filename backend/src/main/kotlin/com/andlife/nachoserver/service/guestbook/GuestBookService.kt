@@ -149,7 +149,10 @@ class GuestBookService(
                     name = guestBook.user.name,
                     profileImageUrl = guestBook.user.profileImageUrl
                 ),
-                invitation = null,
+                invitation = GuestBookInvitationResponse(
+                    id = guestBook.invitation.id,
+                    title = null
+                ),
                 textContent = guestBook.textContent,
                 visualMedias = visualMedias,
                 audioMedias = audioMedias,
@@ -336,6 +339,18 @@ class GuestBookService(
     @Transactional
     fun deleteAllByInvitation(invitationId: Long) {
         val guestBooks = guestBookRepository.findAllByInvitationId(invitationId)
+        val allMediaKeys = guestBooks.flatMap { getAllMediaKeys(it) }
+        guestBookRepository.deleteAll(guestBooks)
+        allMediaKeys.forEach { key ->
+            if (key.isNotBlank()) {
+                mediaService.deleteMedia(key)
+            }
+        }
+    }
+
+    @Transactional
+    fun deleteAllByUserId(userId: Long) {
+        val guestBooks = guestBookRepository.findAllByUserId(userId)
         val allMediaKeys = guestBooks.flatMap { getAllMediaKeys(it) }
         guestBookRepository.deleteAll(guestBooks)
         allMediaKeys.forEach { key ->

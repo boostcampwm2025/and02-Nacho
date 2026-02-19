@@ -107,13 +107,17 @@ class MyInvitationDetailViewModel @Inject constructor(
         val locationText = content.location.name
         val firstImage = content.imageList.firstOrNull()
 
-        kakaoShareManager.share(
+        val isAvailable = kakaoShareManager.share(
             invitationId = myInvitationId,
             title = content.title,
             imageUrl = firstImage,
             date = dateText,
             location = locationText,
         )
+
+        if (!isAvailable) {
+            sendEffect(MyInvitationDetailSideEffect.KakaoTalkNotAvailable)
+        }
     }
 
     private fun deleteInvitation() {

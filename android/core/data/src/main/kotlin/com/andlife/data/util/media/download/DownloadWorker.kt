@@ -3,6 +3,8 @@ package com.andlife.data.util.media.download
 import android.app.Notification
 import android.content.Context
 import android.content.pm.ServiceInfo
+import android.media.MediaScannerConnection
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.hilt.work.HiltWorker
@@ -16,10 +18,13 @@ import com.andlife.network.di.NachoMedia
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.job
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.coroutines.resume
 
 @HiltWorker
 class DownloadWorker @AssistedInject constructor(
@@ -33,7 +38,8 @@ class DownloadWorker @AssistedInject constructor(
     private val uniqueNotificationId: Int by lazy { id.hashCode() }
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
-        val notification = notificationManager.createProgressNotification(id, 0)
+        val fileName = inputData.getString(DownloadKey.FILE_NAME) ?: ""
+        val notification = notificationManager.createProgressNotification(id, fileName, 0)
         return buildForegroundInfo(notification)
     }
 
@@ -55,7 +61,10 @@ class DownloadWorker @AssistedInject constructor(
             setProgress(workDataOf(DownloadKey.PROGRESS to 0))
 
             val request = Request.Builder().url(url).build()
-            okHttpClient.newCall(request).execute().use { response ->
+            val call = okHttpClient.newCall(request)
+            coroutineContext.job.invokeOnCompletion { call.cancel() }
+            call.execute().use { response ->
+
                 if (!response.isSuccessful) throw Exception("${DownloadError.FAILED}${response.code}")
 
                 val body = checkNotNull(response.body) { DownloadError.MISSING_BODY }
@@ -65,11 +74,17 @@ class DownloadWorker @AssistedInject constructor(
                     fileName = fileName,
                     mediaType = mediaType,
                     contentLength = body.contentLength(),
-                    onProgress = { progress -> updateProgress(progress) },
+                    onProgress = { progress -> updateProgress(fileName, progress) },
                     isStopped = { isStopped },
                 )
 
-                notificationManager.notifyComplete(fileName, mediaType)
+                val contentUri = if (uri.startsWith(FileConstants.FILE_SCHEMA)) {
+                    scanToContentUri(Uri.parse(uri).path ?: "") ?: uri
+                } else {
+                    uri
+                }
+                notificationManager.notifyComplete(fileName, mediaType, contentUri)
+
                 Result.success(workDataOf(DownloadKey.RESULT_URL to uri))
             }
         } catch (e: Exception) {
@@ -82,13 +97,13 @@ class DownloadWorker @AssistedInject constructor(
         }
     }
 
-    private suspend fun updateProgress(progress: Int) {
+    private suspend fun updateProgress(fileName: String, progress: Int) {
         val progressData = workDataOf(
             DownloadKey.PROGRESS to progress,
         )
         setProgress(progressData)
 
-        val notification = notificationManager.createProgressNotification(id, progress)
+        val notification = notificationManager.createProgressNotification(id, fileName, progress)
         try {
             setForeground(buildForegroundInfo(notification))
         } catch (e: Exception) {
@@ -107,6 +122,17 @@ class DownloadWorker @AssistedInject constructor(
     fun errorData(message: String): Data {
         return workDataOf(DownloadKey.ERROR_MESSAGE to message)
     }
+
+    private suspend fun scanToContentUri(filePath: String): String? =
+        suspendCancellableCoroutine { cont ->
+            MediaScannerConnection.scanFile(
+                context,
+                arrayOf(filePath),
+                null
+            ) { _, contentUri ->
+                cont.resume(contentUri?.toString())
+            }
+        }
 
     companion object {
         private const val TAG = "DownloadWorker"

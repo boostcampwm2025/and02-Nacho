@@ -111,11 +111,11 @@ fun InvitationContentsScreen(
                 onMapError = onMapError,
                 isMapVisible = isMapVisible,
             )
-            if (showLottie) {
-                LottieEffect(
-                    selectEffect = uiState.invitationContentsUiModel.invitationCard?.card?.backgroundImageUrl
-                )
-            }
+        }
+        if (showLottie) {
+            LottieEffect(
+                selectEffect = uiState.invitationContentsUiModel.invitationCard?.card?.backgroundImageUrl
+            )
         }
     }
 }

@@ -13,15 +13,18 @@ import com.andlife.domain.model.guestbook.GuestBook
 import com.andlife.domain.model.guestbook.UploadState
 import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.guestbook.GuestBookRepository
+import com.andlife.domain.repository.report.ReportRepository
 import com.andlife.domain.util.BackgroundMediaUploader
+import com.andlife.domain.util.onFailure
+import com.andlife.domain.util.onSuccess
 import com.andlife.domain.util.RefreshEventHub
 import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.domain.util.Result
-import com.andlife.domain.util.onFailure
-import com.andlife.domain.util.onSuccess
 import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.media.audio.AudioPlayerManager
 import com.andlife.media.video.AutoVideoPlayerPool
+import com.andlife.model.common.ReportReason
+import com.andlife.model.common.ReportTargetType
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.model.guestbook.UiMediaType
@@ -54,6 +57,7 @@ class MyInvitationGuestBookViewModel
 constructor(
     private val backgroundMediaUploader: BackgroundMediaUploader,
     private val guestBookRepository: GuestBookRepository,
+    private val reportRepository: ReportRepository,
     private val authStateManager: AuthStateManager,
     val audioPlayerManager: AudioPlayerManager,
     val videoPlayerPool: AutoVideoPlayerPool,
@@ -85,9 +89,9 @@ constructor(
         authStateManager.authState
             .onEach { authState ->
                 val isStateChanged = uiState.value.isAuthStateChanged(authState)
-                updateState { copy(authState = authState) }
+                updateState { copy( authState = authState ) }
                 if (isStateChanged) {
-                    sendEffect(MyInvitationGuestBookSideEffect.AuthStateChanged(authState))
+                    sendEffect(MyInvitationGuestBookSideEffect.AuthStateChanged(authState) )
                 }
             }
             .launchIn(viewModelScope)
@@ -127,6 +131,9 @@ constructor(
             MyInvitationGuestBookUiEvent.Refresh -> refresh()
             MyInvitationGuestBookUiEvent.CheckLogin -> checkLogin()
             MyInvitationGuestBookUiEvent.DismissLoginDialog -> dismissLoginDialog()
+            is MyInvitationGuestBookUiEvent.ShowReport -> updateReportTargetId(event.guestBookId)
+            MyInvitationGuestBookUiEvent.DismissReport -> updateReportTargetId(null)
+            is MyInvitationGuestBookUiEvent.SubmitReport -> submitReport(event.reason, event.description)
         }
     }
 
@@ -355,7 +362,8 @@ constructor(
             sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("최대 5개까지 미디어를 추가할 수 있습니다."))
             return
         }
-        updateState { copy(audioRecordingDuration = 0) }
+        updateState { copy(isMediaPlaying = false, audioRecordingDuration = 0) }
+        audioPlayerManager.pause()
         sendEffect(MyInvitationGuestBookSideEffect.ShowAudioRecordingBottomSheet)
     }
 
@@ -390,6 +398,37 @@ constructor(
 
     private fun dismissLoginDialog() {
         updateState { copy(showLoginDialog = false) }
+    }
+
+    private fun updateReportTargetId(targetId: Long?) {
+        val authState = authStateManager.authState.value
+        if (authState !is AuthState.Authenticated) {
+            updateState { copy(showLoginDialog = true) }
+            return
+        }
+        updateState { copy(reportTargetId = targetId) }
+    }
+
+    private fun submitReport(reason: ReportReason, description: String?) {
+        val targetId = uiState.value.reportTargetId ?: return
+        viewModelScope.launch {
+            reportRepository.sendReport(
+                targetType = ReportTargetType.GUESTBOOK.name,
+                targetId = targetId,
+                reason = reason.name,
+                description = description
+            ).onSuccess {
+                updateState { copy(reportTargetId = null) }
+                sendEffect(MyInvitationGuestBookSideEffect.ReportSuccess)
+            }.onFailure { error, message ->
+                val messageToShow = if (error == DataError.Network.CONFLICT) {
+                    message
+                } else {
+                    null
+                }
+                sendEffect(MyInvitationGuestBookSideEffect.ReportFailure(messageToShow))
+            }
+        }
     }
 
 

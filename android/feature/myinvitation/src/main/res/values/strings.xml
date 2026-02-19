@@ -39,6 +39,7 @@
 
     <string name="snack_download_fail">저장에 실패하였습니다</string>
     <string name="snack_permission_denied">파일을 저장하려면 저장공간 접근 권한이 필요합니다</string>
+    <string name="snack_notification_permission_denied">다운로드 진행 상태를 알림으로 받으려면 알림 권한이 필요합니다</string>
     <string name="snack_download_guide">다운로드 상태는 상단 알림창에서 확인 가능합니다</string>
 
     <string name="dialog_network_title">안내</string>
@@ -53,5 +54,6 @@
     <string name="txt_delete_thanks_card">감사카드 삭제</string>
     <string name="desc_delete_thanks_card">정말 감사카드를 삭제하시겠습니까?</string>
     <string name="label_guestbook_empty">작성된 방명록이 없습니다.\n첫 인사를 남겨보세요!</string>
-    <string name="msg_invitation_delete_failed">초대장 삭제에 실패하였습니다.</string>
+    <string name="msg_invitation_delete_failed">초대장 삭제에 실패하였습니다</string>
+    <string name="msg_kakaotalk_available_failed">카카오톡이 설치되어 있지 않습니다</string>
 </resources>

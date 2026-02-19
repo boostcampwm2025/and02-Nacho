@@ -40,6 +40,7 @@ naver-map-location = "21.0.2"
 workManager = "2.10.5"
 hiltWork = "1.2.0"
 lottie = "6.7.1"
+ucrop = "2.2.8"
 
 [libraries]
 androidx-compose-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "materialIconsCore" }
@@ -141,6 +142,9 @@ naver-map-location = { group = "io.github.fornewid", name = "naver-map-location"
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
 androidx-hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltWork" }
 androidx-hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hiltWork" }
+
+# Image Crop
+ucrop = { group = "com.github.yalantis", name = "ucrop", version.ref = "ucrop" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

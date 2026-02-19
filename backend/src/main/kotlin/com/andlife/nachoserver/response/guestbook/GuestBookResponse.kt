@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 data class GuestBookResponse(
     val id: Long,
     val author: AuthorResponse,
-    val invitation: GuestBookInvitationResponse?,
+    val invitation: GuestBookInvitationResponse,
     val textContent: String,
     val visualMedias: List<GuestBookMediaResponse>,
     val audioMedias: List<GuestBookMediaResponse>,
@@ -21,7 +21,7 @@ data class GuestBookResponse(
 
 data class GuestBookInvitationResponse(
     val id: Long,
-    val title: String,
+    val title: String? = null
 )
 
 data class GuestBookMediaResponse(

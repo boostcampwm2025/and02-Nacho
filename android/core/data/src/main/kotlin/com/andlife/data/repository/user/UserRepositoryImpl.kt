@@ -2,12 +2,16 @@ package com.andlife.data.repository.user
 
 import com.andlife.data.datasource.remote.user.UserRemoteDataSource
 import com.andlife.data.repository.user.mapper.toDomain
+import com.andlife.database.InvitationDatabase
 import com.andlife.datastore.UserStorage
 import com.andlife.domain.error.DataError
 import com.andlife.domain.error.InvitationError
 import com.andlife.domain.model.auth.AuthState
+import com.andlife.domain.model.auth.User
 import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.user.UserRepository
+import com.andlife.domain.util.MediaFileProvider
+import com.andlife.domain.util.MediaUploader
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.map
 import com.andlife.domain.util.runResultCatching
@@ -18,11 +22,25 @@ import javax.inject.Inject
 internal class UserRepositoryImpl @Inject constructor(
     private val userStorage: UserStorage,
     private val userRemoteDataSource: UserRemoteDataSource,
-    private val authStateManager: AuthStateManager
+    private val authStateManager: AuthStateManager,
+    private val invitationDatabase: InvitationDatabase,
+    private val mediaUploader: MediaUploader,
+    private val mediaFileProvider: MediaFileProvider
 ) : UserRepository {
     override suspend fun login(accessToken: String): Result<Unit, DataError> {
         return userRemoteDataSource.login(AuthRequest(accessToken))
             .map { authResponse ->
+                clearInvitationCache()
+                authStateManager.setAuthenticated(authResponse.user.toDomain())
+                saveToken(authResponse.accessToken, authResponse.refreshToken)
+                syncGuestInvitations()
+            }
+    }
+
+    override suspend fun loginWithTestUser(): Result<Unit, DataError> {
+        return userRemoteDataSource.loginWithTestUser()
+            .map {  authResponse ->
+                clearInvitationCache()
                 authStateManager.setAuthenticated(authResponse.user.toDomain())
                 saveToken(authResponse.accessToken, authResponse.refreshToken)
                 syncGuestInvitations()
@@ -30,19 +48,20 @@ internal class UserRepositoryImpl @Inject constructor(
     }
 
     private suspend fun syncGuestInvitations(): Result<Unit, DataError> {
-        val invitationIds = userStorage.getInvitationIds()
+        val authState = authStateManager.authState.value
 
-        if (invitationIds.isEmpty()) {
-            return Result.Success(Unit)
-        }
+        val invitationIds = userStorage.getInvitationIds()
+        val idsWithoutSample = invitationIds.filter { it != UserStorage.SAMPLE_INVITATION_ID }
+
+        if (idsWithoutSample.isEmpty() && authState !is AuthState.Authenticated) return Result.Success(Unit)
+
         return userRemoteDataSource.syncInvitations(invitationIds)
-            .map {
-                userStorage.clearGuestData()
-            }
+            .map { userStorage.clearGuestData() }
     }
 
     override suspend fun guestLogin(): Result<Unit, InvitationError> {
         return runResultCatching {
+            clearInvitationCache()
             userStorage.setWasLoggedIn(true)
             authStateManager.setGuest()
         }
@@ -78,6 +97,16 @@ internal class UserRepositoryImpl @Inject constructor(
         authStateManager.setLoading()
         userStorage.clearTokens()
         userStorage.setWasLoggedIn(false)
+        clearInvitationCache()
+    }
+
+    override suspend fun signOut(): Result<Unit, DataError> {
+        return userRemoteDataSource.signedOut().map { Unit }
+    }
+
+    private suspend fun clearInvitationCache() {
+        invitationDatabase.invitationSummaryDao().clearAll()
+        invitationDatabase.upcomingInvitationDao().clearAll()
     }
 
     override suspend fun getUserInfo(): AuthState {
@@ -105,4 +134,41 @@ internal class UserRepositoryImpl @Inject constructor(
     override suspend fun isFirstDownloadDone(): Boolean = userStorage.isFirstDownloadDone()
 
     override suspend fun setFirstDownloadDone() = userStorage.setFirstDownloadDone()
+
+    override suspend fun updateProfile(
+        nickname: String?,
+        newImageUri: String?
+    ): Result<User, DataError> {
+        return try {
+            var finalProfileImageUrl: String? = null
+
+            if (newImageUri != null) {
+                val mediaFile = mediaFileProvider.createFromUri(newImageUri)
+                    ?: return Result.Error(DataError.LocalImage.NotFound)
+
+                val uploadResult = mediaUploader.uploadMedias(listOf(mediaFile))
+
+                when (uploadResult) {
+                    is Result.Success -> {
+                        finalProfileImageUrl = uploadResult.data.firstOrNull()
+                    }
+                    is Result.Error -> return Result.Error(uploadResult.error)
+                }
+            }
+
+            userRemoteDataSource.updateProfile(
+                nickname = nickname,
+                profileImageUrl = finalProfileImageUrl
+            ).map { userResponse ->
+                val updatedUser = userResponse.toDomain()
+                authStateManager.setAuthenticated(updatedUser)
+                updatedUser
+            }
+
+        } catch (e: IOException) {
+            Result.Error(DataError.Local.IOEXCEPTION)
+        } catch (e: Exception) {
+            Result.Error(DataError.Network.UNKNOWN)
+        }
+    }
 }

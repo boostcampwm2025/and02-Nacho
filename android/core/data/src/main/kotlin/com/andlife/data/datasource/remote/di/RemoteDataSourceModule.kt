@@ -6,6 +6,8 @@ import com.andlife.data.datasource.remote.invitation.InvitationRemoteDataSource
 import com.andlife.data.datasource.remote.invitation.InvitationRemoteDataSourceImpl
 import com.andlife.data.datasource.remote.guestbook.GuestBookRemoteDataSource
 import com.andlife.data.datasource.remote.guestbook.GuestBookRemoteDataSourceImpl
+import com.andlife.data.datasource.remote.report.ReportRemoteDataSource
+import com.andlife.data.datasource.remote.report.ReportRemoteDataSourceImpl
 import com.andlife.data.datasource.remote.thankscard.ThanksCardRemoteDataSource
 import com.andlife.data.datasource.remote.thankscard.ThanksCardRemoteDataSourceImpl
 import com.andlife.data.datasource.remote.user.UserRemoteDataSource
@@ -48,4 +50,10 @@ internal abstract class RemoteDataSourceModule {
     abstract fun bindThanksCardRemoteDataSource(
         thanksCardRemoteDataSourceImpl: ThanksCardRemoteDataSourceImpl,
     ): ThanksCardRemoteDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindReportRemoteDataSource(
+        reportRemoteDataSourceImpl: ReportRemoteDataSourceImpl
+    ): ReportRemoteDataSource
 }

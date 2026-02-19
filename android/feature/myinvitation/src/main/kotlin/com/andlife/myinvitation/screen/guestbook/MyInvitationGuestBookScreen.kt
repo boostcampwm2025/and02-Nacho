@@ -75,6 +75,7 @@ import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookSideEffect
 import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookUiEvent
 import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookUiState
 import com.andlife.myinvitation.viewmodel.MyInvitationGuestBookViewModel
+import com.andlife.ui.R as uiR
 import com.andlife.ui.component.dialog.LoginDialog
 import com.andlife.ui.component.AudioRecordingBottomSheet
 import com.andlife.ui.component.dialog.NachoInfoDialog
@@ -82,6 +83,7 @@ import com.andlife.ui.component.dialog.NachoPermissionDialog
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.invitation.InvitationGuestBookForm
 import com.andlife.ui.component.paging.PagingStateContent
+import com.andlife.ui.component.report.ReportBottomSheet
 import com.andlife.ui.util.audio.AudioRecorder
 import com.andlife.ui.util.collectWithLifecycle
 import com.andlife.ui.util.imeWithoutNavBars
@@ -286,7 +288,19 @@ fun MyInvitationGuestBookRoute(
                 guestBooks.refresh()
             }
 
-            else -> {}
+            MyInvitationGuestBookSideEffect.ReportSuccess -> {
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(res.getString(uiR.string.msg_report_success))
+                }
+            }
+
+            is MyInvitationGuestBookSideEffect.ReportFailure -> {
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(effect.message ?: res.getString(uiR.string.msg_report_failure))
+                }
+            }
         }
     }
 
@@ -402,6 +416,17 @@ fun MyInvitationGuestBookRoute(
         )
     }
 
+    if (uiState.reportTargetId != null) {
+        ReportBottomSheet(
+            onSubmit = { reason, description ->
+                viewModel.onEvent(MyInvitationGuestBookUiEvent.SubmitReport(reason, description))
+            },
+            onDismiss = {
+                viewModel.onEvent(MyInvitationGuestBookUiEvent.DismissReport)
+            }
+        )
+    }
+
     InvitationGuestBookScreen(
         uiState = uiState,
         guestBooks = guestBooks,
@@ -445,9 +470,11 @@ fun MyInvitationGuestBookRoute(
                     }
                 }
                 showRecordingBottomSheet = false
+                viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateMediaPlayState(true))
             },
             onDismiss = {
                 showRecordingBottomSheet = false
+                viewModel.onEvent(MyInvitationGuestBookUiEvent.UpdateMediaPlayState(true))
             }
         )
     }
@@ -610,6 +637,7 @@ private fun InvitationGuestBookScreen(
                                         isEditing = uiState.editingGuestBookId == guestBook.id,
                                         onEditClick = { onEvent(MyInvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
                                         onDeleteClick = { onDeleteMenuClick(guestBook.id) },
+                                        onReportClick = { onEvent(MyInvitationGuestBookUiEvent.ShowReport(guestBook.id)) },
                                         onVisualMediaClick = { onEvent(MyInvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
                                         onAudioMediaClick = { onEvent(MyInvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
                                         onPlayVideoClick = { url ->
@@ -803,6 +831,7 @@ private fun InvitationGuestBookResultPreview() {
         ),
         GuestBookUiModel(
             id = 2L,
+            invitation = GuestBookInvitationUiModel(id = 222L),
             author = AuthorUiModel(id = 112L, name = "이순신", profileImageUrl = null),
             textContent = "직접 가서 축하해주고 싶었는데 아쉽네요. 멀리서나마 응원합니다!",
             visualMedias = emptyList<GuestBookMediaUiModel>().toImmutableList(),

@@ -29,6 +29,7 @@ class LoginViewModel @Inject constructor(
         when (event) {
             LoginUiEvent.GuestLogin -> guest()
             is LoginUiEvent.SocialLoginSuccess -> login(event.accessToken)
+            LoginUiEvent.TestLogin -> testLogin()
         }
     }
 
@@ -38,6 +39,20 @@ class LoginViewModel @Inject constructor(
             userRepository.login(accessToken)
                 .onFailure { error, msg ->
                     sendEffect(LoginSideEffect.FailSocialLogin)
+                }
+                .onSuccess {
+                    authStateManager.navigateToHome()
+                }
+            updateState { copy(false) }
+        }
+    }
+
+    private fun testLogin() {
+        viewModelScope.launch {
+            updateState { copy(true) }
+            userRepository.loginWithTestUser()
+                .onFailure { error, msg ->
+                    sendEffect(LoginSideEffect.FailTestLogin)
                 }
                 .onSuccess {
                     authStateManager.navigateToHome()

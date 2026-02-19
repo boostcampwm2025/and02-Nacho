@@ -2,8 +2,9 @@ package com.andlife.database.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.andlife.database.DatabaseConstants
 
-@Entity(tableName = "invitation_summary")
+@Entity(tableName = DatabaseConstants.TABLE_INVITATION_SUMMARY)
 data class InvitationSummaryEntity(
     @PrimaryKey
     val id: Long,

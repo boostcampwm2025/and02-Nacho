@@ -5,6 +5,7 @@ import com.andlife.network.model.auth.AuthRequest
 import com.andlife.network.model.auth.AuthResponse
 import com.andlife.network.model.auth.RefreshTokenRequest
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.POST
 
 interface AuthService {
@@ -17,4 +18,7 @@ interface AuthService {
     suspend fun reissue(
         @Body request: RefreshTokenRequest
     ) : BaseResponse<AuthResponse>
+
+    @POST("api/auth/test-user")
+    suspend fun loginWithTestUser(): BaseResponse<AuthResponse>
 }

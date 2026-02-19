@@ -54,6 +54,11 @@ class InvitationService(
         invitationIds.forEach { invitationId ->
             if (!participantRepository.existsByInvitationIdAndUserId(invitationId, userId)) {
                 invitationRepository.findById(invitationId).ifPresent { invitation ->
+
+                    if (invitation.host.id == userId) {
+                        return@ifPresent
+                    }
+
                     participantRepository.save(
                         InvitationParticipant(user = user, invitation = invitation)
                     )

@@ -84,6 +84,11 @@ fun LoginRoute(
                 snackbarHostState.currentSnackbarData?.dismiss()
                 snackbarHostState.showSnackbar(res.getString(R.string.fail_kakao_login))
             }
+
+            LoginSideEffect.FailTestLogin -> {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar(res.getString(R.string.fail_test_login))
+            }
         }
     }
 
@@ -153,6 +158,12 @@ private fun LoginScreen(
                     modifier = Modifier.fillMaxWidth(),
                     onLoginClick = { onSocialLogin(SocialType.KAKAO) }
                 )
+
+                TestLoginButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onTestLoginClick = { onEvent(LoginUiEvent.TestLogin) }
+                )
+
                 GuestLoginButton(
                     modifier = Modifier.fillMaxWidth(),
                     onGuestLoginClick = { onEvent(LoginUiEvent.GuestLogin) }
@@ -287,6 +298,47 @@ private fun GuestLoginButton(
 
             Text(
                 text = stringResource(R.string.txt_guest_login),
+                style = NachoTheme.typography.bodyLargeMedium,
+                color = NachoTheme.colorScheme.textSecondary,
+            )
+            Spacer(modifier = Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun TestLoginButton(
+    onTestLoginClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    shape: Shape = RoundedCornerShape(NachoSpacing.medium),
+    isLoading: Boolean = false
+) {
+
+    NachoButton(
+        modifier = modifier,
+        shape = shape,
+        enabled = !isLoading,
+        onClick = onTestLoginClick,
+        containerColor = NachoTheme.colorScheme.backgroundPrimary,
+        contentColor = NachoTheme.colorScheme.textSecondary,
+        contentPadding = PaddingValues(NachoSpacing.large)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_baseline_person_24),
+                contentDescription = null,
+                tint = KakaoTextColor
+
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Text(
+                text = stringResource(R.string.txt_test_user_login),
                 style = NachoTheme.typography.bodyLargeMedium,
                 color = NachoTheme.colorScheme.textSecondary,
             )

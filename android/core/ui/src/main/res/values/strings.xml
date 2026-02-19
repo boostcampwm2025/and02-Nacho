@@ -170,15 +170,18 @@
     <string name="btn_label_cancel">취소</string>
     <string name="btn_label_to_setting">설정으로 이동</string>
     <string name="dialog_do_not_show_again">다시 보지 않기</string>
-    <!--  CardDialog  -->
-    <string name="txt_exit_dialog_title">작성 취소</string>
-    <string name="txt_exit_dialog_message">작성을 취소하시겠습니까?\n작성 중인 내용은 저장되지 않습니다.</string>
-    <string name="btn_exit">나가기</string>
-    <string name="btn_continue">계속 작성</string>
 
     <string name="effect_snow">눈</string>
     <string name="effect_party">파티</string>
     <string name="effect_cherry_blossom">벚꽃</string>
     <string name="effect_none">없음</string>
     <string name="btn_select">선택</string>
+    <string name="txt_report">신고하기</string>
+    <string name="txt_report_reason_title">사유 선택</string>
+    <string name="txt_report_submit">제출하기</string>
+    <string name="msg_report_success">신고처리 되었습니다.</string>
+    <string name="msg_report_failure">서버 에러로 신고처리에 실패하였습니다.</string>
+    <string name="txt_label_report">신고</string>
+    <string name="txt_report_description_title">신고하시는 이유를 자세히 알려주세요.</string>
+    <string name="txt_report_description_hint">타당한 사유 없이 허위 신고 시 신고자에 대한 활동 제한이 가해질 수 있으니, 신고 전에 신중하게 제고해 주시기 바랍니다.</string>
 </resources>

@@ -49,6 +49,8 @@ val IconDisabled = Color(0xFFE5E7EB)
 val KakaoButtonColor = Color(0xFFFEE500)
 val KakaoTextColor = Color(0xFF000000).copy(alpha = 0.85f)
 
+val Error = Color(0xFFFF0000)
+
 @Immutable
 data class InvitationColorScheme(
     val backgroundPrimary: Color,
@@ -73,6 +75,7 @@ data class InvitationColorScheme(
     val iconOnSecondary: Color,
     val iconTertiary: Color,
     val iconDisabled: Color,
+    val error: Color,
 )
 
 val LightInvitationColorScheme =
@@ -99,6 +102,7 @@ val LightInvitationColorScheme =
         iconOnSecondary = IconOnSecondary,
         iconTertiary = IconTertiary,
         iconDisabled = IconDisabled,
+        error = Error,
     )
 
 // TODO: 나중에 다크모드 색상 정의 필요. 지금은 라이트모드와 동일하게 설정

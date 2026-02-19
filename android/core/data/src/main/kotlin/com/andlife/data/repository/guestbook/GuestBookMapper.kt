@@ -30,7 +30,7 @@ fun GuestBookResponse.toDomain(): GuestBook =
     GuestBook(
         id = id,
         author = author.toDomain(),
-        invitation = invitation?.toDomain(),
+        invitation = invitation.toDomain(),
         textContent = textContent,
         visualMedias = visualMedias.map { it.toDomain() },
         audioMedias = audioMedias.map { it.toDomain() },

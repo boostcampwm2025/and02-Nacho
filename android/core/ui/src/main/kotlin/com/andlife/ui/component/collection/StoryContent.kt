@@ -23,6 +23,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
@@ -88,7 +89,10 @@ fun StoryContent(
     ) {
         if (item.type == UiMediaType.IMAGE || !item.thumbnailUrl.isNullOrEmpty()) {
             AsyncImage(
-                model = if (item.type == UiMediaType.IMAGE) item.mediaUrl else item.thumbnailUrl,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(if (item.type == UiMediaType.IMAGE) item.mediaUrl else item.thumbnailUrl)
+                    .size(100)
+                    .build(),
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize().blur(NachoSpacing.xLarge),
                 contentScale = ContentScale.Crop,

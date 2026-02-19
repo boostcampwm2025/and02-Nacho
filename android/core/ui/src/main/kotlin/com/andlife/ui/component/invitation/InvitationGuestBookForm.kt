@@ -128,7 +128,7 @@ fun InvitationGuestBookForm(
         }
 
     Column(
-        modifier = modifier,
+        modifier = modifier.padding(top = NachoSpacing.small),
         verticalArrangement = Arrangement.spacedBy(NachoSpacing.small),
     ) {
         // 미디어 업로드 UI
@@ -137,10 +137,9 @@ fun InvitationGuestBookForm(
             currentMediaSizeBytes = currentMediaSizeBytes,
             maxMediasCount = MAX_MEDIAS_COUNT,
             maxMediaSizeBytes = MAX_MEDIA_SIZE_BYTES,
+            isUploading = isUploading,
             onMediaRemove = onMediaRemove,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = NachoSpacing.xSmall),
+            modifier = Modifier.fillMaxWidth()
         )
 
         Box(
@@ -176,7 +175,7 @@ fun InvitationGuestBookForm(
                     singleLine = false,
                     minLines = 3,
                     maxLines = 3,
-                    enabled = isAuthenticated,
+                    enabled = isAuthenticated && !isUploading,
                 )
 
                 Text(
@@ -199,7 +198,7 @@ fun InvitationGuestBookForm(
             // 미디어 아이콘 및 용량 표시
             Column {
                 // 미디어 아이콘 표시
-                val isMediaAddEnabled = isAuthenticated && selectedMedias.size < MAX_MEDIAS_COUNT
+                val isMediaAddEnabled = isAuthenticated && selectedMedias.size < MAX_MEDIAS_COUNT && !isUploading
                 val iconColor =
                     if (isMediaAddEnabled) {
                         NachoTheme.colorScheme.brandPrimary

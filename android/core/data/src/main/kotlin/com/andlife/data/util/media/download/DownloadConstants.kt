@@ -33,14 +33,17 @@ object DownloadNoti {
     const val CHANNEL_NAME_PROGRESS = "다운로드 진행 상태"
     const val CHANNEL_NAME_COMPLETE = "다운로드 완료 안내"
 
-    const val ID_COMPLETE_VISUAL = 1001
-    const val ID_COMPLETE_AUDIO = 1002
+    const val ID_COMPLETE_IMAGE = 1001
+    const val ID_COMPLETE_VIDEO = 1002
+    const val ID_COMPLETE_AUDIO = 1003
 
     const val TITLE_DOWNLOADING = "다운로드 중"
     const val MSG_PREPARING = "파일을 저장하고 있습니다."
+    const val TITLE_COMPLETE_IMAGE = "이미지 저장 완료"
+    const val TITLE_COMPLETE_VIDEO = "비디오 저장 완료"
     const val TITLE_COMPLETE_AUDIO = "오디오 저장 완료"
-    const val TITLE_COMPLETE_VISUAL = "미디어 저장 완료"
-    const val MSG_COMPLETE_SUFFIX = "개의 파일이 저장되었습니다."
+
+    const val MSG_COMPLETE = "파일이 저장되었습니다."
     const val ACTION_CANCEL = "취소"
 
     const val MSG_CANCELLED = "다운로드가 취소되었습니다."
@@ -53,12 +56,6 @@ object DownloadFile {
     const val MIME_IMAGE = "image/*"
     const val MIME_VIDEO = "video/*"
     const val MIME_AUDIO = "audio/*"
-    const val MIME_FOLDER_Q = "vnd.android.document/root"
-    const val URI_STORAGE_ROOT = "content://com.android.externalstorage.documents/root/primary"
-
-    const val PREF_NAME = "download_prefs"
-    const val KEY_COUNT_AUDIO = "audio_count"
-    const val KEY_COUNT_VISUAL = "visual_count"
 }
 
 object DownloadError {
@@ -68,4 +65,8 @@ object DownloadError {
     const val MISSING_BODY = "응답 본문이 없습니다."
     const val FAILED = "다운로드 실패: "
     const val UNKNOWN = "알 수 없는 오류"
+}
+
+object FileConstants {
+    const val FILE_SCHEMA = "file://"
 }
