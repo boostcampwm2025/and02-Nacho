@@ -175,7 +175,7 @@ class UploadWorker @AssistedInject constructor(
 
             // 4단계: 방명록 생성/수정 (80-100%)
             updateProgress(progress = 80, currentFileName = "방명록 처리 중...", currentOrder = 0, totalCount = 1)
-            val result = if (editingGuestBookId == -1L) {
+            val result = if (editingGuestBookId != -1L) {
                 guestBookRepository.updateGuestBook(
                     guestBookId = editingGuestBookId,
                     textContent = guestBookText,
