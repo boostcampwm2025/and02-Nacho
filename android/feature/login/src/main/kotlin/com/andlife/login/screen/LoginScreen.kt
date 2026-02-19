@@ -1,6 +1,5 @@
 package com.andlife.login.screen
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,8 +20,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -58,14 +59,17 @@ import com.andlife.login.social.SocialType
 import com.andlife.login.viewmodel.LoginViewModel
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.util.collectWithLifecycle
+import com.andlife.ui.component.webview.PolicyUrl
+import com.andlife.ui.component.webview.WebViewBottomSheet
 import kotlinx.coroutines.launch
 import com.andlife.designsystem.R as designR
 
 @Composable
 fun LoginRoute(
     modifier: Modifier = Modifier,
-    viewModel: LoginViewModel = hiltViewModel()
+    viewModel: LoginViewModel = hiltViewModel(),
 ) {
+    var webViewState by remember { mutableStateOf<Pair<String, String>?>(null) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val loginManager = LocalLoginManager.current
     val scope = rememberCoroutineScope()
@@ -97,6 +101,7 @@ fun LoginRoute(
         modifier = modifier,
         snackbarHostState = snackbarHostState,
         onEvent = viewModel::onEvent,
+        onWebViewClick = { url, title -> webViewState = url to title },
         onSocialLogin = { socialType ->
             scope.launch {
                 loginManager.login(
@@ -115,6 +120,14 @@ fun LoginRoute(
             }
         }
     )
+
+    webViewState?.let { (url, title) ->
+        WebViewBottomSheet(
+            url = url,
+            title = title,
+            onDismiss = { webViewState = null },
+        )
+    }
 }
 
 @Composable
@@ -123,7 +136,8 @@ private fun LoginScreen(
     snackbarHostState: SnackbarHostState,
     onSocialLogin: (SocialType) -> Unit,
     onEvent: (LoginUiEvent) -> Unit,
-    modifier: Modifier = Modifier
+    onWebViewClick: (String, String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier,
@@ -176,9 +190,16 @@ private fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium)
             ) {
+                val serviceTitle = stringResource(R.string.termsofuse)
+                val privacyTitle = stringResource(R.string.privacypolicy)
+
                 PolicyAndTermsText(
-                    onPrivacyPolicyClick = { Log.d("Login", "onPrivacyPolicyClick") },
-                    onTermsOfServiceClick = { Log.d("Login", "onTermsOfServiceClick") }
+                    onTermsOfServiceClick = {
+                        onWebViewClick(PolicyUrl.SERVICE, serviceTitle)
+                    },
+                    onPrivacyPolicyClick = {
+                        onWebViewClick(PolicyUrl.PRIVACY, privacyTitle)
+                    },
                 )
 
                 CopyrightText(
@@ -421,7 +442,8 @@ private fun LoginScreenPreview() {
             uiState = LoginUiState(),
             snackbarHostState = remember { SnackbarHostState() },
             onSocialLogin = {},
-            onEvent = {}
+            onEvent = {},
+            onWebViewClick = { _, _ -> },
         )
     }
 }
