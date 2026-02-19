@@ -82,6 +82,8 @@ import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.auth.AuthState
 import com.andlife.login.LocalLoginManager
 import com.andlife.login.social.SocialType
+import com.andlife.ui.component.webview.PolicyUrl
+import com.andlife.ui.component.webview.WebViewBottomSheet
 import com.andlife.setting.R
 import com.andlife.setting.model.NicknameError
 import com.andlife.setting.model.SettingMessage
@@ -110,6 +112,7 @@ fun SettingRoute(
     var isNicknameDialogVisible by remember { mutableStateOf(false) }
     var isImageActionDialogVisible by remember { mutableStateOf(false) }
     var isProfileDetailVisible by remember { mutableStateOf(false) }
+    var webViewState by remember { mutableStateOf<Pair<String, String>?>(null) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val loginManager = LocalLoginManager.current
@@ -145,6 +148,7 @@ fun SettingRoute(
         uiState = uiState,
         snackbarHostState = snackbarHostState,
         onNavigateToLogin = onNavigateToLogin,
+        onWebViewClick = { url, title -> webViewState = url to title },
         onEvent = viewModel::onEvent,
         modifier = modifier,
         onClickEditNickname = {
@@ -267,6 +271,14 @@ fun SettingRoute(
             )
         }
     }
+
+    webViewState?.let { (url, title) ->
+        WebViewBottomSheet(
+            url = url,
+            title = title,
+            onDismiss = { webViewState = null },
+        )
+    }
 }
 
 @Composable
@@ -276,6 +288,7 @@ fun SettingScreen(
     onNavigateToLogin: () -> Unit,
     onClickEditNickname: () -> Unit,
     onClickEditImage: () -> Unit,
+    onWebViewClick: (String, String) -> Unit = { _, _ -> },
     onClickLogout: () -> Unit,
     onClickQuit: () -> Unit,
     onEvent: (SettingUiEvent) -> Unit = {},
@@ -341,9 +354,16 @@ fun SettingScreen(
                     }
 
                     SettingSection(headerTitle = stringResource(R.string.txt_header_policy)) { modifier ->
+                        val serviceTitle = stringResource(R.string.txt_policy_service)
+                        val privacyTitle = stringResource(R.string.txt_policy_privacy)
+
                         PolicyContent(
-                            onClickService = {},
-                            onClickPrivacy = {},
+                            onClickService = {
+                                onWebViewClick(PolicyUrl.SERVICE, serviceTitle)
+                            },
+                            onClickPrivacy = {
+                                onWebViewClick(PolicyUrl.PRIVACY, privacyTitle)
+                            },
                             modifier = modifier,
                         )
                     }
@@ -618,6 +638,7 @@ private fun PolicyContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable(onClick = onClickService)
                 .padding(vertical = NachoSpacing.medium),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -640,6 +661,7 @@ private fun PolicyContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable(onClick = onClickPrivacy)
                 .padding(vertical = NachoSpacing.medium),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {

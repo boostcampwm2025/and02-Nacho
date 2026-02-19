@@ -184,4 +184,7 @@
     <string name="txt_label_report">신고</string>
     <string name="txt_report_description_title">신고하시는 이유를 자세히 알려주세요.</string>
     <string name="txt_report_description_hint">타당한 사유 없이 허위 신고 시 신고자에 대한 활동 제한이 가해질 수 있으니, 신고 전에 신중하게 제고해 주시기 바랍니다.</string>
+
+    <!-- WebView -->
+    <string name="txt_error_network">네트워크 연결을 확인해주세요</string>
 </resources>
