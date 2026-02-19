@@ -99,6 +99,7 @@ fun GuestBookItem(
     onPlayVideoClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     shouldPlayVideo: Boolean = false,
+    isFromInvitationDetail: Boolean = true,
     isEditing: Boolean = false,
     onEditClick: (GuestBookUiModel) -> Unit = {},
     onDeleteClick: (GuestBookUiModel) -> Unit = {},
@@ -117,7 +118,11 @@ fun GuestBookItem(
         else -> 6
     }
 
-    val canShowMenuButton = guestBook.invitation.id != SAMPLE_INVITATION_ID
+    val canShowMenuButton = if (isFromInvitationDetail) {
+        guestBook.id != SAMPLE_INVITATION_ID
+    } else {
+        !(guestBook.id == SAMPLE_INVITATION_ID || guestBook.isOwner)
+    }
 
     Column(
         modifier = modifier
@@ -129,8 +134,8 @@ fun GuestBookItem(
             author = guestBook.author,
             createdAt = guestBook.createdAt,
             canShowMenuButton = canShowMenuButton,
-            canEdit = guestBook.isOwner,
-            canDelete = (guestBook.isOwner || guestBook.isInvitationOwner),
+            canEdit = guestBook.isOwner && isFromInvitationDetail,
+            canDelete = (guestBook.isOwner || guestBook.isInvitationOwner) && isFromInvitationDetail,
             canReport = !guestBook.isOwner,
             onEditClick = { onEditClick(guestBook) },
             onDeleteClick = { onDeleteClick(guestBook) },

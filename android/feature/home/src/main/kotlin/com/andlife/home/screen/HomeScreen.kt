@@ -683,10 +683,11 @@ private fun LazyListScope.homeGuestBookSection(
                     guestBook = guestBook,
                     videoPlayerPool = videoPlayerPool,
                     shouldPlayVideo = uiState.canPlayVideo && (index == playVideoIndex),
+                    isFromInvitationDetail = false,
                     audioPlaybackState = uiState.audioPlaybackState,
                     onInvitationTitleClick = {
                         onInvitationTitleClick(
-                            guestBook.invitation?.id ?: -1L,
+                            guestBook.invitation.id,
                             guestBook.isInvitationOwner,
                         )
                     },
