@@ -12,6 +12,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.domain.util.AnalyticsLogger
 import com.andlife.login.LocalLoginManager
 import com.andlife.login.social.LoginManager
 import com.andlife.nacho.viewmodel.MainViewModel
@@ -25,6 +26,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var loginManager: LoginManager
 
+    @Inject
+    lateinit var analyticsLogger: AnalyticsLogger
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val splashScreen = installSplashScreen()
@@ -35,7 +39,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NachoTheme {
-                CompositionLocalProvider(LocalLoginManager provides loginManager) {
+                CompositionLocalProvider(
+                    LocalLoginManager provides loginManager,
+                    LocalAnalyticsLogger provides analyticsLogger
+                ) {
                     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                     if (!uiState.isSplash) {
                         NachoApp(
@@ -54,6 +61,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-val LocalLoginManager = staticCompositionLocalOf<LoginManager> {
-    error("LoginManager가 설정되지 않았습니다.")
+val LocalAnalyticsLogger = staticCompositionLocalOf<AnalyticsLogger> {
+    error("AnalyticsLogger 설정되지 않았습니다.")
 }
