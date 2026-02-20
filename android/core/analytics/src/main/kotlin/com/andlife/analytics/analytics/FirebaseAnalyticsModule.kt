@@ -1,4 +1,4 @@
-package com.andlife.analytics
+package com.andlife.analytics.analytics
 
 import com.andlife.domain.util.AnalyticsLogger
 import com.google.firebase.Firebase
