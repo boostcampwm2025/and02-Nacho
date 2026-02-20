@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
@@ -41,7 +40,6 @@ class MediaDownloaderImpl @Inject constructor(
             .setInputData(inputData)
             .setConstraints(constraints)
             .addTag(DownloadKey.TAG_MEDIA_DOWNLOAD)
-            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
             .build()
 
         workManager.enqueue(downloadRequest)
