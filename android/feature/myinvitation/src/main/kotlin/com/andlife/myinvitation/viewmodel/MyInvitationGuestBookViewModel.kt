@@ -15,6 +15,7 @@ import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.repository.report.ReportRepository
 import com.andlife.domain.util.BackgroundMediaUploader
+import com.andlife.domain.util.MediaFileCopyManager
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.domain.util.RefreshEventHub
@@ -59,6 +60,7 @@ constructor(
     private val guestBookRepository: GuestBookRepository,
     private val reportRepository: ReportRepository,
     private val authStateManager: AuthStateManager,
+    private val mediaFileCopyManager: MediaFileCopyManager,
     val audioPlayerManager: AudioPlayerManager,
     val videoPlayerPool: AutoVideoPlayerPool,
     savedStateHandle: SavedStateHandle,
@@ -162,11 +164,55 @@ constructor(
         exceededAvailableBytes: Boolean,
         exceededAvailableSlots: Boolean
     ) {
-        updateState {
-            copy(
-                selectedMedias = medias.toPersistentList(),
-                currentMediaSizeBytes = calculateTotalMediaSize(medias)
-            )
+        // 새로 추가된 Photo Picker 파일들을 내부 저장소로 복사
+        val newPhotoPickerMedias = medias.filter { media ->
+            media.id == null && media.uri.startsWith("content://") && media.uri.contains("picker")
+        }
+        
+        if (newPhotoPickerMedias.isNotEmpty()) {
+            updateState { copy(isProcessingMedia = true) }
+            
+            viewModelScope.launch {
+                try {
+                    // Photo Picker 파일들을 내부 저장소로 복사
+                    val copiedUris = mediaFileCopyManager.copyFilesToInternal(
+                        newPhotoPickerMedias.map { it.uri }
+                    )
+                    
+                    // 복사된 URI로 업데이트된 미디어 리스트 생성
+                    val updatedMedias = medias.map { media ->
+                        val newPhotoPickerIndex = newPhotoPickerMedias.indexOfFirst { it.uri == media.uri }
+                        if (newPhotoPickerIndex >= 0) {
+                            // Photo Picker 파일인 경우 복사된 경로로 교체
+                            val copiedUri = copiedUris[newPhotoPickerIndex]
+                            media.copy(uri = copiedUri ?: media.uri)  // TODO: 복사에 실패한 경우 기존 URI 반환하고있음
+                        } else {
+                            media
+                        }
+                    }
+                    
+                    updateState {
+                        copy(
+                            selectedMedias = updatedMedias.toPersistentList(),
+                            currentMediaSizeBytes = calculateTotalMediaSize(updatedMedias),
+                            isProcessingMedia = false
+                        )
+                    }
+                    
+                } catch (e: Exception) {
+                    Log.e("MyInvitationGuestBookVM", "파일 복사 중 오류", e)
+                    updateState { copy(isProcessingMedia = false) }
+                    sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("파일 처리 중 오류가 발생했습니다"))
+                }
+            }
+        } else {
+            // Photo Picker 파일이 없는 경우 바로 업데이트
+            updateState {
+                copy(
+                    selectedMedias = medias.toPersistentList(),
+                    currentMediaSizeBytes = calculateTotalMediaSize(medias)
+                )
+            }
         }
 
         // 용량 초과로 거부된 파일이 있으면 스낵바로 알림
@@ -343,6 +389,7 @@ constructor(
                 originalTextContent = "",
                 originalMediaIds = emptySet(),
                 currentMediaSizeBytes = 0L,
+                isProcessingMedia = false,
             )
         }
     }
