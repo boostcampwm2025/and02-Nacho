@@ -2,7 +2,7 @@ package com.andlife.domain.util
 
 sealed interface AnalyticsEvent {
     val eventName: String
-    val params: Map<String, String?>
+    val params: Map<String, String>
 
     data class ScreenView(val screenName: String) : AnalyticsEvent {
         override val eventName: String = "screen_view"
@@ -35,6 +35,6 @@ sealed interface AnalyticsEvent {
 
     data class Event(
         override val eventName: String,
-        override val params: Map<String, String?> = emptyMap(),
+        override val params: Map<String, String> = emptyMap(),
     ) : AnalyticsEvent
 }
