@@ -280,16 +280,21 @@ private fun MyInvitationDetailScreen(
     val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()
     val coroutineScope = rememberCoroutineScope()
     var isMapVisible by remember { mutableStateOf(true) }
+    var isGuestBookUploading by remember { mutableStateOf(false) }
+    var showUploadCancelDialog by remember { mutableStateOf(false) }
 
-    val navigateBackWithMapCleanup: () -> Unit = {
+    val doNavigateBack: () -> Unit = {
         isMapVisible = false
         coroutineScope.launch {
             delay(50L)
             onEvent(MyInvitationDetailUiEvent.ClickBack)
         }
     }
+    val navigateBackWithCleanup: () -> Unit = {
+        if (isGuestBookUploading) showUploadCancelDialog = true else doNavigateBack()
+    }
 
-    BackHandler(onBack = navigateBackWithMapCleanup)
+    BackHandler(onBack = navigateBackWithCleanup)
 
     Scaffold(
         modifier = modifier
@@ -304,7 +309,7 @@ private fun MyInvitationDetailScreen(
                 title = uiState.invitationContentsUiModel.title,
                 hasThanksCard = uiState.hasThanksCard,
                 showActions = !uiState.isLoading && !uiState.isError,
-                onBack = navigateBackWithMapCleanup,
+                onBack = navigateBackWithCleanup,
                 onClickThanksCard = { onEvent(MyInvitationDetailUiEvent.ClickThanksCard) },
                 onEditThanksCard = { onEditThanksCard() },
                 onDeleteThanksCard = onDeleteThanksCard,
@@ -369,7 +374,8 @@ private fun MyInvitationDetailScreen(
 
                             1 -> MyInvitationGuestBookRoute(
                                 onNavigateBack = onNavigateBack,
-                                onNavigateToLogin = onNavigateToLogin
+                                onNavigateToLogin = onNavigateToLogin,
+                                onUploadingChanged = { isGuestBookUploading = it },
                             )
 
                             2 -> MyInvitationCollectionRoute()
@@ -377,6 +383,20 @@ private fun MyInvitationDetailScreen(
                     },
             )
         }
+    }
+
+    if (showUploadCancelDialog) {
+        NachoInfoDialog(
+            title = stringResource(R.string.dialog_back_title),
+            message = stringResource(R.string.dialog_back_message),
+            confirmText = stringResource(R.string.dialog_back_confirm),
+            dismissText = stringResource(R.string.dialog_back_cancel),
+            onConfirm = {
+                showUploadCancelDialog = false
+                doNavigateBack()
+            },
+            onDismiss = { showUploadCancelDialog = false },
+        )
     }
 }
 

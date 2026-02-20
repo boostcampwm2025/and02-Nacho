@@ -106,10 +106,13 @@ private const val MAX_MEDIAS_COUNT = 20
 fun MyInvitationGuestBookRoute(
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onUploadingChanged: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: MyInvitationGuestBookViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    onUploadingChanged(uiState.isUploading)
     val guestBooks = viewModel.guestBooksPagingFlow.collectAsLazyPagingItems()
 
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -125,7 +128,6 @@ fun MyInvitationGuestBookRoute(
     var scrollToTop by remember { mutableStateOf(false) }
     var showRecordingBottomSheet by remember { mutableStateOf(false) }
     var lastPrecachedCount by remember { mutableIntStateOf(0) }
-    var showUploadCancelDialog by remember { mutableStateOf(false) }
 
     var isMediaActive by remember { mutableStateOf(true) }
     val navigateBackWithCleanup: () -> Unit = {
@@ -381,20 +383,6 @@ fun MyInvitationGuestBookRoute(
         )
     }
 
-    if (showUploadCancelDialog) {
-        NachoInfoDialog(
-            title = stringResource(R.string.dialog_back_title),
-            message = stringResource(R.string.dialog_back_message),
-            confirmText = stringResource(R.string.dialog_back_confirm),
-            dismissText = stringResource(R.string.dialog_back_cancel),
-            onConfirm = {
-                showUploadCancelDialog = false
-                navigateBackWithCleanup()
-            },
-            onDismiss = { showUploadCancelDialog = false },
-        )
-    }
-
     if (showPermissionDialog != null) {
         NachoPermissionDialog(
             message = when (showPermissionDialog) {
@@ -440,7 +428,6 @@ fun MyInvitationGuestBookRoute(
         lazyListState = lazyListState,
         videoPlayerPool = viewModel.videoPlayerPool,
         onDeleteMenuClick = { guestBookId -> showDeleteDialog = guestBookId },
-        onBackDuringUpload = { showUploadCancelDialog = true },
         context = context,
         cameraPermissionLauncher = cameraPermissionLauncher,
         audioPermissionLauncher = audioPermissionLauncher,
@@ -495,7 +482,6 @@ private fun InvitationGuestBookScreen(
     lazyListState: LazyListState,
     videoPlayerPool: AutoVideoPlayerPool,
     onDeleteMenuClick: (Long) -> Unit,
-    onBackDuringUpload: () -> Unit,
     context: Context,
     cameraPermissionLauncher: ActivityResultLauncher<String>,
     audioPermissionLauncher: ActivityResultLauncher<String>,
@@ -512,10 +498,6 @@ private fun InvitationGuestBookScreen(
 
     BackHandler(enabled = !uiState.isUploading) {
         when {
-            uiState.isUploading -> {
-                onBackDuringUpload()
-            }
-
             isImVisible -> {
                 focusManager.clearFocus()
             }
@@ -782,7 +764,6 @@ private fun InvitationGuestBookEmptyPreview() {
             snackbarHostState = SnackbarHostState(),
             lazyListState = rememberLazyListState(),
             onDeleteMenuClick = {},
-            onBackDuringUpload = {},
             context = LocalContext.current,
             cameraPermissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestPermission()
