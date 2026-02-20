@@ -106,13 +106,10 @@ private const val MAX_MEDIAS_COUNT = 20
 fun MyInvitationGuestBookRoute(
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
-    onUploadingChanged: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: MyInvitationGuestBookViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    onUploadingChanged(uiState.isUploading)
     val guestBooks = viewModel.guestBooksPagingFlow.collectAsLazyPagingItems()
 
     val lifecycleOwner = LocalLifecycleOwner.current

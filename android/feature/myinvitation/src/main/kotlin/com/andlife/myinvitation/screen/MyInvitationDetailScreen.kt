@@ -65,6 +65,7 @@ import com.andlife.myinvitation.model.detail.MyInvitationDetailUiState
 import com.andlife.myinvitation.screen.collection.MyInvitationCollectionRoute
 import com.andlife.myinvitation.screen.guestbook.MyInvitationGuestBookRoute
 import com.andlife.myinvitation.viewmodel.MyInvitationDetailViewModel
+import com.andlife.myinvitation.viewmodel.MyInvitationGuestBookViewModel
 import com.andlife.ui.component.GenericTabRow
 import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.ui.component.loading.InvitationLoadingError
@@ -92,6 +93,9 @@ fun MyInvitationDetailRoute(
     viewModel: MyInvitationDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val guestBookViewModel: MyInvitationGuestBookViewModel = hiltViewModel()
+    val guestBookUiState by guestBookViewModel.uiState.collectAsStateWithLifecycle()
+    val isGuestBookUploading = guestBookUiState.isUploading
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -183,6 +187,7 @@ fun MyInvitationDetailRoute(
     Box {
         MyInvitationDetailScreen(
             uiState = uiState,
+            isGuestBookUploading = isGuestBookUploading,
             snackbarHostState = snackbarHostState,
             scrollBehavior = scrollBehavior,
             onEvent = viewModel::onEvent,
@@ -267,6 +272,7 @@ fun MyInvitationDetailRoute(
 @Composable
 private fun MyInvitationDetailScreen(
     uiState: MyInvitationDetailUiState,
+    isGuestBookUploading: Boolean,
     snackbarHostState: SnackbarHostState,
     scrollBehavior: TopAppBarScrollBehavior,
     onEvent: (MyInvitationDetailUiEvent) -> Unit,
@@ -280,7 +286,6 @@ private fun MyInvitationDetailScreen(
     val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()
     val coroutineScope = rememberCoroutineScope()
     var isMapVisible by remember { mutableStateOf(true) }
-    var isGuestBookUploading by remember { mutableStateOf(false) }
     var showUploadCancelDialog by remember { mutableStateOf(false) }
 
     val doNavigateBack: () -> Unit = {
@@ -375,7 +380,6 @@ private fun MyInvitationDetailScreen(
                             1 -> MyInvitationGuestBookRoute(
                                 onNavigateBack = onNavigateBack,
                                 onNavigateToLogin = onNavigateToLogin,
-                                onUploadingChanged = { isGuestBookUploading = it },
                             )
 
                             2 -> MyInvitationCollectionRoute()
@@ -676,6 +680,7 @@ private fun InvitationMoreMenu(
 private fun MyInvitationDetailScreenPreview() {
     NachoTheme {
         MyInvitationDetailScreen(
+            isGuestBookUploading = false,
             uiState =
                 MyInvitationDetailUiState(
                     isLoading = false,
