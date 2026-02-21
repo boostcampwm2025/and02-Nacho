@@ -492,6 +492,9 @@ constructor(
                 // 홈 화면 새로고침 트리거
                 RefreshEventHub.emit(RefreshTarget.HOME)
 
+                // 앱 내부 저장소 파일 정리
+                mediaFileCopyManager.cleanupTempFiles()
+
                 sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("방명록이 등록되었습니다"))
             }
 
