@@ -326,24 +326,6 @@ constructor(
         }
     }
 
-    // TODO: 해당 메소드 제거하기, 백그라운드 업로드 완료 시 refresh되도록 수정
-    private fun handleResult(result: Result<GuestBook, DataError>, isUpdate: Boolean = false) = viewModelScope.launch {
-        updateState { copy(isUploading = false) }
-        when (result) {
-            is Result.Success -> {
-                clearFormInput()
-                if (isUpdate) {
-                    sendEffect(MyInvitationGuestBookSideEffect.UpdateGuestBookSuccess)
-                } else {
-                    sendEffect(MyInvitationGuestBookSideEffect.CreateGuestBookSuccess)
-                }
-                RefreshEventHub.emit(RefreshTarget.HOME)
-            }
-
-            is Result.Error -> sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("실패: ${result.message}"))
-        }
-    }
-
     private fun deleteGuestBook(guestBookId: Long) {
         if (authStateManager.authState.value !is AuthState.Authenticated) {
             updateState { copy(isUploading = false) }
