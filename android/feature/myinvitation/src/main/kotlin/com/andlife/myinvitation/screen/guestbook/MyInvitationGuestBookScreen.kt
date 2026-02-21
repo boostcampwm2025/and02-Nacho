@@ -719,6 +719,7 @@ private fun GuestBookFormSection(
         isSubmittable = uiState.isSubmittable,
         editingGuestBookId = uiState.editingGuestBookId,
         currentMediaSizeBytes = uiState.currentMediaSizeBytes,
+        isProcessingMedia = uiState.isProcessingMedia,
         onMediasSelected = { medias, exceededAvailableBytes, exceedAvailableSlots ->
             onEvent(
                 MyInvitationGuestBookUiEvent.UpdateSelectedMedias(
