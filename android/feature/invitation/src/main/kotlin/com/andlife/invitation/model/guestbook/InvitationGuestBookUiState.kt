@@ -26,6 +26,7 @@ data class InvitationGuestBookUiState(
     val authState: AuthState = AuthState.Loading,
     val currentMediaSizeBytes: Long = 0L,
     val reportTargetId: Long? = null,
+    val isProcessingMedia: Boolean = false,
 ) : BaseUiState {
 
     val isContentChanged: Boolean
