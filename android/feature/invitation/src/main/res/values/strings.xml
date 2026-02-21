@@ -39,5 +39,10 @@
 
     <string name="label_guestbook_empty">작성된 방명록이 없습니다.\n첫 인사를 남겨보세요!</string>
     <string name="msg_leave_invitation_error">초대장 나가기에 실패하였습니다.</string>
+
+    <string name="dialog_back_title">업로드 중</string>
+    <string name="dialog_back_message">업로드 중에 나가면 업로드가 취소될 수 있습니다.\n그래도 나가시겠습니까?</string>
+    <string name="dialog_back_confirm">나가기</string>
+    <string name="dialog_back_cancel">취소</string>
 </resources>
 

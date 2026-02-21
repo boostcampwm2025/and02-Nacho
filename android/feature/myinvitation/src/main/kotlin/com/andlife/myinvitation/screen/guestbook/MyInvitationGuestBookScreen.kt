@@ -493,7 +493,7 @@ private fun InvitationGuestBookScreen(
         if (!isImVisible) focusManager.clearFocus()
     }
 
-    BackHandler(enabled = true) {
+    BackHandler(enabled = !uiState.isUploading) {
         when {
             isImVisible -> {
                 focusManager.clearFocus()

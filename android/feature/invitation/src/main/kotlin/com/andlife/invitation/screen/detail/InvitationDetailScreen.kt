@@ -44,6 +44,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import com.andlife.designsystem.component.dialog.NachoDialog
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
@@ -55,7 +57,9 @@ import com.andlife.invitation.model.detail.InvitationDetailUiState
 import com.andlife.invitation.screen.collection.InvitationCollectionRoute
 import com.andlife.invitation.screen.guestbook.InvitationGuestBookRoute
 import com.andlife.invitation.viewmodel.InvitationDetailViewModel
+import com.andlife.invitation.viewmodel.InvitationGuestBookViewModel
 import com.andlife.ui.component.GenericTabRow
+import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.ui.component.loading.InvitationLoadingError
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.component.lottie.LottieEffect
@@ -72,8 +76,13 @@ fun InvitationDetailRoute(
     onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: InvitationDetailViewModel = hiltViewModel(),
+    guestBookViewModel: InvitationGuestBookViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isGuestBookUploading by guestBookViewModel.uiState
+        .map { it.isUploading }
+        .distinctUntilChanged()
+        .collectAsStateWithLifecycle(initialValue = false)
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -113,6 +122,7 @@ fun InvitationDetailRoute(
     Box {
         InvitationDetailScreen(
             uiState = uiState,
+            isGuestBookUploading = isGuestBookUploading,
             snackbarHostState = snackbarHostState,
             scrollBehavior = scrollBehavior,
             onEvent = viewModel::onEvent,
@@ -176,6 +186,7 @@ fun InvitationDetailRoute(
 @Composable
 private fun InvitationDetailScreen(
     uiState: InvitationDetailUiState,
+    isGuestBookUploading: Boolean,
     snackbarHostState: SnackbarHostState,
     scrollBehavior: TopAppBarScrollBehavior,
     onEvent: (InvitationDetailUiEvent) -> Unit,
@@ -187,15 +198,20 @@ private fun InvitationDetailScreen(
     val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()
     val coroutineScope = rememberCoroutineScope()
     var isMapVisible by remember { mutableStateOf(true) }
-    val navigateBackWithMapCleanup: () -> Unit = {
+    var showUploadCancelDialog by remember { mutableStateOf(false) }
+
+    val doNavigateBack: () -> Unit = {
         isMapVisible = false
         coroutineScope.launch {
             delay(50L)
             onEvent(InvitationDetailUiEvent.ClickBack)
         }
     }
+    val navigateBackWithCleanup: () -> Unit = {
+        if (isGuestBookUploading) showUploadCancelDialog = true else doNavigateBack()
+    }
 
-    BackHandler(onBack = navigateBackWithMapCleanup)
+    BackHandler(onBack = navigateBackWithCleanup)
 
     Scaffold(
         modifier = modifier
@@ -210,7 +226,7 @@ private fun InvitationDetailScreen(
                 title = uiState.invitationContentsUiModel.title,
                 hasThanksCard = uiState.hasThanksCard,
                 showActions = !uiState.isLoading && !uiState.isError,
-                onBack = navigateBackWithMapCleanup,
+                onBack = navigateBackWithCleanup,
                 onClickThanksCard = { onEvent(InvitationDetailUiEvent.ClickThanksCard) },
                 onLeave = { onEvent(InvitationDetailUiEvent.ClickLeaveInvitation) },
             )
@@ -270,6 +286,20 @@ private fun InvitationDetailScreen(
                 },
             )
         }
+    }
+
+    if (showUploadCancelDialog) {
+        NachoInfoDialog(
+            title = stringResource(R.string.dialog_back_title),
+            message = stringResource(R.string.dialog_back_message),
+            confirmText = stringResource(R.string.dialog_back_confirm),
+            dismissText = stringResource(R.string.dialog_back_cancel),
+            onConfirm = {
+                showUploadCancelDialog = false
+                doNavigateBack()
+            },
+            onDismiss = { showUploadCancelDialog = false },
+        )
     }
 }
 
