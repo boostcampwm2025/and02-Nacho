@@ -119,7 +119,7 @@ constructor(
 
             is MyInvitationGuestBookUiEvent.UpdateTextContent -> updateTextContent(event.textContent)
             is MyInvitationGuestBookUiEvent.RemoveMedia -> removeMedia(event.media)
-            is MyInvitationGuestBookUiEvent.UploadMedias -> handleUploadMedias()
+            is MyInvitationGuestBookUiEvent.UploadMedias -> handleUploadAndSubmit()
             is MyInvitationGuestBookUiEvent.ClickCamera -> handleCameraClick()
             is MyInvitationGuestBookUiEvent.ClickMicrophone -> handleMicrophoneClick()
             is MyInvitationGuestBookUiEvent.ClearError -> clearError()
@@ -291,8 +291,7 @@ constructor(
         }
     }
 
-    // TODO: handleSubmit으로 이름 변경
-    private fun handleUploadMedias() {
+    private fun handleUploadAndSubmit() {
         val state = uiState.value
         if (!state.isSubmittable) return
 
