@@ -9,3 +9,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+keystore.properties
+app/andlife-release-key.jks

@@ -18,6 +18,28 @@ android {
     namespace = "com.andlife.nacho"
     compileSdk = 36
 
+    val properties = Properties()
+    val propertiesFile = rootProject.file("local.properties")
+    if (propertiesFile.exists()) {
+        properties.load(FileInputStream(propertiesFile))
+    }
+
+    val keystoreProperties = Properties().apply {
+        val file = rootProject.file("keystore.properties")
+        if (file.exists()) {
+            load(file.inputStream())
+        }
+    }
+
+    signingConfigs {
+        maybeCreate("release").apply {
+            storeFile = file(keystoreProperties["storeFile"] ?: "")
+            storePassword = keystoreProperties["storePassword"]?.toString()
+            keyAlias = keystoreProperties["keyAlias"]?.toString()
+            keyPassword = keystoreProperties["keyPassword"]?.toString()
+        }
+    }
+
     defaultConfig {
         applicationId = "com.andlife.nacho"
         minSdk = 26
@@ -27,37 +49,15 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        var properties = Properties()
-        properties.load(FileInputStream("local.properties"))
         val kakaoRestApiKey = properties.getProperty("KAKAO_REST_API_KEY") ?: ""
         val kakaoNativeAppKey = properties.getProperty("KAKAO_NATIVE_APP_KEY") ?: ""
         val appsflyerDevKey = properties.getProperty("APPSFLYER_DEV_KEY") ?: ""
         val naverMapClientId = properties.getProperty("NAVER_MAP_CLIENT_ID") ?: ""
 
-
-        buildConfigField(
-            "String",
-            "KAKAO_REST_API_KEY",
-            "\"$kakaoRestApiKey\"",
-        )
-
-        buildConfigField(
-            "String",
-            "KAKAO_NATIVE_APP_KEY",
-            "\"$kakaoNativeAppKey\"",
-        )
-
-        buildConfigField(
-            "String",
-            "APPSFLYER_DEV_KEY",
-            "\"$appsflyerDevKey\"",
-        )
-
-        buildConfigField(
-            "String",
-            "NAVER_MAP_CLIENT_ID",
-            "\"$naverMapClientId\"",
-        )
+        buildConfigField("String", "KAKAO_REST_API_KEY", "\"$kakaoRestApiKey\"")
+        buildConfigField("String", "KAKAO_NATIVE_APP_KEY", "\"$kakaoNativeAppKey\"")
+        buildConfigField("String", "APPSFLYER_DEV_KEY", "\"$appsflyerDevKey\"")
+        buildConfigField("String", "NAVER_MAP_CLIENT_ID", "\"$naverMapClientId\"")
 
         manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoNativeAppKey
         manifestPlaceholders["APPSFLYER_DEV_KEY"] = appsflyerDevKey
@@ -65,7 +65,10 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
