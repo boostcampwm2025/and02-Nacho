@@ -17,7 +17,6 @@ import javax.inject.Singleton
 class MediaFileCopyManagerImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : MediaFileCopyManager {
-    // TODO: 파일 선택기에서 선택된 url인 경우에도 복사해오도록 수정하기
     override suspend fun copyPhotoPickerFileToInternal(uriString: String): String? = withContext(Dispatchers.IO) {
         if (!uriString.startsWith("content://")) {
             Log.d(TAG, "Content URI가 아님: $uriString")
@@ -25,12 +24,6 @@ class MediaFileCopyManagerImpl @Inject constructor(
         }
 
         val uri = uriString.toUri()
-
-        // Photo Picker URI가 아니면 원본 반환
-        if (uri.authority?.contains("picker") != true) {
-            Log.d(TAG, "Photo Picker URI가 아님: $uriString")
-            return@withContext null
-        }
 
         return@withContext try {
             // 파일 확장자 추출
