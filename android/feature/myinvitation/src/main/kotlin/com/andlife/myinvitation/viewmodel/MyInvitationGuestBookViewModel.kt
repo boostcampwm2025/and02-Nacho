@@ -394,8 +394,8 @@ constructor(
 
     private fun handleCameraClick() {
         val state = uiState.value
-        if (state.selectedMedias.size >= 5) {
-            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("최대 5개까지 미디어를 추가할 수 있습니다."))
+        if (state.selectedMedias.size >= 20) {
+            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("최대 20개까지 미디어를 추가할 수 있습니다."))
             return
         }
         sendEffect(MyInvitationGuestBookSideEffect.LaunchCamera)
@@ -403,8 +403,8 @@ constructor(
 
     private fun handleMicrophoneClick() {
         val state = uiState.value
-        if (state.selectedMedias.size >= 5) {
-            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("최대 5개까지 미디어를 추가할 수 있습니다."))
+        if (state.selectedMedias.size >= 20) {
+            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("최대 20개까지 미디어를 추가할 수 있습니다."))
             return
         }
         updateState { copy(isMediaPlaying = false, audioRecordingDuration = 0) }
