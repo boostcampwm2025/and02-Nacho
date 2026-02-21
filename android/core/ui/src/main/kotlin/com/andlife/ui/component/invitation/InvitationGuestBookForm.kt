@@ -294,7 +294,7 @@ fun InvitationGuestBookForm(
             }
             NachoButton(
                 onClick = onUploadClick,
-                enabled = isSubmittable && isAuthenticated,
+                enabled = isSubmittable && isAuthenticated && !isProcessingMedia,
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
