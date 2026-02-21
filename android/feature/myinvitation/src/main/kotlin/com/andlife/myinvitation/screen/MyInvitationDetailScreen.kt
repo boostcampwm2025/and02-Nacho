@@ -45,6 +45,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import com.andlife.designsystem.component.NachoDivider
 import com.andlife.designsystem.component.dialog.NachoDialog
 import com.andlife.designsystem.preview.PreviewTheme
@@ -91,11 +93,13 @@ fun MyInvitationDetailRoute(
     onNavigateToUpdateThanksCard: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MyInvitationDetailViewModel = hiltViewModel(),
+    guestBookViewModel: MyInvitationGuestBookViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val guestBookViewModel: MyInvitationGuestBookViewModel = hiltViewModel()
-    val guestBookUiState by guestBookViewModel.uiState.collectAsStateWithLifecycle()
-    val isGuestBookUploading = guestBookUiState.isUploading
+    val isGuestBookUploading by guestBookViewModel.uiState
+        .map { it.isUploading }
+        .distinctUntilChanged()
+        .collectAsStateWithLifecycle(initialValue = false)
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
