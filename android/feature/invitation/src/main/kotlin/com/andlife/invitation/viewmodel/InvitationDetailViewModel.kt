@@ -6,6 +6,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.andlife.domain.repository.invitation.InvitationRepository
+import com.andlife.domain.util.AnalyticsEvent
+import com.andlife.domain.util.AnalyticsLogger
+import com.andlife.domain.util.Button
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.invitation.InvitationDetail
@@ -15,6 +18,7 @@ import com.andlife.invitation.model.detail.InvitationDetailUiState
 import com.andlife.model.invitation.toContentsUiModel
 import com.andlife.domain.util.RefreshEventHub
 import com.andlife.domain.util.RefreshEventHub.RefreshTarget
+import com.andlife.domain.util.Screen
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
@@ -29,6 +33,7 @@ import javax.inject.Inject
 class InvitationDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val invitationRepository: InvitationRepository,
+    private val analyticsLogger: AnalyticsLogger
 ) : BaseViewModel<InvitationDetailUiState, InvitationDetailUiEvent, InvitationDetailSideEffect>(
     initialState = InvitationDetailUiState(),
 ) {
@@ -86,8 +91,14 @@ class InvitationDetailViewModel @Inject constructor(
     override fun onEvent(event: InvitationDetailUiEvent) {
         when (event) {
             is InvitationDetailUiEvent.ClickBack -> clickClose()
-            is InvitationDetailUiEvent.ClickThanksCard -> showThanksCardOnboarding()
-            is InvitationDetailUiEvent.ClickLeaveInvitation -> leaveInvitation()
+            is InvitationDetailUiEvent.ClickThanksCard -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.INVITATION_DETAIL, Button.SHOW_THANKS_CARD))
+                showThanksCardOnboarding()
+            }
+            is InvitationDetailUiEvent.ClickLeaveInvitation -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.INVITATION_DETAIL, Button.INVITATION_LEAVE))
+                leaveInvitation()
+            }
             is InvitationDetailUiEvent.ClickImage -> navigateToFullScreenImage(event.imageList, event.index)
             is InvitationDetailUiEvent.MapError -> showMapErrorSnackbar()
             is InvitationDetailUiEvent.RetryLoad -> retryLoad()
