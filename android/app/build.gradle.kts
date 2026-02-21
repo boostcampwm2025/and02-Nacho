@@ -18,6 +18,12 @@ android {
     namespace = "com.andlife.nacho"
     compileSdk = 36
 
+    val properties = Properties()
+    val propertiesFile = rootProject.file("local.properties")
+    if (propertiesFile.exists()) {
+        properties.load(FileInputStream(propertiesFile))
+    }
+
     defaultConfig {
         applicationId = "com.andlife.nacho"
         minSdk = 26
@@ -27,46 +33,42 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        var properties = Properties()
-        properties.load(FileInputStream("local.properties"))
         val kakaoRestApiKey = properties.getProperty("KAKAO_REST_API_KEY") ?: ""
         val kakaoNativeAppKey = properties.getProperty("KAKAO_NATIVE_APP_KEY") ?: ""
         val appsflyerDevKey = properties.getProperty("APPSFLYER_DEV_KEY") ?: ""
         val naverMapClientId = properties.getProperty("NAVER_MAP_CLIENT_ID") ?: ""
 
-
-        buildConfigField(
-            "String",
-            "KAKAO_REST_API_KEY",
-            "\"$kakaoRestApiKey\"",
-        )
-
-        buildConfigField(
-            "String",
-            "KAKAO_NATIVE_APP_KEY",
-            "\"$kakaoNativeAppKey\"",
-        )
-
-        buildConfigField(
-            "String",
-            "APPSFLYER_DEV_KEY",
-            "\"$appsflyerDevKey\"",
-        )
-
-        buildConfigField(
-            "String",
-            "NAVER_MAP_CLIENT_ID",
-            "\"$naverMapClientId\"",
-        )
+        buildConfigField("String", "KAKAO_REST_API_KEY", "\"$kakaoRestApiKey\"")
+        buildConfigField("String", "KAKAO_NATIVE_APP_KEY", "\"$kakaoNativeAppKey\"")
+        buildConfigField("String", "APPSFLYER_DEV_KEY", "\"$appsflyerDevKey\"")
+        buildConfigField("String", "NAVER_MAP_CLIENT_ID", "\"$naverMapClientId\"")
 
         manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoNativeAppKey
         manifestPlaceholders["APPSFLYER_DEV_KEY"] = appsflyerDevKey
+    }
+
+    signingConfigs {
+        val storePath = properties.getProperty("RELEASE_STORE_FILE")
+        val storeFileExists = storePath != null && file(storePath).exists()
+
+        maybeCreate("release").apply {
+            if (storeFileExists) {
+                storeFile = file(storePath!!)
+                storePassword = properties.getProperty("RELEASE_STORE_PASSWORD")
+                keyAlias = properties.getProperty("RELEASE_KEY_ALIAS")
+                keyPassword = properties.getProperty("RELEASE_KEY_PASSWORD")
+            } else {
+                initWith(getByName("debug"))
+            }
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
