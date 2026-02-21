@@ -164,33 +164,30 @@ constructor(
         exceededAvailableBytes: Boolean,
         exceededAvailableSlots: Boolean
     ) {
-        // 새로 추가된 Photo Picker 파일들을 내부 저장소로 복사
-        val newPhotoPickerMedias = medias.filter { media ->
-            media.id == null && media.uri.startsWith("content://") && media.uri.contains("picker")
+        Log.d("MyInvitationGuestBookVM", "업데이트된 미디어의 uri: ${medias.map { it.uri }}")
+        // 새로 추가된 미디어 중 content uri인 파일들을 내부 저장소로 복사
+        val newContentUriMedias = medias.filter { media ->
+            media.id == null && media.uri.startsWith("content://")
         }
-        
-        if (newPhotoPickerMedias.isNotEmpty()) {
+        if (newContentUriMedias.isNotEmpty()) {
             updateState { copy(isProcessingMedia = true) }
-            
             viewModelScope.launch {
                 try {
-                    // Photo Picker 파일들을 내부 저장소로 복사
                     val copiedUris = mediaFileCopyManager.copyFilesToInternal(
-                        newPhotoPickerMedias.map { it.uri }
+                        newContentUriMedias.map { it.uri }
                     )
-                    
                     // 복사된 URI로 업데이트된 미디어 리스트 생성
                     val updatedMedias = medias.map { media ->
-                        val newPhotoPickerIndex = newPhotoPickerMedias.indexOfFirst { it.uri == media.uri }
-                        if (newPhotoPickerIndex >= 0) {
-                            // Photo Picker 파일인 경우 복사된 경로로 교체
-                            val copiedUri = copiedUris[newPhotoPickerIndex]
+                        val newContentUriIndex = newContentUriMedias.indexOfFirst { it.uri == media.uri }
+                        if (newContentUriIndex >= 0) {
+                            // content uri 파일인 경우 복사된 경로로 교체
+                            val copiedUri = copiedUris[newContentUriIndex]
                             media.copy(uri = copiedUri ?: media.uri)  // TODO: 복사에 실패한 경우 기존 URI 반환하고있음
                         } else {
                             media
                         }
                     }
-                    
+
                     updateState {
                         copy(
                             selectedMedias = updatedMedias.toPersistentList(),
@@ -198,7 +195,8 @@ constructor(
                             isProcessingMedia = false
                         )
                     }
-                    
+                    Log.d("MyInvitationGuestBookVM", "파일 복사 완료, 업데이트된 미디어: ${updatedMedias.map { it.uri }}")
+
                 } catch (e: Exception) {
                     Log.e("MyInvitationGuestBookVM", "파일 복사 중 오류", e)
                     updateState { copy(isProcessingMedia = false) }
