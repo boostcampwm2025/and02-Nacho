@@ -7,7 +7,7 @@
     <string name="fail_guest_login">게스트 로그인에 실패했습니다.</string>
     <string name="fail_test_login">테스트 로그인에 실패했습니다.</string>
     <string name="whenloggingin">"로그인 시 "</string>
-    <string name="termsofuse">이용약관</string>
+    <string name="termsofuse">서비스 이용약관</string>
     <string name="and">" 및 "</string>
     <string name="privacypolicy">개인정보처리방침</string>
     <string name="agree">에\n동의하는 것으로 간주됩니다.</string>

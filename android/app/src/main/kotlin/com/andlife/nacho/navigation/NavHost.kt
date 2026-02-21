@@ -129,11 +129,12 @@ fun NachoNavHost(
             )
 
             myInvitationNavGraph(
-                 snackbarHostState = snackbarHostState,
+                snackbarHostState = snackbarHostState,
                 paddingValues = innerPadding,
                 onNavigateToCreate = navigator::navigateToMyInvitationCreate,
                 onNavigateToDetail = navigator::navigateToMyInvitationDetail,
-                onNavigateToLogin = { navigator.navigateToLogin()
+                onNavigateToLogin = {
+                    navigator.navigateToLogin()
                 }
             )
 

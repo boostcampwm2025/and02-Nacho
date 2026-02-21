@@ -10,6 +10,8 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     id("invitation.ktlint")
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -127,6 +129,11 @@ dependencies {
 
     // Splash
     implementation(libs.androidx.core.splashscreen)
+
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
