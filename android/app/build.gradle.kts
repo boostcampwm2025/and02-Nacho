@@ -24,6 +24,22 @@ android {
         properties.load(FileInputStream(propertiesFile))
     }
 
+    val keystoreProperties = Properties().apply {
+        val file = rootProject.file("keystore.properties")
+        if (file.exists()) {
+            load(file.inputStream())
+        }
+    }
+
+    signingConfigs {
+        maybeCreate("release").apply {
+            storeFile = file(keystoreProperties["storeFile"] ?: "")
+            storePassword = keystoreProperties["storePassword"]?.toString()
+            keyAlias = keystoreProperties["keyAlias"]?.toString()
+            keyPassword = keystoreProperties["keyPassword"]?.toString()
+        }
+    }
+
     defaultConfig {
         applicationId = "com.andlife.nacho"
         minSdk = 26
@@ -45,22 +61,6 @@ android {
 
         manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoNativeAppKey
         manifestPlaceholders["APPSFLYER_DEV_KEY"] = appsflyerDevKey
-    }
-
-    signingConfigs {
-        val storePath = properties.getProperty("RELEASE_STORE_FILE")
-        val storeFileExists = storePath != null && file(storePath).exists()
-
-        maybeCreate("release").apply {
-            if (storeFileExists) {
-                storeFile = file(storePath!!)
-                storePassword = properties.getProperty("RELEASE_STORE_PASSWORD")
-                keyAlias = properties.getProperty("RELEASE_KEY_ALIAS")
-                keyPassword = properties.getProperty("RELEASE_KEY_PASSWORD")
-            } else {
-                initWith(getByName("debug"))
-            }
-        }
     }
 
     buildTypes {
