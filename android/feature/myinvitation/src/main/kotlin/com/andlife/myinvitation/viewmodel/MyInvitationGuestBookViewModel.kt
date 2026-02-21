@@ -15,11 +15,17 @@ import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.repository.report.ReportRepository
+import com.andlife.domain.util.AnalyticsEvent
+import com.andlife.domain.util.AnalyticsLogger
+import com.andlife.domain.util.Button
+import com.andlife.domain.util.CrashlyticsLogger
+import com.andlife.domain.util.EventType
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
 import com.andlife.domain.util.RefreshEventHub
 import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.domain.util.Result
+import com.andlife.domain.util.Screen
 import com.andlife.domain.util.ThumbnailGenerator
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
@@ -65,6 +71,8 @@ constructor(
     private val authStateManager: AuthStateManager,
     val audioPlayerManager: AudioPlayerManager,
     val videoPlayerPool: AutoVideoPlayerPool,
+    private val analyticsLogger: AnalyticsLogger,
+    private val crashlyticsLogger: CrashlyticsLogger,
     savedStateHandle: SavedStateHandle,
 ) : BaseViewModel<MyInvitationGuestBookUiState, MyInvitationGuestBookUiEvent, MyInvitationGuestBookSideEffect>(
     MyInvitationGuestBookUiState(),
@@ -121,23 +129,35 @@ constructor(
 
             is MyInvitationGuestBookUiEvent.UpdateTextContent -> updateTextContent(event.textContent)
             is MyInvitationGuestBookUiEvent.RemoveMedia -> removeMedia(event.media)
-            is MyInvitationGuestBookUiEvent.UploadMedias -> handleUploadMedias()
+            is MyInvitationGuestBookUiEvent.UploadMedias -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL_GUEST_BOOK, Button.UPLOAD_GUEST_BOOK))
+                handleUploadMedias()
+            }
             is MyInvitationGuestBookUiEvent.ClickCamera -> handleCameraClick()
             is MyInvitationGuestBookUiEvent.ClickMicrophone -> handleMicrophoneClick()
             is MyInvitationGuestBookUiEvent.ClearError -> clearError()
             is MyInvitationGuestBookUiEvent.ClickAudioMedia -> clickAudioMedia(event.url)
             is MyInvitationGuestBookUiEvent.ClickVideoPlayButton -> clickVideoPlayButton(event.url, event.itemId)
             is MyInvitationGuestBookUiEvent.ClickVisualMedia -> {}
-            is MyInvitationGuestBookUiEvent.ClickEditMenu -> startEditing(event.guestBook)
+            is MyInvitationGuestBookUiEvent.ClickEditMenu -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL_GUEST_BOOK, Button.UPDATE_GUEST_BOOK))
+                startEditing(event.guestBook)
+            }
             is MyInvitationGuestBookUiEvent.CancelEdit -> cancelEdit()
-            is MyInvitationGuestBookUiEvent.ClickDeleteMenu -> deleteGuestBook(event.guestBookId)
+            is MyInvitationGuestBookUiEvent.ClickDeleteMenu -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL_GUEST_BOOK, Button.DELETE_GUEST_BOOK))
+                deleteGuestBook(event.guestBookId)
+            }
             is MyInvitationGuestBookUiEvent.UpdateMediaPlayState -> updatePlayState(event.isPlaying)
             MyInvitationGuestBookUiEvent.Refresh -> refresh()
             MyInvitationGuestBookUiEvent.CheckLogin -> checkLogin()
             MyInvitationGuestBookUiEvent.DismissLoginDialog -> dismissLoginDialog()
             is MyInvitationGuestBookUiEvent.ShowReport -> updateReportTargetId(event.guestBookId)
             MyInvitationGuestBookUiEvent.DismissReport -> updateReportTargetId(null)
-            is MyInvitationGuestBookUiEvent.SubmitReport -> submitReport(event.reason, event.description)
+            is MyInvitationGuestBookUiEvent.SubmitReport -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL_GUEST_BOOK, Button.INVITATION_REPORT))
+                submitReport(event.reason, event.description)
+            }
         }
     }
 
@@ -175,6 +195,7 @@ constructor(
 
         // 용량 초과로 거부된 파일이 있으면 스낵바로 알림
         if (exceededAvailableBytes) {
+            analyticsLogger.logEvent(AnalyticsEvent.Event(EventType.GUEST_BOOK_MAX_SIZE.value))
             sendEffect(
                 MyInvitationGuestBookSideEffect.ShowSnackbar(
                     "파일이 500MB를 초과하여 제외되었습니다."
@@ -184,6 +205,7 @@ constructor(
 
         // 제외된 파일이 있으면 스낵바로 알림 (후순위)
         else if (exceededAvailableSlots) {
+            analyticsLogger.logEvent(AnalyticsEvent.Event(EventType.GUEST_BOOK_MAX_MEDIA.value))
             sendEffect(
                 MyInvitationGuestBookSideEffect.ShowSnackbar(
                     "파일은 20개까지만 추가 가능합니다."
@@ -285,6 +307,7 @@ constructor(
                     updateGuestBook(state.editingGuestBookId, uploadedUrls, thumbnailUrls, state.selectedMedias)
                 }
             } catch (e: Exception) {
+                crashlyticsLogger.log(e.message ?: "upload Error")
                 updateState { copy(isUploading = false) }
                 sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("업로드 중 오류 발생: ${e.message}"))
                 return@launch
@@ -541,9 +564,19 @@ constructor(
                 reason = reason.name,
                 description = description
             ).onSuccess {
+                analyticsLogger.logEvent(AnalyticsEvent.Event(EventType.SUCCESS_REPORT_GUESTBOOK.value))
                 updateState { copy(reportTargetId = null) }
                 sendEffect(MyInvitationGuestBookSideEffect.ReportSuccess)
             }.onFailure { error, message ->
+                analyticsLogger.logEvent(
+                    AnalyticsEvent.Event(
+                        EventType.FAIL_REPORT_GUESTBOOK.value, mapOf(
+                            "id" to targetId.toString(),
+                            "error" to "$error: $message"
+                        )
+                    )
+                )
+                crashlyticsLogger.recordException("$targetId: $error - $message")
                 val messageToShow = if (error == DataError.Network.CONFLICT) {
                     message
                 } else {

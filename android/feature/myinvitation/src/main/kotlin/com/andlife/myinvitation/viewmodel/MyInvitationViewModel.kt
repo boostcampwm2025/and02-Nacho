@@ -8,6 +8,10 @@ import com.andlife.domain.model.invitation.InvitationStatus
 import com.andlife.domain.model.invitation.SortDirection
 import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.invitation.InvitationRepository
+import com.andlife.domain.util.AnalyticsEvent
+import com.andlife.domain.util.AnalyticsLogger
+import com.andlife.domain.util.Button
+import com.andlife.domain.util.Screen
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.model.invitation.InvitationSummaryUiModel
@@ -34,7 +38,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MyInvitationViewModel @Inject constructor(
     private val invitationRepository: InvitationRepository,
-    private val authStateManager: AuthStateManager
+    private val authStateManager: AuthStateManager,
+    private val analyticsLogger: AnalyticsLogger
 ) : BaseViewModel<MyInvitationUiState, MyInvitationUiEvent, MyInvitationSideEffect>(
     initialState = MyInvitationUiState()
 ) {
@@ -104,8 +109,10 @@ class MyInvitationViewModel @Inject constructor(
             }
             is MyInvitationUiEvent.ChangeSort -> {
                 if (event.isUpcoming) {
+                    analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION, Button.MY_INVITATION_SORT_UPCOMING))
                     _upcomingSort.value = event.newSort
                 } else {
+                    analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION, Button.MY_INVITATION_SORT_PAST))
                     _pastSort.value = event.newSort
                 }
             }
@@ -113,6 +120,7 @@ class MyInvitationViewModel @Inject constructor(
                 sendEffect(MyInvitationSideEffect.NavigateToCreate)
             }
             is MyInvitationUiEvent.ClickDeleteInvitation -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION, Button.DELETE_INVITATION))
                 deleteInvitation(event.id)
             }
 

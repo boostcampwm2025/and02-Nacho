@@ -1,6 +1,6 @@
 package com.andlife.analytics.crash
 
-import com.andlife.domain.util.CrashLogger
+import com.andlife.domain.util.CrashlyticsLogger
 import com.google.firebase.Firebase
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.crashlytics.crashlytics
@@ -25,5 +25,5 @@ abstract class FirebaseCrashlyticsBindModule {
     @Binds
     abstract fun bindFirebaseCrashlyticsLogger(
         firebaseCrashlyticsLogger: FirebaseCrashlyticsLogger
-    ): CrashLogger
+    ): CrashlyticsLogger
 }

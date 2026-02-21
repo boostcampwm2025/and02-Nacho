@@ -29,6 +29,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.media3.common.Player
+import com.andlife.domain.util.AnalyticsEvent
+import com.andlife.domain.util.AnalyticsLogger
+import com.andlife.domain.util.Button
+import com.andlife.domain.util.CrashlyticsLogger
+import com.andlife.domain.util.Screen
 
 @HiltViewModel
 class InvitationCollectionViewModel @Inject constructor(
@@ -36,6 +41,8 @@ class InvitationCollectionViewModel @Inject constructor(
     private val mediaDownloader: MediaDownloader,
     private val userRepository: UserRepository,
     val playerPool: StoryMediaPlayerPool,
+    private val analyticsLogger: AnalyticsLogger,
+    private val crashlyticsLogger: CrashlyticsLogger,
     @param:ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<InvitationCollectionUiState, InvitationCollectionUiEvent, InvitationCollectionSideEffect>(
@@ -62,7 +69,10 @@ class InvitationCollectionViewModel @Inject constructor(
             is InvitationCollectionUiEvent.CloseStory -> closeStory()
             is InvitationCollectionUiEvent.PageChanged -> pageChanged(event.index)
             is InvitationCollectionUiEvent.ToggleExpand -> toggleExpand()
-            is InvitationCollectionUiEvent.DownloadMedia -> downloadCurrentMedia()
+            is InvitationCollectionUiEvent.DownloadMedia -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.INVITATION_DETAIL_COLLECTION, Button.MEDIA_DOWNLOAD))
+                downloadCurrentMedia()
+            }
             is InvitationCollectionUiEvent.DisableNetworkDialogPermanently -> disableNetworkDialogPermanently()
         }
     }
@@ -215,6 +225,7 @@ class InvitationCollectionViewModel @Inject constructor(
                         updateState { copy(downloadState = DownloadState.Idle) }
                     }
                     is DownloadState.Error -> {
+                        crashlyticsLogger.log(state.message)
                         updateState { copy(downloadingUrls = downloadingUrls - url) }
                         sendEffect(InvitationCollectionSideEffect.DownloadFailed)
                         updateState { copy(downloadState = DownloadState.Idle) }

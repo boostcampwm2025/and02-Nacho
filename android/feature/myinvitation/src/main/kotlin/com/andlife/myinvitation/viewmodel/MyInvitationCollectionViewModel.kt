@@ -9,7 +9,12 @@ import com.andlife.domain.model.guestbook.DownloadState
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.repository.user.UserRepository
+import com.andlife.domain.util.AnalyticsEvent
+import com.andlife.domain.util.AnalyticsLogger
+import com.andlife.domain.util.Button
+import com.andlife.domain.util.CrashlyticsLogger
 import com.andlife.domain.util.MediaDownloader
+import com.andlife.domain.util.Screen
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.model.collection.toUiModel
@@ -36,6 +41,8 @@ class MyInvitationCollectionViewModel @Inject constructor(
     private val mediaDownloader: MediaDownloader,
     private val userRepository: UserRepository,
     val playerPool: StoryMediaPlayerPool,
+    private val analyticsLogger: AnalyticsLogger,
+    private val crashlyticsLogger: CrashlyticsLogger,
     @param:ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<MyInvitationCollectionUiState, MyInvitationCollectionUiEvent, MyInvitationCollectionSideEffect>(
@@ -61,7 +68,10 @@ class MyInvitationCollectionViewModel @Inject constructor(
             is MyInvitationCollectionUiEvent.CloseStory -> closeStory()
             is MyInvitationCollectionUiEvent.PageChanged -> pageChanged(event.index)
             is MyInvitationCollectionUiEvent.ToggleExpand -> toggleExpand()
-            is MyInvitationCollectionUiEvent.DownloadMedia -> downloadCurrentMedia()
+            is MyInvitationCollectionUiEvent.DownloadMedia -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL_COLLECTION, Button.MEDIA_DOWNLOAD))
+                downloadCurrentMedia()
+            }
             is MyInvitationCollectionUiEvent.DisableNetworkDialogPermanently -> disableNetworkDialogPermanently()
         }
     }
@@ -200,6 +210,7 @@ class MyInvitationCollectionViewModel @Inject constructor(
                     }
 
                     is DownloadState.Error -> {
+                        crashlyticsLogger.log(state.message)
                         updateState { copy(downloadingUrls = downloadingUrls - url) }
                         sendEffect(MyInvitationCollectionSideEffect.DownloadFailed)
                         updateState { copy(downloadState = DownloadState.Idle) }

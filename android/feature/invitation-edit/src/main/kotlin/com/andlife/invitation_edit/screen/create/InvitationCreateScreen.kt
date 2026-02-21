@@ -108,7 +108,7 @@ fun InvitationCreateRoute(
                 }
             }
 
-            else -> {}
+            InvitationFormSideEffect.NavigateToPreview -> onNavigateToPreview
         }
     }
 
@@ -143,7 +143,6 @@ fun InvitationCreateRoute(
         snackbarHostState = snackbarHostState,
         onEvent = viewModel::onEvent,
         onNavigateToAddressSearch = onNavigateToAddressSearch,
-        onNavigateToPreview = onNavigateToPreview,
         onAddImageClick = {
             pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         },
@@ -235,7 +234,6 @@ private fun InvitationCreateScreen(
     onStartTimeClick: () -> Unit,
     onEndTimeClick: () -> Unit,
     onNavigateToAddressSearch: () -> Unit,
-    onNavigateToPreview: () -> Unit,
     onAddAnnouncementClick: () -> Unit,
     onClickCreateCard: () -> Unit,
     onRemoveAnnouncementClick: (AnnouncementUiModel) -> Unit,
@@ -252,7 +250,7 @@ private fun InvitationCreateScreen(
             TopBarSection(
                 title = stringResource(R.string.txt_create),
                 onBackClick = { onEvent(InvitationFormUiEvent.OnClickBack) },
-                onPreviewClick = onNavigateToPreview,
+                onPreviewClick = { onEvent(InvitationFormUiEvent.OnClickPreview) },
                 isLoading = uiState.isLoading
             )
         },
