@@ -109,6 +109,7 @@ fun InvitationCreateRoute(
             }
 
             InvitationFormSideEffect.NavigateToPreview -> onNavigateToPreview
+            InvitationFormSideEffect.FailLoad -> {}
         }
     }
 
