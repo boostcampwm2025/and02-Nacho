@@ -11,7 +11,7 @@ import com.andlife.domain.model.guestbook.UploadState
 import com.andlife.domain.util.BackgroundMediaUploader
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import java.util.UUID
 import javax.inject.Inject
 
@@ -61,58 +61,85 @@ class BackgroundMediaUploaderImpl @Inject constructor(
             .then(guestBookRequest)
             .enqueue()
 
-        return uploadRequest.id.toString()
+        return "${uploadRequest.id},${guestBookRequest.id}"
     }
 
-    // TODO: 방명록 생성/수정 작업도 관찰할 수 있도록 수정하기
     override fun observeUploadProgress(workId: String): Flow<UploadState> {
-        return workManager
-            .getWorkInfoByIdFlow(UUID.fromString(workId))
-            .map { workInfo ->
-                if (workInfo == null) return@map UploadState.Enqueued
+        val (uploadId, guestBookId) = workId.split(",")
 
-                when (workInfo.state) {
-                    WorkInfo.State.ENQUEUED ->
-                        UploadState.Enqueued
-
-                    WorkInfo.State.RUNNING -> {
-                        val progress = workInfo.progress
-                        UploadState.Progress(
-                            percent = progress.getInt(UploadKey.PROGRESS, 0),
-                            currentFileName = progress.getString(UploadKey.CURRENT_FILE_NAME),
-                            currentOrder = progress.getInt(UploadKey.CURRENT_ORDER, 0),
-                            totalCount = progress.getInt(UploadKey.TOTAL_COUNT, 1),
-                        )
-                    }
-
-                    WorkInfo.State.SUCCEEDED -> {
-                        val urls =
-                            workInfo.outputData.getStringArray(UploadKey.RESULT_URLS)
-                                ?.toList()
-                                ?: emptyList()
-
-                        UploadState.Success(urls)
-                    }
-
-                    WorkInfo.State.FAILED -> {
-                        val message =
-                            workInfo.outputData.getString(UploadKey.ERROR_MESSAGE)
-                                ?: UploadError.UNKNOWN
-
-                        UploadState.Failure(message)
-                    }
-
-                    WorkInfo.State.CANCELLED ->
-                        UploadState.Cancelled
-
-                    else ->
-                        UploadState.Enqueued
+        return combine(
+            workManager.getWorkInfoByIdFlow(UUID.fromString(uploadId)),
+            workManager.getWorkInfoByIdFlow(UUID.fromString(guestBookId))
+        ) { uploadInfo, guestBookInfo ->
+            when {
+                // 업로드 작업이 실행 중
+                uploadInfo?.state == WorkInfo.State.RUNNING -> {
+                    val progress = uploadInfo.progress
+                    UploadState.Progress(
+                        percent = progress.getInt(UploadKey.PROGRESS, 0),
+                        currentFileName = progress.getString(UploadKey.CURRENT_FILE_NAME),
+                        currentOrder = progress.getInt(UploadKey.CURRENT_ORDER, 0),
+                        totalCount = progress.getInt(UploadKey.TOTAL_COUNT, 1),
+                    )
                 }
+
+                // 업로드 완료, 방명록 작업 대기 중
+                uploadInfo?.state == WorkInfo.State.SUCCEEDED &&
+                    guestBookInfo?.state == WorkInfo.State.ENQUEUED -> {
+                    UploadState.Progress(
+                        percent = 85,
+                        currentFileName = "방명록 처리 준비 중...",
+                        currentOrder = 1,
+                        totalCount = 1,
+                    )
+                }
+
+                // 업로드 완료, 방명록 처리 중
+                uploadInfo?.state == WorkInfo.State.SUCCEEDED &&
+                    guestBookInfo?.state == WorkInfo.State.RUNNING -> {
+                    UploadState.Progress(
+                        percent = 90,
+                        currentFileName = "방명록 처리 중...",
+                        currentOrder = 1,
+                        totalCount = 1,
+                    )
+                }
+
+                // 전체 완료 - GuestBookWorker에서 최종 결과 반환
+                guestBookInfo?.state == WorkInfo.State.SUCCEEDED -> {
+                    val urls = guestBookInfo.outputData.getStringArray(UploadKey.RESULT_URLS)
+                        ?.toList() ?: emptyList()
+                    UploadState.Success(urls)
+                }
+
+                // 업로드 작업 실패
+                uploadInfo?.state == WorkInfo.State.FAILED -> {
+                    val message = uploadInfo.outputData.getString(UploadKey.ERROR_MESSAGE)
+                        ?: UploadError.UNKNOWN
+                    UploadState.Failure("업로드 실패: $message")
+                }
+
+                // 방명록 처리 실패
+                guestBookInfo?.state == WorkInfo.State.FAILED -> {
+                    val message = guestBookInfo.outputData.getString(UploadKey.ERROR_MESSAGE)
+                        ?: UploadError.UNKNOWN
+                    UploadState.Failure("방명록 처리 실패: $message")
+                }
+
+                // 취소됨
+                uploadInfo?.state == WorkInfo.State.CANCELLED ||
+                    guestBookInfo?.state == WorkInfo.State.CANCELLED -> {
+                    UploadState.Cancelled
+                }
+
+                else -> UploadState.Enqueued
             }
+        }
     }
 
     override fun cancelUpload(workId: String) {
-        val uuid = UUID.fromString(workId)
-        workManager.cancelWorkById(uuid)
+        val (uploadId, guestBookId) = workId.split(",")
+        workManager.cancelWorkById(UUID.fromString(uploadId))
+        workManager.cancelWorkById(UUID.fromString(guestBookId))
     }
 }
