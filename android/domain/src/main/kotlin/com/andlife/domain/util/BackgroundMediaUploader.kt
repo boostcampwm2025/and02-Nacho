@@ -14,7 +14,7 @@ interface BackgroundMediaUploader {
      * @param selectedMediasType 선택된 미디어 타입들
      * @param selectedMediasDuration 선택된 미디어 길이들 (영상인 경우)
      * @param selectedMediasThumbnailUrl 선택된 미디어 썸네일 URL들 (영상인 경우)
-     * @return 업로드 작업 ID
+     * @return Pair<업로드 작업 ID, 방명록 작업 ID>
      */
     fun uploadMediasInBackground(
         invitationId: Long,
@@ -25,18 +25,18 @@ interface BackgroundMediaUploader {
         selectedMediasType: String, // List<String>
         selectedMediasDuration: String, // List<Int?>
         selectedMediasThumbnailUrl: String, // List<String?>
-    ): String
+    ): Pair<String, String>
 
     /**
      * 특정 업로드 작업의 진행 상황을 관찰
-     * @param workId 작업 ID
+     * @param pairOfWorkIds Pair<업로드 작업 ID, 방명록 작업 ID>
      * @return UploadState를 담은 Flow
      */
-    fun observeUploadProgress(workId: String): Flow<UploadState>
+    fun observeUploadProgress(pairOfWorkIds: Pair<String, String>): Flow<UploadState>
 
     /**
      * 업로드 작업을 취소
-     * @param workId 취소할 작업 ID
+     * @param pairOfWorkIds 취소할 Pair<업로드 작업 ID, 방명록 작업 ID>
      */
-    fun cancelUpload(workId: String)
+    fun cancelUpload(pairOfWorkIds: Pair<String, String>)
 }

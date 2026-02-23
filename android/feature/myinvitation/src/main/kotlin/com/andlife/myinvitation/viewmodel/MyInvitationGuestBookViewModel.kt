@@ -305,7 +305,7 @@ constructor(
         val selectedMediasThumbnailUrl = state.selectedMedias.map { it.thumbnailUrl }
 
         // 백그라운드 업로드 시작
-        val workId = backgroundMediaUploader.uploadMediasInBackground(
+        val pairOfWorkIds = backgroundMediaUploader.uploadMediasInBackground(
             invitationId = invitationId,
             guestBookText = state.textContent,
             editingGuestBookId = state.editingGuestBookId ?: -1L, // 새 방명록인 경우 -1로 전달
@@ -316,11 +316,14 @@ constructor(
             selectedMediasThumbnailUrl = Json.encodeToString(selectedMediasThumbnailUrl),
         )
 
-        Log.d("BackgroundUpload", "WorkID: $workId")
+        val uploadWorkId = pairOfWorkIds.first
+        val guestBookWorkId = pairOfWorkIds.second
+
+        Log.d("BackgroundUpload", "WorkID: $uploadWorkId, $guestBookWorkId")
 
         // 업로드 진행상황 관찰
         viewModelScope.launch {
-            backgroundMediaUploader.observeUploadProgress(workId).collect { uploadState ->
+            backgroundMediaUploader.observeUploadProgress(uploadWorkId to guestBookWorkId).collect { uploadState ->
                 handleUploadStateChange(uploadState, state)
             }
         }

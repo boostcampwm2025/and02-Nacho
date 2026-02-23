@@ -29,7 +29,7 @@ class BackgroundMediaUploaderImpl @Inject constructor(
         selectedMediasType: String, // List<String>
         selectedMediasDuration: String, // List<Int?>
         selectedMediasThumbnailUrl: String, // List<String?>
-    ): String {
+    ): Pair<String, String> {
         val workData = workDataOf(
             UploadKey.INVITATION_ID to invitationId,
             UploadKey.GUEST_BOOK_TEXT to guestBookText,
@@ -61,15 +61,16 @@ class BackgroundMediaUploaderImpl @Inject constructor(
             .then(guestBookRequest)
             .enqueue()
 
-        return "${uploadRequest.id},${guestBookRequest.id}"
+        return uploadRequest.id.toString() to guestBookRequest.id.toString()
     }
 
-    override fun observeUploadProgress(workId: String): Flow<UploadState> {
-        val (uploadId, guestBookId) = workId.split(",")
+    override fun observeUploadProgress(pairOfWorkIds: Pair<String, String>): Flow<UploadState> {
+        val uploadWorkId = pairOfWorkIds.first
+        val guestBookWorkId = pairOfWorkIds.second
 
         return combine(
-            workManager.getWorkInfoByIdFlow(UUID.fromString(uploadId)),
-            workManager.getWorkInfoByIdFlow(UUID.fromString(guestBookId))
+            workManager.getWorkInfoByIdFlow(UUID.fromString(uploadWorkId)),
+            workManager.getWorkInfoByIdFlow(UUID.fromString(guestBookWorkId))
         ) { uploadInfo, guestBookInfo ->
             when {
                 // 업로드 작업이 실행 중
@@ -137,9 +138,10 @@ class BackgroundMediaUploaderImpl @Inject constructor(
         }
     }
 
-    override fun cancelUpload(workId: String) {
-        val (uploadId, guestBookId) = workId.split(",")
-        workManager.cancelWorkById(UUID.fromString(uploadId))
-        workManager.cancelWorkById(UUID.fromString(guestBookId))
+    override fun cancelUpload(pairOfWorkIds: Pair<String, String>) {
+        val uploadWorkId = pairOfWorkIds.first
+        val guestBookWorkId = pairOfWorkIds.second
+        workManager.cancelWorkById(UUID.fromString(uploadWorkId))
+        workManager.cancelWorkById(UUID.fromString(guestBookWorkId))
     }
 }
