@@ -15,10 +15,8 @@ import com.andlife.domain.model.guestbook.GuestBookMedia
 import com.andlife.domain.model.guestbook.MediaFile
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.domain.model.guestbook.UploadState
-import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
-import com.andlife.domain.util.Result as DomainResult
 import com.andlife.domain.util.ThumbnailGenerator
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -32,7 +30,6 @@ class UploadWorker @AssistedInject constructor(
     private val mediaUploader: MediaUploader,
     private val mediaFileProvider: MediaFileProvider,
     private val thumbnailGenerator: ThumbnailGenerator,
-    private val guestBookRepository: GuestBookRepository,
     private val notificationManager: UploadNotificationManager,
 ) : CoroutineWorker(context, params) {
 
@@ -183,52 +180,27 @@ class UploadWorker @AssistedInject constructor(
                 // 썸네일이 없는 경우 썸네일 업로드 단계 건너뛰기
             }
 
-            // 4단계: 방명록 생성/수정 (80-100%)
-            updateProgress(progress = 80, currentFileName = "방명록 처리 중...", currentOrder = 0, totalCount = 1)
-            val result = if (editingGuestBookId != -1L) {
-                guestBookRepository.updateGuestBook(
-                    guestBookId = editingGuestBookId,
-                    textContent = guestBookText,
-                    // 유지할 기존 이미지 미디어의 ID 목록 (삭제되지 않고 계속 보존될 이미지들)
-                    existingImageIds = guestBookMedias.filter { it.id != null && it.type == MediaType.IMAGE }
-                        .map { it.id!! },
-                    existingVideoIds = guestBookMedias.filter { it.id != null && it.type == MediaType.VIDEO }
-                        .map { it.id!! },
-                    existingAudioIds = guestBookMedias.filter { it.id != null && it.type == MediaType.AUDIO }
-                        .map { it.id!! },
-                    newMedias = guestBookMedias.filter { it.id == null }
+            // 4단계: 미디어 업로드 완료 (80-100%)
+//            updateProgress(
+//                progress = 100,
+//                currentFileName = "미디어 업로드 완료",
+//                currentOrder = guestBookMedias.size,
+//                totalCount = guestBookMedias.size
+//            )
+
+            Result.success(
+                workDataOf(
+                    UploadKey.INVITATION_ID to invitationId,
+                    UploadKey.GUEST_BOOK_TEXT to guestBookText,
+                    UploadKey.EDITING_GUEST_BOOK_ID to editingGuestBookId,
+                    UploadKey.MEDIA_IDS to Json.encodeToString(guestBookMedias.map { it.id }),
+                    UploadKey.MEDIA_URIS to Json.encodeToString(guestBookMedias.map { it.url }),
+                    UploadKey.MEDIA_TYPES to Json.encodeToString(guestBookMedias.map { it.type.name }),
+                    UploadKey.MEDIA_DURATIONS to Json.encodeToString(guestBookMedias.map { it.durationSeconds }),
+                    UploadKey.MEDIA_THUMBNAIL_URLS to Json.encodeToString(guestBookMedias.map { it.thumbnailUrl }),
+                    UploadKey.PROGRESS to 100
                 )
-
-            } else {
-                guestBookRepository.createGuestBook(
-                    invitationId = invitationId,
-                    textContent = guestBookText,
-                    medias = guestBookMedias
-                )
-            }
-
-
-            when (result) {
-                is DomainResult.Success -> {
-                    updateProgress(
-                        progress = 100,
-                        currentFileName = "완료",
-                        currentOrder = guestBookMedias.size,
-                        totalCount = guestBookMedias.size
-                    )
-                    notificationManager.notifyComplete(id)
-                    Result.success(
-                        workDataOf(
-                            UploadKey.RESULT_URLS to guestBookMedias.map { it.url }.toTypedArray(),
-                            UploadKey.PROGRESS to 100
-                        )
-                    )
-                }
-
-                is DomainResult.Error -> {
-                    Result.failure(errorData("방명록 처리 실패: ${result.message ?: "알 수 없는 오류"}"))
-                }
-            }
+            )
 
         } catch (e: Exception) {
             if (e is CancellationException || isStopped) {
@@ -269,7 +241,6 @@ class UploadWorker @AssistedInject constructor(
             )
         )
     }
-
 
     private fun buildForegroundInfo(notification: Notification): ForegroundInfo {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
