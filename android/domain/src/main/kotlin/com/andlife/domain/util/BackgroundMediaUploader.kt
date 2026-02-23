@@ -1,6 +1,6 @@
 package com.andlife.domain.util
 
-import com.andlife.domain.model.guestbook.UploadState
+import com.andlife.domain.model.guestbook.UploadGuestBookState
 import kotlinx.coroutines.flow.Flow
 
 interface BackgroundMediaUploader {
@@ -30,9 +30,9 @@ interface BackgroundMediaUploader {
     /**
      * 특정 업로드 작업의 진행 상황을 관찰
      * @param pairOfWorkIds Pair<업로드 작업 ID, 방명록 작업 ID>
-     * @return UploadState를 담은 Flow
+     * @return UploadGuestBookState를 담은 Flow
      */
-    fun observeUploadProgress(pairOfWorkIds: Pair<String, String>): Flow<UploadState>
+    fun observeUploadProgress(pairOfWorkIds: Pair<String, String>): Flow<UploadGuestBookState>
 
     /**
      * 업로드 작업을 취소

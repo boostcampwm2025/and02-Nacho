@@ -14,7 +14,7 @@ import androidx.work.workDataOf
 import com.andlife.domain.model.guestbook.GuestBookMedia
 import com.andlife.domain.model.guestbook.MediaFile
 import com.andlife.domain.model.guestbook.MediaType
-import com.andlife.domain.model.guestbook.UploadState
+import com.andlife.domain.model.guestbook.UploadGuestBookState
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
 import com.andlife.domain.util.ThumbnailGenerator
@@ -97,7 +97,7 @@ class UploadWorker @AssistedInject constructor(
                 mediaUploader.uploadMediasWithProgress(indexAndFiles.map { it.second })
                     .collect { state ->
                         when (state) {
-                            is UploadState.Progress -> {
+                            is UploadGuestBookState.Progress -> {
                                 updateProgress(
                                     progress = (state.percent * 0.6).toInt(),
                                     currentFileName = state.currentFileName,
@@ -106,7 +106,7 @@ class UploadWorker @AssistedInject constructor(
                                 )
                             }
 
-                            is UploadState.Success -> {
+                            is UploadGuestBookState.Success -> {
                                 // state.urls에는 업로드된 미디어들의 URL이 순서대로 담겨있음(null 허용)
                                 // 업로드된 URL을 guestBookMedias에 반영
                                 indexAndFiles.forEachIndexed { uploadedIndex, pair ->
@@ -118,8 +118,8 @@ class UploadWorker @AssistedInject constructor(
                                 }
                             }
 
-                            is UploadState.Failure -> throw Exception(state.message)
-                            is UploadState.Cancelled -> throw CancellationException(UploadNoti.MSG_CANCELLED)
+                            is UploadGuestBookState.Failure -> throw Exception(state.message)
+                            is UploadGuestBookState.Cancelled -> throw CancellationException(UploadNoti.MSG_CANCELLED)
                             else -> {}
                         }
                     }
@@ -152,7 +152,7 @@ class UploadWorker @AssistedInject constructor(
                 mediaUploader.uploadMediasWithProgress(indexAndThumbnailFiles.map { it.second })
                     .collect { state ->
                         when (state) {
-                            is UploadState.Progress -> {
+                            is UploadGuestBookState.Progress -> {
                                 updateProgress(
                                     progress = 70 + (state.percent * 0.1).toInt(),
                                     currentFileName = state.currentFileName,
@@ -161,7 +161,7 @@ class UploadWorker @AssistedInject constructor(
                                 )
                             }
 
-                            is UploadState.Success -> {
+                            is UploadGuestBookState.Success -> {
                                 // 업로드된 썸네일 URL을 guestBookMedias에 반영
                                 indexAndThumbnailFiles.forEachIndexed { uploadedIndex, pair ->
                                     val originalIndex = pair.first
@@ -171,8 +171,8 @@ class UploadWorker @AssistedInject constructor(
                                 }
                             }
 
-                            is UploadState.Failure -> throw Exception(state.message)
-                            is UploadState.Cancelled -> throw CancellationException(UploadNoti.MSG_CANCELLED)
+                            is UploadGuestBookState.Failure -> throw Exception(state.message)
+                            is UploadGuestBookState.Cancelled -> throw CancellationException(UploadNoti.MSG_CANCELLED)
                             else -> {}
                         }
                     }

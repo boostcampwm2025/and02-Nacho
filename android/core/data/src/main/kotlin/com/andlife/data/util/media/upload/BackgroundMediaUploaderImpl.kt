@@ -7,7 +7,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
-import com.andlife.domain.model.guestbook.UploadState
+import com.andlife.domain.model.guestbook.UploadGuestBookState
 import com.andlife.domain.util.BackgroundMediaUploader
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -64,7 +64,7 @@ class BackgroundMediaUploaderImpl @Inject constructor(
         return uploadRequest.id.toString() to guestBookRequest.id.toString()
     }
 
-    override fun observeUploadProgress(pairOfWorkIds: Pair<String, String>): Flow<UploadState> {
+    override fun observeUploadProgress(pairOfWorkIds: Pair<String, String>): Flow<UploadGuestBookState> {
         val uploadWorkId = pairOfWorkIds.first
         val guestBookWorkId = pairOfWorkIds.second
 
@@ -76,7 +76,7 @@ class BackgroundMediaUploaderImpl @Inject constructor(
                 // 업로드 작업이 실행 중
                 uploadInfo?.state == WorkInfo.State.RUNNING -> {
                     val progress = uploadInfo.progress
-                    UploadState.Progress(
+                    UploadGuestBookState.Progress(
                         percent = progress.getInt(UploadKey.PROGRESS, 0),
                         currentFileName = progress.getString(UploadKey.CURRENT_FILE_NAME),
                         currentOrder = progress.getInt(UploadKey.CURRENT_ORDER, 0),
@@ -87,7 +87,7 @@ class BackgroundMediaUploaderImpl @Inject constructor(
                 // 업로드 완료, 방명록 작업 대기 중
                 uploadInfo?.state == WorkInfo.State.SUCCEEDED &&
                     guestBookInfo?.state == WorkInfo.State.ENQUEUED -> {
-                    UploadState.Progress(
+                    UploadGuestBookState.Progress(
                         percent = 85,
                         currentFileName = "방명록 처리 준비 중...",
                         currentOrder = 1,
@@ -98,7 +98,7 @@ class BackgroundMediaUploaderImpl @Inject constructor(
                 // 업로드 완료, 방명록 처리 중
                 uploadInfo?.state == WorkInfo.State.SUCCEEDED &&
                     guestBookInfo?.state == WorkInfo.State.RUNNING -> {
-                    UploadState.Progress(
+                    UploadGuestBookState.Progress(
                         percent = 90,
                         currentFileName = "방명록 처리 중...",
                         currentOrder = 1,
@@ -110,30 +110,30 @@ class BackgroundMediaUploaderImpl @Inject constructor(
                 guestBookInfo?.state == WorkInfo.State.SUCCEEDED -> {
                     val urls = guestBookInfo.outputData.getStringArray(UploadKey.RESULT_URLS)
                         ?.toList() ?: emptyList()
-                    UploadState.Success(urls)
+                    UploadGuestBookState.Success(urls)
                 }
 
                 // 업로드 작업 실패
                 uploadInfo?.state == WorkInfo.State.FAILED -> {
                     val message = uploadInfo.outputData.getString(UploadKey.ERROR_MESSAGE)
                         ?: UploadError.UNKNOWN
-                    UploadState.Failure("업로드 실패: $message")
+                    UploadGuestBookState.Failure("업로드 실패: $message")
                 }
 
                 // 방명록 처리 실패
                 guestBookInfo?.state == WorkInfo.State.FAILED -> {
                     val message = guestBookInfo.outputData.getString(UploadKey.ERROR_MESSAGE)
                         ?: UploadError.UNKNOWN
-                    UploadState.Failure("방명록 처리 실패: $message")
+                    UploadGuestBookState.Failure("방명록 처리 실패: $message")
                 }
 
                 // 취소됨
                 uploadInfo?.state == WorkInfo.State.CANCELLED ||
                     guestBookInfo?.state == WorkInfo.State.CANCELLED -> {
-                    UploadState.Cancelled
+                    UploadGuestBookState.Cancelled
                 }
 
-                else -> UploadState.Enqueued
+                else -> UploadGuestBookState.Enqueued
             }
         }
     }
