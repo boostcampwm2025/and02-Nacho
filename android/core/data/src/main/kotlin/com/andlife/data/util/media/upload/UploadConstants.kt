@@ -12,7 +12,7 @@ object UploadKey {
     const val MEDIA_TYPES = "media_types"
     const val MEDIA_DURATIONS = "media_durations"
     const val MEDIA_THUMBNAIL_URLS = "media_thumbnail_urls"
-    
+
     const val RESULT_URLS = "result_urls"
     const val ERROR_MESSAGE = "error_message"
     const val PROGRESS = "progress"
@@ -34,7 +34,7 @@ object UploadNoti {
     const val TITLE_UPLOADING = "업로드 중"
     const val MSG_PREPARING = "파일을 업로드하고 있습니다."
     const val TITLE_COMPLETE = "업로드 완료"
-    const val MSG_COMPLETE = "모든 파일이 성공적으로 업로드되었습니다."
+    const val MSG_COMPLETE = "방명록이 성공적으로 업로드되었습니다."
     const val ACTION_CANCEL = "취소"
     const val MSG_CANCELLED = "업로드가 취소되었습니다."
 }
