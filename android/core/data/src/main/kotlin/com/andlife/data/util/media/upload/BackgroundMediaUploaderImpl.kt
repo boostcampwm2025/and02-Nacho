@@ -51,11 +51,20 @@ class BackgroundMediaUploaderImpl @Inject constructor(
             .addTag(UploadKey.TAG_MEDIA_UPLOAD)
             .build()
 
-        workManager.enqueue(uploadRequest)
+        val guestBookRequest = OneTimeWorkRequestBuilder<GuestBookWorker>()
+            .setConstraints(constraints)
+            .addTag(UploadKey.TAG_MEDIA_UPLOAD)
+            .build()
+
+        workManager
+            .beginWith(uploadRequest)
+            .then(guestBookRequest)
+            .enqueue()
 
         return uploadRequest.id.toString()
     }
 
+    // TODO: 방명록 생성/수정 작업도 관찰할 수 있도록 수정하기
     override fun observeUploadProgress(workId: String): Flow<UploadState> {
         return workManager
             .getWorkInfoByIdFlow(UUID.fromString(workId))
