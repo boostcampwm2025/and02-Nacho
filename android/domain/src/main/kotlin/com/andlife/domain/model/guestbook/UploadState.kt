@@ -1,5 +1,8 @@
 package com.andlife.domain.model.guestbook
 
+/**
+ * 방명록 미디어 업로드 및 방명록 생성/수정 작업의 상태
+ */
 sealed interface UploadState {
     data object Enqueued : UploadState
     data class Progress(
