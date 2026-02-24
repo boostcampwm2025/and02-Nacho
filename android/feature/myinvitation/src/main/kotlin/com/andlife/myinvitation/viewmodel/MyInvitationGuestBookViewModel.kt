@@ -202,7 +202,7 @@ constructor(
             analyticsLogger.logEvent(AnalyticsEvent.Event(EventType.GUEST_BOOK_MAX_SIZE.value))
             sendEffect(
                 MyInvitationGuestBookSideEffect.ShowSnackbar(
-                    "파일이 500MB를 초과하여 제외되었습니다."
+                    "최대 파일 용량을 초과하여 제외되었습니다."
                 )
             )
         }
@@ -212,7 +212,7 @@ constructor(
             analyticsLogger.logEvent(AnalyticsEvent.Event(EventType.GUEST_BOOK_MAX_MEDIA.value))
             sendEffect(
                 MyInvitationGuestBookSideEffect.ShowSnackbar(
-                    "파일은 20개까지만 추가 가능합니다."
+                    "최대 파일 개수를 초과하여 제외되었습니다."
                 )
             )
         }
