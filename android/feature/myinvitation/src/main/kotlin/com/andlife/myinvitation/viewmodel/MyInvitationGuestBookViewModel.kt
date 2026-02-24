@@ -44,6 +44,7 @@ import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookUiEvent
 import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookUiState
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
+import com.andlife.ui.util.media.validateSelectedMediasByRule
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -186,9 +187,16 @@ constructor(
         exceededAvailableBytes: Boolean,
         exceededAvailableSlots: Boolean
     ) {
+        // 용량/개수 검증
+        val (validatedMedias, exceededAvailableBytes, exceededAvailableSlots) = validateSelectedMediasByRule(
+            selectedMedias = medias,
+            availableSlotCnt = 20 - uiState.value.selectedMedias.size,
+            currentMediaSizeBytes = uiState.value.currentMediaSizeBytes
+        )
+
         updateState {
             copy(
-                selectedMedias = medias.toPersistentList(),
+                selectedMedias = validatedMedias.toPersistentList(),
                 currentMediaSizeBytes = calculateTotalMediaSize(medias)
             )
         }

@@ -40,7 +40,6 @@ import com.andlife.ui.util.media.uriToSelectedMedia
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import com.andlife.ui.util.media.validateUriStringsByRule
 
 private const val MAX_LENGTH = 500
 private const val MAX_MEDIAS_COUNT = 20
@@ -81,24 +80,12 @@ fun InvitationGuestBookForm(
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetMultipleContents(),
         ) { uris ->
-            val availableSlotsCnt = MAX_MEDIAS_COUNT - selectedMedias.size
-            val uriStrings = uris.map { it.toString() }
+            val selectedMediasToAdd = uris.map { uriToSelectedMedia(context, it.toString()) }
 
-            // 파일 크기 검증
-            val (validUriStrings, exceededAvailableBytes, exceededAvailableSlots) = validateUriStringsByRule(
-                context = context,
-                uriStrings = uriStrings,
-                availableSlotCnt = availableSlotsCnt,
-                currentMediaSizeBytes = currentMediaSizeBytes,
-            )
-
-            val mediasToAdd = validUriStrings.map { uriString ->
-                uriToSelectedMedia(context, uriString)
-            }
             onMediasSelected(
-                (selectedMedias + mediasToAdd).toImmutableList(),
-                exceededAvailableBytes,
-                exceededAvailableSlots
+                (selectedMedias + selectedMediasToAdd).toImmutableList(),
+                false,  // TODO: 임시
+                false  // TODO: 임시
             )
         }
 
@@ -106,24 +93,13 @@ fun InvitationGuestBookForm(
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.PickMultipleVisualMedia(MAX_MEDIAS_COUNT)
         ) { uris ->
-            val availableSlotsCnt = MAX_MEDIAS_COUNT - selectedMedias.size
-            val uriStrings = uris.map { it.toString() }
 
-            // 파일 크기 검증
-            val (validUriStrings, exceededAvailableBytes, exceededAvailableSlots) = validateUriStringsByRule(
-                context = context,
-                uriStrings = uriStrings,
-                availableSlotCnt = availableSlotsCnt,
-                currentMediaSizeBytes = currentMediaSizeBytes,
-            )
+            val selectedMediasToAdd = uris.map { uriToSelectedMedia(context, it.toString()) }
 
-            val mediasToAdd = validUriStrings.map { uriString ->
-                uriToSelectedMedia(context, uriString)
-            }
             onMediasSelected(
-                (selectedMedias + mediasToAdd).toImmutableList(),
-                exceededAvailableBytes,
-                exceededAvailableSlots
+                (selectedMedias + selectedMediasToAdd).toImmutableList(),
+                false,  // TODO: 임시
+                false  // TODO: 임시
             )
         }
 
