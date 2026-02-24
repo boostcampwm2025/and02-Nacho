@@ -124,8 +124,6 @@ constructor(
         when (event) {
             is MyInvitationGuestBookUiEvent.UpdateSelectedMedias -> updateSelectedMedias(
                 event.medias,
-                event.exceededAvailableBytes,
-                event.exceededAvailableSlots
             )
 
             is MyInvitationGuestBookUiEvent.UpdateTextContent -> updateTextContent(event.textContent)
@@ -184,8 +182,6 @@ constructor(
 
     private fun updateSelectedMedias(
         medias: List<SelectedMedia>,
-        exceededAvailableBytes: Boolean,
-        exceededAvailableSlots: Boolean
     ) {
         // 용량/개수 검증
         val (validatedMedias, exceededAvailableBytes, exceededAvailableSlots) = validateSelectedMediasByRule(
