@@ -67,6 +67,7 @@ class InvitationEditViewModel @Inject constructor(
             is InvitationFormUiEvent.UpdateAnnouncement -> updateAnnouncement(event)
             is InvitationFormUiEvent.RemoveImage -> updateRemoveImage(event)
             is InvitationFormUiEvent.RemoveAnnouncement -> updateRemoveAnnouncement(event)
+            is InvitationFormUiEvent.ReorderAnnouncement -> {}
             InvitationFormUiEvent.OnClickBack -> onBackClick()
             InvitationFormUiEvent.OnClickSave -> updateInvitation()
             InvitationFormUiEvent.OnClickPreview -> {}
@@ -101,7 +102,11 @@ class InvitationEditViewModel @Inject constructor(
                             lat = invitation.latitude,
                             lng = invitation.longitude,
                             announcement = invitation.announcements.map {
-                                AnnouncementUiModel(title = it.title, content = it.content)
+                                AnnouncementUiModel(
+                                    title = it.title,
+                                    content = it.content,
+                                    displayOrder = it.displayOrder
+                                )
                             }.toPersistentList(),
                         ),
                         isLoading = false,
@@ -201,7 +206,14 @@ class InvitationEditViewModel @Inject constructor(
     }
 
     private fun updateAnnouncement(event: InvitationFormUiEvent.UpdateAnnouncement) {
-        val announcement = AnnouncementUiModel(title = event.title, content = event.content)
+        val currentList = uiState.value.invitationFormUiModel.announcement
+
+        val announcement = AnnouncementUiModel(
+            title = event.title,
+            content = event.content,
+            displayOrder = currentList.size
+
+        )
         val newAnnouncementList = uiState.value.invitationFormUiModel.announcement
             .toPersistentList()
             .add(announcement)
