@@ -193,7 +193,7 @@ constructor(
         updateState {
             copy(
                 selectedMedias = validatedMedias.toPersistentList(),
-                currentMediaSizeBytes = calculateTotalMediaSize(medias)
+                currentMediaSizeBytes = calculateTotalMediaSize(validatedMedias)
             )
         }
 
