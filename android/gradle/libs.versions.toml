@@ -42,6 +42,7 @@ workManager = "2.10.5"
 hiltWork = "1.2.0"
 lottie = "6.7.1"
 ucrop = "2.2.8"
+composeReorderable = "0.9.6"
 
 [libraries]
 androidx-compose-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "materialIconsCore" }
@@ -149,6 +150,8 @@ androidx-hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", vers
 
 # Image Crop
 ucrop = { group = "com.github.yalantis", name = "ucrop", version.ref = "ucrop" }
+
+compose-reorderable = { group = "org.burnoo", name = "compose-reorderable", version.ref = "composeReorderable" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
