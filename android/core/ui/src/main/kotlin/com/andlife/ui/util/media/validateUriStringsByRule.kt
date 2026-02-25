@@ -18,24 +18,23 @@ import com.andlife.ui.component.invitation.SelectedMedia
  * - 세 번째 값: 선택 가능 개수 초과로 인해 검사가 종료되었는지 여부
  */
 
+private const val MAX_MEDIAS_COUNT = 20
 private const val MAX_MEDIA_SIZE_BYTES = 500 * 1024 * 1024L // 500MB
 
 fun validateSelectedMediasByRule(
     selectedMedias: List<SelectedMedia>,
-    availableSlotCnt: Int,
-    currentMediaSizeBytes: Long = 0L,
 ): Triple<List<SelectedMedia>, Boolean, Boolean> {
     val validSelectedMedias = mutableListOf<SelectedMedia>()
     var exceededAvailableBytes = false
     var exceededAvailableSlots = false
-    var currentBytes = currentMediaSizeBytes
+    var currentBytes = 0L
 
     selectedMedias
         .forEach { selectedMedia ->
             val fileSize = selectedMedia.sizeBytes
 
             if (fileSize != null) {
-                if (validSelectedMedias.size >= availableSlotCnt) {
+                if (validSelectedMedias.size > MAX_MEDIAS_COUNT) {
                     exceededAvailableSlots = true
                     return@forEach
                 } else if (currentBytes + fileSize > MAX_MEDIA_SIZE_BYTES) {
