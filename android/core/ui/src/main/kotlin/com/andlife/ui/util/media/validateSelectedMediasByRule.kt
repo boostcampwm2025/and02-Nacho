@@ -29,17 +29,19 @@ fun validateSelectedMediasByRule(
 
     selectedMedias
         .forEach { selectedMedia ->
+            // 개수 제한 체크
+            if (validSelectedMedias.size >= MAX_MEDIAS_COUNT) {
+                exceededAvailableSlots = true
+                return@forEach
+            }
+            // 용량 제한 체크
             val fileSize = selectedMedia.sizeBytes
-
             if (fileSize != null) {
-                if (validSelectedMedias.size > MAX_MEDIAS_COUNT) {
-                    exceededAvailableSlots = true
-                    return@forEach
-                } else if (currentBytes + fileSize > MAX_MEDIA_SIZE_BYTES) {
+                if (currentBytes + fileSize >= MAX_MEDIA_SIZE_BYTES) {
                     exceededAvailableBytes = true
                 } else {
-                    validSelectedMedias.add(selectedMedia)
                     currentBytes += fileSize
+                    validSelectedMedias.add(selectedMedia)
                 }
             } else {
                 // TODO: 파일을 읽을 수 없는 경우 별도의 스낵바 안내 필요
