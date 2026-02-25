@@ -53,7 +53,7 @@ fun InvitationGuestBookForm(
     isSubmittable: Boolean,
     isAuthenticated: Boolean,
     currentMediaSizeBytes: Long,
-    onMediasSelected: (ImmutableList<SelectedMedia>, Boolean, Boolean) -> Unit,
+    onMediasSelected: (ImmutableList<SelectedMedia>) -> Unit,
     onMediaRemove: (SelectedMedia) -> Unit,
     onTextContentChange: (String) -> Unit,
     onCameraClick: () -> Unit,
@@ -84,8 +84,6 @@ fun InvitationGuestBookForm(
 
             onMediasSelected(
                 (selectedMedias + selectedMediasToAdd).toImmutableList(),
-                false,  // TODO: 임시
-                false  // TODO: 임시
             )
         }
 
@@ -98,8 +96,6 @@ fun InvitationGuestBookForm(
 
             onMediasSelected(
                 (selectedMedias + selectedMediasToAdd).toImmutableList(),
-                false,  // TODO: 임시
-                false  // TODO: 임시
             )
         }
 
@@ -290,7 +286,7 @@ private fun InvitationGuestBookFormPreview() {
             isUploading = false,
             isSubmittable = false,
             currentMediaSizeBytes = 0L,
-            onMediasSelected = { _, _, _ -> },
+            onMediasSelected = {},
             onMediaRemove = {},
             onTextContentChange = {},
             onCameraClick = {},
