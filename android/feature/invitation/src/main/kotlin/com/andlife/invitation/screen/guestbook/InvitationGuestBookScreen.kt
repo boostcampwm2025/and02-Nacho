@@ -87,7 +87,6 @@ import com.andlife.ui.component.report.ReportBottomSheet
 import com.andlife.ui.util.audio.AudioRecorder
 import com.andlife.ui.util.collectWithLifecycle
 import com.andlife.ui.util.imeWithoutNavBars
-import com.andlife.ui.util.media.getFileSizeOrNull
 import com.andlife.ui.util.media.uriToSelectedMedia
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
@@ -99,8 +98,6 @@ import kotlin.math.max
 import kotlin.math.min
 
 private const val CAMERA_IMAGES_DIR = "camera_images"
-private const val MAX_MEDIA_SIZE_BYTES = 500 * 1024 * 1024L // 500MB
-private const val MAX_MEDIAS_COUNT = 20
 
 @Composable
 fun InvitationGuestBookRoute(
@@ -169,26 +166,10 @@ fun InvitationGuestBookRoute(
     ) { success ->
         if (success && cameraImageUri != null) {
             val currentMedias = uiState.selectedMedias
-            if (currentMedias.size >= MAX_MEDIAS_COUNT) {
-                viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, false, true))
-            } else {
-                if (getFileSizeOrNull(context, cameraImageUri!!) == null) {
-                    // TODO: 파일 크기를 읽을 수 없는 경우 별도의 스낵바 안내 필요
-                    viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, true, false))
-                    // 남은 용량 계산해서 초과 여부 전달
-                } else if (getFileSizeOrNull(
-                        context,
-                        cameraImageUri!!
-                    )!! + uiState.currentMediaSizeBytes > MAX_MEDIA_SIZE_BYTES
-                ) {
-                    viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, true, false))
-                } else {
-                    // 촬영한 사진을 SelectedMedia로 변환해 추가
-                    val newMedia = uriToSelectedMedia(context, cameraImageUri.toString())
-                    val updatedMedias = (currentMedias + newMedia).toImmutableList()
-                    viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias, false, false))
-                }
-            }
+            // 촬영한 사진을 SelectedMedia로 변환해 추가
+            val newMedia = uriToSelectedMedia(context, cameraImageUri.toString())
+            val updatedMedias = (currentMedias + newMedia).toImmutableList()
+            viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias))
         }
     }
 
@@ -436,19 +417,10 @@ fun InvitationGuestBookRoute(
             audioRecorder = audioRecorder,
             onRecordingComplete = { recordedFile ->
                 val currentMedias = uiState.selectedMedias
-                if (currentMedias.size >= MAX_MEDIAS_COUNT) {
-                    viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, false, true))
-                } else {
-                    // 남은 용량 계산해서 초과 여부 전달
-                    if (recordedFile.length() + uiState.currentMediaSizeBytes > MAX_MEDIA_SIZE_BYTES) {
-                        viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, true, false))
-                    } else {
-                        // 녹음을 SelectedMedia로 변환해 추가
-                        val newMedia = uriToSelectedMedia(context, recordedFile.toURI().toString())
-                        val updatedMedias = (currentMedias + newMedia).toImmutableList()
-                        viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias, false, false))
-                    }
-                }
+                // 녹음을 SelectedMedia로 변환해 추가
+                val newMedia = uriToSelectedMedia(context, recordedFile.toURI().toString())
+                val updatedMedias = (currentMedias + newMedia).toImmutableList()
+                viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias))
                 showRecordingBottomSheet = false
                 viewModel.onEvent(InvitationGuestBookUiEvent.UpdateMediaPlayState(true))
             },
@@ -692,8 +664,6 @@ private fun GuestBookFormSection(
             onEvent(
                 InvitationGuestBookUiEvent.UpdateSelectedMedias(
                     medias,
-                    exceededAvailableBytes,
-                    exceededAvailableSlots
                 )
             )
         },

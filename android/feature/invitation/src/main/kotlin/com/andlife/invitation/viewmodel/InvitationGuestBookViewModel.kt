@@ -44,6 +44,7 @@ import com.andlife.model.guestbook.UiMediaType
 import com.andlife.model.guestbook.toUiModel
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
+import com.andlife.ui.util.media.validateSelectedMediasByRule
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -123,8 +124,6 @@ constructor(
         when (event) {
             is InvitationGuestBookUiEvent.UpdateSelectedMedias -> updateSelectedMedias(
                 event.medias,
-                event.exceededAvailableBytes,
-                event.exceededAvailableSlots
             )
 
             is InvitationGuestBookUiEvent.UpdateTextContent -> updateTextContent(event.textContent)
@@ -183,13 +182,16 @@ constructor(
 
     private fun updateSelectedMedias(
         medias: List<SelectedMedia>,
-        exceededAvailableBytes: Boolean,
-        exceededAvailableSlots: Boolean,
     ) {
+        // 용량/개수 검증
+        val (validatedMedias, exceededAvailableBytes, exceededAvailableSlots) = validateSelectedMediasByRule(
+            selectedMedias = medias,
+        )
+
         updateState {
             copy(
-                selectedMedias = medias.toPersistentList(),
-                currentMediaSizeBytes = calculateTotalMediaSize(medias)
+                selectedMedias = validatedMedias.toPersistentList(),
+                currentMediaSizeBytes = calculateTotalMediaSize(validatedMedias)
             )
         }
 
@@ -198,7 +200,7 @@ constructor(
             analyticsLogger.logEvent(AnalyticsEvent.Event(EventType.GUEST_BOOK_MAX_SIZE.value))
             sendEffect(
                 InvitationGuestBookSideEffect.ShowSnackbar(
-                    "파일이 500MB를 초과하여 제외되었습니다."
+                    "최대 파일 용량을 초과하여 제외되었습니다."
                 )
             )
         }
@@ -208,7 +210,7 @@ constructor(
             analyticsLogger.logEvent(AnalyticsEvent.Event(EventType.GUEST_BOOK_MAX_MEDIA.value))
             sendEffect(
                 InvitationGuestBookSideEffect.ShowSnackbar(
-                    "파일은 20개까지만 추가 가능합니다."
+                    "최대 파일 개수를 초과하여 제외되었습니다."
                 )
             )
         }
