@@ -37,8 +37,6 @@ class DeepLinkManagerImpl @Inject constructor(
             .appendQueryParameter("c", DeepLinkConfig.AF_CAMPAIGN)
             .appendQueryParameter(DeepLinkConfig.AF_DEEP_LINK_SUB1, invitationId.toString())
             .appendQueryParameter("af_dp", buildKakaoDeepLinkUrl(invitationId))
-            .appendQueryParameter("af_android_url", DeepLinkConfig.PLAY_STORE_URL) // TODO: Play Store 정식 출시 후 제거
-            .appendQueryParameter("af_web_dp", DeepLinkConfig.PLAY_STORE_URL) // TODO: Play Store 정식 출시 후 제거
             .build()
             .toString()
 }

@@ -10,7 +10,4 @@ object DeepLinkConfig {
     const val AF_CAMPAIGN = "invitation_share"
     const val AF_DEEP_LINK_VALUE = "deep_link_value"
     const val AF_DEEP_LINK_SUB1 = "deep_link_sub1"
-
-    // TODO: Play Store 정식 출시 후에는 코드 제거 후 앱스플라이어 대시보드에 URL 등록
-    const val PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.andlife.nacho"
 }

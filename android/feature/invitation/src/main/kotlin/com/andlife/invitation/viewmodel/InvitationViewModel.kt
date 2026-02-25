@@ -12,8 +12,14 @@ import com.andlife.domain.model.invitation.SortDirection
 import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.domain.repository.report.ReportRepository
+import com.andlife.domain.util.AnalyticsEvent
+import com.andlife.domain.util.AnalyticsLogger
+import com.andlife.domain.util.Button
+import com.andlife.domain.util.CrashlyticsLogger
+import com.andlife.domain.util.EventType
 import com.andlife.domain.util.RefreshEventHub
 import com.andlife.domain.util.RefreshEventHub.RefreshTarget
+import com.andlife.domain.util.Screen
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.invitation.model.InvitationSideEffect
@@ -42,7 +48,9 @@ import javax.inject.Inject
 class InvitationViewModel @Inject constructor(
     private val invitationRepository: InvitationRepository,
     private val reportRepository: ReportRepository,
-    private val authStateManager: AuthStateManager
+    private val authStateManager: AuthStateManager,
+    private val analyticsLogger: AnalyticsLogger,
+    private val crashlyticsLogger: CrashlyticsLogger,
 ) : BaseViewModel<InvitationUiState, InvitationUiEvent, InvitationSideEffect>(
     initialState = InvitationUiState()
 ) {
@@ -110,16 +118,27 @@ class InvitationViewModel @Inject constructor(
             is InvitationUiEvent.ClickInvitation -> {
                 sendEffect(InvitationSideEffect.NavigateToDetail(event.id))
             }
+
             is InvitationUiEvent.ChangeSort -> {
                 if (event.isUpcoming) {
+                    analyticsLogger.logEvent(
+                        AnalyticsEvent.ButtonClick(
+                            Screen.INVITATION,
+                            Button.INVITATION_SORT_UPCOMING
+                        )
+                    )
                     _upcomingSort.value = event.newSort
                 } else {
+                    analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.INVITATION, Button.INVITATION_SORT_PAST))
                     _pastSort.value = event.newSort
                 }
             }
+
             is InvitationUiEvent.ClickLeaveInvitation -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.INVITATION, Button.INVITATION_LEAVE))
                 leaveInvitation(event.id)
             }
+
             is InvitationUiEvent.ShowReport -> {
                 val authState = authStateManager.authState.value
                 if (authState !is AuthState.Authenticated) {
@@ -129,12 +148,16 @@ class InvitationViewModel @Inject constructor(
                     updateState { copy(reportTargetId = event.invitationId) }
                 }
             }
+
             is InvitationUiEvent.DismissReport -> {
                 updateState { copy(reportTargetId = null) }
             }
+
             is InvitationUiEvent.SubmitReport -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.INVITATION, Button.INVITATION_REPORT))
                 submitReport(event.reason, event.description)
             }
+
             is InvitationUiEvent.DismissLoginDialog -> {
                 updateState { copy(showLoginDialog = false) }
             }
@@ -175,9 +198,19 @@ class InvitationViewModel @Inject constructor(
                 reason = reason.name,
                 description = description
             ).onSuccess {
+                analyticsLogger.logEvent(AnalyticsEvent.Event(EventType.SUCCESS_REPORT_INVITATION.value))
                 updateState { copy(reportTargetId = null) }
                 sendEffect(InvitationSideEffect.ReportSuccess)
             }.onFailure { error, message ->
+                analyticsLogger.logEvent(
+                    AnalyticsEvent.Event(
+                        EventType.FAIL_REPORT_INVITATION.value, mapOf(
+                            "id" to targetId.toString(),
+                            "error" to "$error: $message"
+                        )
+                    )
+                )
+                crashlyticsLogger.recordException("$targetId: $error - $message")
                 val messageToShow = if (error == DataError.Network.CONFLICT) {
                     message
                 } else {

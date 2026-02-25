@@ -8,6 +8,8 @@ import com.andlife.deeplink.DeepLinkConfig
 import com.andlife.deeplink.DeepLinkManager
 import com.andlife.deeplink.di.AppsFlyerDevKey
 import com.andlife.deeplink.di.KakaoNativeKey
+import com.andlife.domain.util.AnalyticsEvent
+import com.andlife.domain.util.AnalyticsLogger
 import com.andlife.nacho.di.NaverMapClientId
 import com.appsflyer.AppsFlyerLib
 import com.appsflyer.deeplink.DeepLinkResult
@@ -37,6 +39,9 @@ class NachoApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var deepLinkManager: DeepLinkManager
 
+    @Inject
+    lateinit var analyticsLogger: AnalyticsLogger
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
@@ -63,6 +68,14 @@ class NachoApplication : Application(), Configuration.Provider {
 
                 if (!invitationId.isNullOrEmpty()) {
                     Log.d("AppsFlyer", "invitationId: $invitationId")
+                    analyticsLogger.logEvent(
+                        AnalyticsEvent.Event(
+                            "Deeplink",
+                            mapOf(
+                                "invitation_id" to invitationId
+                            )
+                        )
+                    )
                     deepLinkManager.emitInvitationId(invitationId)
                 }
             } else if (status == DeepLinkResult.Status.ERROR) {

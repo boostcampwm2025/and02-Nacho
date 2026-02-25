@@ -113,6 +113,8 @@ fun InvitationEditRoute(
                     snackbarHostState.showSnackbar(message = res.getString(R.string.snack_load_error_time))
                 }
             }
+
+            InvitationFormSideEffect.NavigateToPreview -> {}
         }
     }
 

@@ -502,7 +502,7 @@ private fun InvitationGuestBookScreen(
         if (!isImVisible) focusManager.clearFocus()
     }
 
-    BackHandler(enabled = true) {
+    BackHandler(enabled = !uiState.isUploading) {
         when {
             isImVisible -> {
                 focusManager.clearFocus()
@@ -631,7 +631,13 @@ private fun InvitationGuestBookScreen(
                                         isEditing = uiState.editingGuestBookId == guestBook.id,
                                         onEditClick = { onEvent(InvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
                                         onDeleteClick = { onDeleteMenuClick(guestBook.id) },
-                                        onReportClick = { targetId -> onEvent(InvitationGuestBookUiEvent.ShowReport(targetId)) },
+                                        onReportClick = { targetId ->
+                                            onEvent(
+                                                InvitationGuestBookUiEvent.ShowReport(
+                                                    targetId
+                                                )
+                                            )
+                                        },
                                         onVisualMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
                                         onAudioMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
                                         onPlayVideoClick = { url ->

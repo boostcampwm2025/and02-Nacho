@@ -45,6 +45,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import com.andlife.designsystem.component.NachoDivider
 import com.andlife.designsystem.component.dialog.NachoDialog
 import com.andlife.designsystem.preview.PreviewTheme
@@ -65,6 +67,7 @@ import com.andlife.myinvitation.model.detail.MyInvitationDetailUiState
 import com.andlife.myinvitation.screen.collection.MyInvitationCollectionRoute
 import com.andlife.myinvitation.screen.guestbook.MyInvitationGuestBookRoute
 import com.andlife.myinvitation.viewmodel.MyInvitationDetailViewModel
+import com.andlife.myinvitation.viewmodel.MyInvitationGuestBookViewModel
 import com.andlife.ui.component.GenericTabRow
 import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.ui.component.loading.InvitationLoadingError
@@ -90,8 +93,13 @@ fun MyInvitationDetailRoute(
     onNavigateToUpdateThanksCard: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MyInvitationDetailViewModel = hiltViewModel(),
+    guestBookViewModel: MyInvitationGuestBookViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isGuestBookUploading by guestBookViewModel.uiState
+        .map { it.isUploading }
+        .distinctUntilChanged()
+        .collectAsStateWithLifecycle(initialValue = false)
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -183,6 +191,7 @@ fun MyInvitationDetailRoute(
     Box {
         MyInvitationDetailScreen(
             uiState = uiState,
+            isGuestBookUploading = isGuestBookUploading,
             snackbarHostState = snackbarHostState,
             scrollBehavior = scrollBehavior,
             onEvent = viewModel::onEvent,
@@ -267,6 +276,7 @@ fun MyInvitationDetailRoute(
 @Composable
 private fun MyInvitationDetailScreen(
     uiState: MyInvitationDetailUiState,
+    isGuestBookUploading: Boolean,
     snackbarHostState: SnackbarHostState,
     scrollBehavior: TopAppBarScrollBehavior,
     onEvent: (MyInvitationDetailUiEvent) -> Unit,
@@ -280,16 +290,20 @@ private fun MyInvitationDetailScreen(
     val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()
     val coroutineScope = rememberCoroutineScope()
     var isMapVisible by remember { mutableStateOf(true) }
+    var showUploadCancelDialog by remember { mutableStateOf(false) }
 
-    val navigateBackWithMapCleanup: () -> Unit = {
+    val doNavigateBack: () -> Unit = {
         isMapVisible = false
         coroutineScope.launch {
             delay(50L)
             onEvent(MyInvitationDetailUiEvent.ClickBack)
         }
     }
+    val navigateBackWithCleanup: () -> Unit = {
+        if (isGuestBookUploading) showUploadCancelDialog = true else doNavigateBack()
+    }
 
-    BackHandler(onBack = navigateBackWithMapCleanup)
+    BackHandler(onBack = navigateBackWithCleanup)
 
     Scaffold(
         modifier = modifier
@@ -304,7 +318,7 @@ private fun MyInvitationDetailScreen(
                 title = uiState.invitationContentsUiModel.title,
                 hasThanksCard = uiState.hasThanksCard,
                 showActions = !uiState.isLoading && !uiState.isError,
-                onBack = navigateBackWithMapCleanup,
+                onBack = navigateBackWithCleanup,
                 onClickThanksCard = { onEvent(MyInvitationDetailUiEvent.ClickThanksCard) },
                 onEditThanksCard = { onEditThanksCard() },
                 onDeleteThanksCard = onDeleteThanksCard,
@@ -369,7 +383,7 @@ private fun MyInvitationDetailScreen(
 
                             1 -> MyInvitationGuestBookRoute(
                                 onNavigateBack = onNavigateBack,
-                                onNavigateToLogin = onNavigateToLogin
+                                onNavigateToLogin = onNavigateToLogin,
                             )
 
                             2 -> MyInvitationCollectionRoute()
@@ -377,6 +391,20 @@ private fun MyInvitationDetailScreen(
                     },
             )
         }
+    }
+
+    if (showUploadCancelDialog) {
+        NachoInfoDialog(
+            title = stringResource(R.string.dialog_back_title),
+            message = stringResource(R.string.dialog_back_message),
+            confirmText = stringResource(R.string.dialog_back_confirm),
+            dismissText = stringResource(R.string.dialog_back_cancel),
+            onConfirm = {
+                showUploadCancelDialog = false
+                doNavigateBack()
+            },
+            onDismiss = { showUploadCancelDialog = false },
+        )
     }
 }
 
@@ -656,6 +684,7 @@ private fun InvitationMoreMenu(
 private fun MyInvitationDetailScreenPreview() {
     NachoTheme {
         MyInvitationDetailScreen(
+            isGuestBookUploading = false,
             uiState =
                 MyInvitationDetailUiState(
                     isLoading = false,
