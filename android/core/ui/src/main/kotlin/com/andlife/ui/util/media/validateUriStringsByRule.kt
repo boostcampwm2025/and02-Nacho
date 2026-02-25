@@ -1,7 +1,5 @@
 package com.andlife.ui.util.media
 
-import android.content.Context
-import android.net.Uri
 import com.andlife.ui.component.invitation.SelectedMedia
 
 /**
@@ -48,18 +46,5 @@ fun validateSelectedMediasByRule(
             }
         }
     return Triple(validSelectedMedias, exceededAvailableBytes, exceededAvailableSlots)
-}
-
-fun getFileSizeOrNull(
-    context: Context,
-    uri: Uri,
-): Long? {
-    return try {
-        context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
-            pfd.statSize.takeIf { it > 0 }
-        }
-    } catch (e: Exception) {
-        null
-    }
 }
 
