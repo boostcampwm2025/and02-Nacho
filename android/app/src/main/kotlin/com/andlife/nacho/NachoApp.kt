@@ -6,7 +6,6 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.navOptions
 import com.andlife.invitation.InvitationDetail
-import com.andlife.login.Login
 import com.andlife.nacho.model.MainSideEffect
 import com.andlife.nacho.navigation.NachoNavHost
 import com.andlife.nacho.navigation.rememberInvitationNavigator
