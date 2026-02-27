@@ -46,7 +46,6 @@ fun NavController.navigateToMyInvitationDetail(
 
 fun NavGraphBuilder.myInvitationNavGraph(
     snackbarHostState: SnackbarHostState,
-    paddingValues: PaddingValues,
     onNavigateToCreate: () -> Unit,
     onNavigateToDetail: (Long) -> Unit,
     onNavigateToLogin: () -> Unit,
@@ -70,7 +69,7 @@ fun NavGraphBuilder.myInvitationNavGraph(
             onNavigateToCreate = onNavigateToCreate,
             onNavigateToDetail = onNavigateToDetail,
             onNavigateToLogin = onNavigateToLogin,
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier
         )
     }
 }
