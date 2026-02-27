@@ -29,7 +29,6 @@ fun NavController.navigateToHome(navOptions: NavOptions) {
 }
 
 fun NavGraphBuilder.homeNavGraph(
-    paddingValues: PaddingValues,
     snackbarHostState: SnackbarHostState,
     onNavigateToCreate: () -> Unit,
     onNavigateToLogin: () -> Unit,
@@ -56,7 +55,7 @@ fun NavGraphBuilder.homeNavGraph(
             onNavigateToInvitationDetail = onNavigateToInvitationDetail,
             onNavigateToMyInvitationDetail = onNavigateToMyInvitationDetail,
             onNavigateToSetting = onNavigateToSetting,
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier,
         )
     }
 }
