@@ -56,6 +56,11 @@ sealed interface InvitationFormUiEvent : BaseUiEvent {
         val announcement: AnnouncementUiModel,
     ) : InvitationFormUiEvent
 
+    data class ReorderAnnouncement(
+        val fromIndex: Int,
+        val toIndex: Int
+    ): InvitationFormUiEvent
+
     data object OnClickBack : InvitationFormUiEvent
 
     data object OnClickSave : InvitationFormUiEvent
