@@ -13,7 +13,6 @@ dependencies {
     // paging
     implementation(libs.androidx.paging.compose)
     implementation(libs.kotlinx.datetime)
-    implementation(libs.compose.reorderable)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
