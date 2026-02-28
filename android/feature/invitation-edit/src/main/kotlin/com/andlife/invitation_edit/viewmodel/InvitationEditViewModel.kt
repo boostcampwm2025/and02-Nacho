@@ -312,6 +312,27 @@ class InvitationEditViewModel @Inject constructor(
         }
     }
 
+    private fun reorderAnnouncement(event: InvitationFormUiEvent.ReorderAnnouncement) {
+        val currentList = uiState.value.invitationFormUiModel.announcement.toMutableList()
+
+        if (event.fromIndex !in currentList.indices || event.toIndex !in currentList.indices) return
+
+        val movedItem = currentList.removeAt(event.fromIndex)
+        currentList.add(event.toIndex, movedItem)
+
+        val updatedList = currentList.mapIndexed { index, announcement ->
+            announcement.copy(displayOrder = index)
+        }.toPersistentList()
+
+        updateState {
+            copy(
+                invitationFormUiModel = invitationFormUiModel.copy(
+                    announcement = updatedList
+                )
+            )
+        }
+    }
+
     companion object {
         private const val MAX_IMAGE_COUNT = 10
         private const val PREFIX_EXISTING_IMAGE = "EXISTING_"
