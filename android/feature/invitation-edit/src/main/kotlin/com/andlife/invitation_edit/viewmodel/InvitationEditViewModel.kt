@@ -67,7 +67,7 @@ class InvitationEditViewModel @Inject constructor(
             is InvitationFormUiEvent.UpdateAnnouncement -> updateAnnouncement(event)
             is InvitationFormUiEvent.RemoveImage -> updateRemoveImage(event)
             is InvitationFormUiEvent.RemoveAnnouncement -> updateRemoveAnnouncement(event)
-            is InvitationFormUiEvent.ReorderAnnouncement -> {}
+            is InvitationFormUiEvent.ReorderAnnouncement -> reorderAnnouncement(event)
             InvitationFormUiEvent.OnClickBack -> onBackClick()
             InvitationFormUiEvent.OnClickSave -> updateInvitation()
             InvitationFormUiEvent.OnClickPreview -> {}
@@ -223,11 +223,15 @@ class InvitationEditViewModel @Inject constructor(
     }
 
     private fun updateRemoveAnnouncement(event: InvitationFormUiEvent.RemoveAnnouncement) {
-        val newAnnouncementList = uiState.value.invitationFormUiModel.announcement
-            .toPersistentList()
-            .remove(event.announcement)
+        val currentList = uiState.value.invitationFormUiModel.announcement.toMutableList()
+        currentList.remove(event.announcement)
+
+        val updatedList = currentList.mapIndexed { index, announcement ->
+            announcement.copy(displayOrder = index)
+        }.toPersistentList()
+
         updateState {
-            copy(invitationFormUiModel = invitationFormUiModel.copy(announcement = newAnnouncementList))
+            copy(invitationFormUiModel = invitationFormUiModel.copy(announcement = updatedList))
         }
     }
 
