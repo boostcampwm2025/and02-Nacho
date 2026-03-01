@@ -252,7 +252,10 @@ private fun MyInvitationScreen(
 
                         PullToRefreshBox(
                             isRefreshing = isMediatorLoading,
-                            onRefresh = { currentItems.refresh() },
+                            onRefresh = {
+                                upcomingItems.refresh()
+                                pastItems.refresh()
+                            },
                             modifier = Modifier.fillMaxSize()
                         ) {
                             PagingStateContent(
