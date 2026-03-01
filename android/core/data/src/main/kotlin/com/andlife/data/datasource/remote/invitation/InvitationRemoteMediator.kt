@@ -4,7 +4,6 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import androidx.paging.RemoteMediator.InitializeAction
 import androidx.room.withTransaction
 import com.andlife.data.repository.invitation.mapper.toEntity
 import com.andlife.database.InvitationDatabase
@@ -25,7 +24,13 @@ class InvitationRemoteMediator(
 
     private val dao = database.invitationSummaryDao()
 
-    override suspend fun initialize(): InitializeAction = InitializeAction.LAUNCH_INITIAL_REFRESH
+    override suspend fun initialize(): InitializeAction {
+        return if (dao.count(status.name, isMyInvitation) > 0) {
+            InitializeAction.SKIP_INITIAL_REFRESH
+        } else {
+            InitializeAction.LAUNCH_INITIAL_REFRESH
+        }
+    }
 
     override suspend fun load(
         loadType: LoadType,
