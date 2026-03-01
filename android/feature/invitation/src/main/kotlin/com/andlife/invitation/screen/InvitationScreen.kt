@@ -1,5 +1,6 @@
 package com.andlife.invitation.screen
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,7 +9,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,7 +27,6 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.invitation.SortDirection
@@ -39,6 +38,7 @@ import com.andlife.model.invitation.InvitationSummaryUiModel
 import com.andlife.ui.R
 import com.andlife.ui.component.GenericTabRow
 import com.andlife.ui.component.dialog.LoginDialog
+import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.ui.component.invitation.InvitationListHeader
 import com.andlife.ui.component.invitation.InvitationTopBar
 import com.andlife.ui.component.listitem.InvitationListItem
@@ -256,10 +256,12 @@ private fun InvitationScreen(
                                                 if (index == 0) SortDirection.DESC else SortDirection.ASC
                                             }
 
-                                            onEvent(InvitationUiEvent.ChangeSort(
-                                                isUpcoming = isUpcoming,
-                                                newSort = newDirection
-                                            ))
+                                            onEvent(
+                                                InvitationUiEvent.ChangeSort(
+                                                    isUpcoming = isUpcoming,
+                                                    newSort = newDirection
+                                                )
+                                            )
                                         }
                                     )
                                 }

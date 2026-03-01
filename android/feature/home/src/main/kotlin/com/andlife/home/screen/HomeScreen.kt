@@ -69,7 +69,6 @@ import com.andlife.model.common.VideoCandidate
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.model.invitation.UpcomingInvitationUiModel
-import com.andlife.ui.R as uiR
 import com.andlife.ui.component.dialog.LoginDialog
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItem
@@ -85,6 +84,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
 import com.andlife.designsystem.R as designR
+import com.andlife.ui.R as uiR
 
 private const val GUESTBOOK_KEY_OFFSET = 2
 private const val UPCOMING_CARD_WIDTH_RATIO = 0.85f
