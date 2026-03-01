@@ -1,5 +1,6 @@
 package com.andlife.nacho.navigation
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +16,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +30,7 @@ import com.andlife.deeplink.DeepLinkManager
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.domain.util.AnalyticsEvent
 import com.andlife.home.homeNavGraph
 import com.andlife.invitation.invitationDetailNavGraph
 import com.andlife.invitation.invitationNavGraph
@@ -44,6 +47,7 @@ import com.andlife.model.util.NavigationKeyConstant.CREATE_THANKS_CARD
 import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
 import com.andlife.myinvitation.myInvitationDetailNavGraph
 import com.andlife.myinvitation.myInvitationNavGraph
+import com.andlife.nacho.LocalAnalyticsLogger
 import com.andlife.setting.settingNavGraph
 import com.andlife.thanks_card.createThanksCardNavGraph
 import com.andlife.thanks_card.updateThanksCardNavGraph
@@ -58,6 +62,13 @@ fun NachoNavHost(
     modifier: Modifier = Modifier,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val analyticsLogger = LocalAnalyticsLogger.current
+    LaunchedEffect(navigator.currentDestination) {
+        navigator.navController.currentDestination?.route?.let { route ->
+            analyticsLogger.logEvent(AnalyticsEvent.ScreenView(route))
+        }
+    }
+
     Scaffold(
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
         snackbarHost = {

@@ -15,6 +15,7 @@ import com.andlife.domain.model.guestbook.GuestBookMedia
 import com.andlife.domain.model.guestbook.MediaFile
 import com.andlife.domain.model.guestbook.MediaType
 import com.andlife.domain.model.guestbook.UploadGuestBookState
+import com.andlife.domain.util.CrashlyticsLogger
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
 import com.andlife.domain.util.ThumbnailGenerator
@@ -31,6 +32,7 @@ class UploadWorker @AssistedInject constructor(
     private val mediaFileProvider: MediaFileProvider,
     private val thumbnailGenerator: ThumbnailGenerator,
     private val notificationManager: UploadNotificationManager,
+    private val crashlyticsLogger: CrashlyticsLogger,
 ) : CoroutineWorker(context, params) {
 
     private val uniqueNotificationId: Int by lazy { id.hashCode() }
@@ -181,13 +183,6 @@ class UploadWorker @AssistedInject constructor(
             }
 
             // 4단계: 미디어 업로드 완료 (80-100%)
-//            updateProgress(
-//                progress = 100,
-//                currentFileName = "미디어 업로드 완료",
-//                currentOrder = guestBookMedias.size,
-//                totalCount = guestBookMedias.size
-//            )
-
             Result.success(
                 workDataOf(
                     UploadKey.INVITATION_ID to invitationId,
@@ -208,6 +203,7 @@ class UploadWorker @AssistedInject constructor(
                 Result.failure(errorData(UploadNoti.MSG_CANCELLED))
             } else {
                 Log.e(TAG, "전체 프로세스 중 오류 발생", e)
+                crashlyticsLogger.log(e.message ?: "upload Error")
                 Result.failure(errorData(e.message ?: UploadError.UNKNOWN))
             }
         }

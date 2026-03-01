@@ -3,6 +3,10 @@ package com.andlife.setting.viewmodel
 import androidx.lifecycle.viewModelScope
 import com.andlife.domain.model.auth.AuthState
 import com.andlife.domain.repository.user.UserRepository
+import com.andlife.domain.util.AnalyticsEvent
+import com.andlife.domain.util.AnalyticsLogger
+import com.andlife.domain.util.Button
+import com.andlife.domain.util.Screen
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.setting.model.NicknameError
@@ -21,7 +25,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingViewModel @Inject constructor(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val analyticsLogger: AnalyticsLogger
 ) : BaseViewModel<SettingUiState, SettingUiEvent, SettingSideEffect>(SettingUiState()) {
 
     override val uiState: StateFlow<SettingUiState> = mutableUiState
@@ -37,11 +42,23 @@ class SettingViewModel @Inject constructor(
     override fun onEvent(event: SettingUiEvent) {
         when (event) {
             is SettingUiEvent.OnNicknameChanged -> validateNickname(event.nickname)
-            is SettingUiEvent.ClickConfirmNickname -> updateProfile(event.nickname)
-            is SettingUiEvent.ClickConfirmProfileImage -> updateProfile(imageUri = event.uri)
+            is SettingUiEvent.ClickConfirmNickname -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.SETTING, Button.SETTING_NICKNAME))
+                updateProfile(event.nickname)
+            }
+            is SettingUiEvent.ClickConfirmProfileImage -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.SETTING, Button.SETTING_PROFILE_IMAGE))
+                updateProfile(imageUri = event.uri)
+            }
             SettingUiEvent.ClickBack -> sendEffect(SettingSideEffect.PopBackStack)
-            SettingUiEvent.ClickLogout -> logout()
-            SettingUiEvent.ClickSignOut -> signOut()
+            SettingUiEvent.ClickLogout -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.SETTING, Button.SETTING_LOGOUT))
+                logout()
+            }
+            SettingUiEvent.ClickSignOut -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.SETTING, Button.SETTING_SIGN_OUT))
+                signOut()
+            }
         }
     }
 

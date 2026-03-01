@@ -11,8 +11,13 @@ import androidx.navigation.toRoute
 import com.andlife.deeplink.DeepLinkManager
 import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.domain.repository.thankscard.ThanksCardRepository
+import com.andlife.domain.util.AnalyticsEvent
+import com.andlife.domain.util.AnalyticsLogger
+import com.andlife.domain.util.Button
 import com.andlife.domain.util.RefreshEventHub
 import com.andlife.domain.util.RefreshEventHub.RefreshTarget
+import com.andlife.domain.util.Screen
+import com.andlife.domain.util.ShareMethod
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.editor.util.CreateCardSession
@@ -42,6 +47,7 @@ class MyInvitationDetailViewModel @Inject constructor(
     private val deepLinkManager: DeepLinkManager,
     private val clipboardManager: ClipboardManager,
     private val thanksCardRepository: ThanksCardRepository,
+    private val analyticsLogger: AnalyticsLogger
 ) : BaseViewModel<MyInvitationDetailUiState, MyInvitationDetailUiEvent, MyInvitationDetailSideEffect>(
     initialState = MyInvitationDetailUiState(),
 ) {
@@ -80,18 +86,55 @@ class MyInvitationDetailViewModel @Inject constructor(
         when (event) {
             is MyInvitationDetailUiEvent.ClickBack -> clickClose()
             is MyInvitationDetailUiEvent.ClickThanksCard -> showThanksCardOnboarding()
-            is MyInvitationDetailUiEvent.ClickShare -> shareInvitation()
-            is MyInvitationDetailUiEvent.ClickEdit -> navigateToEditInvitation()
-            is MyInvitationDetailUiEvent.ClickDelete -> deleteInvitation()
-            is MyInvitationDetailUiEvent.CreateThanksCard -> navigateToCreateThanksCard()
-            is MyInvitationDetailUiEvent.ClickEditCard -> navigateToEditCard()
+            is MyInvitationDetailUiEvent.ClickShare -> {
+                analyticsLogger.logEvent(
+                    AnalyticsEvent.Share(
+                        myInvitationId.toString(),
+                        ShareMethod.KAKAO_LINK
+                    )
+                )
+                shareInvitation()
+            }
+            is MyInvitationDetailUiEvent.ClickEdit -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL, Button.UPDATE_INVITATION))
+                navigateToEditInvitation()
+            }
+            is MyInvitationDetailUiEvent.ClickDelete -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL, Button.DELETE_INVITATION))
+                deleteInvitation()
+            }
+            is MyInvitationDetailUiEvent.CreateThanksCard -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL, Button.CREATE_THANKS_CARD))
+                navigateToCreateThanksCard()
+            }
+            is MyInvitationDetailUiEvent.ClickEditCard -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL, Button.UPDATE_INVITATION_CARD))
+                navigateToEditCard()
+            }
             is MyInvitationDetailUiEvent.ClickImage -> navigateToFullScreenImage(event.imageList, event.index)
             is MyInvitationDetailUiEvent.MapError -> showMapErrorSnackbar()
             is MyInvitationDetailUiEvent.RetryLoad -> retryLoad()
-            MyInvitationDetailUiEvent.ClickCreateCard -> navigateToCreateCard()
-            MyInvitationDetailUiEvent.CopyInvitationLink -> copyInvitationLink()
-            MyInvitationDetailUiEvent.ClickDeleteThanksCard -> deleteThanksCard()
-            is MyInvitationDetailUiEvent.ClickUpdateThanksCard -> updateThanksCard(event.cardId)
+            MyInvitationDetailUiEvent.ClickCreateCard -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL, Button.CREATE_INVITATION_CARD))
+                navigateToCreateCard()
+            }
+            MyInvitationDetailUiEvent.CopyInvitationLink -> {
+                analyticsLogger.logEvent(
+                    AnalyticsEvent.Share(
+                        myInvitationId.toString(),
+                        ShareMethod.CLIPBOARD
+                    )
+                )
+                copyInvitationLink()
+            }
+            MyInvitationDetailUiEvent.ClickDeleteThanksCard -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL, Button.DELETE_THANKS_CARD))
+                deleteThanksCard()
+            }
+            is MyInvitationDetailUiEvent.ClickUpdateThanksCard -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL, Button.UPDATE_THANKS_CARD))
+                updateThanksCard(event.cardId)
+            }
             MyInvitationDetailUiEvent.LottieStarted -> updateLottieStarted()
         }
     }

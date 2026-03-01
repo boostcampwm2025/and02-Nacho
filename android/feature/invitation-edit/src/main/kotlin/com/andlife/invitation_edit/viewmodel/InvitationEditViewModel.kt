@@ -69,6 +69,7 @@ class InvitationEditViewModel @Inject constructor(
             is InvitationFormUiEvent.RemoveAnnouncement -> updateRemoveAnnouncement(event)
             InvitationFormUiEvent.OnClickBack -> onBackClick()
             InvitationFormUiEvent.OnClickSave -> updateInvitation()
+            InvitationFormUiEvent.OnClickPreview -> {}
         }
     }
 

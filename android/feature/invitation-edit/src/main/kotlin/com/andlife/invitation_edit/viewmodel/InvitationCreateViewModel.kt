@@ -6,6 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.andlife.domain.util.Result
 import com.andlife.domain.error.DataError
 import com.andlife.domain.repository.invitation.InvitationRepository
+import com.andlife.domain.util.AnalyticsEvent
+import com.andlife.domain.util.AnalyticsEvent.*
+import com.andlife.domain.util.AnalyticsLogger
+import com.andlife.domain.util.Button
+import com.andlife.domain.util.EventType
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
 import com.andlife.domain.util.map
@@ -27,6 +32,7 @@ import com.andlife.model.editor.NachoUiCard
 import com.andlife.model.editor.toDomain
 import com.andlife.domain.util.RefreshEventHub
 import com.andlife.domain.util.RefreshEventHub.RefreshTarget
+import com.andlife.domain.util.Screen
 import com.andlife.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toPersistentList
@@ -42,6 +48,7 @@ class InvitationCreateViewModel @Inject constructor(
     private val mediaUploader: MediaUploader,
     private val editorConverter: CardConverter,
     private val invitationRepository: InvitationRepository,
+    private val analyticsLogger: AnalyticsLogger
 ) : BaseViewModel<InvitationFormUiState, InvitationFormUiEvent, InvitationFormSideEffect>(
     InvitationFormUiState(),
 ) {
@@ -62,7 +69,15 @@ class InvitationCreateViewModel @Inject constructor(
             is InvitationFormUiEvent.RemoveImage -> updateRemoveImage(event)
             is InvitationFormUiEvent.RemoveAnnouncement -> updateRemoveAnnouncement(event)
             InvitationFormUiEvent.OnClickBack -> onBackClick()
-            InvitationFormUiEvent.OnClickSave -> createInvitation()
+            InvitationFormUiEvent.OnClickSave -> {
+                analyticsLogger.logEvent(ButtonClick(Screen.INVITATION_CREATE, Button.INVITATION_CREATE))
+                createInvitation()
+            }
+
+            InvitationFormUiEvent.OnClickPreview -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.INVITATION_PREVIEW, Button.PREVIEW_INVITATION))
+                sendEffect(InvitationFormSideEffect.NavigateToPreview)
+            }
         }
     }
 
@@ -168,7 +183,7 @@ class InvitationCreateViewModel @Inject constructor(
             .toPersistentList()
             .remove(event.announcement)
         updateState {
-            copy(invitationFormUiModel = invitationFormUiModel.copy(announcement = newAnnouncementList),)
+            copy(invitationFormUiModel = invitationFormUiModel.copy(announcement = newAnnouncementList))
         }
     }
 

@@ -1,13 +1,16 @@
 package com.andlife.login.viewmodel
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.user.UserRepository
+import com.andlife.domain.util.AnalyticsEvent
+import com.andlife.domain.util.AnalyticsLogger
+import com.andlife.domain.util.Button
+import com.andlife.domain.util.CrashlyticsLogger
+import com.andlife.domain.util.LoginMethod
+import com.andlife.domain.util.Screen
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
-import com.andlife.login.Login
 import com.andlife.login.model.LoginSideEffect
 import com.andlife.login.model.LoginUiEvent
 import com.andlife.login.model.LoginUiState
@@ -22,13 +25,21 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val authStateManager: AuthStateManager,
+    private val analyticsLogger: AnalyticsLogger,
+    private val crashLogger: CrashlyticsLogger,
 ) : BaseViewModel<LoginUiState, LoginUiEvent, LoginSideEffect>(LoginUiState()) {
 
     override val uiState: StateFlow<LoginUiState> = mutableUiState.asStateFlow()
     override fun onEvent(event: LoginUiEvent) {
         when (event) {
-            LoginUiEvent.GuestLogin -> guest()
-            is LoginUiEvent.SocialLoginSuccess -> login(event.accessToken)
+            LoginUiEvent.GuestLogin -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.LOGIN, Button.GUEST_LOGIN))
+                guest()
+            }
+            is LoginUiEvent.SocialLoginSuccess -> {
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.LOGIN, Button.KAKAO_LOGIN))
+                login(event.accessToken)
+            }
             LoginUiEvent.TestLogin -> testLogin()
         }
     }
@@ -38,9 +49,11 @@ class LoginViewModel @Inject constructor(
             updateState { copy(true) }
             userRepository.login(accessToken)
                 .onFailure { error, msg ->
+                    crashLogger.recordException("$error: $msg")
                     sendEffect(LoginSideEffect.FailSocialLogin)
                 }
                 .onSuccess {
+                    analyticsLogger.logEvent(AnalyticsEvent.Login(LoginMethod.KAKAO))
                     authStateManager.navigateToHome()
                 }
             updateState { copy(false) }
@@ -66,9 +79,11 @@ class LoginViewModel @Inject constructor(
             updateState { copy(true) }
             userRepository.guestLogin()
                 .onFailure { error, msg ->
+                    crashLogger.recordException("$error: $msg")
                     sendEffect(LoginSideEffect.FailGuestLogin)
                 }
                 .onSuccess {
+                    analyticsLogger.logEvent(AnalyticsEvent.Login(LoginMethod.GUEST))
                     authStateManager.navigateToHome()
                 }
             updateState { copy(false) }
