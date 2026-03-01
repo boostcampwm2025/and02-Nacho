@@ -107,10 +107,6 @@ class InvitationViewModel @Inject constructor(
 
     override fun onEvent(event: InvitationUiEvent) {
         when (event) {
-            is InvitationUiEvent.Refresh -> {
-                updateState { copy(isRefreshing = true) }
-            }
-
             is InvitationUiEvent.SelectTab -> {
                 updateState { copy(selectedTab = event.index) }
             }
@@ -178,11 +174,6 @@ class InvitationViewModel @Inject constructor(
                 }
             updateState { copy(isRefreshing = false) }
         }
-    }
-
-    fun onRefreshFinished(hasError: Boolean) {
-        updateState { copy(isRefreshing = false) }
-        if (hasError) sendEffect(InvitationSideEffect.RefreshFailure)
     }
 
     fun handleRefresh() {

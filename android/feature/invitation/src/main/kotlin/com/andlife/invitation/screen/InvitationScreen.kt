@@ -78,12 +78,6 @@ fun InvitationRoute(
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is InvitationSideEffect.NavigateToDetail -> onNavigateToDetail(effect.id)
-            is InvitationSideEffect.RefreshFailure -> {
-                scope.launch {
-                    snackbarHostState.currentSnackbarData?.dismiss()
-                    snackbarHostState.showSnackbar(refreshFailureMessage)
-                }
-            }
             is InvitationSideEffect.LeaveSuccess -> {
                 scope.launch {
                     snackbarHostState.currentSnackbarData?.dismiss()
@@ -117,15 +111,15 @@ fun InvitationRoute(
         }
     }
 
-    LaunchedEffect(upcomingItems.loadState.refresh, pastItems.loadState.refresh) {
-        val isNotLoading = upcomingItems.loadState.refresh !is LoadState.Loading &&
-            pastItems.loadState.refresh !is LoadState.Loading
-
-        if (isNotLoading && uiState.isRefreshing) {
-            viewModel.onRefreshFinished(
-                hasError = upcomingItems.loadState.refresh is LoadState.Error ||
-                    pastItems.loadState.refresh is LoadState.Error
-            )
+    LaunchedEffect(upcomingItems.loadState.mediator?.refresh, pastItems.loadState.mediator?.refresh) {
+        val hasError =
+            upcomingItems.loadState.mediator?.refresh is LoadState.Error ||
+            pastItems.loadState.mediator?.refresh is LoadState.Error
+        if (hasError) {
+            scope.launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar(refreshFailureMessage)
+            }
         }
     }
 
@@ -219,10 +213,7 @@ private fun InvitationScreen(
 
                 PullToRefreshBox(
                     isRefreshing = uiState.isRefreshing || isMediatorLoading,
-                    onRefresh = {
-                        currentItems.refresh()
-                        onEvent(InvitationUiEvent.Refresh)
-                    },
+                    onRefresh = { currentItems.refresh() },
                     modifier = Modifier.fillMaxSize()
                 ) {
                     PagingStateContent(
