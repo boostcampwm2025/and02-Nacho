@@ -24,13 +24,7 @@ class InvitationRemoteMediator(
 
     private val dao = database.invitationSummaryDao()
 
-    override suspend fun initialize(): InitializeAction {
-        return if (dao.count(status.name, isMyInvitation) > 0) {
-            InitializeAction.SKIP_INITIAL_REFRESH
-        } else {
-            InitializeAction.LAUNCH_INITIAL_REFRESH
-        }
-    }
+    override suspend fun initialize(): InitializeAction = InitializeAction.SKIP_INITIAL_REFRESH
 
     override suspend fun load(
         loadType: LoadType,

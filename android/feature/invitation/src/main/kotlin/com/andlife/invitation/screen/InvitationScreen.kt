@@ -75,6 +75,27 @@ fun InvitationRoute(
     val reportSuccessMessage = stringResource(R.string.msg_report_success)
     val reportFailureMessage = stringResource(R.string.msg_report_failure)
 
+    LaunchedEffect(upcomingItems.loadState.source.refresh, pastItems.loadState.source.refresh) {
+        val upcomingReady = upcomingItems.loadState.source.refresh is LoadState.NotLoading
+        val pastReady = pastItems.loadState.source.refresh is LoadState.NotLoading
+
+        if (upcomingReady || pastReady) {
+            viewModel.triggerBackgroundRefresh()
+        }
+    }
+
+    LaunchedEffect(upcomingItems.loadState.mediator?.refresh, pastItems.loadState.mediator?.refresh) {
+        val hasError =
+            upcomingItems.loadState.mediator?.refresh is LoadState.Error ||
+            pastItems.loadState.mediator?.refresh is LoadState.Error
+        if (hasError) {
+            scope.launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar(refreshFailureMessage)
+            }
+        }
+    }
+
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is InvitationSideEffect.NavigateToDetail -> onNavigateToDetail(effect.id)
@@ -105,18 +126,6 @@ fun InvitationRoute(
                     snackbarHostState.currentSnackbarData?.dismiss()
                     snackbarHostState.showSnackbar(effect.message ?: reportFailureMessage)
                 }
-            }
-        }
-    }
-
-    LaunchedEffect(upcomingItems.loadState.mediator?.refresh, pastItems.loadState.mediator?.refresh) {
-        val hasError =
-            upcomingItems.loadState.mediator?.refresh is LoadState.Error ||
-            pastItems.loadState.mediator?.refresh is LoadState.Error
-        if (hasError) {
-            scope.launch {
-                snackbarHostState.currentSnackbarData?.dismiss()
-                snackbarHostState.showSnackbar(refreshFailureMessage)
             }
         }
     }

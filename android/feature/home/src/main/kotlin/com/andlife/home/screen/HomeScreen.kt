@@ -177,21 +177,11 @@ fun HomeRoute(
         }
     }
 
-    LaunchedEffect(guestBooks.itemCount) {
-        val currentCount = guestBooks.itemCount
-        if (currentCount < lastPrecachedCount) lastPrecachedCount = 0
-        if (currentCount <= lastPrecachedCount) return@LaunchedEffect
-
-        val videoUrls = (lastPrecachedCount until currentCount).mapNotNull { index ->
-            val item = guestBooks.peek(index)
-            item?.visualMedias?.firstOrNull { it.type == MediaUiType.VIDEO }?.url
-        }.distinct()
-
-        lastPrecachedCount = currentCount
-
-        if (videoUrls.isNotEmpty()) {
-            viewModel.videoPlayerPool.preparePlayers(videoUrls.size)
-            viewModel.videoPlayerPool.precacheVideos(videoUrls)
+    LaunchedEffect(upcomingInvitations.loadState.source.refresh, guestBooks.loadState.source.refresh) {
+        val upcomingReady = upcomingInvitations.loadState.source.refresh is LoadState.NotLoading
+        val guestBooksReady = guestBooks.loadState.source.refresh is LoadState.NotLoading
+        if (upcomingReady || guestBooksReady) {
+            viewModel.triggerBackgroundRefresh()
         }
     }
 
@@ -211,6 +201,24 @@ fun HomeRoute(
         if (isNotLoading && pendingScrollToTop) {
             pendingScrollToTop = false
             lazyListState.animateScrollToItem(0)
+        }
+    }
+
+    LaunchedEffect(guestBooks.itemCount) {
+        val currentCount = guestBooks.itemCount
+        if (currentCount < lastPrecachedCount) lastPrecachedCount = 0
+        if (currentCount <= lastPrecachedCount) return@LaunchedEffect
+
+        val videoUrls = (lastPrecachedCount until currentCount).mapNotNull { index ->
+            val item = guestBooks.peek(index)
+            item?.visualMedias?.firstOrNull { it.type == MediaUiType.VIDEO }?.url
+        }.distinct()
+
+        lastPrecachedCount = currentCount
+
+        if (videoUrls.isNotEmpty()) {
+            viewModel.videoPlayerPool.preparePlayers(videoUrls.size)
+            viewModel.videoPlayerPool.precacheVideos(videoUrls)
         }
     }
 
