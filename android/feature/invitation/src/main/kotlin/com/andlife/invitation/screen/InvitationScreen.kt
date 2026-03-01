@@ -215,8 +215,10 @@ private fun InvitationScreen(
                 val currentSortOptions = if (isUpcoming) upcomingSortOptions else pastSortOptions
                 val currentSortIndex = if (isUpcoming) upcomingSortIndex else pastSortIndex
 
+                val isMediatorLoading = currentItems.loadState.mediator?.refresh is LoadState.Loading
+
                 PullToRefreshBox(
-                    isRefreshing = uiState.isRefreshing,
+                    isRefreshing = uiState.isRefreshing || isMediatorLoading,
                     onRefresh = {
                         currentItems.refresh()
                         onEvent(InvitationUiEvent.Refresh)
