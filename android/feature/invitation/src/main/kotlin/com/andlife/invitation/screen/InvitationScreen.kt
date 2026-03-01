@@ -83,8 +83,6 @@ fun InvitationRoute(
                     snackbarHostState.currentSnackbarData?.dismiss()
                     snackbarHostState.showSnackbar(leaveSuccessMessage)
                 }
-                upcomingItems.refresh()
-                pastItems.refresh()
             }
             is InvitationSideEffect.LeaveFailure -> {
                 scope.launch {

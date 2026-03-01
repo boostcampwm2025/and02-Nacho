@@ -51,6 +51,7 @@ internal class InvitationRepositoryImpl @Inject constructor(
     override suspend fun leaveInvitation(invitationId: Long): Result<Unit, DataError> {
         return invitationRemoteDataSource.leaveInvitation(invitationId).onSuccess {
             userStorage.deleteInvitationId(invitationId)
+            database.invitationSummaryDao().deleteById(invitationId)
         }
     }
 
