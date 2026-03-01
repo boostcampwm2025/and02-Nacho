@@ -1,11 +1,14 @@
 package com.andlife.data.repository.guestbook
 
+import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.andlife.data.datasource.remote.guestbook.AllGuestBookPagingSource
+import androidx.paging.map
+import com.andlife.data.datasource.remote.guestbook.AllGuestBookRemoteMediator
 import com.andlife.data.datasource.remote.guestbook.GuestBookPagingSource
 import com.andlife.data.datasource.remote.guestbook.GuestBookRemoteDataSource
+import com.andlife.database.InvitationDatabase
 import com.andlife.domain.error.DataError
 import com.andlife.domain.model.guestbook.GalleryMedia
 import com.andlife.domain.model.guestbook.GuestBook
@@ -16,10 +19,12 @@ import com.andlife.domain.util.map
 import com.andlife.network.model.guestbook.GuestBookRequest
 import com.andlife.network.model.guestbook.UpdateGuestBookRequest
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 internal class GuestBookRepositoryImpl @Inject constructor(
     private val guestBookRemoteDataSource: GuestBookRemoteDataSource,
+    private val database: InvitationDatabase,
 ) : GuestBookRepository {
     override suspend fun getMediaCollection(invitationId: Long): Result<List<GalleryMedia>, DataError> {
         val result = guestBookRemoteDataSource.getMediaCollection(invitationId)
@@ -82,17 +87,24 @@ internal class GuestBookRepositoryImpl @Inject constructor(
         guestBookRemoteDataSource.deleteGuestBook(guestBookId)
 
 
-    override fun getAllRelatedGuestBooks(): Flow<PagingData<GuestBook>>  =
+    @OptIn(ExperimentalPagingApi::class)
+    override fun getAllRelatedGuestBooks(): Flow<PagingData<GuestBook>> =
         Pager(
             config = PagingConfig(
                 pageSize = PAGE_SIZE,
                 enablePlaceholders = false,
                 initialLoadSize = PAGE_SIZE
             ),
+            remoteMediator = AllGuestBookRemoteMediator(
+                remoteDataSource = guestBookRemoteDataSource,
+                database = database,
+            ),
             pagingSourceFactory = {
-                AllGuestBookPagingSource(guestBookRemoteDataSource)
+                database.guestBookDao().pagingSource()
             }
-        ).flow
+        ).flow.map { pagingData ->
+            pagingData.map { it.toDomain() }
+        }
 
     companion object {
         private const val PAGE_SIZE = 10
