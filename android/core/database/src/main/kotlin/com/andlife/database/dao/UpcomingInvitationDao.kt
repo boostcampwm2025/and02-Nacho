@@ -9,9 +9,6 @@ import com.andlife.database.entity.UpcomingInvitationEntity
 @Dao
 interface UpcomingInvitationDao {
 
-    @Query("SELECT COUNT(*) FROM upcoming_invitation")
-    suspend fun count(): Int
-
     @Query("SELECT * FROM upcoming_invitation ORDER BY invitationDate ASC, startTime ASC")
     fun pagingSource(): PagingSource<Int, UpcomingInvitationEntity>
 
@@ -20,4 +17,7 @@ interface UpcomingInvitationDao {
 
     @Query("DELETE FROM upcoming_invitation")
     suspend fun clearAll()
+
+    @Query("SELECT COUNT(*) FROM upcoming_invitation")
+    suspend fun count(): Int
 }
