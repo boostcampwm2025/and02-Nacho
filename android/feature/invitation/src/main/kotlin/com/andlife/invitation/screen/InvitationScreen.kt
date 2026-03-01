@@ -212,7 +212,7 @@ private fun InvitationScreen(
                 val isMediatorLoading = currentItems.loadState.mediator?.refresh is LoadState.Loading
 
                 PullToRefreshBox(
-                    isRefreshing = uiState.isRefreshing || isMediatorLoading,
+                    isRefreshing = isMediatorLoading,
                     onRefresh = { currentItems.refresh() },
                     modifier = Modifier.fillMaxSize()
                 ) {

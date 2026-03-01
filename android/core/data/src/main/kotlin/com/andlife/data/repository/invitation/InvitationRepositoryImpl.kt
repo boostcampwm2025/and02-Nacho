@@ -72,7 +72,9 @@ internal class InvitationRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteInvitation(invitationId: Long): Result<Unit, DataError> =
-        invitationRemoteDataSource.deleteInvitation(invitationId)
+        invitationRemoteDataSource.deleteInvitation(invitationId).onSuccess {
+            database.invitationSummaryDao().deleteById(invitationId)
+        }
 
     override suspend fun getInvitation(invitationId: Long): Result<Invitation, DataError> =
         invitationRemoteDataSource.getInvitation(invitationId).map { response ->

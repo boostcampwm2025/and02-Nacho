@@ -95,8 +95,6 @@ fun MyInvitationRoute(
                     snackbarHostState.currentSnackbarData?.dismiss()
                     snackbarHostState.showSnackbar(deleteSuccessMessage)
                 }
-                upcomingItems.refresh()
-                pastItems.refresh()
             }
 
             is MyInvitationSideEffect.DeleteFailure -> {
@@ -253,7 +251,7 @@ private fun MyInvitationScreen(
                         val isMediatorLoading = currentItems.loadState.mediator?.refresh is LoadState.Loading
 
                         PullToRefreshBox(
-                            isRefreshing = uiState.isRefreshing || isMediatorLoading,
+                            isRefreshing = isMediatorLoading,
                             onRefresh = { currentItems.refresh() },
                             modifier = Modifier.fillMaxSize()
                         ) {

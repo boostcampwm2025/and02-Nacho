@@ -162,7 +162,6 @@ class InvitationViewModel @Inject constructor(
 
     fun leaveInvitation(invitationId: Long) {
         viewModelScope.launch {
-            updateState { copy(isRefreshing = true) }
             invitationRepository.leaveInvitation(invitationId)
                 .onSuccess {
                     sendEffect(InvitationSideEffect.LeaveSuccess)
@@ -172,7 +171,6 @@ class InvitationViewModel @Inject constructor(
                     sendEffect(InvitationSideEffect.LeaveFailure)
                     Log.e("InvitationViewModel", "에러 발생: $it")
                 }
-            updateState { copy(isRefreshing = false) }
         }
     }
 
