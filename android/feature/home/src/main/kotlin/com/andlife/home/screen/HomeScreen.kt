@@ -545,6 +545,20 @@ private fun LazyListScope.homeUpcomingSection(
                 }
 
                 isError -> {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
+                        contentPadding = PaddingValues(horizontal = NachoSpacing.large),
+                        userScrollEnabled = false
+                    ) {
+                        items(SKELETON_ITEM_COUNT) {
+                            InvitationScheduleListItemSkeleton(
+                                modifier = Modifier
+                                    .fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO)
+                                    .alpha(0.5f),
+                            )
+                        }
+                    }
                     UpcomingStatusContent(
                         title = stringResource(R.string.txt_error_upcoming_title),
                         description = stringResource(R.string.txt_error_upcoming_desc),
