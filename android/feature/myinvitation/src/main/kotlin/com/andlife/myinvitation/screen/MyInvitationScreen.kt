@@ -89,13 +89,6 @@ fun MyInvitationRoute(
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is MyInvitationSideEffect.NavigateToDetail -> onNavigateToDetail(effect.id)
-            is MyInvitationSideEffect.RefreshFailure -> {
-                scope.launch {
-                    snackbarHostState.currentSnackbarData?.dismiss()
-                    snackbarHostState.showSnackbar(refreshFailureMessage)
-                }
-            }
-
             is MyInvitationSideEffect.NavigateToCreate -> onNavigateToCreate()
             is MyInvitationSideEffect.DeleteSuccess -> {
                 scope.launch {
@@ -122,15 +115,15 @@ fun MyInvitationRoute(
         }
     }
 
-    LaunchedEffect(upcomingItems.loadState.refresh, pastItems.loadState.refresh) {
-        val isNotLoading = upcomingItems.loadState.refresh !is LoadState.Loading &&
-            pastItems.loadState.refresh !is LoadState.Loading
-
-        if (isNotLoading && uiState.isRefreshing) {
-            viewModel.onRefreshFinished(
-                hasError = upcomingItems.loadState.refresh is LoadState.Error ||
-                    pastItems.loadState.refresh is LoadState.Error
-            )
+    LaunchedEffect(upcomingItems.loadState.mediator?.refresh, pastItems.loadState.mediator?.refresh) {
+        val hasError =
+            upcomingItems.loadState.mediator?.refresh is LoadState.Error ||
+            pastItems.loadState.mediator?.refresh is LoadState.Error
+        if (hasError) {
+            scope.launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar(refreshFailureMessage)
+            }
         }
     }
 
@@ -261,10 +254,7 @@ private fun MyInvitationScreen(
 
                         PullToRefreshBox(
                             isRefreshing = uiState.isRefreshing || isMediatorLoading,
-                            onRefresh = {
-                                currentItems.refresh()
-                                onEvent(MyInvitationUiEvent.Refresh)
-                            },
+                            onRefresh = { currentItems.refresh() },
                             modifier = Modifier.fillMaxSize()
                         ) {
                             PagingStateContent(

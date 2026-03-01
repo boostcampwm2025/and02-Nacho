@@ -98,9 +98,6 @@ class MyInvitationViewModel @Inject constructor(
 
     override fun onEvent(event: MyInvitationUiEvent) {
         when (event) {
-            is MyInvitationUiEvent.Refresh -> {
-                updateState { copy(isRefreshing = true) }
-            }
             is MyInvitationUiEvent.SelectTab -> {
                 updateState { copy(selectedTab = event.index) }
             }
@@ -128,11 +125,6 @@ class MyInvitationViewModel @Inject constructor(
                 sendEffect(NavigateToLogin)
             }
         }
-    }
-
-    fun onRefreshFinished(hasError: Boolean) {
-        updateState { copy(isRefreshing = false) }
-        if (hasError) sendEffect(MyInvitationSideEffect.RefreshFailure)
     }
 
     fun deleteInvitation(invitationId: Long) {
