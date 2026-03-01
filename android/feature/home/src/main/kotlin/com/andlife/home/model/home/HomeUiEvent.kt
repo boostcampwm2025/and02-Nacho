@@ -32,8 +32,6 @@ sealed interface HomeUiEvent : BaseUiEvent {
 
     data object ClickCreate : HomeUiEvent
 
-    data object Refresh : HomeUiEvent
-
     data class UpdateMediaPlayState(
         val isPlaying: Boolean
     ) : HomeUiEvent

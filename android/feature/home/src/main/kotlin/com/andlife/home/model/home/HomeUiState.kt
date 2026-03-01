@@ -7,7 +7,6 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 data class HomeUiState(
-    val isRefreshing: Boolean = false,
     val isMediaPlaying: Boolean = false,
     val upcomingInvitations: ImmutableList<UpcomingInvitationUiModel> = persistentListOf(),
     val audioPlaybackState: AudioPlaybackState = AudioPlaybackState(),

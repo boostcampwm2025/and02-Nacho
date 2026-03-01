@@ -106,6 +106,7 @@ fun HomeRoute(
     val upcomingInvitations = viewModel.upcomingInvitationsPagingFlow.collectAsLazyPagingItems()
     val guestBooks = viewModel.guestBooksPagingFlow.collectAsLazyPagingItems()
     var lastPrecachedCount by remember { mutableIntStateOf(0) }
+    var pendingScrollToTop by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -154,18 +155,8 @@ fun HomeRoute(
                 onNavigateToCreate()
             }
 
-            is HomeSideEffect.ScrollToTop -> {
-                scope.launch { lazyListState.animateScrollToItem(0) }
-            }
-
-            is HomeSideEffect.RefreshFailure -> {
-                scope.launch {
-                    snackbarHostState.currentSnackbarData?.dismiss()
-                    snackbarHostState.showSnackbar(refreshFailMessage)
-                }
-            }
-
             is HomeSideEffect.NeedRefresh -> {
+                pendingScrollToTop = true
                 upcomingInvitations.refresh()
                 guestBooks.refresh()
             }
@@ -204,14 +195,22 @@ fun HomeRoute(
         }
     }
 
-    LaunchedEffect(upcomingInvitations.loadState.refresh, guestBooks.loadState.refresh) {
-        val upcomingState = upcomingInvitations.loadState.refresh
-        val guestBookState = guestBooks.loadState.refresh
+    LaunchedEffect(upcomingInvitations.loadState.mediator?.refresh, guestBooks.loadState.mediator?.refresh) {
+        val upcomingState = upcomingInvitations.loadState.mediator?.refresh
+        val guestBookState = guestBooks.loadState.mediator?.refresh
 
-        if (upcomingState !is LoadState.Loading && guestBookState !is LoadState.Loading) {
-            viewModel.onRefreshFinished(
-                hasError = upcomingState is LoadState.Error || guestBookState is LoadState.Error
-            )
+        val hasError = upcomingState is LoadState.Error || guestBookState is LoadState.Error
+        if (hasError) {
+            scope.launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar(refreshFailMessage)
+            }
+        }
+
+        val isNotLoading = upcomingState is LoadState.NotLoading && guestBookState is LoadState.NotLoading
+        if (isNotLoading && pendingScrollToTop) {
+            pendingScrollToTop = false
+            lazyListState.animateScrollToItem(0)
         }
     }
 
@@ -375,13 +374,14 @@ fun HomeScreen(
         },
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
     ) { paddingValues ->
+        val isRefreshing =
+            upcomingInvitations.loadState.mediator?.refresh is LoadState.Loading || guestBooks.loadState.mediator?.refresh is LoadState.Loading
 
         PullToRefreshBox(
-            isRefreshing = uiState.isRefreshing,
+            isRefreshing = isRefreshing,
             onRefresh = {
                 upcomingInvitations.refresh()
                 guestBooks.refresh()
-                onEvent(HomeUiEvent.Refresh)
             },
             modifier = Modifier
                 .fillMaxSize()

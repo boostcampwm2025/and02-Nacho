@@ -19,11 +19,9 @@ sealed interface HomeSideEffect : BaseSideEffect {
 
     data object NavigateToCreate : HomeSideEffect
 
-    data object ScrollToTop : HomeSideEffect
-
-    data object RefreshFailure : HomeSideEffect
     data object NeedRefresh : HomeSideEffect
 
     data object ReportSuccess : HomeSideEffect
+
     data class ReportFailure(val message: String? = null) : HomeSideEffect
 }
