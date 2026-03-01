@@ -9,6 +9,9 @@ import com.andlife.database.entity.InvitationSummaryEntity
 @Dao
 interface InvitationSummaryDao {
 
+    @Query("SELECT COUNT(*) FROM invitation_summary WHERE status = :status AND isMyInvitation = :isMyInvitation")
+    suspend fun count(status: String, isMyInvitation: Boolean): Int
+
     @Query(
         """
           SELECT * FROM invitation_summary
