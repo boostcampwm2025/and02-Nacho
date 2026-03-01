@@ -17,7 +17,4 @@ interface GuestBookDao {
 
     @Query("DELETE FROM guest_book")
     suspend fun clearAll()
-
-    @Query("SELECT COUNT(*) FROM guest_book")
-    suspend fun count(): Int
 }

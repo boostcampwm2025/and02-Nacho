@@ -49,7 +49,4 @@ interface InvitationSummaryDao {
 
     @Query("DELETE FROM invitation_summary")
     suspend fun clearAll()
-
-    @Query("SELECT COUNT(*) FROM invitation_summary WHERE status = :status AND isMyInvitation = :isMyInvitation")
-    suspend fun count(status: String, isMyInvitation: Boolean): Int
 }
