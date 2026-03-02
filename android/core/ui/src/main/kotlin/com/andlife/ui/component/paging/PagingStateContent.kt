@@ -30,39 +30,38 @@ fun PagingStateContent(
     val isRefreshing = loadState is LoadState.Loading || mediatorLoadState is LoadState.Loading
     val isError = loadState is LoadState.Error || mediatorLoadState is LoadState.Error
 
-    val isMediatorNotLoading = mediatorLoadState == null ||
-        mediatorLoadState is LoadState.NotLoading
-
+    val isMediatorNotLoading = mediatorLoadState == null || mediatorLoadState is LoadState.NotLoading
     val isSourceNotLoading = loadState is LoadState.NotLoading
-
     val isEmpty = isMediatorNotLoading && isSourceNotLoading && itemCount == 0
 
     Box(modifier = modifier.fillMaxSize()) {
-        when {
-            itemCount > 0 -> content()
+        if (itemCount > 0) {
+            content()
+        } else {
+            when {
+                isRefreshing -> {
+                    InvitationLoadingIndicator()
+                }
 
-            isRefreshing -> {
-                InvitationLoadingIndicator()
-            }
+                isError -> {
+                    InvitationLoadingError(onRetry = onRetry)
+                }
 
-            isError -> {
-                InvitationLoadingError(onRetry = onRetry)
-            }
-
-            isEmpty -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState()),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = emptyComment,
-                        style = NachoTheme.typography.bodyLargeMedium,
-                        color = NachoTheme.colorScheme.textSecondary,
-                        textAlign = TextAlign.Center,
-                        lineHeight = NachoTheme.typography.bodyLargeMedium.lineHeight * 1.4f
-                    )
+                isEmpty -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState()),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = emptyComment,
+                            style = NachoTheme.typography.bodyLargeMedium,
+                            color = NachoTheme.colorScheme.textSecondary,
+                            textAlign = TextAlign.Center,
+                            lineHeight = NachoTheme.typography.bodyLargeMedium.lineHeight * 1.4f
+                        )
+                    }
                 }
             }
         }
