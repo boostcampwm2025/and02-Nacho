@@ -34,9 +34,12 @@ import com.andlife.domain.util.AnalyticsLogger
 import com.andlife.domain.util.Button
 import com.andlife.domain.util.CrashlyticsLogger
 import com.andlife.domain.util.Screen
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
-@HiltViewModel
-class InvitationCollectionViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = InvitationCollectionViewModel.Factory::class)
+class InvitationCollectionViewModel @AssistedInject constructor(
     private val guestBookRepository: GuestBookRepository,
     private val mediaDownloader: MediaDownloader,
     private val userRepository: UserRepository,
@@ -44,13 +47,10 @@ class InvitationCollectionViewModel @Inject constructor(
     private val analyticsLogger: AnalyticsLogger,
     private val crashlyticsLogger: CrashlyticsLogger,
     @param:ApplicationContext private val context: Context,
-    savedStateHandle: SavedStateHandle
+    @Assisted val invitationId: Long,
 ) : BaseViewModel<InvitationCollectionUiState, InvitationCollectionUiEvent, InvitationCollectionSideEffect>(
     initialState = InvitationCollectionUiState(),
 ) {
-
-    private val invitationId: Long = savedStateHandle.toRoute<InvitationDetail>().id
-
     override val uiState: StateFlow<InvitationCollectionUiState> =
         mutableUiState
             .onStart {
@@ -243,5 +243,12 @@ class InvitationCollectionViewModel @Inject constructor(
 
     companion object {
         private const val FILE_NAME_PREFIX = "nacho_"
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            invitationId: Long,
+        ): InvitationCollectionViewModel
     }
 }
