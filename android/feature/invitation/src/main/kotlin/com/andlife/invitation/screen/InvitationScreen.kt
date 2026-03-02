@@ -75,20 +75,13 @@ fun InvitationRoute(
     val reportSuccessMessage = stringResource(R.string.msg_report_success)
     val reportFailureMessage = stringResource(R.string.msg_report_failure)
 
-    LaunchedEffect(upcomingItems.loadState.source.refresh, pastItems.loadState.source.refresh) {
-        val upcomingReady = upcomingItems.loadState.source.refresh is LoadState.NotLoading
-        val pastReady = pastItems.loadState.source.refresh is LoadState.NotLoading
-
-        if (upcomingReady || pastReady) {
-            viewModel.triggerBackgroundRefresh()
-        }
-    }
-
     LaunchedEffect(upcomingItems.loadState.mediator?.refresh, pastItems.loadState.mediator?.refresh) {
-        val hasError =
-            upcomingItems.loadState.mediator?.refresh is LoadState.Error ||
+        val currentTabHasError = if (uiState.selectedTab == 0) {
+            upcomingItems.loadState.mediator?.refresh is LoadState.Error
+        } else {
             pastItems.loadState.mediator?.refresh is LoadState.Error
-        if (hasError) {
+        }
+        if (currentTabHasError) {
             scope.launch {
                 snackbarHostState.currentSnackbarData?.dismiss()
                 snackbarHostState.showSnackbar(refreshFailureMessage)
