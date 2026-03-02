@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.navOptions
+import com.andlife.invitation.Invitation
 import com.andlife.invitation.InvitationDetail
 import com.andlife.nacho.model.MainSideEffect
 import com.andlife.nacho.navigation.NachoNavHost
@@ -27,8 +28,8 @@ fun NachoApp(
             is MainSideEffect.NavigateToDetail -> {
                 Log.d("DeepLink Debug", "Received Deferred DeepLink invitationId: ${effect.invitationId}")
                 navigator.navController.navigate(
-                    InvitationDetail(
-                        id = effect.invitationId,
+                    Invitation(
+                        initialInvitationId = effect.invitationId,
                         isFromDeepLink = true
                     )
                 ) {
