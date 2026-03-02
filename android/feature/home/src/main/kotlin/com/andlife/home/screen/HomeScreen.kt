@@ -177,14 +177,6 @@ fun HomeRoute(
         }
     }
 
-    LaunchedEffect(upcomingInvitations.loadState.source.refresh, guestBooks.loadState.source.refresh) {
-        val upcomingReady = upcomingInvitations.loadState.source.refresh is LoadState.NotLoading
-        val guestBooksReady = guestBooks.loadState.source.refresh is LoadState.NotLoading
-        if (upcomingReady || guestBooksReady) {
-            viewModel.triggerBackgroundRefresh()
-        }
-    }
-
     LaunchedEffect(upcomingInvitations.loadState.mediator?.refresh, guestBooks.loadState.mediator?.refresh) {
         val upcomingState = upcomingInvitations.loadState.mediator?.refresh
         val guestBookState = guestBooks.loadState.mediator?.refresh
@@ -505,99 +497,98 @@ private fun LazyListScope.homeUpcomingSection(
                 .wrapContentHeight(),
             contentAlignment = Alignment.Center
         ) {
-            when {
-                upcomingInvitations.itemCount > 0 -> {
-                    LazyRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
-                        contentPadding = PaddingValues(horizontal = NachoSpacing.large)
-                    ) {
-                        items(
-                            count = upcomingInvitations.itemCount,
-                            key = upcomingInvitations.itemKey { it.id }
-                        ) { index ->
-                            upcomingInvitations[index]?.let { invitation ->
-                                val dDayText = remember(invitation.startTime.date) {
-                                    invitation.startTime.date.toDDayText()
-                                }
-                                InvitationScheduleListItem(
-                                    modifier = Modifier.fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO),
-                                    imageUrl = invitation.thumbnailUrl,
-                                    title = invitation.title,
-                                    startTime = invitation.startTime.toDateTimeSingleLine(),
-                                    hostName = invitation.hostInfo.name,
-                                    dDayText = dDayText,
-                                    onClick = { onInvitationClick(invitation.id, invitation.isOwner) },
+            if (upcomingInvitations.itemCount > 0) {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
+                    contentPadding = PaddingValues(horizontal = NachoSpacing.large)
+                ) {
+                    items(
+                        count = upcomingInvitations.itemCount,
+                        key = upcomingInvitations.itemKey { it.id }
+                    ) { index ->
+                        upcomingInvitations[index]?.let { invitation ->
+                            val dDayText = remember(invitation.startTime.date) {
+                                invitation.startTime.date.toDDayText()
+                            }
+                            InvitationScheduleListItem(
+                                modifier = Modifier.fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO),
+                                imageUrl = invitation.thumbnailUrl,
+                                title = invitation.title,
+                                startTime = invitation.startTime.toDateTimeSingleLine(),
+                                hostName = invitation.hostInfo.name,
+                                dDayText = dDayText,
+                                onClick = { onInvitationClick(invitation.id, invitation.isOwner) },
+                            )
+                        }
+                    }
+                }
+            } else {
+                when {
+                    isRefreshing -> {
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
+                            contentPadding = PaddingValues(horizontal = NachoSpacing.large),
+                            userScrollEnabled = false
+                        ) {
+                            items(SKELETON_ITEM_COUNT) {
+                                InvitationScheduleListItemSkeleton(
+                                    modifier = Modifier
+                                        .fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO)
+                                        .alpha(0.5f),
                                 )
                             }
                         }
+                        InvitationLoadingIndicator()
                     }
-                }
 
-                isRefreshing -> {
-                    LazyRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
-                        contentPadding = PaddingValues(horizontal = NachoSpacing.large),
-                        userScrollEnabled = false
-                    ) {
-                        items(SKELETON_ITEM_COUNT) {
-                            InvitationScheduleListItemSkeleton(
-                                modifier = Modifier
-                                    .fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO)
-                                    .alpha(0.5f),
-                            )
+                    isError -> {
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
+                            contentPadding = PaddingValues(horizontal = NachoSpacing.large),
+                            userScrollEnabled = false
+                        ) {
+                            items(SKELETON_ITEM_COUNT) {
+                                InvitationScheduleListItemSkeleton(
+                                    modifier = Modifier
+                                        .fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO)
+                                        .alpha(0.5f),
+                                )
+                            }
                         }
+                        UpcomingStatusContent(
+                            title = stringResource(R.string.txt_error_upcoming_title),
+                            description = stringResource(R.string.txt_error_upcoming_desc),
+                        )
                     }
-                    InvitationLoadingIndicator()
-                }
 
-                isError -> {
-                    LazyRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
-                        contentPadding = PaddingValues(horizontal = NachoSpacing.large),
-                        userScrollEnabled = false
-                    ) {
-                        items(SKELETON_ITEM_COUNT) {
-                            InvitationScheduleListItemSkeleton(
-                                modifier = Modifier
-                                    .fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO)
-                                    .alpha(0.5f),
-                            )
+                    isEmpty -> {
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
+                            contentPadding = PaddingValues(horizontal = NachoSpacing.large),
+                            userScrollEnabled = false
+                        ) {
+                            items(SKELETON_ITEM_COUNT) {
+                                InvitationScheduleListItemSkeleton(
+                                    modifier = Modifier
+                                        .fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO)
+                                        .alpha(0.5f),
+                                )
+                            }
                         }
+                        UpcomingStatusContent(
+                            title = stringResource(R.string.txt_empty_upcoming_title),
+                            description = stringResource(R.string.txt_empty_upcoming_desc),
+                            buttonText = stringResource(R.string.txt_action_create_invitation),
+                            onButtonClick = onNavigateToCreate,
+                            buttonIconRes = designR.drawable.ic_add_24
+                        )
                     }
-                    UpcomingStatusContent(
-                        title = stringResource(R.string.txt_error_upcoming_title),
-                        description = stringResource(R.string.txt_error_upcoming_desc),
-                    )
-                }
-
-                isEmpty -> {
-                    LazyRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
-                        contentPadding = PaddingValues(horizontal = NachoSpacing.large),
-                        userScrollEnabled = false
-                    ) {
-                        items(SKELETON_ITEM_COUNT) {
-                            InvitationScheduleListItemSkeleton(
-                                modifier = Modifier
-                                    .fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO)
-                                    .alpha(0.5f),
-                            )
-                        }
-                    }
-                    UpcomingStatusContent(
-                        title = stringResource(R.string.txt_empty_upcoming_title),
-                        description = stringResource(R.string.txt_empty_upcoming_desc),
-                        buttonText = stringResource(R.string.txt_action_create_invitation),
-                        onButtonClick = onNavigateToCreate,
-                        buttonIconRes = designR.drawable.ic_add_24
-                    )
                 }
             }
-
         }
     }
 }
@@ -672,32 +663,19 @@ private fun LazyListScope.homeGuestBookSection(
         )
     }
 
+    val sourceLoadState = guestBooks.loadState.source.refresh
+    val mediatorLoadState = guestBooks.loadState.mediator?.refresh
 
-    val refreshState = guestBooks.loadState.refresh
-    val isInitialLoading = refreshState is LoadState.Loading && guestBooks.itemCount == 0
-    val isInitialError = refreshState is LoadState.Error && guestBooks.itemCount == 0
-    val isEmpty = refreshState is LoadState.NotLoading && guestBooks.itemCount == 0
+    val isRefreshing = sourceLoadState is LoadState.Loading || mediatorLoadState is LoadState.Loading
+    val isError = sourceLoadState is LoadState.Error || mediatorLoadState is LoadState.Error
+    val isEmpty = !isRefreshing && guestBooks.itemCount == 0
 
-    if (isInitialLoading || isInitialError || isEmpty) {
-        item {
-            Box(
-                modifier = Modifier.fillParentMaxHeight(0.3f),
-                contentAlignment = Alignment.Center
-            ) {
-                GuestBookStatusContent(
-                    isLoading = isInitialLoading,
-                    title = when {
-                        isInitialError -> stringResource(R.string.error_msg_failed_load_post)
-                        isEmpty -> stringResource(R.string.txt_empty_new_post_desc)
-                        else -> null
-                    },
-                )
-            }
-        }
-    } else {
+    if (guestBooks.itemCount > 0) {
         items(
             count = guestBooks.itemCount,
-            key = { index -> index + GUESTBOOK_KEY_OFFSET },
+            key = { index ->
+                guestBooks.peek(index)?.id ?: (index + GUESTBOOK_KEY_OFFSET)
+            },
         ) { index ->
             guestBooks[index]?.let { guestBook ->
                 GuestBookItem(
@@ -718,6 +696,31 @@ private fun LazyListScope.homeGuestBookSection(
                     onPlayVideoClick = { url -> onPlayVideoClick(url, guestBook.id) },
                     onReportClick = { onReportClick(guestBook.id) },
                 )
+            }
+        }
+    } else {
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillParentMaxHeight(0.3f),
+                contentAlignment = Alignment.Center
+            ) {
+                when {
+                    isRefreshing -> {
+                        GuestBookStatusContent(isLoading = true)
+                    }
+                    isError -> {
+                        GuestBookStatusContent(
+                            title = stringResource(R.string.error_msg_failed_load_post)
+                        )
+                    }
+                    isEmpty -> {
+                        GuestBookStatusContent(
+                            title = stringResource(R.string.txt_empty_new_post_desc)
+                        )
+                    }
+                }
             }
         }
     }
