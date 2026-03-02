@@ -80,7 +80,10 @@ fun NachoNavHost(
             navSuiteType.isNavigationBar && isBottomTab == null -> {
                 if (suiteState.currentValue == NavigationSuiteScaffoldValue.Visible) suiteState.hide()
             }
-            !navSuiteType.isNavigationBar -> {
+            !navSuiteType.isNavigationBar && isBottomTab == null -> {
+                if (suiteState.currentValue == NavigationSuiteScaffoldValue.Visible) suiteState.hide()
+            }
+            !navSuiteType.isNavigationBar && isBottomTab != null -> {
                 if (suiteState.currentValue == NavigationSuiteScaffoldValue.Hidden) suiteState.show()
             }
         }
