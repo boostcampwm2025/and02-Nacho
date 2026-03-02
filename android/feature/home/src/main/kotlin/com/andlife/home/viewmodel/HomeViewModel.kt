@@ -58,8 +58,6 @@ class HomeViewModel @Inject constructor(
             }
             .cachedIn(viewModelScope)
 
-    private var initialRefreshTriggered = false
-
     override val uiState: StateFlow<HomeUiState> = mutableUiState.asStateFlow()
 
     init {
@@ -144,13 +142,6 @@ class HomeViewModel @Inject constructor(
 
     fun handleRefresh() {
         sendEffect(HomeSideEffect.NeedRefresh)
-    }
-
-    fun triggerBackgroundRefresh() {
-        if (!initialRefreshTriggered) {
-            initialRefreshTriggered = true
-            sendEffect(HomeSideEffect.NeedRefresh)
-        }
     }
 
     private fun dismissLoginDialog() {

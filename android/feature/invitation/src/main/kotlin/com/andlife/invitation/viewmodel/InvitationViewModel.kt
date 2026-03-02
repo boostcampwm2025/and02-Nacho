@@ -56,7 +56,6 @@ class InvitationViewModel @Inject constructor(
 ) {
     private val _upcomingSort = MutableStateFlow(SortDirection.ASC)
     private val _pastSort = MutableStateFlow(SortDirection.DESC)
-    private var initialRefreshTriggered = false
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val upcomingInvitationPagingFlow: Flow<PagingData<InvitationSummaryUiModel>> =
@@ -177,13 +176,6 @@ class InvitationViewModel @Inject constructor(
 
     fun handleRefresh() {
         sendEffect(InvitationSideEffect.NeedRefresh)
-    }
-
-    fun triggerBackgroundRefresh() {
-        if (!initialRefreshTriggered) {
-            initialRefreshTriggered = true
-            sendEffect(InvitationSideEffect.NeedRefresh)
-        }
     }
 
     private fun submitReport(reason: ReportReason, description: String?) {
