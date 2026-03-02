@@ -2,6 +2,8 @@ package com.andlife.nacho.navigation
 
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationItemColors
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.WideNavigationRailDefaults
@@ -105,146 +107,152 @@ fun NachoNavHost(
         ),
         state = suiteState
     ) {
-        NavHost(
-            modifier = Modifier,
-            navController = navigator.navController,
-            startDestination = navigator.startDestination,
-        ) {
-            homeNavGraph(
-                snackbarHostState = snackbarHostState,
-                onNavigateToCreate = navigator::navigateToMyInvitationCreate,
-                onNavigateToLogin = { navigator.navigateToLogin() },
-                onNavigateToInvitationDetail = navigator::navigateToInvitationDetail,
-                onNavigateToMyInvitationDetail = navigator::navigateToMyInvitationDetail,
-                onNavigateToSetting = navigator::navigateToSetting,
-            )
-
-            settingNavGraph(
-                onNavigateBack = navigator::navigatePopBackStack,
-                onNavigateToLogin = {
-                    navigator.navigateToLogin()
-                },
-                onSignedOut = {
-                    val navOptions = navOptions {
-                        popUpTo(navigator.navController.graph.id) {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
-                    }
-                    navigator.navigateToLogin(navOptions)
-                },
-                onLogout = {
-                    val navOptions = navOptions {
-                        popUpTo(navigator.navController.graph.id) {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
-                    }
-                    navigator.navigateToLogin(navOptions)
-                }
-            )
-
-            invitationNavGraph(
-                onNavigateToDetail = navigator::navigateToInvitationDetail,
-                onNavigateToLogin = { navigator.navigateToLogin() },
-                snackbarHostState = snackbarHostState
-            )
-
-            invitationDetailNavGraph(
-                deepLinks = navDeepLink { uriPattern = deepLinkManager.getKakaoDeepLinkPattern() },
-                onNavigateBack = navigator::navigatePopBackStack,
-                onNavigateToLogin = { navigator.navigateToLogin() }
-            )
-
-            myInvitationNavGraph(
-                snackbarHostState = snackbarHostState,
-                onNavigateToCreate = navigator::navigateToMyInvitationCreate,
-                onNavigateToDetail = navigator::navigateToMyInvitationDetail,
-                onNavigateToLogin = {
-                    navigator.navigateToLogin()
-                }
-            )
-
-            myInvitationDetailNavGraph(
-                onNavigateBack = navigator::navigatePopBackStack,
-                onNavigateToLogin = {
-                    val navOptions = navOptions {
-                        popUpTo(navigator.navController.graph.id) {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
-                    }
-                    navigator.navigateToLogin(navOptions)
-                },
-                onNavigateToEditInvitation = navigator::navigateToMyInvitationEdit,
-                onNavigateToEditCard = navigator::navigateToUpdateCard,
-                onNavigateToCreateCard = navigator::navigateToCreateCardByInvitation,
-                onNavigateToCreateThanksCard = navigator::navigateToCreateThanksCard,
-                onNavigateToUpdateThanksCard = navigator::navigateToUpdateThanksCard
-            )
-
-            invitationCreateNavGraph(
-                onNavigateToAddressSearch = navigator::navigateToAddressSearch,
-                onNavigateToPreview = navigator::navigateToInvitationPreview,
-                onNavigateBack = navigator::navigatePopBackStack,
-                onNavigateCreateCard = navigator::navigateToCreateCard,
-                onNavigateToInvitationDetail = navigator::navigateToMyInvitationDetailByCreate
-            )
-
-            invitationEditNavGraph(
+        Scaffold(
+            snackbarHost = {
+                SnackbarHost(snackbarHostState)
+            }
+        ) { innerPadding ->
+            NavHost(
+                modifier = Modifier,
                 navController = navigator.navController,
-                onNavigateToAddressSearch = navigator::navigateToAddressSearch,
-                onNavigateBack = navigator::navigatePopBackStack,
-            )
+                startDestination = navigator.startDestination,
+            ) {
+                homeNavGraph(
+                    snackbarHostState = snackbarHostState,
+                    onNavigateToCreate = navigator::navigateToMyInvitationCreate,
+                    onNavigateToLogin = { navigator.navigateToLogin() },
+                    onNavigateToInvitationDetail = navigator::navigateToInvitationDetail,
+                    onNavigateToMyInvitationDetail = navigator::navigateToMyInvitationDetail,
+                    onNavigateToSetting = navigator::navigateToSetting,
+                )
 
-            addressSearchNavGraph(
-                navController = navigator.navController,
-                onNavigateBack = navigator::navigatePopBackStack,
-            )
+                settingNavGraph(
+                    onNavigateBack = navigator::navigatePopBackStack,
+                    onNavigateToLogin = {
+                        navigator.navigateToLogin()
+                    },
+                    onSignedOut = {
+                        val navOptions = navOptions {
+                            popUpTo(navigator.navController.graph.id) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                        navigator.navigateToLogin(navOptions)
+                    },
+                    onLogout = {
+                        val navOptions = navOptions {
+                            popUpTo(navigator.navController.graph.id) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                        navigator.navigateToLogin(navOptions)
+                    }
+                )
 
-            invitationPreviewNavGraph(
-                navController = navigator.navController,
-                onNavigateBack = navigator::navigatePopBackStack,
-            )
+                invitationNavGraph(
+                    deepLinks = navDeepLink { uriPattern = deepLinkManager.getKakaoDeepLinkPattern() },
+                    onNavigateToLogin = { navigator.navigateToLogin() },
+                    snackbarHostState = snackbarHostState
+                )
 
-            createCardNavGraph(
-                onBackClick = navigator::navigatePopBackStack
-            )
+                invitationDetailNavGraph(
+                    deepLinks = navDeepLink { uriPattern = deepLinkManager.getKakaoDeepLinkPattern() },
+                    onNavigateBack = navigator::navigatePopBackStack,
+                    onNavigateToLogin = { navigator.navigateToLogin() }
+                )
 
-            createCardByInvitationNavGraph(
-                onBackClick = navigator::navigatePopBackStack,
-                onSuccessCreateCard = {
-                    navigator.navController.previousBackStackEntry?.savedStateHandle[CREATE_CARD_BY_INVITATION_ID] =
-                        true
-                    navigator.navigatePopBackStack()
-                }
-            )
+                myInvitationNavGraph(
+                    snackbarHostState = snackbarHostState,
+                    onNavigateToCreate = navigator::navigateToMyInvitationCreate,
+                    onNavigateToDetail = navigator::navigateToMyInvitationDetail,
+                    onNavigateToLogin = {
+                        navigator.navigateToLogin()
+                    }
+                )
 
-            updateCardNavGraph(
-                onBackClick = navigator::navigatePopBackStack,
-                onSuccessCreateCard = {
-                    navigator.navController.previousBackStackEntry?.savedStateHandle[UPDATE_CARD] = true
-                    navigator.navigatePopBackStack()
-                }
-            )
+                myInvitationDetailNavGraph(
+                    onNavigateBack = navigator::navigatePopBackStack,
+                    onNavigateToLogin = {
+                        val navOptions = navOptions {
+                            popUpTo(navigator.navController.graph.id) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                        navigator.navigateToLogin(navOptions)
+                    },
+                    onNavigateToEditInvitation = navigator::navigateToMyInvitationEdit,
+                    onNavigateToEditCard = navigator::navigateToUpdateCard,
+                    onNavigateToCreateCard = navigator::navigateToCreateCardByInvitation,
+                    onNavigateToCreateThanksCard = navigator::navigateToCreateThanksCard,
+                    onNavigateToUpdateThanksCard = navigator::navigateToUpdateThanksCard
+                )
 
-            loginNavGraph()
+                invitationCreateNavGraph(
+                    onNavigateToAddressSearch = navigator::navigateToAddressSearch,
+                    onNavigateToPreview = navigator::navigateToInvitationPreview,
+                    onNavigateBack = navigator::navigatePopBackStack,
+                    onNavigateCreateCard = navigator::navigateToCreateCard,
+                    onNavigateToInvitationDetail = navigator::navigateToMyInvitationDetailByCreate
+                )
 
-            createThanksCardNavGraph(
-                onSuccessfulCreate = {
-                    navigator.navController.previousBackStackEntry?.savedStateHandle[CREATE_THANKS_CARD] = true
-                    navigator.navigatePopBackStack()
-                },
-                onBackClick = navigator::navigatePopBackStack,
-            )
+                invitationEditNavGraph(
+                    navController = navigator.navController,
+                    onNavigateToAddressSearch = navigator::navigateToAddressSearch,
+                    onNavigateBack = navigator::navigatePopBackStack,
+                )
 
-            updateThanksCardNavGraph(
-                onSuccessfulUpdate = {
-                    navigator.navController.previousBackStackEntry?.savedStateHandle[UPDATE_CARD] = true
-                    navigator.navigatePopBackStack()
-                },
-                onBackClick = navigator::navigatePopBackStack
-            )
+                addressSearchNavGraph(
+                    navController = navigator.navController,
+                    onNavigateBack = navigator::navigatePopBackStack,
+                )
+
+                invitationPreviewNavGraph(
+                    navController = navigator.navController,
+                    onNavigateBack = navigator::navigatePopBackStack,
+                )
+
+                createCardNavGraph(
+                    onBackClick = navigator::navigatePopBackStack
+                )
+
+                createCardByInvitationNavGraph(
+                    onBackClick = navigator::navigatePopBackStack,
+                    onSuccessCreateCard = {
+                        navigator.navController.previousBackStackEntry?.savedStateHandle[CREATE_CARD_BY_INVITATION_ID] =
+                            true
+                        navigator.navigatePopBackStack()
+                    }
+                )
+
+                updateCardNavGraph(
+                    onBackClick = navigator::navigatePopBackStack,
+                    onSuccessCreateCard = {
+                        navigator.navController.previousBackStackEntry?.savedStateHandle[UPDATE_CARD] = true
+                        navigator.navigatePopBackStack()
+                    }
+                )
+
+                loginNavGraph()
+
+                createThanksCardNavGraph(
+                    onSuccessfulCreate = {
+                        navigator.navController.previousBackStackEntry?.savedStateHandle[CREATE_THANKS_CARD] = true
+                        navigator.navigatePopBackStack()
+                    },
+                    onBackClick = navigator::navigatePopBackStack,
+                )
+
+                updateThanksCardNavGraph(
+                    onSuccessfulUpdate = {
+                        navigator.navController.previousBackStackEntry?.savedStateHandle[UPDATE_CARD] = true
+                        navigator.navigatePopBackStack()
+                    },
+                    onBackClick = navigator::navigatePopBackStack
+                )
+            }
         }
     }
 }
