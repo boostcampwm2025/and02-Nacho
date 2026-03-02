@@ -52,6 +52,7 @@ internal class InvitationRepositoryImpl @Inject constructor(
         return invitationRemoteDataSource.leaveInvitation(invitationId).onSuccess {
             userStorage.deleteInvitationId(invitationId)
             database.invitationSummaryDao().deleteById(invitationId)
+            database.upcomingInvitationDao().deleteById(invitationId)
         }
     }
 
@@ -75,6 +76,7 @@ internal class InvitationRepositoryImpl @Inject constructor(
     override suspend fun deleteInvitation(invitationId: Long): Result<Unit, DataError> =
         invitationRemoteDataSource.deleteInvitation(invitationId).onSuccess {
             database.invitationSummaryDao().deleteById(invitationId)
+            database.upcomingInvitationDao().deleteById(invitationId)
         }
 
     override suspend fun getInvitation(invitationId: Long): Result<Invitation, DataError> =
