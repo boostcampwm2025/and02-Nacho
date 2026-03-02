@@ -20,7 +20,7 @@ class UpcomingInvitationRemoteMediator(
 
     private val dao = database.upcomingInvitationDao()
 
-    override suspend fun initialize(): InitializeAction = InitializeAction.SKIP_INITIAL_REFRESH
+    override suspend fun initialize(): InitializeAction = InitializeAction.LAUNCH_INITIAL_REFRESH
 
     override suspend fun load(
         loadType: LoadType,
