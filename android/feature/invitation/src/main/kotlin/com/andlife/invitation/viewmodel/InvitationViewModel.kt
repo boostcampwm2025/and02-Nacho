@@ -17,8 +17,6 @@ import com.andlife.domain.util.AnalyticsLogger
 import com.andlife.domain.util.Button
 import com.andlife.domain.util.CrashlyticsLogger
 import com.andlife.domain.util.EventType
-import com.andlife.domain.util.RefreshEventHub
-import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.domain.util.Screen
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
@@ -165,7 +163,6 @@ class InvitationViewModel @Inject constructor(
             invitationRepository.leaveInvitation(invitationId)
                 .onSuccess {
                     sendEffect(InvitationSideEffect.LeaveSuccess)
-                    RefreshEventHub.emit(RefreshTarget.HOME)
                 }
                 .onFailure { it, msg ->
                     sendEffect(InvitationSideEffect.LeaveFailure)

@@ -48,14 +48,6 @@ internal class InvitationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun leaveInvitation(invitationId: Long): Result<Unit, DataError> {
-        return invitationRemoteDataSource.leaveInvitation(invitationId).onSuccess {
-            userStorage.deleteInvitationId(invitationId)
-            database.invitationSummaryDao().deleteById(invitationId)
-            database.upcomingInvitationDao().deleteById(invitationId)
-        }
-    }
-
     override suspend fun createInvitation(params: InvitationSaveParam): Result<Long, DataError> {
         val request = params.toRequest(json)
         return invitationRemoteDataSource.createInvitation(request).map { response ->
@@ -72,6 +64,13 @@ internal class InvitationRepositoryImpl @Inject constructor(
             response.id
         }
     }
+
+    override suspend fun leaveInvitation(invitationId: Long): Result<Unit, DataError> =
+        invitationRemoteDataSource.leaveInvitation(invitationId).onSuccess {
+            userStorage.deleteInvitationId(invitationId)
+            database.invitationSummaryDao().deleteById(invitationId)
+            database.upcomingInvitationDao().deleteById(invitationId)
+        }
 
     override suspend fun deleteInvitation(invitationId: Long): Result<Unit, DataError> =
         invitationRemoteDataSource.deleteInvitation(invitationId).onSuccess {
