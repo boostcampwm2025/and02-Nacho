@@ -22,6 +22,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
@@ -40,6 +43,9 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
         LinkedHashMap<Long, String>(maxPoolSize, 0.75f, true) // 방명록 ID별 마지막 재생 URL 추적
 
     private var currentPlayingUrl: String? = null
+
+    private val _isMuted = MutableStateFlow(false)
+    override val isMuted = _isMuted.asStateFlow()
 
     private val precacheScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val activePrecacheJobs = ConcurrentHashMap<String, Job>()
@@ -112,6 +118,7 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
             }
 
         playerToUse.url = url
+        playerToUse.setMuted(_isMuted.value)
         val mediaSource =
             ProgressiveMediaSource
                 .Factory(cacheDataSourceFactory)
@@ -151,6 +158,11 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
 
     override fun pauseAllPlayers() {
         activePlayers.values.forEach { it.pause() }
+    }
+
+    override fun toggleMute() {
+        _isMuted.update { !it }
+        activePlayers.values.forEach { it.setMuted(_isMuted.value) }
     }
 
     override fun resumeLastPlayed() {

@@ -1,6 +1,12 @@
 package com.andlife.media.video
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+
 interface AutoVideoPlayerPool {
+
+    val isMuted: StateFlow<Boolean>
+
     fun preparePlayers(neededCount: Int)
 
     fun getPlayer(url: String): AutoVideoPlayer
@@ -13,6 +19,7 @@ interface AutoVideoPlayerPool {
     fun pausePlayer(url: String)
 
     fun pauseAllPlayers()
+    fun toggleMute()
 
     fun resumeLastPlayed()
 
@@ -26,6 +33,7 @@ interface AutoVideoPlayerPool {
 }
 
 class FakeAutoVideoPlayerPool : AutoVideoPlayerPool {
+    override val isMuted: StateFlow<Boolean> = MutableStateFlow(false)
     override fun preparePlayers(neededCount: Int) {}
     override fun getPlayer(url: String): AutoVideoPlayer {
         throw NotImplementedError()
@@ -34,6 +42,7 @@ class FakeAutoVideoPlayerPool : AutoVideoPlayerPool {
     override fun playPlayer(url: String, itemId: Long) {}
     override fun pausePlayer(url: String) {}
     override fun pauseAllPlayers() {}
+    override fun toggleMute() {}
     override fun resumeLastPlayed() {}
     override fun clearCacheById(itemId: Long?) {}
     override fun precacheVideos(urls: List<String>) {}

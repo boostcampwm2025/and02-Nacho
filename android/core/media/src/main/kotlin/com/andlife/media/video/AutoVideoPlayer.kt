@@ -23,13 +23,16 @@ class AutoVideoPlayer(
 
     fun stop() {
         currentState.stop(this)
-        // 정지 시 마지막 프레임이 남지 않도록 검은 화면 처리하거나 초기화
-        playerView.keepScreenOn = false // 화면 켜짐 해제
+        playerView.keepScreenOn = false
     }
 
     fun release() {
         exoPlayer.release()
-        playerView.player = null // PlayerView와의 연결 해제
+        playerView.player = null
+    }
+
+    fun setMuted(isMuted: Boolean) {
+        exoPlayer.volume = if (isMuted) 0f else 1f
     }
 
     @OptIn(UnstableApi::class)
