@@ -490,15 +490,21 @@ private fun VideoPlayerContainer(
     modifier: Modifier = Modifier,
 ) {
     var isVideoReady by remember(videoUrl) { mutableStateOf(false) }
-    var remainingDurationMs by remember(videoUrl) {
-        mutableLongStateOf((totalDurationSeconds?.times(1000))?.toLong() ?: 0L)
-    }
+    var remainingDurationMs by remember(videoUrl) { mutableLongStateOf((totalDurationSeconds?.times(1000L)) ?: 0L) }
+    var currentPositionMs by remember(videoUrl) { mutableLongStateOf(0L) }
+    var totalDurationMs by remember(videoUrl) { mutableLongStateOf((totalDurationSeconds?.times(1000L)) ?: 0L) }
     val isMuted by videoPlayerPool.isMuted.collectAsStateWithLifecycle()
 
     val thumbnailAlpha by animateFloatAsState(
         targetValue = if (shouldPlay && isVideoReady) 0f else 1f,
         animationSpec = tween(durationMillis = 200),
     )
+
+    val progress = if (totalDurationMs > 0) {
+        (currentPositionMs.toFloat() / totalDurationMs.toFloat()).coerceIn(0f, 1f)
+    } else {
+        0f
+    }
 
     LaunchedEffect(shouldPlay, videoUrl) {
         if (shouldPlay) {
@@ -516,20 +522,6 @@ private fun VideoPlayerContainer(
         if (shouldPlay) {
             val currentPlayer = remember(videoUrl) { videoPlayerPool.getPlayer(videoUrl) }
 
-            LaunchedEffect(isVideoReady) {
-                if (isVideoReady && totalDurationSeconds != null) {
-                    while (true) {
-                        val duration = currentPlayer.exoPlayer.duration
-                        val position = currentPlayer.exoPlayer.currentPosition
-
-                        remainingDurationMs = (duration - position).coerceAtLeast(0L)
-                        delay(1000L)
-                    }
-                } else {
-                    remainingDurationMs = (totalDurationSeconds?.times(1000))?.toLong() ?: 0L
-                }
-            }
-
             DisposableEffect(currentPlayer, videoUrl) {
                 val listener = object : Player.Listener {
                     override fun onRenderedFirstFrame() {
@@ -539,18 +531,40 @@ private fun VideoPlayerContainer(
                     override fun onPlaybackStateChanged(state: Int) {
                         if (state == Player.STATE_READY && currentPlayer.exoPlayer.playWhenReady) {
                             isVideoReady = true
+                            totalDurationMs = currentPlayer.exoPlayer.duration.coerceAtLeast(0L)
                         }
                     }
                 }
-
                 currentPlayer.exoPlayer.addListener(listener)
-
                 if (currentPlayer.exoPlayer.playbackState == Player.STATE_READY) {
                     isVideoReady = true
+                    totalDurationMs = currentPlayer.exoPlayer.duration.coerceAtLeast(0L)
                 }
-
                 onDispose {
                     currentPlayer.exoPlayer.removeListener(listener)
+                }
+            }
+
+            LaunchedEffect(isVideoReady) {
+                if (!isVideoReady) {
+                    remainingDurationMs = (totalDurationSeconds?.times(1000L)) ?: 0L
+                    return@LaunchedEffect
+                }
+                while (true) {
+                    val position = currentPlayer.exoPlayer.currentPosition
+                    remainingDurationMs = (totalDurationMs - position).coerceAtLeast(0L)
+                    delay(1000L)
+                }
+            }
+
+            LaunchedEffect(isVideoReady) {
+                if (!isVideoReady) {
+                    currentPositionMs = 0L
+                    return@LaunchedEffect
+                }
+                while (true) {
+                    currentPositionMs = currentPlayer.exoPlayer.currentPosition.coerceAtLeast(0L)
+                    delay(16L)
                 }
             }
 
@@ -580,6 +594,10 @@ private fun VideoPlayerContainer(
         }
 
         if (shouldPlay) {
+            PlayerSeekbar(
+                progress = progress,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
             PlayerMuteButton(
                 isMuted = isMuted,
                 onToggle = { videoPlayerPool.toggleMute() },
@@ -590,7 +608,6 @@ private fun VideoPlayerContainer(
         }
     }
 }
-
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -635,6 +652,24 @@ private fun VideoDurationOverlay(
     MediaOverlay(
         modifier = modifier,
         text = duration
+    )
+}
+
+@Composable
+private fun PlayerSeekbar(
+    progress: Float,
+    modifier: Modifier = Modifier,
+) {
+    LinearProgressIndicator(
+        progress = { progress },
+        modifier = modifier
+            .fillMaxWidth()
+            .height(2.dp),
+        color = NachoTheme.colorScheme.brandPrimary,
+        trackColor = NachoTheme.colorScheme.backgroundBorder,
+        gapSize = 0.dp,
+        strokeCap = StrokeCap.Square,
+        drawStopIndicator = { /* No-op */ },
     )
 }
 
