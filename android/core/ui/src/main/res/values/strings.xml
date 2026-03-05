@@ -102,6 +102,8 @@
     <string name="desc_video_thumbnail">비디오 썸네일 이미지</string>
     <string name="desc_guest_book_image_media">방명록에 게시된 이미지</string>
     <string name="desc_error_image">이미지 불러오기 에러</string>
+    <string name="desc_unmute_video">음소거 해제</string>
+    <string name="desc_mute_video">음소거</string>
 
     <!-- DateUtils -->
     <string name="txt_just_now">방금 전</string>
@@ -187,4 +189,5 @@
 
     <!-- WebView -->
     <string name="txt_error_network">네트워크 연결을 확인해주세요</string>
+
 </resources>

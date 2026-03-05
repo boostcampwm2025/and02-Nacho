@@ -9,6 +9,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,6 +54,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import coil3.compose.AsyncImage
@@ -491,6 +493,7 @@ private fun VideoPlayerContainer(
     var remainingDurationMs by remember(videoUrl) {
         mutableLongStateOf((totalDurationSeconds?.times(1000))?.toLong() ?: 0L)
     }
+    val isMuted by videoPlayerPool.isMuted.collectAsStateWithLifecycle()
 
     val thumbnailAlpha by animateFloatAsState(
         targetValue = if (shouldPlay && isVideoReady) 0f else 1f,
@@ -575,6 +578,16 @@ private fun VideoPlayerContainer(
                     .padding(NachoSpacing.small),
             )
         }
+
+        if (shouldPlay) {
+            PlayerMuteButton(
+                isMuted = isMuted,
+                onToggle = { videoPlayerPool.toggleMute() },
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(NachoSpacing.small),
+            )
+        }
     }
 }
 
@@ -623,6 +636,44 @@ private fun VideoDurationOverlay(
         modifier = modifier,
         text = duration
     )
+}
+
+@Composable
+private fun PlayerMuteButton(
+    isMuted: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val iconResId = if (isMuted) {
+        R.drawable.ic_volume_off_filled_24
+    } else {
+        R.drawable.ic_volume_up_filled_24
+    }
+    val contentDescription = if (isMuted) {
+        stringResource(R.string.desc_unmute_video)
+    } else {
+        stringResource(R.string.desc_mute_video)
+    }
+    Box(
+        modifier = modifier
+            .background(
+                color = NachoTheme.colorScheme.backgroundOverlay,
+                shape = CircleShape
+            )
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onToggle
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painter = painterResource(id = iconResId),
+            contentDescription = contentDescription,
+            tint = NachoTheme.colorScheme.iconTertiary,
+            modifier = Modifier.padding(NachoSpacing.xSmall)
+        )
+    }
 }
 
 @Composable
