@@ -2,10 +2,13 @@ package com.andlife.ui.component.guestbook
 
 import android.view.ViewGroup
 import androidx.annotation.OptIn
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -46,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
@@ -493,6 +497,7 @@ private fun VideoPlayerContainer(
     var remainingDurationMs by remember(videoUrl) { mutableLongStateOf((totalDurationSeconds?.times(1000L)) ?: 0L) }
     var currentPositionMs by remember(videoUrl) { mutableLongStateOf(0L) }
     var totalDurationMs by remember(videoUrl) { mutableLongStateOf((totalDurationSeconds?.times(1000L)) ?: 0L) }
+    var isControlVisible by remember(videoUrl) { mutableStateOf(false) }
     val isMuted by videoPlayerPool.isMuted.collectAsStateWithLifecycle()
 
     val thumbnailAlpha by animateFloatAsState(
@@ -506,6 +511,10 @@ private fun VideoPlayerContainer(
         0f
     }
 
+    val currentTimeText = (currentPositionMs / 1000).toInt().toFormatDuration()
+    val totalTimeText = (totalDurationMs / 1000).toInt().toFormatDuration()
+    val timeText = "$currentTimeText / $totalTimeText"
+
     LaunchedEffect(shouldPlay, videoUrl) {
         if (shouldPlay) {
             videoPlayerPool.playPlayer(videoUrl, guestBookId)
@@ -514,10 +523,24 @@ private fun VideoPlayerContainer(
         }
     }
 
+    LaunchedEffect(isControlVisible) {
+        if (isControlVisible) {
+            delay(3000L)
+            isControlVisible = false
+        }
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Black)
+            .then(
+                if (shouldPlay && isVideoReady) {
+                    Modifier.clickable { isControlVisible = !isControlVisible }
+                } else {
+                    Modifier
+                }
+            )
     ) {
         if (shouldPlay) {
             val currentPlayer = remember(videoUrl) { videoPlayerPool.getPlayer(videoUrl) }
@@ -584,20 +607,57 @@ private fun VideoPlayerContainer(
             )
         }
 
-        if (totalDurationSeconds != null) {
-            VideoDurationOverlay(
-                duration = (remainingDurationMs / 1000).toInt().toFormatDuration(),
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(NachoSpacing.small),
-            )
-        }
+//        if (totalDurationSeconds != null) {
+//            VideoDurationOverlay(
+//                duration = (remainingDurationMs / 1000).toInt().toFormatDuration(),
+//                modifier = Modifier
+//                    .align(Alignment.BottomEnd)
+//                    .padding(NachoSpacing.small),
+//            )
+//        }
 
         if (shouldPlay) {
-            PlayerSeekbar(
-                progress = progress,
+            AnimatedVisibility(
+                visible = !isControlVisible,
+                enter = fadeIn(),
+                exit = fadeOut(),
                 modifier = Modifier.align(Alignment.BottomCenter)
-            )
+            ) {
+                PlayerSeekbar(
+                    progress = progress,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            AnimatedVisibility(
+                visible = isControlVisible,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier.align(Alignment.BottomCenter)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f))
+                            )
+                        )
+                        .padding(horizontal = NachoSpacing.medium)
+                        .padding(bottom = NachoSpacing.small),
+                ) {
+                    Text(
+                        text = timeText,
+                        style = NachoTheme.typography.bodySmallRegular,
+                        color = Color.White,
+                    )
+                    PlayerSeekbar(
+                        progress = progress,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+
             PlayerMuteButton(
                 isMuted = isMuted,
                 onToggle = { videoPlayerPool.toggleMute() },
