@@ -32,7 +32,6 @@ fun InvitationTopBar(
                     overflow = TextOverflow.Ellipsis,
                 )
             },
-            windowInsets = WindowInsets(),
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = NachoTheme.colorScheme.backgroundPrimary,
             ),
