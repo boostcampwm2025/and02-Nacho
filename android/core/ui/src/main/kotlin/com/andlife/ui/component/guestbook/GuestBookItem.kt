@@ -605,6 +605,7 @@ private fun VideoPlayerContainer(
                 isMuted = isMuted,
                 isVideoReady = isVideoReady,
                 onVideoClick = { isControlVisible = !isControlVisible },
+                onPlayVideoClick = { onPlayVideoClick(videoUrl) },
                 onSeekValueChange = { newValue ->
                     if (!isSeeking) currentPlayer.pause()
                     isSeeking = true
@@ -629,6 +630,7 @@ private fun VideoPlayerContainer(
                 isMuted = isMuted,
                 isVideoReady = false,
                 onVideoClick = { /* No-op */ },
+                onPlayVideoClick = { onPlayVideoClick(videoUrl) },
                 onSeekValueChange = { /* No-op */ },
                 onSeekValueChangeFinished = { /* No-op */ },
                 onMuteToggle = { videoPlayerPool.toggleMute() },
@@ -649,6 +651,7 @@ private fun VideoPlayerContent(
     isMuted: Boolean,
     isVideoReady: Boolean,
     onVideoClick: () -> Unit,
+    onPlayVideoClick: () -> Unit,
     onSeekValueChange: (Float) -> Unit,
     onSeekValueChangeFinished: () -> Unit,
     onMuteToggle: () -> Unit,
@@ -682,7 +685,7 @@ private fun VideoPlayerContent(
         if (thumbnailUrl != null && thumbnailAlphaAnimated > 0f) {
             ThumbnailWrapper(
                 thumbnailUrl = thumbnailUrl,
-                onPlayVideoClick = { onVideoClick() },
+                onPlayVideoClick = onPlayVideoClick,
                 modifier = Modifier
                     .fillMaxSize()
                     .alpha(thumbnailAlphaAnimated),
