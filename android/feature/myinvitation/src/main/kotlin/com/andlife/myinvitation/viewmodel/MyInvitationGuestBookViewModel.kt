@@ -40,6 +40,7 @@ import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookUiEvent
 import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookUiState
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
+import com.andlife.ui.util.media.validateSelectedMediasByRule
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -119,8 +120,6 @@ constructor(
         when (event) {
             is MyInvitationGuestBookUiEvent.UpdateSelectedMedias -> updateSelectedMedias(
                 event.medias,
-                event.exceededAvailableBytes,
-                event.exceededAvailableSlots
             )
 
             is MyInvitationGuestBookUiEvent.UpdateTextContent -> updateTextContent(event.textContent)
@@ -179,12 +178,15 @@ constructor(
 
     private fun updateSelectedMedias(
         medias: List<SelectedMedia>,
-        exceededAvailableBytes: Boolean,
-        exceededAvailableSlots: Boolean
     ) {
-        Log.d("MyInvitationGuestBookVM", "업데이트된 미디어의 uri: ${medias.map { it.uri }}")
+        // 용량/개수 검증
+        val (validatedMedias, exceededAvailableBytes, exceededAvailableSlots) = validateSelectedMediasByRule(
+            selectedMedias = medias,
+        )
+
+        Log.d("MyInvitationGuestBookVM", "업데이트된 미디어의 uri: ${validatedMedias.map { it.uri }}")
         // 새로 추가된 미디어 중 content uri인 파일들을 내부 저장소로 복사
-        val newContentUriMedias = medias.filter { media ->
+        val newContentUriMedias = validatedMedias.filter { media ->
             media.id == null && media.uri.startsWith("content://")
         }
         if (newContentUriMedias.isNotEmpty()) {
@@ -195,7 +197,7 @@ constructor(
                         newContentUriMedias.map { it.uri }
                     )
                     // 복사된 URI로 업데이트된 미디어 리스트 생성
-                    val updatedMedias = medias.map { media ->
+                    val updatedMedias = validatedMedias.map { media ->
                         val newContentUriIndex = newContentUriMedias.indexOfFirst { it.uri == media.uri }
                         if (newContentUriIndex >= 0) {
                             // content uri 파일인 경우 복사된 경로로 교체
@@ -222,11 +224,11 @@ constructor(
                 }
             }
         } else {
-            // Photo Picker 파일이 없는 경우 바로 업데이트
+            // content uri인 파일이 없는 경우 바로 업데이트
             updateState {
                 copy(
-                    selectedMedias = medias.toPersistentList(),
-                    currentMediaSizeBytes = calculateTotalMediaSize(medias)
+                    selectedMedias = validatedMedias.toPersistentList(),
+                    currentMediaSizeBytes = calculateTotalMediaSize(validatedMedias)
                 )
             }
         }
@@ -236,7 +238,7 @@ constructor(
             analyticsLogger.logEvent(AnalyticsEvent.Event(EventType.GUEST_BOOK_MAX_SIZE.value))
             sendEffect(
                 MyInvitationGuestBookSideEffect.ShowSnackbar(
-                    "파일이 500MB를 초과하여 제외되었습니다."
+                    "최대 파일 용량을 초과하여 제외되었습니다."
                 )
             )
         }
@@ -246,7 +248,7 @@ constructor(
             analyticsLogger.logEvent(AnalyticsEvent.Event(EventType.GUEST_BOOK_MAX_MEDIA.value))
             sendEffect(
                 MyInvitationGuestBookSideEffect.ShowSnackbar(
-                    "파일은 20개까지만 추가 가능합니다."
+                    "최대 파일 개수를 초과하여 제외되었습니다."
                 )
             )
         }
