@@ -102,6 +102,10 @@
             android:name="com.andlife.data.util.media.download.DownloadCancelReceiver"
             android:exported="false" />
 
+        <receiver
+            android:name="com.andlife.data.util.media.upload.UploadCancelReceiver"
+            android:exported="false" />
+
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"

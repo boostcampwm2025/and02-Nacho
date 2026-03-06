@@ -89,6 +89,7 @@ import com.andlife.ui.util.collectWithLifecycle
 import com.andlife.ui.util.imeWithoutNavBars
 import com.andlife.ui.util.media.getFileSizeOrNull
 import com.andlife.ui.util.media.uriToSelectedMedia
+import com.andlife.ui.util.shouldRequestNotificationPermission
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
@@ -200,6 +201,17 @@ fun MyInvitationGuestBookRoute(
             viewModel.onEvent(MyInvitationGuestBookUiEvent.ClickMicrophone)
         } else {
             showPermissionDialog = Manifest.permission.RECORD_AUDIO
+        }
+    }
+
+    // 알림 권한 요청 launcher
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.onEvent(MyInvitationGuestBookUiEvent.UploadMedias)
+        } else {
+            showPermissionDialog = Manifest.permission.POST_NOTIFICATIONS
         }
     }
 
@@ -385,6 +397,7 @@ fun MyInvitationGuestBookRoute(
             message = when (showPermissionDialog) {
                 Manifest.permission.CAMERA -> stringResource(R.string.txt_permission_camera)
                 Manifest.permission.RECORD_AUDIO -> stringResource(R.string.txt_permission_audio)
+                Manifest.permission.POST_NOTIFICATIONS -> stringResource(R.string.txt_permission_notification)
                 else -> stringResource(R.string.txt_permission_etc)
             },
             onDismiss = { showPermissionDialog = null },
@@ -428,6 +441,7 @@ fun MyInvitationGuestBookRoute(
         context = context,
         cameraPermissionLauncher = cameraPermissionLauncher,
         audioPermissionLauncher = audioPermissionLauncher,
+        notificationPermissionLauncher = notificationPermissionLauncher,
         modifier = modifier,
     )
 
@@ -482,6 +496,7 @@ private fun InvitationGuestBookScreen(
     context: Context,
     cameraPermissionLauncher: ActivityResultLauncher<String>,
     audioPermissionLauncher: ActivityResultLauncher<String>,
+    notificationPermissionLauncher: ActivityResultLauncher<String>,
     modifier: Modifier = Modifier,
 ) {
     val isImVisible = WindowInsets.isImeVisible
@@ -625,7 +640,14 @@ private fun InvitationGuestBookScreen(
                                         onReportClick = { onEvent(MyInvitationGuestBookUiEvent.ShowReport(guestBook.id)) },
                                         onVisualMediaClick = { onEvent(MyInvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
                                         onAudioMediaClick = { onEvent(MyInvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
-                                        onPlayVideoClick = { url -> onEvent(MyInvitationGuestBookUiEvent.ClickVideoPlayButton(url, guestBook.id))}
+                                        onPlayVideoClick = { url ->
+                                            onEvent(
+                                                MyInvitationGuestBookUiEvent.ClickVideoPlayButton(
+                                                    url,
+                                                    guestBook.id
+                                                )
+                                            )
+                                        }
                                     )
                                 }
                             }
@@ -667,7 +689,8 @@ private fun InvitationGuestBookScreen(
                     },
                     context = context,
                     cameraPermissionLauncher = cameraPermissionLauncher,
-                    audioPermissionLauncher = audioPermissionLauncher
+                    audioPermissionLauncher = audioPermissionLauncher,
+                    notificationPermissionLauncher = notificationPermissionLauncher
                 )
             }
         }
@@ -683,6 +706,7 @@ private fun GuestBookFormSection(
     context: Context,
     cameraPermissionLauncher: ActivityResultLauncher<String>,
     audioPermissionLauncher: ActivityResultLauncher<String>,
+    notificationPermissionLauncher: ActivityResultLauncher<String>,
     modifier: Modifier = Modifier,
 ) {
     InvitationGuestBookForm(
@@ -695,6 +719,7 @@ private fun GuestBookFormSection(
         isSubmittable = uiState.isSubmittable,
         editingGuestBookId = uiState.editingGuestBookId,
         currentMediaSizeBytes = uiState.currentMediaSizeBytes,
+        isProcessingMedia = uiState.isProcessingMedia,
         onMediasSelected = { medias, exceededAvailableBytes, exceedAvailableSlots ->
             onEvent(
                 MyInvitationGuestBookUiEvent.UpdateSelectedMedias(
@@ -711,7 +736,12 @@ private fun GuestBookFormSection(
             onEvent(MyInvitationGuestBookUiEvent.UpdateTextContent(text))
         },
         onUploadClick = {
-            onEvent(MyInvitationGuestBookUiEvent.UploadMedias)
+            // 알림 권한 체크 후 업로드 진행
+            if (context.shouldRequestNotificationPermission()) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                onEvent(MyInvitationGuestBookUiEvent.UploadMedias)
+            }
         },
         isAuthenticated = isAuthenticated,
         onTextFieldClick = { onEvent(MyInvitationGuestBookUiEvent.CheckLogin) },
@@ -766,6 +796,9 @@ private fun InvitationGuestBookEmptyPreview() {
                 contract = ActivityResultContracts.RequestPermission()
             ) {},
             audioPermissionLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestPermission()
+            ) {},
+            notificationPermissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestPermission()
             ) {},
         )
