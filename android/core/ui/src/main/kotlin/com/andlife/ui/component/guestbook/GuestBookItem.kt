@@ -595,133 +595,252 @@ private fun VideoPlayerContainer(
                 }
             }
 
+            VideoPlayerContent(
+                currentPlayer = currentPlayer,
+                thumbnailUrl = thumbnailUrl,
+                thumbnailAlpha = thumbnailAlpha,
+                progress = progress,
+                timeText = timeText,
+                isControlVisible = isControlVisible,
+                isMuted = isMuted,
+                isVideoReady = isVideoReady,
+                onVideoClick = { isControlVisible = !isControlVisible },
+                onSeekValueChange = { newValue ->
+                    if (!isSeeking) currentPlayer.pause()
+                    isSeeking = true
+                    seekPositionMs = (newValue * totalDurationMs).toLong()
+                },
+                onSeekValueChangeFinished = {
+                    currentPlayer.seekTo(seekPositionMs)
+                    currentPlayer.play()
+                    isSeeking = false
+                },
+                onMuteToggle = { videoPlayerPool.toggleMute() },
+                onFullscreenClick = { /* TODO: 전체화면 기능 */ },
+            )
+        } else {
+            VideoPlayerContent(
+                currentPlayer = null,
+                thumbnailUrl = thumbnailUrl,
+                thumbnailAlpha = 1f,
+                progress = 0f,
+                timeText = "00:00 / 00:00",
+                isControlVisible = false,
+                isMuted = isMuted,
+                isVideoReady = false,
+                onVideoClick = { /* No-op */ },
+                onSeekValueChange = { /* No-op */ },
+                onSeekValueChangeFinished = { /* No-op */ },
+                onMuteToggle = { videoPlayerPool.toggleMute() },
+                onFullscreenClick = { /* TODO: 전체화면 기능 */ },
+            )
+        }
+    }
+}
+
+@Composable
+private fun VideoPlayerContent(
+    currentPlayer: AutoVideoPlayer?,
+    thumbnailUrl: String?,
+    thumbnailAlpha: Float,
+    progress: Float,
+    timeText: String,
+    isControlVisible: Boolean,
+    isMuted: Boolean,
+    isVideoReady: Boolean,
+    onVideoClick: () -> Unit,
+    onSeekValueChange: (Float) -> Unit,
+    onSeekValueChangeFinished: () -> Unit,
+    onMuteToggle: () -> Unit,
+    onFullscreenClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val thumbnailAlphaAnimated by animateFloatAsState(
+        targetValue = thumbnailAlpha,
+        animationSpec = tween(durationMillis = 200),
+    )
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .then(
+                if (isVideoReady) {
+                    Modifier.clickable { onVideoClick() }
+                } else {
+                    Modifier
+                }
+            )
+    ) {
+        currentPlayer?.let {
             VideoPlayerView(
-                autoPlayer = currentPlayer,
+                autoPlayer = it,
                 modifier = Modifier.fillMaxSize(),
             )
         }
 
-        if (thumbnailUrl != null && thumbnailAlpha > 0f) {
+        if (thumbnailUrl != null && thumbnailAlphaAnimated > 0f) {
             ThumbnailWrapper(
                 thumbnailUrl = thumbnailUrl,
-                onPlayVideoClick = { onPlayVideoClick(videoUrl) },
+                onPlayVideoClick = { onVideoClick() },
                 modifier = Modifier
                     .fillMaxSize()
-                    .alpha(thumbnailAlpha),
+                    .alpha(thumbnailAlphaAnimated),
             )
         }
 
-        if (shouldPlay) {
-            AnimatedVisibility(
-                visible = !isControlVisible,
-                enter = fadeIn(),
-                exit = fadeOut(),
-                modifier = Modifier.align(Alignment.BottomCenter)
-            ) {
-                PlayerSeekbar(
-                    progress = progress,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+        if (currentPlayer != null) {
+            PlayerControlOverlay(
+                progress = progress,
+                timeText = timeText,
+                isControlVisible = isControlVisible,
+                isMuted = isMuted,
+                onSeekValueChange = onSeekValueChange,
+                onSeekValueChangeFinished = onSeekValueChangeFinished,
+                onMuteToggle = onMuteToggle,
+                onFullscreenClick = onFullscreenClick,
+            )
+        }
+    }
+}
 
-            AnimatedVisibility(
-                visible = isControlVisible,
-                enter = slideInVertically(
-                    initialOffsetY = { it },
-                    animationSpec = tween(durationMillis = 250)
-                ) + fadeIn(animationSpec = tween(durationMillis = 250)),
-                exit = slideOutVertically(
-                    targetOffsetY = { it },
-                    animationSpec = tween(durationMillis = 250)
-                ) + fadeOut(animationSpec = tween(durationMillis = 250)),
-                modifier = Modifier.align(Alignment.BottomCenter)
-            ) {
-                Column(
+@Composable
+private fun PlayerControlOverlay(
+    progress: Float,
+    timeText: String,
+    isControlVisible: Boolean,
+    isMuted: Boolean,
+    onSeekValueChange: (Float) -> Unit,
+    onSeekValueChangeFinished: () -> Unit,
+    onMuteToggle: () -> Unit,
+    onFullscreenClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier.fillMaxSize()) {
+        AnimatedVisibility(
+            visible = !isControlVisible,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier.align(Alignment.BottomCenter)
+        ) {
+            PlayerSeekbar(
+                progress = progress,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        AnimatedVisibility(
+            visible = isControlVisible,
+            enter = slideInVertically(
+                initialOffsetY = { it },
+                animationSpec = tween(durationMillis = 250)
+            ) + fadeIn(animationSpec = tween(durationMillis = 250)),
+            exit = slideOutVertically(
+                targetOffsetY = { it },
+                animationSpec = tween(durationMillis = 250)
+            ) + fadeOut(animationSpec = tween(durationMillis = 250)),
+            modifier = Modifier.align(Alignment.BottomCenter)
+        ) {
+            PlayerControlBar(
+                progress = progress,
+                timeText = timeText,
+                onSeekValueChange = onSeekValueChange,
+                onSeekValueChangeFinished = onSeekValueChangeFinished,
+                onFullscreenClick = onFullscreenClick,
+            )
+        }
+
+        PlayerMuteButton(
+            isMuted = isMuted,
+            onToggle = onMuteToggle,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(NachoSpacing.small),
+        )
+    }
+}
+
+@kotlin.OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PlayerControlBar(
+    progress: Float,
+    timeText: String,
+    onSeekValueChange: (Float) -> Unit,
+    onSeekValueChangeFinished: () -> Unit,
+    onFullscreenClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f))
+                )
+            )
+            .padding(horizontal = NachoSpacing.small)
+            .padding(bottom = NachoSpacing.medium),
+        verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
+    ) {
+        Slider(
+            value = progress,
+            onValueChange = onSeekValueChange,
+            onValueChangeFinished = onSeekValueChangeFinished,
+            modifier = Modifier.fillMaxWidth().height(0.dp),
+            thumb = {
+                Box(
+                    modifier = Modifier
+                        .size(15.dp)
+                        .shadow(
+                            elevation = NachoElevation.medium,
+                            shape = CircleShape
+                        )
+                        .background(
+                            color = Color.White,
+                            shape = CircleShape,
+                        )
+                )
+            },
+            track = { sliderState ->
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f))
-                            )
-                        )
-                        .padding(horizontal = NachoSpacing.medium)
-                        .padding(bottom = NachoSpacing.small),
+                        .height(NachoStroke.large)
+                        .clip(NachoTheme.shapes.extraSmall)
+                        .background(NachoTheme.colorScheme.backgroundBorder)
                 ) {
-                    Slider(
-                        value = progress,
-                        onValueChange = { newValue ->
-                            if (!isSeeking) videoPlayerPool.pausePlayer(videoUrl)
-                            isSeeking = true
-                            seekPositionMs = (newValue * totalDurationMs).toLong()
-                        },
-                        onValueChangeFinished = {
-                            videoPlayerPool.seekTo(videoUrl, seekPositionMs)
-                            videoPlayerPool.playPlayer(videoUrl, guestBookId)
-                            isSeeking = false
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        thumb = {
-                            Box(
-                                modifier = Modifier
-                                    .size(15.dp)
-                                    .shadow(
-                                        elevation = NachoElevation.medium,
-                                        shape = CircleShape
-                                    )
-                                    .background(
-                                        color = Color.White,
-                                        shape = CircleShape,
-                                    )
-                            )
-                        },
-                        track = { sliderState ->
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(NachoStroke.large)
-                                    .clip(NachoTheme.shapes.extraSmall)
-                                    .background(NachoTheme.colorScheme.backgroundBorder)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth(sliderState.value)
-                                        .fillMaxHeight()
-                                        .background(NachoTheme.colorScheme.brandPrimary)
-                                )
-                            }
-                        },
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(sliderState.value)
+                            .fillMaxHeight()
+                            .background(NachoTheme.colorScheme.brandPrimary)
                     )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = timeText,
-                            style = NachoTheme.typography.bodySmallRegular,
-                            color = Color.White,
-                        )
-                        Icon(
-                            painter = painterResource(R.drawable.ic_fullscreen_24),
-                            contentDescription = stringResource(R.string.desc_fullscreen),
-                            tint = Color.White,
-                            modifier = Modifier
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null,
-                                    onClick = { /* TODO: 전체화면 기능 */ }
-                                ),
-                        )
-                    }
                 }
-            }
-
-            PlayerMuteButton(
-                isMuted = isMuted,
-                onToggle = { videoPlayerPool.toggleMute() },
+            },
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = NachoSpacing.xSmall),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = timeText,
+                style = NachoTheme.typography.bodySmallRegular,
+                color = Color.White,
+                modifier = Modifier.padding(start = NachoSpacing.xSmall)
+            )
+            Icon(
+                painter = painterResource(R.drawable.ic_fullscreen_24),
+                contentDescription = stringResource(R.string.desc_fullscreen),
+                tint = Color.White,
                 modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(NachoSpacing.small),
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = onFullscreenClick
+                    ),
             )
         }
     }
