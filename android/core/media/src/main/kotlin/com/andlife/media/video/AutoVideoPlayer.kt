@@ -35,6 +35,8 @@ class AutoVideoPlayer(
         exoPlayer.volume = if (isMuted) 0f else 1f
     }
 
+    fun seekTo(positionMs: Long) = exoPlayer.seekTo(positionMs)
+
     @OptIn(UnstableApi::class)
     fun setMediaSource(mediaSource: MediaSource) = exoPlayer.setMediaSource(mediaSource)
 

@@ -9,6 +9,8 @@ import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,6 +20,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,10 +34,12 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,6 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -64,6 +70,7 @@ import androidx.media3.common.util.UnstableApi
 import coil3.compose.AsyncImage
 import coil3.compose.SubcomposeAsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
+import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
@@ -481,7 +488,7 @@ private fun GuestBookItemVisualMediaSection(
     }
 }
 
-@OptIn(UnstableApi::class)
+@kotlin.OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun VideoPlayerContainer(
     guestBookId: Long,
@@ -494,10 +501,11 @@ private fun VideoPlayerContainer(
     modifier: Modifier = Modifier,
 ) {
     var isVideoReady by remember(videoUrl) { mutableStateOf(false) }
-    var remainingDurationMs by remember(videoUrl) { mutableLongStateOf((totalDurationSeconds?.times(1000L)) ?: 0L) }
     var currentPositionMs by remember(videoUrl) { mutableLongStateOf(0L) }
     var totalDurationMs by remember(videoUrl) { mutableLongStateOf((totalDurationSeconds?.times(1000L)) ?: 0L) }
     var isControlVisible by remember(videoUrl) { mutableStateOf(false) }
+    var isSeeking by remember(videoUrl) { mutableStateOf(false) }
+    var seekPositionMs by remember(videoUrl) { mutableLongStateOf(0L) }
     val isMuted by videoPlayerPool.isMuted.collectAsStateWithLifecycle()
 
     val thumbnailAlpha by animateFloatAsState(
@@ -505,15 +513,17 @@ private fun VideoPlayerContainer(
         animationSpec = tween(durationMillis = 200),
     )
 
+    val displayPositionMs = if (isSeeking) seekPositionMs else currentPositionMs
+
     val progress = if (totalDurationMs > 0) {
-        (currentPositionMs.toFloat() / totalDurationMs.toFloat()).coerceIn(0f, 1f)
+        (displayPositionMs.toFloat() / totalDurationMs.toFloat()).coerceIn(0f, 1f)
     } else {
         0f
     }
 
-    val currentTimeText = (currentPositionMs / 1000).toInt().toFormatDuration()
-    val totalTimeText = (totalDurationMs / 1000).toInt().toFormatDuration()
-    val timeText = "$currentTimeText / $totalTimeText"
+    val timeText = "${(displayPositionMs / 1000).toInt().toFormatDuration()} / ${
+        (totalDurationMs / 1000).toInt().toFormatDuration()
+    }"
 
     LaunchedEffect(shouldPlay, videoUrl) {
         if (shouldPlay) {
@@ -528,6 +538,10 @@ private fun VideoPlayerContainer(
             delay(3000L)
             isControlVisible = false
         }
+    }
+
+    LaunchedEffect(shouldPlay) {
+        if (!shouldPlay) isControlVisible = false
     }
 
     Box(
@@ -570,23 +584,13 @@ private fun VideoPlayerContainer(
 
             LaunchedEffect(isVideoReady) {
                 if (!isVideoReady) {
-                    remainingDurationMs = (totalDurationSeconds?.times(1000L)) ?: 0L
-                    return@LaunchedEffect
-                }
-                while (true) {
-                    val position = currentPlayer.exoPlayer.currentPosition
-                    remainingDurationMs = (totalDurationMs - position).coerceAtLeast(0L)
-                    delay(1000L)
-                }
-            }
-
-            LaunchedEffect(isVideoReady) {
-                if (!isVideoReady) {
                     currentPositionMs = 0L
                     return@LaunchedEffect
                 }
                 while (true) {
-                    currentPositionMs = currentPlayer.exoPlayer.currentPosition.coerceAtLeast(0L)
+                    if (!isSeeking) {
+                        currentPositionMs = currentPlayer.exoPlayer.currentPosition.coerceAtLeast(0L)
+                    }
                     delay(16L)
                 }
             }
@@ -607,15 +611,6 @@ private fun VideoPlayerContainer(
             )
         }
 
-//        if (totalDurationSeconds != null) {
-//            VideoDurationOverlay(
-//                duration = (remainingDurationMs / 1000).toInt().toFormatDuration(),
-//                modifier = Modifier
-//                    .align(Alignment.BottomEnd)
-//                    .padding(NachoSpacing.small),
-//            )
-//        }
-
         if (shouldPlay) {
             AnimatedVisibility(
                 visible = !isControlVisible,
@@ -631,8 +626,14 @@ private fun VideoPlayerContainer(
 
             AnimatedVisibility(
                 visible = isControlVisible,
-                enter = fadeIn(),
-                exit = fadeOut(),
+                enter = slideInVertically(
+                    initialOffsetY = { it },
+                    animationSpec = tween(durationMillis = 250)
+                ) + fadeIn(animationSpec = tween(durationMillis = 250)),
+                exit = slideOutVertically(
+                    targetOffsetY = { it },
+                    animationSpec = tween(durationMillis = 250)
+                ) + fadeOut(animationSpec = tween(durationMillis = 250)),
                 modifier = Modifier.align(Alignment.BottomCenter)
             ) {
                 Column(
@@ -646,15 +647,72 @@ private fun VideoPlayerContainer(
                         .padding(horizontal = NachoSpacing.medium)
                         .padding(bottom = NachoSpacing.small),
                 ) {
-                    Text(
-                        text = timeText,
-                        style = NachoTheme.typography.bodySmallRegular,
-                        color = Color.White,
+                    Slider(
+                        value = progress,
+                        onValueChange = { newValue ->
+                            if (!isSeeking) videoPlayerPool.pausePlayer(videoUrl)
+                            isSeeking = true
+                            seekPositionMs = (newValue * totalDurationMs).toLong()
+                        },
+                        onValueChangeFinished = {
+                            videoPlayerPool.seekTo(videoUrl, seekPositionMs)
+                            videoPlayerPool.playPlayer(videoUrl, guestBookId)
+                            isSeeking = false
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        thumb = {
+                            Box(
+                                modifier = Modifier
+                                    .size(15.dp)
+                                    .shadow(
+                                        elevation = NachoElevation.medium,
+                                        shape = CircleShape
+                                    )
+                                    .background(
+                                        color = Color.White,
+                                        shape = CircleShape,
+                                    )
+                            )
+                        },
+                        track = { sliderState ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(NachoStroke.large)
+                                    .clip(NachoTheme.shapes.extraSmall)
+                                    .background(NachoTheme.colorScheme.backgroundBorder)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(sliderState.value)
+                                        .fillMaxHeight()
+                                        .background(NachoTheme.colorScheme.brandPrimary)
+                                )
+                            }
+                        },
                     )
-                    PlayerSeekbar(
-                        progress = progress,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = timeText,
+                            style = NachoTheme.typography.bodySmallRegular,
+                            color = Color.White,
+                        )
+                        Icon(
+                            painter = painterResource(R.drawable.ic_fullscreen_24),
+                            contentDescription = stringResource(R.string.desc_fullscreen),
+                            tint = Color.White,
+                            modifier = Modifier
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null,
+                                    onClick = { /* TODO: 전체화면 기능 */ }
+                                ),
+                        )
+                    }
                 }
             }
 
@@ -724,7 +782,7 @@ private fun PlayerSeekbar(
         progress = { progress },
         modifier = modifier
             .fillMaxWidth()
-            .height(2.dp),
+            .height(NachoStroke.medium),
         color = NachoTheme.colorScheme.brandPrimary,
         trackColor = NachoTheme.colorScheme.backgroundBorder,
         gapSize = 0.dp,

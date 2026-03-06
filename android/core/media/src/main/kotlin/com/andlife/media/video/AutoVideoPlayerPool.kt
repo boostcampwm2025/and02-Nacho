@@ -20,6 +20,7 @@ interface AutoVideoPlayerPool {
 
     fun pauseAllPlayers()
     fun toggleMute()
+    fun seekTo(url: String, positionMs: Long)
 
     fun resumeLastPlayed()
 
@@ -43,6 +44,7 @@ class FakeAutoVideoPlayerPool : AutoVideoPlayerPool {
     override fun pausePlayer(url: String) {}
     override fun pauseAllPlayers() {}
     override fun toggleMute() {}
+    override fun seekTo(url: String, positionMs: Long) {}
     override fun resumeLastPlayed() {}
     override fun clearCacheById(itemId: Long?) {}
     override fun precacheVideos(urls: List<String>) {}

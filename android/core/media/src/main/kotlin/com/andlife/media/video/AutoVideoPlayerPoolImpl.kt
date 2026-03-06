@@ -165,6 +165,10 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
         activePlayers.values.forEach { it.setMuted(_isMuted.value) }
     }
 
+    override fun seekTo(url: String, positionMs: Long) {
+        activePlayers[url]?.seekTo(positionMs)
+    }
+
     override fun resumeLastPlayed() {
         currentPlayingUrl?.let { activePlayers[it]?.play() }
     }

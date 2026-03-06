@@ -189,5 +189,6 @@
 
     <!-- WebView -->
     <string name="txt_error_network">네트워크 연결을 확인해주세요</string>
+    <string name="desc_fullscreen">전체 화면 클릭</string>
 
 </resources>
