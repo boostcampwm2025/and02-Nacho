@@ -63,6 +63,7 @@ fun InvitationGuestBookForm(
     onTextFieldClick: () -> Unit,
     modifier: Modifier = Modifier,
     editingGuestBookId: Long? = null,
+    isProcessingMedia: Boolean = false,
 ) {
     val context = LocalContext.current
     val focusRequester = remember { FocusRequester() }
@@ -170,7 +171,7 @@ fun InvitationGuestBookForm(
             // 미디어 아이콘 및 용량 표시
             Column {
                 // 미디어 아이콘 표시
-                val isMediaAddEnabled = isAuthenticated && selectedMedias.size < MAX_MEDIAS_COUNT && !isUploading
+                val isMediaAddEnabled = isAuthenticated && selectedMedias.size < MAX_MEDIAS_COUNT && !isUploading && !isProcessingMedia
                 val iconColor =
                     if (isMediaAddEnabled) {
                         NachoTheme.colorScheme.brandPrimary
@@ -253,11 +254,19 @@ fun InvitationGuestBookForm(
                                     }
                                 },
                     )
+                    
+                    if (isProcessingMedia) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(NachoIconSize.semiLarge),
+                            color = NachoTheme.colorScheme.brandPrimary,
+                            strokeWidth = NachoSpacing.xSmall
+                        )
+                    }
                 }
             }
             NachoButton(
                 onClick = onUploadClick,
-                enabled = isSubmittable && isAuthenticated,
+                enabled = isSubmittable && isAuthenticated && !isProcessingMedia,
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
