@@ -42,13 +42,6 @@ class InvitationDetailViewModel @AssistedInject constructor(
 ) : BaseViewModel<InvitationDetailUiState, InvitationDetailUiEvent, InvitationDetailSideEffect>(
     initialState = InvitationDetailUiState(),
 ) {
-    //private val route = savedStateHandle.toRoute<InvitationDetail>()
-    //private val isFromDeepLink: Boolean = route.isFromDeepLink
-    //private val invitationId: Long = route.id
-
-    init {
-        Log.d("InvitationDetailViewModel", "init VM id: $invitationId, hash: ${hashCode()}")
-    }
 
     override val uiState: StateFlow<InvitationDetailUiState> =
         mutableUiState
