@@ -105,6 +105,7 @@ fun GuestBookItem(
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
     onPlayVideoClick: (String) -> Unit,
+    onFullscreenClick: (String) -> Unit = {}, // TODO: 기본 값 제거
     modifier: Modifier = Modifier,
     shouldPlayVideo: Boolean = false,
     isFromInvitationDetail: Boolean = true,
@@ -163,6 +164,7 @@ fun GuestBookItem(
             videoPlayerPool = videoPlayerPool,
             onVisualMediaClick = onVisualMediaClick,
             onPlayVideoClick = onPlayVideoClick,
+            onFullscreenClick = onFullscreenClick
         )
         GuestBookItemAudioSection(
             audioMedias = guestBook.audioMedias,
@@ -390,6 +392,7 @@ private fun GuestBookItemVisualMediaSection(
     videoPlayerPool: AutoVideoPlayerPool,
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     onPlayVideoClick: (String) -> Unit,
+    onFullscreenClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (visualMediaUrls.isEmpty()) return
@@ -436,6 +439,7 @@ private fun GuestBookItemVisualMediaSection(
                             shouldPlay = shouldPlayVideo && pagerState.currentPage == page,
                             videoPlayerPool = videoPlayerPool,
                             onPlayVideoClick = onPlayVideoClick,
+                            onFullscreenClick = onFullscreenClick
                         )
                     }
 
@@ -498,6 +502,7 @@ private fun VideoPlayerContainer(
     shouldPlay: Boolean,
     videoPlayerPool: AutoVideoPlayerPool,
     onPlayVideoClick: (String) -> Unit,
+    onFullscreenClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var isVideoReady by remember(videoUrl) { mutableStateOf(false) }
@@ -617,7 +622,7 @@ private fun VideoPlayerContainer(
                     isSeeking = false
                 },
                 onMuteToggle = { videoPlayerPool.toggleMute() },
-                onFullscreenClick = { /* TODO: 전체화면 기능 */ },
+                onFullscreenClick = { onFullscreenClick(videoUrl) },
             )
         } else {
             VideoPlayerContent(

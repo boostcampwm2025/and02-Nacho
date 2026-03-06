@@ -8,6 +8,9 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,10 +20,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -40,10 +45,15 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -51,6 +61,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.media3.ui.compose.ContentFrame
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
@@ -414,6 +425,21 @@ fun InvitationGuestBookRoute(
         )
     }
 
+//    if (uiState.fullscreenVideoUrl != null) {
+//        VideoFullscreenDialog(
+//            videoUrl = uiState.fullscreenVideoUrl,
+//            videoPlayerPool = viewModel.videoPlayerPool,
+//            onDismiss = { viewModel.onEvent(InvitationGuestBookUiEvent.DismissFullscreenVideo) }
+//        )
+//    }
+    uiState.fullscreenVideoUrl?.let {
+        VideoFullscreenDialog(
+            videoUrl = it,
+            videoPlayerPool = viewModel.videoPlayerPool,
+            onDismiss = { viewModel.onEvent(InvitationGuestBookUiEvent.DismissFullscreenVideo) }
+        )
+    }
+
     InvitationGuestBookScreen(
         uiState = uiState,
         guestBooks = guestBooks,
@@ -618,7 +644,8 @@ private fun InvitationGuestBookScreen(
                                         onReportClick = { targetId -> onEvent(InvitationGuestBookUiEvent.ShowReport(targetId)) },
                                         onVisualMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
                                         onAudioMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
-                                        onPlayVideoClick = { url -> onEvent(InvitationGuestBookUiEvent.ClickVideoPlayButton(url, guestBook.id))}
+                                        onPlayVideoClick = { url -> onEvent(InvitationGuestBookUiEvent.ClickVideoPlayButton(url, guestBook.id))},
+                                        onFullscreenClick = { url -> onEvent(InvitationGuestBookUiEvent.ShowFullscreenVideo(url)) }
                                     )
                                 }
                             }
@@ -821,9 +848,54 @@ private fun InvitationGuestBookResultPreview() {
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},
                     onAudioMediaClick = {},
-                    onPlayVideoClick = {}
+                    onPlayVideoClick = {},
+                    onFullscreenClick = {}
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun VideoFullscreenDialog(
+    videoUrl: String,
+    videoPlayerPool: AutoVideoPlayerPool,
+    onDismiss: () -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = true,
+            dismissOnClickOutside = false,
+        ),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black)
+        ) {
+            val player = remember(videoUrl) { videoPlayerPool.getPlayer(videoUrl) }
+
+            ContentFrame(
+                player = player.exoPlayer,
+                modifier = Modifier.fillMaxSize(),
+            )
+
+            Icon(
+                painter = painterResource(R.drawable.ic_fullscreen_exit_24),
+                contentDescription = stringResource(R.string.desc_exit_fullscreen),
+                tint = Color.White,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(NachoSpacing.medium)
+                    .size(24.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = onDismiss,
+                    ),
+            )
         }
     }
 }

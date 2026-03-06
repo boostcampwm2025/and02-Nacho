@@ -158,6 +158,8 @@ constructor(
                 analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.INVITATION_DETAIL_GUEST_BOOK, Button.GUEST_BOOK_REPORT))
                 submitReport(event.reason, event.description)
             }
+            is InvitationGuestBookUiEvent.ShowFullscreenVideo -> updateState { copy(fullscreenVideoUrl = event.url) }
+            InvitationGuestBookUiEvent.DismissFullscreenVideo -> updateState { copy(fullscreenVideoUrl = null) }
         }
     }
 

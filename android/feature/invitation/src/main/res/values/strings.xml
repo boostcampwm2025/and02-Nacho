@@ -44,5 +44,6 @@
     <string name="dialog_back_message">업로드 중에 나가면 업로드가 취소될 수 있습니다.\n그래도 나가시겠습니까?</string>
     <string name="dialog_back_confirm">나가기</string>
     <string name="dialog_back_cancel">취소</string>
+    <string name="desc_exit_fullscreen">전체화면 종료</string>
 </resources>
 
