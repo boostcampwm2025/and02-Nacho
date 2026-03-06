@@ -20,6 +20,9 @@ import com.andlife.domain.util.RefreshEventHub
 import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.domain.util.Screen
 import com.andlife.ui.base.BaseViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,22 +32,21 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@HiltViewModel
-class InvitationDetailViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = InvitationDetailViewModel.Factory::class)
+class InvitationDetailViewModel @AssistedInject constructor(
     savedStateHandle: SavedStateHandle,
     private val invitationRepository: InvitationRepository,
-    private val analyticsLogger: AnalyticsLogger
+    private val analyticsLogger: AnalyticsLogger,
+    @Assisted val invitationId: Long,
+    @Assisted val isFromDeepLink: Boolean,
 ) : BaseViewModel<InvitationDetailUiState, InvitationDetailUiEvent, InvitationDetailSideEffect>(
     initialState = InvitationDetailUiState(),
 ) {
-    private val route = savedStateHandle.toRoute<InvitationDetail>()
-    private val isFromDeepLink: Boolean = route.isFromDeepLink
-    private val invitationId: Long = route.id
 
     override val uiState: StateFlow<InvitationDetailUiState> =
         mutableUiState
             .onStart {
-                Log.d("DeepLink Debug", "[${this@InvitationDetailViewModel.hashCode()}] 딥링크 진입 : $isFromDeepLink")
+                Log.d("InvitationDetailViewModel", "[${this@InvitationDetailViewModel.hashCode()}] 딥링크 진입 : $isFromDeepLink")
                 if (isFromDeepLink) {
                     joinAndLoadInvitation()
                 } else {
@@ -62,8 +64,10 @@ class InvitationDetailViewModel @Inject constructor(
 
         invitationRepository.joinInvitation(invitationId)
             .onSuccess {
-                RefreshEventHub.emit(RefreshTarget.HOME)
-                RefreshEventHub.emit(RefreshTarget.INVITATION)
+                if (!it.alreadyJoined) {
+                    RefreshEventHub.emit(RefreshTarget.HOME)
+                    RefreshEventHub.emit(RefreshTarget.INVITATION)
+                }
                 loadInvitation()
             }
             .onFailure { error, _ ->
@@ -72,6 +76,7 @@ class InvitationDetailViewModel @Inject constructor(
     }
 
     private suspend fun loadInvitation() {
+        Log.d("InvitationDetailViewModel", "id: $invitationId")
         updateState { copy(isLoading = true, isError = false, editableCache = null) }
 
         invitationRepository.getInvitation(invitationId)
@@ -95,10 +100,12 @@ class InvitationDetailViewModel @Inject constructor(
                 analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.INVITATION_DETAIL, Button.SHOW_THANKS_CARD))
                 showThanksCardOnboarding()
             }
+
             is InvitationDetailUiEvent.ClickLeaveInvitation -> {
                 analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.INVITATION_DETAIL, Button.INVITATION_LEAVE))
                 leaveInvitation()
             }
+
             is InvitationDetailUiEvent.ClickImage -> navigateToFullScreenImage(event.imageList, event.index)
             is InvitationDetailUiEvent.MapError -> showMapErrorSnackbar()
             is InvitationDetailUiEvent.RetryLoad -> retryLoad()
@@ -130,7 +137,8 @@ class InvitationDetailViewModel @Inject constructor(
         sendEffect(InvitationDetailSideEffect.ThanksCardOnBoarding)
     }
 
-    private fun navigateToFullScreenImage(imageList: ImmutableList<String>, index: Int) { /* TODO: 이미지 풀스크린*/ }
+    private fun navigateToFullScreenImage(imageList: ImmutableList<String>, index: Int) { /* TODO: 이미지 풀스크린*/
+    }
 
     private fun showMapErrorSnackbar() {
         sendEffect(InvitationDetailSideEffect.ShowMapErrorSnackbar)
@@ -155,4 +163,11 @@ class InvitationDetailViewModel @Inject constructor(
         updateState { copy(hasShownLottie = true) }
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            invitationId: Long,
+            isFromDeepLink: Boolean
+        ): InvitationDetailViewModel
+    }
 }

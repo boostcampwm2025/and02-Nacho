@@ -1,5 +1,8 @@
 package com.andlife.invitation.screen
 
+import android.util.Log
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +12,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.AnimatedPane
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.layout.PaneAdaptedValue
+import androidx.compose.material3.adaptive.navigation.BackNavigationBehavior
+import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
+import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
+import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldPredictiveBackHandler
+import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,6 +29,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringArrayResource
@@ -31,9 +44,18 @@ import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.invitation.SortDirection
+import com.andlife.domain.util.RefreshEventHub
+import com.andlife.invitation.InvitationDetail
+import com.andlife.invitation.InvitationPlaceholder
 import com.andlife.invitation.model.InvitationSideEffect
 import com.andlife.invitation.model.InvitationUiEvent
 import com.andlife.invitation.model.InvitationUiState
+import com.andlife.invitation.screen.detail.InvitationDetailRoute
+import com.andlife.invitation.screen.detail.InvitationPlaceholderScreen
+import com.andlife.invitation.viewmodel.Invitation2PaneUiState
+import com.andlife.invitation.viewmodel.Invitation2PaneViewModel
+import com.andlife.invitation.viewmodel.InvitationDetailViewModel
+import com.andlife.invitation.viewmodel.InvitationGuestBookViewModel
 import com.andlife.invitation.viewmodel.InvitationViewModel
 import com.andlife.model.invitation.InvitationSummaryUiModel
 import com.andlife.ui.R
@@ -53,15 +75,140 @@ import kotlinx.coroutines.launch
 
 private const val SAMPLE_INVITATION_ID = 1L
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@Composable
+fun InvitationsListDetailScreen(
+    snackbarHostState: SnackbarHostState,
+    onNavigateToLogin: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: Invitation2PaneViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    InvitationListDetailScreen(
+        uiState = uiState,
+        snackbarHostState = snackbarHostState,
+        onNavigateToLogin = onNavigateToLogin,
+        onInvitationClick = viewModel::onInvitationClick
+    )
+}
+
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@Composable
+private fun InvitationListDetailScreen(
+    uiState: Invitation2PaneUiState,
+    snackbarHostState: SnackbarHostState,
+    onNavigateToLogin: () -> Unit,
+    onInvitationClick: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val selectedInvitationId = uiState.selectedInvitationId
+
+    val listDetailNavigator = rememberListDetailPaneScaffoldNavigator()
+    val coroutineScope = rememberCoroutineScope()
+
+    var invitationRoute by remember {
+        val route = selectedInvitationId?.let { InvitationDetail(id = it) } ?: InvitationPlaceholder
+        mutableStateOf(route)
+    }
+
+    var isConsumeDeepLink by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    fun onInvitationClickShowDetailPane(id: Long) {
+        Log.d("onInvitationClickShowDetailPane", "onInvitationClickShowDetailPane: $id")
+        onInvitationClick(id)
+        invitationRoute = InvitationDetail(id)
+        coroutineScope.launch {
+            listDetailNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (!isConsumeDeepLink && uiState.isFromDeelLink) {
+            val id = uiState.selectedInvitationId ?: return@LaunchedEffect
+            onInvitationClickShowDetailPane(id)
+            isConsumeDeepLink = true
+        }
+    }
+
+    ThreePaneScaffoldPredictiveBackHandler(
+        listDetailNavigator,
+        BackNavigationBehavior.PopUntilScaffoldValueChange,
+    )
+
+    NavigableListDetailPaneScaffold(
+        navigator = listDetailNavigator,
+        listPane = {
+            AnimatedPane {
+                InvitationRoute(
+                    snackbarHostState = snackbarHostState,
+                    onNavigateToDetail = { onInvitationClickShowDetailPane(it) },
+                    onNavigateToLogin = onNavigateToLogin,
+                    selectedInvitationId = uiState.selectedInvitationId,
+                    shouldHighlightSelected = listDetailNavigator.isDetailPaneVisible(),
+                )
+            }
+        },
+        detailPane = {
+            AnimatedPane {
+                AnimatedContent(invitationRoute) { route ->
+                    when (route) {
+                        is InvitationDetail -> {
+                            InvitationDetailRoute(
+                                selectedId = route.id,
+                                onNavigateBack = {
+                                    coroutineScope.launch {
+                                        listDetailNavigator.navigateBack()
+                                    }
+                                },
+                                onNavigateToLogin = onNavigateToLogin,
+                                showBackButton = !listDetailNavigator.isListPaneVisible(),
+                                viewModel = hiltViewModel<InvitationDetailViewModel, InvitationDetailViewModel.Factory>(
+                                    key = "detail ${route.id}"
+                                ){ factory ->
+                                    factory.create(route.id, uiState.isFromDeelLink)
+                                },
+                                guestBookViewModel = hiltViewModel<InvitationGuestBookViewModel, InvitationGuestBookViewModel.Factory>(
+                                    key = "guestbook ${route.id}"
+                                ) { factory ->
+                                    factory.create(route.id)
+                                }
+                            )
+                        }
+                        is InvitationPlaceholder -> {
+                            InvitationPlaceholderScreen()
+                        }
+                    }
+                }
+            }
+        },
+        modifier = modifier.background(NachoTheme.colorScheme.backgroundPrimary),
+    )
+}
+
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+private fun <T> ThreePaneScaffoldNavigator<T>.isListPaneVisible(): Boolean =
+    scaffoldValue[ListDetailPaneScaffoldRole.List] == PaneAdaptedValue.Expanded
+
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+private fun <T> ThreePaneScaffoldNavigator<T>.isDetailPaneVisible(): Boolean =
+    scaffoldValue[ListDetailPaneScaffoldRole.Detail] == PaneAdaptedValue.Expanded
+
 @Composable
 fun InvitationRoute(
     snackbarHostState: SnackbarHostState,
     onNavigateToDetail: (Long) -> Unit,
     onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
+    selectedInvitationId: Long? = null,
+    shouldHighlightSelected: Boolean = false,
     viewModel: InvitationViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val needsRefresh by RefreshEventHub.invitationRefresh.collectAsStateWithLifecycle()
+
     val upcomingItems = viewModel.upcomingInvitationPagingFlow.collectAsLazyPagingItems()
     val pastItems = viewModel.pastInvitationPagingFlow.collectAsLazyPagingItems()
 
@@ -114,6 +261,14 @@ fun InvitationRoute(
                     snackbarHostState.showSnackbar(effect.message ?: reportFailureMessage)
                 }
             }
+        }
+    }
+
+    LaunchedEffect(needsRefresh) {
+        Log.d("RefreshEventHub", "invitation needsRefresh: $needsRefresh")
+        if (needsRefresh) {
+            viewModel.handleRefresh()
+            RefreshEventHub.consumeInvitation()
         }
     }
 
@@ -172,7 +327,9 @@ fun InvitationRoute(
         pastItems = pastItems,
         modifier = modifier,
         onEvent = viewModel::onEvent,
-        onLeaveClick = { invitationIdToLeave = it }
+        onLeaveClick = { invitationIdToLeave = it },
+        selectedInvitationId = selectedInvitationId,
+        shouldHighlightSelected = shouldHighlightSelected
     )
 }
 
@@ -184,7 +341,9 @@ private fun InvitationScreen(
     pastItems: LazyPagingItems<InvitationSummaryUiModel>,
     onEvent: (InvitationUiEvent) -> Unit,
     onLeaveClick: (Long) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    selectedInvitationId: Long? = null,
+    shouldHighlightSelected: Boolean = false,
 ) {
     val tabs = stringArrayResource(R.array.arr_invitation_tabs).toImmutableList()
     val upcomingSortOptions = stringArrayResource(R.array.arr_invitation_sort_options).toImmutableList()
@@ -268,6 +427,7 @@ private fun InvitationScreen(
                                 key = currentItems.itemKey { it.id }
                             ) { index ->
                                 currentItems[index]?.let { invitation ->
+                                    val isSelected = shouldHighlightSelected && invitation.id == selectedInvitationId
                                     val dDayLabel = when (val count = invitation.dDayCount) {
                                         null -> null
                                         0 -> stringResource(R.string.format_invitation_d_day_today)
@@ -302,7 +462,8 @@ private fun InvitationScreen(
                                         address = invitation.address,
                                         dDayText = dDayLabel,
                                         onClick = { onEvent(InvitationUiEvent.ClickInvitation(invitation.id)) },
-                                        menuItems = menuItems
+                                        menuItems = menuItems,
+                                        isSelected = isSelected
                                     )
                                 }
                             }
@@ -319,3 +480,11 @@ private fun InvitationScreen(
         )
     }
 }
+
+/**
+ * 딥링크인가?
+ * 2paneViewModel에서 event를 가진다. (채널로 가진다)
+ * 딥링크가 true라면 이벤트를 한번 소비시킨다.
+ * 그 후 다른 초대장을 클릭하면? false로 이동하긴 해야 한다. true false 값이 바뀌어야 함, 딥링크로 들어온 id들을 배열로 관리하면?(상태관리)
+ * 값은
+ */

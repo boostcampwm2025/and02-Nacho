@@ -44,6 +44,9 @@ import com.andlife.model.guestbook.UiMediaType
 import com.andlife.model.guestbook.toUiModel
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -59,10 +62,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@HiltViewModel
-class InvitationGuestBookViewModel
-@Inject
-constructor(
+@HiltViewModel(assistedFactory = InvitationGuestBookViewModel.Factory::class)
+class InvitationGuestBookViewModel @AssistedInject constructor(
     private val mediaUploader: MediaUploader,
     private val mediaFileProvider: MediaFileProvider,
     private val thumbnailGenerator: ThumbnailGenerator,
@@ -73,12 +74,10 @@ constructor(
     val videoPlayerPool: AutoVideoPlayerPool,
     private val analyticsLogger: AnalyticsLogger,
     private val crashlyticsLogger: CrashlyticsLogger,
-    savedStateHandle: SavedStateHandle,
+    @Assisted val invitationId: Long,
 ) : BaseViewModel<InvitationGuestBookUiState, InvitationGuestBookUiEvent, InvitationGuestBookSideEffect>(
     InvitationGuestBookUiState(),
 ) {
-    private val invitationId: Long = savedStateHandle.toRoute<InvitationDetail>().id
-
     override val uiState: StateFlow<InvitationGuestBookUiState> = mutableUiState.asStateFlow()
 
     private val refreshFlow = MutableStateFlow(0)
@@ -595,5 +594,12 @@ constructor(
                 sendEffect(InvitationGuestBookSideEffect.ReportFailure(messageToShow))
             }
         }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            invitationId: Long,
+        ): InvitationGuestBookViewModel
     }
 }
