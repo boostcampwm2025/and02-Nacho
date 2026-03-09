@@ -15,6 +15,9 @@ interface GuestBookDao {
     @Upsert
     suspend fun upsertAll(guestBooks: List<GuestBookEntity>)
 
+    @Query("DELETE FROM guest_book WHERE id = :guestBookId")
+    suspend fun deleteById(guestBookId: Long)
+
     @Query("DELETE FROM guest_book")
     suspend fun clearAll()
 }

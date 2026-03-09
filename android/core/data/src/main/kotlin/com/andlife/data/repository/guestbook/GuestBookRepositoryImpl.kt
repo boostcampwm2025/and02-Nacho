@@ -16,6 +16,7 @@ import com.andlife.domain.model.guestbook.GuestBookMedia
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.map
+import com.andlife.domain.util.onSuccess
 import com.andlife.network.model.guestbook.GuestBookRequest
 import com.andlife.network.model.guestbook.UpdateGuestBookRequest
 import kotlinx.coroutines.flow.Flow
@@ -85,8 +86,9 @@ internal class GuestBookRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteGuestBook(guestBookId: Long): Result<Long, DataError> =
-        guestBookRemoteDataSource.deleteGuestBook(guestBookId)
-
+        guestBookRemoteDataSource.deleteGuestBook(guestBookId).onSuccess {
+            guestBookDao.deleteById(guestBookId)
+        }
 
     @OptIn(ExperimentalPagingApi::class)
     override fun getAllRelatedGuestBooks(): Flow<PagingData<GuestBook>> =
