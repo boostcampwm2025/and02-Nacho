@@ -8,7 +8,7 @@ import androidx.paging.map
 import com.andlife.data.datasource.remote.guestbook.AllGuestBookRemoteMediator
 import com.andlife.data.datasource.remote.guestbook.GuestBookPagingSource
 import com.andlife.data.datasource.remote.guestbook.GuestBookRemoteDataSource
-import com.andlife.database.InvitationDatabase
+import com.andlife.database.dao.GuestBookDao
 import com.andlife.domain.error.DataError
 import com.andlife.domain.model.guestbook.GalleryMedia
 import com.andlife.domain.model.guestbook.GuestBook
@@ -24,7 +24,8 @@ import javax.inject.Inject
 
 internal class GuestBookRepositoryImpl @Inject constructor(
     private val guestBookRemoteDataSource: GuestBookRemoteDataSource,
-    private val database: InvitationDatabase,
+    private val guestBookDao: GuestBookDao,
+    private val allGuestBookRemoteMediator: AllGuestBookRemoteMediator,
 ) : GuestBookRepository {
     override suspend fun getMediaCollection(invitationId: Long): Result<List<GalleryMedia>, DataError> {
         val result = guestBookRemoteDataSource.getMediaCollection(invitationId)
@@ -95,12 +96,9 @@ internal class GuestBookRepositoryImpl @Inject constructor(
                 enablePlaceholders = false,
                 initialLoadSize = PAGE_SIZE
             ),
-            remoteMediator = AllGuestBookRemoteMediator(
-                remoteDataSource = guestBookRemoteDataSource,
-                database = database,
-            ),
+            remoteMediator = allGuestBookRemoteMediator,
             pagingSourceFactory = {
-                database.guestBookDao().pagingSource()
+                guestBookDao.pagingSource()
             }
         ).flow.map { pagingData ->
             pagingData.map { it.toDomain() }

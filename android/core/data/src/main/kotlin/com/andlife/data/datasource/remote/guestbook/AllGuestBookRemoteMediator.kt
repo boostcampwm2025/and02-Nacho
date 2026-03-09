@@ -9,9 +9,10 @@ import com.andlife.data.repository.guestbook.toEntity
 import com.andlife.database.InvitationDatabase
 import com.andlife.database.entity.GuestBookEntity
 import com.andlife.domain.util.Result
+import javax.inject.Inject
 
 @OptIn(ExperimentalPagingApi::class)
-class AllGuestBookRemoteMediator(
+class AllGuestBookRemoteMediator @Inject constructor(
     private val remoteDataSource: GuestBookRemoteDataSource,
     private val database: InvitationDatabase,
 ) : RemoteMediator<Int, GuestBookEntity>() {
