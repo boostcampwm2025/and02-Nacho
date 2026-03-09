@@ -673,9 +673,7 @@ private fun LazyListScope.homeGuestBookSection(
     if (guestBooks.itemCount > 0) {
         items(
             count = guestBooks.itemCount,
-            key = { index ->
-                guestBooks.peek(index)?.id ?: (index + GUESTBOOK_KEY_OFFSET)
-            },
+            key = { index -> index + GUESTBOOK_KEY_OFFSET }
         ) { index ->
             guestBooks[index]?.let { guestBook ->
                 GuestBookItem(
