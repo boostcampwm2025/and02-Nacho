@@ -425,19 +425,8 @@ fun InvitationGuestBookRoute(
         )
     }
 
-//    if (uiState.fullscreenVideoUrl != null) {
-//        VideoFullscreenDialog(
-//            videoUrl = uiState.fullscreenVideoUrl,
-//            videoPlayerPool = viewModel.videoPlayerPool,
-//            onDismiss = { viewModel.onEvent(InvitationGuestBookUiEvent.DismissFullscreenVideo) }
-//        )
-//    }
     uiState.fullscreenVideoUrl?.let {
-        VideoFullscreenDialog(
-            videoUrl = it,
-            videoPlayerPool = viewModel.videoPlayerPool,
-            onDismiss = { viewModel.onEvent(InvitationGuestBookUiEvent.DismissFullscreenVideo) }
-        )
+        // TODO: 전체화면 UI 구현
     }
 
     InvitationGuestBookScreen(
@@ -852,50 +841,6 @@ private fun InvitationGuestBookResultPreview() {
                     onFullscreenClick = {}
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun VideoFullscreenDialog(
-    videoUrl: String,
-    videoPlayerPool: AutoVideoPlayerPool,
-    onDismiss: () -> Unit,
-) {
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            dismissOnBackPress = true,
-            dismissOnClickOutside = false,
-        ),
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black)
-        ) {
-            val player = remember(videoUrl) { videoPlayerPool.getPlayer(videoUrl) }
-
-            ContentFrame(
-                player = player.exoPlayer,
-                modifier = Modifier.fillMaxSize(),
-            )
-
-            Icon(
-                painter = painterResource(R.drawable.ic_fullscreen_exit_24),
-                contentDescription = stringResource(R.string.desc_exit_fullscreen),
-                tint = Color.White,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(NachoSpacing.medium)
-                    .size(24.dp)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = onDismiss,
-                    ),
-            )
         }
     }
 }
