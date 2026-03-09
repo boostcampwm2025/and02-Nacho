@@ -11,7 +11,8 @@ import com.andlife.database.entity.GuestBookEntity
 import com.andlife.domain.util.Result
 
 @OptIn(ExperimentalPagingApi::class)
-class AllGuestBookRemoteMediator(
+class GuestBookRemoteMediator(
+    private val invitationId: Long,
     private val remoteDataSource: GuestBookRemoteDataSource,
     private val database: InvitationDatabase,
 ) : RemoteMediator<Int, GuestBookEntity>() {
@@ -38,7 +39,8 @@ class AllGuestBookRemoteMediator(
                 }
             }
 
-            val result = remoteDataSource.getAllRelatedGuestBooks(
+            val result = remoteDataSource.getGuestBooksByInvitationId(
+                invitationId = invitationId,
                 page = page,
                 size = state.config.pageSize
             )
@@ -49,7 +51,7 @@ class AllGuestBookRemoteMediator(
 
                     database.withTransaction {
                         if (loadType == LoadType.REFRESH) {
-                            dao.clearAll()
+                            dao.clearByInvitationId(invitationId)
                         }
                         val entities = response.content.map { it.toEntity() }
 
