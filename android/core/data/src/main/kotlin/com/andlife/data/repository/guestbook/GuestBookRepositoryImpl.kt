@@ -8,7 +8,7 @@ import androidx.paging.map
 import com.andlife.data.datasource.remote.guestbook.AllGuestBookRemoteMediator
 import com.andlife.data.datasource.remote.guestbook.GuestBookRemoteDataSource
 import com.andlife.data.datasource.remote.guestbook.GuestBookRemoteMediator
-import com.andlife.database.InvitationDatabase
+import com.andlife.database.dao.GuestBookDao
 import com.andlife.domain.error.DataError
 import com.andlife.domain.model.guestbook.GalleryMedia
 import com.andlife.domain.model.guestbook.GuestBook
@@ -25,7 +25,9 @@ import javax.inject.Inject
 
 internal class GuestBookRepositoryImpl @Inject constructor(
     private val guestBookRemoteDataSource: GuestBookRemoteDataSource,
-    private val database: InvitationDatabase,
+    private val guestBookDao: GuestBookDao,
+    private val allGuestBookRemoteMediator: AllGuestBookRemoteMediator,
+    private val guestBookRemoteMediatorFactory: GuestBookRemoteMediator.Factory,
 ) : GuestBookRepository {
 
     @OptIn(ExperimentalPagingApi::class)
@@ -36,13 +38,8 @@ internal class GuestBookRepositoryImpl @Inject constructor(
                 enablePlaceholders = false,
                 initialLoadSize = PAGE_SIZE
             ),
-            remoteMediator = AllGuestBookRemoteMediator(
-                remoteDataSource = guestBookRemoteDataSource,
-                database = database
-            ),
-            pagingSourceFactory = {
-                database.guestBookDao().pagingSource()
-            }
+            remoteMediator = allGuestBookRemoteMediator,
+            pagingSourceFactory = { guestBookDao.pagingSource() }
         ).flow.map { pagingData ->
             pagingData.map { it.toDomain() }
         }
@@ -55,14 +52,8 @@ internal class GuestBookRepositoryImpl @Inject constructor(
                 enablePlaceholders = true,
                 initialLoadSize = PAGE_SIZE,
             ),
-            remoteMediator = GuestBookRemoteMediator(
-                invitationId = invitationId,
-                remoteDataSource = guestBookRemoteDataSource,
-                database = database,
-            ),
-            pagingSourceFactory = {
-                database.guestBookDao().pagingSourceByInvitationId(invitationId)
-            }
+            remoteMediator = guestBookRemoteMediatorFactory.create(invitationId),
+            pagingSourceFactory = { guestBookDao.pagingSourceByInvitationId(invitationId) }
         ).flow.map { pagingData ->
             pagingData.map { it.toDomain() }
         }
@@ -83,7 +74,7 @@ internal class GuestBookRepositoryImpl @Inject constructor(
         )
         return guestBookRemoteDataSource.createGuestBook(invitationId, request)
             .onSuccess { response ->
-                database.guestBookDao().upsertAll(listOf(response.toEntity()))
+                guestBookDao.upsertAll(listOf(response.toEntity()))
             }
             .map { it.toDomain() }
     }
@@ -105,14 +96,14 @@ internal class GuestBookRepositoryImpl @Inject constructor(
         )
         return guestBookRemoteDataSource.updateGuestBook(guestBookId, request)
             .onSuccess { response ->
-                database.guestBookDao().upsertAll(listOf(response.toEntity()))
+                guestBookDao.upsertAll(listOf(response.toEntity()))
             }
             .map { it.toDomain() }
     }
 
     override suspend fun deleteGuestBook(guestBookId: Long): Result<Long, DataError> =
         guestBookRemoteDataSource.deleteGuestBook(guestBookId).onSuccess {
-            database.guestBookDao().deleteById(guestBookId)
+            guestBookDao.deleteById(guestBookId)
         }
 
     companion object {

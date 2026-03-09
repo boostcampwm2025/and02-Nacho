@@ -9,13 +9,21 @@ import com.andlife.data.repository.guestbook.toEntity
 import com.andlife.database.InvitationDatabase
 import com.andlife.database.entity.GuestBookEntity
 import com.andlife.domain.util.Result
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
 @OptIn(ExperimentalPagingApi::class)
-class GuestBookRemoteMediator(
-    private val invitationId: Long,
+class GuestBookRemoteMediator @AssistedInject constructor(
+    @Assisted private val invitationId: Long,
     private val remoteDataSource: GuestBookRemoteDataSource,
     private val database: InvitationDatabase,
 ) : RemoteMediator<Int, GuestBookEntity>() {
+
+    @AssistedFactory
+    interface Factory {
+        fun create(invitationId: Long): GuestBookRemoteMediator
+    }
 
     private val dao = database.guestBookDao()
 
