@@ -4,18 +4,17 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import androidx.paging.RemoteMediator.InitializeAction
 import androidx.room.withTransaction
 import com.andlife.data.repository.invitation.mapper.toEntity
 import com.andlife.database.InvitationDatabase
 import com.andlife.database.entity.UpcomingInvitationEntity
 import com.andlife.domain.util.Result
+import javax.inject.Inject
 
 @OptIn(ExperimentalPagingApi::class)
-class UpcomingInvitationRemoteMediator(
+class UpcomingInvitationRemoteMediator @Inject constructor(
     private val remoteDataSource: InvitationRemoteDataSource,
     private val database: InvitationDatabase,
-    private val days: Long,
 ) : RemoteMediator<Int, UpcomingInvitationEntity>() {
 
     private val dao = database.upcomingInvitationDao()
@@ -40,7 +39,7 @@ class UpcomingInvitationRemoteMediator(
             }
 
             val result = remoteDataSource.getUpcomingInvitations(
-                days = days,
+                days = UPCOMING_DAYS_THRESHOLD,
                 page = page,
                 size = state.config.pageSize
             )
@@ -69,5 +68,9 @@ class UpcomingInvitationRemoteMediator(
         } catch (e: Exception) {
             MediatorResult.Error(e)
         }
+    }
+
+    companion object {
+        private const val UPCOMING_DAYS_THRESHOLD = 30L
     }
 }
