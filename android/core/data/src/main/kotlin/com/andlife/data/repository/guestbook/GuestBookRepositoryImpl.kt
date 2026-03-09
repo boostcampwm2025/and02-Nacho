@@ -27,13 +27,25 @@ internal class GuestBookRepositoryImpl @Inject constructor(
     private val guestBookRemoteDataSource: GuestBookRemoteDataSource,
     private val database: InvitationDatabase,
 ) : GuestBookRepository {
-    override suspend fun getMediaCollection(invitationId: Long): Result<List<GalleryMedia>, DataError> {
-        val result = guestBookRemoteDataSource.getMediaCollection(invitationId)
 
-        return result.map { list ->
-            list.map { it.toDomain() }
+    @OptIn(ExperimentalPagingApi::class)
+    override fun getAllRelatedGuestBooks(): Flow<PagingData<GuestBook>> =
+        Pager(
+            config = PagingConfig(
+                pageSize = PAGE_SIZE,
+                enablePlaceholders = false,
+                initialLoadSize = PAGE_SIZE
+            ),
+            remoteMediator = AllGuestBookRemoteMediator(
+                remoteDataSource = guestBookRemoteDataSource,
+                database = database
+            ),
+            pagingSourceFactory = {
+                database.guestBookDao().pagingSource()
+            }
+        ).flow.map { pagingData ->
+            pagingData.map { it.toDomain() }
         }
-    }
 
     @OptIn(ExperimentalPagingApi::class)
     override fun getGuestBooksByInvitationId(invitationId: Long): Flow<PagingData<GuestBook>> =
@@ -55,16 +67,20 @@ internal class GuestBookRepositoryImpl @Inject constructor(
             pagingData.map { it.toDomain() }
         }
 
+    override suspend fun getMediaCollection(invitationId: Long): Result<List<GalleryMedia>, DataError> =
+        guestBookRemoteDataSource.getMediaCollection(invitationId).map { list ->
+            list.map { it.toDomain() }
+        }
+
     override suspend fun createGuestBook(
         invitationId: Long,
         textContent: String,
         medias: List<GuestBookMedia>,
     ): Result<GuestBook, DataError> {
-        val request =
-            GuestBookRequest(
-                textContent = textContent,
-                medias = medias.map { it.toRequest() },
-            )
+        val request = GuestBookRequest(
+            textContent = textContent,
+            medias = medias.map { it.toRequest() },
+        )
         return guestBookRemoteDataSource.createGuestBook(invitationId, request)
             .onSuccess { response ->
                 database.guestBookDao().upsertAll(listOf(response.toEntity()))
@@ -80,14 +96,13 @@ internal class GuestBookRepositoryImpl @Inject constructor(
         existingAudioIds: List<Long>,
         newMedias: List<GuestBookMedia>
     ): Result<GuestBook, DataError> {
-        val request =
-            UpdateGuestBookRequest(
-                textContent = textContent,
-                existingImageIds = existingImageIds,
-                existingVideoIds = existingVideoIds,
-                existingAudioIds = existingAudioIds,
-                newMedias = newMedias.map { it.toRequest() },
-            )
+        val request = UpdateGuestBookRequest(
+            textContent = textContent,
+            existingImageIds = existingImageIds,
+            existingVideoIds = existingVideoIds,
+            existingAudioIds = existingAudioIds,
+            newMedias = newMedias.map { it.toRequest() },
+        )
         return guestBookRemoteDataSource.updateGuestBook(guestBookId, request)
             .onSuccess { response ->
                 database.guestBookDao().upsertAll(listOf(response.toEntity()))
@@ -98,25 +113,6 @@ internal class GuestBookRepositoryImpl @Inject constructor(
     override suspend fun deleteGuestBook(guestBookId: Long): Result<Long, DataError> =
         guestBookRemoteDataSource.deleteGuestBook(guestBookId).onSuccess {
             database.guestBookDao().deleteById(guestBookId)
-        }
-
-    @OptIn(ExperimentalPagingApi::class)
-    override fun getAllRelatedGuestBooks(): Flow<PagingData<GuestBook>> =
-        Pager(
-            config = PagingConfig(
-                pageSize = PAGE_SIZE,
-                enablePlaceholders = false,
-                initialLoadSize = PAGE_SIZE
-            ),
-            remoteMediator = AllGuestBookRemoteMediator(
-                remoteDataSource = guestBookRemoteDataSource,
-                database = database
-            ),
-            pagingSourceFactory = {
-                database.guestBookDao().pagingSource()
-            }
-        ).flow.map { pagingData ->
-            pagingData.map { it.toDomain() }
         }
 
     companion object {
