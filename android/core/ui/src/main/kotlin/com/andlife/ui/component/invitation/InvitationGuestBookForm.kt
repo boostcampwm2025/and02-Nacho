@@ -40,7 +40,6 @@ import com.andlife.ui.util.media.uriToSelectedMedia
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import com.andlife.ui.util.media.validateUriStringsByRule
 
 private const val MAX_LENGTH = 500
 private const val MAX_MEDIAS_COUNT = 20
@@ -54,7 +53,7 @@ fun InvitationGuestBookForm(
     isSubmittable: Boolean,
     isAuthenticated: Boolean,
     currentMediaSizeBytes: Long,
-    onMediasSelected: (ImmutableList<SelectedMedia>, Boolean, Boolean) -> Unit,
+    onMediasSelected: (ImmutableList<SelectedMedia>) -> Unit,
     onMediaRemove: (SelectedMedia) -> Unit,
     onTextContentChange: (String) -> Unit,
     onCameraClick: () -> Unit,
@@ -64,6 +63,7 @@ fun InvitationGuestBookForm(
     onTextFieldClick: () -> Unit,
     modifier: Modifier = Modifier,
     editingGuestBookId: Long? = null,
+    isProcessingMedia: Boolean = false,
 ) {
     val context = LocalContext.current
     val focusRequester = remember { FocusRequester() }
@@ -81,24 +81,10 @@ fun InvitationGuestBookForm(
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetMultipleContents(),
         ) { uris ->
-            val availableSlotsCnt = MAX_MEDIAS_COUNT - selectedMedias.size
-            val uriStrings = uris.map { it.toString() }
+            val selectedMediasToAdd = uris.map { uriToSelectedMedia(context, it.toString()) }
 
-            // 파일 크기 검증
-            val (validUriStrings, exceededAvailableBytes, exceededAvailableSlots) = validateUriStringsByRule(
-                context = context,
-                uriStrings = uriStrings,
-                availableSlotCnt = availableSlotsCnt,
-                currentMediaSizeBytes = currentMediaSizeBytes,
-            )
-
-            val mediasToAdd = validUriStrings.map { uriString ->
-                uriToSelectedMedia(context, uriString)
-            }
             onMediasSelected(
-                (selectedMedias + mediasToAdd).toImmutableList(),
-                exceededAvailableBytes,
-                exceededAvailableSlots
+                (selectedMedias + selectedMediasToAdd).toImmutableList(),
             )
         }
 
@@ -106,24 +92,11 @@ fun InvitationGuestBookForm(
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.PickMultipleVisualMedia(MAX_MEDIAS_COUNT)
         ) { uris ->
-            val availableSlotsCnt = MAX_MEDIAS_COUNT - selectedMedias.size
-            val uriStrings = uris.map { it.toString() }
 
-            // 파일 크기 검증
-            val (validUriStrings, exceededAvailableBytes, exceededAvailableSlots) = validateUriStringsByRule(
-                context = context,
-                uriStrings = uriStrings,
-                availableSlotCnt = availableSlotsCnt,
-                currentMediaSizeBytes = currentMediaSizeBytes,
-            )
+            val selectedMediasToAdd = uris.map { uriToSelectedMedia(context, it.toString()) }
 
-            val mediasToAdd = validUriStrings.map { uriString ->
-                uriToSelectedMedia(context, uriString)
-            }
             onMediasSelected(
-                (selectedMedias + mediasToAdd).toImmutableList(),
-                exceededAvailableBytes,
-                exceededAvailableSlots
+                (selectedMedias + selectedMediasToAdd).toImmutableList(),
             )
         }
 
@@ -198,7 +171,7 @@ fun InvitationGuestBookForm(
             // 미디어 아이콘 및 용량 표시
             Column {
                 // 미디어 아이콘 표시
-                val isMediaAddEnabled = isAuthenticated && selectedMedias.size < MAX_MEDIAS_COUNT && !isUploading
+                val isMediaAddEnabled = isAuthenticated && selectedMedias.size < MAX_MEDIAS_COUNT && !isUploading && !isProcessingMedia
                 val iconColor =
                     if (isMediaAddEnabled) {
                         NachoTheme.colorScheme.brandPrimary
@@ -281,11 +254,19 @@ fun InvitationGuestBookForm(
                                     }
                                 },
                     )
+                    
+                    if (isProcessingMedia) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(NachoIconSize.semiLarge),
+                            color = NachoTheme.colorScheme.brandPrimary,
+                            strokeWidth = NachoSpacing.xSmall
+                        )
+                    }
                 }
             }
             NachoButton(
                 onClick = onUploadClick,
-                enabled = isSubmittable && isAuthenticated,
+                enabled = isSubmittable && isAuthenticated && !isProcessingMedia,
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
@@ -314,7 +295,7 @@ private fun InvitationGuestBookFormPreview() {
             isUploading = false,
             isSubmittable = false,
             currentMediaSizeBytes = 0L,
-            onMediasSelected = { _, _, _ -> },
+            onMediasSelected = {},
             onMediaRemove = {},
             onTextContentChange = {},
             onCameraClick = {},

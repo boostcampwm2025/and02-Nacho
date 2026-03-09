@@ -8,9 +8,6 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,12 +17,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -45,15 +40,10 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -61,7 +51,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.media3.ui.compose.ContentFrame
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
@@ -86,7 +75,6 @@ import com.andlife.model.guestbook.GuestBookInvitationUiModel
 import com.andlife.model.guestbook.GuestBookMediaUiModel
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
-import com.andlife.ui.R as uiR
 import com.andlife.ui.component.AudioRecordingBottomSheet
 import com.andlife.ui.component.dialog.LoginDialog
 import com.andlife.ui.component.dialog.NachoInfoDialog
@@ -98,8 +86,8 @@ import com.andlife.ui.component.report.ReportBottomSheet
 import com.andlife.ui.util.audio.AudioRecorder
 import com.andlife.ui.util.collectWithLifecycle
 import com.andlife.ui.util.imeWithoutNavBars
-import com.andlife.ui.util.media.getFileSizeOrNull
 import com.andlife.ui.util.media.uriToSelectedMedia
+import com.andlife.ui.util.shouldRequestNotificationPermission
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
@@ -108,10 +96,9 @@ import kotlinx.datetime.LocalDateTime
 import java.io.File
 import kotlin.math.max
 import kotlin.math.min
+import com.andlife.ui.R as uiR
 
 private const val CAMERA_IMAGES_DIR = "camera_images"
-private const val MAX_MEDIA_SIZE_BYTES = 500 * 1024 * 1024L // 500MB
-private const val MAX_MEDIAS_COUNT = 20
 
 @Composable
 fun InvitationGuestBookRoute(
@@ -180,26 +167,10 @@ fun InvitationGuestBookRoute(
     ) { success ->
         if (success && cameraImageUri != null) {
             val currentMedias = uiState.selectedMedias
-            if (currentMedias.size >= MAX_MEDIAS_COUNT) {
-                viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, false, true))
-            } else {
-                if (getFileSizeOrNull(context, cameraImageUri!!) == null) {
-                    // TODO: 파일 크기를 읽을 수 없는 경우 별도의 스낵바 안내 필요
-                    viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, true, false))
-                    // 남은 용량 계산해서 초과 여부 전달
-                } else if (getFileSizeOrNull(
-                        context,
-                        cameraImageUri!!
-                    )!! + uiState.currentMediaSizeBytes > MAX_MEDIA_SIZE_BYTES
-                ) {
-                    viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, true, false))
-                } else {
-                    // 촬영한 사진을 SelectedMedia로 변환해 추가
-                    val newMedia = uriToSelectedMedia(context, cameraImageUri.toString())
-                    val updatedMedias = (currentMedias + newMedia).toImmutableList()
-                    viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias, false, false))
-                }
-            }
+            // 촬영한 사진을 SelectedMedia로 변환해 추가
+            val newMedia = uriToSelectedMedia(context, cameraImageUri.toString())
+            val updatedMedias = (currentMedias + newMedia).toImmutableList()
+            viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias))
         }
     }
 
@@ -211,6 +182,17 @@ fun InvitationGuestBookRoute(
             viewModel.onEvent(InvitationGuestBookUiEvent.ClickMicrophone)
         } else {
             showPermissionDialog = Manifest.permission.RECORD_AUDIO
+        }
+    }
+
+    // 알림 권한 요청 launcher
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.onEvent(InvitationGuestBookUiEvent.UploadMedias)
+        } else {
+            showPermissionDialog = Manifest.permission.POST_NOTIFICATIONS
         }
     }
 
@@ -396,6 +378,7 @@ fun InvitationGuestBookRoute(
             message = when (showPermissionDialog) {
                 Manifest.permission.CAMERA -> stringResource(R.string.txt_permission_camera)
                 Manifest.permission.RECORD_AUDIO -> stringResource(R.string.txt_permission_audio)
+                Manifest.permission.POST_NOTIFICATIONS -> stringResource(R.string.txt_permission_notification)
                 else -> stringResource(R.string.txt_permission_etc)
             },
             onDismiss = { showPermissionDialog = null },
@@ -443,6 +426,7 @@ fun InvitationGuestBookRoute(
         context = context,
         cameraPermissionLauncher = cameraPermissionLauncher,
         audioPermissionLauncher = audioPermissionLauncher,
+        notificationPermissionLauncher = notificationPermissionLauncher,
         modifier = modifier,
     )
 
@@ -451,19 +435,10 @@ fun InvitationGuestBookRoute(
             audioRecorder = audioRecorder,
             onRecordingComplete = { recordedFile ->
                 val currentMedias = uiState.selectedMedias
-                if (currentMedias.size >= MAX_MEDIAS_COUNT) {
-                    viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, false, true))
-                } else {
-                    // 남은 용량 계산해서 초과 여부 전달
-                    if (recordedFile.length() + uiState.currentMediaSizeBytes > MAX_MEDIA_SIZE_BYTES) {
-                        viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(currentMedias, true, false))
-                    } else {
-                        // 녹음을 SelectedMedia로 변환해 추가
-                        val newMedia = uriToSelectedMedia(context, recordedFile.toURI().toString())
-                        val updatedMedias = (currentMedias + newMedia).toImmutableList()
-                        viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias, false, false))
-                    }
-                }
+                // 녹음을 SelectedMedia로 변환해 추가
+                val newMedia = uriToSelectedMedia(context, recordedFile.toURI().toString())
+                val updatedMedias = (currentMedias + newMedia).toImmutableList()
+                viewModel.onEvent(InvitationGuestBookUiEvent.UpdateSelectedMedias(updatedMedias))
                 showRecordingBottomSheet = false
                 viewModel.onEvent(InvitationGuestBookUiEvent.UpdateMediaPlayState(true))
             },
@@ -491,6 +466,7 @@ private fun InvitationGuestBookScreen(
     context: Context,
     cameraPermissionLauncher: ActivityResultLauncher<String>,
     audioPermissionLauncher: ActivityResultLauncher<String>,
+    notificationPermissionLauncher: ActivityResultLauncher<String>,
     modifier: Modifier = Modifier,
 ) {
     val isImVisible = WindowInsets.isImeVisible
@@ -601,7 +577,8 @@ private fun InvitationGuestBookScreen(
                     .fillMaxWidth()
             ) {
                 if (isMediaActive) {
-                    val isInitialLoading = guestBooks.loadState.refresh is LoadState.Loading && guestBooks.itemCount == 0
+                    val isInitialLoading =
+                        guestBooks.loadState.refresh is LoadState.Loading && guestBooks.itemCount == 0
 
                     if (isInitialLoading || guestBooks.itemCount == 0) {
                         PagingStateContent(
@@ -676,7 +653,8 @@ private fun InvitationGuestBookScreen(
                     },
                     context = context,
                     cameraPermissionLauncher = cameraPermissionLauncher,
-                    audioPermissionLauncher = audioPermissionLauncher
+                    audioPermissionLauncher = audioPermissionLauncher,
+                    notificationPermissionLauncher = notificationPermissionLauncher
                 )
             }
         }
@@ -692,6 +670,7 @@ private fun GuestBookFormSection(
     context: Context,
     cameraPermissionLauncher: ActivityResultLauncher<String>,
     audioPermissionLauncher: ActivityResultLauncher<String>,
+    notificationPermissionLauncher: ActivityResultLauncher<String>,
     modifier: Modifier = Modifier,
 ) {
     InvitationGuestBookForm(
@@ -704,12 +683,10 @@ private fun GuestBookFormSection(
         isSubmittable = uiState.isSubmittable,
         editingGuestBookId = uiState.editingGuestBookId,
         currentMediaSizeBytes = uiState.currentMediaSizeBytes,
-        onMediasSelected = { medias, exceededAvailableBytes, exceededAvailableSlots ->
+        onMediasSelected = { medias ->
             onEvent(
                 InvitationGuestBookUiEvent.UpdateSelectedMedias(
                     medias,
-                    exceededAvailableBytes,
-                    exceededAvailableSlots
                 )
             )
         },
@@ -720,7 +697,12 @@ private fun GuestBookFormSection(
             onEvent(InvitationGuestBookUiEvent.UpdateTextContent(text))
         },
         onUploadClick = {
-            onEvent(InvitationGuestBookUiEvent.UploadMedias)
+            // 알림 권한 체크 후 업로드 진행
+            if (context.shouldRequestNotificationPermission()) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                onEvent(InvitationGuestBookUiEvent.UploadMedias)
+            }
         },
         isAuthenticated = isAuthenticated,
         onTextFieldClick = { onEvent(InvitationGuestBookUiEvent.CheckLogin) },
@@ -775,6 +757,9 @@ private fun InvitationGuestBookEmptyPreview() {
                 contract = ActivityResultContracts.RequestPermission()
             ) {},
             audioPermissionLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestPermission()
+            ) {},
+            notificationPermissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestPermission()
             ) {},
         )
