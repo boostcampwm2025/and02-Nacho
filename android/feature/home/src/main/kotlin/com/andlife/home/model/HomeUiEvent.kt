@@ -1,4 +1,4 @@
-package com.andlife.home.model.home
+package com.andlife.home.model
 
 import com.andlife.model.common.ReportReason
 import com.andlife.ui.base.BaseUiEvent
