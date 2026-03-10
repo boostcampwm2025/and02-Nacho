@@ -109,6 +109,7 @@ internal class UserRepositoryImpl @Inject constructor(
     private suspend fun clearInvitationCache() {
         invitationDatabase.invitationSummaryDao().clearAll()
         invitationDatabase.upcomingInvitationDao().clearAll()
+        invitationDatabase.homeGuestBookDao().clearAll()
         invitationDatabase.guestBookDao().clearAll()
     }
 

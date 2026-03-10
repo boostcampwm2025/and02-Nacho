@@ -9,9 +9,6 @@ import com.andlife.database.entity.GuestBookEntity
 @Dao
 interface GuestBookDao {
 
-    @Query("SELECT * FROM guest_book ORDER BY createdAt DESC")
-    fun pagingSource(): PagingSource<Int, GuestBookEntity>
-
     @Query("SELECT * FROM guest_book WHERE invitationId = :invitationId ORDER BY createdAt DESC")
     fun pagingSourceByInvitationId(invitationId: Long): PagingSource<Int, GuestBookEntity>
 

@@ -5,10 +5,11 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
-import com.andlife.data.datasource.remote.guestbook.AllGuestBookRemoteMediator
+import com.andlife.data.datasource.remote.guestbook.HomeGuestBookRemoteMediator
 import com.andlife.data.datasource.remote.guestbook.GuestBookRemoteDataSource
 import com.andlife.data.datasource.remote.guestbook.GuestBookRemoteMediator
 import com.andlife.database.dao.GuestBookDao
+import com.andlife.database.dao.HomeGuestBookDao
 import com.andlife.domain.error.DataError
 import com.andlife.domain.model.guestbook.GalleryMedia
 import com.andlife.domain.model.guestbook.GuestBook
@@ -26,7 +27,8 @@ import javax.inject.Inject
 internal class GuestBookRepositoryImpl @Inject constructor(
     private val guestBookRemoteDataSource: GuestBookRemoteDataSource,
     private val guestBookDao: GuestBookDao,
-    private val allGuestBookRemoteMediator: AllGuestBookRemoteMediator,
+    private val homeGuestBookDao: HomeGuestBookDao,
+    private val homeGuestBookRemoteMediator: HomeGuestBookRemoteMediator,
     private val guestBookRemoteMediatorFactory: GuestBookRemoteMediator.Factory,
 ) : GuestBookRepository {
 
@@ -38,8 +40,8 @@ internal class GuestBookRepositoryImpl @Inject constructor(
                 enablePlaceholders = false,
                 initialLoadSize = PAGE_SIZE
             ),
-            remoteMediator = allGuestBookRemoteMediator,
-            pagingSourceFactory = { guestBookDao.pagingSource() }
+            remoteMediator = homeGuestBookRemoteMediator,
+            pagingSourceFactory = { homeGuestBookDao.pagingSource() }
         ).flow.map { pagingData ->
             pagingData.map { it.toDomain() }
         }
@@ -75,6 +77,7 @@ internal class GuestBookRepositoryImpl @Inject constructor(
         return guestBookRemoteDataSource.createGuestBook(invitationId, request)
             .onSuccess { response ->
                 guestBookDao.upsertAll(listOf(response.toEntity()))
+                homeGuestBookDao.upsertAll(listOf(response.toHomeEntity()))
             }
             .map { it.toDomain() }
     }
@@ -97,6 +100,7 @@ internal class GuestBookRepositoryImpl @Inject constructor(
         return guestBookRemoteDataSource.updateGuestBook(guestBookId, request)
             .onSuccess { response ->
                 guestBookDao.upsertAll(listOf(response.toEntity()))
+                homeGuestBookDao.upsertAll(listOf(response.toHomeEntity()))
             }
             .map { it.toDomain() }
     }
@@ -104,6 +108,7 @@ internal class GuestBookRepositoryImpl @Inject constructor(
     override suspend fun deleteGuestBook(guestBookId: Long): Result<Long, DataError> =
         guestBookRemoteDataSource.deleteGuestBook(guestBookId).onSuccess {
             guestBookDao.deleteById(guestBookId)
+            homeGuestBookDao.deleteById(guestBookId)
         }
 
     companion object {

@@ -1,6 +1,7 @@
 package com.andlife.data.repository.guestbook
 
 import com.andlife.database.entity.GuestBookEntity
+import com.andlife.database.entity.HomeGuestBookEntity
 import com.andlife.database.entity.MediaCache
 import com.andlife.domain.model.guestbook.Author
 import com.andlife.domain.model.guestbook.GuestBook
@@ -11,8 +12,8 @@ import com.andlife.network.model.guestbook.GuestBookMediaResponse
 import com.andlife.network.model.guestbook.GuestBookResponse
 import kotlinx.datetime.LocalDateTime
 
-fun GuestBookResponse.toEntity(): GuestBookEntity {
-    return GuestBookEntity(
+fun GuestBookResponse.toHomeEntity(): HomeGuestBookEntity {
+    return HomeGuestBookEntity(
         id = id,
         invitationId = invitation.id,
         authorId = author.id,
@@ -30,14 +31,45 @@ fun GuestBookResponse.toEntity(): GuestBookEntity {
     )
 }
 
-fun GuestBookMediaResponse.toCache(): MediaCache {
-    return MediaCache(
+fun HomeGuestBookEntity.toDomain(): GuestBook {
+    return GuestBook(
         id = id,
-        type = type,
-        url = url,
-        thumbnailUrl = thumbnailUrl,
-        durationSeconds = durationSeconds,
-        displayOrder = displayOrder,
+        author = Author(
+            id = authorId,
+            name = authorName,
+            profileImageUrl = authorProfileUrl
+        ),
+        invitation = GuestBookInvitation(
+            id = invitationId,
+            title = invitationTitle
+        ),
+        textContent = textContent,
+        visualMedias = visualMedias.map { it.toDomain() },
+        audioMedias = audioMedias.map { it.toDomain() },
+        totalVisualCount = totalVisualCount,
+        isOwner = isOwner,
+        isInvitationOwner = isInvitationOwner,
+        createdAt = LocalDateTime.parse(createdAt),
+        updatedAt = LocalDateTime.parse(updatedAt),
+    )
+}
+
+fun GuestBookResponse.toEntity(): GuestBookEntity {
+    return GuestBookEntity(
+        id = id,
+        invitationId = invitation.id,
+        authorId = author.id,
+        authorName = author.name,
+        authorProfileUrl = author.profileImageUrl,
+        invitationTitle = invitation.title,
+        textContent = textContent,
+        totalVisualCount = totalVisualCount,
+        isOwner = isOwner,
+        isInvitationOwner = isInvitationOwner,
+        createdAt = createdAt.toString(),
+        updatedAt = updatedAt.toString(),
+        visualMedias = visualMedias.map { it.toCache() },
+        audioMedias = audioMedias.map { it.toCache() },
     )
 }
 
@@ -61,6 +93,17 @@ fun GuestBookEntity.toDomain(): GuestBook {
         isInvitationOwner = isInvitationOwner,
         createdAt = LocalDateTime.parse(createdAt),
         updatedAt = LocalDateTime.parse(updatedAt),
+    )
+}
+
+fun GuestBookMediaResponse.toCache(): MediaCache {
+    return MediaCache(
+        id = id,
+        type = type,
+        url = url,
+        thumbnailUrl = thumbnailUrl,
+        durationSeconds = durationSeconds,
+        displayOrder = displayOrder,
     )
 }
 

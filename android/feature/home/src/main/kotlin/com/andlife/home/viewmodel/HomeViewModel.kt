@@ -12,9 +12,9 @@ import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.domain.repository.report.ReportRepository
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
-import com.andlife.home.model.home.HomeSideEffect
-import com.andlife.home.model.home.HomeUiEvent
-import com.andlife.home.model.home.HomeUiState
+import com.andlife.home.model.HomeSideEffect
+import com.andlife.home.model.HomeUiEvent
+import com.andlife.home.model.HomeUiState
 import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.media.audio.AudioPlayerManager
 import com.andlife.media.video.AutoVideoPlayerPool

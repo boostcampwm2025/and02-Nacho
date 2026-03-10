@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.andlife.database.DatabaseConstants
 import com.andlife.database.InvitationDatabase
 import com.andlife.database.dao.GuestBookDao
+import com.andlife.database.dao.HomeGuestBookDao
 import com.andlife.database.dao.InvitationSummaryDao
 import com.andlife.database.dao.UpcomingInvitationDao
 import dagger.Module
@@ -41,6 +42,12 @@ object DatabaseModule {
     @Singleton
     fun provideUpcomingInvitationDao(db: InvitationDatabase): UpcomingInvitationDao {
         return db.upcomingInvitationDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideHomeGuestBookDao(db: InvitationDatabase): HomeGuestBookDao {
+        return db.homeGuestBookDao()
     }
 
     @Provides

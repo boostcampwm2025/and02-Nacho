@@ -6,5 +6,6 @@ object DatabaseConstants {
 
     const val TABLE_INVITATION_SUMMARY = "invitation_summary"
     const val TABLE_UPCOMING_INVITATION = "upcoming_invitation"
+    const val TABLE_HOME_GUEST_BOOK = "home_guest_book"
     const val TABLE_GUEST_BOOK = "guest_book"
 }

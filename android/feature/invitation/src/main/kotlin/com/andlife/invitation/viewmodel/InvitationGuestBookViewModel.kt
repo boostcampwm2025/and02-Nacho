@@ -22,8 +22,6 @@ import com.andlife.domain.util.CrashlyticsLogger
 import com.andlife.domain.util.EventType
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
-import com.andlife.domain.util.RefreshEventHub
-import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.domain.util.Result
 import com.andlife.domain.util.Screen
 import com.andlife.domain.util.ThumbnailGenerator
@@ -75,7 +73,7 @@ constructor(
     private val crashlyticsLogger: CrashlyticsLogger,
     savedStateHandle: SavedStateHandle,
 ) : BaseViewModel<InvitationGuestBookUiState, InvitationGuestBookUiEvent, InvitationGuestBookSideEffect>(
-    InvitationGuestBookUiState(),
+    InvitationGuestBookUiState(authState = authStateManager.authState.value),
 ) {
     private val invitationId: Long = savedStateHandle.toRoute<InvitationDetail>().id
 
@@ -458,7 +456,6 @@ constructor(
                 } else {
                     sendEffect(InvitationGuestBookSideEffect.CreateGuestBookSuccess)
                 }
-                RefreshEventHub.emit(RefreshTarget.HOME)
             }
 
             is Result.Error -> sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("실패: ${result.message}"))

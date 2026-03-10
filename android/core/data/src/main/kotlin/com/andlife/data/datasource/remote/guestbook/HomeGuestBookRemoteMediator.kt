@@ -5,25 +5,25 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
-import com.andlife.data.repository.guestbook.toEntity
+import com.andlife.data.repository.guestbook.toHomeEntity
 import com.andlife.database.InvitationDatabase
-import com.andlife.database.entity.GuestBookEntity
+import com.andlife.database.entity.HomeGuestBookEntity
 import com.andlife.domain.util.Result
 import javax.inject.Inject
 
 @OptIn(ExperimentalPagingApi::class)
-class AllGuestBookRemoteMediator @Inject constructor(
+class HomeGuestBookRemoteMediator @Inject constructor(
     private val remoteDataSource: GuestBookRemoteDataSource,
     private val database: InvitationDatabase,
-) : RemoteMediator<Int, GuestBookEntity>() {
+) : RemoteMediator<Int, HomeGuestBookEntity>() {
 
-    private val dao = database.guestBookDao()
+    private val dao = database.homeGuestBookDao()
 
     override suspend fun initialize(): InitializeAction = InitializeAction.LAUNCH_INITIAL_REFRESH
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, GuestBookEntity>
+        state: PagingState<Int, HomeGuestBookEntity>
     ): MediatorResult {
         return try {
 
@@ -52,8 +52,7 @@ class AllGuestBookRemoteMediator @Inject constructor(
                         if (loadType == LoadType.REFRESH) {
                             dao.clearAll()
                         }
-                        val entities = response.content.map { it.toEntity() }
-
+                        val entities = response.content.map { it.toHomeEntity() }
                         dao.upsertAll(entities)
                     }
                     MediatorResult.Success(
