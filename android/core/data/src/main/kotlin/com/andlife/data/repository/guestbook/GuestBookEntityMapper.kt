@@ -61,7 +61,7 @@ fun GuestBookResponse.toEntity(): GuestBookEntity {
         authorId = author.id,
         authorName = author.name,
         authorProfileUrl = author.profileImageUrl,
-        invitationTitle = invitation.title,
+        invitationTitle = null,
         textContent = textContent,
         totalVisualCount = totalVisualCount,
         isOwner = isOwner,
