@@ -221,17 +221,14 @@ fun MyInvitationGuestBookRoute(
             is MyInvitationGuestBookSideEffect.CreateGuestBookSuccess -> {
                 focusManager.clearFocus()
                 scrollToTop = true
-                guestBooks.refresh()
             }
 
             is MyInvitationGuestBookSideEffect.UpdateGuestBookSuccess -> {
                 focusManager.clearFocus()
-                guestBooks.refresh()
             }
 
             is MyInvitationGuestBookSideEffect.DeleteGuestBookSuccess -> {
                 focusManager.clearFocus()
-                guestBooks.refresh()
             }
 
             is MyInvitationGuestBookSideEffect.ScrollToTop -> {
