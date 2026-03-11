@@ -31,7 +31,6 @@ class NachoFirebaseMessagingService : FirebaseMessagingService() {
         super.onNewToken(token)
 
         fcmTokenManager.initializeToken(token)
-        // TODO: 갱신 완료한 토큰을 서버로 보내주기
     }
 
     // 클라우드 서버에서 메시지를 전송했을 때 호출
