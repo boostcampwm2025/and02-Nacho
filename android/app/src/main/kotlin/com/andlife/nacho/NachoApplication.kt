@@ -10,9 +10,12 @@ import com.andlife.deeplink.di.AppsFlyerDevKey
 import com.andlife.deeplink.di.KakaoNativeKey
 import com.andlife.domain.util.AnalyticsEvent
 import com.andlife.domain.util.AnalyticsLogger
+import com.andlife.domain.util.FcmTokenManager
 import com.andlife.nacho.di.NaverMapClientId
 import com.appsflyer.AppsFlyerLib
 import com.appsflyer.deeplink.DeepLinkResult
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 import com.kakao.sdk.common.KakaoSdk
 import com.naver.maps.map.NaverMapSdk
 import dagger.hilt.android.HiltAndroidApp
@@ -40,6 +43,9 @@ class NachoApplication : Application(), Configuration.Provider {
     lateinit var deepLinkManager: DeepLinkManager
 
     @Inject
+    lateinit var fcmTokenManager: FcmTokenManager
+
+    @Inject
     lateinit var analyticsLogger: AnalyticsLogger
 
     override val workManagerConfiguration: Configuration
@@ -55,6 +61,8 @@ class NachoApplication : Application(), Configuration.Provider {
         KakaoSdk.init(this, kakaoNativeKey)
         NaverMapSdk.getInstance(this).client =
             NaverMapSdk.NcpKeyClient(naverMapClientId)
+
+        initFcmToken()
     }
 
     private fun initAppsFlyer() {
@@ -87,5 +95,19 @@ class NachoApplication : Application(), Configuration.Provider {
 
         appsFlyer.init(appsFlyerDevKey, null, this)
         appsFlyer.start(this)
+    }
+
+    private fun initFcmToken() {
+        // FCM 토큰 초기화
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("FCM", "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
+
+            val token = task.result
+            Log.d("FCM", "FCM Registration token: $token")
+            fcmTokenManager.initializeToken(token)
+        })
     }
 }
