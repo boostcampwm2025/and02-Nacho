@@ -45,7 +45,7 @@ class BackgroundMediaUploaderImpl @Inject constructor(
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
-        val uploadRequest = OneTimeWorkRequestBuilder<UploadWorker>()
+        val uploadRequest = OneTimeWorkRequestBuilder<UploadMediaWorker>()
             .setInputData(workData)
             .setConstraints(constraints)
             .addTag(UploadKey.TAG_MEDIA_UPLOAD)
@@ -65,11 +65,11 @@ class BackgroundMediaUploaderImpl @Inject constructor(
     }
 
     override fun observeUploadProgress(pairOfWorkIds: Pair<String, String>): Flow<UploadGuestBookState> {
-        val uploadWorkId = pairOfWorkIds.first
+        val uploadMediaWorkId = pairOfWorkIds.first
         val guestBookWorkId = pairOfWorkIds.second
 
         return combine(
-            workManager.getWorkInfoByIdFlow(UUID.fromString(uploadWorkId)),
+            workManager.getWorkInfoByIdFlow(UUID.fromString(uploadMediaWorkId)),
             workManager.getWorkInfoByIdFlow(UUID.fromString(guestBookWorkId))
         ) { uploadInfo, guestBookInfo ->
             when {
@@ -139,9 +139,9 @@ class BackgroundMediaUploaderImpl @Inject constructor(
     }
 
     override fun cancelUpload(pairOfWorkIds: Pair<String, String>) {
-        val uploadWorkId = pairOfWorkIds.first
+        val uploadMediaWorkId = pairOfWorkIds.first
         val guestBookWorkId = pairOfWorkIds.second
-        workManager.cancelWorkById(UUID.fromString(uploadWorkId))
+        workManager.cancelWorkById(UUID.fromString(uploadMediaWorkId))
         workManager.cancelWorkById(UUID.fromString(guestBookWorkId))
     }
 }

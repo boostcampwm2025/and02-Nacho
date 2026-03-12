@@ -338,14 +338,14 @@ constructor(
             selectedMediasThumbnailUrl = Json.encodeToString(selectedMediasThumbnailUrl),
         )
 
-        val uploadWorkId = pairOfWorkIds.first
+        val uploadMediaWorkId = pairOfWorkIds.first
         val guestBookWorkId = pairOfWorkIds.second
 
-        Log.d("BackgroundUpload", "WorkID: $uploadWorkId, $guestBookWorkId")
+        Log.d("BackgroundUpload", "WorkID: $uploadMediaWorkId, $guestBookWorkId")
 
         // 업로드 진행상황 관찰
         viewModelScope.launch {
-            backgroundMediaUploader.observeUploadProgress(uploadWorkId to guestBookWorkId)
+            backgroundMediaUploader.observeUploadProgress(uploadMediaWorkId to guestBookWorkId)
                 .collect { uploadGuestBookState ->
                     handleUploadGuestBookStateChange(uploadGuestBookState, state)
                 }

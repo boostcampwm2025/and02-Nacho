@@ -25,7 +25,7 @@ import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.serialization.json.Json
 
 @HiltWorker
-class UploadWorker @AssistedInject constructor(
+class UploadMediaWorker @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted private val params: WorkerParameters,
     private val mediaUploader: MediaUploader,
@@ -251,7 +251,7 @@ class UploadWorker @AssistedInject constructor(
     }
 
     companion object {
-        private const val TAG = "UploadWorker"
+        private const val TAG = "UploadMediaWorker"
     }
 }
 
