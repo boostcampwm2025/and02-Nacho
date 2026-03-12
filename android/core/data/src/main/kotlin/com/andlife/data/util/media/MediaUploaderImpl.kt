@@ -8,7 +8,7 @@ import com.andlife.data.util.apiCall
 import com.andlife.domain.error.DataError
 import com.andlife.domain.model.guestbook.MediaFile
 import com.andlife.domain.model.guestbook.MediaType
-import com.andlife.domain.model.guestbook.UploadState
+import com.andlife.domain.model.guestbook.UploadGuestBookState
 import com.andlife.domain.util.MediaUploader
 import com.andlife.domain.util.Result
 import kotlinx.coroutines.flow.Flow
@@ -168,10 +168,10 @@ constructor(
             }
         }
 
-    override fun uploadMediasWithProgress(files: List<MediaFile>): Flow<UploadState> = flow {
+    override fun uploadMediasWithProgress(files: List<MediaFile>): Flow<UploadGuestBookState> = flow {
         try {
             emit(
-                UploadState.Progress(
+                UploadGuestBookState.Progress(
                     percent = 0,
                     currentFileName = "파일 크기 체크 중...",
                 )
@@ -182,13 +182,13 @@ constructor(
             files.forEach { file ->
                 totalFileSize += file.fileSize
                 if (totalFileSize > MAX_MEDIA_SIZE_BYTES) {
-                    emit(UploadState.Failure("파일 크기가 ${MAX_MEDIA_SIZE_BYTES / (1024 * 1024)}MB를 초과해 업로드에 실패했습니다."))
+                    emit(UploadGuestBookState.Failure("파일 크기가 ${MAX_MEDIA_SIZE_BYTES / (1024 * 1024)}MB를 초과해 업로드에 실패했습니다."))
                     return@flow
                 }
             }
 
             emit(
-                UploadState.Progress(
+                UploadGuestBookState.Progress(
                     percent = 10,
                     currentFileName = "이미지 압축 중...",
                 )
@@ -204,7 +204,7 @@ constructor(
             }
 
             emit(
-                UploadState.Progress(
+                UploadGuestBookState.Progress(
                     percent = 20,
                     currentFileName = "업로드 중...",
                 )
@@ -228,13 +228,13 @@ constructor(
 
             val startResult = apiCall { mediaService.batchStartUpload(startRequest) }
             if (startResult is Result.Error) {
-                emit(UploadState.Failure(startResult.message ?: "업로드 시작 실패"))
+                emit(UploadGuestBookState.Failure(startResult.message ?: "업로드 시작 실패"))
                 return@flow
             }
 
             val uploadInfos = (startResult as Result.Success).data.files
             emit(
-                UploadState.Progress(
+                UploadGuestBookState.Progress(
                     percent = 30,
                     currentFileName = "업로드 정보 수신 완료. 파일 개수: ${uploadInfos.size}"
                 )
@@ -249,7 +249,7 @@ constructor(
                 try {
                     val baseProgress = 30 + (index / files.size) * 60
                     emit(
-                        UploadState.Progress(
+                        UploadGuestBookState.Progress(
                             percent = baseProgress,
                             currentFileName = file.fileName,
                             currentOrder = index + 1,
@@ -308,7 +308,7 @@ constructor(
             }
 
             emit(
-                UploadState.Progress(
+                UploadGuestBookState.Progress(
                     percent = 90,
                     currentFileName = "업로드 완료 요청 중..."
                 )
@@ -316,7 +316,7 @@ constructor(
 
             val successfulFiles = uploadResults.filterNotNull()
             if (successfulFiles.isEmpty()) {
-                emit(UploadState.Failure("모든 파일 업로드가 실패했습니다"))
+                emit(UploadGuestBookState.Failure("모든 파일 업로드가 실패했습니다"))
                 return@flow
             }
 
@@ -326,7 +326,7 @@ constructor(
 
             when (completeResult) {
                 is Result.Error -> {
-                    emit(UploadState.Failure(completeResult.message ?: "업로드 완료 실패"))
+                    emit(UploadGuestBookState.Failure(completeResult.message ?: "업로드 완료 실패"))
                 }
 
                 is Result.Success -> {
@@ -336,11 +336,11 @@ constructor(
                             .find { it.mediaKey == info.mediaKey && it.success }
                             ?.mediaUrl
                     }
-                    emit(UploadState.Success(finalUrls))
+                    emit(UploadGuestBookState.Success(finalUrls))
                 }
             }
         } catch (e: Exception) {
-            emit(UploadState.Failure(e.message ?: "알 수 없는 오류"))
+            emit(UploadGuestBookState.Failure(e.message ?: "알 수 없는 오류"))
         }
     }
 

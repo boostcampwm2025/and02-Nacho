@@ -9,7 +9,7 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import com.andlife.domain.error.DataError
 import com.andlife.domain.model.auth.AuthState
-import com.andlife.domain.model.guestbook.UploadState
+import com.andlife.domain.model.guestbook.UploadGuestBookState
 import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.repository.report.ReportRepository
@@ -361,7 +361,7 @@ constructor(
         val selectedMediasThumbnailUrl = state.selectedMedias.map { it.thumbnailUrl }
 
         // 백그라운드 업로드 시작
-        val workId = backgroundMediaUploader.uploadMediasInBackground(
+        val pairOfWorkIds = backgroundMediaUploader.uploadMediasInBackground(
             invitationId = invitationId,
             guestBookText = state.textContent,
             editingGuestBookId = state.editingGuestBookId ?: -1L, // 새 방명록인 경우 -1로 전달
@@ -372,13 +372,17 @@ constructor(
             selectedMediasThumbnailUrl = Json.encodeToString(selectedMediasThumbnailUrl),
         )
 
-        Log.d("BackgroundUpload", "WorkID: $workId")
+        val uploadMediaWorkId = pairOfWorkIds.first
+        val guestBookWorkId = pairOfWorkIds.second
+
+        Log.d("BackgroundUpload", "WorkID: $uploadMediaWorkId, $guestBookWorkId")
 
         // 업로드 진행상황 관찰
         viewModelScope.launch {
-            backgroundMediaUploader.observeUploadProgress(workId).collect { uploadState ->
-                handleUploadStateChange(uploadState, state)
-            }
+            backgroundMediaUploader.observeUploadProgress(uploadMediaWorkId to guestBookWorkId)
+                .collect { uploadGuestBookState ->
+                    handleUploadGuestBookStateChange(uploadGuestBookState, state)
+                }
         }
     }
 
@@ -515,26 +519,26 @@ constructor(
         }
     }
 
-    private fun handleUploadStateChange(
-        uploadState: UploadState,
+    private fun handleUploadGuestBookStateChange(
+        uploadGuestBookState: UploadGuestBookState,
         originalState: InvitationGuestBookUiState
     ) {
-        Log.d("BackgroundUpload", "업로드 상태 변화: $uploadState")
+        Log.d("BackgroundUpload", "업로드 상태 변화: $uploadGuestBookState")
 
-        when (uploadState) {
-            is UploadState.Enqueued -> {
+        when (uploadGuestBookState) {
+            is UploadGuestBookState.Enqueued -> {
                 Log.d("BackgroundUpload", "업로드 대기 중")
             }
 
-            is UploadState.Progress -> {
+            is UploadGuestBookState.Progress -> {
                 Log.d(
                     "BackgroundUpload",
-                    "업로드 진행: ${uploadState.percent}% (${uploadState.currentOrder}/${uploadState.totalCount})"
+                    "업로드 진행: ${uploadGuestBookState.percent}% (${uploadGuestBookState.currentOrder}/${uploadGuestBookState.totalCount})"
                 )
             }
 
-            is UploadState.Success -> {
-                Log.d("BackgroundUpload", "업로드 및 방명록 처리 완료: ${uploadState.urls}")
+            is UploadGuestBookState.Success -> {
+                Log.d("BackgroundUpload", "업로드 및 방명록 처리 완료: ${uploadGuestBookState.urls}")
 
                 updateState { copy(isUploading = false) }
                 clearFormInput()
@@ -555,13 +559,13 @@ constructor(
                 sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("방명록이 등록되었습니다"))
             }
 
-            is UploadState.Failure -> {
-                Log.e("BackgroundUpload", "업로드 실패: ${uploadState.message}")
+            is UploadGuestBookState.Failure -> {
+                Log.e("BackgroundUpload", "업로드 실패: ${uploadGuestBookState.message}")
                 updateState { copy(isUploading = false) }
-                sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("업로드 실패: ${uploadState.message}"))
+                sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("업로드 실패: ${uploadGuestBookState.message}"))
             }
 
-            is UploadState.Cancelled -> {
+            is UploadGuestBookState.Cancelled -> {
                 Log.d("BackgroundUpload", "업로드 취소됨")
                 updateState { copy(isUploading = false) }
                 sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("업로드가 취소되었습니다"))
