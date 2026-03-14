@@ -30,6 +30,7 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
+import com.andlife.invitation_edit.dragdrop.rememberDragDropState
 import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.invitation_edit.model.address.AddressUiModel
 import com.andlife.invitation_edit.model.form.AnnouncementUiModel
@@ -240,6 +241,13 @@ private fun InvitationEditScreen(
 ) {
     val listState = rememberLazyListState()
 
+    val dragDropState = rememberDragDropState(
+        lazyListState = listState,
+        onMove = { fromIndex, toIndex ->
+            onEvent(InvitationFormUiEvent.ReorderAnnouncement(fromIndex, toIndex))
+        }
+    )
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = {
@@ -345,6 +353,7 @@ private fun InvitationEditScreen(
                     onAddAnnouncementClick = onAddAnnouncementClick,
                     onRemoveAnnouncementClick = onRemoveAnnouncementClick,
                     isLoading = uiState.isLoading,
+                    dragDropState = dragDropState,
                     modifier = Modifier.padding(top = NachoSpacing.medium),
                 )
             }

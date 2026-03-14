@@ -2,6 +2,7 @@ package com.andlife.invitation_edit.section
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,9 +26,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -40,6 +43,8 @@ import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
+import com.andlife.invitation_edit.dragdrop.DragDropState
+import com.andlife.invitation_edit.dragdrop.dragDropItem
 import com.andlife.invitation_edit.model.form.AnnouncementUiModel
 import kotlinx.collections.immutable.ImmutableList
 import com.andlife.designsystem.R as designR
@@ -48,6 +53,7 @@ fun LazyListScope.announcementSection(
     announcementList: ImmutableList<AnnouncementUiModel>,
     onRemoveAnnouncementClick: (AnnouncementUiModel) -> Unit,
     onAddAnnouncementClick: () -> Unit,
+    dragDropState: DragDropState,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
 ) {
@@ -119,15 +125,20 @@ fun LazyListScope.announcementSection(
             items = announcementList,
             key = { _, item -> item.id },
         ) { index, item ->
+            val absoluteIndex = index + 8
+
             Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .background(NachoTheme.colorScheme.backgroundPrimary),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(NachoTheme.colorScheme.backgroundPrimary)
+                    .dragDropItem(absoluteIndex, dragDropState)
             ) {
                 AnnouncementItem(
                     announcementUiModel = item,
                     onRemoveClick = { onRemoveAnnouncementClick(item) },
+                    onDragStart = { dragDropState.onDragStart(absoluteIndex, item.id) },
+                    onDrag = { offset -> dragDropState.onDrag(offset) },
+                    onDragInterrupted = { dragDropState.onDragInterrupted() }
                 )
             }
         }
@@ -138,6 +149,9 @@ fun LazyListScope.announcementSection(
 private fun AnnouncementItem(
     announcementUiModel: AnnouncementUiModel,
     onRemoveClick: () -> Unit,
+    onDragStart: () -> Unit,
+    onDrag: (Offset) -> Unit,
+    onDragInterrupted: () -> Unit,
     modifier: Modifier = Modifier,
     shape: Shape = NachoTheme.shapes.small,
     color: Color = NachoTheme.colorScheme.backgroundSecondary,
@@ -181,6 +195,17 @@ private fun AnnouncementItem(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_reorder),
                     contentDescription = null,
                     tint = NachoTheme.colorScheme.textTertiary,
+                    modifier = Modifier.pointerInput(Unit) {
+                        detectDragGesturesAfterLongPress(
+                            onDragStart = { onDragStart() },
+                            onDrag = { change, dragAmount ->
+                                change.consume() // 이벤트 독점
+                                onDrag(dragAmount)
+                            },
+                            onDragEnd = { onDragInterrupted() },
+                            onDragCancel = { onDragInterrupted() }
+                        )
+                    }
                 )
                 Spacer(
                     modifier =

@@ -1,5 +1,6 @@
 package com.andlife.invitation_edit.dragdrop
 
+import android.util.Log
 import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
@@ -35,9 +36,16 @@ class DragDropState(
 
     private var draggingItemInitialInfo: LazyListItemInfo? = null
 
-    fun onDragStart(index: Int) {
-        draggingItemIndex = index
-        draggingItemInitialInfo = lazyListState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == index }
+    fun onDragStart(index: Int, key: Any) {
+        draggedDistance = 0f
+
+        val itemInfo = lazyListState.layoutInfo.visibleItemsInfo.firstOrNull { it.key == key }
+
+        if (itemInfo != null) {
+            draggingItemIndex = itemInfo.index
+            draggingItemInitialInfo = itemInfo
+            Log.d("DragDrop", "Start dragging RealIndex: ${itemInfo.index}, Key: $key")
+        }
     }
 
     fun onDrag(offset: Offset) {
@@ -64,12 +72,15 @@ class DragDropState(
             val fromIndex = currentDraggingIndex
             val toIndex = overlappingItem.index
 
-            val distanceCorrection = initialInfo.offset - overlappingItem.offset
+            onMove(fromIndex, toIndex)
 
+            val distanceCorrection = initialInfo.offset - overlappingItem.offset
 
             draggingItemIndex = toIndex
             draggedDistance += distanceCorrection
             draggingItemInitialInfo = overlappingItem
+
+            Log.d("DragDrop", "Moved from $fromIndex to $toIndex")
         }
     }
 
