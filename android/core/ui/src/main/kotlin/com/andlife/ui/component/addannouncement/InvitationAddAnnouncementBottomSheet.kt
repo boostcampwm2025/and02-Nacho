@@ -45,6 +45,8 @@ fun InvitationAddAnnouncementBottomSheet(
     initialContent: String = "",
     viewModel: InvitationAddAnnouncementViewModel = viewModel(),
 ) {
+    val isEditMode = initialTitle.isNotBlank() || initialContent.isNotBlank()
+
     val keyboardManager = LocalSoftwareKeyboardController.current
     val sheetState =
         rememberModalBottomSheetState(
@@ -80,7 +82,7 @@ fun InvitationAddAnnouncementBottomSheet(
                     .padding(top = NachoSpacing.twoXLarge),
         ) {
             Text(
-                text = stringResource(R.string.label_add_announcement),
+                text = if(isEditMode) stringResource(R.string.label_edit_announcement) else stringResource(R.string.label_add_announcement),
                 style = NachoTheme.typography.headingSmallSemiBold,
                 color = NachoTheme.colorScheme.textPrimary,
                 modifier = Modifier.align(Alignment.Center),
@@ -168,7 +170,7 @@ fun InvitationAddAnnouncementBottomSheet(
                     ),
             ) {
                 Text(
-                    text = stringResource(R.string.txt_submit),
+                    text = if(isEditMode) stringResource(R.string.txt_modify) else stringResource(R.string.txt_submit),
                     style = NachoTheme.typography.bodyLargeSemiBold,
                 )
             }
