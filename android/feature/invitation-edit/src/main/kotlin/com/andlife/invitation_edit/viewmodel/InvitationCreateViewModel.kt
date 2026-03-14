@@ -68,6 +68,7 @@ class InvitationCreateViewModel @Inject constructor(
             is InvitationFormUiEvent.UpdateAnnouncement -> updateAnnouncement(event)
             is InvitationFormUiEvent.RemoveImage -> updateRemoveImage(event)
             is InvitationFormUiEvent.RemoveAnnouncement -> updateRemoveAnnouncement(event)
+            is InvitationFormUiEvent.ReorderAnnouncement -> reorderAnnouncement(event.fromIndex, event.toIndex)
             InvitationFormUiEvent.OnClickBack -> onBackClick()
             InvitationFormUiEvent.OnClickSave -> {
                 analyticsLogger.logEvent(ButtonClick(Screen.INVITATION_CREATE, Button.INVITATION_CREATE))
@@ -169,12 +170,28 @@ class InvitationCreateViewModel @Inject constructor(
     }
 
     private fun updateAnnouncement(event: InvitationFormUiEvent.UpdateAnnouncement) {
-        val announcement = AnnouncementUiModel(title = event.title, content = event.content)
-        val newAnnouncementList = uiState.value.invitationFormUiModel.announcement
-            .toPersistentList()
-            .add(announcement)
+        val currentList = uiState.value.invitationFormUiModel.announcement.toMutableList()
+
+        val existingIndex = currentList.indexOfFirst { it.id == event.id }
+
+        if (existingIndex != -1) {
+            currentList[existingIndex] = currentList[existingIndex].copy(
+                title = event.title,
+                content = event.content
+            )
+        } else {
+            val announcement = AnnouncementUiModel(
+                title = event.title,
+                content = event.content,
+                displayOrder = currentList.size
+            )
+            currentList.add(announcement)
+        }
+
         updateState {
-            copy(invitationFormUiModel = invitationFormUiModel.copy(announcement = newAnnouncementList))
+            copy(invitationFormUiModel = invitationFormUiModel.copy(
+                announcement = currentList.toPersistentList()
+            ))
         }
     }
 
@@ -307,6 +324,24 @@ class InvitationCreateViewModel @Inject constructor(
         val mediaFiles = mediaFileProvider.createFromUris(images)
         return mediaUploader.uploadMedias(mediaFiles)
             .map { urls -> urls.filterNotNull() }
+    }
+
+    private fun reorderAnnouncement(fromIndex: Int, toIndex: Int) {
+        val from = fromIndex - 8
+        val to = toIndex - 8
+
+        val currentList = uiState.value.invitationFormUiModel.announcement
+        if (from !in currentList.indices || to !in currentList.indices) return
+
+        val mutableList = currentList.toMutableList()
+        val item = mutableList.removeAt(from)
+        mutableList.add(to, item)
+
+        updateState {
+            copy(invitationFormUiModel = invitationFormUiModel.copy(
+                announcement = mutableList.toPersistentList()
+            ))
+        }
     }
 
     companion object {
