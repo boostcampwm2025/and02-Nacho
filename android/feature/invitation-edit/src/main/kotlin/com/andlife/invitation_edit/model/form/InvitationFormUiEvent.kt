@@ -48,6 +48,7 @@ sealed interface InvitationFormUiEvent : BaseUiEvent {
     ) : InvitationFormUiEvent
 
     data class UpdateAnnouncement(
+        val id: String? = null,
         val title: String,
         val content: String,
     ) : InvitationFormUiEvent
