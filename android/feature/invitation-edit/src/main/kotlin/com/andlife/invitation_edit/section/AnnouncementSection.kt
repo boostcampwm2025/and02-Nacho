@@ -53,6 +53,7 @@ fun LazyListScope.announcementSection(
     announcementList: ImmutableList<AnnouncementUiModel>,
     onRemoveAnnouncementClick: (AnnouncementUiModel) -> Unit,
     onAddAnnouncementClick: () -> Unit,
+    onEditAnnouncementClick: (AnnouncementUiModel) -> Unit,
     dragDropState: DragDropState,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
@@ -132,6 +133,7 @@ fun LazyListScope.announcementSection(
                     .fillMaxWidth()
                     .background(NachoTheme.colorScheme.backgroundPrimary)
                     .dragDropItem(absoluteIndex, dragDropState)
+                    .clickable { onEditAnnouncementClick(item) }
             ) {
                 AnnouncementItem(
                     announcementUiModel = item,

@@ -16,6 +16,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -40,6 +41,8 @@ fun InvitationAddAnnouncementBottomSheet(
     onConfirm: (String, String) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    initialTitle: String = "",
+    initialContent: String = "",
     viewModel: InvitationAddAnnouncementViewModel = viewModel(),
 ) {
     val keyboardManager = LocalSoftwareKeyboardController.current
@@ -50,6 +53,11 @@ fun InvitationAddAnnouncementBottomSheet(
 
     val scope = rememberCoroutineScope()
     val draft by viewModel.announcementDraft.collectAsStateWithLifecycle()
+
+    LaunchedEffect(initialTitle, initialContent) {
+        viewModel.updateTitle(initialTitle)
+        viewModel.updateContent(initialContent)
+    }
 
     BackHandler {
         scope.launch {

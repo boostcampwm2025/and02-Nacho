@@ -76,6 +76,7 @@ fun InvitationEditRoute(
     var isShowAnnouncementSheet by remember { mutableStateOf(false) }
     var isShowDeleteAnnouncement by remember { mutableStateOf(false) }
     var selectedAnnouncement by remember { mutableStateOf<AnnouncementUiModel?>(null) }
+    var selectedAnnouncementForEdit by remember { mutableStateOf<AnnouncementUiModel?>(null) }
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
@@ -160,11 +161,16 @@ fun InvitationEditRoute(
             isShowEndTimePicker = true
         },
         onAddAnnouncementClick = {
+            selectedAnnouncementForEdit = null
             isShowAnnouncementSheet = true
         },
         onRemoveAnnouncementClick = {
             selectedAnnouncement = it
             isShowDeleteAnnouncement = true
+        },
+        onEditAnnouncementClick = { announcement ->
+            selectedAnnouncementForEdit = announcement
+            isShowAnnouncementSheet = true
         },
         modifier = modifier,
     )
@@ -200,10 +206,23 @@ fun InvitationEditRoute(
 
     if (isShowAnnouncementSheet) {
         InvitationAddAnnouncementBottomSheet(
+            initialTitle = selectedAnnouncementForEdit?.title ?: "",
+            initialContent = selectedAnnouncementForEdit?.content ?: "",
             onConfirm = { title, content ->
-                viewModel.onEvent(InvitationFormUiEvent.UpdateAnnouncement(title, content))
+                viewModel.onEvent(
+                    InvitationFormUiEvent.UpdateAnnouncement(
+                        id = selectedAnnouncementForEdit?.id,
+                        title = title,
+                        content = content
+                    )
+                )
+                selectedAnnouncementForEdit = null
+                isShowAnnouncementSheet = false
             },
-            onDismiss = { isShowAnnouncementSheet = false },
+            onDismiss = {
+                selectedAnnouncementForEdit = null
+                isShowAnnouncementSheet = false
+            },
         )
     }
 
@@ -223,6 +242,7 @@ fun InvitationEditRoute(
             onDismiss = { isShowDeleteAnnouncement = false },
         )
     }
+
 }
 
 @Composable
@@ -237,6 +257,7 @@ private fun InvitationEditScreen(
     onNavigateToAddressSearch: () -> Unit,
     onAddAnnouncementClick: () -> Unit,
     onRemoveAnnouncementClick: (AnnouncementUiModel) -> Unit,
+    onEditAnnouncementClick: (AnnouncementUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val listState = rememberLazyListState()
@@ -352,6 +373,7 @@ private fun InvitationEditScreen(
                     announcementList = uiState.invitationFormUiModel.announcement,
                     onAddAnnouncementClick = onAddAnnouncementClick,
                     onRemoveAnnouncementClick = onRemoveAnnouncementClick,
+                    onEditAnnouncementClick = onEditAnnouncementClick,
                     isLoading = uiState.isLoading,
                     dragDropState = dragDropState,
                     modifier = Modifier.padding(top = NachoSpacing.medium),
@@ -380,6 +402,7 @@ fun InvitationEditScreenPreview() {
             onNavigateToAddressSearch = {},
             onAddAnnouncementClick = {},
             onRemoveAnnouncementClick = {},
+            onEditAnnouncementClick = {}
         )
     }
 }
