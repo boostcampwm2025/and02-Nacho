@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
+import com.andlife.invitation_edit.dragdrop.rememberDragDropState
 import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.invitation_edit.model.address.AddressUiModel
 import com.andlife.invitation_edit.model.form.AnnouncementUiModel
@@ -76,6 +77,7 @@ fun InvitationCreateRoute(
     var isShowAnnouncementSheet by remember { mutableStateOf(false) }
     var isShowDeleteAnnouncement by remember { mutableStateOf(false) }
     var selectedAnnouncement by remember { mutableStateOf<AnnouncementUiModel?>(null) }
+    var selectedAnnouncementForEdit by remember { mutableStateOf<AnnouncementUiModel?>(null) }
 
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
@@ -157,11 +159,16 @@ fun InvitationCreateRoute(
             isShowEndTimePicker = true
         },
         onAddAnnouncementClick = {
+            selectedAnnouncementForEdit = null
             isShowAnnouncementSheet = true
         },
         onRemoveAnnouncementClick = {
             selectedAnnouncement = it
             isShowDeleteAnnouncement = true
+        },
+        onEditAnnouncementClick = { announcement ->
+            selectedAnnouncementForEdit = announcement
+            isShowAnnouncementSheet = true
         },
         onClickCreateCard = {
             onNavigateCreateCard()
@@ -200,10 +207,23 @@ fun InvitationCreateRoute(
 
     if (isShowAnnouncementSheet) {
         InvitationAddAnnouncementBottomSheet(
+            initialTitle = selectedAnnouncementForEdit?.title ?: "",
+            initialContent = selectedAnnouncementForEdit?.content ?: "",
             onConfirm = { title, content ->
-                viewModel.onEvent(InvitationFormUiEvent.UpdateAnnouncement(title, content))
+                viewModel.onEvent(
+                    InvitationFormUiEvent.UpdateAnnouncement(
+                        id = selectedAnnouncementForEdit?.id,
+                        title = title,
+                        content = content
+                    )
+                )
+                selectedAnnouncementForEdit = null
+                isShowAnnouncementSheet = false
             },
-            onDismiss = { isShowAnnouncementSheet = false },
+            onDismiss = {
+                selectedAnnouncementForEdit = null
+                isShowAnnouncementSheet = false
+            },
         )
     }
 
@@ -238,9 +258,16 @@ private fun InvitationCreateScreen(
     onAddAnnouncementClick: () -> Unit,
     onClickCreateCard: () -> Unit,
     onRemoveAnnouncementClick: (AnnouncementUiModel) -> Unit,
+    onEditAnnouncementClick: (AnnouncementUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val listState = rememberLazyListState()
+    val dragDropState = rememberDragDropState(
+        lazyListState = listState,
+        onMove = { fromIndex, toIndex ->
+            onEvent(InvitationFormUiEvent.ReorderAnnouncement(fromIndex, toIndex))
+        }
+    )
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -351,7 +378,9 @@ private fun InvitationCreateScreen(
                     announcementList = uiState.invitationFormUiModel.announcement,
                     onAddAnnouncementClick = onAddAnnouncementClick,
                     onRemoveAnnouncementClick = onRemoveAnnouncementClick,
+                    onEditAnnouncementClick = onEditAnnouncementClick,
                     isLoading = uiState.isLoading,
+                    dragDropState = dragDropState,
                     modifier = Modifier.padding(top = NachoSpacing.medium),
                 )
             }
