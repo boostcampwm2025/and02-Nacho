@@ -82,7 +82,6 @@ fun InvitationDetailRoute(
     viewModel: InvitationDetailViewModel = hiltViewModel(),
     guestBookViewModel: InvitationGuestBookViewModel = hiltViewModel(),
 ) {
-    Log.d("InvitationDetailRoute", "vm:  ${viewModel.invitationId} ${viewModel.hashCode()}")
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isGuestBookUploading by guestBookViewModel.uiState
         .map { it.isUploading }
