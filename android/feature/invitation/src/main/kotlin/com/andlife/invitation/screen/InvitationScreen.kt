@@ -68,6 +68,7 @@ import com.andlife.ui.component.listitem.MenuItem
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.component.paging.PagingStateContent
 import com.andlife.ui.component.report.ReportBottomSheet
+import com.andlife.ui.util.DetailPaneViewModelScope
 import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -156,26 +157,28 @@ private fun InvitationListDetailScreen(
                 AnimatedContent(invitationRoute) { route ->
                     when (route) {
                         is InvitationDetail -> {
-                            InvitationDetailRoute(
-                                selectedId = route.id,
-                                onNavigateBack = {
-                                    coroutineScope.launch {
-                                        listDetailNavigator.navigateBack()
+                            DetailPaneViewModelScope {
+                                InvitationDetailRoute(
+                                    selectedId = route.id,
+                                    onNavigateBack = {
+                                        coroutineScope.launch {
+                                            listDetailNavigator.navigateBack()
+                                        }
+                                    },
+                                    onNavigateToLogin = onNavigateToLogin,
+                                    showBackButton = !listDetailNavigator.isListPaneVisible(),
+                                    viewModel = hiltViewModel<InvitationDetailViewModel, InvitationDetailViewModel.Factory>(
+                                        key = "detail ${route.id}"
+                                    ) { factory ->
+                                        factory.create(route.id, uiState.isFromDeelLink)
+                                    },
+                                    guestBookViewModel = hiltViewModel<InvitationGuestBookViewModel, InvitationGuestBookViewModel.Factory>(
+                                        key = "guestbook ${route.id}"
+                                    ) { factory ->
+                                        factory.create(route.id)
                                     }
-                                },
-                                onNavigateToLogin = onNavigateToLogin,
-                                showBackButton = !listDetailNavigator.isListPaneVisible(),
-                                viewModel = hiltViewModel<InvitationDetailViewModel, InvitationDetailViewModel.Factory>(
-                                    key = "detail ${route.id}"
-                                ){ factory ->
-                                    factory.create(route.id, uiState.isFromDeelLink)
-                                },
-                                guestBookViewModel = hiltViewModel<InvitationGuestBookViewModel, InvitationGuestBookViewModel.Factory>(
-                                    key = "guestbook ${route.id}"
-                                ) { factory ->
-                                    factory.create(route.id)
-                                }
-                            )
+                                )
+                            }
                         }
                         is InvitationPlaceholder -> {
                             InvitationPlaceholderScreen()
