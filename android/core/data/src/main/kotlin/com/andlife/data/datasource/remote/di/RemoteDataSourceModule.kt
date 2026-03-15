@@ -2,6 +2,8 @@ package com.andlife.data.datasource.remote.di
 
 import com.andlife.data.datasource.remote.address.AddressRemoteDataSource
 import com.andlife.data.datasource.remote.address.AddressRemoteDataSourceImpl
+import com.andlife.data.datasource.remote.fcm.FcmTokenDataSource
+import com.andlife.data.datasource.remote.fcm.FcmTokenDataSourceImpl
 import com.andlife.data.datasource.remote.invitation.InvitationRemoteDataSource
 import com.andlife.data.datasource.remote.invitation.InvitationRemoteDataSourceImpl
 import com.andlife.data.datasource.remote.guestbook.GuestBookRemoteDataSource
@@ -56,4 +58,10 @@ internal abstract class RemoteDataSourceModule {
     abstract fun bindReportRemoteDataSource(
         reportRemoteDataSourceImpl: ReportRemoteDataSourceImpl
     ): ReportRemoteDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindFcmTokenDataSource(
+        fcmTokenDataSourceImpl: FcmTokenDataSourceImpl
+    ): FcmTokenDataSource
 }

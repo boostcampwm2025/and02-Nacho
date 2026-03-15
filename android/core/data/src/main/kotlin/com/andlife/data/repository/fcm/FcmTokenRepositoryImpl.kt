@@ -1,11 +1,14 @@
 package com.andlife.data.repository.fcm
 
+import com.andlife.data.datasource.remote.fcm.FcmTokenDataSource
 import com.andlife.domain.repository.fcm.FcmTokenRepository
 import javax.inject.Inject
 
-internal class FcmTokenRepositoryImpl @Inject constructor() : FcmTokenRepository {
+internal class FcmTokenRepositoryImpl @Inject constructor(
+    private val fcmTokenDataSource: FcmTokenDataSource
+) : FcmTokenRepository {
 
     override suspend fun registerTokenToServer(token: String) {
-        // TODO: 서버 api 호출
+        fcmTokenDataSource.registerTokenToServer(token)
     }
 }
