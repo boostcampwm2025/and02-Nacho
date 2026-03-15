@@ -57,4 +57,11 @@ class FcmTokenManagerImpl @Inject constructor(
         }
         Log.d(TAG, "로컬에 FCM 토큰 저장됨: $token")
     }
+
+    private fun deleteStoredToken() {
+        sharedPreferences.edit {
+            remove(KEY_FCM_TOKEN)
+        }
+        Log.d(TAG, "로컬에 저장된 FCM 토큰 삭제됨")
+    }
 }
