@@ -426,6 +426,9 @@ fun InvitationGuestBookRoute(
     }
 
     uiState.fullscreenVideoUrl?.let { url ->
+        val player = viewModel.videoPlayerPool.getPlayer(url)
+        val isMuted by viewModel.videoPlayerPool.isMuted.collectAsStateWithLifecycle()
+
         Dialog(
             onDismissRequest = {},
             properties = DialogProperties(
@@ -455,9 +458,10 @@ fun InvitationGuestBookRoute(
             }
 
             VideoFullscreenOverlay(
-                videoUrl = url,
+                player = player,
                 thumbnailUrl = uiState.fullscreenThumbnailUrl,
                 startBounds = uiState.fullscreenStartBounds,
+                isMuted = isMuted,
                 videoPlayerPool = viewModel.videoPlayerPool,
                 onDismiss = {
                     viewModel.onEvent(InvitationGuestBookUiEvent.DismissFullscreenVideo)

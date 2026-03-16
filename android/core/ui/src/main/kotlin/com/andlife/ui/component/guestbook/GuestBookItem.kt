@@ -893,9 +893,10 @@ private fun PlayerControlBar(
 @OptIn(UnstableApi::class)
 @Composable
 fun VideoFullscreenOverlay(
-    videoUrl: String,
+    player: AutoVideoPlayer,
     thumbnailUrl: String?,
     startBounds: Rect?,
+    isMuted: Boolean,
     videoPlayerPool: AutoVideoPlayerPool,
     onDismiss: () -> Unit,
 ) {
@@ -919,9 +920,9 @@ fun VideoFullscreenOverlay(
 
     // 컨트롤바 표시 상태
     var isControlVisible by remember { mutableStateOf(true) }
-
-    val isMuted by videoPlayerPool.isMuted.collectAsStateWithLifecycle()
-    val player = remember(videoUrl) { videoPlayerPool.getPlayer(videoUrl) }
+//
+//    val isMuted by videoPlayerPool.isMuted.collectAsStateWithLifecycle()
+//    val player = remember(videoUrl) { videoPlayerPool.getPlayer(videoUrl) }
 
     val displayPositionMs = if (isSeeking) seekPositionMs else currentPositionMs
     val progress = if (totalDurationMs > 0) {
@@ -1049,7 +1050,7 @@ fun VideoFullscreenOverlay(
                 (player.exoPlayer.currentPosition / 1000).toInt().toFormatDuration()
             } / ${(player.exoPlayer.duration / 1000).toInt().toFormatDuration()}",
             isControlVisible = isControlVisible,
-            isMuted = videoPlayerPool.isMuted.collectAsStateWithLifecycle().value,
+            isMuted = isMuted,
             isFullscreen = true,
             onSeekValueChange = { newValue ->
                 val seekPositionMs = (newValue * player.exoPlayer.duration).toLong()
