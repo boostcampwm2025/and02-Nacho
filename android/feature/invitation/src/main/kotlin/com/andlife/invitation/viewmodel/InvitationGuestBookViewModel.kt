@@ -184,6 +184,7 @@ constructor(
                 fullscreenThumbnailUrl = null,
                 fullscreenStartBounds = null,
             )}
+            InvitationGuestBookUiEvent.ToggleVideoMute -> videoPlayerPool.toggleMute()
         }
     }
 

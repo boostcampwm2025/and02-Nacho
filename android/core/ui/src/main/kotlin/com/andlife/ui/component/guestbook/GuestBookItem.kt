@@ -1,5 +1,6 @@
 package com.andlife.ui.component.guestbook
 
+import android.annotation.SuppressLint
 import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
@@ -82,6 +83,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import coil3.compose.AsyncImage
 import coil3.compose.SubcomposeAsyncImage
+import com.andlife.designsystem.R as designR
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoIconSize
@@ -109,7 +111,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 import kotlin.math.roundToInt
-import com.andlife.designsystem.R as designR
 
 private const val SAMPLE_INVITATION_ID = 1L
 
@@ -891,6 +892,7 @@ private fun PlayerControlBar(
     }
 }
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @OptIn(UnstableApi::class)
 @Composable
 fun VideoFullscreenOverlay(
@@ -898,8 +900,8 @@ fun VideoFullscreenOverlay(
     thumbnailUrl: String?,
     startBounds: Rect?,
     isMuted: Boolean,
-    videoPlayerPool: AutoVideoPlayerPool,
     onDismiss: () -> Unit,
+    onMuteToggle: () -> Unit,
 ) {
     val density = LocalDensity.current
     val configuration = LocalConfiguration.current
@@ -1067,7 +1069,7 @@ fun VideoFullscreenOverlay(
                 player.play()
                 isSeeking = false
             },
-            onMuteToggle = { videoPlayerPool.toggleMute() },
+            onMuteToggle = onMuteToggle,
             onExitFullscreen = { handleDismiss() },
         )
     }

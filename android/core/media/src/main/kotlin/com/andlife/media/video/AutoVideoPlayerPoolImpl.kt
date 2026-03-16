@@ -162,7 +162,7 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
 
     override fun toggleMute() {
         _isMuted.update { !it }
-        activePlayers.values.forEach { it.setMuted(_isMuted.value) }
+        activePlayers.values.forEach { it.toggleMute(_isMuted.value) }
     }
 
     override fun resumeLastPlayed() {

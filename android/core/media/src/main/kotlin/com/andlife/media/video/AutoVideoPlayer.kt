@@ -41,4 +41,6 @@ class AutoVideoPlayer(
     fun setMediaSource(mediaSource: MediaSource) = exoPlayer.setMediaSource(mediaSource)
 
     fun prepare() = exoPlayer.prepare()
+
+    fun toggleMute(isMuted: Boolean) = setMuted(isMuted)
 }

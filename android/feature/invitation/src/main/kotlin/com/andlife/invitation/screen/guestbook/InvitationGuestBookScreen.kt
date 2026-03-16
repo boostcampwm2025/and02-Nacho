@@ -462,10 +462,8 @@ fun InvitationGuestBookRoute(
                 thumbnailUrl = uiState.fullscreenThumbnailUrl,
                 startBounds = uiState.fullscreenStartBounds,
                 isMuted = isMuted,
-                videoPlayerPool = viewModel.videoPlayerPool,
-                onDismiss = {
-                    viewModel.onEvent(InvitationGuestBookUiEvent.DismissFullscreenVideo)
-                },
+                onDismiss = { viewModel.onEvent(InvitationGuestBookUiEvent.DismissFullscreenVideo) },
+                onMuteToggle = { viewModel.onEvent(InvitationGuestBookUiEvent.ToggleVideoMute) }
             )
         }
     }

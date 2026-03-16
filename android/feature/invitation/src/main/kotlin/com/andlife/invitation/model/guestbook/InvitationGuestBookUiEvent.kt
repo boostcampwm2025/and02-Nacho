@@ -78,4 +78,6 @@ sealed interface InvitationGuestBookUiEvent : BaseUiEvent {
     ) : InvitationGuestBookUiEvent
 
     data object DismissFullscreenVideo : InvitationGuestBookUiEvent
+
+    data object ToggleVideoMute : InvitationGuestBookUiEvent
 }
