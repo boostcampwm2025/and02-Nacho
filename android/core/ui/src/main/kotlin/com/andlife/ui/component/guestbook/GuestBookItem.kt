@@ -883,6 +883,7 @@ private fun PlayerControlBar(
 @Composable
 fun VideoFullscreenOverlay(
     videoUrl: String,
+    thumbnailUrl: String?,
     startBounds: Rect?,
     videoPlayerPool: AutoVideoPlayerPool,
     onDismiss: () -> Unit,
@@ -950,7 +951,9 @@ fun VideoFullscreenOverlay(
         if (player.exoPlayer.playbackState == Player.STATE_READY) {
             isVideoReadyInFullscreen = true
         }
-        onDispose { player.exoPlayer.removeListener(listener) }
+        onDispose {
+            player.exoPlayer.removeListener(listener)
+        }
     }
 
     BackHandler { handleDismiss() }
@@ -971,6 +974,17 @@ fun VideoFullscreenOverlay(
                 autoPlayer = player,
                 modifier = Modifier.fillMaxSize(),
             )
+
+            if (thumbnailUrl != null && thumbnailAlpha > 0f) {
+                AsyncImage(
+                    model = thumbnailUrl,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .alpha(thumbnailAlpha),
+                    contentScale = ContentScale.Fit,
+                )
+            }
         }
 
         PlayerControlOverlay(

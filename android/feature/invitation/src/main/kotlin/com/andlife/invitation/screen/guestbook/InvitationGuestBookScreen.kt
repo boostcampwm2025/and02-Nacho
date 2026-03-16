@@ -456,7 +456,7 @@ fun InvitationGuestBookRoute(
 
             VideoFullscreenOverlay(
                 videoUrl = url,
-//                thumbnailUrl = uiState.fullscreenThumbnailUrl,
+                thumbnailUrl = uiState.fullscreenThumbnailUrl,
                 startBounds = uiState.fullscreenStartBounds,
                 videoPlayerPool = viewModel.videoPlayerPool,
                 onDismiss = {
