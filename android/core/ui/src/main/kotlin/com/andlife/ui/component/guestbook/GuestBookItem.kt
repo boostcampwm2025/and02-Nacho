@@ -895,7 +895,7 @@ fun VideoFullscreenOverlay(
 
     var isExpanded by remember { mutableStateOf(false) }
     // 추가: 오버레이에서 첫 프레임 렌더링 완료 여부
-    var isVideoReady by remember { mutableStateOf(false) }
+    var isVideoReadyInFullscreen by remember { mutableStateOf(false) }
 
     val animSpec: AnimationSpec<Float> = tween(durationMillis = 300, easing = FastOutSlowInEasing)
 
@@ -920,9 +920,8 @@ fun VideoFullscreenOverlay(
         animationSpec = animSpec, label = "alpha",
     )
     val thumbnailAlpha by animateFloatAsState(
-        targetValue = if (isVideoReady) 0f else 1f,
+        targetValue = if (isVideoReadyInFullscreen) 0f else 1f,
         animationSpec = tween(durationMillis = 200),
-        label = "thumbnailAlpha",
     )
 
     LaunchedEffect(Unit) {
@@ -942,12 +941,12 @@ fun VideoFullscreenOverlay(
     DisposableEffect(player) {
         val listener = object : Player.Listener {
             override fun onRenderedFirstFrame() {
-                isVideoReady = true
+                isVideoReadyInFullscreen = true
             }
         }
         player.exoPlayer.addListener(listener)
         if (player.exoPlayer.playbackState == Player.STATE_READY) {
-            isVideoReady = true
+            isVideoReadyInFullscreen = true
         }
         onDispose { player.exoPlayer.removeListener(listener) }
     }
