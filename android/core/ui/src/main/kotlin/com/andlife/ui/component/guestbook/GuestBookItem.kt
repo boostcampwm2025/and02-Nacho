@@ -99,6 +99,7 @@ import com.andlife.model.guestbook.MediaUiType
 import com.andlife.ui.R
 import com.andlife.ui.component.icon.PlayerThumbnailIcon
 import com.andlife.ui.component.media.MediaOverlay
+import com.andlife.ui.util.noRippleClickable
 import com.andlife.ui.util.toFormatDuration
 import com.andlife.ui.util.toRelativeTimeString
 import kotlinx.collections.immutable.ImmutableList
@@ -751,7 +752,7 @@ private fun PlayerControlOverlay(
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         AnimatedVisibility(
-            visible = !isControlVisible,
+            visible = !isControlVisible && !isFullscreen,
             enter = fadeIn(),
             exit = fadeOut(),
             modifier = Modifier.align(Alignment.BottomCenter)
@@ -1007,7 +1008,11 @@ fun VideoFullscreenOverlay(
 
     BackHandler { handleDismiss() }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .noRippleClickable { isControlVisible = !isControlVisible },
+    ) {
         Box(
             modifier = Modifier
                 .offset {
@@ -1043,7 +1048,7 @@ fun VideoFullscreenOverlay(
             timeText = "${
                 (player.exoPlayer.currentPosition / 1000).toInt().toFormatDuration()
             } / ${(player.exoPlayer.duration / 1000).toInt().toFormatDuration()}",
-            isControlVisible = true,
+            isControlVisible = isControlVisible,
             isMuted = videoPlayerPool.isMuted.collectAsStateWithLifecycle().value,
             isFullscreen = true,
             onSeekValueChange = { newValue ->
