@@ -1026,6 +1026,7 @@ fun VideoFullscreenOverlay(
 
     val handleDismiss: () -> Unit = {
         scope.launch {
+            context.findActivity()?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             isExpanded = false
             delay(250L)
             onDismiss()
