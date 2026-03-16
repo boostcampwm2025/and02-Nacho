@@ -1,5 +1,7 @@
 package com.andlife.myinvitation.screen
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +22,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.layout.AnimatedPane
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.layout.PaneAdaptedValue
+import androidx.compose.material3.adaptive.navigation.BackNavigationBehavior
+import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
+import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
+import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldPredictiveBackHandler
+import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldValue
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,9 +62,16 @@ import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.auth.AuthState
 import com.andlife.domain.model.invitation.SortDirection
 import com.andlife.model.invitation.InvitationSummaryUiModel
+import com.andlife.myinvitation.MyInvitationDetail
+import com.andlife.myinvitation.MyInvitationPlaceholder
 import com.andlife.myinvitation.model.MyInvitationSideEffect
 import com.andlife.myinvitation.model.MyInvitationUiEvent
 import com.andlife.myinvitation.model.MyInvitationUiState
+import com.andlife.myinvitation.screen.detail.MyInvitationDetailRoute
+import com.andlife.myinvitation.screen.detail.MyInvitationPlaceholderScreen
+import com.andlife.myinvitation.viewmodel.MyInvitation2PaneViewModel
+import com.andlife.myinvitation.viewmodel.MyInvitationDetailViewModel
+import com.andlife.myinvitation.viewmodel.MyInvitationGuestBookViewModel
 import com.andlife.myinvitation.viewmodel.MyInvitationViewModel
 import com.andlife.ui.R
 import com.andlife.ui.component.GenericTabRow
@@ -60,11 +81,153 @@ import com.andlife.ui.component.listitem.InvitationListItem
 import com.andlife.ui.component.listitem.MenuItem
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.component.paging.PagingStateContent
+import com.andlife.ui.util.DetailPaneViewModelScope
+import com.andlife.ui.util.LocalNavigationSuiteState
 import com.andlife.ui.util.collectWithLifecycle
+import com.andlife.ui.util.isNavigationBar
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import com.andlife.designsystem.R as designR
+
+@Composable
+fun MyInvitationScreen(
+    snackbarHostState: SnackbarHostState,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToCreate: () -> Unit,
+    onNavigateToEditInvitation: (Long) -> Unit,
+    onNavigateToEditCard: (Long) -> Unit,
+    onNavigateToCreateCard: (Long) -> Unit,
+    onNavigateToCreateThanksCard: (Long) -> Unit,
+    onNavigateToUpdateThanksCard: (Long) -> Unit,
+    viewModel: MyInvitation2PaneViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.initialInvitationId.collectAsStateWithLifecycle()
+
+    MyInvitationScreen(
+        initialInvitationId = uiState,
+        snackbarHostState = snackbarHostState,
+        onNavigateToLogin = onNavigateToLogin,
+        onNavigateToCreate = onNavigateToCreate,
+        onNavigateToEditInvitation = onNavigateToEditInvitation,
+        onNavigateToEditCard = onNavigateToEditCard,
+        onNavigateToCreateCard = onNavigateToCreateCard,
+        onNavigateToCreateThanksCard = onNavigateToCreateThanksCard,
+        onNavigateToUpdateThanksCard = onNavigateToUpdateThanksCard,
+        onNavigateToDetail = viewModel::setInitialInvitationId,
+    )
+}
+
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@Composable
+private fun MyInvitationScreen(
+    initialInvitationId: Long?,
+    snackbarHostState: SnackbarHostState,
+    onNavigateToDetail: (Long) -> Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToCreate: () -> Unit,
+    onNavigateToEditInvitation: (Long) -> Unit,
+    onNavigateToEditCard: (Long) -> Unit,
+    onNavigateToCreateCard: (Long) -> Unit,
+    onNavigateToCreateThanksCard: (Long) -> Unit,
+    onNavigateToUpdateThanksCard: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
+
+    val suiteState = LocalNavigationSuiteState.current
+
+    val navSuiteType =
+        NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())
+
+    val listDetailNavigator = rememberListDetailPaneScaffoldNavigator()
+    val coroutineScope = rememberCoroutineScope()
+
+    var myInvitationRoute by remember {
+        val route = initialInvitationId?.let { MyInvitationDetail(id = it) } ?: MyInvitationPlaceholder
+        mutableStateOf(route)
+    }
+
+    fun onInvitationClickShowDetailPane(id: Long) {
+        onNavigateToDetail(id)
+        myInvitationRoute = MyInvitationDetail(id)
+        coroutineScope.launch {
+            if (navSuiteType.isNavigationBar && suiteState.currentValue == NavigationSuiteScaffoldValue.Visible) suiteState.hide()
+            listDetailNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail)
+        }
+    }
+
+    ThreePaneScaffoldPredictiveBackHandler(
+        listDetailNavigator,
+        BackNavigationBehavior.PopUntilScaffoldValueChange,
+    )
+
+    NavigableListDetailPaneScaffold(
+        navigator = listDetailNavigator,
+        listPane = {
+            AnimatedPane {
+                MyInvitationRoute(
+                    snackbarHostState = snackbarHostState,
+                    onNavigateToDetail = { onInvitationClickShowDetailPane(it) },
+                    onNavigateToLogin = onNavigateToLogin,
+                    onNavigateToCreate = onNavigateToCreate,
+                    selectedInvitationId = initialInvitationId,
+                    shouldHighlightSelected = listDetailNavigator.isDetailPaneVisible(),
+                )
+            }
+        },
+        detailPane = {
+            AnimatedPane {
+                AnimatedContent(myInvitationRoute) { route ->
+                    when (route) {
+                        is MyInvitationDetail -> {
+                            DetailPaneViewModelScope {
+                                MyInvitationDetailRoute(
+                                    selectedId = route.id,
+                                    onNavigateBack = {
+                                        coroutineScope.launch {
+                                            if (navSuiteType.isNavigationBar && suiteState.currentValue == NavigationSuiteScaffoldValue.Hidden) suiteState.show()
+                                            listDetailNavigator.navigateBack()
+                                        }
+                                    },
+                                    onNavigateToLogin = onNavigateToLogin,
+                                    onNavigateToEditCard = onNavigateToEditCard,
+                                    onNavigateToEditInvitation = onNavigateToEditInvitation,
+                                    onNavigateToCreateCard = onNavigateToCreateCard,
+                                    onNavigateToCreateThanksCard = onNavigateToCreateThanksCard,
+                                    onNavigateToUpdateThanksCard = onNavigateToUpdateThanksCard,
+                                    showBackButton = !listDetailNavigator.isListPaneVisible(),
+                                    viewModel = hiltViewModel<MyInvitationDetailViewModel, MyInvitationDetailViewModel.Factory>(
+                                        key = "myDetail ${route.id}"
+                                    ) { factory ->
+                                        factory.create(route.id)
+                                    },
+                                    guestBookViewModel = hiltViewModel<MyInvitationGuestBookViewModel, MyInvitationGuestBookViewModel.Factory>(
+                                        key = "myDetail guestBook ${route.id}"
+                                    ) { factory ->
+                                        factory.create(route.id)
+                                    }
+                                )
+                            }
+                        }
+
+                        MyInvitationPlaceholder -> {
+                            MyInvitationPlaceholderScreen()
+                        }
+                    }
+                }
+            }
+        },
+        modifier = modifier.background(NachoTheme.colorScheme.backgroundPrimary),
+    )
+}
+
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+private fun <T> ThreePaneScaffoldNavigator<T>.isListPaneVisible(): Boolean =
+    scaffoldValue[ListDetailPaneScaffoldRole.List] == PaneAdaptedValue.Expanded
+
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+private fun <T> ThreePaneScaffoldNavigator<T>.isDetailPaneVisible(): Boolean =
+    scaffoldValue[ListDetailPaneScaffoldRole.Detail] == PaneAdaptedValue.Expanded
 
 @Composable
 fun MyInvitationRoute(
@@ -72,6 +235,8 @@ fun MyInvitationRoute(
     onNavigateToCreate: () -> Unit,
     onNavigateToDetail: (Long) -> Unit,
     onNavigateToLogin: () -> Unit,
+    selectedInvitationId: Long? = null,
+    shouldHighlightSelected: Boolean = false,
     modifier: Modifier = Modifier,
     viewModel: MyInvitationViewModel = hiltViewModel(),
 ) {
@@ -196,7 +361,9 @@ fun MyInvitationRoute(
         pastItems = pastItems,
         modifier = modifier,
         onEvent = viewModel::onEvent,
-        onDeleteClick = { invitationIdToDelete = it }
+        onDeleteClick = { invitationIdToDelete = it },
+        selectedInvitationId = selectedInvitationId,
+        shouldHighlightSelected = shouldHighlightSelected,
     )
 }
 
@@ -209,6 +376,8 @@ private fun MyInvitationScreen(
     pastItems: LazyPagingItems<InvitationSummaryUiModel>,
     onEvent: (MyInvitationUiEvent) -> Unit,
     onDeleteClick: (Long) -> Unit,
+    selectedInvitationId: Long? = null,
+    shouldHighlightSelected: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val tabs = stringArrayResource(R.array.arr_invitation_tabs).toImmutableList()
@@ -312,6 +481,8 @@ private fun MyInvitationScreen(
                                         key = currentItems.itemKey { it.id }
                                     ) { index ->
                                         currentItems[index]?.let { invitation ->
+                                            val isSelected =
+                                                shouldHighlightSelected && invitation.id == selectedInvitationId
                                             val dDayLabel = when (val count = invitation.dDayCount) {
                                                 null -> null
                                                 0 -> stringResource(R.string.format_invitation_d_day_today)
@@ -331,7 +502,8 @@ private fun MyInvitationScreen(
                                                         title = stringResource(R.string.txt_delete_invitation_title),
                                                         onClick = { onDeleteClick(invitation.id) }
                                                     )
-                                                )
+                                                ),
+                                                isSelected = isSelected
                                             )
                                         }
                                     }
