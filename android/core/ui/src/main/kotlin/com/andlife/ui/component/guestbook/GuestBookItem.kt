@@ -597,7 +597,7 @@ private fun VideoPlayerContainer(
                 if (!isSeeking) {
                     currentPositionMs = currentPlayer.exoPlayer.currentPosition.coerceAtLeast(0L)
                 }
-                delay(16L)
+                delay(250L)
             }
         }
 
@@ -910,27 +910,46 @@ fun VideoFullscreenOverlay(
     var isExpanded by remember { mutableStateOf(false) }
     var isVideoReadyInFullscreen by remember { mutableStateOf(false) }
 
-    val animSpec: AnimationSpec<Float> = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+    // seekbar용 상태
+    var currentPositionMs by remember { mutableLongStateOf(0L) }
+    var totalDurationMs by remember { mutableLongStateOf(0L) }
+    var isSeeking by remember { mutableStateOf(false) }
+    var seekPositionMs by remember { mutableLongStateOf(0L) }
 
+    // 컨트롤바 표시 상태
+    var isControlVisible by remember { mutableStateOf(true) }
+
+    val isMuted by videoPlayerPool.isMuted.collectAsStateWithLifecycle()
+    val player = remember(videoUrl) { videoPlayerPool.getPlayer(videoUrl) }
+
+    val displayPositionMs = if (isSeeking) seekPositionMs else currentPositionMs
+    val progress = if (totalDurationMs > 0) {
+        (displayPositionMs.toFloat() / totalDurationMs.toFloat()).coerceIn(0f, 1f)
+    } else {
+        0f
+    }
+    val timeText = "${(displayPositionMs / 1000).toInt().toFormatDuration()} / ${(totalDurationMs / 1000).toInt().toFormatDuration()}"
+
+    val animSpec: AnimationSpec<Float> = tween(durationMillis = 300, easing = FastOutSlowInEasing)
     val animLeft by animateFloatAsState(
         targetValue = if (isExpanded) fullBounds.left else initialBounds.left,
         animationSpec = animSpec,
-        label = "left",
+        label = "left"
     )
     val animTop by animateFloatAsState(
         targetValue = if (isExpanded) fullBounds.top else initialBounds.top,
         animationSpec = animSpec,
-        label = "top",
+        label = "top"
     )
     val animWidth by animateFloatAsState(
         targetValue = if (isExpanded) fullBounds.width else initialBounds.width,
         animationSpec = animSpec,
-        label = "width",
+        label = "width"
     )
     val animHeight by animateFloatAsState(
         targetValue = if (isExpanded) fullBounds.height else initialBounds.height,
         animationSpec = animSpec,
-        label = "height",
+        label = "height"
     )
     val thumbnailAlpha by animateFloatAsState(
         targetValue = if (isVideoReadyInFullscreen) 0f else 1f,
@@ -941,28 +960,48 @@ fun VideoFullscreenOverlay(
         isExpanded = true
     }
 
-    val handleDismiss: () -> Unit = {
-        scope.launch {
-            isExpanded = false
-            delay(300L)
-            onDismiss()
+    LaunchedEffect(isControlVisible) {
+        if (isControlVisible) {
+            delay(3000L)
+            isControlVisible = false
         }
     }
-
-    val player = remember(videoUrl) { videoPlayerPool.getPlayer(videoUrl) }
 
     DisposableEffect(player) {
         val listener = object : Player.Listener {
             override fun onRenderedFirstFrame() {
                 isVideoReadyInFullscreen = true
             }
+            override fun onPlaybackStateChanged(state: Int) {
+                if (state == Player.STATE_READY) {
+                    isVideoReadyInFullscreen = true
+                    totalDurationMs = player.exoPlayer.duration.coerceAtLeast(0L)
+                }
+            }
         }
         player.exoPlayer.addListener(listener)
         if (player.exoPlayer.playbackState == Player.STATE_READY) {
             isVideoReadyInFullscreen = true
+            totalDurationMs = player.exoPlayer.duration.coerceAtLeast(0L)
         }
-        onDispose {
-            player.exoPlayer.removeListener(listener)
+        onDispose { player.exoPlayer.removeListener(listener) }
+    }
+
+    LaunchedEffect(isVideoReadyInFullscreen) {
+        if (!isVideoReadyInFullscreen) return@LaunchedEffect
+        while (true) {
+            if (!isSeeking) {
+                currentPositionMs = player.exoPlayer.currentPosition.coerceAtLeast(0L)
+            }
+            delay(300L)
+        }
+    }
+
+    val handleDismiss: () -> Unit = {
+        scope.launch {
+            isExpanded = false
+            delay(250L)
+            onDismiss()
         }
     }
 
