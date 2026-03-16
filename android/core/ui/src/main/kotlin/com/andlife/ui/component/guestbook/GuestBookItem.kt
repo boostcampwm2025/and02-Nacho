@@ -918,7 +918,7 @@ fun VideoFullscreenOverlay(
     var totalDurationMs by remember { mutableLongStateOf(0L) }
     var isSeeking by remember { mutableStateOf(false) }
     var seekPositionMs by remember { mutableLongStateOf(0L) }
-    var isControlVisible by remember { mutableStateOf(true) }
+    var isControlVisible by remember { mutableStateOf(false) }
     var isPlaying by remember { mutableStateOf(false) }
 
     val displayPositionMs = if (isSeeking) seekPositionMs else currentPositionMs
