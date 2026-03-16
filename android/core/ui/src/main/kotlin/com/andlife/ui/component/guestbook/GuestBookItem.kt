@@ -119,7 +119,7 @@ fun GuestBookItem(
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
     onPlayVideoClick: (String) -> Unit,
-    onFullscreenClick: (String, String?, Rect) -> Unit= { _, _, _ -> }, // TODO: 기본값 제거
+    onFullscreenClick: (String, String?, Rect) -> Unit = { _, _, _ -> }, // TODO: 기본값 제거
     modifier: Modifier = Modifier,
     shouldPlayVideo: Boolean = false,
     isFromInvitationDetail: Boolean = true,
@@ -539,7 +539,9 @@ private fun VideoPlayerContainer(
     } else {
         0f
     }
-    val timeText = "${(displayPositionMs / 1000).toInt().toFormatDuration()} / ${(totalDurationMs / 1000).toInt().toFormatDuration()}"
+    val timeText = "${(displayPositionMs / 1000).toInt().toFormatDuration()} / ${
+        (totalDurationMs / 1000).toInt().toFormatDuration()
+    }"
 
     LaunchedEffect(shouldPlay, videoUrl) {
         if (shouldPlay) {
@@ -815,7 +817,9 @@ private fun PlayerControlBar(
             value = progress,
             onValueChange = onSeekValueChange,
             onValueChangeFinished = onSeekValueChangeFinished,
-            modifier = Modifier.fillMaxWidth().height(0.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(0.dp),
             thumb = {
                 Box(
                     modifier = Modifier
@@ -879,7 +883,6 @@ private fun PlayerControlBar(
 @Composable
 fun VideoFullscreenOverlay(
     videoUrl: String,
-    thumbnailUrl: String?,
     startBounds: Rect?,
     videoPlayerPool: AutoVideoPlayerPool,
     onDismiss: () -> Unit,
@@ -894,30 +897,29 @@ fun VideoFullscreenOverlay(
     val initialBounds = startBounds ?: fullBounds
 
     var isExpanded by remember { mutableStateOf(false) }
-    // 추가: 오버레이에서 첫 프레임 렌더링 완료 여부
     var isVideoReadyInFullscreen by remember { mutableStateOf(false) }
 
     val animSpec: AnimationSpec<Float> = tween(durationMillis = 300, easing = FastOutSlowInEasing)
 
     val animLeft by animateFloatAsState(
         targetValue = if (isExpanded) fullBounds.left else initialBounds.left,
-        animationSpec = animSpec, label = "left",
+        animationSpec = animSpec,
+        label = "left",
     )
     val animTop by animateFloatAsState(
         targetValue = if (isExpanded) fullBounds.top else initialBounds.top,
-        animationSpec = animSpec, label = "top",
+        animationSpec = animSpec,
+        label = "top",
     )
     val animWidth by animateFloatAsState(
         targetValue = if (isExpanded) fullBounds.width else initialBounds.width,
-        animationSpec = animSpec, label = "width",
+        animationSpec = animSpec,
+        label = "width",
     )
     val animHeight by animateFloatAsState(
         targetValue = if (isExpanded) fullBounds.height else initialBounds.height,
-        animationSpec = animSpec, label = "height",
-    )
-    val backgroundAlpha by animateFloatAsState(
-        targetValue = if (isExpanded) 1f else 0f,
-        animationSpec = animSpec, label = "alpha",
+        animationSpec = animSpec,
+        label = "height",
     )
     val thumbnailAlpha by animateFloatAsState(
         targetValue = if (isVideoReadyInFullscreen) 0f else 1f,
@@ -953,11 +955,7 @@ fun VideoFullscreenOverlay(
 
     BackHandler { handleDismiss() }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = backgroundAlpha))
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
                 .offset {
@@ -973,25 +971,16 @@ fun VideoFullscreenOverlay(
                 autoPlayer = player,
                 modifier = Modifier.fillMaxSize(),
             )
-
-            if (thumbnailUrl != null && thumbnailAlpha > 0f) {
-                AsyncImage(
-                    model = thumbnailUrl,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .alpha(thumbnailAlpha),
-                    contentScale = ContentScale.Fit,
-                )
-            }
         }
 
         PlayerControlOverlay(
             progress = if (player.exoPlayer.duration > 0) {
                 player.exoPlayer.currentPosition.toFloat() / player.exoPlayer.duration.toFloat()
             } else 0f,
-            timeText = "${(player.exoPlayer.currentPosition / 1000).toInt().toFormatDuration()} / ${(player.exoPlayer.duration / 1000).toInt().toFormatDuration()}",
-            isControlVisible = true, // 항상 보이도록
+            timeText = "${
+                (player.exoPlayer.currentPosition / 1000).toInt().toFormatDuration()
+            } / ${(player.exoPlayer.duration / 1000).toInt().toFormatDuration()}",
+            isControlVisible = true,
             isMuted = videoPlayerPool.isMuted.collectAsStateWithLifecycle().value,
             onSeekValueChange = { newValue ->
                 val seekPositionMs = (newValue * player.exoPlayer.duration).toLong()
