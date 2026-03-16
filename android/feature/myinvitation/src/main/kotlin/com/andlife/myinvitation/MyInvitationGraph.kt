@@ -1,7 +1,6 @@
 package com.andlife.myinvitation
 
 import android.util.Log
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
@@ -13,28 +12,30 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.andlife.domain.util.RefreshEventHub
-import com.andlife.model.util.NavigationKeyConstant.CREATE_CARD_BY_INVITATION_ID
-import com.andlife.model.util.NavigationKeyConstant.CREATE_THANKS_CARD
-import com.andlife.model.util.NavigationKeyConstant.INVITATION_UPDATED
-import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
-import com.andlife.myinvitation.model.detail.MyInvitationDetailUiEvent
-import com.andlife.myinvitation.screen.MyInvitationDetailRoute
-import com.andlife.myinvitation.screen.MyInvitationRoute
+import com.andlife.myinvitation.screen.detail.MyInvitationDetailRoute
+import com.andlife.myinvitation.screen.MyInvitationScreen
 import com.andlife.myinvitation.viewmodel.MyInvitationDetailViewModel
+import com.andlife.myinvitation.viewmodel.MyInvitationGuestBookViewModel
 import com.andlife.myinvitation.viewmodel.MyInvitationViewModel
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object MyInvitation
+data class MyInvitation(
+    val initialInvitationId: Long? = null,
+)
 
 @Serializable
 data class MyInvitationDetail(
     val id: Long,
 )
 
-fun NavController.navigateToMyInvitation(navOptions: NavOptions) {
-    navigate(MyInvitation, navOptions)
+internal data object MyInvitationPlaceholder
+
+
+fun NavController.navigateToMyInvitation(navOptions: NavOptions, id: Long? = null) {
+    navigate(MyInvitation(id), navOptions)
 }
 
 fun NavController.navigateToMyInvitationDetail(
@@ -47,8 +48,12 @@ fun NavController.navigateToMyInvitationDetail(
 fun NavGraphBuilder.myInvitationNavGraph(
     snackbarHostState: SnackbarHostState,
     onNavigateToCreate: () -> Unit,
-    onNavigateToDetail: (Long) -> Unit,
     onNavigateToLogin: () -> Unit,
+    onNavigateToEditInvitation: (Long) -> Unit,
+    onNavigateToEditCard: (Long) -> Unit,
+    onNavigateToCreateCard: (Long) -> Unit,
+    onNavigateToCreateThanksCard: (Long) -> Unit,
+    onNavigateToUpdateThanksCard: (Long) -> Unit,
 ) {
     composable<MyInvitation> {
         val viewModel: MyInvitationViewModel = hiltViewModel()
@@ -63,13 +68,15 @@ fun NavGraphBuilder.myInvitationNavGraph(
             }
         }
 
-        MyInvitationRoute(
-            viewModel = viewModel,
+        MyInvitationScreen(
             snackbarHostState = snackbarHostState,
             onNavigateToCreate = onNavigateToCreate,
-            onNavigateToDetail = onNavigateToDetail,
             onNavigateToLogin = onNavigateToLogin,
-            modifier = Modifier
+            onNavigateToEditInvitation = onNavigateToEditInvitation,
+            onNavigateToEditCard = onNavigateToEditCard,
+            onNavigateToCreateCard = onNavigateToCreateCard,
+            onNavigateToCreateThanksCard = onNavigateToCreateThanksCard,
+            onNavigateToUpdateThanksCard = onNavigateToUpdateThanksCard,
         )
     }
 }
@@ -83,40 +90,12 @@ fun NavGraphBuilder.myInvitationDetailNavGraph(
     onNavigateToCreateThanksCard: (Long) -> Unit,
     onNavigateToUpdateThanksCard: (Long) -> Unit,
 ) {
-    composable<MyInvitationDetail> { backStackEntry ->
-        val viewModel: MyInvitationDetailViewModel = hiltViewModel()
-        val cardCreated by backStackEntry.savedStateHandle.getStateFlow<Boolean>(
-            CREATE_CARD_BY_INVITATION_ID, false
-        ).collectAsStateWithLifecycle()
+    composable<MyInvitationDetail> { backStackEntry  ->
 
-        val cardUpdated by backStackEntry.savedStateHandle.getStateFlow<Boolean>(
-            UPDATE_CARD, false
-        ).collectAsStateWithLifecycle()
-
-        val invitationUpdated by backStackEntry.savedStateHandle.getStateFlow<Boolean>(
-            INVITATION_UPDATED, false
-        ).collectAsStateWithLifecycle()
-
-        val thanksCardCreated by backStackEntry.savedStateHandle.getStateFlow<Boolean>(
-            CREATE_THANKS_CARD, false
-        ).collectAsStateWithLifecycle()
-
-        val thanksCardUpdated by backStackEntry.savedStateHandle.getStateFlow<Boolean>(
-            UPDATE_CARD, false
-        ).collectAsStateWithLifecycle()
-
-
-        LaunchedEffect(cardCreated, cardUpdated, invitationUpdated, thanksCardCreated, thanksCardUpdated) {
-            if (cardCreated || cardUpdated || invitationUpdated || thanksCardCreated || thanksCardUpdated) {
-                viewModel.onEvent(MyInvitationDetailUiEvent.RetryLoad)
-                backStackEntry.savedStateHandle.remove<Boolean>(CREATE_CARD_BY_INVITATION_ID)
-                backStackEntry.savedStateHandle.remove<Boolean>(UPDATE_CARD)
-                backStackEntry.savedStateHandle.remove<Boolean>(INVITATION_UPDATED)
-                backStackEntry.savedStateHandle.remove<Boolean>(CREATE_THANKS_CARD)
-            }
-        }
+        val id = backStackEntry.toRoute<MyInvitationDetail>().id
 
         MyInvitationDetailRoute(
+            selectedId = id,
             onNavigateBack = onNavigateBack,
             onNavigateToLogin = onNavigateToLogin,
             onNavigateToEditInvitation = onNavigateToEditInvitation,
@@ -125,7 +104,16 @@ fun NavGraphBuilder.myInvitationDetailNavGraph(
             onNavigateToCreateThanksCard = onNavigateToCreateThanksCard,
             modifier = Modifier.padding(),
             onNavigateToUpdateThanksCard = onNavigateToUpdateThanksCard,
-            viewModel = viewModel
+            viewModel = hiltViewModel<MyInvitationDetailViewModel, MyInvitationDetailViewModel.Factory>(
+                key = "myDetail $id"
+            ) { factory ->
+                factory.create(id)
+            },
+            guestBookViewModel = hiltViewModel<MyInvitationGuestBookViewModel, MyInvitationGuestBookViewModel.Factory>(
+                key = "myguestBook $id"
+            ) { factory ->
+                factory.create(id)
+            },
         )
     }
 }
