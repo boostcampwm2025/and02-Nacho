@@ -53,6 +53,7 @@
             android:name="com.andlife.nacho.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.Invitation"
             android:launchMode="singleTask">
