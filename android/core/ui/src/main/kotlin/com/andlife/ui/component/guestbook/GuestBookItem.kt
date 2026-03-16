@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -752,7 +753,7 @@ private fun PlayerControlOverlay(
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         AnimatedVisibility(
-            visible = !isControlVisible && !isFullscreen,
+            visible = !isControlVisible,
             enter = fadeIn(),
             exit = fadeOut(),
             modifier = Modifier.align(Alignment.BottomCenter)
@@ -806,11 +807,11 @@ private fun PlayerControlBar(
     onFullscreenClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val fullScreenIconRes = if (isFullscreen) {
-        R.drawable.ic_fullscreen_exit_24
-    } else {
-        R.drawable.ic_fullscreen_24
-    }
+//    val fullScreenIconRes = if (isFullscreen) {
+//        R.drawable.ic_fullscreen_exit_24
+//    } else {
+//        R.drawable.ic_fullscreen_24
+//    }
 
     Column(
         modifier = modifier
@@ -876,7 +877,7 @@ private fun PlayerControlBar(
                 modifier = Modifier.padding(start = NachoSpacing.xSmall)
             )
             Icon(
-                painter = painterResource(fullScreenIconRes),
+                painter = painterResource(R.drawable.ic_fullscreen_24),
                 contentDescription = stringResource(R.string.desc_fullscreen),
                 tint = Color.White,
                 modifier = Modifier
@@ -911,18 +912,12 @@ fun VideoFullscreenOverlay(
 
     var isExpanded by remember { mutableStateOf(false) }
     var isVideoReadyInFullscreen by remember { mutableStateOf(false) }
-
-    // seekbar용 상태
     var currentPositionMs by remember { mutableLongStateOf(0L) }
     var totalDurationMs by remember { mutableLongStateOf(0L) }
     var isSeeking by remember { mutableStateOf(false) }
     var seekPositionMs by remember { mutableLongStateOf(0L) }
-
-    // 컨트롤바 표시 상태
     var isControlVisible by remember { mutableStateOf(true) }
-//
-//    val isMuted by videoPlayerPool.isMuted.collectAsStateWithLifecycle()
-//    val player = remember(videoUrl) { videoPlayerPool.getPlayer(videoUrl) }
+    var isPlaying by remember { mutableStateOf(false) }
 
     val displayPositionMs = if (isSeeking) seekPositionMs else currentPositionMs
     val progress = if (totalDurationMs > 0) {
@@ -930,7 +925,9 @@ fun VideoFullscreenOverlay(
     } else {
         0f
     }
-    val timeText = "${(displayPositionMs / 1000).toInt().toFormatDuration()} / ${(totalDurationMs / 1000).toInt().toFormatDuration()}"
+    val timeText = "${(displayPositionMs / 1000).toInt().toFormatDuration()} / ${
+        (totalDurationMs / 1000).toInt().toFormatDuration()
+    }"
 
     val animSpec: AnimationSpec<Float> = tween(durationMillis = 300, easing = FastOutSlowInEasing)
     val animLeft by animateFloatAsState(
@@ -971,9 +968,14 @@ fun VideoFullscreenOverlay(
 
     DisposableEffect(player) {
         val listener = object : Player.Listener {
+            override fun onIsPlayingChanged(playing: Boolean) {
+                isPlaying = playing
+            }
+
             override fun onRenderedFirstFrame() {
                 isVideoReadyInFullscreen = true
             }
+
             override fun onPlaybackStateChanged(state: Int) {
                 if (state == Player.STATE_READY) {
                     isVideoReadyInFullscreen = true
@@ -986,6 +988,7 @@ fun VideoFullscreenOverlay(
             isVideoReadyInFullscreen = true
             totalDurationMs = player.exoPlayer.duration.coerceAtLeast(0L)
         }
+        isPlaying = player.exoPlayer.isPlaying
         onDispose { player.exoPlayer.removeListener(listener) }
     }
 
@@ -997,6 +1000,11 @@ fun VideoFullscreenOverlay(
             }
             delay(300L)
         }
+    }
+
+    val onPlayPauseClick: () -> Unit = {
+        if (isPlaying) player.pause()
+        else player.play()
     }
 
     val handleDismiss: () -> Unit = {
@@ -1042,25 +1050,196 @@ fun VideoFullscreenOverlay(
             }
         }
 
-        PlayerControlOverlay(
-            progress = if (player.exoPlayer.duration > 0) {
-                player.exoPlayer.currentPosition.toFloat() / player.exoPlayer.duration.toFloat()
-            } else 0f,
-            timeText = "${
-                (player.exoPlayer.currentPosition / 1000).toInt().toFormatDuration()
-            } / ${(player.exoPlayer.duration / 1000).toInt().toFormatDuration()}",
+        FullscreenControlOverlay(
+            progress = progress,
+            timeText = timeText,
             isControlVisible = isControlVisible,
+            isPlaying = isPlaying,
             isMuted = isMuted,
-            isFullscreen = true,
+            onPlayPauseClick = onPlayPauseClick,
             onSeekValueChange = { newValue ->
-                val seekPositionMs = (newValue * player.exoPlayer.duration).toLong()
-                player.exoPlayer.seekTo(seekPositionMs)
+                if (!isSeeking) player.pause()
+                isSeeking = true
+                seekPositionMs = (newValue * totalDurationMs).toLong()
             },
-            onSeekValueChangeFinished = { /* No-op */ },
+            onSeekValueChangeFinished = {
+                player.seekTo(seekPositionMs)
+                player.play()
+                isSeeking = false
+            },
             onMuteToggle = { videoPlayerPool.toggleMute() },
-            onFullscreenClick = { handleDismiss() },
-            modifier = Modifier.align(Alignment.BottomCenter)
+            onExitFullscreen = { handleDismiss() },
         )
+    }
+}
+
+@Composable
+private fun FullscreenControlOverlay(
+    progress: Float,
+    timeText: String,
+    isControlVisible: Boolean,
+    isPlaying: Boolean,
+    isMuted: Boolean,
+    onPlayPauseClick: () -> Unit,
+    onSeekValueChange: (Float) -> Unit,
+    onSeekValueChangeFinished: () -> Unit,
+    onMuteToggle: () -> Unit,
+    onExitFullscreen: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier.fillMaxSize()) {
+        AnimatedVisibility(
+            visible = isControlVisible,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier.align(Alignment.Center),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .background(
+                        color = Color.Black.copy(alpha = 0.5f),
+                        shape = CircleShape,
+                    )
+                    .noRippleClickable { onPlayPauseClick() },
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    painter = painterResource(
+                        if (isPlaying) R.drawable.ic_pause_filled_24
+                        else R.drawable.ic_play_arrow_24
+                    ),
+                    contentDescription = if (isPlaying) "일시정지" else "재생",
+                    tint = Color.White,
+                    modifier = Modifier.size(32.dp),
+                )
+            }
+        }
+
+        AnimatedVisibility(
+            visible = isControlVisible,
+            enter = slideInVertically(
+                initialOffsetY = { it },
+                animationSpec = tween(durationMillis = 250),
+            ) + fadeIn(animationSpec = tween(durationMillis = 250)),
+            exit = slideOutVertically(
+                targetOffsetY = { it },
+                animationSpec = tween(durationMillis = 250),
+            ) + fadeOut(animationSpec = tween(durationMillis = 250)),
+            modifier = Modifier.align(Alignment.BottomCenter),
+        ) {
+            FullscreenControlBar(
+                progress = progress,
+                timeText = timeText,
+                isPlaying = isPlaying,
+                isMuted = isMuted,
+                onPlayPauseClick = onPlayPauseClick,
+                onSeekValueChange = onSeekValueChange,
+                onSeekValueChangeFinished = onSeekValueChangeFinished,
+                onMuteToggle = onMuteToggle,
+                onExitFullscreen = onExitFullscreen,
+            )
+        }
+    }
+}
+
+@kotlin.OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FullscreenControlBar(
+    progress: Float,
+    timeText: String,
+    isPlaying: Boolean,
+    isMuted: Boolean,
+    onPlayPauseClick: () -> Unit,
+    onSeekValueChange: (Float) -> Unit,
+    onSeekValueChangeFinished: () -> Unit,
+    onMuteToggle: () -> Unit,
+    onExitFullscreen: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f))
+                )
+            )
+            .padding(horizontal = NachoSpacing.small)
+            .padding(bottom = NachoSpacing.medium),
+        verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
+    ) {
+        Slider(
+            value = progress,
+            onValueChange = onSeekValueChange,
+            onValueChangeFinished = onSeekValueChangeFinished,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(0.dp),
+            thumb = {
+                Box(
+                    modifier = Modifier
+                        .size(15.dp)
+                        .shadow(elevation = NachoElevation.medium, shape = CircleShape)
+                        .background(color = Color.White, shape = CircleShape)
+                )
+            },
+            track = { sliderState ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(NachoStroke.large)
+                        .clip(NachoTheme.shapes.extraSmall)
+                        .background(NachoTheme.colorScheme.backgroundBorder)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(sliderState.value)
+                            .fillMaxHeight()
+                            .background(NachoTheme.colorScheme.brandPrimary)
+                    )
+                }
+            },
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = NachoSpacing.xSmall, vertical = NachoSpacing.small),
+            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                painter = painterResource(
+                    if (isPlaying) R.drawable.ic_pause_filled_24
+                    else R.drawable.ic_play_arrow_24
+                ),
+                contentDescription = if (isPlaying) "일시정지" else "재생",
+                tint = Color.White,
+                modifier = Modifier.noRippleClickable { onPlayPauseClick() },
+            )
+            Text(
+                text = timeText,
+                style = NachoTheme.typography.bodySmallRegular,
+                color = Color.White,
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(
+                painter = painterResource(
+                    if (isMuted) R.drawable.ic_volume_off_filled_24
+                    else R.drawable.ic_volume_up_filled_24
+                ),
+                contentDescription = if (isMuted) "음소거 해제" else "음소거",
+                tint = Color.White,
+                modifier = Modifier.noRippleClickable { onMuteToggle() },
+            )
+            Icon(
+                painter = painterResource(R.drawable.ic_fullscreen_exit_24),
+                contentDescription = stringResource(R.string.desc_exit_fullscreen),
+                tint = Color.White,
+                modifier = Modifier.noRippleClickable { onExitFullscreen() },
+            )
+        }
     }
 }
 
