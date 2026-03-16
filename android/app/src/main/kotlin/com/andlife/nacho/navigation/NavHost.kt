@@ -231,7 +231,6 @@ fun NachoNavHost(
                 createCardByInvitationNavGraph(
                     onBackClick = navigator::navigatePopBackStack,
                     onSuccessCreateCard = {
-                        RefreshEventHub.emit(RefreshEventHub.RefreshTarget.MY_INVITATION_DETAIL)
                         navigator.navigatePopBackStack()
                     }
                 )
@@ -239,7 +238,6 @@ fun NachoNavHost(
                 updateCardNavGraph(
                     onBackClick = navigator::navigatePopBackStack,
                     onSuccessCreateCard = {
-                        RefreshEventHub.emit(RefreshEventHub.RefreshTarget.MY_INVITATION_DETAIL)
                         navigator.navigatePopBackStack()
                     }
                 )
@@ -247,18 +245,12 @@ fun NachoNavHost(
                 loginNavGraph()
 
                 createThanksCardNavGraph(
-                    onSuccessfulCreate = {
-                        RefreshEventHub.emit(RefreshEventHub.RefreshTarget.MY_INVITATION_DETAIL)
-                        navigator.navigatePopBackStack()
-                    },
+                    onSuccessfulCreate = navigator::navigatePopBackStack,
                     onBackClick = navigator::navigatePopBackStack,
                 )
 
                 updateThanksCardNavGraph(
-                    onSuccessfulUpdate = {
-                        RefreshEventHub.emit(RefreshEventHub.RefreshTarget.MY_INVITATION_DETAIL)
-                        navigator.navigatePopBackStack()
-                    },
+                    onSuccessfulUpdate = navigator::navigatePopBackStack,
                     onBackClick = navigator::navigatePopBackStack
                 )
             }
