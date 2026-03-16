@@ -1,4 +1,4 @@
-package com.andlife.myinvitation.screen
+package com.andlife.myinvitation.screen.detail
 
 import android.text.Editable
 import android.view.ViewGroup
@@ -27,6 +27,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,6 +53,7 @@ import com.andlife.designsystem.component.dialog.NachoDialog
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
+import com.andlife.domain.util.RefreshEventHub
 import com.andlife.editor.screen.NachoTextView
 import com.andlife.model.invitation.DateTimeInfo
 import com.andlife.model.invitation.HostInfo
@@ -66,6 +68,7 @@ import com.andlife.myinvitation.model.detail.MyInvitationDetailUiEvent
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiState
 import com.andlife.myinvitation.screen.collection.MyInvitationCollectionRoute
 import com.andlife.myinvitation.screen.guestbook.MyInvitationGuestBookRoute
+import com.andlife.myinvitation.viewmodel.MyInvitationCollectionViewModel
 import com.andlife.myinvitation.viewmodel.MyInvitationDetailViewModel
 import com.andlife.myinvitation.viewmodel.MyInvitationGuestBookViewModel
 import com.andlife.ui.component.GenericTabRow
@@ -84,6 +87,7 @@ import com.andlife.designsystem.R as designR
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyInvitationDetailRoute(
+    selectedId: Long,
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
     onNavigateToEditInvitation: (Long) -> Unit,
@@ -92,6 +96,7 @@ fun MyInvitationDetailRoute(
     onNavigateToCreateThanksCard: (Long) -> Unit,
     onNavigateToUpdateThanksCard: (Long) -> Unit,
     modifier: Modifier = Modifier,
+    showBackButton: Boolean = false,
     viewModel: MyInvitationDetailViewModel = hiltViewModel(),
     guestBookViewModel: MyInvitationGuestBookViewModel = hiltViewModel(),
 ) {
@@ -191,6 +196,8 @@ fun MyInvitationDetailRoute(
     Box {
         MyInvitationDetailScreen(
             uiState = uiState,
+            guestBookViewModel = guestBookViewModel,
+            selectedId = selectedId,
             isGuestBookUploading = isGuestBookUploading,
             snackbarHostState = snackbarHostState,
             scrollBehavior = scrollBehavior,
@@ -204,6 +211,7 @@ fun MyInvitationDetailRoute(
                     viewModel.onEvent(MyInvitationDetailUiEvent.ClickUpdateThanksCard(id))
                 }
             },
+            showBackButton = showBackButton,
             modifier = modifier,
         )
 
@@ -267,7 +275,7 @@ fun MyInvitationDetailRoute(
             onConfirm = {
                 viewModel.onEvent(MyInvitationDetailUiEvent.ClickDeleteThanksCard)
                 isDeleteThanksCardVisible = false
-            }
+            },
         )
     }
 }
@@ -276,6 +284,8 @@ fun MyInvitationDetailRoute(
 @Composable
 private fun MyInvitationDetailScreen(
     uiState: MyInvitationDetailUiState,
+    selectedId: Long,
+    guestBookViewModel: MyInvitationGuestBookViewModel,
     isGuestBookUploading: Boolean,
     snackbarHostState: SnackbarHostState,
     scrollBehavior: TopAppBarScrollBehavior,
@@ -285,6 +295,7 @@ private fun MyInvitationDetailScreen(
     onNavigateToLogin: () -> Unit,
     onEditThanksCard: () -> Unit,
     onDeleteThanksCard: () -> Unit,
+    showBackButton: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()
@@ -319,6 +330,7 @@ private fun MyInvitationDetailScreen(
                 hasThanksCard = uiState.hasThanksCard,
                 showActions = !uiState.isLoading && !uiState.isError,
                 onBack = navigateBackWithCleanup,
+                showBackButton = showBackButton,
                 onClickThanksCard = { onEvent(MyInvitationDetailUiEvent.ClickThanksCard) },
                 onEditThanksCard = { onEditThanksCard() },
                 onDeleteThanksCard = onDeleteThanksCard,
@@ -384,9 +396,16 @@ private fun MyInvitationDetailScreen(
                             1 -> MyInvitationGuestBookRoute(
                                 onNavigateBack = onNavigateBack,
                                 onNavigateToLogin = onNavigateToLogin,
+                                viewModel = guestBookViewModel
                             )
 
-                            2 -> MyInvitationCollectionRoute()
+                            2 -> MyInvitationCollectionRoute(
+                                viewModel = hiltViewModel<MyInvitationCollectionViewModel, MyInvitationCollectionViewModel.Factory>(
+                                    key = "collection $selectedId"
+                                ) { factory ->
+                                    factory.create(selectedId)
+                                }
+                            )
                         }
                     },
             )
@@ -423,6 +442,7 @@ private fun MyInvitationDetailTopBar(
     onDelete: () -> Unit,
     onCreateThanksCard: () -> Unit,
     modifier: Modifier = Modifier,
+    showBackButton: Boolean = false,
     showActions: Boolean = true,
     hasThanksCard: Boolean = false,
 ) {
@@ -440,12 +460,14 @@ private fun MyInvitationDetailTopBar(
             )
         },
         navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    painter = painterResource(designR.drawable.ic_arrow_back_24),
-                    contentDescription = stringResource(R.string.desc_top_bar_back),
-                    tint = NachoTheme.colorScheme.iconSecondary,
-                )
+            if (showBackButton) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        painter = painterResource(designR.drawable.ic_arrow_back_24),
+                        contentDescription = stringResource(R.string.desc_top_bar_back),
+                        tint = NachoTheme.colorScheme.iconSecondary,
+                    )
+                }
             }
         },
         actions = {
@@ -684,6 +706,8 @@ private fun InvitationMoreMenu(
 private fun MyInvitationDetailScreenPreview() {
     NachoTheme {
         MyInvitationDetailScreen(
+            selectedId = 1L,
+            guestBookViewModel = hiltViewModel(),
             isGuestBookUploading = false,
             uiState =
                 MyInvitationDetailUiState(
