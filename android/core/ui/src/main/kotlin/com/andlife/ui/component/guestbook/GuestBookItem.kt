@@ -823,7 +823,7 @@ private fun PlayerControlBar(
             )
             .padding(horizontal = NachoSpacing.small)
             .padding(bottom = NachoSpacing.medium),
-        verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
+//        verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
     ) {
         Slider(
             value = progress,
@@ -831,11 +831,11 @@ private fun PlayerControlBar(
             onValueChangeFinished = onSeekValueChangeFinished,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(0.dp),
+                .height(24.dp),
             thumb = {
                 Box(
                     modifier = Modifier
-                        .size(15.dp)
+                        .size(NachoIconSize.xSmall)
                         .shadow(
                             elevation = NachoElevation.medium,
                             shape = CircleShape
@@ -866,7 +866,7 @@ private fun PlayerControlBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = NachoSpacing.xSmall),
+                .padding(horizontal = NachoSpacing.xSmall, vertical = NachoSpacing.xSmall),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -1166,8 +1166,7 @@ private fun FullscreenControlBar(
                 )
             )
             .padding(horizontal = NachoSpacing.small)
-            .padding(bottom = NachoSpacing.medium),
-        verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
+            .padding(bottom = NachoSpacing.xLarge),
     ) {
         Slider(
             value = progress,
@@ -1175,11 +1174,11 @@ private fun FullscreenControlBar(
             onValueChangeFinished = onSeekValueChangeFinished,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(0.dp),
+                .height(24.dp),
             thumb = {
                 Box(
                     modifier = Modifier
-                        .size(15.dp)
+                        .size(NachoIconSize.xSmall)
                         .shadow(elevation = NachoElevation.medium, shape = CircleShape)
                         .background(color = Color.White, shape = CircleShape)
                 )
@@ -1205,7 +1204,7 @@ private fun FullscreenControlBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = NachoSpacing.xSmall, vertical = NachoSpacing.small),
+                .padding(horizontal = NachoSpacing.xSmall, vertical = NachoSpacing.xSmall),
             horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
             verticalAlignment = Alignment.CenterVertically,
         ) {
