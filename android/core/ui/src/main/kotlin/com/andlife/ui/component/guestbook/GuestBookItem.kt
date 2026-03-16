@@ -1,6 +1,8 @@
 package com.andlife.ui.component.guestbook
 
 import android.annotation.SuppressLint
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
@@ -71,6 +73,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -102,6 +105,7 @@ import com.andlife.model.guestbook.MediaUiType
 import com.andlife.ui.R
 import com.andlife.ui.component.icon.PlayerThumbnailIcon
 import com.andlife.ui.component.media.MediaOverlay
+import com.andlife.ui.util.findActivity
 import com.andlife.ui.util.noRippleClickable
 import com.andlife.ui.util.toFormatDuration
 import com.andlife.ui.util.toRelativeTimeString
@@ -905,7 +909,10 @@ fun VideoFullscreenOverlay(
 ) {
     val density = LocalDensity.current
     val configuration = LocalConfiguration.current
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     val screenWidthPx = with(density) { configuration.screenWidthDp.dp.toPx() }
     val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
@@ -1009,6 +1016,14 @@ fun VideoFullscreenOverlay(
         else player.play()
     }
 
+    val onOrientationClick: () -> Unit = {
+        context.findActivity()?.requestedOrientation = if (isLandscape) {
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        } else {
+            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        }
+    }
+
     val handleDismiss: () -> Unit = {
         scope.launch {
             isExpanded = false
@@ -1026,12 +1041,19 @@ fun VideoFullscreenOverlay(
     ) {
         Box(
             modifier = Modifier
-                .offset {
-                    IntOffset(animLeft.roundToInt(), animTop.roundToInt())
-                }
-                .size(
-                    width = with(density) { animWidth.toDp() },
-                    height = with(density) { animHeight.toDp() },
+                .then(
+                    if (isLandscape) {
+                        Modifier.fillMaxSize()
+                    } else {
+                        Modifier
+                            .offset {
+                                IntOffset(animLeft.roundToInt(), animTop.roundToInt())
+                            }
+                            .size(
+                                width = with(density) { animWidth.toDp() },
+                                height = with(density) { animHeight.toDp() },
+                            )
+                    }
                 )
                 .background(Color.Black)
         ) {
@@ -1058,6 +1080,7 @@ fun VideoFullscreenOverlay(
             isControlVisible = isControlVisible,
             isPlaying = isPlaying,
             isMuted = isMuted,
+            isLandscape = isLandscape,
             onPlayPauseClick = onPlayPauseClick,
             onSeekValueChange = { newValue ->
                 if (!isSeeking) player.pause()
@@ -1070,6 +1093,7 @@ fun VideoFullscreenOverlay(
                 isSeeking = false
             },
             onMuteToggle = onMuteToggle,
+            onOrientationClick = onOrientationClick,
             onExitFullscreen = { handleDismiss() },
         )
     }
@@ -1082,10 +1106,12 @@ private fun FullscreenControlOverlay(
     isControlVisible: Boolean,
     isPlaying: Boolean,
     isMuted: Boolean,
+    isLandscape: Boolean,
     onPlayPauseClick: () -> Unit,
     onSeekValueChange: (Float) -> Unit,
     onSeekValueChangeFinished: () -> Unit,
     onMuteToggle: () -> Unit,
+    onOrientationClick: () -> Unit,
     onExitFullscreen: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -1135,10 +1161,12 @@ private fun FullscreenControlOverlay(
                 timeText = timeText,
                 isPlaying = isPlaying,
                 isMuted = isMuted,
+                isLandscape = isLandscape,
                 onPlayPauseClick = onPlayPauseClick,
                 onSeekValueChange = onSeekValueChange,
                 onSeekValueChangeFinished = onSeekValueChangeFinished,
                 onMuteToggle = onMuteToggle,
+                onOrientationClick = onOrientationClick,
                 onExitFullscreen = onExitFullscreen,
             )
         }
@@ -1152,10 +1180,12 @@ private fun FullscreenControlBar(
     timeText: String,
     isPlaying: Boolean,
     isMuted: Boolean,
+    isLandscape: Boolean,
     onPlayPauseClick: () -> Unit,
     onSeekValueChange: (Float) -> Unit,
     onSeekValueChangeFinished: () -> Unit,
     onMuteToggle: () -> Unit,
+    onOrientationClick: () -> Unit,
     onExitFullscreen: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -1233,6 +1263,12 @@ private fun FullscreenControlBar(
                 contentDescription = if (isMuted) "음소거 해제" else "음소거",
                 tint = Color.White,
                 modifier = Modifier.noRippleClickable { onMuteToggle() },
+            )
+            Icon(
+                painter = painterResource(R.drawable.ic_screen_rotation_24),
+                contentDescription = if (isLandscape) "세로 모드" else "가로 모드",
+                tint = Color.White,
+                modifier = Modifier.noRippleClickable { onOrientationClick() },
             )
             Icon(
                 painter = painterResource(R.drawable.ic_fullscreen_exit_24),
