@@ -9,6 +9,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import com.andlife.domain.util.RefreshEventHub
 import com.andlife.invitation_edit.model.address.AddressUiModel
 import com.andlife.invitation_edit.screen.address.AddressSearchRoute
 import com.andlife.invitation_edit.screen.create.InvitationCreateRoute
@@ -92,12 +93,7 @@ fun NavGraphBuilder.invitationEditNavGraph(
             onNavigateBack = onNavigateBack,
             modifier = Modifier,
             address = selectedAddressUiModel,
-            onSuccessSave = {
-                navController.previousBackStackEntry
-                    ?.savedStateHandle
-                    ?.set(NavigationKeyConstant.INVITATION_UPDATED, true)
-                onNavigateBack()
-            },
+            onSuccessSave = onNavigateBack
         )
     }
 }
