@@ -328,23 +328,18 @@ class InvitationEditViewModel @Inject constructor(
     }
 
     private fun reorderAnnouncement(fromIndex: Int, toIndex: Int) {
-        // 💡 UI 인덱스(절대값)를 리스트 인덱스(상대값)로 변환
-        // 앞에 7개 섹션 + 공지사항 헤더 1개 = 총 8개 제외
         val from = fromIndex - 8
         val to = toIndex - 8
 
         val currentList = uiState.value.invitationFormUiModel.announcement
 
-        // 💡 안전한 범위인지 확인 (이게 없으면 에러 날 수 있음)
         if (from !in currentList.indices || to !in currentList.indices) return
 
         val mutableList = currentList.toMutableList()
 
-        // 💡 데이터 위치 변경
         val item = mutableList.removeAt(from)
         mutableList.add(to, item)
 
-        // 💡 변경된 리스트로 State 업데이트
         updateState {
             copy(
                 invitationFormUiModel = invitationFormUiModel.copy(
