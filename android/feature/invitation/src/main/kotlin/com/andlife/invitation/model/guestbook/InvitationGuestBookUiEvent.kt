@@ -1,5 +1,6 @@
 package com.andlife.invitation.model.guestbook
 
+import androidx.compose.ui.geometry.Rect
 import com.andlife.model.common.ReportReason
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.ui.base.BaseUiEvent
@@ -71,7 +72,9 @@ sealed interface InvitationGuestBookUiEvent : BaseUiEvent {
     ) : InvitationGuestBookUiEvent
 
     data class ShowFullscreenVideo(
-        val url: String,
+        val videoUrl: String,
+        val thumbnailUrl: String?,
+        val startBounds: Rect,
     ) : InvitationGuestBookUiEvent
 
     data object DismissFullscreenVideo : InvitationGuestBookUiEvent

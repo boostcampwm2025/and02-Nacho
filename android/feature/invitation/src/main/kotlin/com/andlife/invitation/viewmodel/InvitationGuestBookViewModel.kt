@@ -174,8 +174,16 @@ constructor(
                 )
                 submitReport(event.reason, event.description)
             }
-            is InvitationGuestBookUiEvent.ShowFullscreenVideo -> updateState { copy(fullscreenVideoUrl = event.url) }
-            InvitationGuestBookUiEvent.DismissFullscreenVideo -> updateState { copy(fullscreenVideoUrl = null) }
+            is InvitationGuestBookUiEvent.ShowFullscreenVideo -> updateState {     copy(
+                fullscreenVideoUrl = event.videoUrl,
+                fullscreenThumbnailUrl = event.thumbnailUrl,
+                fullscreenStartBounds = event.startBounds,
+            ) }
+            InvitationGuestBookUiEvent.DismissFullscreenVideo -> updateState {   copy(
+                fullscreenVideoUrl = null,
+                fullscreenThumbnailUrl = null,
+                fullscreenStartBounds = null,
+            )}
         }
     }
 

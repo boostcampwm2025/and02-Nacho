@@ -1,8 +1,11 @@
 package com.andlife.ui.component.guestbook
 
 import android.view.ViewGroup
+import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
@@ -24,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -46,22 +50,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -92,7 +104,9 @@ import com.andlife.ui.util.toRelativeTimeString
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
+import kotlin.math.roundToInt
 import com.andlife.designsystem.R as designR
 
 private const val SAMPLE_INVITATION_ID = 1L
@@ -105,11 +119,12 @@ fun GuestBookItem(
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
     onPlayVideoClick: (String) -> Unit,
-    onFullscreenClick: (String) -> Unit = {}, // TODO: 기본 값 제거
+    onFullscreenClick: (String, String?, Rect) -> Unit= { _, _, _ -> }, // TODO: 기본값 제거
     modifier: Modifier = Modifier,
     shouldPlayVideo: Boolean = false,
     isFromInvitationDetail: Boolean = true,
     isEditing: Boolean = false,
+    isFullscreen: Boolean = false,
     onEditClick: (GuestBookUiModel) -> Unit = {},
     onDeleteClick: (GuestBookUiModel) -> Unit = {},
     onReportClick: (Long) -> Unit = {},
@@ -161,6 +176,7 @@ fun GuestBookItem(
             visualMediaUrls = guestBook.visualMedias,
             totalVisualCount = guestBook.totalVisualCount,
             shouldPlayVideo = shouldPlayVideo,
+            isFullscreen = isFullscreen,
             videoPlayerPool = videoPlayerPool,
             onVisualMediaClick = onVisualMediaClick,
             onPlayVideoClick = onPlayVideoClick,
@@ -389,16 +405,17 @@ private fun GuestBookItemVisualMediaSection(
     visualMediaUrls: ImmutableList<GuestBookMediaUiModel>,
     totalVisualCount: Int,
     shouldPlayVideo: Boolean,
+    isFullscreen: Boolean,
     videoPlayerPool: AutoVideoPlayerPool,
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     onPlayVideoClick: (String) -> Unit,
-    onFullscreenClick: (String) -> Unit,
+    onFullscreenClick: (String, String?, Rect) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (visualMediaUrls.isEmpty()) return
 
     val pagerState = rememberPagerState(pageCount = { visualMediaUrls.size })
-    var beyondViewportPageCount by remember { mutableStateOf(0) }
+    var beyondViewportPageCount by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(pagerState.currentPage) {
         val nextPage = pagerState.currentPage + 1
@@ -437,6 +454,7 @@ private fun GuestBookItemVisualMediaSection(
                             thumbnailUrl = media.thumbnailUrl,
                             totalDurationSeconds = media.durationSeconds,
                             shouldPlay = shouldPlayVideo && pagerState.currentPage == page,
+                            isFullscreen = isFullscreen,
                             videoPlayerPool = videoPlayerPool,
                             onPlayVideoClick = onPlayVideoClick,
                             onFullscreenClick = onFullscreenClick
@@ -492,7 +510,7 @@ private fun GuestBookItemVisualMediaSection(
     }
 }
 
-@kotlin.OptIn(ExperimentalMaterial3Api::class)
+@OptIn(UnstableApi::class)
 @Composable
 private fun VideoPlayerContainer(
     guestBookId: Long,
@@ -500,9 +518,10 @@ private fun VideoPlayerContainer(
     thumbnailUrl: String?,
     totalDurationSeconds: Int?,
     shouldPlay: Boolean,
+    isFullscreen: Boolean,
     videoPlayerPool: AutoVideoPlayerPool,
+    onFullscreenClick: (String, String?, Rect) -> Unit,
     onPlayVideoClick: (String) -> Unit,
-    onFullscreenClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var isVideoReady by remember(videoUrl) { mutableStateOf(false) }
@@ -512,23 +531,15 @@ private fun VideoPlayerContainer(
     var isSeeking by remember(videoUrl) { mutableStateOf(false) }
     var seekPositionMs by remember(videoUrl) { mutableLongStateOf(0L) }
     val isMuted by videoPlayerPool.isMuted.collectAsStateWithLifecycle()
-
-    val thumbnailAlpha by animateFloatAsState(
-        targetValue = if (shouldPlay && isVideoReady) 0f else 1f,
-        animationSpec = tween(durationMillis = 200),
-    )
+    var containerBounds by remember { mutableStateOf(Rect.Zero) }
 
     val displayPositionMs = if (isSeeking) seekPositionMs else currentPositionMs
-
     val progress = if (totalDurationMs > 0) {
         (displayPositionMs.toFloat() / totalDurationMs.toFloat()).coerceIn(0f, 1f)
     } else {
         0f
     }
-
-    val timeText = "${(displayPositionMs / 1000).toInt().toFormatDuration()} / ${
-        (totalDurationMs / 1000).toInt().toFormatDuration()
-    }"
+    val timeText = "${(displayPositionMs / 1000).toInt().toFormatDuration()} / ${(totalDurationMs / 1000).toInt().toFormatDuration()}"
 
     LaunchedEffect(shouldPlay, videoUrl) {
         if (shouldPlay) {
@@ -549,99 +560,88 @@ private fun VideoPlayerContainer(
         if (!shouldPlay) isControlVisible = false
     }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color.Black)
-            .then(
-                if (shouldPlay && isVideoReady) {
-                    Modifier.clickable { isControlVisible = !isControlVisible }
-                } else {
-                    Modifier
-                }
-            )
-    ) {
-        if (shouldPlay) {
-            val currentPlayer = remember(videoUrl) { videoPlayerPool.getPlayer(videoUrl) }
+    if (shouldPlay) {
+        val currentPlayer = remember(videoUrl) { videoPlayerPool.getPlayer(videoUrl) }
 
-            DisposableEffect(currentPlayer, videoUrl) {
-                val listener = object : Player.Listener {
-                    override fun onRenderedFirstFrame() {
-                        isVideoReady = true
-                    }
-
-                    override fun onPlaybackStateChanged(state: Int) {
-                        if (state == Player.STATE_READY && currentPlayer.exoPlayer.playWhenReady) {
-                            isVideoReady = true
-                            totalDurationMs = currentPlayer.exoPlayer.duration.coerceAtLeast(0L)
-                        }
-                    }
-                }
-                currentPlayer.exoPlayer.addListener(listener)
-                if (currentPlayer.exoPlayer.playbackState == Player.STATE_READY) {
+        DisposableEffect(currentPlayer, videoUrl) {
+            val listener = object : Player.Listener {
+                override fun onRenderedFirstFrame() {
                     isVideoReady = true
-                    totalDurationMs = currentPlayer.exoPlayer.duration.coerceAtLeast(0L)
                 }
-                onDispose {
-                    currentPlayer.exoPlayer.removeListener(listener)
-                }
-            }
 
-            LaunchedEffect(isVideoReady) {
-                if (!isVideoReady) {
-                    currentPositionMs = 0L
-                    return@LaunchedEffect
-                }
-                while (true) {
-                    if (!isSeeking) {
-                        currentPositionMs = currentPlayer.exoPlayer.currentPosition.coerceAtLeast(0L)
+                override fun onPlaybackStateChanged(state: Int) {
+                    if (state == Player.STATE_READY && currentPlayer.exoPlayer.playWhenReady) {
+                        isVideoReady = true
+                        totalDurationMs = currentPlayer.exoPlayer.duration.coerceAtLeast(0L)
                     }
-                    delay(16L)
                 }
             }
-
-            VideoPlayerContent(
-                currentPlayer = currentPlayer,
-                thumbnailUrl = thumbnailUrl,
-                thumbnailAlpha = thumbnailAlpha,
-                progress = progress,
-                timeText = timeText,
-                isControlVisible = isControlVisible,
-                isMuted = isMuted,
-                isVideoReady = isVideoReady,
-                onVideoClick = { isControlVisible = !isControlVisible },
-                onPlayVideoClick = { onPlayVideoClick(videoUrl) },
-                onSeekValueChange = { newValue ->
-                    if (!isSeeking) currentPlayer.pause()
-                    isSeeking = true
-                    seekPositionMs = (newValue * totalDurationMs).toLong()
-                },
-                onSeekValueChangeFinished = {
-                    currentPlayer.seekTo(seekPositionMs)
-                    currentPlayer.play()
-                    isSeeking = false
-                },
-                onMuteToggle = { videoPlayerPool.toggleMute() },
-                onFullscreenClick = { onFullscreenClick(videoUrl) },
-            )
-        } else {
-            VideoPlayerContent(
-                currentPlayer = null,
-                thumbnailUrl = thumbnailUrl,
-                thumbnailAlpha = 1f,
-                progress = 0f,
-                timeText = "00:00 / 00:00",
-                isControlVisible = false,
-                isMuted = isMuted,
-                isVideoReady = false,
-                onVideoClick = { /* No-op */ },
-                onPlayVideoClick = { onPlayVideoClick(videoUrl) },
-                onSeekValueChange = { /* No-op */ },
-                onSeekValueChangeFinished = { /* No-op */ },
-                onMuteToggle = { videoPlayerPool.toggleMute() },
-                onFullscreenClick = { /* TODO: 전체화면 기능 */ },
-            )
+            currentPlayer.exoPlayer.addListener(listener)
+            if (currentPlayer.exoPlayer.playbackState == Player.STATE_READY) {
+                isVideoReady = true
+                totalDurationMs = currentPlayer.exoPlayer.duration.coerceAtLeast(0L)
+            }
+            onDispose {
+                currentPlayer.exoPlayer.removeListener(listener)
+            }
         }
+
+        LaunchedEffect(isVideoReady) {
+            if (!isVideoReady) {
+                currentPositionMs = 0L
+                return@LaunchedEffect
+            }
+            while (true) {
+                if (!isSeeking) {
+                    currentPositionMs = currentPlayer.exoPlayer.currentPosition.coerceAtLeast(0L)
+                }
+                delay(16L)
+            }
+        }
+
+        VideoPlayerContent(
+            currentPlayer = currentPlayer,
+            thumbnailUrl = thumbnailUrl,
+            progress = progress,
+            timeText = timeText,
+            isControlVisible = isControlVisible,
+            isMuted = isMuted,
+            isVideoReady = isVideoReady,
+            isFullscreen = isFullscreen,
+            onVideoClick = { isControlVisible = !isControlVisible },
+            onPlayVideoClick = { onPlayVideoClick(videoUrl) },
+            onContainerPositioned = { containerBounds = it },
+            onSeekValueChange = { newValue ->
+                if (!isSeeking) currentPlayer.pause()
+                isSeeking = true
+                seekPositionMs = (newValue * totalDurationMs).toLong()
+            },
+            onSeekValueChangeFinished = {
+                currentPlayer.seekTo(seekPositionMs)
+                currentPlayer.play()
+                isSeeking = false
+            },
+            onMuteToggle = { videoPlayerPool.toggleMute() },
+            onFullscreenClick = { onFullscreenClick(videoUrl, thumbnailUrl, containerBounds) }
+        )
+    } else {
+        VideoPlayerContent(
+            currentPlayer = null,
+            thumbnailUrl = thumbnailUrl,
+            progress = 0f,
+            timeText = "",
+            isControlVisible = false,
+            isMuted = isMuted,
+            isVideoReady = false,
+            isFullscreen = false,
+            onVideoClick = {},
+            onPlayVideoClick = { onPlayVideoClick(videoUrl) },
+            onContainerPositioned = {},
+            onSeekValueChange = {},
+            onSeekValueChangeFinished = {},
+            onMuteToggle = { videoPlayerPool.toggleMute() },
+            onFullscreenClick = {}
+        )
     }
 }
 
@@ -649,22 +649,23 @@ private fun VideoPlayerContainer(
 private fun VideoPlayerContent(
     currentPlayer: AutoVideoPlayer?,
     thumbnailUrl: String?,
-    thumbnailAlpha: Float,
     progress: Float,
     timeText: String,
     isControlVisible: Boolean,
     isMuted: Boolean,
     isVideoReady: Boolean,
+    isFullscreen: Boolean,
     onVideoClick: () -> Unit,
     onPlayVideoClick: () -> Unit,
+    onContainerPositioned: (Rect) -> Unit,
     onSeekValueChange: (Float) -> Unit,
     onSeekValueChangeFinished: () -> Unit,
     onMuteToggle: () -> Unit,
     onFullscreenClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val thumbnailAlphaAnimated by animateFloatAsState(
-        targetValue = thumbnailAlpha,
+    val thumbnailAlpha by animateFloatAsState(
+        targetValue = if (isVideoReady) 0f else 1f,
         animationSpec = tween(durationMillis = 200),
     )
 
@@ -672,28 +673,48 @@ private fun VideoPlayerContent(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Black)
+            .onGloballyPositioned { coordinates ->
+                onContainerPositioned(coordinates.boundsInWindow())
+            }
             .then(
-                if (isVideoReady) {
-                    Modifier.clickable { onVideoClick() }
-                } else {
-                    Modifier
-                }
+                if (isVideoReady) Modifier.clickable { onVideoClick() }
+                else Modifier
             )
     ) {
-        currentPlayer?.let {
-            VideoPlayerView(
-                autoPlayer = it,
-                modifier = Modifier.fillMaxSize(),
-            )
+        // 오버레이 열려있으면 VideoPlayerView 제거 → 닫힐 때 factory 재실행으로 자동 reattach
+//        if (autoPlayer != null && !isFullscreen) {
+//            VideoPlayerView(
+//                autoPlayer = autoPlayer,
+//                modifier = Modifier.fillMaxSize(),
+//            )
+//        }
+
+        if (currentPlayer != null) {
+            if (!isFullscreen) {
+                VideoPlayerView(
+                    autoPlayer = currentPlayer,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            } else {
+                // PlayerView 빠지는 순간 썸네일로 커버
+                if (thumbnailUrl != null) {
+                    AsyncImage(
+                        model = thumbnailUrl,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit,
+                    )
+                }
+            }
         }
 
-        if (thumbnailUrl != null && thumbnailAlphaAnimated > 0f) {
+        if (thumbnailUrl != null && thumbnailAlpha > 0f) {
             ThumbnailWrapper(
                 thumbnailUrl = thumbnailUrl,
                 onPlayVideoClick = onPlayVideoClick,
                 modifier = Modifier
                     .fillMaxSize()
-                    .alpha(thumbnailAlphaAnimated),
+                    .alpha(thumbnailAlpha),
             )
         }
 
@@ -856,7 +877,138 @@ private fun PlayerControlBar(
 
 @OptIn(UnstableApi::class)
 @Composable
-private fun VideoPlayerView(
+fun VideoFullscreenOverlay(
+    videoUrl: String,
+    thumbnailUrl: String?,
+    startBounds: Rect?,
+    videoPlayerPool: AutoVideoPlayerPool,
+    onDismiss: () -> Unit,
+) {
+    val density = LocalDensity.current
+    val configuration = LocalConfiguration.current
+    val scope = rememberCoroutineScope()
+
+    val screenWidthPx = with(density) { configuration.screenWidthDp.dp.toPx() }
+    val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
+    val fullBounds = Rect(0f, 0f, screenWidthPx, screenHeightPx)
+    val initialBounds = startBounds ?: fullBounds
+
+    var isExpanded by remember { mutableStateOf(false) }
+    // 추가: 오버레이에서 첫 프레임 렌더링 완료 여부
+    var isVideoReady by remember { mutableStateOf(false) }
+
+    val animSpec: AnimationSpec<Float> = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+
+    val animLeft by animateFloatAsState(
+        targetValue = if (isExpanded) fullBounds.left else initialBounds.left,
+        animationSpec = animSpec, label = "left",
+    )
+    val animTop by animateFloatAsState(
+        targetValue = if (isExpanded) fullBounds.top else initialBounds.top,
+        animationSpec = animSpec, label = "top",
+    )
+    val animWidth by animateFloatAsState(
+        targetValue = if (isExpanded) fullBounds.width else initialBounds.width,
+        animationSpec = animSpec, label = "width",
+    )
+    val animHeight by animateFloatAsState(
+        targetValue = if (isExpanded) fullBounds.height else initialBounds.height,
+        animationSpec = animSpec, label = "height",
+    )
+    val backgroundAlpha by animateFloatAsState(
+        targetValue = if (isExpanded) 1f else 0f,
+        animationSpec = animSpec, label = "alpha",
+    )
+    val thumbnailAlpha by animateFloatAsState(
+        targetValue = if (isVideoReady) 0f else 1f,
+        animationSpec = tween(durationMillis = 200),
+        label = "thumbnailAlpha",
+    )
+
+    LaunchedEffect(Unit) {
+        isExpanded = true
+    }
+
+    val handleDismiss: () -> Unit = {
+        scope.launch {
+            isExpanded = false
+            delay(300L)
+            onDismiss()
+        }
+    }
+
+    val player = remember(videoUrl) { videoPlayerPool.getPlayer(videoUrl) }
+
+    DisposableEffect(player) {
+        val listener = object : Player.Listener {
+            override fun onRenderedFirstFrame() {
+                isVideoReady = true
+            }
+        }
+        player.exoPlayer.addListener(listener)
+        if (player.exoPlayer.playbackState == Player.STATE_READY) {
+            isVideoReady = true
+        }
+        onDispose { player.exoPlayer.removeListener(listener) }
+    }
+
+    BackHandler { handleDismiss() }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = backgroundAlpha))
+    ) {
+        Box(
+            modifier = Modifier
+                .offset {
+                    IntOffset(animLeft.roundToInt(), animTop.roundToInt())
+                }
+                .size(
+                    width = with(density) { animWidth.toDp() },
+                    height = with(density) { animHeight.toDp() },
+                )
+                .background(Color.Black)
+        ) {
+            VideoPlayerView(
+                autoPlayer = player,
+                modifier = Modifier.fillMaxSize(),
+            )
+
+            if (thumbnailUrl != null && thumbnailAlpha > 0f) {
+                AsyncImage(
+                    model = thumbnailUrl,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .alpha(thumbnailAlpha),
+                    contentScale = ContentScale.Fit,
+                )
+            }
+        }
+
+        PlayerControlOverlay(
+            progress = if (player.exoPlayer.duration > 0) {
+                player.exoPlayer.currentPosition.toFloat() / player.exoPlayer.duration.toFloat()
+            } else 0f,
+            timeText = "${(player.exoPlayer.currentPosition / 1000).toInt().toFormatDuration()} / ${(player.exoPlayer.duration / 1000).toInt().toFormatDuration()}",
+            isControlVisible = true, // 항상 보이도록
+            isMuted = videoPlayerPool.isMuted.collectAsStateWithLifecycle().value,
+            onSeekValueChange = { newValue ->
+                val seekPositionMs = (newValue * player.exoPlayer.duration).toLong()
+                player.exoPlayer.seekTo(seekPositionMs)
+            },
+            onSeekValueChangeFinished = { /* No-op */ },
+            onMuteToggle = { videoPlayerPool.toggleMute() },
+            onFullscreenClick = { /* No-op, 이미 전체화면 */ },
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
+    }
+}
+
+@OptIn(UnstableApi::class)
+@Composable
+fun VideoPlayerView(
     autoPlayer: AutoVideoPlayer,
     modifier: Modifier = Modifier,
 ) {

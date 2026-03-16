@@ -1,5 +1,6 @@
 package com.andlife.invitation.model.guestbook
 
+import androidx.compose.ui.geometry.Rect
 import com.andlife.domain.model.auth.AuthState
 import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.ui.base.BaseUiState
@@ -28,6 +29,8 @@ data class InvitationGuestBookUiState(
     val reportTargetId: Long? = null,
     val isProcessingMedia: Boolean = false,
     val fullscreenVideoUrl: String? = null,
+    val fullscreenThumbnailUrl: String? = null,
+    val fullscreenStartBounds: Rect? = null,
 ) : BaseUiState {
 
     val isContentChanged: Boolean
