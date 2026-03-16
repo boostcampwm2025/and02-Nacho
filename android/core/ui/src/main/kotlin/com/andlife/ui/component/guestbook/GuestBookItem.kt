@@ -726,6 +726,7 @@ private fun VideoPlayerContent(
                 timeText = timeText,
                 isControlVisible = isControlVisible,
                 isMuted = isMuted,
+                isFullscreen = isFullscreen,
                 onSeekValueChange = onSeekValueChange,
                 onSeekValueChangeFinished = onSeekValueChangeFinished,
                 onMuteToggle = onMuteToggle,
@@ -741,6 +742,7 @@ private fun PlayerControlOverlay(
     timeText: String,
     isControlVisible: Boolean,
     isMuted: Boolean,
+    isFullscreen: Boolean,
     onSeekValueChange: (Float) -> Unit,
     onSeekValueChangeFinished: () -> Unit,
     onMuteToggle: () -> Unit,
@@ -775,6 +777,7 @@ private fun PlayerControlOverlay(
             PlayerControlBar(
                 progress = progress,
                 timeText = timeText,
+                isFullscreen = isFullscreen,
                 onSeekValueChange = onSeekValueChange,
                 onSeekValueChangeFinished = onSeekValueChangeFinished,
                 onFullscreenClick = onFullscreenClick,
@@ -796,11 +799,18 @@ private fun PlayerControlOverlay(
 private fun PlayerControlBar(
     progress: Float,
     timeText: String,
+    isFullscreen: Boolean,
     onSeekValueChange: (Float) -> Unit,
     onSeekValueChangeFinished: () -> Unit,
     onFullscreenClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val fullScreenIconRes = if (isFullscreen) {
+        R.drawable.ic_fullscreen_exit_24
+    } else {
+        R.drawable.ic_fullscreen_24
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -865,7 +875,7 @@ private fun PlayerControlBar(
                 modifier = Modifier.padding(start = NachoSpacing.xSmall)
             )
             Icon(
-                painter = painterResource(R.drawable.ic_fullscreen_24),
+                painter = painterResource(fullScreenIconRes),
                 contentDescription = stringResource(R.string.desc_fullscreen),
                 tint = Color.White,
                 modifier = Modifier
@@ -996,13 +1006,14 @@ fun VideoFullscreenOverlay(
             } / ${(player.exoPlayer.duration / 1000).toInt().toFormatDuration()}",
             isControlVisible = true,
             isMuted = videoPlayerPool.isMuted.collectAsStateWithLifecycle().value,
+            isFullscreen = true,
             onSeekValueChange = { newValue ->
                 val seekPositionMs = (newValue * player.exoPlayer.duration).toLong()
                 player.exoPlayer.seekTo(seekPositionMs)
             },
             onSeekValueChangeFinished = { /* No-op */ },
             onMuteToggle = { videoPlayerPool.toggleMute() },
-            onFullscreenClick = { /* No-op, 이미 전체화면 */ },
+            onFullscreenClick = { handleDismiss() },
             modifier = Modifier.align(Alignment.BottomCenter)
         )
     }
