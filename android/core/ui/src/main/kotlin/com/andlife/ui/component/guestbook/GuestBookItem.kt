@@ -662,22 +662,13 @@ private fun VideoPlayerContent(
                 else Modifier
             )
     ) {
-        // 오버레이 열려있으면 VideoPlayerView 제거 → 닫힐 때 factory 재실행으로 자동 reattach
-//        if (autoPlayer != null && !isFullscreen) {
-//            VideoPlayerView(
-//                autoPlayer = autoPlayer,
-//                modifier = Modifier.fillMaxSize(),
-//            )
-//        }
-
-        if (currentPlayer != null) {
+        currentPlayer?.let {
             if (!isFullscreen) {
                 VideoPlayerView(
-                    autoPlayer = currentPlayer,
+                    autoPlayer = it,
                     modifier = Modifier.fillMaxSize(),
                 )
             } else {
-                // PlayerView 빠지는 순간 썸네일로 커버
                 if (thumbnailUrl != null) {
                     AsyncImage(
                         model = thumbnailUrl,

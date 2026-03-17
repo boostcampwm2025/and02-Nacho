@@ -108,19 +108,20 @@ fun FullscreenControlOverlay(
             ) + fadeOut(animationSpec = tween(durationMillis = ANIM_FULLSCREEN_DURATION)),
             modifier = Modifier.align(Alignment.BottomCenter),
         ) {
-            FullscreenControlBar(
+            VideoControlBar(
                 progress = progress,
                 timeText = timeText,
+                isFullscreen = true,
+                onSeekValueChange = onSeekValueChange,
+                onSeekValueChangeFinished = onSeekValueChangeFinished,
+                onFullscreenClick = onExitFullscreen,
                 playPauseIconRes = playPauseIconRes,
                 playPauseIconDesc = playPauseIconDesc,
                 isMuted = isMuted,
                 isLandscape = isLandscape,
                 onPlayPauseClick = onPlayPauseClick,
-                onSeekValueChange = onSeekValueChange,
-                onSeekValueChangeFinished = onSeekValueChangeFinished,
                 onMuteToggle = onMuteToggle,
                 onOrientationClick = onOrientationClick,
-                onExitFullscreen = onExitFullscreen,
             )
         }
     }
