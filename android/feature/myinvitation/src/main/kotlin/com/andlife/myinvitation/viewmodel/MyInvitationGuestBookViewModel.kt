@@ -20,8 +20,6 @@ import com.andlife.domain.util.Button
 import com.andlife.domain.util.CrashlyticsLogger
 import com.andlife.domain.util.EventType
 import com.andlife.domain.util.MediaFileCopyManager
-import com.andlife.domain.util.RefreshEventHub
-import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.domain.util.Screen
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
@@ -98,9 +96,9 @@ constructor(
         authStateManager.authState
             .onEach { authState ->
                 val isStateChanged = uiState.value.isAuthStateChanged(authState)
-                updateState { copy(authState = authState) }
+                updateState { copy( authState = authState ) }
                 if (isStateChanged) {
-                    sendEffect(MyInvitationGuestBookSideEffect.AuthStateChanged(authState))
+                    sendEffect(MyInvitationGuestBookSideEffect.AuthStateChanged(authState) )
                 }
             }
             .launchIn(viewModelScope)
@@ -524,9 +522,6 @@ constructor(
                 } else {
                     sendEffect(MyInvitationGuestBookSideEffect.CreateGuestBookSuccess)
                 }
-
-                // 홈 화면 새로고침 트리거
-                RefreshEventHub.emit(RefreshTarget.HOME)
 
                 // 앱 내부 저장소 파일 정리
                 mediaFileCopyManager.cleanupTempFiles()

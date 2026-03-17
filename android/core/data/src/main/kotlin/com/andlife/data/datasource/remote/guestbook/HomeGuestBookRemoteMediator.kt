@@ -1,31 +1,32 @@
-package com.andlife.data.datasource.remote.invitation
+package com.andlife.data.datasource.remote.guestbook
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
-import com.andlife.data.repository.invitation.mapper.toEntity
+import com.andlife.data.repository.guestbook.toHomeEntity
 import com.andlife.database.InvitationDatabase
-import com.andlife.database.entity.UpcomingInvitationEntity
+import com.andlife.database.entity.HomeGuestBookEntity
 import com.andlife.domain.util.Result
 import javax.inject.Inject
 
 @OptIn(ExperimentalPagingApi::class)
-class UpcomingInvitationRemoteMediator @Inject constructor(
-    private val remoteDataSource: InvitationRemoteDataSource,
+class HomeGuestBookRemoteMediator @Inject constructor(
+    private val remoteDataSource: GuestBookRemoteDataSource,
     private val database: InvitationDatabase,
-) : RemoteMediator<Int, UpcomingInvitationEntity>() {
+) : RemoteMediator<Int, HomeGuestBookEntity>() {
 
-    private val dao = database.upcomingInvitationDao()
+    private val dao = database.homeGuestBookDao()
 
     override suspend fun initialize(): InitializeAction = InitializeAction.LAUNCH_INITIAL_REFRESH
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, UpcomingInvitationEntity>
+        state: PagingState<Int, HomeGuestBookEntity>
     ): MediatorResult {
         return try {
+
             val page = when (loadType) {
                 LoadType.REFRESH -> 0
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
@@ -38,8 +39,7 @@ class UpcomingInvitationRemoteMediator @Inject constructor(
                 }
             }
 
-            val result = remoteDataSource.getUpcomingInvitations(
-                days = UPCOMING_DAYS_THRESHOLD,
+            val result = remoteDataSource.getAllRelatedGuestBooks(
                 page = page,
                 size = state.config.pageSize
             )
@@ -52,10 +52,9 @@ class UpcomingInvitationRemoteMediator @Inject constructor(
                         if (loadType == LoadType.REFRESH) {
                             dao.clearAll()
                         }
-                        val entities = response.content.map { it.toEntity() }
+                        val entities = response.content.map { it.toHomeEntity() }
                         dao.upsertAll(entities)
                     }
-
                     MediatorResult.Success(
                         endOfPaginationReached = response.meta.isEnd || response.content.isEmpty()
                     )
@@ -68,9 +67,5 @@ class UpcomingInvitationRemoteMediator @Inject constructor(
         } catch (e: Exception) {
             MediatorResult.Error(e)
         }
-    }
-
-    companion object {
-        private const val UPCOMING_DAYS_THRESHOLD = 30L
     }
 }

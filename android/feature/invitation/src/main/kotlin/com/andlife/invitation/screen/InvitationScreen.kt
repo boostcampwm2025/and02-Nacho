@@ -1,5 +1,6 @@
 package com.andlife.invitation.screen
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,7 +9,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,7 +27,6 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.invitation.SortDirection
@@ -39,6 +38,7 @@ import com.andlife.model.invitation.InvitationSummaryUiModel
 import com.andlife.ui.R
 import com.andlife.ui.component.GenericTabRow
 import com.andlife.ui.component.dialog.LoginDialog
+import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.ui.component.invitation.InvitationListHeader
 import com.andlife.ui.component.invitation.InvitationTopBar
 import com.andlife.ui.component.listitem.InvitationListItem
@@ -75,22 +75,28 @@ fun InvitationRoute(
     val reportSuccessMessage = stringResource(R.string.msg_report_success)
     val reportFailureMessage = stringResource(R.string.msg_report_failure)
 
+    LaunchedEffect(upcomingItems.loadState.mediator?.refresh, pastItems.loadState.mediator?.refresh) {
+        val currentTabHasError = if (uiState.selectedTab == 0) {
+            upcomingItems.loadState.mediator?.refresh is LoadState.Error
+        } else {
+            pastItems.loadState.mediator?.refresh is LoadState.Error
+        }
+        if (currentTabHasError) {
+            scope.launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar(refreshFailureMessage)
+            }
+        }
+    }
+
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is InvitationSideEffect.NavigateToDetail -> onNavigateToDetail(effect.id)
-            is InvitationSideEffect.RefreshFailure -> {
-                scope.launch {
-                    snackbarHostState.currentSnackbarData?.dismiss()
-                    snackbarHostState.showSnackbar(refreshFailureMessage)
-                }
-            }
             is InvitationSideEffect.LeaveSuccess -> {
                 scope.launch {
                     snackbarHostState.currentSnackbarData?.dismiss()
                     snackbarHostState.showSnackbar(leaveSuccessMessage)
                 }
-                upcomingItems.refresh()
-                pastItems.refresh()
             }
             is InvitationSideEffect.LeaveFailure -> {
                 scope.launch {
@@ -114,18 +120,6 @@ fun InvitationRoute(
                     snackbarHostState.showSnackbar(effect.message ?: reportFailureMessage)
                 }
             }
-        }
-    }
-
-    LaunchedEffect(upcomingItems.loadState.refresh, pastItems.loadState.refresh) {
-        val isNotLoading = upcomingItems.loadState.refresh !is LoadState.Loading &&
-            pastItems.loadState.refresh !is LoadState.Loading
-
-        if (isNotLoading && uiState.isRefreshing) {
-            viewModel.onRefreshFinished(
-                hasError = upcomingItems.loadState.refresh is LoadState.Error ||
-                    pastItems.loadState.refresh is LoadState.Error
-            )
         }
     }
 
@@ -215,11 +209,13 @@ private fun InvitationScreen(
                 val currentSortOptions = if (isUpcoming) upcomingSortOptions else pastSortOptions
                 val currentSortIndex = if (isUpcoming) upcomingSortIndex else pastSortIndex
 
+                val isMediatorLoading = currentItems.loadState.mediator?.refresh is LoadState.Loading
+
                 PullToRefreshBox(
-                    isRefreshing = uiState.isRefreshing,
+                    isRefreshing = isMediatorLoading,
                     onRefresh = {
-                        currentItems.refresh()
-                        onEvent(InvitationUiEvent.Refresh)
+                        upcomingItems.refresh()
+                        pastItems.refresh()
                     },
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -254,10 +250,12 @@ private fun InvitationScreen(
                                                 if (index == 0) SortDirection.DESC else SortDirection.ASC
                                             }
 
-                                            onEvent(InvitationUiEvent.ChangeSort(
-                                                isUpcoming = isUpcoming,
-                                                newSort = newDirection
-                                            ))
+                                            onEvent(
+                                                InvitationUiEvent.ChangeSort(
+                                                    isUpcoming = isUpcoming,
+                                                    newSort = newDirection
+                                                )
+                                            )
                                         }
                                     )
                                 }

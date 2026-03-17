@@ -13,15 +13,13 @@ import com.andlife.domain.model.guestbook.UploadGuestBookState
 import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.repository.report.ReportRepository
-import com.andlife.domain.util.BackgroundMediaUploader
 import com.andlife.domain.util.AnalyticsEvent
 import com.andlife.domain.util.AnalyticsLogger
+import com.andlife.domain.util.BackgroundMediaUploader
 import com.andlife.domain.util.Button
 import com.andlife.domain.util.CrashlyticsLogger
 import com.andlife.domain.util.EventType
 import com.andlife.domain.util.MediaFileCopyManager
-import com.andlife.domain.util.RefreshEventHub
-import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.domain.util.Screen
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
@@ -72,7 +70,7 @@ constructor(
     private val crashlyticsLogger: CrashlyticsLogger,
     savedStateHandle: SavedStateHandle,
 ) : BaseViewModel<InvitationGuestBookUiState, InvitationGuestBookUiEvent, InvitationGuestBookSideEffect>(
-    InvitationGuestBookUiState(),
+    InvitationGuestBookUiState(authState = authStateManager.authState.value),
 ) {
     private val invitationId: Long = savedStateHandle.toRoute<InvitationDetail>().id
 
@@ -98,9 +96,9 @@ constructor(
         authStateManager.authState
             .onEach { authState ->
                 val isStateChanged = uiState.value.isAuthStateChanged(authState)
-                updateState { copy(authState = authState) }
+                updateState { copy( authState = authState ) }
                 if (isStateChanged) {
-                    sendEffect(InvitationGuestBookSideEffect.AuthStateChanged(authState))
+                    sendEffect(InvitationGuestBookSideEffect.AuthStateChanged(authState) )
                 }
             }
             .launchIn(viewModelScope)
@@ -110,7 +108,7 @@ constructor(
         audioPlayerManager.currentAudio
             .onEach { audioPlaybackState ->
                 updateState {
-                    copy(audioPlaybackState = audioPlaybackState ?: AudioPlaybackState())
+                    copy( audioPlaybackState = audioPlaybackState ?: AudioPlaybackState() )
                 }
             }
             .launchIn(viewModelScope)
@@ -549,9 +547,6 @@ constructor(
                 } else {
                     sendEffect(InvitationGuestBookSideEffect.CreateGuestBookSuccess)
                 }
-
-                // 홈 화면 새로고침 트리거
-                RefreshEventHub.emit(RefreshTarget.HOME)
 
                 // 앱 내부 저장소 파일 정리
                 mediaFileCopyManager.cleanupTempFiles()

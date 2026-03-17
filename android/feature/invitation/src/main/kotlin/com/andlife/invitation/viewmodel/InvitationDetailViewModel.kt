@@ -61,9 +61,10 @@ class InvitationDetailViewModel @Inject constructor(
         updateState { copy(isLoading = true, isError = false) }
 
         invitationRepository.joinInvitation(invitationId)
-            .onSuccess {
-                RefreshEventHub.emit(RefreshTarget.HOME)
-                RefreshEventHub.emit(RefreshTarget.INVITATION)
+            .onSuccess { joinResult ->
+                if (!joinResult.isMember) {
+                    RefreshEventHub.emit(RefreshTarget.INVITATION)
+                }
                 loadInvitation()
             }
             .onFailure { error, _ ->
@@ -116,8 +117,6 @@ class InvitationDetailViewModel @Inject constructor(
             invitationRepository.leaveInvitation(invitationId)
                 .onSuccess {
                     sendEffect(InvitationDetailSideEffect.NavigateBack)
-                    RefreshEventHub.emit(RefreshTarget.INVITATION)
-                    RefreshEventHub.emit(RefreshTarget.HOME)
                 }
                 .onFailure { error, _ ->
                     sendEffect(InvitationDetailSideEffect.ShowLeaveInvitationErrorSnackbar)

@@ -1,4 +1,4 @@
-package com.andlife.home.model.home
+package com.andlife.home.model
 
 import com.andlife.model.common.ReportReason
 import com.andlife.ui.base.BaseUiEvent
@@ -31,8 +31,6 @@ sealed interface HomeUiEvent : BaseUiEvent {
     data object ClickSetting : HomeUiEvent
 
     data object ClickCreate : HomeUiEvent
-
-    data object Refresh : HomeUiEvent
 
     data class UpdateMediaPlayState(
         val isPlaying: Boolean

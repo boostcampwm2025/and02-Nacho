@@ -213,17 +213,14 @@ fun MyInvitationGuestBookRoute(
             is MyInvitationGuestBookSideEffect.CreateGuestBookSuccess -> {
                 focusManager.clearFocus()
                 scrollToTop = true
-                guestBooks.refresh()
             }
 
             is MyInvitationGuestBookSideEffect.UpdateGuestBookSuccess -> {
                 focusManager.clearFocus()
-                guestBooks.refresh()
             }
 
             is MyInvitationGuestBookSideEffect.DeleteGuestBookSuccess -> {
                 focusManager.clearFocus()
-                guestBooks.refresh()
             }
 
             is MyInvitationGuestBookSideEffect.ScrollToTop -> {
@@ -572,12 +569,10 @@ private fun InvitationGuestBookScreen(
                     .fillMaxWidth()
             ) {
                 if (isMediaActive) {
-                    val isInitialLoading =
-                        guestBooks.loadState.refresh is LoadState.Loading && guestBooks.itemCount == 0
-
-                    if (isInitialLoading || guestBooks.itemCount == 0) {
+                    if (guestBooks.itemCount == 0) {
                         PagingStateContent(
-                            loadState = guestBooks.loadState.refresh,
+                            loadState = guestBooks.loadState.source.refresh,
+                            mediatorLoadState = guestBooks.loadState.mediator?.refresh,
                             itemCount = guestBooks.itemCount,
                             modifier = Modifier.fillMaxSize(),
                             emptyComment = stringResource(R.string.label_guestbook_empty),

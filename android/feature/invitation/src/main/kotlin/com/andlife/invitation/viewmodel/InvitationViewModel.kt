@@ -17,8 +17,6 @@ import com.andlife.domain.util.AnalyticsLogger
 import com.andlife.domain.util.Button
 import com.andlife.domain.util.CrashlyticsLogger
 import com.andlife.domain.util.EventType
-import com.andlife.domain.util.RefreshEventHub
-import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.domain.util.Screen
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
@@ -107,10 +105,6 @@ class InvitationViewModel @Inject constructor(
 
     override fun onEvent(event: InvitationUiEvent) {
         when (event) {
-            is InvitationUiEvent.Refresh -> {
-                updateState { copy(isRefreshing = true) }
-            }
-
             is InvitationUiEvent.SelectTab -> {
                 updateState { copy(selectedTab = event.index) }
             }
@@ -166,23 +160,15 @@ class InvitationViewModel @Inject constructor(
 
     fun leaveInvitation(invitationId: Long) {
         viewModelScope.launch {
-            updateState { copy(isRefreshing = true) }
             invitationRepository.leaveInvitation(invitationId)
                 .onSuccess {
                     sendEffect(InvitationSideEffect.LeaveSuccess)
-                    RefreshEventHub.emit(RefreshTarget.HOME)
                 }
                 .onFailure { it, msg ->
                     sendEffect(InvitationSideEffect.LeaveFailure)
                     Log.e("InvitationViewModel", "에러 발생: $it")
                 }
-            updateState { copy(isRefreshing = false) }
         }
-    }
-
-    fun onRefreshFinished(hasError: Boolean) {
-        updateState { copy(isRefreshing = false) }
-        if (hasError) sendEffect(InvitationSideEffect.RefreshFailure)
     }
 
     fun handleRefresh() {
