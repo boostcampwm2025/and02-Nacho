@@ -24,11 +24,7 @@ import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
-import com.andlife.ui.component.media.video.PlayerControlOverlayConstants.ANIM_CONTROL_BAR_DURATION
-
-private object PlayerControlOverlayConstants {
-    const val ANIM_CONTROL_BAR_DURATION = 250
-}
+import com.andlife.ui.util.AnimationConstants.ANIM_COMPACT_CONTROL_BAR_DURATION
 
 @Composable
 fun CompactPlaybackControls(
@@ -58,12 +54,12 @@ fun CompactPlaybackControls(
             visible = isControlVisible,
             enter = slideInVertically(
                 initialOffsetY = { it },
-                animationSpec = tween(durationMillis = ANIM_CONTROL_BAR_DURATION)
-            ) + fadeIn(animationSpec = tween(durationMillis = ANIM_CONTROL_BAR_DURATION)),
+                animationSpec = tween(durationMillis = ANIM_COMPACT_CONTROL_BAR_DURATION)
+            ) + fadeIn(animationSpec = tween(durationMillis = ANIM_COMPACT_CONTROL_BAR_DURATION)),
             exit = slideOutVertically(
                 targetOffsetY = { it },
-                animationSpec = tween(durationMillis = ANIM_CONTROL_BAR_DURATION)
-            ) + fadeOut(animationSpec = tween(durationMillis = ANIM_CONTROL_BAR_DURATION)),
+                animationSpec = tween(durationMillis = ANIM_COMPACT_CONTROL_BAR_DURATION)
+            ) + fadeOut(animationSpec = tween(durationMillis = ANIM_COMPACT_CONTROL_BAR_DURATION)),
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
             VideoPlayerControlBar(

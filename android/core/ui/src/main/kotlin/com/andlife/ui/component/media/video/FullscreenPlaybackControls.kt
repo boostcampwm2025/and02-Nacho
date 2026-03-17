@@ -20,12 +20,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.ui.R
-import com.andlife.ui.component.media.video.FullscreenControlOverlayConstants.ANIM_FULLSCREEN_DURATION
+import com.andlife.ui.util.AnimationConstants.ANIM_FULLSCREEN_DURATION
 import com.andlife.ui.util.noRippleClickable
-
-private object FullscreenControlOverlayConstants {
-    const val ANIM_FULLSCREEN_DURATION = 300
-}
 
 @Composable
 fun FullscreenPlaybackControls(

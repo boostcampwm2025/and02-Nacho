@@ -37,19 +37,13 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import coil3.compose.AsyncImage
 import com.andlife.media.video.AutoVideoPlayer
-import com.andlife.ui.component.media.video.FullscreenVideoContainerConstants.ANIM_FULLSCREEN_DURATION_MS
-import com.andlife.ui.component.media.video.FullscreenVideoContainerConstants.ANIM_THUMBNAIL_FADE_DURATION_MS
+import com.andlife.ui.util.AnimationConstants.ANIM_THUMBNAIL_FADE_DURATION
 import com.andlife.ui.util.findActivity
 import com.andlife.ui.util.noRippleClickable
 import com.andlife.ui.util.toFormatDuration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-
-private object FullscreenVideoContainerConstants {
-    const val ANIM_FULLSCREEN_DURATION_MS = 300
-    const val ANIM_THUMBNAIL_FADE_DURATION_MS = 200
-}
 
 @SuppressLint("ConfigurationScreenWidthHeight")
 @OptIn(UnstableApi::class)
@@ -93,7 +87,7 @@ fun FullscreenVideoPlayerContainer(
         (totalDurationMs / 1000).toInt().toFormatDuration()
     }"
 
-    val animSpec: AnimationSpec<Float> = tween(durationMillis = ANIM_FULLSCREEN_DURATION_MS, easing = FastOutSlowInEasing)
+    val animSpec: AnimationSpec<Float> = tween(durationMillis = ANIM_THUMBNAIL_FADE_DURATION, easing = FastOutSlowInEasing)
     val animLeft by animateFloatAsState(
         targetValue = if (isExpanded) fullBounds.left else initialBounds.left,
         animationSpec = animSpec,
@@ -116,7 +110,7 @@ fun FullscreenVideoPlayerContainer(
     )
     val thumbnailAlpha by animateFloatAsState(
         targetValue = if (isVideoReadyInFullscreen) 0f else 1f,
-        animationSpec = tween(durationMillis = ANIM_THUMBNAIL_FADE_DURATION_MS)
+        animationSpec = tween(durationMillis = ANIM_THUMBNAIL_FADE_DURATION)
     )
 
     LaunchedEffect(Unit) {
