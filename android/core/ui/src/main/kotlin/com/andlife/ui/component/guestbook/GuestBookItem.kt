@@ -705,7 +705,6 @@ private fun VideoPlayerContent(
                 timeText = timeText,
                 isControlVisible = isControlVisible,
                 isMuted = isMuted,
-                isFullscreen = isFullscreen,
                 onSeekValueChange = onSeekValueChange,
                 onSeekValueChangeFinished = onSeekValueChangeFinished,
                 onMuteToggle = onMuteToggle,

@@ -36,7 +36,6 @@ fun PlayerControlOverlay(
     timeText: String,
     isControlVisible: Boolean,
     isMuted: Boolean,
-    isFullscreen: Boolean,
     onSeekValueChange: (Float) -> Unit,
     onSeekValueChangeFinished: () -> Unit,
     onMuteToggle: () -> Unit,
@@ -55,7 +54,6 @@ fun PlayerControlOverlay(
                 modifier = Modifier.fillMaxWidth()
             )
         }
-
         AnimatedVisibility(
             visible = isControlVisible,
             enter = slideInVertically(
@@ -68,10 +66,10 @@ fun PlayerControlOverlay(
             ) + fadeOut(animationSpec = tween(durationMillis = ANIM_CONTROL_BAR_DURATION)),
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
-            PlayerControlBar(
+            VideoControlBar(
                 progress = progress,
                 timeText = timeText,
-                isFullscreen = isFullscreen,
+                isFullscreen = false,
                 onSeekValueChange = onSeekValueChange,
                 onSeekValueChangeFinished = onSeekValueChangeFinished,
                 onFullscreenClick = onFullscreenClick,
@@ -112,19 +110,14 @@ private fun PlayerMuteButton(
     onToggle: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val iconResId = if (isMuted) {
-        R.drawable.ic_volume_off_filled_24
+    val (iconRes, contentDescription) = if (isMuted) {
+        R.drawable.ic_volume_off_filled_24 to stringResource(R.string.desc_unmute_video)
     } else {
-        R.drawable.ic_volume_up_filled_24
-    }
-    val contentDescription = if (isMuted) {
-        stringResource(R.string.desc_unmute_video)
-    } else {
-        stringResource(R.string.desc_mute_video)
+        R.drawable.ic_volume_up_filled_24 to stringResource(R.string.desc_mute_video)
     }
     IconButton(onClick = onToggle,) {
         Icon(
-            painter = painterResource(id = iconResId),
+            painter = painterResource(id = iconRes),
             contentDescription = contentDescription,
             tint = NachoTheme.colorScheme.iconTertiary,
         )
