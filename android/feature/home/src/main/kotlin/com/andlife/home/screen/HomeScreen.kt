@@ -85,7 +85,7 @@ import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItemSkeleton
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
-import com.andlife.ui.component.media.video.FullscreenVideoContainer
+import com.andlife.ui.component.media.video.FullscreenVideoPlayerContainer
 import com.andlife.ui.component.report.ReportBottomSheet
 import com.andlife.ui.util.collectWithLifecycle
 import com.andlife.ui.util.toDDayText
@@ -303,7 +303,7 @@ fun HomeRoute(
                 }
             }
 
-            FullscreenVideoContainer(
+            FullscreenVideoPlayerContainer(
                 player = player,
                 thumbnailUrl = uiState.fullscreenThumbnailUrl,
                 startBounds = uiState.fullscreenStartBounds,

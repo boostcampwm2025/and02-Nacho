@@ -31,7 +31,7 @@ private object PlayerControlOverlayConstants {
 }
 
 @Composable
-fun VideoPlaybackControlOverlay(
+fun CompactPlaybackControls(
     progress: Float,
     timeText: String,
     isControlVisible: Boolean,
@@ -66,7 +66,7 @@ fun VideoPlaybackControlOverlay(
             ) + fadeOut(animationSpec = tween(durationMillis = ANIM_CONTROL_BAR_DURATION)),
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
-            VideoControlBar(
+            VideoPlayerControlBar(
                 progress = progress,
                 timeText = timeText,
                 isFullscreen = false,

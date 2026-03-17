@@ -37,7 +37,6 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import coil3.compose.AsyncImage
 import com.andlife.media.video.AutoVideoPlayer
-import com.andlife.ui.component.guestbook.VideoSurface
 import com.andlife.ui.component.media.video.FullscreenVideoContainerConstants.ANIM_FULLSCREEN_DURATION_MS
 import com.andlife.ui.component.media.video.FullscreenVideoContainerConstants.ANIM_THUMBNAIL_FADE_DURATION_MS
 import com.andlife.ui.util.findActivity
@@ -55,7 +54,7 @@ private object FullscreenVideoContainerConstants {
 @SuppressLint("ConfigurationScreenWidthHeight")
 @OptIn(UnstableApi::class)
 @Composable
-fun FullscreenVideoContainer(
+fun FullscreenVideoPlayerContainer(
     player: AutoVideoPlayer,
     thumbnailUrl: String?,
     startBounds: Rect?,
@@ -230,7 +229,7 @@ fun FullscreenVideoContainer(
                 )
             }
         }
-        FullscreenControlOverlay(
+        FullscreenPlaybackControls(
             progress = progress,
             timeText = timeText,
             isControlVisible = isControlVisible,

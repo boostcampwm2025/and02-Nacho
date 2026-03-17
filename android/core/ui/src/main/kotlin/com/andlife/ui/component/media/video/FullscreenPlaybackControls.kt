@@ -28,7 +28,7 @@ private object FullscreenControlOverlayConstants {
 }
 
 @Composable
-fun FullscreenControlOverlay(
+fun FullscreenPlaybackControls(
     progress: Float,
     timeText: String,
     isControlVisible: Boolean,
@@ -86,7 +86,7 @@ fun FullscreenControlOverlay(
             ) + fadeOut(animationSpec = tween(durationMillis = ANIM_FULLSCREEN_DURATION)),
             modifier = Modifier.align(Alignment.BottomCenter),
         ) {
-            VideoControlBar(
+            VideoPlayerControlBar(
                 progress = progress,
                 timeText = timeText,
                 isFullscreen = true,

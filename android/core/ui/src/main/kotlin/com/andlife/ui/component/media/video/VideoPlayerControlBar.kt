@@ -38,7 +38,7 @@ import com.andlife.ui.util.noRippleClickable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VideoControlBar(
+fun VideoPlayerControlBar(
     progress: Float,
     timeText: String,
     isFullscreen: Boolean,
@@ -72,7 +72,7 @@ fun VideoControlBar(
             .padding(horizontal = NachoSpacing.small)
             .padding(bottom = if (isFullscreen) NachoSpacing.xLarge else NachoSpacing.medium),
     ) {
-        VideoSlider(
+        VideoSeekBar(
             progress = progress,
             onSeekValueChange = onSeekValueChange,
             onSeekValueChangeFinished = onSeekValueChangeFinished
@@ -129,7 +129,7 @@ fun VideoControlBar(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun VideoSlider(
+private fun VideoSeekBar(
     progress: Float,
     onSeekValueChange: (Float) -> Unit,
     onSeekValueChangeFinished: () -> Unit
