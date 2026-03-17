@@ -91,7 +91,7 @@ import kotlinx.coroutines.launch
 import com.andlife.designsystem.R as designR
 
 @Composable
-fun MyInvitationScreen(
+fun MyInvitationListDetailRoute(
     snackbarHostState: SnackbarHostState,
     onNavigateToLogin: () -> Unit,
     onNavigateToCreate: () -> Unit,
@@ -104,7 +104,7 @@ fun MyInvitationScreen(
 ) {
     val uiState by viewModel.initialInvitationId.collectAsStateWithLifecycle()
 
-    MyInvitationScreen(
+    MyInvitationListDetailScreen(
         initialInvitationId = uiState,
         snackbarHostState = snackbarHostState,
         onNavigateToLogin = onNavigateToLogin,
@@ -120,7 +120,7 @@ fun MyInvitationScreen(
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-private fun MyInvitationScreen(
+private fun MyInvitationListDetailScreen(
     initialInvitationId: Long?,
     snackbarHostState: SnackbarHostState,
     onNavigateToDetail: (Long) -> Unit,
@@ -354,7 +354,7 @@ fun MyInvitationRoute(
         }
     }
 
-    MyInvitationScreen(
+    MyInvitationListPaneRoute(
         uiState = uiState,
         authState = authState,
         upcomingItems = upcomingItems,
@@ -369,7 +369,7 @@ fun MyInvitationRoute(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun MyInvitationScreen(
+private fun MyInvitationListPaneRoute(
     uiState: MyInvitationUiState,
     authState: AuthState,
     upcomingItems: LazyPagingItems<InvitationSummaryUiModel>,
