@@ -1,5 +1,7 @@
 package com.andlife.ui.component.media.video
 
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -57,6 +59,12 @@ fun FullscreenControlOverlay(
     onExitFullscreen: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val (playPauseIconRes, playPauseIconDesc) = if (isPlaying) {
+        R.drawable.ic_pause_filled_24 to R.string.desc_pause_video
+    } else {
+        R.drawable.ic_play_arrow_24 to R.string.desc_play_video
+    }
+
     Box(modifier = modifier.fillMaxSize()) {
         AnimatedVisibility(
             visible = isControlVisible,
@@ -66,22 +74,19 @@ fun FullscreenControlOverlay(
         ) {
             Box(
                 modifier = Modifier
-                    .size(56.dp)
+                    .size(NachoIconSize.twoXLarge)
                     .background(
-                        color = Color.Black.copy(alpha = 0.5f),
+                        color = Color.Black.copy(alpha = 0.4f),
                         shape = CircleShape,
                     )
                     .noRippleClickable { onPlayPauseClick() },
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    painter = painterResource(
-                        if (isPlaying) R.drawable.ic_pause_filled_24
-                        else R.drawable.ic_play_arrow_24
-                    ),
-                    contentDescription = if (isPlaying) "일시정지" else "재생",
+                    painter = painterResource(playPauseIconRes),
+                    contentDescription = stringResource(playPauseIconDesc),
                     tint = Color.White,
-                    modifier = Modifier.size(32.dp),
+                    modifier = Modifier.size(NachoIconSize.large)
                 )
             }
         }
@@ -101,7 +106,8 @@ fun FullscreenControlOverlay(
             FullscreenControlBar(
                 progress = progress,
                 timeText = timeText,
-                isPlaying = isPlaying,
+                playPauseIconRes = playPauseIconRes,
+                playPauseIconDesc = playPauseIconDesc,
                 isMuted = isMuted,
                 isLandscape = isLandscape,
                 onPlayPauseClick = onPlayPauseClick,
@@ -115,12 +121,13 @@ fun FullscreenControlOverlay(
     }
 }
 
-@kotlin.OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FullscreenControlBar(
     progress: Float,
     timeText: String,
-    isPlaying: Boolean,
+    @DrawableRes playPauseIconRes: Int,
+    @StringRes playPauseIconDesc: Int,
     isMuted: Boolean,
     isLandscape: Boolean,
     onPlayPauseClick: () -> Unit,
@@ -131,6 +138,13 @@ private fun FullscreenControlBar(
     onExitFullscreen: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val (muteIconRes, muteIconDesc) = if (isMuted) {
+        R.drawable.ic_volume_off_filled_24 to R.string.desc_unmute_video
+    } else {
+        R.drawable.ic_volume_up_filled_24 to R.string.desc_mute_video
+    }
+    val orientationIconDesc = if (isLandscape) R.string.desc_portrait else R.string.desc_landscape
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -183,11 +197,8 @@ private fun FullscreenControlBar(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                painter = painterResource(
-                    if (isPlaying) R.drawable.ic_pause_filled_24
-                    else R.drawable.ic_play_arrow_24
-                ),
-                contentDescription = if (isPlaying) "일시정지" else "재생",
+                painter = painterResource(playPauseIconRes),
+                contentDescription = stringResource(playPauseIconDesc),
                 tint = Color.White,
                 modifier = Modifier.noRippleClickable { onPlayPauseClick() },
             )
@@ -198,17 +209,14 @@ private fun FullscreenControlBar(
             )
             Spacer(modifier = Modifier.weight(1f))
             Icon(
-                painter = painterResource(
-                    if (isMuted) R.drawable.ic_volume_off_filled_24
-                    else R.drawable.ic_volume_up_filled_24
-                ),
-                contentDescription = if (isMuted) "음소거 해제" else "음소거",
+                painter = painterResource(muteIconRes),
+                contentDescription = stringResource(muteIconDesc),
                 tint = Color.White,
                 modifier = Modifier.noRippleClickable { onMuteToggle() },
             )
             Icon(
                 painter = painterResource(R.drawable.ic_screen_rotation_24),
-                contentDescription = if (isLandscape) "세로 모드" else "가로 모드",
+                contentDescription = stringResource(orientationIconDesc),
                 tint = Color.White,
                 modifier = Modifier.noRippleClickable { onOrientationClick() },
             )
