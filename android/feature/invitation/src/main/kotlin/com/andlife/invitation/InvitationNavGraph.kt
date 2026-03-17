@@ -3,6 +3,7 @@ package com.andlife.invitation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.Modifier
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
@@ -11,6 +12,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.andlife.invitation.screen.detail.InvitationDetailRoute
 import com.andlife.invitation.screen.InvitationsListDetailScreen
+import com.andlife.invitation.viewmodel.InvitationDetailViewModel
+import com.andlife.invitation.viewmodel.InvitationGuestBookViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
 
@@ -65,13 +68,19 @@ fun NavGraphBuilder.invitationDetailNavGraph(
     onNavigateToLogin: () -> Unit,
 ) {
     composable<InvitationDetail>(
-        deepLinks = persistentListOf(deepLinks),
+
     ) { val invitationDetail = it.toRoute<InvitationDetail>()
         InvitationDetailRoute(
             selectedId = invitationDetail.id,
             onNavigateBack = onNavigateBack,
             onNavigateToLogin = onNavigateToLogin,
             modifier = Modifier.padding(),
+            viewModel = hiltViewModel<InvitationDetailViewModel, InvitationDetailViewModel.Factory> { factory ->
+                factory.create(invitationDetail.id, false)
+            },
+            guestBookViewModel = hiltViewModel<InvitationGuestBookViewModel, InvitationGuestBookViewModel.Factory> { factory ->
+                factory.create(invitationDetail.id)
+            }
         )
     }
 }

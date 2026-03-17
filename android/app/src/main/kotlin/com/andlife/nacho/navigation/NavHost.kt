@@ -13,7 +13,6 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldValue
-import androidx.compose.material3.adaptive.navigationsuite.rememberNavigationSuiteScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -46,10 +45,11 @@ import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
 import com.andlife.myinvitation.myInvitationDetailNavGraph
 import com.andlife.myinvitation.myInvitationNavGraph
 import com.andlife.nacho.LocalAnalyticsLogger
-import com.andlife.nacho.util.isNavigationBar
 import com.andlife.setting.settingNavGraph
 import com.andlife.thanks_card.createThanksCardNavGraph
 import com.andlife.thanks_card.updateThanksCardNavGraph
+import com.andlife.ui.util.LocalNavigationSuiteState
+import com.andlife.ui.util.isNavigationBar
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
@@ -59,7 +59,7 @@ fun NachoNavHost(
     deepLinkManager: DeepLinkManager,
     modifier: Modifier = Modifier,
 ) {
-    val suiteState = rememberNavigationSuiteScaffoldState()
+    val suiteState = LocalNavigationSuiteState.current
     val currentDestination = navigator.currentDestination
     val navSuiteType =
         NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())

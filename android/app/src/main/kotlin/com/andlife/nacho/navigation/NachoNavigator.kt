@@ -36,12 +36,9 @@ import com.andlife.login.Login
 import com.andlife.login.navigateToLogin
 import com.andlife.myinvitation.navigateToMyInvitation
 import com.andlife.myinvitation.navigateToMyInvitationDetail
-import com.andlife.nacho.util.isNavigationBar
 import com.andlife.setting.navigateToSetting
 import com.andlife.thanks_card.navigateToCreateThanksCard
 import com.andlife.thanks_card.navigateToUpdateThanksCard
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
 
 @Stable

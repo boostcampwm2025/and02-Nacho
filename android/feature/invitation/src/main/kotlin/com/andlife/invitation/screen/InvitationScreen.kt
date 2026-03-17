@@ -13,6 +13,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.layout.PaneAdaptedValue
@@ -21,6 +22,8 @@ import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneSca
 import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldPredictiveBackHandler
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldValue
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -68,7 +71,10 @@ import com.andlife.ui.component.listitem.MenuItem
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.component.paging.PagingStateContent
 import com.andlife.ui.component.report.ReportBottomSheet
+import com.andlife.ui.util.DetailPaneViewModelScope
+import com.andlife.ui.util.LocalNavigationSuiteState
 import com.andlife.ui.util.collectWithLifecycle
+import com.andlife.ui.util.isNavigationBar
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
@@ -104,6 +110,10 @@ private fun InvitationListDetailScreen(
 ) {
     val selectedInvitationId = uiState.selectedInvitationId
 
+    val suiteState = LocalNavigationSuiteState.current
+    val navSuiteType =
+        NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())
+
     val listDetailNavigator = rememberListDetailPaneScaffoldNavigator()
     val coroutineScope = rememberCoroutineScope()
 
@@ -121,6 +131,7 @@ private fun InvitationListDetailScreen(
         onInvitationClick(id)
         invitationRoute = InvitationDetail(id)
         coroutineScope.launch {
+            if (navSuiteType.isNavigationBar && suiteState.currentValue == NavigationSuiteScaffoldValue.Visible) suiteState.hide()
             listDetailNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail)
         }
     }
@@ -156,26 +167,29 @@ private fun InvitationListDetailScreen(
                 AnimatedContent(invitationRoute) { route ->
                     when (route) {
                         is InvitationDetail -> {
-                            InvitationDetailRoute(
-                                selectedId = route.id,
-                                onNavigateBack = {
-                                    coroutineScope.launch {
-                                        listDetailNavigator.navigateBack()
+                            DetailPaneViewModelScope {
+                                InvitationDetailRoute(
+                                    selectedId = route.id,
+                                    onNavigateBack = {
+                                        coroutineScope.launch {
+                                            if (navSuiteType.isNavigationBar && suiteState.currentValue == NavigationSuiteScaffoldValue.Hidden) suiteState.show()
+                                            listDetailNavigator.navigateBack()
+                                        }
+                                    },
+                                    onNavigateToLogin = onNavigateToLogin,
+                                    showBackButton = !listDetailNavigator.isListPaneVisible(),
+                                    viewModel = hiltViewModel<InvitationDetailViewModel, InvitationDetailViewModel.Factory>(
+                                        key = "detail ${route.id}"
+                                    ) { factory ->
+                                        factory.create(route.id, uiState.isFromDeelLink)
+                                    },
+                                    guestBookViewModel = hiltViewModel<InvitationGuestBookViewModel, InvitationGuestBookViewModel.Factory>(
+                                        key = "guestbook ${route.id}"
+                                    ) { factory ->
+                                        factory.create(route.id)
                                     }
-                                },
-                                onNavigateToLogin = onNavigateToLogin,
-                                showBackButton = !listDetailNavigator.isListPaneVisible(),
-                                viewModel = hiltViewModel<InvitationDetailViewModel, InvitationDetailViewModel.Factory>(
-                                    key = "detail ${route.id}"
-                                ){ factory ->
-                                    factory.create(route.id, uiState.isFromDeelLink)
-                                },
-                                guestBookViewModel = hiltViewModel<InvitationGuestBookViewModel, InvitationGuestBookViewModel.Factory>(
-                                    key = "guestbook ${route.id}"
-                                ) { factory ->
-                                    factory.create(route.id)
-                                }
-                            )
+                                )
+                            }
                         }
                         is InvitationPlaceholder -> {
                             InvitationPlaceholderScreen()
