@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +25,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoIconSize
@@ -31,6 +34,7 @@ import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
+import com.andlife.ui.util.noRippleClickable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,7 +85,7 @@ fun VideoControlBar(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (isFullscreen) {
-                PlayerControlBarIconButton(
+                VideoControlButton(
                     iconRes = playPauseIconRes,
                     contentDescRes = playPauseIconDesc,
                     onClick = onPlayPauseClick,
@@ -94,7 +98,7 @@ fun VideoControlBar(
                 modifier = if (!isFullscreen) Modifier.padding(start = NachoSpacing.xSmall) else Modifier
             )
             if (isFullscreen) {
-                PlayerControlBarIconButton(
+                VideoControlButton(
                     iconRes = muteIconRes,
                     contentDescRes = muteIconDesc,
                     onClick = onMuteToggle
@@ -102,18 +106,18 @@ fun VideoControlBar(
             }
             if (isFullscreen) Spacer(modifier = Modifier.weight(1f))
             if (isFullscreen) {
-                PlayerControlBarIconButton(
+                VideoControlButton(
                     iconRes = R.drawable.ic_screen_rotation_24,
                     contentDescRes = orientationIconDesc,
                     onClick = onOrientationClick
                 )
-                PlayerControlBarIconButton(
+                VideoControlButton(
                     iconRes = R.drawable.ic_fullscreen_exit_24,
                     contentDescRes = R.string.desc_exit_fullscreen,
                     onClick = onFullscreenClick
                 )
             } else {
-                PlayerControlBarIconButton(
+                VideoControlButton(
                     iconRes = R.drawable.ic_fullscreen_24,
                     contentDescRes = R.string.desc_fullscreen,
                     onClick = onFullscreenClick
@@ -160,4 +164,30 @@ private fun VideoSlider(
             }
         }
     )
+}
+
+@Composable
+private fun VideoControlButton(
+    @DrawableRes iconRes: Int,
+    @StringRes contentDescRes: Int,
+    color: Color = Color.White,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .background(
+                color = Color.Transparent,
+                shape = CircleShape,
+            )
+            .noRippleClickable { onClick() },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            painter = painterResource(iconRes),
+            contentDescription = stringResource(contentDescRes),
+            tint = color,
+            modifier = Modifier.padding(NachoSpacing.xSmall)
+        )
+    }
 }

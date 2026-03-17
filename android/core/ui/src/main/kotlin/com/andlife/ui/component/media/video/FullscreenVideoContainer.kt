@@ -37,8 +37,9 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import coil3.compose.AsyncImage
 import com.andlife.media.video.AutoVideoPlayer
-import com.andlife.ui.component.guestbook.VideoPlayerView
+import com.andlife.ui.component.guestbook.VideoSurface
 import com.andlife.ui.component.media.video.FullscreenVideoContainerConstants.ANIM_FULLSCREEN_DURATION_MS
+import com.andlife.ui.component.media.video.FullscreenVideoContainerConstants.ANIM_THUMBNAIL_FADE_DURATION_MS
 import com.andlife.ui.util.findActivity
 import com.andlife.ui.util.noRippleClickable
 import com.andlife.ui.util.toFormatDuration
@@ -48,6 +49,7 @@ import kotlin.math.roundToInt
 
 private object FullscreenVideoContainerConstants {
     const val ANIM_FULLSCREEN_DURATION_MS = 300
+    const val ANIM_THUMBNAIL_FADE_DURATION_MS = 200
 }
 
 @SuppressLint("ConfigurationScreenWidthHeight")
@@ -115,7 +117,7 @@ fun FullscreenVideoContainer(
     )
     val thumbnailAlpha by animateFloatAsState(
         targetValue = if (isVideoReadyInFullscreen) 0f else 1f,
-        animationSpec = tween(durationMillis = 200),
+        animationSpec = tween(durationMillis = ANIM_THUMBNAIL_FADE_DURATION_MS)
     )
 
     LaunchedEffect(Unit) {
@@ -212,7 +214,7 @@ fun FullscreenVideoContainer(
                 )
                 .background(Color.Black)
         ) {
-            VideoPlayerView(
+            VideoSurface(
                 autoPlayer = player,
                 modifier = Modifier.fillMaxSize(),
             )
@@ -228,7 +230,6 @@ fun FullscreenVideoContainer(
                 )
             }
         }
-
         FullscreenControlOverlay(
             progress = progress,
             timeText = timeText,

@@ -79,7 +79,7 @@ import com.andlife.model.guestbook.MediaUiType
 import com.andlife.ui.R
 import com.andlife.ui.component.icon.PlayerThumbnailIcon
 import com.andlife.ui.component.media.MediaOverlay
-import com.andlife.ui.component.media.video.PlayerControlOverlay
+import com.andlife.ui.component.media.video.VideoPlaybackControlOverlay
 import com.andlife.ui.util.toFormatDuration
 import com.andlife.ui.util.toRelativeTimeString
 import kotlinx.collections.immutable.ImmutableList
@@ -664,7 +664,7 @@ private fun VideoPlayerContent(
     ) {
         currentPlayer?.let {
             if (!isFullscreen) {
-                VideoPlayerView(
+                VideoSurface(
                     autoPlayer = it,
                     modifier = Modifier.fillMaxSize(),
                 )
@@ -681,7 +681,7 @@ private fun VideoPlayerContent(
         }
 
         if (thumbnailUrl != null && thumbnailAlpha > 0f) {
-            ThumbnailWrapper(
+            VideoThumbnail(
                 thumbnailUrl = thumbnailUrl,
                 onPlayVideoClick = onPlayVideoClick,
                 modifier = Modifier
@@ -691,7 +691,7 @@ private fun VideoPlayerContent(
         }
 
         if (currentPlayer != null) {
-            PlayerControlOverlay(
+            VideoPlaybackControlOverlay(
                 progress = progress,
                 timeText = timeText,
                 isControlVisible = isControlVisible,
@@ -707,7 +707,7 @@ private fun VideoPlayerContent(
 
 @OptIn(UnstableApi::class)
 @Composable
-fun VideoPlayerView(
+fun VideoSurface(
     autoPlayer: AutoVideoPlayer,
     modifier: Modifier = Modifier,
 ) {
@@ -722,14 +722,12 @@ fun VideoPlayerView(
 }
 
 @Composable
-private fun ThumbnailWrapper(
+private fun VideoThumbnail(
     thumbnailUrl: String?,
     onPlayVideoClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier.clickable { onPlayVideoClick() }
-    ) {
+    Box(modifier = modifier.clickable { onPlayVideoClick() }) {
         AsyncImage(
             model = thumbnailUrl,
             contentDescription = stringResource(R.string.desc_video_thumbnail),

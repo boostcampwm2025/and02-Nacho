@@ -31,7 +31,7 @@ private object PlayerControlOverlayConstants {
 }
 
 @Composable
-fun PlayerControlOverlay(
+fun VideoPlaybackControlOverlay(
     progress: Float,
     timeText: String,
     isControlVisible: Boolean,
@@ -75,7 +75,6 @@ fun PlayerControlOverlay(
                 onFullscreenClick = onFullscreenClick,
             )
         }
-
         PlayerMuteButton(
             isMuted = isMuted,
             onToggle = onMuteToggle,
