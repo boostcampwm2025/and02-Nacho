@@ -44,7 +44,7 @@ fun VideoPlayerControlBar(
     isFullscreen: Boolean,
     onSeekValueChange: (Float) -> Unit,
     onSeekValueChangeFinished: () -> Unit,
-    onFullscreenClick: () -> Unit, // 리스트 -> 전체화면 혹은 전체화면 -> 리스트(종료)
+    onFullscreenClick: () -> Unit,
     modifier: Modifier = Modifier,
     @DrawableRes playPauseIconRes: Int = R.drawable.ic_play_arrow_24,
     @StringRes playPauseIconDesc: Int = R.string.desc_play_video,
