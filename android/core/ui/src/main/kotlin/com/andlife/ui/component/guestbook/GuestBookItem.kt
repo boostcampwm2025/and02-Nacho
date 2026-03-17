@@ -1,37 +1,22 @@
 package com.andlife.ui.component.guestbook
 
-import android.annotation.SuppressLint
-import android.content.pm.ActivityInfo
-import android.content.res.Configuration
 import android.view.ViewGroup
-import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -42,12 +27,10 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -58,27 +41,20 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -86,9 +62,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import coil3.compose.AsyncImage
 import coil3.compose.SubcomposeAsyncImage
-import com.andlife.designsystem.R as designR
 import com.andlife.designsystem.preview.PreviewTheme
-import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
@@ -105,18 +79,14 @@ import com.andlife.model.guestbook.MediaUiType
 import com.andlife.ui.R
 import com.andlife.ui.component.icon.PlayerThumbnailIcon
 import com.andlife.ui.component.media.MediaOverlay
-import com.andlife.ui.component.media.video.FullscreenControlOverlay
 import com.andlife.ui.component.media.video.PlayerControlOverlay
-import com.andlife.ui.util.findActivity
-import com.andlife.ui.util.noRippleClickable
 import com.andlife.ui.util.toFormatDuration
 import com.andlife.ui.util.toRelativeTimeString
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
-import kotlin.math.roundToInt
+import com.andlife.designsystem.R as designR
 
 private const val SAMPLE_INVITATION_ID = 1L
 
@@ -742,210 +712,6 @@ private fun VideoPlayerContent(
                 onFullscreenClick = onFullscreenClick,
             )
         }
-    }
-}
-
-@SuppressLint("ConfigurationScreenWidthHeight")
-@OptIn(UnstableApi::class)
-@Composable
-fun VideoFullscreenOverlay(
-    player: AutoVideoPlayer,
-    thumbnailUrl: String?,
-    startBounds: Rect?,
-    isMuted: Boolean,
-    onDismiss: () -> Unit,
-    onMuteToggle: () -> Unit,
-) {
-    val density = LocalDensity.current
-    val configuration = LocalConfiguration.current
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-
-    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-
-    val screenWidthPx = with(density) { configuration.screenWidthDp.dp.toPx() }
-    val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
-    val fullBounds = Rect(0f, 0f, screenWidthPx, screenHeightPx)
-    val initialBounds = startBounds ?: fullBounds
-
-    var isExpanded by remember { mutableStateOf(false) }
-    var isVideoReadyInFullscreen by remember { mutableStateOf(false) }
-    var currentPositionMs by remember { mutableLongStateOf(0L) }
-    var totalDurationMs by remember { mutableLongStateOf(0L) }
-    var isSeeking by remember { mutableStateOf(false) }
-    var seekPositionMs by remember { mutableLongStateOf(0L) }
-    var isControlVisible by remember { mutableStateOf(false) }
-    var isPlaying by remember { mutableStateOf(false) }
-
-    val displayPositionMs = if (isSeeking) seekPositionMs else currentPositionMs
-    val progress = if (totalDurationMs > 0) {
-        (displayPositionMs.toFloat() / totalDurationMs.toFloat()).coerceIn(0f, 1f)
-    } else {
-        0f
-    }
-    val timeText = "${(displayPositionMs / 1000).toInt().toFormatDuration()} / ${
-        (totalDurationMs / 1000).toInt().toFormatDuration()
-    }"
-
-    val animSpec: AnimationSpec<Float> = tween(durationMillis = 300, easing = FastOutSlowInEasing)
-    val animLeft by animateFloatAsState(
-        targetValue = if (isExpanded) fullBounds.left else initialBounds.left,
-        animationSpec = animSpec,
-        label = "left"
-    )
-    val animTop by animateFloatAsState(
-        targetValue = if (isExpanded) fullBounds.top else initialBounds.top,
-        animationSpec = animSpec,
-        label = "top"
-    )
-    val animWidth by animateFloatAsState(
-        targetValue = if (isExpanded) fullBounds.width else initialBounds.width,
-        animationSpec = animSpec,
-        label = "width"
-    )
-    val animHeight by animateFloatAsState(
-        targetValue = if (isExpanded) fullBounds.height else initialBounds.height,
-        animationSpec = animSpec,
-        label = "height"
-    )
-    val thumbnailAlpha by animateFloatAsState(
-        targetValue = if (isVideoReadyInFullscreen) 0f else 1f,
-        animationSpec = tween(durationMillis = 200),
-    )
-
-    LaunchedEffect(Unit) {
-        isExpanded = true
-    }
-
-    LaunchedEffect(isControlVisible) {
-        if (isControlVisible) {
-            delay(3000L)
-            isControlVisible = false
-        }
-    }
-
-    DisposableEffect(player) {
-        val listener = object : Player.Listener {
-            override fun onIsPlayingChanged(playing: Boolean) {
-                isPlaying = playing
-            }
-
-            override fun onRenderedFirstFrame() {
-                isVideoReadyInFullscreen = true
-            }
-
-            override fun onPlaybackStateChanged(state: Int) {
-                if (state == Player.STATE_READY) {
-                    isVideoReadyInFullscreen = true
-                    totalDurationMs = player.exoPlayer.duration.coerceAtLeast(0L)
-                }
-            }
-        }
-        player.exoPlayer.addListener(listener)
-        if (player.exoPlayer.playbackState == Player.STATE_READY) {
-            isVideoReadyInFullscreen = true
-            totalDurationMs = player.exoPlayer.duration.coerceAtLeast(0L)
-        }
-        isPlaying = player.exoPlayer.isPlaying
-        onDispose { player.exoPlayer.removeListener(listener) }
-    }
-
-    LaunchedEffect(isVideoReadyInFullscreen) {
-        if (!isVideoReadyInFullscreen) return@LaunchedEffect
-        while (true) {
-            if (!isSeeking) {
-                currentPositionMs = player.exoPlayer.currentPosition.coerceAtLeast(0L)
-            }
-            delay(300L)
-        }
-    }
-
-    val onPlayPauseClick: () -> Unit = {
-        if (isPlaying) player.pause()
-        else player.play()
-    }
-
-    val onOrientationClick: () -> Unit = {
-        context.findActivity()?.requestedOrientation = if (isLandscape) {
-            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        } else {
-            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-        }
-    }
-
-    val handleDismiss: () -> Unit = {
-        scope.launch {
-            context.findActivity()?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-            isExpanded = false
-            delay(250L)
-            onDismiss()
-        }
-    }
-
-    BackHandler { handleDismiss() }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .noRippleClickable { isControlVisible = !isControlVisible },
-    ) {
-        Box(
-            modifier = Modifier
-                .then(
-                    if (isLandscape) {
-                        Modifier.fillMaxSize()
-                    } else {
-                        Modifier
-                            .offset {
-                                IntOffset(animLeft.roundToInt(), animTop.roundToInt())
-                            }
-                            .size(
-                                width = with(density) { animWidth.toDp() },
-                                height = with(density) { animHeight.toDp() },
-                            )
-                    }
-                )
-                .background(Color.Black)
-        ) {
-            VideoPlayerView(
-                autoPlayer = player,
-                modifier = Modifier.fillMaxSize(),
-            )
-
-            if (thumbnailUrl != null && thumbnailAlpha > 0f) {
-                AsyncImage(
-                    model = thumbnailUrl,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .alpha(thumbnailAlpha),
-                    contentScale = ContentScale.Fit,
-                )
-            }
-        }
-
-        FullscreenControlOverlay(
-            progress = progress,
-            timeText = timeText,
-            isControlVisible = isControlVisible,
-            isPlaying = isPlaying,
-            isMuted = isMuted,
-            isLandscape = isLandscape,
-            onPlayPauseClick = onPlayPauseClick,
-            onSeekValueChange = { newValue ->
-                if (!isSeeking) player.pause()
-                isSeeking = true
-                seekPositionMs = (newValue * totalDurationMs).toLong()
-            },
-            onSeekValueChangeFinished = {
-                player.seekTo(seekPositionMs)
-                player.play()
-                isSeeking = false
-            },
-            onMuteToggle = onMuteToggle,
-            onOrientationClick = onOrientationClick,
-            onExitFullscreen = { handleDismiss() },
-        )
     }
 }
 

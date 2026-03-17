@@ -89,8 +89,8 @@ import com.andlife.ui.component.dialog.LoginDialog
 import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.ui.component.dialog.NachoPermissionDialog
 import com.andlife.ui.component.guestbook.GuestBookItem
-import com.andlife.ui.component.guestbook.VideoFullscreenOverlay
 import com.andlife.ui.component.invitation.InvitationGuestBookForm
+import com.andlife.ui.component.media.video.FullscreenVideoContainer
 import com.andlife.ui.component.paging.PagingStateContent
 import com.andlife.ui.component.report.ReportBottomSheet
 import com.andlife.ui.util.audio.AudioRecorder
@@ -448,7 +448,7 @@ fun InvitationGuestBookRoute(
                 }
             }
 
-            VideoFullscreenOverlay(
+            FullscreenVideoContainer(
                 player = player,
                 thumbnailUrl = uiState.fullscreenThumbnailUrl,
                 startBounds = uiState.fullscreenStartBounds,
