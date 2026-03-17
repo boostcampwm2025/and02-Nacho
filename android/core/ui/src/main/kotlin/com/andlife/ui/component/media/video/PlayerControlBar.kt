@@ -1,8 +1,6 @@
 package com.andlife.ui.component.media.video
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,19 +12,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoIconSize
@@ -34,7 +28,6 @@ import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
-import com.andlife.ui.util.noRippleClickable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -116,11 +109,10 @@ fun PlayerControlBar(
                 color = Color.White,
                 modifier = Modifier.padding(start = NachoSpacing.xSmall)
             )
-            Icon(
-                painter = painterResource(R.drawable.ic_fullscreen_24),
-                contentDescription = stringResource(R.string.desc_fullscreen),
-                tint = Color.White,
-                modifier = Modifier.noRippleClickable { onFullscreenClick() },
+            PlayerControlBarIconButton(
+                iconRes = R.drawable.ic_fullscreen_24,
+                contentDescRes = R.string.desc_fullscreen,
+                onClick = onFullscreenClick
             )
         }
     }

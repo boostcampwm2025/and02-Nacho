@@ -193,7 +193,6 @@ private fun FullscreenControlBar(
                 }
             },
         )
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -201,37 +200,58 @@ private fun FullscreenControlBar(
             horizontalArrangement = Arrangement.spacedBy(NachoSpacing.small),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                painter = painterResource(playPauseIconRes),
-                contentDescription = stringResource(playPauseIconDesc),
-                tint = Color.White,
-                modifier = Modifier.noRippleClickable { onPlayPauseClick() },
+            PlayerControlBarIconButton(
+                iconRes = playPauseIconRes,
+                contentDescRes = playPauseIconDesc,
+                onClick = onPlayPauseClick,
             )
             Text(
                 text = timeText,
                 style = NachoTheme.typography.bodySmallRegular,
                 color = Color.White,
             )
-            Icon(
-                painter = painterResource(muteIconRes),
-                contentDescription = stringResource(muteIconDesc),
-                tint = Color.White,
-                modifier = Modifier.noRippleClickable { onMuteToggle() },
+            PlayerControlBarIconButton(
+                iconRes = muteIconRes,
+                contentDescRes = muteIconDesc,
+                onClick = onMuteToggle,
             )
             Spacer(modifier = Modifier.weight(1f))
-            Icon(
-                painter = painterResource(R.drawable.ic_screen_rotation_24),
-                contentDescription = stringResource(orientationIconDesc),
-                tint = Color.White,
-                modifier = Modifier.noRippleClickable { onOrientationClick() },
+            PlayerControlBarIconButton(
+                iconRes = R.drawable.ic_screen_rotation_24,
+                contentDescRes = orientationIconDesc,
+                onClick = onOrientationClick,
             )
-            Icon(
-                painter = painterResource(R.drawable.ic_fullscreen_exit_24),
-                contentDescription = stringResource(R.string.desc_exit_fullscreen),
-                tint = Color.White,
-                modifier = Modifier.noRippleClickable { onExitFullscreen() },
+            PlayerControlBarIconButton(
+                iconRes = R.drawable.ic_fullscreen_exit_24,
+                contentDescRes = R.string.desc_exit_fullscreen,
+                onClick = onExitFullscreen,
             )
         }
     }
 }
 
+@Composable
+fun PlayerControlBarIconButton(
+    @DrawableRes iconRes: Int,
+    @StringRes contentDescRes: Int,
+    color: Color = Color.White,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .background(
+                color = Color.Transparent,
+                shape = CircleShape,
+            )
+            .noRippleClickable { onClick() },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            painter = painterResource(iconRes),
+            contentDescription = stringResource(contentDescRes),
+            tint = color,
+            modifier = Modifier.padding(NachoSpacing.xSmall)
+        )
+    }
+}
