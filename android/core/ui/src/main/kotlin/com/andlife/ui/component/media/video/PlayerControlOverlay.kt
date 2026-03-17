@@ -20,11 +20,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
+import com.andlife.ui.component.media.video.PlayerControlOverlayConstants.ANIM_CONTROL_BAR_DURATION
+
+private object PlayerControlOverlayConstants {
+    const val ANIM_CONTROL_BAR_DURATION = 250
+}
 
 @Composable
 fun PlayerControlOverlay(
@@ -56,12 +60,12 @@ fun PlayerControlOverlay(
             visible = isControlVisible,
             enter = slideInVertically(
                 initialOffsetY = { it },
-                animationSpec = tween(durationMillis = 250)
-            ) + fadeIn(animationSpec = tween(durationMillis = 250)),
+                animationSpec = tween(durationMillis = ANIM_CONTROL_BAR_DURATION)
+            ) + fadeIn(animationSpec = tween(durationMillis = ANIM_CONTROL_BAR_DURATION)),
             exit = slideOutVertically(
                 targetOffsetY = { it },
-                animationSpec = tween(durationMillis = 250)
-            ) + fadeOut(animationSpec = tween(durationMillis = 250)),
+                animationSpec = tween(durationMillis = ANIM_CONTROL_BAR_DURATION)
+            ) + fadeOut(animationSpec = tween(durationMillis = ANIM_CONTROL_BAR_DURATION)),
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
             PlayerControlBar(
@@ -96,7 +100,7 @@ private fun PlayerSeekbar(
             .height(NachoStroke.medium),
         color = NachoTheme.colorScheme.brandPrimary,
         trackColor = NachoTheme.colorScheme.backgroundBorder,
-        gapSize = 0.dp,
+        gapSize = NachoSpacing.none,
         strokeCap = StrokeCap.Square,
         drawStopIndicator = { /* No-op */ },
     )

@@ -41,7 +41,12 @@ import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
+import com.andlife.ui.component.media.video.FullscreenControlOverlayConstants.ANIM_FULLSCREEN_DURATION
 import com.andlife.ui.util.noRippleClickable
+
+private object FullscreenControlOverlayConstants {
+    const val ANIM_FULLSCREEN_DURATION = 300
+}
 
 @Composable
 fun FullscreenControlOverlay(
@@ -95,12 +100,12 @@ fun FullscreenControlOverlay(
             visible = isControlVisible,
             enter = slideInVertically(
                 initialOffsetY = { it },
-                animationSpec = tween(durationMillis = 250),
-            ) + fadeIn(animationSpec = tween(durationMillis = 250)),
+                animationSpec = tween(durationMillis = ANIM_FULLSCREEN_DURATION),
+            ) + fadeIn(animationSpec = tween(durationMillis = ANIM_FULLSCREEN_DURATION)),
             exit = slideOutVertically(
                 targetOffsetY = { it },
-                animationSpec = tween(durationMillis = 250),
-            ) + fadeOut(animationSpec = tween(durationMillis = 250)),
+                animationSpec = tween(durationMillis = ANIM_FULLSCREEN_DURATION),
+            ) + fadeOut(animationSpec = tween(durationMillis = ANIM_FULLSCREEN_DURATION)),
             modifier = Modifier.align(Alignment.BottomCenter),
         ) {
             FullscreenControlBar(
@@ -207,13 +212,13 @@ private fun FullscreenControlBar(
                 style = NachoTheme.typography.bodySmallRegular,
                 color = Color.White,
             )
-            Spacer(modifier = Modifier.weight(1f))
             Icon(
                 painter = painterResource(muteIconRes),
                 contentDescription = stringResource(muteIconDesc),
                 tint = Color.White,
                 modifier = Modifier.noRippleClickable { onMuteToggle() },
             )
+            Spacer(modifier = Modifier.weight(1f))
             Icon(
                 painter = painterResource(R.drawable.ic_screen_rotation_24),
                 contentDescription = stringResource(orientationIconDesc),

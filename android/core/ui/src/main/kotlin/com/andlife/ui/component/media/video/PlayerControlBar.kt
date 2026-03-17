@@ -34,6 +34,7 @@ import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.ui.R
+import com.andlife.ui.util.noRippleClickable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -119,12 +120,7 @@ fun PlayerControlBar(
                 painter = painterResource(R.drawable.ic_fullscreen_24),
                 contentDescription = stringResource(R.string.desc_fullscreen),
                 tint = Color.White,
-                modifier = Modifier
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = onFullscreenClick
-                    ),
+                modifier = Modifier.noRippleClickable { onFullscreenClick() },
             )
         }
     }
