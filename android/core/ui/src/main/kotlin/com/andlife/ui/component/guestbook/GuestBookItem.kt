@@ -2,18 +2,25 @@ package com.andlife.ui.component.guestbook
 
 import android.view.ViewGroup
 import androidx.annotation.OptIn
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,10 +34,12 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,6 +54,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
@@ -53,11 +64,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import coil3.compose.AsyncImage
 import coil3.compose.SubcomposeAsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
+import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoIconSize
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
@@ -92,6 +105,7 @@ fun GuestBookItem(
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
     onPlayVideoClick: (String) -> Unit,
+    onFullscreenClick: (String) -> Unit = {}, // TODO: 기본 값 제거
     modifier: Modifier = Modifier,
     shouldPlayVideo: Boolean = false,
     isFromInvitationDetail: Boolean = true,
@@ -150,6 +164,7 @@ fun GuestBookItem(
             videoPlayerPool = videoPlayerPool,
             onVisualMediaClick = onVisualMediaClick,
             onPlayVideoClick = onPlayVideoClick,
+            onFullscreenClick = onFullscreenClick
         )
         GuestBookItemAudioSection(
             audioMedias = guestBook.audioMedias,
@@ -377,6 +392,7 @@ private fun GuestBookItemVisualMediaSection(
     videoPlayerPool: AutoVideoPlayerPool,
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     onPlayVideoClick: (String) -> Unit,
+    onFullscreenClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (visualMediaUrls.isEmpty()) return
@@ -423,6 +439,7 @@ private fun GuestBookItemVisualMediaSection(
                             shouldPlay = shouldPlayVideo && pagerState.currentPage == page,
                             videoPlayerPool = videoPlayerPool,
                             onPlayVideoClick = onPlayVideoClick,
+                            onFullscreenClick = onFullscreenClick
                         )
                     }
 
@@ -475,7 +492,7 @@ private fun GuestBookItemVisualMediaSection(
     }
 }
 
-@OptIn(UnstableApi::class)
+@kotlin.OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun VideoPlayerContainer(
     guestBookId: Long,
@@ -485,17 +502,33 @@ private fun VideoPlayerContainer(
     shouldPlay: Boolean,
     videoPlayerPool: AutoVideoPlayerPool,
     onPlayVideoClick: (String) -> Unit,
+    onFullscreenClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var isVideoReady by remember(videoUrl) { mutableStateOf(false) }
-    var remainingDurationMs by remember(videoUrl) {
-        mutableLongStateOf((totalDurationSeconds?.times(1000))?.toLong() ?: 0L)
-    }
+    var currentPositionMs by remember(videoUrl) { mutableLongStateOf(0L) }
+    var totalDurationMs by remember(videoUrl) { mutableLongStateOf((totalDurationSeconds?.times(1000L)) ?: 0L) }
+    var isControlVisible by remember(videoUrl) { mutableStateOf(false) }
+    var isSeeking by remember(videoUrl) { mutableStateOf(false) }
+    var seekPositionMs by remember(videoUrl) { mutableLongStateOf(0L) }
+    val isMuted by videoPlayerPool.isMuted.collectAsStateWithLifecycle()
 
     val thumbnailAlpha by animateFloatAsState(
         targetValue = if (shouldPlay && isVideoReady) 0f else 1f,
         animationSpec = tween(durationMillis = 200),
     )
+
+    val displayPositionMs = if (isSeeking) seekPositionMs else currentPositionMs
+
+    val progress = if (totalDurationMs > 0) {
+        (displayPositionMs.toFloat() / totalDurationMs.toFloat()).coerceIn(0f, 1f)
+    } else {
+        0f
+    }
+
+    val timeText = "${(displayPositionMs / 1000).toInt().toFormatDuration()} / ${
+        (totalDurationMs / 1000).toInt().toFormatDuration()
+    }"
 
     LaunchedEffect(shouldPlay, videoUrl) {
         if (shouldPlay) {
@@ -505,27 +538,31 @@ private fun VideoPlayerContainer(
         }
     }
 
+    LaunchedEffect(isControlVisible) {
+        if (isControlVisible) {
+            delay(3000L)
+            isControlVisible = false
+        }
+    }
+
+    LaunchedEffect(shouldPlay) {
+        if (!shouldPlay) isControlVisible = false
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Black)
+            .then(
+                if (shouldPlay && isVideoReady) {
+                    Modifier.clickable { isControlVisible = !isControlVisible }
+                } else {
+                    Modifier
+                }
+            )
     ) {
         if (shouldPlay) {
             val currentPlayer = remember(videoUrl) { videoPlayerPool.getPlayer(videoUrl) }
-
-            LaunchedEffect(isVideoReady) {
-                if (isVideoReady && totalDurationSeconds != null) {
-                    while (true) {
-                        val duration = currentPlayer.exoPlayer.duration
-                        val position = currentPlayer.exoPlayer.currentPosition
-
-                        remainingDurationMs = (duration - position).coerceAtLeast(0L)
-                        delay(1000L)
-                    }
-                } else {
-                    remainingDurationMs = (totalDurationSeconds?.times(1000))?.toLong() ?: 0L
-                }
-            }
 
             DisposableEffect(currentPlayer, videoUrl) {
                 val listener = object : Player.Listener {
@@ -536,48 +573,286 @@ private fun VideoPlayerContainer(
                     override fun onPlaybackStateChanged(state: Int) {
                         if (state == Player.STATE_READY && currentPlayer.exoPlayer.playWhenReady) {
                             isVideoReady = true
+                            totalDurationMs = currentPlayer.exoPlayer.duration.coerceAtLeast(0L)
                         }
                     }
                 }
-
                 currentPlayer.exoPlayer.addListener(listener)
-
                 if (currentPlayer.exoPlayer.playbackState == Player.STATE_READY) {
                     isVideoReady = true
+                    totalDurationMs = currentPlayer.exoPlayer.duration.coerceAtLeast(0L)
                 }
-
                 onDispose {
                     currentPlayer.exoPlayer.removeListener(listener)
                 }
             }
 
-            VideoPlayerView(
-                autoPlayer = currentPlayer,
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
+            LaunchedEffect(isVideoReady) {
+                if (!isVideoReady) {
+                    currentPositionMs = 0L
+                    return@LaunchedEffect
+                }
+                while (true) {
+                    if (!isSeeking) {
+                        currentPositionMs = currentPlayer.exoPlayer.currentPosition.coerceAtLeast(0L)
+                    }
+                    delay(16L)
+                }
+            }
 
-        if (thumbnailUrl != null && thumbnailAlpha > 0f) {
-            ThumbnailWrapper(
+            VideoPlayerContent(
+                currentPlayer = currentPlayer,
                 thumbnailUrl = thumbnailUrl,
+                thumbnailAlpha = thumbnailAlpha,
+                progress = progress,
+                timeText = timeText,
+                isControlVisible = isControlVisible,
+                isMuted = isMuted,
+                isVideoReady = isVideoReady,
+                onVideoClick = { isControlVisible = !isControlVisible },
                 onPlayVideoClick = { onPlayVideoClick(videoUrl) },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(thumbnailAlpha),
+                onSeekValueChange = { newValue ->
+                    if (!isSeeking) currentPlayer.pause()
+                    isSeeking = true
+                    seekPositionMs = (newValue * totalDurationMs).toLong()
+                },
+                onSeekValueChangeFinished = {
+                    currentPlayer.seekTo(seekPositionMs)
+                    currentPlayer.play()
+                    isSeeking = false
+                },
+                onMuteToggle = { videoPlayerPool.toggleMute() },
+                onFullscreenClick = { onFullscreenClick(videoUrl) },
             )
-        }
-
-        if (totalDurationSeconds != null) {
-            VideoDurationOverlay(
-                duration = (remainingDurationMs / 1000).toInt().toFormatDuration(),
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(NachoSpacing.small),
+        } else {
+            VideoPlayerContent(
+                currentPlayer = null,
+                thumbnailUrl = thumbnailUrl,
+                thumbnailAlpha = 1f,
+                progress = 0f,
+                timeText = "00:00 / 00:00",
+                isControlVisible = false,
+                isMuted = isMuted,
+                isVideoReady = false,
+                onVideoClick = { /* No-op */ },
+                onPlayVideoClick = { onPlayVideoClick(videoUrl) },
+                onSeekValueChange = { /* No-op */ },
+                onSeekValueChangeFinished = { /* No-op */ },
+                onMuteToggle = { videoPlayerPool.toggleMute() },
+                onFullscreenClick = { /* TODO: 전체화면 기능 */ },
             )
         }
     }
 }
 
+@Composable
+private fun VideoPlayerContent(
+    currentPlayer: AutoVideoPlayer?,
+    thumbnailUrl: String?,
+    thumbnailAlpha: Float,
+    progress: Float,
+    timeText: String,
+    isControlVisible: Boolean,
+    isMuted: Boolean,
+    isVideoReady: Boolean,
+    onVideoClick: () -> Unit,
+    onPlayVideoClick: () -> Unit,
+    onSeekValueChange: (Float) -> Unit,
+    onSeekValueChangeFinished: () -> Unit,
+    onMuteToggle: () -> Unit,
+    onFullscreenClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val thumbnailAlphaAnimated by animateFloatAsState(
+        targetValue = thumbnailAlpha,
+        animationSpec = tween(durationMillis = 200),
+    )
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .then(
+                if (isVideoReady) {
+                    Modifier.clickable { onVideoClick() }
+                } else {
+                    Modifier
+                }
+            )
+    ) {
+        currentPlayer?.let {
+            VideoPlayerView(
+                autoPlayer = it,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+
+        if (thumbnailUrl != null && thumbnailAlphaAnimated > 0f) {
+            ThumbnailWrapper(
+                thumbnailUrl = thumbnailUrl,
+                onPlayVideoClick = onPlayVideoClick,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(thumbnailAlphaAnimated),
+            )
+        }
+
+        if (currentPlayer != null) {
+            PlayerControlOverlay(
+                progress = progress,
+                timeText = timeText,
+                isControlVisible = isControlVisible,
+                isMuted = isMuted,
+                onSeekValueChange = onSeekValueChange,
+                onSeekValueChangeFinished = onSeekValueChangeFinished,
+                onMuteToggle = onMuteToggle,
+                onFullscreenClick = onFullscreenClick,
+            )
+        }
+    }
+}
+
+@Composable
+private fun PlayerControlOverlay(
+    progress: Float,
+    timeText: String,
+    isControlVisible: Boolean,
+    isMuted: Boolean,
+    onSeekValueChange: (Float) -> Unit,
+    onSeekValueChangeFinished: () -> Unit,
+    onMuteToggle: () -> Unit,
+    onFullscreenClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier.fillMaxSize()) {
+        AnimatedVisibility(
+            visible = !isControlVisible,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier.align(Alignment.BottomCenter)
+        ) {
+            PlayerSeekbar(
+                progress = progress,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        AnimatedVisibility(
+            visible = isControlVisible,
+            enter = slideInVertically(
+                initialOffsetY = { it },
+                animationSpec = tween(durationMillis = 250)
+            ) + fadeIn(animationSpec = tween(durationMillis = 250)),
+            exit = slideOutVertically(
+                targetOffsetY = { it },
+                animationSpec = tween(durationMillis = 250)
+            ) + fadeOut(animationSpec = tween(durationMillis = 250)),
+            modifier = Modifier.align(Alignment.BottomCenter)
+        ) {
+            PlayerControlBar(
+                progress = progress,
+                timeText = timeText,
+                onSeekValueChange = onSeekValueChange,
+                onSeekValueChangeFinished = onSeekValueChangeFinished,
+                onFullscreenClick = onFullscreenClick,
+            )
+        }
+
+        PlayerMuteButton(
+            isMuted = isMuted,
+            onToggle = onMuteToggle,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(NachoSpacing.small),
+        )
+    }
+}
+
+@kotlin.OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PlayerControlBar(
+    progress: Float,
+    timeText: String,
+    onSeekValueChange: (Float) -> Unit,
+    onSeekValueChangeFinished: () -> Unit,
+    onFullscreenClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f))
+                )
+            )
+            .padding(horizontal = NachoSpacing.small)
+            .padding(bottom = NachoSpacing.medium),
+        verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
+    ) {
+        Slider(
+            value = progress,
+            onValueChange = onSeekValueChange,
+            onValueChangeFinished = onSeekValueChangeFinished,
+            modifier = Modifier.fillMaxWidth().height(0.dp),
+            thumb = {
+                Box(
+                    modifier = Modifier
+                        .size(15.dp)
+                        .shadow(
+                            elevation = NachoElevation.medium,
+                            shape = CircleShape
+                        )
+                        .background(
+                            color = Color.White,
+                            shape = CircleShape,
+                        )
+                )
+            },
+            track = { sliderState ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(NachoStroke.large)
+                        .clip(NachoTheme.shapes.extraSmall)
+                        .background(NachoTheme.colorScheme.backgroundBorder)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(sliderState.value)
+                            .fillMaxHeight()
+                            .background(NachoTheme.colorScheme.brandPrimary)
+                    )
+                }
+            },
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = NachoSpacing.xSmall),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = timeText,
+                style = NachoTheme.typography.bodySmallRegular,
+                color = Color.White,
+                modifier = Modifier.padding(start = NachoSpacing.xSmall)
+            )
+            Icon(
+                painter = painterResource(R.drawable.ic_fullscreen_24),
+                contentDescription = stringResource(R.string.desc_fullscreen),
+                tint = Color.White,
+                modifier = Modifier
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = onFullscreenClick
+                    ),
+            )
+        }
+    }
+}
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -623,6 +898,62 @@ private fun VideoDurationOverlay(
         modifier = modifier,
         text = duration
     )
+}
+
+@Composable
+private fun PlayerSeekbar(
+    progress: Float,
+    modifier: Modifier = Modifier,
+) {
+    LinearProgressIndicator(
+        progress = { progress },
+        modifier = modifier
+            .fillMaxWidth()
+            .height(NachoStroke.medium),
+        color = NachoTheme.colorScheme.brandPrimary,
+        trackColor = NachoTheme.colorScheme.backgroundBorder,
+        gapSize = 0.dp,
+        strokeCap = StrokeCap.Square,
+        drawStopIndicator = { /* No-op */ },
+    )
+}
+
+@Composable
+private fun PlayerMuteButton(
+    isMuted: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val iconResId = if (isMuted) {
+        R.drawable.ic_volume_off_filled_24
+    } else {
+        R.drawable.ic_volume_up_filled_24
+    }
+    val contentDescription = if (isMuted) {
+        stringResource(R.string.desc_unmute_video)
+    } else {
+        stringResource(R.string.desc_mute_video)
+    }
+    Box(
+        modifier = modifier
+            .background(
+                color = NachoTheme.colorScheme.backgroundOverlay,
+                shape = CircleShape
+            )
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onToggle
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painter = painterResource(id = iconResId),
+            contentDescription = contentDescription,
+            tint = NachoTheme.colorScheme.iconTertiary,
+            modifier = Modifier.padding(NachoSpacing.xSmall)
+        )
+    }
 }
 
 @Composable

@@ -63,10 +63,16 @@ sealed interface InvitationGuestBookUiEvent : BaseUiEvent {
         val targetId: Long
     ) : InvitationGuestBookUiEvent
 
-     data object DismissReport : InvitationGuestBookUiEvent
+    data object DismissReport : InvitationGuestBookUiEvent
 
-     data class SubmitReport(
-         val reason: ReportReason,
-         val description: String?
-     ) : InvitationGuestBookUiEvent
+    data class SubmitReport(
+        val reason: ReportReason,
+        val description: String?
+    ) : InvitationGuestBookUiEvent
+
+    data class ShowFullscreenVideo(
+        val url: String,
+    ) : InvitationGuestBookUiEvent
+
+    data object DismissFullscreenVideo : InvitationGuestBookUiEvent
 }

@@ -75,7 +75,6 @@ import com.andlife.model.guestbook.GuestBookInvitationUiModel
 import com.andlife.model.guestbook.GuestBookMediaUiModel
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
-import com.andlife.ui.R as uiR
 import com.andlife.ui.component.AudioRecordingBottomSheet
 import com.andlife.ui.component.dialog.LoginDialog
 import com.andlife.ui.component.dialog.NachoInfoDialog
@@ -97,6 +96,7 @@ import kotlinx.datetime.LocalDateTime
 import java.io.File
 import kotlin.math.max
 import kotlin.math.min
+import com.andlife.ui.R as uiR
 
 private const val CAMERA_IMAGES_DIR = "camera_images"
 
@@ -405,6 +405,10 @@ fun InvitationGuestBookRoute(
         )
     }
 
+    uiState.fullscreenVideoUrl?.let {
+        // TODO: 전체화면 UI 구현
+    }
+
     InvitationGuestBookScreen(
         uiState = uiState,
         guestBooks = guestBooks,
@@ -598,23 +602,11 @@ private fun InvitationGuestBookScreen(
                                         isEditing = uiState.editingGuestBookId == guestBook.id,
                                         onEditClick = { onEvent(InvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
                                         onDeleteClick = { onDeleteMenuClick(guestBook.id) },
-                                        onReportClick = { targetId ->
-                                            onEvent(
-                                                InvitationGuestBookUiEvent.ShowReport(
-                                                    targetId
-                                                )
-                                            )
-                                        },
+                                        onReportClick = { targetId -> onEvent(InvitationGuestBookUiEvent.ShowReport(targetId)) },
                                         onVisualMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
                                         onAudioMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
-                                        onPlayVideoClick = { url ->
-                                            onEvent(
-                                                InvitationGuestBookUiEvent.ClickVideoPlayButton(
-                                                    url,
-                                                    guestBook.id
-                                                )
-                                            )
-                                        }
+                                        onPlayVideoClick = { url -> onEvent(InvitationGuestBookUiEvent.ClickVideoPlayButton(url, guestBook.id))},
+                                        onFullscreenClick = { url -> onEvent(InvitationGuestBookUiEvent.ShowFullscreenVideo(url)) }
                                     )
                                 }
                             }
@@ -825,7 +817,8 @@ private fun InvitationGuestBookResultPreview() {
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},
                     onAudioMediaClick = {},
-                    onPlayVideoClick = {}
+                    onPlayVideoClick = {},
+                    onFullscreenClick = {}
                 )
             }
         }
