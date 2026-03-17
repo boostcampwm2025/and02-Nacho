@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
@@ -52,6 +51,7 @@ import com.andlife.designsystem.R as designR
 
 fun LazyListScope.announcementSection(
     announcementList: ImmutableList<AnnouncementUiModel>,
+    itemOffset: Int,
     onRemoveAnnouncementClick: (AnnouncementUiModel) -> Unit,
     onAddAnnouncementClick: () -> Unit,
     onEditAnnouncementClick: (AnnouncementUiModel) -> Unit,
@@ -129,7 +129,7 @@ fun LazyListScope.announcementSection(
             items = announcementList,
             key = { _, item -> item.id },
         ) { index, item ->
-            val absoluteIndex = index + 8
+            val absoluteIndex = index + itemOffset
 
             Box(
                 modifier = Modifier

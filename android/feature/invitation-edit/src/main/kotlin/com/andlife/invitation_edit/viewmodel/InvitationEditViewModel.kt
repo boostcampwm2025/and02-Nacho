@@ -328,8 +328,8 @@ class InvitationEditViewModel @Inject constructor(
     }
 
     private fun reorderAnnouncement(fromIndex: Int, toIndex: Int) {
-        val from = fromIndex - 8
-        val to = toIndex - 8
+        val from = fromIndex
+        val to = toIndex
 
         val currentList = uiState.value.invitationFormUiModel.announcement
 

@@ -56,6 +56,7 @@ import com.andlife.ui.util.collectWithLifecycle
 import kotlinx.coroutines.launch
 
 private const val MAX_IMAGE_COUNT = 10
+private const val ANNOUNCEMENT_ITEM_OFFSET = 8
 
 @Composable
 fun InvitationEditRoute(
@@ -264,6 +265,7 @@ private fun InvitationEditScreen(
 
     val dragDropState = rememberDragDropState(
         lazyListState = listState,
+        itemOffset = ANNOUNCEMENT_ITEM_OFFSET,
         onMove = { fromIndex, toIndex ->
             onEvent(InvitationFormUiEvent.ReorderAnnouncement(fromIndex, toIndex))
         }
@@ -371,6 +373,7 @@ private fun InvitationEditScreen(
 
                 announcementSection(
                     announcementList = uiState.invitationFormUiModel.announcement,
+                    itemOffset = ANNOUNCEMENT_ITEM_OFFSET,
                     onAddAnnouncementClick = onAddAnnouncementClick,
                     onRemoveAnnouncementClick = onRemoveAnnouncementClick,
                     onEditAnnouncementClick = onEditAnnouncementClick,

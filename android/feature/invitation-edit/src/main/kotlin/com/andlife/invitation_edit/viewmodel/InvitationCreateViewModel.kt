@@ -10,7 +10,6 @@ import com.andlife.domain.util.AnalyticsEvent
 import com.andlife.domain.util.AnalyticsEvent.*
 import com.andlife.domain.util.AnalyticsLogger
 import com.andlife.domain.util.Button
-import com.andlife.domain.util.EventType
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
 import com.andlife.domain.util.map
@@ -327,8 +326,8 @@ class InvitationCreateViewModel @Inject constructor(
     }
 
     private fun reorderAnnouncement(fromIndex: Int, toIndex: Int) {
-        val from = fromIndex - 8
-        val to = toIndex - 8
+        val from = fromIndex
+        val to = toIndex
 
         val currentList = uiState.value.invitationFormUiModel.announcement
         if (from !in currentList.indices || to !in currentList.indices) return

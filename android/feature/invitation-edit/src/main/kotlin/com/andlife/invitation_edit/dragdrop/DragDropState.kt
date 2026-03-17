@@ -11,16 +11,18 @@ import androidx.compose.ui.zIndex
 @Composable
 fun rememberDragDropState(
     lazyListState: LazyListState,
+    itemOffset: Int,
     onMove: (Int, Int) -> Unit
 ): DragDropState {
     return remember(lazyListState) {
-        DragDropState(lazyListState, onMove)
+        DragDropState(lazyListState, itemOffset, onMove)
     }
 }
 
 @Stable
 class DragDropState(
     private val lazyListState: LazyListState,
+    private val itemOffset: Int,
     private val onMove: (Int, Int) -> Unit
 ) {
     var draggingItemIndex by mutableStateOf<Int?>(null)
@@ -52,7 +54,7 @@ class DragDropState(
         val currentEnd = currentStart + initialInfo.size
 
         val overlappingItem = lazyListState.layoutInfo.visibleItemsInfo.firstOrNull { item ->
-            if (item.index == currentDraggingIndex || item.index < 8) return@firstOrNull false
+            if (item.index == currentDraggingIndex || item.index < itemOffset) return@firstOrNull false
 
             val itemCenter = item.offset + (item.size / 2)
 
@@ -67,7 +69,7 @@ class DragDropState(
             val fromIndex = currentDraggingIndex
             val toIndex = overlappingItem.index
 
-            onMove(fromIndex, toIndex)
+            onMove(fromIndex - itemOffset, toIndex - itemOffset)
 
             val distanceCorrection = initialInfo.offset - overlappingItem.offset
 
