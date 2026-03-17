@@ -44,6 +44,9 @@ import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookUiEvent
 import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookUiState
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -59,10 +62,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@HiltViewModel
-class MyInvitationGuestBookViewModel
-@Inject
-constructor(
+@HiltViewModel(assistedFactory = MyInvitationGuestBookViewModel.Factory::class)
+class MyInvitationGuestBookViewModel @AssistedInject constructor(
     private val mediaUploader: MediaUploader,
     private val mediaFileProvider: MediaFileProvider,
     private val thumbnailGenerator: ThumbnailGenerator,
@@ -73,12 +74,11 @@ constructor(
     val videoPlayerPool: AutoVideoPlayerPool,
     private val analyticsLogger: AnalyticsLogger,
     private val crashlyticsLogger: CrashlyticsLogger,
+    @Assisted private val invitationId: Long,
     savedStateHandle: SavedStateHandle,
 ) : BaseViewModel<MyInvitationGuestBookUiState, MyInvitationGuestBookUiEvent, MyInvitationGuestBookSideEffect>(
     MyInvitationGuestBookUiState(),
 ) {
-    private val invitationId: Long = savedStateHandle.toRoute<MyInvitationDetail>().id
-
     override val uiState: StateFlow<MyInvitationGuestBookUiState> = mutableUiState.asStateFlow()
 
     private val refreshFlow = MutableStateFlow(0)
@@ -101,9 +101,9 @@ constructor(
         authStateManager.authState
             .onEach { authState ->
                 val isStateChanged = uiState.value.isAuthStateChanged(authState)
-                updateState { copy( authState = authState ) }
+                updateState { copy(authState = authState) }
                 if (isStateChanged) {
-                    sendEffect(MyInvitationGuestBookSideEffect.AuthStateChanged(authState) )
+                    sendEffect(MyInvitationGuestBookSideEffect.AuthStateChanged(authState))
                 }
             }
             .launchIn(viewModelScope)
@@ -130,9 +130,15 @@ constructor(
             is MyInvitationGuestBookUiEvent.UpdateTextContent -> updateTextContent(event.textContent)
             is MyInvitationGuestBookUiEvent.RemoveMedia -> removeMedia(event.media)
             is MyInvitationGuestBookUiEvent.UploadMedias -> {
-                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL_GUEST_BOOK, Button.UPLOAD_GUEST_BOOK))
+                analyticsLogger.logEvent(
+                    AnalyticsEvent.ButtonClick(
+                        Screen.MY_INVITATION_DETAIL_GUEST_BOOK,
+                        Button.UPLOAD_GUEST_BOOK
+                    )
+                )
                 handleUploadMedias()
             }
+
             is MyInvitationGuestBookUiEvent.ClickCamera -> handleCameraClick()
             is MyInvitationGuestBookUiEvent.ClickMicrophone -> handleMicrophoneClick()
             is MyInvitationGuestBookUiEvent.ClearError -> clearError()
@@ -140,14 +146,26 @@ constructor(
             is MyInvitationGuestBookUiEvent.ClickVideoPlayButton -> clickVideoPlayButton(event.url, event.itemId)
             is MyInvitationGuestBookUiEvent.ClickVisualMedia -> {}
             is MyInvitationGuestBookUiEvent.ClickEditMenu -> {
-                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL_GUEST_BOOK, Button.UPDATE_GUEST_BOOK))
+                analyticsLogger.logEvent(
+                    AnalyticsEvent.ButtonClick(
+                        Screen.MY_INVITATION_DETAIL_GUEST_BOOK,
+                        Button.UPDATE_GUEST_BOOK
+                    )
+                )
                 startEditing(event.guestBook)
             }
+
             is MyInvitationGuestBookUiEvent.CancelEdit -> cancelEdit()
             is MyInvitationGuestBookUiEvent.ClickDeleteMenu -> {
-                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL_GUEST_BOOK, Button.DELETE_GUEST_BOOK))
+                analyticsLogger.logEvent(
+                    AnalyticsEvent.ButtonClick(
+                        Screen.MY_INVITATION_DETAIL_GUEST_BOOK,
+                        Button.DELETE_GUEST_BOOK
+                    )
+                )
                 deleteGuestBook(event.guestBookId)
             }
+
             is MyInvitationGuestBookUiEvent.UpdateMediaPlayState -> updatePlayState(event.isPlaying)
             MyInvitationGuestBookUiEvent.Refresh -> refresh()
             MyInvitationGuestBookUiEvent.CheckLogin -> checkLogin()
@@ -155,7 +173,12 @@ constructor(
             is MyInvitationGuestBookUiEvent.ShowReport -> updateReportTargetId(event.guestBookId)
             MyInvitationGuestBookUiEvent.DismissReport -> updateReportTargetId(null)
             is MyInvitationGuestBookUiEvent.SubmitReport -> {
-                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL_GUEST_BOOK, Button.INVITATION_REPORT))
+                analyticsLogger.logEvent(
+                    AnalyticsEvent.ButtonClick(
+                        Screen.MY_INVITATION_DETAIL_GUEST_BOOK,
+                        Button.INVITATION_REPORT
+                    )
+                )
                 submitReport(event.reason, event.description)
             }
         }
@@ -585,5 +608,12 @@ constructor(
                 sendEffect(MyInvitationGuestBookSideEffect.ReportFailure(messageToShow))
             }
         }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            myInvitationId: Long,
+        ): MyInvitationGuestBookViewModel
     }
 }

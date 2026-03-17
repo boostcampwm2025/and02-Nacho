@@ -28,6 +28,7 @@ import com.andlife.deeplink.DeepLinkManager
 import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.util.AnalyticsEvent
+import com.andlife.domain.util.RefreshEventHub
 import com.andlife.home.homeNavGraph
 import com.andlife.invitation.invitationDetailNavGraph
 import com.andlife.invitation.invitationNavGraph
@@ -39,9 +40,6 @@ import com.andlife.invitation_edit.invitationCreateNavGraph
 import com.andlife.invitation_edit.invitationEditNavGraph
 import com.andlife.invitation_edit.invitationPreviewNavGraph
 import com.andlife.login.loginNavGraph
-import com.andlife.model.util.NavigationKeyConstant.CREATE_CARD_BY_INVITATION_ID
-import com.andlife.model.util.NavigationKeyConstant.CREATE_THANKS_CARD
-import com.andlife.model.util.NavigationKeyConstant.UPDATE_CARD
 import com.andlife.myinvitation.myInvitationDetailNavGraph
 import com.andlife.myinvitation.myInvitationNavGraph
 import com.andlife.nacho.LocalAnalyticsLogger
@@ -77,12 +75,15 @@ fun NachoNavHost(
             navSuiteType.isNavigationBar && isBottomTab != null -> {
                 if (suiteState.currentValue == NavigationSuiteScaffoldValue.Hidden) suiteState.show()
             }
+
             navSuiteType.isNavigationBar && isBottomTab == null -> {
                 if (suiteState.currentValue == NavigationSuiteScaffoldValue.Visible) suiteState.hide()
             }
+
             !navSuiteType.isNavigationBar && isBottomTab == null -> {
                 if (suiteState.currentValue == NavigationSuiteScaffoldValue.Visible) suiteState.hide()
             }
+
             !navSuiteType.isNavigationBar && isBottomTab != null -> {
                 if (suiteState.currentValue == NavigationSuiteScaffoldValue.Hidden) suiteState.show()
             }
@@ -169,10 +170,14 @@ fun NachoNavHost(
                 myInvitationNavGraph(
                     snackbarHostState = snackbarHostState,
                     onNavigateToCreate = navigator::navigateToMyInvitationCreate,
-                    onNavigateToDetail = navigator::navigateToMyInvitationDetail,
                     onNavigateToLogin = {
                         navigator.navigateToLogin()
-                    }
+                    },
+                    onNavigateToEditInvitation = navigator::navigateToMyInvitationEdit,
+                    onNavigateToEditCard = navigator::navigateToUpdateCard,
+                    onNavigateToCreateCard = navigator::navigateToCreateCardByInvitation,
+                    onNavigateToCreateThanksCard = navigator::navigateToCreateThanksCard,
+                    onNavigateToUpdateThanksCard = navigator::navigateToUpdateThanksCard
                 )
 
                 myInvitationDetailNavGraph(
@@ -198,7 +203,9 @@ fun NachoNavHost(
                     onNavigateToPreview = navigator::navigateToInvitationPreview,
                     onNavigateBack = navigator::navigatePopBackStack,
                     onNavigateCreateCard = navigator::navigateToCreateCard,
-                    onNavigateToInvitationDetail = navigator::navigateToMyInvitationDetailByCreate
+                    onNavigateToInvitationDetail = { id ->
+                        navigator.navigatePopBackStack()
+                    }
                 )
 
                 invitationEditNavGraph(
@@ -224,8 +231,6 @@ fun NachoNavHost(
                 createCardByInvitationNavGraph(
                     onBackClick = navigator::navigatePopBackStack,
                     onSuccessCreateCard = {
-                        navigator.navController.previousBackStackEntry?.savedStateHandle[CREATE_CARD_BY_INVITATION_ID] =
-                            true
                         navigator.navigatePopBackStack()
                     }
                 )
@@ -233,7 +238,6 @@ fun NachoNavHost(
                 updateCardNavGraph(
                     onBackClick = navigator::navigatePopBackStack,
                     onSuccessCreateCard = {
-                        navigator.navController.previousBackStackEntry?.savedStateHandle[UPDATE_CARD] = true
                         navigator.navigatePopBackStack()
                     }
                 )
@@ -241,18 +245,12 @@ fun NachoNavHost(
                 loginNavGraph()
 
                 createThanksCardNavGraph(
-                    onSuccessfulCreate = {
-                        navigator.navController.previousBackStackEntry?.savedStateHandle[CREATE_THANKS_CARD] = true
-                        navigator.navigatePopBackStack()
-                    },
+                    onSuccessfulCreate = navigator::navigatePopBackStack,
                     onBackClick = navigator::navigatePopBackStack,
                 )
 
                 updateThanksCardNavGraph(
-                    onSuccessfulUpdate = {
-                        navigator.navController.previousBackStackEntry?.savedStateHandle[UPDATE_CARD] = true
-                        navigator.navigatePopBackStack()
-                    },
+                    onSuccessfulUpdate = navigator::navigatePopBackStack,
                     onBackClick = navigator::navigatePopBackStack
                 )
             }

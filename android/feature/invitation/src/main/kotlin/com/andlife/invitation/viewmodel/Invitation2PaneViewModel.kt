@@ -19,7 +19,7 @@ class Invitation2PaneViewModel @Inject constructor(
     private val _uiState: MutableStateFlow<Invitation2PaneUiState> = MutableStateFlow(
         Invitation2PaneUiState(
             selectedInvitationId = route.initialInvitationId,
-            isFromDeelLink = route.isFromDeepLink
+            isFromDeeplLink = route.isFromDeepLink
         )
     )
     val uiState = _uiState.asStateFlow()
@@ -31,5 +31,5 @@ class Invitation2PaneViewModel @Inject constructor(
 
 data class Invitation2PaneUiState(
     val selectedInvitationId: Long? = null,
-    val isFromDeelLink: Boolean = false,
+    val isFromDeeplLink: Boolean = false,
 )

@@ -1,4 +1,4 @@
-package com.andlife.myinvitation.screen
+package com.andlife.myinvitation.screen.detail
 
 import android.text.Editable
 import android.view.ViewGroup

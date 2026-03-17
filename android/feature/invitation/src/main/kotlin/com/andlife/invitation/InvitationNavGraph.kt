@@ -11,7 +11,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.andlife.invitation.screen.detail.InvitationDetailRoute
-import com.andlife.invitation.screen.InvitationsListDetailScreen
+import com.andlife.invitation.screen.InvitationsListDetailRoute
 import com.andlife.invitation.viewmodel.InvitationDetailViewModel
 import com.andlife.invitation.viewmodel.InvitationGuestBookViewModel
 import kotlinx.collections.immutable.persistentListOf
@@ -55,7 +55,7 @@ fun NavGraphBuilder.invitationNavGraph(
     composable<Invitation>(
         deepLinks = persistentListOf(deepLinks)
     ) {
-        InvitationsListDetailScreen(
+        InvitationsListDetailRoute(
             snackbarHostState = snackbarHostState,
             onNavigateToLogin = onNavigateToLogin,
         )
@@ -68,8 +68,8 @@ fun NavGraphBuilder.invitationDetailNavGraph(
     onNavigateToLogin: () -> Unit,
 ) {
     composable<InvitationDetail>(
-
-    ) { val invitationDetail = it.toRoute<InvitationDetail>()
+    ) {
+        val invitationDetail = it.toRoute<InvitationDetail>()
         InvitationDetailRoute(
             selectedId = invitationDetail.id,
             onNavigateBack = onNavigateBack,

@@ -83,7 +83,7 @@ private const val SAMPLE_INVITATION_ID = 1L
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun InvitationsListDetailScreen(
+fun InvitationsListDetailRoute(
     snackbarHostState: SnackbarHostState,
     onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
@@ -137,7 +137,7 @@ private fun InvitationListDetailScreen(
     }
 
     LaunchedEffect(Unit) {
-        if (!isConsumeDeepLink && uiState.isFromDeelLink) {
+        if (!isConsumeDeepLink && uiState.isFromDeeplLink) {
             val id = uiState.selectedInvitationId ?: return@LaunchedEffect
             onInvitationClickShowDetailPane(id)
             isConsumeDeepLink = true
@@ -181,7 +181,7 @@ private fun InvitationListDetailScreen(
                                     viewModel = hiltViewModel<InvitationDetailViewModel, InvitationDetailViewModel.Factory>(
                                         key = "detail ${route.id}"
                                     ) { factory ->
-                                        factory.create(route.id, uiState.isFromDeelLink)
+                                        factory.create(route.id, uiState.isFromDeeplLink)
                                     },
                                     guestBookViewModel = hiltViewModel<InvitationGuestBookViewModel, InvitationGuestBookViewModel.Factory>(
                                         key = "guestbook ${route.id}"

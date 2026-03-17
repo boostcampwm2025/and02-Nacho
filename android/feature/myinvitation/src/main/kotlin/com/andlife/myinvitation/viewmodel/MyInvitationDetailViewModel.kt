@@ -29,6 +29,9 @@ import com.andlife.myinvitation.model.detail.MyInvitationDetailUiEvent
 import com.andlife.myinvitation.model.detail.MyInvitationDetailUiState
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.util.toDateTimeSingleLine
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.SharingStarted
@@ -38,8 +41,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@HiltViewModel
-class MyInvitationDetailViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = MyInvitationDetailViewModel.Factory::class)
+class MyInvitationDetailViewModel @AssistedInject constructor(
     savedStateHandle: SavedStateHandle,
     private val kakaoShareManager: KakaoShareManager,
     private val invitationRepository: InvitationRepository,
@@ -47,13 +50,11 @@ class MyInvitationDetailViewModel @Inject constructor(
     private val deepLinkManager: DeepLinkManager,
     private val clipboardManager: ClipboardManager,
     private val thanksCardRepository: ThanksCardRepository,
-    private val analyticsLogger: AnalyticsLogger
+    private val analyticsLogger: AnalyticsLogger,
+    @Assisted private val myInvitationId: Long,
 ) : BaseViewModel<MyInvitationDetailUiState, MyInvitationDetailUiEvent, MyInvitationDetailSideEffect>(
     initialState = MyInvitationDetailUiState(),
 ) {
-
-    private val myInvitationId: Long = savedStateHandle.toRoute<MyInvitationDetail>().id
-
     override val uiState: StateFlow<MyInvitationDetailUiState> =
         mutableUiState
             .onStart {
@@ -272,5 +273,12 @@ class MyInvitationDetailViewModel @Inject constructor(
 
     companion object {
         private const val CLIP_LABEL_INVITATION = "invitation_link"
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            myInvitationId: Long,
+        ): MyInvitationDetailViewModel
     }
 }
