@@ -1,5 +1,6 @@
 package com.andlife.home.viewmodel
 
+import androidx.compose.ui.geometry.Rect
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
@@ -88,6 +89,9 @@ class HomeViewModel @Inject constructor(
             is HomeUiEvent.ShowReport -> updateReportTargetId(event.targetId)
             HomeUiEvent.DismissReport -> updateReportTargetId(null)
             is HomeUiEvent.SubmitReport -> submitReport(event.reason, event.description)
+            is HomeUiEvent.ShowFullscreenVideo -> updateFullscreenVideo(event.videoUrl, event.thumbnailUrl, event.startBounds)
+            HomeUiEvent.DismissFullscreenVideo -> updateFullscreenVideo(null, null, null)
+            HomeUiEvent.ToggleVideoMute -> videoPlayerPool.toggleMute()
         }
     }
 
@@ -177,5 +181,13 @@ class HomeViewModel @Inject constructor(
                 sendEffect(HomeSideEffect.ReportFailure(messageToShow))
             }
         }
+    }
+
+    private fun updateFullscreenVideo(videoUrl: String?, thumbnailUrl: String?, startBounds: Rect?) {
+        updateState { copy(
+            fullscreenVideoUrl = videoUrl,
+            fullscreenThumbnailUrl = thumbnailUrl,
+            fullscreenStartBounds = startBounds,
+        ) }
     }
 }

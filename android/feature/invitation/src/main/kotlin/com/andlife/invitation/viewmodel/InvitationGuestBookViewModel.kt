@@ -1,6 +1,7 @@
 package com.andlife.invitation.viewmodel
 
 import android.util.Log
+import androidx.compose.ui.geometry.Rect
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
@@ -174,16 +175,8 @@ constructor(
                 )
                 submitReport(event.reason, event.description)
             }
-            is InvitationGuestBookUiEvent.ShowFullscreenVideo -> updateState {     copy(
-                fullscreenVideoUrl = event.videoUrl,
-                fullscreenThumbnailUrl = event.thumbnailUrl,
-                fullscreenStartBounds = event.startBounds,
-            ) }
-            InvitationGuestBookUiEvent.DismissFullscreenVideo -> updateState {   copy(
-                fullscreenVideoUrl = null,
-                fullscreenThumbnailUrl = null,
-                fullscreenStartBounds = null,
-            )}
+            is InvitationGuestBookUiEvent.ShowFullscreenVideo -> updateFullscreenVideo(event.videoUrl, event.thumbnailUrl, event.startBounds)
+            InvitationGuestBookUiEvent.DismissFullscreenVideo -> updateFullscreenVideo(null, null, null)
             InvitationGuestBookUiEvent.ToggleVideoMute -> videoPlayerPool.toggleMute()
         }
     }
@@ -577,5 +570,13 @@ constructor(
                 sendEffect(InvitationGuestBookSideEffect.ShowSnackbar("업로드가 취소되었습니다"))
             }
         }
+    }
+
+    private fun updateFullscreenVideo(videoUrl: String?, thumbnailUrl: String?, startBounds: Rect?) {
+        updateState { copy(
+            fullscreenVideoUrl = videoUrl,
+            fullscreenThumbnailUrl = thumbnailUrl,
+            fullscreenStartBounds = startBounds,
+        ) }
     }
 }
