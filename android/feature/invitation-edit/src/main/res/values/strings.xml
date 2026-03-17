@@ -51,6 +51,11 @@
     <string name="desc_update_card">초대카드 편집</string>
     <string name="txt_edit_card_empty_guide">초대카드는 초대장에서 편집 가능합니다.</string>
 
+    <!--  공지사항  -->
+    <string name="desc_reorder_announcement">공지사항 순서 변경을 위한 드래그 핸들 아이콘</string>
+    <string name="desc_edit_announcement">공지사항 수정을 위한 아이콘</string>
+    <string name="desc_remove_announcement">공지사항 삭제를 위한 아이콘</string>
+
     <string name="snack_full_image">이미지는 최대 10개까지 가능합니다.</string>
     <string name="snack_fail_create">초대 생성에 실패했습니다 다시 시도해 주세요</string>
     <string name="snack_fail_save">저장에 실패했습니다. 다시 시도해 주세요.</string>
