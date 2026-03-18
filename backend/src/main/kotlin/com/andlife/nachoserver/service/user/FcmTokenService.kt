@@ -5,11 +5,10 @@ import com.andlife.nachoserver.auth.exception.TokenExpiredException
 import com.andlife.nachoserver.entity.FcmToken
 import com.andlife.nachoserver.repository.user.FcmTokenRepository
 import com.andlife.nachoserver.repository.user.UserRepository
-import com.andlife.nachoserver.response.user.RegisterFcmTokenResponse
+import com.andlife.nachoserver.response.user.FcmTokenResponse
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
 
 @Service
 class FcmTokenService(
@@ -18,7 +17,7 @@ class FcmTokenService(
 ) {
 
     @Transactional
-    fun putFcmToken(authContext: AuthContext, token: String): RegisterFcmTokenResponse {
+    fun putFcmToken(authContext: AuthContext, token: String): FcmTokenResponse {
         val userId = (authContext as? AuthContext.Member)?.userId
             ?: throw TokenExpiredException()
         val user = userRepository.findById(userId)
@@ -29,7 +28,7 @@ class FcmTokenService(
         if (fcmToken != null) {
             // 이미 존재하는 FCM 토큰이 있다면 updated_at만 업데이트
             // fcmToken.updatedAt = LocalDateTime.now() // TODO: FcmToken 엔티티에 updated_at 필드 추가
-            return RegisterFcmTokenResponse(
+            return FcmTokenResponse(
                     fcmToken = fcmToken.fcmToken,
                     userId = fcmToken.user?.id,
                     createdAt = fcmToken.createdAt
@@ -41,7 +40,7 @@ class FcmTokenService(
             fcmToken = fcmToken,
             user = user
         )
-        return RegisterFcmTokenResponse(
+        return FcmTokenResponse(
             fcmToken = newToken.fcmToken,
             userId = newToken.user?.id,
             createdAt = newToken.createdAt

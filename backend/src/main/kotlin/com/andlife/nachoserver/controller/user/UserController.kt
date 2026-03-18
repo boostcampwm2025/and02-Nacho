@@ -2,10 +2,10 @@ package com.andlife.nachoserver.controller.user
 
 import com.andlife.nachoserver.auth.AuthContext
 import com.andlife.nachoserver.auth.dto.UserResponse
-import com.andlife.nachoserver.request.user.RegisterFcmTokenRequest
+import com.andlife.nachoserver.request.user.FcmTokenRequest
 import com.andlife.nachoserver.request.user.UpdateProfileRequest
 import com.andlife.nachoserver.response.BaseResponse
-import com.andlife.nachoserver.response.user.RegisterFcmTokenResponse
+import com.andlife.nachoserver.response.user.FcmTokenResponse
 import com.andlife.nachoserver.service.user.FcmTokenService
 import com.andlife.nachoserver.service.user.UserService
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -51,8 +51,8 @@ class UserController(
     @PutMapping("/fcm-token")
     fun putFcmToken(
         authContext: AuthContext,
-        @RequestBody request: RegisterFcmTokenRequest
-    ): BaseResponse<RegisterFcmTokenResponse> {
+        @RequestBody request: FcmTokenRequest
+    ): BaseResponse<FcmTokenResponse> {
         val response = fcmTokenService.putFcmToken(authContext, request.fcmToken)
         return BaseResponse.success(response)
     }

@@ -1,5 +1,5 @@
 package com.andlife.nachoserver.request.user
 
-data class RegisterFcmTokenRequest(
+data class FcmTokenRequest(
     val fcmToken: String
 )
