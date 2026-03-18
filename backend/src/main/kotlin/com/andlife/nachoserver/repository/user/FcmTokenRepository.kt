@@ -5,6 +5,6 @@ import com.andlife.nachoserver.entity.User
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface FcmTokenRepository : JpaRepository<FcmToken, String> {
-    fun findByUser(user: User): FcmToken?
+    fun findByUser(user: User): List<FcmToken>
     fun deleteByUser(user: User)
 }
