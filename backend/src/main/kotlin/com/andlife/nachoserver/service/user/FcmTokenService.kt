@@ -7,6 +7,7 @@ import com.andlife.nachoserver.repository.user.FcmTokenRepository
 import com.andlife.nachoserver.repository.user.UserRepository
 import com.andlife.nachoserver.response.user.FcmTokenResponse
 import com.andlife.nachoserver.util.FCMUtil
+import com.andlife.nachoserver.util.FcmSendResult
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -55,12 +56,27 @@ class FcmTokenService(
 
     // 특정 FCM 토큰으로 알림 전송
     fun sendNotificationToToken(fcmToken: String, title: String, body: String) {
-        fcmUtil.sendToToken(fcmToken, title, body)
+        val result = fcmUtil.sendToToken(fcmToken, title, body)
         
-        // lastPushedAt 업데이트
-        fcmTokenRepository.findByFcmToken(fcmToken)?.let { token ->
-            token.lastPushedAt = LocalDateTime.now()
-            fcmTokenRepository.save(token)
+        when (result) {
+            FcmSendResult.SUCCESS -> {
+                // 성공 시 lastPushedAt 업데이트
+                fcmTokenRepository.findByFcmToken(fcmToken)?.let { token ->
+                    token.lastPushedAt = LocalDateTime.now()
+                    fcmTokenRepository.save(token)
+                }
+            }
+            FcmSendResult.INVALID_TOKEN, FcmSendResult.UNREGISTERED -> {
+                // 만료된 또는 잘못된 토큰이면 DB에서 삭제
+                fcmTokenRepository.findByFcmToken(fcmToken)?.let { token ->
+                    fcmTokenRepository.delete(token)
+                    println("FCM 토큰 삭제: $fcmToken")
+                }
+            }
+            FcmSendResult.OTHER_ERROR -> {
+                // 기타 에러는 로그만 남기고 토큰 유지
+                println("FCM 메시지 전송 에러: $fcmToken")
+            }
         }
     }
 
