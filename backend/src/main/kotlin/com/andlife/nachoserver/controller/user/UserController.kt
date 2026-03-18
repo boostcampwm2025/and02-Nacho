@@ -11,7 +11,7 @@ import com.andlife.nachoserver.service.user.UserService
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
-import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -48,12 +48,12 @@ class UserController(
         return BaseResponse.success(user)
     }
 
-    @PostMapping("/fcm-token")
-    fun registerFcmToken(
+    @PutMapping("/fcm-token")
+    fun putFcmToken(
         authContext: AuthContext,
         @RequestBody request: RegisterFcmTokenRequest
     ): BaseResponse<RegisterFcmTokenResponse> {
-        val response = fcmTokenService.registerFcmToken(authContext, request.fcmToken)
+        val response = fcmTokenService.putFcmToken(authContext, request.fcmToken)
         return BaseResponse.success(response)
     }
 }
