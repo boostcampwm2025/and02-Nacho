@@ -8,7 +8,7 @@ internal class FcmTokenRepositoryImpl @Inject constructor(
     private val fcmTokenDataSource: FcmTokenDataSource
 ) : FcmTokenRepository {
 
-    override suspend fun registerTokenToServer(token: String) {
-        fcmTokenDataSource.registerTokenToServer(token)
+    override suspend fun putTokenToServer(token: String) {
+        fcmTokenDataSource.putTokenToServer(token)
     }
 }

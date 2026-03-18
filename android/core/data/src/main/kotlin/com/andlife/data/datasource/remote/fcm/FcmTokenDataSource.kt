@@ -5,5 +5,5 @@ import com.andlife.domain.util.Result
 import com.andlife.network.model.user.RegisterFcmTokenResponse
 
 internal interface FcmTokenDataSource {
-    suspend fun registerTokenToServer(token: String): Result<RegisterFcmTokenResponse, DataError>
+    suspend fun putTokenToServer(token: String): Result<RegisterFcmTokenResponse, DataError>
 }

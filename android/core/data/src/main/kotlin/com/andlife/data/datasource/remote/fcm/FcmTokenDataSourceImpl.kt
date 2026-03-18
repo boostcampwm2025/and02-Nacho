@@ -12,8 +12,8 @@ internal class FcmTokenDataSourceImpl @Inject constructor(
     private val userService: UserService
 ) : FcmTokenDataSource {
 
-    override suspend fun registerTokenToServer(token: String): Result<RegisterFcmTokenResponse, DataError> {
+    override suspend fun putTokenToServer(token: String): Result<RegisterFcmTokenResponse, DataError> {
         val request = RegisterFcmTokenRequest(fcmToken = token)
-        return apiCall { userService.registerFcmToken(request) }
+        return apiCall { userService.putFcmToken(request) }
     }
 }

@@ -24,7 +24,7 @@ interface UserService {
     ): BaseResponse<UserResponse>
 
     @POST("api/users/fcm-token")
-    suspend fun registerFcmToken(
+    suspend fun putFcmToken(
         @Body request: RegisterFcmTokenRequest
     ): BaseResponse<RegisterFcmTokenResponse>
 }
