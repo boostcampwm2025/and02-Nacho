@@ -8,7 +8,9 @@ import com.andlife.nachoserver.auth.dto.RefreshTokenRequest
 import com.andlife.nachoserver.auth.dto.UserResponse
 import com.andlife.nachoserver.auth.jwt.JwtProvider
 import com.andlife.nachoserver.entity.User
+import com.andlife.nachoserver.repository.user.FcmTokenRepository
 import com.andlife.nachoserver.repository.user.UserRepository
+import com.andlife.nachoserver.util.FCMUtil
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.random.Random
@@ -17,7 +19,9 @@ import kotlin.random.Random
 class AuthService(
     private val kakaoAuthClient: KakaoAuthClient,
     private val jwtProvider: JwtProvider,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val fcmUtil: FCMUtil,
+    private val fcmTokenRepository: FcmTokenRepository
 ) {
 
     @Transactional
@@ -116,6 +120,15 @@ class AuthService(
     }
 
     private fun generateAuthResponse(user: User): AuthResponse {
+
+        // 임시: 내 계정으로 로그인된 모든 기기에 로그인 알림 보내기
+        val fcmTokens = fcmTokenRepository.findByUser(user)
+        fcmUtil.sendToTokens(
+            fcmTokens = fcmTokens.map { it.fcmToken },
+            title = "로그인 알림",
+            body = "나의 계정으로 로그인되었습니다.",
+        )
+
         val accessToken = jwtProvider.generateAccessToken(user.id)
         val refreshToken = jwtProvider.generateRefreshToken(user.id)
 
