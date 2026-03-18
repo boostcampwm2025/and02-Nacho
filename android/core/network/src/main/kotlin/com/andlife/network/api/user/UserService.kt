@@ -2,8 +2,8 @@ package com.andlife.network.api.user
 
 import com.andlife.network.model.BaseResponse
 import com.andlife.network.model.auth.UserResponse
-import com.andlife.network.model.user.RegisterFcmTokenRequest
-import com.andlife.network.model.user.RegisterFcmTokenResponse
+import com.andlife.network.model.user.FcmTokenRequest
+import com.andlife.network.model.user.FcmTokenResponse
 import com.andlife.network.model.user.UpdateProfileRequest
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -25,6 +25,6 @@ interface UserService {
 
     @POST("api/users/fcm-token")
     suspend fun putFcmToken(
-        @Body request: RegisterFcmTokenRequest
-    ): BaseResponse<RegisterFcmTokenResponse>
+        @Body request: FcmTokenRequest
+    ): BaseResponse<FcmTokenResponse>
 }

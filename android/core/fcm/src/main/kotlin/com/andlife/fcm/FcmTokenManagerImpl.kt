@@ -22,7 +22,7 @@ class FcmTokenManagerImpl @Inject constructor(
             try {
                 fcmTokenRepository.putTokenToServer(token)
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to register token to server", e)
+                Log.e(TAG, "Failed to put token to server", e)
             }
         }
 

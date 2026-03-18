@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @OptIn(kotlinx.serialization.InternalSerializationApi::class)
 @Serializable
-data class RegisterFcmTokenRequest(
-    val fcmToken: String,
+data class FcmTokenResponse(
+    val id: Long,
+    val token: String,
 )
