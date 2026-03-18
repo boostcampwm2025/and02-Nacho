@@ -9,6 +9,7 @@ import com.andlife.nachoserver.response.user.FcmTokenResponse
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 @Service
 class FcmTokenService(
@@ -27,11 +28,12 @@ class FcmTokenService(
 
         if (fcmToken != null) {
             // 이미 존재하는 FCM 토큰이 있다면 updated_at만 업데이트
-            // fcmToken.updatedAt = LocalDateTime.now() // TODO: FcmToken 엔티티에 updated_at 필드 추가
+            fcmToken.updatedAt = LocalDateTime.now()
             return FcmTokenResponse(
                     fcmToken = fcmToken.fcmToken,
                     userId = fcmToken.user?.id,
-                    createdAt = fcmToken.createdAt
+                    updatedAt = fcmToken.updatedAt,
+                    lastPushedAt = fcmToken.lastPushedAt
                 )
         }
 
@@ -43,7 +45,8 @@ class FcmTokenService(
         return FcmTokenResponse(
             fcmToken = newToken.fcmToken,
             userId = newToken.user?.id,
-            createdAt = newToken.createdAt
+            updatedAt = newToken.updatedAt,
+            lastPushedAt = newToken.lastPushedAt
         )
     }
 }
