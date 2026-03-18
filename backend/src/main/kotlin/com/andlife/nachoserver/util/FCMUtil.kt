@@ -22,11 +22,4 @@ class FCMUtil {
         val response = FirebaseMessaging.getInstance().send(message)
         println("Successfully sent message: $response")
     }
-
-    // 하나의 메시지를 여러 기기에 전송
-    fun sendToTokens(fcmTokens: List<String>, title: String, body: String) {
-        fcmTokens.forEach { token ->
-            sendToToken(token, title, body)
-        }
-    }
 }

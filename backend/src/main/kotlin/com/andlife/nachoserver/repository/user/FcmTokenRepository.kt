@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface FcmTokenRepository : JpaRepository<FcmToken, String> {
     fun findByUser(user: User): List<FcmToken>
-    fun findByFcmToken(fcmToken: String): FcmToken
+    fun findByFcmToken(fcmToken: String): FcmToken?
 }
