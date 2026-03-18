@@ -9,7 +9,7 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.PATCH
-import retrofit2.http.POST
+import retrofit2.http.PUT
 
 interface UserService {
     @GET("api/users/me")
@@ -23,7 +23,7 @@ interface UserService {
         @Body request: UpdateProfileRequest
     ): BaseResponse<UserResponse>
 
-    @POST("api/users/fcm-token")
+    @PUT("api/users/fcm-token")
     suspend fun putFcmToken(
         @Body request: FcmTokenRequest
     ): BaseResponse<FcmTokenResponse>
