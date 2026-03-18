@@ -1,7 +1,6 @@
 package com.andlife.nachoserver.service.user
 
 import com.andlife.nachoserver.auth.AuthContext
-import com.andlife.nachoserver.auth.exception.TokenExpiredException
 import com.andlife.nachoserver.entity.FcmToken
 import com.andlife.nachoserver.repository.user.FcmTokenRepository
 import com.andlife.nachoserver.repository.user.UserRepository
@@ -20,9 +19,10 @@ class FcmTokenService(
     @Transactional
     fun putFcmToken(authContext: AuthContext, token: String): FcmTokenResponse {
         val userId = (authContext as? AuthContext.Member)?.userId
-            ?: throw TokenExpiredException()
-        val user = userRepository.findById(userId)
-            .orElseThrow { EntityNotFoundException("사용자를 찾을 수 없습니다.") }
+        val user = userId?.let { 
+            userRepository.findById(it)
+                .orElseThrow { EntityNotFoundException("사용자를 찾을 수 없습니다.") }
+        }
 
         val fcmToken = fcmTokenRepository.findByFcmToken(token)
 
@@ -39,7 +39,7 @@ class FcmTokenService(
 
         // 새로운 FCM 토큰을 저장
         val newToken = FcmToken(
-            fcmToken = fcmToken,
+            fcmToken = token,
             user = user
         )
         return FcmTokenResponse(
