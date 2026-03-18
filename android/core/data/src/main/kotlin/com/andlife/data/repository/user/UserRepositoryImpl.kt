@@ -9,6 +9,7 @@ import com.andlife.domain.error.InvitationError
 import com.andlife.domain.model.auth.AuthState
 import com.andlife.domain.model.auth.User
 import com.andlife.domain.repository.auth.AuthStateManager
+import com.andlife.domain.repository.fcm.FcmTokenRepository
 import com.andlife.domain.repository.user.UserRepository
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
@@ -16,6 +17,8 @@ import com.andlife.domain.util.Result
 import com.andlife.domain.util.map
 import com.andlife.domain.util.runResultCatching
 import com.andlife.network.model.auth.AuthRequest
+import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.tasks.await
 import java.io.IOException
 import javax.inject.Inject
 
@@ -25,7 +28,8 @@ internal class UserRepositoryImpl @Inject constructor(
     private val authStateManager: AuthStateManager,
     private val invitationDatabase: InvitationDatabase,
     private val mediaUploader: MediaUploader,
-    private val mediaFileProvider: MediaFileProvider
+    private val mediaFileProvider: MediaFileProvider,
+    private val fcmTokenRepository: FcmTokenRepository
 ) : UserRepository {
     override suspend fun login(accessToken: String): Result<Unit, DataError> {
         return userRemoteDataSource.login(AuthRequest(accessToken))
@@ -34,16 +38,18 @@ internal class UserRepositoryImpl @Inject constructor(
                 authStateManager.setAuthenticated(authResponse.user.toDomain())
                 saveToken(authResponse.accessToken, authResponse.refreshToken)
                 syncGuestInvitations()
+                sendFcmTokenToServer()
             }
     }
 
     override suspend fun loginWithTestUser(): Result<Unit, DataError> {
         return userRemoteDataSource.loginWithTestUser()
-            .map {  authResponse ->
+            .map { authResponse ->
                 clearInvitationCache()
                 authStateManager.setAuthenticated(authResponse.user.toDomain())
                 saveToken(authResponse.accessToken, authResponse.refreshToken)
                 syncGuestInvitations()
+                sendFcmTokenToServer()
             }
     }
 
@@ -127,6 +133,15 @@ internal class UserRepositoryImpl @Inject constructor(
         }
     }
 
+    private suspend fun sendFcmTokenToServer() {
+        try {
+            val token = FirebaseMessaging.getInstance().token.await()
+            fcmTokenRepository.putTokenToServer(token)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     override suspend fun isWifiDialogDismissed(): Boolean = userStorage.isWifiDialogDismissed()
 
     override suspend fun setWifiDialogDismissed() = userStorage.setWifiDialogDismissed()
@@ -152,6 +167,7 @@ internal class UserRepositoryImpl @Inject constructor(
                     is Result.Success -> {
                         finalProfileImageUrl = uploadResult.data.firstOrNull()
                     }
+
                     is Result.Error -> return Result.Error(uploadResult.error)
                 }
             }
