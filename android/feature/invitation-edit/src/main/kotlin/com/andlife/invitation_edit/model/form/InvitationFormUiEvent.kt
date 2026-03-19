@@ -48,6 +48,7 @@ sealed interface InvitationFormUiEvent : BaseUiEvent {
     ) : InvitationFormUiEvent
 
     data class UpdateAnnouncement(
+        val id: String? = null,
         val title: String,
         val content: String,
     ) : InvitationFormUiEvent
@@ -55,6 +56,11 @@ sealed interface InvitationFormUiEvent : BaseUiEvent {
     data class RemoveAnnouncement(
         val announcement: AnnouncementUiModel,
     ) : InvitationFormUiEvent
+
+    data class ReorderAnnouncement(
+        val fromIndex: Int,
+        val toIndex: Int
+    ): InvitationFormUiEvent
 
     data object OnClickBack : InvitationFormUiEvent
 

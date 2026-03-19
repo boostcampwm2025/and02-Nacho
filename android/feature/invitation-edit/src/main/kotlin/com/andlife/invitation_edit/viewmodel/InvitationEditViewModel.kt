@@ -67,6 +67,9 @@ class InvitationEditViewModel @Inject constructor(
             is InvitationFormUiEvent.UpdateAnnouncement -> updateAnnouncement(event)
             is InvitationFormUiEvent.RemoveImage -> updateRemoveImage(event)
             is InvitationFormUiEvent.RemoveAnnouncement -> updateRemoveAnnouncement(event)
+            is InvitationFormUiEvent.ReorderAnnouncement -> {
+                reorderAnnouncement(event.fromIndex, event.toIndex)
+            }
             InvitationFormUiEvent.OnClickBack -> onBackClick()
             InvitationFormUiEvent.OnClickSave -> updateInvitation()
             InvitationFormUiEvent.OnClickPreview -> {}
@@ -101,7 +104,11 @@ class InvitationEditViewModel @Inject constructor(
                             lat = invitation.latitude,
                             lng = invitation.longitude,
                             announcement = invitation.announcements.map {
-                                AnnouncementUiModel(title = it.title, content = it.content)
+                                AnnouncementUiModel(
+                                    title = it.title,
+                                    content = it.content,
+                                    displayOrder = it.displayOrder
+                                )
                             }.toPersistentList(),
                         ),
                         isLoading = false,
@@ -201,21 +208,41 @@ class InvitationEditViewModel @Inject constructor(
     }
 
     private fun updateAnnouncement(event: InvitationFormUiEvent.UpdateAnnouncement) {
-        val announcement = AnnouncementUiModel(title = event.title, content = event.content)
-        val newAnnouncementList = uiState.value.invitationFormUiModel.announcement
-            .toPersistentList()
-            .add(announcement)
+        val currentList = uiState.value.invitationFormUiModel.announcement.toMutableList()
+
+        val existingIndex = currentList.indexOfFirst { it.id == event.id }
+
+        if (existingIndex != -1) {
+            currentList[existingIndex] = currentList[existingIndex].copy(
+                title = event.title,
+                content = event.content
+            )
+        } else {
+            val newAnnouncement = AnnouncementUiModel(
+                title = event.title,
+                content = event.content,
+                displayOrder = currentList.size
+            )
+            currentList.add(newAnnouncement)
+        }
+
         updateState {
-            copy(invitationFormUiModel = invitationFormUiModel.copy(announcement = newAnnouncementList))
+            copy(invitationFormUiModel = invitationFormUiModel.copy(
+                announcement = currentList.toPersistentList()
+            ))
         }
     }
 
     private fun updateRemoveAnnouncement(event: InvitationFormUiEvent.RemoveAnnouncement) {
-        val newAnnouncementList = uiState.value.invitationFormUiModel.announcement
-            .toPersistentList()
-            .remove(event.announcement)
+        val currentList = uiState.value.invitationFormUiModel.announcement.toMutableList()
+        currentList.remove(event.announcement)
+
+        val updatedList = currentList.mapIndexed { index, announcement ->
+            announcement.copy(displayOrder = index)
+        }.toPersistentList()
+
         updateState {
-            copy(invitationFormUiModel = invitationFormUiModel.copy(announcement = newAnnouncementList))
+            copy(invitationFormUiModel = invitationFormUiModel.copy(announcement = updatedList))
         }
     }
 
@@ -297,6 +324,28 @@ class InvitationEditViewModel @Inject constructor(
                 }
             }
             is Result.Error -> Result.Error(uploadResult.error)
+        }
+    }
+
+    private fun reorderAnnouncement(fromIndex: Int, toIndex: Int) {
+        val from = fromIndex
+        val to = toIndex
+
+        val currentList = uiState.value.invitationFormUiModel.announcement
+
+        if (from !in currentList.indices || to !in currentList.indices) return
+
+        val mutableList = currentList.toMutableList()
+
+        val item = mutableList.removeAt(from)
+        mutableList.add(to, item)
+
+        updateState {
+            copy(
+                invitationFormUiModel = invitationFormUiModel.copy(
+                    announcement = mutableList.toPersistentList()
+                )
+            )
         }
     }
 

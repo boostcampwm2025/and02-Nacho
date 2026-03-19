@@ -16,6 +16,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -40,8 +41,12 @@ fun InvitationAddAnnouncementBottomSheet(
     onConfirm: (String, String) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    initialTitle: String = "",
+    initialContent: String = "",
     viewModel: InvitationAddAnnouncementViewModel = viewModel(),
 ) {
+    val isEditMode = initialTitle.isNotBlank() || initialContent.isNotBlank()
+
     val keyboardManager = LocalSoftwareKeyboardController.current
     val sheetState =
         rememberModalBottomSheetState(
@@ -50,6 +55,11 @@ fun InvitationAddAnnouncementBottomSheet(
 
     val scope = rememberCoroutineScope()
     val draft by viewModel.announcementDraft.collectAsStateWithLifecycle()
+
+    LaunchedEffect(initialTitle, initialContent) {
+        viewModel.updateTitle(initialTitle)
+        viewModel.updateContent(initialContent)
+    }
 
     BackHandler {
         scope.launch {
@@ -72,7 +82,7 @@ fun InvitationAddAnnouncementBottomSheet(
                     .padding(top = NachoSpacing.twoXLarge),
         ) {
             Text(
-                text = stringResource(R.string.label_add_announcement),
+                text = if(isEditMode) stringResource(R.string.label_edit_announcement) else stringResource(R.string.label_add_announcement),
                 style = NachoTheme.typography.headingSmallSemiBold,
                 color = NachoTheme.colorScheme.textPrimary,
                 modifier = Modifier.align(Alignment.Center),
@@ -160,7 +170,7 @@ fun InvitationAddAnnouncementBottomSheet(
                     ),
             ) {
                 Text(
-                    text = stringResource(R.string.txt_submit),
+                    text = if(isEditMode) stringResource(R.string.txt_modify) else stringResource(R.string.txt_submit),
                     style = NachoTheme.typography.bodyLargeSemiBold,
                 )
             }
