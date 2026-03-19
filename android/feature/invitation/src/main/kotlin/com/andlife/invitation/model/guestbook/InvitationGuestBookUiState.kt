@@ -50,7 +50,7 @@ data class InvitationGuestBookUiState(
         get() = (textContent.isNotBlank() || selectedMedias.isNotEmpty()) && !isUploading && isContentChanged
 
     val canPlayVideo: Boolean
-        get() = isMediaPlaying && !audioPlaybackState.isLoading && !audioPlaybackState.isPlaying
+        get() = isMediaPlaying && !audioPlaybackState.isLoading && !audioPlaybackState.isPlaying && fullscreenVideoUrl == null
 
     fun isAuthStateChanged(current: AuthState) =
         authState::class != current::class && current !is AuthState.Loading

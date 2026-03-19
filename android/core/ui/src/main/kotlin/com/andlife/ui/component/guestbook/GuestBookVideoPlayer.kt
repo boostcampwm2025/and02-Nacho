@@ -67,7 +67,9 @@ fun GuestBookVideoPlayer(
         (totalDurationMs / 1000).toInt().toFormatDuration()
     }"
 
-    LaunchedEffect(shouldPlay, videoUrl) {
+    LaunchedEffect(shouldPlay, videoUrl, isFullscreen) {
+        if (isFullscreen) return@LaunchedEffect
+
         if (shouldPlay) {
             videoPlayerPool.playPlayer(videoUrl, guestBookId)
         } else {

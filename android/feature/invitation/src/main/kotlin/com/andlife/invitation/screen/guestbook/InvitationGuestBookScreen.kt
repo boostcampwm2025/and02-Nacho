@@ -542,10 +542,10 @@ private fun InvitationGuestBookScreen(
         }
     }
 
-    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.audioPlaybackState.isPlaying) {
+    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.audioPlaybackState.isPlaying, uiState.fullscreenVideoUrl) {
         var pendingIndex = -1
         var lastChangedTime = 0L
-        if (!isMediaActive || uiState.audioPlaybackState.isPlaying) {
+        if (!isMediaActive || uiState.audioPlaybackState.isPlaying || uiState.fullscreenVideoUrl != null) {
             playVideoIndex = -1
             return@LaunchedEffect
         }
