@@ -18,7 +18,19 @@ fun VideoSurface(
         factory = {
             autoPlayer.playerView.apply {
                 (parent as? ViewGroup)?.removeView(this)
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                )
+                requestLayout()
             }
+        },
+        update = {
+            it.layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+            )
+            it.requestLayout()
         },
         modifier = modifier,
     )

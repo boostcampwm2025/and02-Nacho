@@ -200,7 +200,7 @@ private fun VideoPlayerContainer(
             .fillMaxSize()
             .background(Color.Black)
             .onGloballyPositioned { coordinates ->
-                onContainerPositioned(coordinates.boundsInWindow())
+                onContainerPositioned(coordinates.boundsInWindow(clipBounds = false))
             }
             .then(
                 if (isVideoReady) Modifier.clickable { onVideoClick() }
