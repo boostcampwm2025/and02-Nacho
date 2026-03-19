@@ -24,12 +24,9 @@ class FcmToken(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = true)
-    val user: User? = null,
-
-    @Column(name = "updated_at", nullable = false)
-    var updatedAt: LocalDateTime? = null,
+    var user: User? = null,
 
     @Column(name = "last_pushed_at", nullable = true)
     var lastPushedAt: LocalDateTime? = null
 )
- : BaseCreatedEntity()
+ : BaseTimeEntity()

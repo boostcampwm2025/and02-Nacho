@@ -31,13 +31,16 @@ class FcmTokenService(
         val fcmToken = fcmTokenRepository.findByFcmToken(token)
 
         if (fcmToken != null) {
-            // 이미 존재하는 FCM 토큰이 있다면 updated_at만 업데이트
-            fcmToken.updatedAt = LocalDateTime.now()
+            // 이미 존재하는 FCM 토큰이 있다면 유저 업데이트시키기
+            fcmToken.user = user
+            val updatedToken = fcmTokenRepository.save(fcmToken)
+
             return FcmTokenResponse(
-                    fcmToken = fcmToken.fcmToken,
-                    userId = fcmToken.user?.id,
-                    updatedAt = fcmToken.updatedAt,
-                    lastPushedAt = fcmToken.lastPushedAt
+                    fcmToken = updatedToken.fcmToken,
+                    userId = updatedToken.user?.id,
+                    lastPushedAt = updatedToken.lastPushedAt,
+                    createdAt = updatedToken.createdAt,
+                    updatedAt = updatedToken.updatedAt
                 )
         }
 
@@ -46,11 +49,13 @@ class FcmTokenService(
             fcmToken = token,
             user = user
         )
+        val savedToken = fcmTokenRepository.save(newToken)
         return FcmTokenResponse(
-            fcmToken = newToken.fcmToken,
-            userId = newToken.user?.id,
-            updatedAt = newToken.updatedAt,
-            lastPushedAt = newToken.lastPushedAt
+            fcmToken = savedToken.fcmToken,
+            userId = savedToken.user?.id,
+            lastPushedAt = savedToken.lastPushedAt,
+            createdAt = savedToken.createdAt,
+            updatedAt = savedToken.updatedAt
         )
     }
 
