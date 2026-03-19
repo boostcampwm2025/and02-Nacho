@@ -150,7 +150,8 @@ fun GuestBookVideoPlayer(
                 isSeeking = false
             },
             onMuteToggle = { videoPlayerPool.toggleMute() },
-            onFullscreenClick = { onFullscreenClick(videoUrl, thumbnailUrl, containerBounds) }
+            onFullscreenClick = { onFullscreenClick(videoUrl, thumbnailUrl, containerBounds) },
+            modifier = modifier
         )
     } else {
         VideoPlayerContainer(
@@ -168,7 +169,8 @@ fun GuestBookVideoPlayer(
             onSeekValueChange = {},
             onSeekValueChangeFinished = {},
             onMuteToggle = { videoPlayerPool.toggleMute() },
-            onFullscreenClick = {}
+            onFullscreenClick = {},
+            modifier = modifier
         )
     }
 }
