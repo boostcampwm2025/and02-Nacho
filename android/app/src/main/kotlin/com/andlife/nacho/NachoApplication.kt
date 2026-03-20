@@ -107,7 +107,7 @@ class NachoApplication : Application(), Configuration.Provider {
 
             val token = task.result
             Log.d("FCM", "FCM Registration token: $token")
-            fcmTokenManager.initializeToken(token)
+            fcmTokenManager.syncToken(token)
         })
     }
 }

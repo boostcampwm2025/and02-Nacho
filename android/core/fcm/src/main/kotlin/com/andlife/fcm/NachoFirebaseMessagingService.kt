@@ -30,7 +30,7 @@ class NachoFirebaseMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
 
-        fcmTokenManager.initializeToken(token)
+        fcmTokenManager.syncToken(token)
     }
 
     // 클라우드 서버에서 메시지를 전송했을 때 호출

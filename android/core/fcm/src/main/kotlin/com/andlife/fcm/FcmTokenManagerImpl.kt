@@ -17,7 +17,7 @@ class FcmTokenManagerImpl @Inject constructor(
         private const val TAG = "FcmTokenManager"
     }
 
-    override fun initializeToken(token: String) {
+    override fun syncToken(token: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 fcmTokenRepository.putTokenToServer(token)
