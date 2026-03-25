@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -72,9 +73,9 @@ fun FullscreenVideoPlayerContainer(
     var isVideoReadyInFullscreen by remember { mutableStateOf(false) }
     var currentPositionMs by remember { mutableLongStateOf(0L) }
     var totalDurationMs by remember { mutableLongStateOf(0L) }
-    var isSeeking by remember { mutableStateOf(false) }
-    var seekPositionMs by remember { mutableLongStateOf(0L) }
-    var isControlVisible by remember { mutableStateOf(false) }
+    var isSeeking by rememberSaveable { mutableStateOf(false) }
+    var seekPositionMs by rememberSaveable { mutableLongStateOf(0L) }
+    var isControlVisible by rememberSaveable { mutableStateOf(false) }
     var isPlaying by remember { mutableStateOf(false) }
 
     val displayPositionMs = if (isSeeking) seekPositionMs else currentPositionMs
