@@ -18,18 +18,6 @@ fun VideoSurface(
         factory = {
             autoPlayer.playerView.apply {
                 (parent as? ViewGroup)?.removeView(this)
-
-                val isNotFillMaxWidth = layoutParams == null ||
-                    layoutParams.width != ViewGroup.LayoutParams.MATCH_PARENT ||
-                    layoutParams.height != ViewGroup.LayoutParams.MATCH_PARENT
-
-                if (isNotFillMaxWidth) {
-                    layoutParams = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                    )
-                    requestLayout()
-                }
             }
         },
         modifier = modifier,
