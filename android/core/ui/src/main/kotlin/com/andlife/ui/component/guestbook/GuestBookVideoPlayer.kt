@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -48,12 +49,12 @@ fun GuestBookVideoPlayer(
     onPlayVideoClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var isVideoReady by remember(videoUrl) { mutableStateOf(false) }
-    var currentPositionMs by remember(videoUrl) { mutableLongStateOf(0L) }
-    var totalDurationMs by remember(videoUrl) { mutableLongStateOf((totalDurationSeconds?.times(1000L)) ?: 0L) }
-    var isControlVisible by remember(videoUrl) { mutableStateOf(false) }
-    var isSeeking by remember(videoUrl) { mutableStateOf(false) }
-    var seekPositionMs by remember(videoUrl) { mutableLongStateOf(0L) }
+    var isVideoReady by rememberSaveable(videoUrl) { mutableStateOf(false) }
+    var currentPositionMs by rememberSaveable(videoUrl) { mutableLongStateOf(0L) }
+    var totalDurationMs by rememberSaveable(videoUrl) { mutableLongStateOf((totalDurationSeconds?.times(1000L)) ?: 0L) }
+    var isControlVisible by rememberSaveable(videoUrl) { mutableStateOf(false) }
+    var isSeeking by rememberSaveable(videoUrl) { mutableStateOf(false) }
+    var seekPositionMs by rememberSaveable(videoUrl) { mutableLongStateOf(0L) }
     val isMuted by videoPlayerPool.isMuted.collectAsStateWithLifecycle()
     var containerBounds by remember { mutableStateOf(Rect.Zero) }
 
