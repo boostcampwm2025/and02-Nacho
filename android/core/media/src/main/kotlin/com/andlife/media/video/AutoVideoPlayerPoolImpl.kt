@@ -3,6 +3,7 @@ package com.andlife.media.video
 import android.app.ActivityManager
 import android.content.Context
 import android.graphics.Color
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
@@ -19,13 +20,16 @@ import androidx.media3.ui.PlayerView
 import com.andlife.media.di.VideoCacheDataSourceFactory
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.isActive
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -188,8 +192,6 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
         urls.forEach { url ->
             val uri = url.toUri()
 
-            if (activePrecacheJobs.contains(url)) return@forEach
-
             val cacheBytes = cache.getCachedBytes(
                 CacheKeyFactory.DEFAULT.buildCacheKey(DataSpec(uri)),
                 0,
@@ -198,7 +200,8 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
 
             if (cacheBytes >= PRECACHE_SIZE_BYTES) return@forEach
 
-            activePrecacheJobs[url] = precacheScope.launch {
+            val precacheJob = precacheScope.launch(start = CoroutineStart.LAZY) {
+                var cancellationHandle: DisposableHandle? = null
                 try {
                     val dataSpec = DataSpec.Builder()
                         .setUri(uri)
@@ -210,18 +213,32 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
                         cacheDataSourceFactory.createDataSourceForDownloading(),
                         dataSpec,
                         null
-                    ) { requestLength, bytesCached, newBytesCached ->
-                        if (!coroutineContext.isActive) {
-                            throw CancellationException("프리캐싱 작업이 취소됨")
+                    ) { _, _, _ ->
+                        ensureActive()
+                    }
+                    cancellationHandle = coroutineContext.job.invokeOnCompletion { cause ->
+                        if (cause is CancellationException) {
+                            cacheWriter.cancel()
                         }
                     }
                     cacheWriter.cache()
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Log.e(TAG, "프리캐시 실패: $url", e)
                 } finally {
+                    cancellationHandle?.dispose()
                     activePrecacheJobs.remove(url)
                 }
             }
+
+            val existing = activePrecacheJobs.putIfAbsent(url, precacheJob)
+            if (existing != null) {
+                precacheJob.cancel()
+                return@forEach
+            }
+
+            precacheJob.start()
         }
     }
 
@@ -233,6 +250,9 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
     }
 
     override fun releaseAllPlayers() {
+        activePrecacheJobs.values.forEach { job ->
+            job.cancel(CancellationException("Pool released"))
+        }
         playerInstances.forEach { it.release() }
         playerInstances.clear()
         activePlayers.values.forEach { it.release() }
@@ -255,6 +275,7 @@ class AutoVideoPlayerPoolImpl @UnstableApi @Inject constructor(
     }
 
     companion object {
+        private const val TAG = "AutoVideoPlayerPool"
         private const val PRECACHE_SIZE_BYTES = 1 * 1024 * 1024L
     }
 }
