@@ -1,5 +1,7 @@
 package com.andlife.home.screen
 
+import android.graphics.Color as AndroidColor
+import android.view.ViewGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +30,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -38,11 +41,19 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
+import androidx.core.graphics.drawable.toDrawable
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -74,6 +85,7 @@ import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItemSkeleton
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
+import com.andlife.ui.component.media.video.FullscreenVideoPlayerContainer
 import com.andlife.ui.component.report.ReportBottomSheet
 import com.andlife.ui.util.collectWithLifecycle
 import com.andlife.ui.util.toDDayText
@@ -259,6 +271,49 @@ fun HomeRoute(
         )
     }
 
+    uiState.fullscreenVideoUrl?.let { url ->
+        val player = viewModel.videoPlayerPool.getPlayer(url)
+        val isMuted by viewModel.videoPlayerPool.isMuted.collectAsStateWithLifecycle()
+
+        Dialog(
+            onDismissRequest = {},
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false,
+                decorFitsSystemWindows = false,
+            ),
+        ) {
+            val view = LocalView.current
+            val window = (view.parent as? DialogWindowProvider)?.window
+
+            SideEffect {
+                window?.apply {
+                    setLayout(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                    )
+                    setBackgroundDrawable(
+                        AndroidColor.BLACK.toDrawable()
+                    )
+                    WindowInsetsControllerCompat(this, decorView).apply {
+                        hide(WindowInsetsCompat.Type.systemBars())
+                        systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                    }
+                }
+            }
+
+            FullscreenVideoPlayerContainer(
+                player = player,
+                thumbnailUrl = uiState.fullscreenThumbnailUrl,
+                startBounds = uiState.fullscreenStartBounds,
+                isMuted = isMuted,
+                onDismiss = { viewModel.onEvent(HomeUiEvent.DismissFullscreenVideo) },
+                onMuteToggle = { viewModel.onEvent(HomeUiEvent.ToggleVideoMute) }
+            )
+        }
+    }
+
     HomeScreen(
         uiState = uiState,
         isMediaActive = isMediaActive,
@@ -297,10 +352,10 @@ fun HomeScreen(
 ) {
     var playVideoIndex by remember { mutableStateOf(-1) }
 
-    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.audioPlaybackState.isPlaying) {
+    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.audioPlaybackState.isPlaying, uiState.fullscreenVideoUrl) {
         var pendingIndex = -1
         var lastChangedTime = 0L
-        if (!isMediaActive || uiState.audioPlaybackState.isPlaying) {
+        if (!isMediaActive || uiState.audioPlaybackState.isPlaying || uiState.fullscreenVideoUrl != null) {
             playVideoIndex = -1
             return@LaunchedEffect
         }
@@ -418,6 +473,9 @@ fun HomeScreen(
                         onEvent(HomeUiEvent.ClickVideoPlayButton(url, itemId))
                     },
                     onReportClick = { targetId -> onEvent(HomeUiEvent.ShowReport(targetId)) },
+                    onFullscreenClick = { url, thumbnailUrl, bounds ->
+                        onEvent(HomeUiEvent.ShowFullscreenVideo(url, thumbnailUrl, bounds))
+                    }
                 )
             }
         }
@@ -652,6 +710,7 @@ private fun LazyListScope.homeGuestBookSection(
     onAudioMediaClick: (String) -> Unit,
     onPlayVideoClick: (String, Long) -> Unit,
     onReportClick: (Long) -> Unit,
+    onFullscreenClick: (String, String?, Rect) -> Unit,
 ) {
     item {
         Text(
@@ -683,6 +742,7 @@ private fun LazyListScope.homeGuestBookSection(
                     shouldPlayVideo = uiState.canPlayVideo && (index == playVideoIndex),
                     isFromInvitationDetail = false,
                     audioPlaybackState = uiState.audioPlaybackState,
+                    isFullscreen = uiState.isFullscreenVideoUrlValid(guestBook),
                     onInvitationTitleClick = {
                         onInvitationTitleClick(
                             guestBook.invitation.id,
@@ -693,6 +753,7 @@ private fun LazyListScope.homeGuestBookSection(
                     onAudioMediaClick = { onAudioMediaClick(it.url) },
                     onPlayVideoClick = { url -> onPlayVideoClick(url, guestBook.id) },
                     onReportClick = { onReportClick(guestBook.id) },
+                    onFullscreenClick = { url, thumbnailUrl, bounds -> onFullscreenClick(url, thumbnailUrl, bounds) },
                 )
             }
         }

@@ -96,6 +96,7 @@
     <string name="desc_audio_media_icon">오디오 아이콘</string>
     <string name="desc_play_audio">오디오 재생 버튼</string>
     <string name="desc_play_video">영상 실행 버튼</string>
+    <string name="desc_pause_video">영상 일시정지 버튼</string>
     <string name="format_audio_duration">%1$d 초</string>
     <string name="format_media_pager_indicator">%1$d/%2$d</string>
     <string name="txt_show_less">접기</string>
@@ -106,6 +107,8 @@
     <string name="desc_error_image">이미지 불러오기 에러</string>
     <string name="desc_unmute_video">음소거 해제</string>
     <string name="desc_mute_video">음소거</string>
+    <string name="desc_fullscreen">전체 화면 클릭</string>
+    <string name="desc_exit_fullscreen">전체화면 종료</string>
 
     <!-- DateUtils -->
     <string name="txt_just_now">방금 전</string>
@@ -191,6 +194,7 @@
 
     <!-- WebView -->
     <string name="txt_error_network">네트워크 연결을 확인해주세요</string>
-    <string name="desc_fullscreen">전체 화면 클릭</string>
+    <string name="desc_portrait">세로 모드로 회전</string>
+    <string name="desc_landscape">가로 모드로 회전</string>
 
 </resources>

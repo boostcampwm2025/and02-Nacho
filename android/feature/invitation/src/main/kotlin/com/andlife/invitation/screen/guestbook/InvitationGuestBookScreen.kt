@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -30,6 +31,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -43,9 +45,16 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.graphics.drawable.toDrawable
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -81,6 +90,7 @@ import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.ui.component.dialog.NachoPermissionDialog
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.invitation.InvitationGuestBookForm
+import com.andlife.ui.component.media.video.FullscreenVideoPlayerContainer
 import com.andlife.ui.component.paging.PagingStateContent
 import com.andlife.ui.component.report.ReportBottomSheet
 import com.andlife.ui.util.audio.AudioRecorder
@@ -96,6 +106,7 @@ import kotlinx.datetime.LocalDateTime
 import java.io.File
 import kotlin.math.max
 import kotlin.math.min
+import android.graphics.Color as AndroidColor
 import com.andlife.ui.R as uiR
 
 private const val CAMERA_IMAGES_DIR = "camera_images"
@@ -405,8 +416,47 @@ fun InvitationGuestBookRoute(
         )
     }
 
-    uiState.fullscreenVideoUrl?.let {
-        // TODO: 전체화면 UI 구현
+    uiState.fullscreenVideoUrl?.let { url ->
+        val player = viewModel.videoPlayerPool.getPlayer(url)
+        val isMuted by viewModel.videoPlayerPool.isMuted.collectAsStateWithLifecycle()
+
+        Dialog(
+            onDismissRequest = {},
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false,
+                decorFitsSystemWindows = false,
+            ),
+        ) {
+            val view = LocalView.current
+            val window = (view.parent as? DialogWindowProvider)?.window
+
+            SideEffect {
+                window?.apply {
+                    setLayout(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                    )
+                    setBackgroundDrawable(
+                        AndroidColor.BLACK.toDrawable()
+                    )
+                    WindowInsetsControllerCompat(this, decorView).apply {
+                        hide(WindowInsetsCompat.Type.systemBars())
+                        systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                    }
+                }
+            }
+
+            FullscreenVideoPlayerContainer(
+                player = player,
+                thumbnailUrl = uiState.fullscreenThumbnailUrl,
+                startBounds = uiState.fullscreenStartBounds,
+                isMuted = isMuted,
+                onDismiss = { viewModel.onEvent(InvitationGuestBookUiEvent.DismissFullscreenVideo) },
+                onMuteToggle = { viewModel.onEvent(InvitationGuestBookUiEvent.ToggleVideoMute) }
+            )
+        }
     }
 
     InvitationGuestBookScreen(
@@ -492,10 +542,10 @@ private fun InvitationGuestBookScreen(
         }
     }
 
-    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.audioPlaybackState.isPlaying) {
+    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.audioPlaybackState.isPlaying, uiState.fullscreenVideoUrl) {
         var pendingIndex = -1
         var lastChangedTime = 0L
-        if (!isMediaActive || uiState.audioPlaybackState.isPlaying) {
+        if (!isMediaActive || uiState.audioPlaybackState.isPlaying || uiState.fullscreenVideoUrl != null) {
             playVideoIndex = -1
             return@LaunchedEffect
         }
@@ -576,8 +626,7 @@ private fun InvitationGuestBookScreen(
                 if (isMediaActive) {
                     if (guestBooks.itemCount == 0) {
                         PagingStateContent(
-                            loadState = guestBooks.loadState.source.refresh,
-                            mediatorLoadState = guestBooks.loadState.mediator?.refresh,
+                            loadState = guestBooks.loadState.refresh,
                             itemCount = guestBooks.itemCount,
                             emptyComment = stringResource(R.string.label_guestbook_empty),
                             modifier = Modifier.fillMaxSize(),
@@ -600,13 +649,16 @@ private fun InvitationGuestBookScreen(
                                         shouldPlayVideo = uiState.canPlayVideo && (index == playVideoIndex),
                                         audioPlaybackState = uiState.audioPlaybackState,
                                         isEditing = uiState.editingGuestBookId == guestBook.id,
+                                        isFullscreen = uiState.isFullscreenVideoUrlValid(guestBook),
                                         onEditClick = { onEvent(InvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
                                         onDeleteClick = { onDeleteMenuClick(guestBook.id) },
                                         onReportClick = { targetId -> onEvent(InvitationGuestBookUiEvent.ShowReport(targetId)) },
                                         onVisualMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
                                         onAudioMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
                                         onPlayVideoClick = { url -> onEvent(InvitationGuestBookUiEvent.ClickVideoPlayButton(url, guestBook.id))},
-                                        onFullscreenClick = { url -> onEvent(InvitationGuestBookUiEvent.ShowFullscreenVideo(url)) }
+                                        onFullscreenClick = { url, thumbnailUrl, bounds ->
+                                            onEvent(InvitationGuestBookUiEvent.ShowFullscreenVideo(url, thumbnailUrl, bounds))
+                                        }
                                     )
                                 }
                             }
@@ -814,11 +866,12 @@ private fun InvitationGuestBookResultPreview() {
                     videoPlayerPool = FakeAutoVideoPlayerPool(),
                     shouldPlayVideo = false,
                     audioPlaybackState = AudioPlaybackState(),
+                    isFullscreen = false,
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},
                     onAudioMediaClick = {},
                     onPlayVideoClick = {},
-                    onFullscreenClick = {}
+                    onFullscreenClick = {_, _, _ -> },
                 )
             }
         }

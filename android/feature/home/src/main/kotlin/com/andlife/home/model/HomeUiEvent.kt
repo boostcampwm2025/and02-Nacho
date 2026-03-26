@@ -1,5 +1,6 @@
 package com.andlife.home.model
 
+import androidx.compose.ui.geometry.Rect
 import com.andlife.model.common.ReportReason
 import com.andlife.ui.base.BaseUiEvent
 
@@ -48,4 +49,14 @@ sealed interface HomeUiEvent : BaseUiEvent {
          val reason: ReportReason,
          val description: String?
      ) : HomeUiEvent
+
+    data class ShowFullscreenVideo(
+        val videoUrl: String,
+        val thumbnailUrl: String?,
+        val startBounds: Rect,
+    ) : HomeUiEvent
+
+    data object DismissFullscreenVideo : HomeUiEvent
+
+    data object ToggleVideoMute : HomeUiEvent
 }
