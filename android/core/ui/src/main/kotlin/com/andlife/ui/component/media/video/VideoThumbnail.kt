@@ -16,15 +16,25 @@ import com.andlife.ui.component.icon.PlayerThumbnailIcon
 fun VideoThumbnail(
     thumbnailUrl: String?,
     onPlayVideoClick: () -> Unit,
+    showPlayButton: Boolean = true,
+    enableClick: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = modifier.clickable { onPlayVideoClick() }) {
+    Box(
+        modifier = if (enableClick) {
+            modifier.clickable { onPlayVideoClick() }
+        } else {
+            modifier
+        }
+    ) {
         AsyncImage(
             model = thumbnailUrl,
             contentDescription = stringResource(R.string.desc_video_thumbnail),
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Fit,
         )
-        PlayerThumbnailIcon(modifier = Modifier.align(Alignment.Center))
+        if (showPlayButton) {
+            PlayerThumbnailIcon(modifier = Modifier.align(Alignment.Center))
+        }
     }
 }

@@ -14,7 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -49,14 +48,16 @@ fun GuestBookVideoPlayer(
     onPlayVideoClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var isVideoReady by rememberSaveable(videoUrl) { mutableStateOf(false) }
-    var currentPositionMs by rememberSaveable(videoUrl) { mutableLongStateOf(0L) }
-    var totalDurationMs by rememberSaveable(videoUrl) { mutableLongStateOf((totalDurationSeconds?.times(1000L)) ?: 0L) }
-    var isControlVisible by rememberSaveable(videoUrl) { mutableStateOf(false) }
-    var isSeeking by rememberSaveable(videoUrl) { mutableStateOf(false) }
-    var seekPositionMs by rememberSaveable(videoUrl) { mutableLongStateOf(0L) }
+    var isVideoReady by remember(videoUrl) { mutableStateOf(false) }
+    var currentPositionMs by remember(videoUrl) { mutableLongStateOf(0L) }
+    var totalDurationMs by remember(videoUrl) { mutableLongStateOf((totalDurationSeconds?.times(1000L)) ?: 0L) }
+    var isControlVisible by remember(videoUrl) { mutableStateOf(false) }
+    var isSeeking by remember(videoUrl) { mutableStateOf(false) }
+    var seekPositionMs by remember(videoUrl) { mutableLongStateOf(0L) }
+    var isFullscreenTransitioning by remember(videoUrl) { mutableStateOf(false) }
     val isMuted by videoPlayerPool.isMuted.collectAsStateWithLifecycle()
     var containerBounds by remember { mutableStateOf(Rect.Zero) }
+    val isFullscreenLike = isFullscreen || isFullscreenTransitioning
 
     val displayPositionMs = if (isSeeking) seekPositionMs else currentPositionMs
     val progress = if (totalDurationMs > 0) {
@@ -72,6 +73,7 @@ fun GuestBookVideoPlayer(
         if (isFullscreen) return@LaunchedEffect
 
         if (shouldPlay) {
+            isVideoReady = false
             videoPlayerPool.playPlayer(videoUrl, guestBookId)
         } else {
             videoPlayerPool.pausePlayer(videoUrl)
@@ -86,7 +88,16 @@ fun GuestBookVideoPlayer(
     }
 
     LaunchedEffect(shouldPlay) {
-        if (!shouldPlay) isControlVisible = false
+        if (!shouldPlay) {
+            isControlVisible = false
+            isVideoReady = false
+        }
+    }
+
+    LaunchedEffect(isFullscreen) {
+        if (!isFullscreen) {
+            isFullscreenTransitioning = false
+        }
     }
 
     if (shouldPlay) {
@@ -99,15 +110,13 @@ fun GuestBookVideoPlayer(
                 }
 
                 override fun onPlaybackStateChanged(state: Int) {
-                    if (state == Player.STATE_READY && currentPlayer.exoPlayer.playWhenReady) {
-                        isVideoReady = true
+                    if (state == Player.STATE_READY) {
                         totalDurationMs = currentPlayer.exoPlayer.duration.coerceAtLeast(0L)
                     }
                 }
             }
             currentPlayer.exoPlayer.addListener(listener)
             if (currentPlayer.exoPlayer.playbackState == Player.STATE_READY) {
-                isVideoReady = true
                 totalDurationMs = currentPlayer.exoPlayer.duration.coerceAtLeast(0L)
             }
             onDispose {
@@ -136,7 +145,7 @@ fun GuestBookVideoPlayer(
             isControlVisible = isControlVisible,
             isMuted = isMuted,
             isVideoReady = isVideoReady,
-            isFullscreen = isFullscreen,
+            isFullscreen = isFullscreenLike,
             onVideoClick = { isControlVisible = !isControlVisible },
             onPlayVideoClick = { onPlayVideoClick(videoUrl) },
             onContainerPositioned = { containerBounds = it },
@@ -151,7 +160,10 @@ fun GuestBookVideoPlayer(
                 isSeeking = false
             },
             onMuteToggle = { videoPlayerPool.toggleMute() },
-            onFullscreenClick = { onFullscreenClick(videoUrl, thumbnailUrl, containerBounds) },
+            onFullscreenClick = {
+                isFullscreenTransitioning = true
+                onFullscreenClick(videoUrl, thumbnailUrl, containerBounds)
+            },
             modifier = modifier
         )
     } else {
@@ -163,7 +175,7 @@ fun GuestBookVideoPlayer(
             isControlVisible = false,
             isMuted = isMuted,
             isVideoReady = false,
-            isFullscreen = false,
+            isFullscreen = isFullscreenLike,
             onVideoClick = {},
             onPlayVideoClick = { onPlayVideoClick(videoUrl) },
             onContainerPositioned = {},
@@ -234,6 +246,8 @@ private fun VideoPlayerContainer(
             VideoThumbnail(
                 thumbnailUrl = thumbnailUrl,
                 onPlayVideoClick = onPlayVideoClick,
+                showPlayButton = !isFullscreen,
+                enableClick = !isFullscreen,
                 modifier = Modifier
                     .fillMaxSize()
                     .alpha(thumbnailAlpha),
