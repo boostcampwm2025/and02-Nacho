@@ -81,6 +81,7 @@
         <activity
             android:name="com.andlife.nacho.FullscreenVideoPlayerActivity"
             android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
             android:theme="@style/Theme.Invitation" />
 
         <provider
