@@ -209,7 +209,7 @@ fun FullscreenVideoPlayerContainer(
                 .background(Color.Black)
         ) {
             VideoSurface(
-                autoPlayer = player,
+                currentPlayer = player,
                 modifier = Modifier.fillMaxSize(),
             )
 

@@ -11,12 +11,12 @@ import com.andlife.media.video.AutoVideoPlayer
 @OptIn(UnstableApi::class)
 @Composable
 fun VideoSurface(
-    autoPlayer: AutoVideoPlayer,
+    currentPlayer: AutoVideoPlayer,
     modifier: Modifier = Modifier,
 ) {
     AndroidView(
         factory = {
-            autoPlayer.playerView.apply {
+            currentPlayer.playerView.apply {
                 (parent as? ViewGroup)?.removeView(this)
             }
         },

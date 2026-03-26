@@ -215,7 +215,7 @@ private fun VideoPlayerContainer(
         currentPlayer?.let {
             if (!isFullscreen) {
                 VideoSurface(
-                    autoPlayer = it,
+                    currentPlayer = it,
                     modifier = Modifier.fillMaxSize(),
                 )
             } else {
