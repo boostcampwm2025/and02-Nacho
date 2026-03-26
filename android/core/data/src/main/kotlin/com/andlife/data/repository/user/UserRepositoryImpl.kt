@@ -38,7 +38,7 @@ internal class UserRepositoryImpl @Inject constructor(
                 authStateManager.setAuthenticated(authResponse.user.toDomain())
                 saveToken(authResponse.accessToken, authResponse.refreshToken)
                 syncGuestInvitations()
-                sendFcmTokenToServer()
+                fcmTokenManager.getToken()?.let { fcmTokenRepository.putTokenToServer(it) }
             }
     }
 
@@ -49,7 +49,7 @@ internal class UserRepositoryImpl @Inject constructor(
                 authStateManager.setAuthenticated(authResponse.user.toDomain())
                 saveToken(authResponse.accessToken, authResponse.refreshToken)
                 syncGuestInvitations()
-                sendFcmTokenToServer()
+                fcmTokenManager.getToken()?.let { fcmTokenRepository.putTokenToServer(it) }
             }
     }
 
@@ -130,15 +130,6 @@ internal class UserRepositoryImpl @Inject constructor(
             Result.Error(DataError.Local.IOEXCEPTION)
         } catch (e: Exception) {
             Result.Error(DataError.Local.UNKNOWN)
-        }
-    }
-
-    private suspend fun sendFcmTokenToServer() {
-        try {
-            val token = fcmTokenManager.getToken()
-            token?.let { fcmTokenRepository.putTokenToServer(it) }
-        } catch (e: Exception) {
-            null // TODO
         }
     }
 
