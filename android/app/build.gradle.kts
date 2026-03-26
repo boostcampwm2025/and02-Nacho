@@ -100,6 +100,7 @@ dependencies {
     implementation(projects.feature.invitationCard)
     implementation(projects.core.analytics)
     implementation(projects.core.data)
+    implementation(projects.core.media)
     implementation(projects.core.network)
     implementation(projects.core.designsystem)
     implementation(projects.core.ui)
