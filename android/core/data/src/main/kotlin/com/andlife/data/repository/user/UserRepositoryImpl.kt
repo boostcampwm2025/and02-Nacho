@@ -10,6 +10,7 @@ import com.andlife.domain.model.auth.AuthState
 import com.andlife.domain.model.auth.User
 import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.fcm.FcmTokenRepository
+import com.andlife.domain.util.FcmTokenManager
 import com.andlife.domain.repository.user.UserRepository
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
@@ -17,8 +18,6 @@ import com.andlife.domain.util.Result
 import com.andlife.domain.util.map
 import com.andlife.domain.util.runResultCatching
 import com.andlife.network.model.auth.AuthRequest
-import com.google.firebase.messaging.FirebaseMessaging
-import kotlinx.coroutines.tasks.await
 import java.io.IOException
 import javax.inject.Inject
 
@@ -29,7 +28,8 @@ internal class UserRepositoryImpl @Inject constructor(
     private val invitationDatabase: InvitationDatabase,
     private val mediaUploader: MediaUploader,
     private val mediaFileProvider: MediaFileProvider,
-    private val fcmTokenRepository: FcmTokenRepository
+    private val fcmTokenRepository: FcmTokenRepository,
+    private val fcmTokenManager: FcmTokenManager
 ) : UserRepository {
     override suspend fun login(accessToken: String): Result<Unit, DataError> {
         return userRemoteDataSource.login(AuthRequest(accessToken))
@@ -135,10 +135,10 @@ internal class UserRepositoryImpl @Inject constructor(
 
     private suspend fun sendFcmTokenToServer() {
         try {
-            val token = FirebaseMessaging.getInstance().token.await()
-            fcmTokenRepository.putTokenToServer(token)
+            val token = fcmTokenManager.getToken()
+            token?.let { fcmTokenRepository.putTokenToServer(it) }
         } catch (e: Exception) {
-            null
+            null // TODO
         }
     }
 
