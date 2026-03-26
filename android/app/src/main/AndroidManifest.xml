@@ -78,6 +78,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name="com.andlife.nacho.FullscreenVideoPlayerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Invitation" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"

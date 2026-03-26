@@ -1,7 +1,7 @@
 package com.andlife.home.screen
 
-import android.graphics.Color as AndroidColor
-import android.view.ViewGroup
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,7 +30,6 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -43,17 +42,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.window.DialogWindowProvider
-import androidx.core.graphics.drawable.toDrawable
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -85,7 +78,7 @@ import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItemSkeleton
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
-import com.andlife.ui.component.media.video.FullscreenVideoPlayerContainer
+import com.andlife.ui.component.media.video.FullscreenVideoActivityContract
 import com.andlife.ui.component.report.ReportBottomSheet
 import com.andlife.ui.util.collectWithLifecycle
 import com.andlife.ui.util.toDDayText
@@ -115,6 +108,7 @@ fun HomeRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var isMediaActive by remember { mutableStateOf(true) }
+    val context = LocalContext.current
     val upcomingInvitations = viewModel.upcomingInvitationsPagingFlow.collectAsLazyPagingItems()
     val guestBooks = viewModel.guestBooksPagingFlow.collectAsLazyPagingItems()
     var lastPrecachedCount by remember { mutableIntStateOf(0) }
@@ -126,6 +120,11 @@ fun HomeRoute(
     val refreshFailMessage = stringResource(R.string.snack_refresh_failure)
     val reportSuccessMessage = stringResource(uiR.string.msg_report_success)
     val reportFailureMessage = stringResource(uiR.string.msg_report_failure)
+    val fullscreenActivityLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        viewModel.onEvent(HomeUiEvent.DismissFullscreenVideo)
+    }
 
     val navigateToLoginWithCleanup: () -> Unit = {
         isMediaActive = false
@@ -244,7 +243,9 @@ fun HomeRoute(
 
                 Lifecycle.Event.ON_PAUSE -> {
                     viewModel.onEvent(HomeUiEvent.UpdateMediaPlayState(false))
-                    viewModel.videoPlayerPool.pauseAllPlayers()
+                    if (uiState.fullscreenVideoUrl == null) {
+                        viewModel.videoPlayerPool.pauseAllPlayers()
+                    }
                     viewModel.audioPlayerManager.pause()
                 }
 
@@ -272,45 +273,14 @@ fun HomeRoute(
     }
 
     uiState.fullscreenVideoUrl?.let { url ->
-        val player = viewModel.videoPlayerPool.getPlayer(url)
-        val isMuted by viewModel.videoPlayerPool.isMuted.collectAsStateWithLifecycle()
-
-        Dialog(
-            onDismissRequest = {},
-            properties = DialogProperties(
-                usePlatformDefaultWidth = false,
-                dismissOnBackPress = false,
-                dismissOnClickOutside = false,
-                decorFitsSystemWindows = false,
-            ),
-        ) {
-            val view = LocalView.current
-            val window = (view.parent as? DialogWindowProvider)?.window
-
-            SideEffect {
-                window?.apply {
-                    setLayout(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                    )
-                    setBackgroundDrawable(
-                        AndroidColor.BLACK.toDrawable()
-                    )
-                    WindowInsetsControllerCompat(this, decorView).apply {
-                        hide(WindowInsetsCompat.Type.systemBars())
-                        systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                    }
-                }
-            }
-
-            FullscreenVideoPlayerContainer(
-                player = player,
+        LaunchedEffect(url, uiState.fullscreenThumbnailUrl, uiState.fullscreenStartBounds) {
+            val fullscreenIntent = FullscreenVideoActivityContract.createIntent(
+                context = context,
+                videoUrl = url,
                 thumbnailUrl = uiState.fullscreenThumbnailUrl,
                 startBounds = uiState.fullscreenStartBounds,
-                isMuted = isMuted,
-                onDismiss = { viewModel.onEvent(HomeUiEvent.DismissFullscreenVideo) },
-                onMuteToggle = { viewModel.onEvent(HomeUiEvent.ToggleVideoMute) }
             )
+            fullscreenActivityLauncher.launch(fullscreenIntent)
         }
     }
 
