@@ -101,12 +101,16 @@ internal class UserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun signOut(): Result<Unit, DataError> {
-        return userRemoteDataSource.signedOut().map { Unit }
+        return userRemoteDataSource.signedOut().map {
+            clearInvitationCache()
+        }
     }
 
     private suspend fun clearInvitationCache() {
         invitationDatabase.invitationSummaryDao().clearAll()
         invitationDatabase.upcomingInvitationDao().clearAll()
+        invitationDatabase.homeGuestBookDao().clearAll()
+        invitationDatabase.guestBookDao().clearAll()
     }
 
     override suspend fun getUserInfo(): AuthState {

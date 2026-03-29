@@ -1,5 +1,6 @@
 package com.andlife.invitation.model.guestbook
 
+import androidx.compose.ui.geometry.Rect
 import com.andlife.model.common.ReportReason
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.ui.base.BaseUiEvent
@@ -8,8 +9,6 @@ import com.andlife.ui.component.invitation.SelectedMedia
 sealed interface InvitationGuestBookUiEvent : BaseUiEvent {
     data class UpdateSelectedMedias(
         val medias: List<SelectedMedia>,
-        val exceededAvailableBytes: Boolean,
-        val exceededAvailableSlots: Boolean,
     ) : InvitationGuestBookUiEvent
 
     data class UpdateTextContent(
@@ -65,10 +64,20 @@ sealed interface InvitationGuestBookUiEvent : BaseUiEvent {
         val targetId: Long
     ) : InvitationGuestBookUiEvent
 
-     data object DismissReport : InvitationGuestBookUiEvent
+    data object DismissReport : InvitationGuestBookUiEvent
 
-     data class SubmitReport(
-         val reason: ReportReason,
-         val description: String?
-     ) : InvitationGuestBookUiEvent
+    data class SubmitReport(
+        val reason: ReportReason,
+        val description: String?
+    ) : InvitationGuestBookUiEvent
+
+    data class ShowFullscreenVideo(
+        val videoUrl: String,
+        val thumbnailUrl: String?,
+        val startBounds: Rect,
+    ) : InvitationGuestBookUiEvent
+
+    data object DismissFullscreenVideo : InvitationGuestBookUiEvent
+
+    data object ToggleVideoMute : InvitationGuestBookUiEvent
 }

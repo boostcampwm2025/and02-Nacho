@@ -1,5 +1,6 @@
 package com.andlife.home.viewmodel
 
+import androidx.compose.ui.geometry.Rect
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
@@ -12,9 +13,9 @@ import com.andlife.domain.repository.invitation.InvitationRepository
 import com.andlife.domain.repository.report.ReportRepository
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
-import com.andlife.home.model.home.HomeSideEffect
-import com.andlife.home.model.home.HomeUiEvent
-import com.andlife.home.model.home.HomeUiState
+import com.andlife.home.model.HomeSideEffect
+import com.andlife.home.model.HomeUiEvent
+import com.andlife.home.model.HomeUiState
 import com.andlife.media.audio.AudioPlaybackState
 import com.andlife.media.audio.AudioPlayerManager
 import com.andlife.media.video.AutoVideoPlayerPool
@@ -83,12 +84,14 @@ class HomeViewModel @Inject constructor(
             is HomeUiEvent.ClickVideoPlayButton -> clickVideoPlayButton(event.url, event.itemId)
             is HomeUiEvent.ClickSetting -> navigateToSetting()
             is HomeUiEvent.ClickCreate -> navigateToCreate()
-            is HomeUiEvent.Refresh -> refresh()
             is HomeUiEvent.UpdateMediaPlayState -> updatePlayState(event.isPlaying)
             HomeUiEvent.DismissLoginDialog -> dismissLoginDialog()
             is HomeUiEvent.ShowReport -> updateReportTargetId(event.targetId)
             HomeUiEvent.DismissReport -> updateReportTargetId(null)
             is HomeUiEvent.SubmitReport -> submitReport(event.reason, event.description)
+            is HomeUiEvent.ShowFullscreenVideo -> updateFullscreenVideo(event.videoUrl, event.thumbnailUrl, event.startBounds)
+            HomeUiEvent.DismissFullscreenVideo -> updateFullscreenVideo(null, null, null)
+            HomeUiEvent.ToggleVideoMute -> videoPlayerPool.toggleMute()
         }
     }
 
@@ -137,23 +140,6 @@ class HomeViewModel @Inject constructor(
         sendEffect(HomeSideEffect.ShowMessage("$type 미디어 클릭됨: $url"))
     }
 
-    private fun refresh() {
-        updateState { copy(isRefreshing = true) }
-    }
-
-    fun onRefreshFinished(hasError: Boolean) {
-        val wasUserTriggered = uiState.value.isRefreshing
-        updateState { copy(isRefreshing = false) }
-
-        if (hasError) {
-            sendEffect(HomeSideEffect.RefreshFailure)
-        } else {
-            if (wasUserTriggered) {
-                sendEffect(HomeSideEffect.ScrollToTop)
-            }
-        }
-    }
-
     private fun updatePlayState(isPlaying: Boolean) {
         updateState { copy(isMediaPlaying = isPlaying) }
     }
@@ -195,5 +181,13 @@ class HomeViewModel @Inject constructor(
                 sendEffect(HomeSideEffect.ReportFailure(messageToShow))
             }
         }
+    }
+
+    private fun updateFullscreenVideo(videoUrl: String?, thumbnailUrl: String?, startBounds: Rect?) {
+        updateState { copy(
+            fullscreenVideoUrl = videoUrl,
+            fullscreenThumbnailUrl = thumbnailUrl,
+            fullscreenStartBounds = startBounds,
+        ) }
     }
 }

@@ -2,6 +2,7 @@ package com.andlife.invitation_edit.section
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,9 +10,9 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
@@ -25,9 +26,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -40,14 +43,19 @@ import com.andlife.designsystem.theme.NachoElevation
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.invitation_edit.R
+import com.andlife.invitation_edit.dragdrop.DragDropState
+import com.andlife.invitation_edit.dragdrop.dragDropItem
 import com.andlife.invitation_edit.model.form.AnnouncementUiModel
 import kotlinx.collections.immutable.ImmutableList
 import com.andlife.designsystem.R as designR
 
 fun LazyListScope.announcementSection(
     announcementList: ImmutableList<AnnouncementUiModel>,
+    itemOffset: Int,
     onRemoveAnnouncementClick: (AnnouncementUiModel) -> Unit,
     onAddAnnouncementClick: () -> Unit,
+    onEditAnnouncementClick: (AnnouncementUiModel) -> Unit,
+    dragDropState: DragDropState,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
 ) {
@@ -94,6 +102,8 @@ fun LazyListScope.announcementSection(
             }
         }
     }
+
+
     if (announcementList.isEmpty()) {
         item {
             Box(
@@ -119,15 +129,22 @@ fun LazyListScope.announcementSection(
             items = announcementList,
             key = { _, item -> item.id },
         ) { index, item ->
+            val absoluteIndex = index + itemOffset
+
             Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .background(NachoTheme.colorScheme.backgroundPrimary),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(NachoTheme.colorScheme.backgroundPrimary)
+                    .dragDropItem(absoluteIndex, dragDropState)
+                    .clickable { onEditAnnouncementClick(item) }
             ) {
                 AnnouncementItem(
                     announcementUiModel = item,
                     onRemoveClick = { onRemoveAnnouncementClick(item) },
+                    onEditClick = { onEditAnnouncementClick(item) },
+                    onDragStart = { dragDropState.onDragStart(absoluteIndex, item.id) },
+                    onDrag = { offset -> dragDropState.onDrag(offset) },
+                    onDragInterrupted = { dragDropState.onDragInterrupted() }
                 )
             }
         }
@@ -138,29 +155,53 @@ fun LazyListScope.announcementSection(
 private fun AnnouncementItem(
     announcementUiModel: AnnouncementUiModel,
     onRemoveClick: () -> Unit,
+    onEditClick: () -> Unit,
+    onDragStart: () -> Unit,
+    onDrag: (Offset) -> Unit,
+    onDragInterrupted: () -> Unit,
     modifier: Modifier = Modifier,
     shape: Shape = NachoTheme.shapes.small,
     color: Color = NachoTheme.colorScheme.backgroundSecondary,
 ) {
     Surface(
-        modifier =
-            modifier.padding(
-                horizontal = NachoSpacing.large,
-                vertical = NachoSpacing.small,
-            ),
+        modifier = modifier.padding(
+            horizontal = NachoSpacing.large,
+            vertical = NachoSpacing.small,
+        ),
         shape = shape,
         color = color,
     ) {
         Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = NachoSpacing.large, vertical = NachoSpacing.medium)
-                    .height(IntrinsicSize.Min),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = NachoSpacing.medium, vertical = NachoSpacing.medium)
+                .height(IntrinsicSize.Min),
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            Icon(
+                painter = painterResource(com.andlife.ui.R.drawable.ic_menu_24),
+                contentDescription = stringResource(R.string.desc_reorder_announcement),
+                tint = NachoTheme.colorScheme.textTertiary,
+                modifier = Modifier
+                    .padding(horizontal = NachoSpacing.small)
+                    .pointerInput(Unit) {
+                        detectDragGesturesAfterLongPress(
+                            onDragStart = { onDragStart() },
+                            onDrag = { change, dragAmount ->
+                                change.consume()
+                                onDrag(dragAmount)
+                            },
+                            onDragEnd = { onDragInterrupted() },
+                            onDragCancel = { onDragInterrupted() }
+                        )
+                    }
+            )
+
             Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(NachoSpacing.medium),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = NachoSpacing.medium),
+                verticalArrangement = Arrangement.spacedBy(NachoSpacing.xSmall),
             ) {
                 Text(
                     text = announcementUiModel.title,
@@ -169,36 +210,38 @@ private fun AnnouncementItem(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-
                 Text(
                     text = announcementUiModel.content,
                     style = NachoTheme.typography.bodyMediumMedium,
                     color = NachoTheme.colorScheme.textSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
-            Column(modifier = Modifier) {
+
+            Column(
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxHeight()
+            ) {
                 Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_reorder),
-                    contentDescription = null,
+                    imageVector = ImageVector.vectorResource(designR.drawable.ic_edit_24),
+                    contentDescription = stringResource(R.string.desc_edit_announcement),
                     tint = NachoTheme.colorScheme.textTertiary,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .clickable(role = Role.Button, onClick = onEditClick)
+                        .padding(NachoSpacing.xSmall)
                 )
-                Spacer(
-                    modifier =
-                        Modifier
-                            .heightIn(min = NachoSpacing.xLarge)
-                            .weight(1f),
-                )
+
                 Icon(
-                    modifier =
-                        Modifier
-                            .clip(CircleShape)
-                            .clickable(
-                                role = Role.Button,
-                                onClick = onRemoveClick,
-                            ),
                     imageVector = ImageVector.vectorResource(R.drawable.ic_trash),
-                    contentDescription = null,
+                    contentDescription = stringResource(R.string.desc_remove_announcement),
                     tint = NachoTheme.colorScheme.textTertiary,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .clickable(role = Role.Button, onClick = onRemoveClick)
+                        .padding(NachoSpacing.xSmall)
                 )
             }
         }

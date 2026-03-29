@@ -54,6 +54,7 @@
             android:name="com.andlife.nacho.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.Invitation"
             android:launchMode="singleTask">
@@ -62,12 +63,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <intent-filter android:autoVerify="true">
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="kakao${KAKAO_NATIVE_APP_KEY}" android:host="kakaolink" />
-                <data android:scheme="https" android:host="nacho.onelink.me" />
+            </intent-filter>
+
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="nacho.onelink.me" />
             </intent-filter>
         </activity>
 
@@ -101,6 +109,10 @@
 
         <receiver
             android:name="com.andlife.data.util.media.download.DownloadCancelReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name="com.andlife.data.util.media.upload.UploadCancelReceiver"
             android:exported="false" />
 
         <activity

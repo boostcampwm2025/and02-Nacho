@@ -3,6 +3,7 @@ package com.andlife.invitation.screen
 import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.layout.AnimatedPane
@@ -43,7 +43,6 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.invitation.SortDirection
@@ -64,6 +63,7 @@ import com.andlife.model.invitation.InvitationSummaryUiModel
 import com.andlife.ui.R
 import com.andlife.ui.component.GenericTabRow
 import com.andlife.ui.component.dialog.LoginDialog
+import com.andlife.ui.component.dialog.NachoInfoDialog
 import com.andlife.ui.component.invitation.InvitationListHeader
 import com.andlife.ui.component.invitation.InvitationTopBar
 import com.andlife.ui.component.listitem.InvitationListItem
@@ -236,22 +236,28 @@ fun InvitationRoute(
     val reportSuccessMessage = stringResource(R.string.msg_report_success)
     val reportFailureMessage = stringResource(R.string.msg_report_failure)
 
+    LaunchedEffect(upcomingItems.loadState.mediator?.refresh, pastItems.loadState.mediator?.refresh) {
+        val currentTabHasError = if (uiState.selectedTab == 0) {
+            upcomingItems.loadState.mediator?.refresh is LoadState.Error
+        } else {
+            pastItems.loadState.mediator?.refresh is LoadState.Error
+        }
+        if (currentTabHasError) {
+            scope.launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar(refreshFailureMessage)
+            }
+        }
+    }
+
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is InvitationSideEffect.NavigateToDetail -> onNavigateToDetail(effect.id)
-            is InvitationSideEffect.RefreshFailure -> {
-                scope.launch {
-                    snackbarHostState.currentSnackbarData?.dismiss()
-                    snackbarHostState.showSnackbar(refreshFailureMessage)
-                }
-            }
             is InvitationSideEffect.LeaveSuccess -> {
                 scope.launch {
                     snackbarHostState.currentSnackbarData?.dismiss()
                     snackbarHostState.showSnackbar(leaveSuccessMessage)
                 }
-                upcomingItems.refresh()
-                pastItems.refresh()
             }
             is InvitationSideEffect.LeaveFailure -> {
                 scope.launch {
@@ -286,15 +292,17 @@ fun InvitationRoute(
         }
     }
 
-    LaunchedEffect(upcomingItems.loadState.refresh, pastItems.loadState.refresh) {
-        val isNotLoading = upcomingItems.loadState.refresh !is LoadState.Loading &&
-            pastItems.loadState.refresh !is LoadState.Loading
-
-        if (isNotLoading && uiState.isRefreshing) {
-            viewModel.onRefreshFinished(
-                hasError = upcomingItems.loadState.refresh is LoadState.Error ||
-                    pastItems.loadState.refresh is LoadState.Error
-            )
+    LaunchedEffect(upcomingItems.loadState.mediator?.refresh, pastItems.loadState.mediator?.refresh) {
+        val currentTabHasError = if (uiState.selectedTab == 0) {
+            upcomingItems.loadState.mediator?.refresh is LoadState.Error
+        } else {
+            pastItems.loadState.mediator?.refresh is LoadState.Error
+        }
+        if (currentTabHasError) {
+            scope.launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar(refreshFailureMessage)
+            }
         }
     }
 
@@ -388,11 +396,13 @@ private fun InvitationScreen(
                 val currentSortOptions = if (isUpcoming) upcomingSortOptions else pastSortOptions
                 val currentSortIndex = if (isUpcoming) upcomingSortIndex else pastSortIndex
 
+                val isMediatorLoading = currentItems.loadState.mediator?.refresh is LoadState.Loading
+
                 PullToRefreshBox(
-                    isRefreshing = uiState.isRefreshing,
+                    isRefreshing = isMediatorLoading,
                     onRefresh = {
-                        currentItems.refresh()
-                        onEvent(InvitationUiEvent.Refresh)
+                        upcomingItems.refresh()
+                        pastItems.refresh()
                     },
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -427,10 +437,12 @@ private fun InvitationScreen(
                                                 if (index == 0) SortDirection.DESC else SortDirection.ASC
                                             }
 
-                                            onEvent(InvitationUiEvent.ChangeSort(
-                                                isUpcoming = isUpcoming,
-                                                newSort = newDirection
-                                            ))
+                                            onEvent(
+                                                InvitationUiEvent.ChangeSort(
+                                                    isUpcoming = isUpcoming,
+                                                    newSort = newDirection
+                                                )
+                                            )
                                         }
                                     )
                                 }
@@ -494,11 +506,3 @@ private fun InvitationScreen(
         )
     }
 }
-
-/**
- * 딥링크인가?
- * 2paneViewModel에서 event를 가진다. (채널로 가진다)
- * 딥링크가 true라면 이벤트를 한번 소비시킨다.
- * 그 후 다른 초대장을 클릭하면? false로 이동하긴 해야 한다. true false 값이 바뀌어야 함, 딥링크로 들어온 id들을 배열로 관리하면?(상태관리)
- * 값은
- */

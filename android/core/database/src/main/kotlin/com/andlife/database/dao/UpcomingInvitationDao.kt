@@ -15,6 +15,9 @@ interface UpcomingInvitationDao {
     @Upsert
     suspend fun upsertAll(invitations: List<UpcomingInvitationEntity>)
 
+    @Query("DELETE FROM upcoming_invitation WHERE id = :id")
+    suspend fun deleteById(id: Long)
+
     @Query("DELETE FROM upcoming_invitation")
     suspend fun clearAll()
 }

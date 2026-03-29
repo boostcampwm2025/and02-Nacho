@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
+import com.andlife.domain.model.auth.AuthState
 import com.andlife.domain.model.invitation.InvitationStatus
 import com.andlife.domain.model.invitation.SortDirection
 import com.andlife.domain.repository.auth.AuthStateManager
@@ -29,6 +30,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -48,8 +50,9 @@ class MyInvitationViewModel @Inject constructor(
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val upcomingMyInvitationPagingFlow: Flow<PagingData<InvitationSummaryUiModel>> =
-        combine(_upcomingSort, authStateManager.authState) { sort, _ -> sort }
-            .flatMapLatest { sort ->
+        combine(_upcomingSort, authStateManager.authState) { sort, authState -> sort to authState }
+            .flatMapLatest { (sort, authState) ->
+                if (authState !is AuthState.Authenticated) return@flatMapLatest flowOf(PagingData.empty())
                 invitationRepository.getMyInvitations(
                     status = InvitationStatus.UPCOMING,
                     sortType = sort,
@@ -68,8 +71,9 @@ class MyInvitationViewModel @Inject constructor(
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val pastMyInvitationPagingFlow: Flow<PagingData<InvitationSummaryUiModel>> =
-        combine(_pastSort, authStateManager.authState) { sort, _ -> sort }
-            .flatMapLatest { sort ->
+        combine(_pastSort, authStateManager.authState) { sort, authState -> sort to authState }
+            .flatMapLatest { (sort, authState) ->
+                if (authState !is AuthState.Authenticated) return@flatMapLatest flowOf(PagingData.empty())
                 invitationRepository.getMyInvitations(
                     status = InvitationStatus.PAST,
                     sortType = sort,
@@ -98,9 +102,6 @@ class MyInvitationViewModel @Inject constructor(
 
     override fun onEvent(event: MyInvitationUiEvent) {
         when (event) {
-            is MyInvitationUiEvent.Refresh -> {
-                updateState { copy(isRefreshing = true) }
-            }
             is MyInvitationUiEvent.SelectTab -> {
                 updateState { copy(selectedTab = event.index) }
             }
@@ -130,14 +131,12 @@ class MyInvitationViewModel @Inject constructor(
         }
     }
 
-    fun onRefreshFinished(hasError: Boolean) {
-        updateState { copy(isRefreshing = false) }
-        if (hasError) sendEffect(MyInvitationSideEffect.RefreshFailure)
+    fun handleRefresh() {
+        sendEffect(MyInvitationSideEffect.NeedRefresh)
     }
 
     fun deleteInvitation(invitationId: Long) {
         viewModelScope.launch {
-            updateState { copy(isRefreshing = true) }
             invitationRepository.deleteInvitation(invitationId)
                 .onSuccess {
                     sendEffect(MyInvitationSideEffect.DeleteSuccess)
@@ -145,11 +144,7 @@ class MyInvitationViewModel @Inject constructor(
                 .onFailure { it, msg ->
                     sendEffect(MyInvitationSideEffect.DeleteFailure)
                 }
-            updateState { copy(isRefreshing = false) }
         }
     }
 
-    fun handleRefresh() {
-        sendEffect(MyInvitationSideEffect.NeedRefresh)
-    }
 }

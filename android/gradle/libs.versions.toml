@@ -32,7 +32,7 @@ ktlint = "14.0.1"
 compose-ruleset = "0.4.28"
 javaxInject = "1"
 exifinterface = "1.3.6"
-media3 = "1.9.0"
+media3 = "1.9.2"
 appsflyer = "6.16.2"
 kakao-sdk = "2.23.2"
 naver-map = "3.23.0"
@@ -133,6 +133,7 @@ androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterfa
 androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
 androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
 androidx-media3-common = { group = "androidx.media3", name = "media3-common", version.ref = "media3" }
+androidx-media3-ui-compose = { group = "androidx.media3", name = "media3-ui-compose", version.ref = "media3" }
 
 kakao-sdk-share = { group = "com.kakao.sdk", name = "v2-share", version.ref = "kakao-sdk" }
 kakao-bom = { module = "com.kakao.sdk:v2-bom", version.ref = "kakao-sdk" }
@@ -174,4 +175,4 @@ compose = [
     "androidx-compose-material3"
 ]
 
-media3 = ["androidx-media3-exoplayer", "androidx-media3-ui", "androidx-media3-common"]
+media3 = ["androidx-media3-exoplayer", "androidx-media3-ui", "androidx-media3-common", "androidx-media3-ui-compose"]

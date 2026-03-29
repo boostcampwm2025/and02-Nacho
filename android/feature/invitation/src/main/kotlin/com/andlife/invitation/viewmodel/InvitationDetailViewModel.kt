@@ -46,7 +46,10 @@ class InvitationDetailViewModel @AssistedInject constructor(
     override val uiState: StateFlow<InvitationDetailUiState> =
         mutableUiState
             .onStart {
-                Log.d("InvitationDetailViewModel", "[${this@InvitationDetailViewModel.hashCode()}] 딥링크 진입 : $isFromDeepLink")
+                Log.d(
+                    "InvitationDetailViewModel",
+                    "[${this@InvitationDetailViewModel.hashCode()}] 딥링크 진입 : $isFromDeepLink"
+                )
                 if (isFromDeepLink) {
                     joinAndLoadInvitation()
                 } else {
@@ -63,9 +66,8 @@ class InvitationDetailViewModel @AssistedInject constructor(
         updateState { copy(isLoading = true, isError = false) }
 
         invitationRepository.joinInvitation(invitationId)
-            .onSuccess {
-                if (!it.alreadyJoined) {
-                    RefreshEventHub.emit(RefreshTarget.HOME)
+            .onSuccess { joinResult ->
+                if (!joinResult.isMember) {
                     RefreshEventHub.emit(RefreshTarget.INVITATION)
                 }
                 loadInvitation()
@@ -97,12 +99,22 @@ class InvitationDetailViewModel @AssistedInject constructor(
         when (event) {
             is InvitationDetailUiEvent.ClickBack -> clickClose()
             is InvitationDetailUiEvent.ClickThanksCard -> {
-                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.INVITATION_DETAIL, Button.SHOW_THANKS_CARD))
+                analyticsLogger.logEvent(
+                    AnalyticsEvent.ButtonClick(
+                        Screen.INVITATION_DETAIL,
+                        Button.SHOW_THANKS_CARD
+                    )
+                )
                 showThanksCardOnboarding()
             }
 
             is InvitationDetailUiEvent.ClickLeaveInvitation -> {
-                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.INVITATION_DETAIL, Button.INVITATION_LEAVE))
+                analyticsLogger.logEvent(
+                    AnalyticsEvent.ButtonClick(
+                        Screen.INVITATION_DETAIL,
+                        Button.INVITATION_LEAVE
+                    )
+                )
                 leaveInvitation()
             }
 
@@ -123,8 +135,6 @@ class InvitationDetailViewModel @AssistedInject constructor(
             invitationRepository.leaveInvitation(invitationId)
                 .onSuccess {
                     sendEffect(InvitationDetailSideEffect.NavigateBack)
-                    RefreshEventHub.emit(RefreshTarget.INVITATION)
-                    RefreshEventHub.emit(RefreshTarget.HOME)
                 }
                 .onFailure { error, _ ->
                     sendEffect(InvitationDetailSideEffect.ShowLeaveInvitationErrorSnackbar)
@@ -162,7 +172,6 @@ class InvitationDetailViewModel @AssistedInject constructor(
     private fun updateLottieStarted() {
         updateState { copy(hasShownLottie = true) }
     }
-
     @AssistedFactory
     interface Factory {
         fun create(

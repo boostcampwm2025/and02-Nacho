@@ -1,6 +1,7 @@
 package com.andlife.myinvitation.viewmodel
 
 import android.util.Log
+import androidx.compose.ui.geometry.Rect
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
@@ -9,22 +10,19 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import com.andlife.domain.error.DataError
 import com.andlife.domain.model.auth.AuthState
-import com.andlife.domain.model.guestbook.GuestBook
-import com.andlife.domain.model.guestbook.GuestBookMedia
-import com.andlife.domain.model.guestbook.MediaType
+import com.andlife.domain.model.guestbook.UploadGuestBookState
 import com.andlife.domain.repository.auth.AuthStateManager
 import com.andlife.domain.repository.guestbook.GuestBookRepository
 import com.andlife.domain.repository.report.ReportRepository
 import com.andlife.domain.util.AnalyticsEvent
 import com.andlife.domain.util.AnalyticsLogger
+import com.andlife.domain.util.BackgroundMediaUploader
 import com.andlife.domain.util.Button
 import com.andlife.domain.util.CrashlyticsLogger
 import com.andlife.domain.util.EventType
+import com.andlife.domain.util.MediaFileCopyManager
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
-import com.andlife.domain.util.RefreshEventHub
-import com.andlife.domain.util.RefreshEventHub.RefreshTarget
-import com.andlife.domain.util.Result
 import com.andlife.domain.util.Screen
 import com.andlife.domain.util.ThumbnailGenerator
 import com.andlife.domain.util.onFailure
@@ -44,6 +42,7 @@ import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookUiEvent
 import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookUiState
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
+import com.andlife.ui.util.media.validateSelectedMediasByRule
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -60,16 +59,19 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 @HiltViewModel(assistedFactory = MyInvitationGuestBookViewModel.Factory::class)
 class MyInvitationGuestBookViewModel @AssistedInject constructor(
+    private val backgroundMediaUploader: BackgroundMediaUploader,
     private val mediaUploader: MediaUploader,
     private val mediaFileProvider: MediaFileProvider,
     private val thumbnailGenerator: ThumbnailGenerator,
     private val guestBookRepository: GuestBookRepository,
     private val reportRepository: ReportRepository,
     private val authStateManager: AuthStateManager,
+    private val mediaFileCopyManager: MediaFileCopyManager,
     val audioPlayerManager: AudioPlayerManager,
     val videoPlayerPool: AutoVideoPlayerPool,
     private val analyticsLogger: AnalyticsLogger,
@@ -123,20 +125,13 @@ class MyInvitationGuestBookViewModel @AssistedInject constructor(
         when (event) {
             is MyInvitationGuestBookUiEvent.UpdateSelectedMedias -> updateSelectedMedias(
                 event.medias,
-                event.exceededAvailableBytes,
-                event.exceededAvailableSlots
             )
 
             is MyInvitationGuestBookUiEvent.UpdateTextContent -> updateTextContent(event.textContent)
             is MyInvitationGuestBookUiEvent.RemoveMedia -> removeMedia(event.media)
             is MyInvitationGuestBookUiEvent.UploadMedias -> {
-                analyticsLogger.logEvent(
-                    AnalyticsEvent.ButtonClick(
-                        Screen.MY_INVITATION_DETAIL_GUEST_BOOK,
-                        Button.UPLOAD_GUEST_BOOK
-                    )
-                )
-                handleUploadMedias()
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL_GUEST_BOOK, Button.UPLOAD_GUEST_BOOK))
+                handleUploadAndSubmit()
             }
 
             is MyInvitationGuestBookUiEvent.ClickCamera -> handleCameraClick()
@@ -146,12 +141,7 @@ class MyInvitationGuestBookViewModel @AssistedInject constructor(
             is MyInvitationGuestBookUiEvent.ClickVideoPlayButton -> clickVideoPlayButton(event.url, event.itemId)
             is MyInvitationGuestBookUiEvent.ClickVisualMedia -> {}
             is MyInvitationGuestBookUiEvent.ClickEditMenu -> {
-                analyticsLogger.logEvent(
-                    AnalyticsEvent.ButtonClick(
-                        Screen.MY_INVITATION_DETAIL_GUEST_BOOK,
-                        Button.UPDATE_GUEST_BOOK
-                    )
-                )
+                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL_GUEST_BOOK, Button.UPDATE_GUEST_BOOK))
                 startEditing(event.guestBook)
             }
 
@@ -181,6 +171,9 @@ class MyInvitationGuestBookViewModel @AssistedInject constructor(
                 )
                 submitReport(event.reason, event.description)
             }
+            is MyInvitationGuestBookUiEvent.ShowFullscreenVideo -> updateFullscreenVideo(event.videoUrl, event.thumbnailUrl, event.startBounds)
+            MyInvitationGuestBookUiEvent.DismissFullscreenVideo -> updateFullscreenVideo(null, null, null)
+            MyInvitationGuestBookUiEvent.ToggleVideoMute -> videoPlayerPool.toggleMute()
         }
     }
 
@@ -206,14 +199,59 @@ class MyInvitationGuestBookViewModel @AssistedInject constructor(
 
     private fun updateSelectedMedias(
         medias: List<SelectedMedia>,
-        exceededAvailableBytes: Boolean,
-        exceededAvailableSlots: Boolean
     ) {
-        updateState {
-            copy(
-                selectedMedias = medias.toPersistentList(),
-                currentMediaSizeBytes = calculateTotalMediaSize(medias)
-            )
+        // 용량/개수 검증
+        val (validatedMedias, exceededAvailableBytes, exceededAvailableSlots) = validateSelectedMediasByRule(
+            selectedMedias = medias,
+        )
+
+        Log.d("MyInvitationGuestBookVM", "업데이트된 미디어의 uri: ${validatedMedias.map { it.uri }}")
+        // 새로 추가된 미디어 중 content uri인 파일들을 내부 저장소로 복사
+        val newContentUriMedias = validatedMedias.filter { media ->
+            media.id == null && media.uri.startsWith("content://")
+        }
+        if (newContentUriMedias.isNotEmpty()) {
+            updateState { copy(isProcessingMedia = true) }
+            viewModelScope.launch {
+                try {
+                    val copiedUris = mediaFileCopyManager.copyFilesToInternal(
+                        newContentUriMedias.map { it.uri }
+                    )
+                    // 복사된 URI로 업데이트된 미디어 리스트 생성
+                    val updatedMedias = validatedMedias.map { media ->
+                        val newContentUriIndex = newContentUriMedias.indexOfFirst { it.uri == media.uri }
+                        if (newContentUriIndex >= 0) {
+                            // content uri 파일인 경우 복사된 경로로 교체
+                            val copiedUri = copiedUris[newContentUriIndex]
+                            media.copy(uri = copiedUri ?: media.uri)  // TODO: 복사에 실패한 경우 기존 URI 반환하고있음
+                        } else {
+                            media
+                        }
+                    }
+
+                    updateState {
+                        copy(
+                            selectedMedias = updatedMedias.toPersistentList(),
+                            currentMediaSizeBytes = calculateTotalMediaSize(updatedMedias),
+                            isProcessingMedia = false
+                        )
+                    }
+                    Log.d("MyInvitationGuestBookVM", "파일 복사 완료, 업데이트된 미디어: ${updatedMedias.map { it.uri }}")
+
+                } catch (e: Exception) {
+                    Log.e("MyInvitationGuestBookVM", "파일 복사 중 오류", e)
+                    updateState { copy(isProcessingMedia = false) }
+                    sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("파일 처리 중 오류가 발생했습니다"))
+                }
+            }
+        } else {
+            // content uri인 파일이 없는 경우 바로 업데이트
+            updateState {
+                copy(
+                    selectedMedias = validatedMedias.toPersistentList(),
+                    currentMediaSizeBytes = calculateTotalMediaSize(validatedMedias)
+                )
+            }
         }
 
         // 용량 초과로 거부된 파일이 있으면 스낵바로 알림
@@ -221,7 +259,7 @@ class MyInvitationGuestBookViewModel @AssistedInject constructor(
             analyticsLogger.logEvent(AnalyticsEvent.Event(EventType.GUEST_BOOK_MAX_SIZE.value))
             sendEffect(
                 MyInvitationGuestBookSideEffect.ShowSnackbar(
-                    "파일이 500MB를 초과하여 제외되었습니다."
+                    "최대 파일 용량을 초과하여 제외되었습니다."
                 )
             )
         }
@@ -231,7 +269,7 @@ class MyInvitationGuestBookViewModel @AssistedInject constructor(
             analyticsLogger.logEvent(AnalyticsEvent.Event(EventType.GUEST_BOOK_MAX_MEDIA.value))
             sendEffect(
                 MyInvitationGuestBookSideEffect.ShowSnackbar(
-                    "파일은 20개까지만 추가 가능합니다."
+                    "최대 파일 개수를 초과하여 제외되었습니다."
                 )
             )
         }
@@ -275,7 +313,7 @@ class MyInvitationGuestBookViewModel @AssistedInject constructor(
             .map { media ->
                 SelectedMedia(
                     id = media.id,
-                    uri = media.url,
+                    uri = media.url,  // 기존 미디어의 URL이 들어감
                     type = when (media.type) {
                         MediaUiType.IMAGE -> UiMediaType.IMAGE
                         MediaUiType.VIDEO -> UiMediaType.VIDEO
@@ -296,177 +334,42 @@ class MyInvitationGuestBookViewModel @AssistedInject constructor(
         }
     }
 
-    private fun handleUploadMedias() {
+    private fun handleUploadAndSubmit() {
         val state = uiState.value
         if (!state.isSubmittable) return
 
-        viewModelScope.launch {
-            updateState { copy(isUploading = true) }
+        updateState { copy(isUploading = true) }
 
-            val newMedias = state.selectedMedias.filter { it.id == null }
+        // 각 필드를 json으로 직렬화 -> worker에서 역직렬화해서 GuestBookMedia 리스트로 만들어 사용
+        val selectedMediasId = state.selectedMedias.map { it.id } // 기존 미디어는 ID, 새 미디어는 null이므로 구분 가능
+        val selectedMediasUri = state.selectedMedias.map { it.uri } // 기존 미디어는 URI 대신 URL을 사용
+        val selectedMediasType = state.selectedMedias.map { it.type.name }
+        val selectedMediasDuration = state.selectedMedias.map { it.duration }
+        val selectedMediasThumbnailUrl = state.selectedMedias.map { it.thumbnailUrl }
 
-            try {
-                val (uploadedUrls, thumbnailUrls) = if (newMedias.isNotEmpty()) {
-                    val mediaFiles = mediaFileProvider.createFromUris(newMedias.map { it.uri })
-                    when (val uploadResult = mediaUploader.uploadMedias(mediaFiles)) {
-                        is Result.Success -> {
-                            val thumbnails = generateAndUploadThumbnails(newMedias)
-                            uploadResult.data to thumbnails
-                        }
-
-                        is Result.Error -> {
-                            updateState { copy(isUploading = false) }
-                            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("업로드 실패: ${uploadResult.message}"))
-                            return@launch
-                        }
-                    }
-                } else {
-                    emptyList<String?>() to emptyList()
-                }
-
-                if (state.editingGuestBookId == null) {
-                    createGuestBook(uploadedUrls, thumbnailUrls, newMedias)
-                } else {
-                    updateGuestBook(state.editingGuestBookId, uploadedUrls, thumbnailUrls, state.selectedMedias)
-                }
-            } catch (e: Exception) {
-                crashlyticsLogger.log(e.message ?: "upload Error")
-                updateState { copy(isUploading = false) }
-                sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("업로드 중 오류 발생: ${e.message}"))
-                return@launch
-            }
-        }
-    }
-
-    private suspend fun generateAndUploadThumbnails(
-        medias: List<SelectedMedia>
-    ): List<String?> {
-        return medias.map { media ->
-            if (media.type != UiMediaType.VIDEO) return@map null
-
-            try {
-                val thumbnailFile = thumbnailGenerator.generateVideoThumbnail(media.uri) ?: return@map null
-
-                val thumbnailMediaFile = mediaFileProvider.createFromFile(thumbnailFile)
-
-                when (val result = mediaUploader.uploadMedias(listOf(thumbnailMediaFile))) {
-                    is Result.Success -> result.data.firstOrNull()
-                    is Result.Error -> {
-                        null
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                null
-            }
-        }
-    }
-
-    private suspend fun createGuestBook(
-        uploadedUrls: List<String?>,
-        thumbnailUrls: List<String?>,
-        newSelectedMedias: List<SelectedMedia>
-    ) {
-        if (authStateManager.authState.value !is AuthState.Authenticated) {
-            updateState { copy(isUploading = false) }
-            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("로그인이 필요합니다."))
-            return
-        }
-
-        val guestBookMedias = uploadedUrls
-            .mapIndexedNotNull { index, url ->
-                val urlValue = url ?: return@mapIndexedNotNull null
-                val selectedMedia = newSelectedMedias.getOrNull(index) ?: return@mapIndexedNotNull null
-                val thumbnailUrl = thumbnailUrls.getOrNull(index)
-
-                GuestBookMedia(
-                    id = 0L,
-                    type = when (selectedMedia.type) {
-                        UiMediaType.IMAGE -> MediaType.IMAGE
-                        UiMediaType.VIDEO -> MediaType.VIDEO
-                        UiMediaType.AUDIO -> MediaType.AUDIO
-                    },
-                    url = urlValue,
-                    thumbnailUrl = thumbnailUrl,
-                    durationSeconds = selectedMedia.duration,
-                    displayOrder = index,
-                )
-            }
-
-        val result = guestBookRepository.createGuestBook(
+        // 백그라운드 업로드 시작
+        val pairOfWorkIds = backgroundMediaUploader.uploadMediasInBackground(
             invitationId = invitationId,
-            textContent = uiState.value.textContent,
-            medias = guestBookMedias,
+            guestBookText = state.textContent,
+            editingGuestBookId = state.editingGuestBookId ?: -1L, // 새 방명록인 경우 -1로 전달
+            selectedMediasId = Json.encodeToString(selectedMediasId),
+            selectedMediasUri = Json.encodeToString(selectedMediasUri),
+            selectedMediasType = Json.encodeToString(selectedMediasType),
+            selectedMediasDuration = Json.encodeToString(selectedMediasDuration),
+            selectedMediasThumbnailUrl = Json.encodeToString(selectedMediasThumbnailUrl),
         )
-        handleResult(result)
-    }
 
-    private suspend fun updateGuestBook(
-        guestBookId: Long,
-        uploadedUrls: List<String?>,
-        thumbnailUrls: List<String?>,
-        allSelectedMedias: List<SelectedMedia>
-    ) {
-        if (authStateManager.authState.value !is AuthState.Authenticated) {
-            updateState { copy(isUploading = false) }
-            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("로그인이 필요합니다."))
-            return
-        }
+        val uploadMediaWorkId = pairOfWorkIds.first
+        val guestBookWorkId = pairOfWorkIds.second
 
-        val existingImageIds =
-            allSelectedMedias.filter { it.id != null && it.type == UiMediaType.IMAGE }.mapNotNull { it.id }
-        val existingAudioIds =
-            allSelectedMedias.filter { it.id != null && it.type == UiMediaType.AUDIO }.mapNotNull { it.id }
-        val existingVideoIds =
-            allSelectedMedias.filter { it.id != null && it.type == UiMediaType.VIDEO }.mapNotNull { it.id }
+        Log.d("BackgroundUpload", "WorkID: $uploadMediaWorkId, $guestBookWorkId")
 
-        val onlyNewMedias = allSelectedMedias.filter { it.id == null }
-
-        val newMedias = uploadedUrls
-            .mapIndexedNotNull { index, url ->
-                val urlValue = url ?: return@mapIndexedNotNull null
-                val selectedMedia = onlyNewMedias.getOrNull(index) ?: return@mapIndexedNotNull null
-                val thumbnailUrl = thumbnailUrls.getOrNull(index)
-
-                GuestBookMedia(
-                    id = 0L,
-                    type = when (selectedMedia.type) {
-                        UiMediaType.IMAGE -> MediaType.IMAGE
-                        UiMediaType.VIDEO -> MediaType.VIDEO
-                        UiMediaType.AUDIO -> MediaType.AUDIO
-                    },
-                    url = urlValue,
-                    thumbnailUrl = thumbnailUrl,
-                    durationSeconds = selectedMedia.duration,
-                    displayOrder = allSelectedMedias.indexOf(selectedMedia)
-                )
-            }
-
-        val result = guestBookRepository.updateGuestBook(
-            guestBookId = guestBookId,
-            textContent = uiState.value.textContent,
-            existingImageIds = existingImageIds,
-            existingVideoIds = existingVideoIds,
-            existingAudioIds = existingAudioIds,
-            newMedias = newMedias
-        )
-        handleResult(result, true)
-    }
-
-    private fun handleResult(result: Result<GuestBook, DataError>, isUpdate: Boolean = false) = viewModelScope.launch {
-        updateState { copy(isUploading = false) }
-        when (result) {
-            is Result.Success -> {
-                clearFormInput()
-                if (isUpdate) {
-                    sendEffect(MyInvitationGuestBookSideEffect.UpdateGuestBookSuccess)
-                } else {
-                    sendEffect(MyInvitationGuestBookSideEffect.CreateGuestBookSuccess)
+        // 업로드 진행상황 관찰
+        viewModelScope.launch {
+            backgroundMediaUploader.observeUploadProgress(uploadMediaWorkId to guestBookWorkId)
+                .collect { uploadGuestBookState ->
+                    handleUploadGuestBookStateChange(uploadGuestBookState, state)
                 }
-                RefreshEventHub.emit(RefreshTarget.HOME)
-            }
-
-            is Result.Error -> sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("실패: ${result.message}"))
         }
     }
 
@@ -512,14 +415,15 @@ class MyInvitationGuestBookViewModel @AssistedInject constructor(
                 originalTextContent = "",
                 originalMediaIds = emptySet(),
                 currentMediaSizeBytes = 0L,
+                isProcessingMedia = false,
             )
         }
     }
 
     private fun handleCameraClick() {
         val state = uiState.value
-        if (state.selectedMedias.size >= 5) {
-            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("최대 5개까지 미디어를 추가할 수 있습니다."))
+        if (state.selectedMedias.size >= 20) {
+            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("최대 20개까지 미디어를 추가할 수 있습니다."))
             return
         }
         sendEffect(MyInvitationGuestBookSideEffect.LaunchCamera)
@@ -527,8 +431,8 @@ class MyInvitationGuestBookViewModel @AssistedInject constructor(
 
     private fun handleMicrophoneClick() {
         val state = uiState.value
-        if (state.selectedMedias.size >= 5) {
-            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("최대 5개까지 미디어를 추가할 수 있습니다."))
+        if (state.selectedMedias.size >= 20) {
+            sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("최대 20개까지 미디어를 추가할 수 있습니다."))
             return
         }
         updateState { copy(isMediaPlaying = false, audioRecordingDuration = 0) }
@@ -608,6 +512,66 @@ class MyInvitationGuestBookViewModel @AssistedInject constructor(
                 sendEffect(MyInvitationGuestBookSideEffect.ReportFailure(messageToShow))
             }
         }
+    }
+
+
+    private fun handleUploadGuestBookStateChange(
+        uploadGuestBookState: UploadGuestBookState,
+        originalState: MyInvitationGuestBookUiState
+    ) {
+        Log.d("BackgroundUpload", "업로드 상태 변화: $uploadGuestBookState")
+
+        when (uploadGuestBookState) {
+            is UploadGuestBookState.Enqueued -> {
+                Log.d("BackgroundUpload", "업로드 대기 중")
+            }
+
+            is UploadGuestBookState.Progress -> {
+                Log.d(
+                    "BackgroundUpload",
+                    "업로드 진행: ${uploadGuestBookState.percent}% (${uploadGuestBookState.currentOrder}/${uploadGuestBookState.totalCount})"
+                )
+            }
+
+            is UploadGuestBookState.Success -> {
+                Log.d("BackgroundUpload", "업로드 및 방명록 처리 완료: ${uploadGuestBookState.urls}")
+
+                updateState { copy(isUploading = false) }
+                clearFormInput()
+
+                val isUpdate = originalState.editingGuestBookId != null
+                if (isUpdate) {
+                    sendEffect(MyInvitationGuestBookSideEffect.UpdateGuestBookSuccess)
+                } else {
+                    sendEffect(MyInvitationGuestBookSideEffect.CreateGuestBookSuccess)
+                }
+
+                // 앱 내부 저장소 파일 정리
+                mediaFileCopyManager.cleanupTempFiles()
+
+                sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("방명록이 등록되었습니다"))
+            }
+
+            is UploadGuestBookState.Failure -> {
+                Log.e("BackgroundUpload", "업로드 실패: ${uploadGuestBookState.message}")
+                updateState { copy(isUploading = false) }
+                sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("업로드 실패: ${uploadGuestBookState.message}"))
+            }
+
+            is UploadGuestBookState.Cancelled -> {
+                Log.d("BackgroundUpload", "업로드 취소됨")
+                updateState { copy(isUploading = false) }
+                sendEffect(MyInvitationGuestBookSideEffect.ShowSnackbar("업로드가 취소되었습니다"))
+            }
+        }
+    }
+
+    private fun updateFullscreenVideo(videoUrl: String?, thumbnailUrl: String?, startBounds: Rect?) {
+        updateState { copy(
+            fullscreenVideoUrl = videoUrl,
+            fullscreenThumbnailUrl = thumbnailUrl,
+            fullscreenStartBounds = startBounds,
+        ) }
     }
 
     @AssistedFactory

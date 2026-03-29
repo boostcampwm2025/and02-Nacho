@@ -53,6 +53,7 @@ data class AnnouncementUiModel(
     val id: String = UUID.randomUUID().toString(),
     val title: String,
     val content: String,
+    val displayOrder: Int
 )
 
 data class CardUiModel(

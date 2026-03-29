@@ -1,7 +1,5 @@
 package com.andlife.ui.component.guestbook
 
-import android.view.ViewGroup
-import androidx.annotation.OptIn
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
@@ -34,27 +32,22 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.media3.common.Player
-import androidx.media3.common.util.UnstableApi
 import coil3.compose.AsyncImage
 import coil3.compose.SubcomposeAsyncImage
 import com.andlife.designsystem.preview.PreviewTheme
@@ -63,7 +56,6 @@ import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoStroke
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.media.audio.AudioPlaybackState
-import com.andlife.media.video.AutoVideoPlayer
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.media.video.FakeAutoVideoPlayerPool
 import com.andlife.model.common.AuthorUiModel
@@ -72,13 +64,11 @@ import com.andlife.model.guestbook.GuestBookMediaUiModel
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.ui.R
-import com.andlife.ui.component.icon.PlayerThumbnailIcon
 import com.andlife.ui.component.media.MediaOverlay
 import com.andlife.ui.util.toFormatDuration
 import com.andlife.ui.util.toRelativeTimeString
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.delay
 import kotlinx.datetime.LocalDateTime
 import com.andlife.designsystem.R as designR
 
@@ -92,6 +82,8 @@ fun GuestBookItem(
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     onAudioMediaClick: (GuestBookMediaUiModel) -> Unit,
     onPlayVideoClick: (String) -> Unit,
+    isFullscreen: Boolean,
+    onFullscreenClick: (String, String?, Rect) -> Unit,
     modifier: Modifier = Modifier,
     shouldPlayVideo: Boolean = false,
     isFromInvitationDetail: Boolean = true,
@@ -147,9 +139,11 @@ fun GuestBookItem(
             visualMediaUrls = guestBook.visualMedias,
             totalVisualCount = guestBook.totalVisualCount,
             shouldPlayVideo = shouldPlayVideo,
+            isFullscreen = isFullscreen,
             videoPlayerPool = videoPlayerPool,
             onVisualMediaClick = onVisualMediaClick,
             onPlayVideoClick = onPlayVideoClick,
+            onFullscreenClick = onFullscreenClick
         )
         GuestBookItemAudioSection(
             audioMedias = guestBook.audioMedias,
@@ -374,15 +368,17 @@ private fun GuestBookItemVisualMediaSection(
     visualMediaUrls: ImmutableList<GuestBookMediaUiModel>,
     totalVisualCount: Int,
     shouldPlayVideo: Boolean,
+    isFullscreen: Boolean,
     videoPlayerPool: AutoVideoPlayerPool,
     onVisualMediaClick: (GuestBookMediaUiModel) -> Unit,
     onPlayVideoClick: (String) -> Unit,
+    onFullscreenClick: (String, String?, Rect) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (visualMediaUrls.isEmpty()) return
 
     val pagerState = rememberPagerState(pageCount = { visualMediaUrls.size })
-    var beyondViewportPageCount by remember { mutableStateOf(0) }
+    var beyondViewportPageCount by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(pagerState.currentPage) {
         val nextPage = pagerState.currentPage + 1
@@ -415,14 +411,16 @@ private fun GuestBookItemVisualMediaSection(
             ) {
                 when (media.type) {
                     MediaUiType.VIDEO -> {
-                        VideoPlayerContainer(
+                        GuestBookVideoPlayer(
                             guestBookId = guestBookId,
                             videoUrl = media.url,
                             thumbnailUrl = media.thumbnailUrl,
                             totalDurationSeconds = media.durationSeconds,
                             shouldPlay = shouldPlayVideo && pagerState.currentPage == page,
+                            isFullscreen = isFullscreen,
                             videoPlayerPool = videoPlayerPool,
                             onPlayVideoClick = onPlayVideoClick,
+                            onFullscreenClick = onFullscreenClick
                         )
                     }
 
@@ -473,156 +471,6 @@ private fun GuestBookItemVisualMediaSection(
             )
         }
     }
-}
-
-@OptIn(UnstableApi::class)
-@Composable
-private fun VideoPlayerContainer(
-    guestBookId: Long,
-    videoUrl: String,
-    thumbnailUrl: String?,
-    totalDurationSeconds: Int?,
-    shouldPlay: Boolean,
-    videoPlayerPool: AutoVideoPlayerPool,
-    onPlayVideoClick: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    var isVideoReady by remember(videoUrl) { mutableStateOf(false) }
-    var remainingDurationMs by remember(videoUrl) {
-        mutableLongStateOf((totalDurationSeconds?.times(1000))?.toLong() ?: 0L)
-    }
-
-    val thumbnailAlpha by animateFloatAsState(
-        targetValue = if (shouldPlay && isVideoReady) 0f else 1f,
-        animationSpec = tween(durationMillis = 200),
-    )
-
-    LaunchedEffect(shouldPlay, videoUrl) {
-        if (shouldPlay) {
-            videoPlayerPool.playPlayer(videoUrl, guestBookId)
-        } else {
-            videoPlayerPool.pausePlayer(videoUrl)
-        }
-    }
-
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color.Black)
-    ) {
-        if (shouldPlay) {
-            val currentPlayer = remember(videoUrl) { videoPlayerPool.getPlayer(videoUrl) }
-
-            LaunchedEffect(isVideoReady) {
-                if (isVideoReady && totalDurationSeconds != null) {
-                    while (true) {
-                        val duration = currentPlayer.exoPlayer.duration
-                        val position = currentPlayer.exoPlayer.currentPosition
-
-                        remainingDurationMs = (duration - position).coerceAtLeast(0L)
-                        delay(1000L)
-                    }
-                } else {
-                    remainingDurationMs = (totalDurationSeconds?.times(1000))?.toLong() ?: 0L
-                }
-            }
-
-            DisposableEffect(currentPlayer, videoUrl) {
-                val listener = object : Player.Listener {
-                    override fun onRenderedFirstFrame() {
-                        isVideoReady = true
-                    }
-
-                    override fun onPlaybackStateChanged(state: Int) {
-                        if (state == Player.STATE_READY && currentPlayer.exoPlayer.playWhenReady) {
-                            isVideoReady = true
-                        }
-                    }
-                }
-
-                currentPlayer.exoPlayer.addListener(listener)
-
-                if (currentPlayer.exoPlayer.playbackState == Player.STATE_READY) {
-                    isVideoReady = true
-                }
-
-                onDispose {
-                    currentPlayer.exoPlayer.removeListener(listener)
-                }
-            }
-
-            VideoPlayerView(
-                autoPlayer = currentPlayer,
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
-
-        if (thumbnailUrl != null && thumbnailAlpha > 0f) {
-            ThumbnailWrapper(
-                thumbnailUrl = thumbnailUrl,
-                onPlayVideoClick = { onPlayVideoClick(videoUrl) },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(thumbnailAlpha),
-            )
-        }
-
-        if (totalDurationSeconds != null) {
-            VideoDurationOverlay(
-                duration = (remainingDurationMs / 1000).toInt().toFormatDuration(),
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(NachoSpacing.small),
-            )
-        }
-    }
-}
-
-
-@OptIn(UnstableApi::class)
-@Composable
-private fun VideoPlayerView(
-    autoPlayer: AutoVideoPlayer,
-    modifier: Modifier = Modifier,
-) {
-    AndroidView(
-        factory = {
-            autoPlayer.playerView.apply {
-                (parent as? ViewGroup)?.removeView(this)
-            }
-        },
-        modifier = modifier,
-    )
-}
-
-@Composable
-private fun ThumbnailWrapper(
-    thumbnailUrl: String?,
-    onPlayVideoClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier.clickable { onPlayVideoClick() }
-    ) {
-        AsyncImage(
-            model = thumbnailUrl,
-            contentDescription = stringResource(R.string.desc_video_thumbnail),
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Fit,
-        )
-        PlayerThumbnailIcon(modifier = Modifier.align(Alignment.Center))
-    }
-}
-
-@Composable
-private fun VideoDurationOverlay(
-    duration: String,
-    modifier: Modifier = Modifier,
-) {
-    MediaOverlay(
-        modifier = modifier,
-        text = duration
-    )
 }
 
 @Composable
@@ -834,6 +682,8 @@ private fun GuestBookItemPreview() {
                     shouldPlayVideo = false,
                     audioPlaybackState = AudioPlaybackState(),
                     isEditing = true,
+                    isFullscreen = false,
+                    onFullscreenClick = { _, _, _ -> },
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},
                     onAudioMediaClick = {},
@@ -897,6 +747,8 @@ private fun GuestBookItemPreview() {
                     shouldPlayVideo = false,
                     audioPlaybackState = AudioPlaybackState(),
                     isEditing = false,
+                    isFullscreen = false,
+                    onFullscreenClick = { _, _, _ -> },
                     onInvitationTitleClick = {},
                     onVisualMediaClick = {},
                     onAudioMediaClick = {},

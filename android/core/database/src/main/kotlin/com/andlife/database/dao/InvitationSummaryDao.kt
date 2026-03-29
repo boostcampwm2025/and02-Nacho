@@ -44,6 +44,9 @@ interface InvitationSummaryDao {
     )
     suspend fun clearByQuery(status: String, isMyInvitation: Boolean)
 
+    @Query("DELETE FROM invitation_summary WHERE id = :id")
+    suspend fun deleteById(id: Long)
+
     @Query("DELETE FROM invitation_summary")
     suspend fun clearAll()
 }

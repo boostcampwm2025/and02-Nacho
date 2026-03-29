@@ -4,7 +4,10 @@
 
 # 나에게로의 초대
 
-**이벤트의 시작부터 끝까지 초대, 참여, 기록, 감사를 연결하는 미디어 기반 아카이빙 플랫폼**
+**이벤트의 시작부터 끝까지 초대, 참여, 기록, 감사를 연결하는 미디어 기반 아카이빙 플랫폼** <br><br>
+<a href="https://play.google.com/store/apps/details?id=com.andlife.nacho&hl=ko">
+  <img height="64" alt="playstore" src="https://user-images.githubusercontent.com/67373938/227817080-0c069757-4000-4e3e-919b-b062e667ecc4.svg" />
+</a>
 
 <br>
 

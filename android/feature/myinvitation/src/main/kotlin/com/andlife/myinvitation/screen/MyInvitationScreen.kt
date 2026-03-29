@@ -251,24 +251,29 @@ fun MyInvitationRoute(
     val deleteSuccessMessage = stringResource(R.string.msg_delete_success)
     val deleteFailureMessage = stringResource(R.string.msg_delete_failure)
 
+    LaunchedEffect(upcomingItems.loadState.mediator?.refresh, pastItems.loadState.mediator?.refresh) {
+        val currentTabHasError = if (uiState.selectedTab == 0) {
+            upcomingItems.loadState.mediator?.refresh is LoadState.Error
+        } else {
+            pastItems.loadState.mediator?.refresh is LoadState.Error
+        }
+        if (currentTabHasError) {
+            scope.launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar(refreshFailureMessage)
+            }
+        }
+    }
+
     viewModel.effectFlow.collectWithLifecycle { effect ->
         when (effect) {
             is MyInvitationSideEffect.NavigateToDetail -> onNavigateToDetail(effect.id)
-            is MyInvitationSideEffect.RefreshFailure -> {
-                scope.launch {
-                    snackbarHostState.currentSnackbarData?.dismiss()
-                    snackbarHostState.showSnackbar(refreshFailureMessage)
-                }
-            }
-
             is MyInvitationSideEffect.NavigateToCreate -> onNavigateToCreate()
             is MyInvitationSideEffect.DeleteSuccess -> {
                 scope.launch {
                     snackbarHostState.currentSnackbarData?.dismiss()
                     snackbarHostState.showSnackbar(deleteSuccessMessage)
                 }
-                upcomingItems.refresh()
-                pastItems.refresh()
             }
 
             is MyInvitationSideEffect.DeleteFailure -> {
@@ -284,18 +289,6 @@ fun MyInvitationRoute(
             }
 
             MyInvitationSideEffect.NavigateToLogin -> onNavigateToLogin()
-        }
-    }
-
-    LaunchedEffect(upcomingItems.loadState.refresh, pastItems.loadState.refresh) {
-        val isNotLoading = upcomingItems.loadState.refresh !is LoadState.Loading &&
-            pastItems.loadState.refresh !is LoadState.Loading
-
-        if (isNotLoading && uiState.isRefreshing) {
-            viewModel.onRefreshFinished(
-                hasError = upcomingItems.loadState.refresh is LoadState.Error ||
-                    pastItems.loadState.refresh is LoadState.Error
-            )
         }
     }
 
@@ -324,7 +317,7 @@ fun MyInvitationRoute(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     TextButton(
                         onClick = { invitationIdToDelete = null }
@@ -426,11 +419,13 @@ private fun MyInvitationListPaneRoute(
                         val currentSortOptions = if (isUpcoming) upcomingSortOptions else pastSortOptions
                         val currentSortIndex = if (isUpcoming) upcomingSortIndex else pastSortIndex
 
+                        val isMediatorLoading = currentItems.loadState.mediator?.refresh is LoadState.Loading
+
                         PullToRefreshBox(
-                            isRefreshing = uiState.isRefreshing,
+                            isRefreshing = isMediatorLoading,
                             onRefresh = {
-                                currentItems.refresh()
-                                onEvent(MyInvitationUiEvent.Refresh)
+                                upcomingItems.refresh()
+                                pastItems.refresh()
                             },
                             modifier = Modifier.fillMaxSize()
                         ) {

@@ -4,7 +4,6 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import androidx.paging.RemoteMediator.InitializeAction
 import androidx.room.withTransaction
 import com.andlife.data.repository.invitation.mapper.toEntity
 import com.andlife.database.InvitationDatabase
@@ -12,16 +11,29 @@ import com.andlife.database.entity.InvitationSummaryEntity
 import com.andlife.domain.model.invitation.InvitationStatus
 import com.andlife.domain.model.invitation.SortDirection
 import com.andlife.domain.util.Result
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
 @OptIn(ExperimentalPagingApi::class)
-class InvitationRemoteMediator(
+class InvitationRemoteMediator @AssistedInject constructor(
+    @Assisted private val status: InvitationStatus,
+    @Assisted private val sortType: SortDirection,
+    @Assisted private val isMyInvitation: Boolean,
+    @Assisted private val onTotalCountLoaded: (Int) -> Unit,
     private val remoteDataSource: InvitationRemoteDataSource,
     private val database: InvitationDatabase,
-    private val status: InvitationStatus,
-    private val sortType: SortDirection,
-    private val isMyInvitation: Boolean,
-    private val onTotalCountLoaded: (Int) -> Unit
 ) : RemoteMediator<Int, InvitationSummaryEntity>() {
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            status: InvitationStatus,
+            sortType: SortDirection,
+            isMyInvitation: Boolean,
+            onTotalCountLoaded: (Int) -> Unit,
+        ): InvitationRemoteMediator
+    }
 
     private val dao = database.invitationSummaryDao()
 

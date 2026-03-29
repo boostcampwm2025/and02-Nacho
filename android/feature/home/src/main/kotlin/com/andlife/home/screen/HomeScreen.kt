@@ -1,5 +1,7 @@
 package com.andlife.home.screen
 
+import android.graphics.Color as AndroidColor
+import android.view.ViewGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +30,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -38,11 +41,19 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
+import androidx.core.graphics.drawable.toDrawable
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -59,9 +70,9 @@ import com.andlife.designsystem.preview.PreviewTheme
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.home.R
-import com.andlife.home.model.home.HomeSideEffect
-import com.andlife.home.model.home.HomeUiEvent
-import com.andlife.home.model.home.HomeUiState
+import com.andlife.home.model.HomeSideEffect
+import com.andlife.home.model.HomeUiEvent
+import com.andlife.home.model.HomeUiState
 import com.andlife.home.viewmodel.HomeViewModel
 import com.andlife.media.video.AutoVideoPlayerPool
 import com.andlife.media.video.FakeAutoVideoPlayerPool
@@ -69,12 +80,12 @@ import com.andlife.model.common.VideoCandidate
 import com.andlife.model.guestbook.GuestBookUiModel
 import com.andlife.model.guestbook.MediaUiType
 import com.andlife.model.invitation.UpcomingInvitationUiModel
-import com.andlife.ui.R as uiR
 import com.andlife.ui.component.dialog.LoginDialog
 import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItemSkeleton
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
+import com.andlife.ui.component.media.video.FullscreenVideoPlayerContainer
 import com.andlife.ui.component.report.ReportBottomSheet
 import com.andlife.ui.util.collectWithLifecycle
 import com.andlife.ui.util.toDDayText
@@ -85,6 +96,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
 import com.andlife.designsystem.R as designR
+import com.andlife.ui.R as uiR
 
 private const val GUESTBOOK_KEY_OFFSET = 2
 private const val UPCOMING_CARD_WIDTH_RATIO = 0.85f
@@ -106,6 +118,7 @@ fun HomeRoute(
     val upcomingInvitations = viewModel.upcomingInvitationsPagingFlow.collectAsLazyPagingItems()
     val guestBooks = viewModel.guestBooksPagingFlow.collectAsLazyPagingItems()
     var lastPrecachedCount by remember { mutableIntStateOf(0) }
+    var pendingScrollToTop by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -154,18 +167,8 @@ fun HomeRoute(
                 onNavigateToCreate()
             }
 
-            is HomeSideEffect.ScrollToTop -> {
-                scope.launch { lazyListState.animateScrollToItem(0) }
-            }
-
-            is HomeSideEffect.RefreshFailure -> {
-                scope.launch {
-                    snackbarHostState.currentSnackbarData?.dismiss()
-                    snackbarHostState.showSnackbar(refreshFailMessage)
-                }
-            }
-
             is HomeSideEffect.NeedRefresh -> {
+                pendingScrollToTop = true
                 upcomingInvitations.refresh()
                 guestBooks.refresh()
             }
@@ -186,6 +189,25 @@ fun HomeRoute(
         }
     }
 
+    LaunchedEffect(upcomingInvitations.loadState.mediator?.refresh, guestBooks.loadState.mediator?.refresh) {
+        val upcomingState = upcomingInvitations.loadState.mediator?.refresh
+        val guestBookState = guestBooks.loadState.mediator?.refresh
+
+        val hasError = upcomingState is LoadState.Error || guestBookState is LoadState.Error
+        if (hasError) {
+            scope.launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar(refreshFailMessage)
+            }
+        }
+
+        val isNotLoading = upcomingState is LoadState.NotLoading && guestBookState is LoadState.NotLoading
+        if (isNotLoading && pendingScrollToTop) {
+            pendingScrollToTop = false
+            lazyListState.animateScrollToItem(0)
+        }
+    }
+
     LaunchedEffect(guestBooks.itemCount) {
         val currentCount = guestBooks.itemCount
         if (currentCount < lastPrecachedCount) lastPrecachedCount = 0
@@ -201,17 +223,6 @@ fun HomeRoute(
         if (videoUrls.isNotEmpty()) {
             viewModel.videoPlayerPool.preparePlayers(videoUrls.size)
             viewModel.videoPlayerPool.precacheVideos(videoUrls)
-        }
-    }
-
-    LaunchedEffect(upcomingInvitations.loadState.refresh, guestBooks.loadState.refresh) {
-        val upcomingState = upcomingInvitations.loadState.refresh
-        val guestBookState = guestBooks.loadState.refresh
-
-        if (upcomingState !is LoadState.Loading && guestBookState !is LoadState.Loading) {
-            viewModel.onRefreshFinished(
-                hasError = upcomingState is LoadState.Error || guestBookState is LoadState.Error
-            )
         }
     }
 
@@ -260,6 +271,49 @@ fun HomeRoute(
         )
     }
 
+    uiState.fullscreenVideoUrl?.let { url ->
+        val player = viewModel.videoPlayerPool.getPlayer(url)
+        val isMuted by viewModel.videoPlayerPool.isMuted.collectAsStateWithLifecycle()
+
+        Dialog(
+            onDismissRequest = {},
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false,
+                decorFitsSystemWindows = false,
+            ),
+        ) {
+            val view = LocalView.current
+            val window = (view.parent as? DialogWindowProvider)?.window
+
+            SideEffect {
+                window?.apply {
+                    setLayout(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                    )
+                    setBackgroundDrawable(
+                        AndroidColor.BLACK.toDrawable()
+                    )
+                    WindowInsetsControllerCompat(this, decorView).apply {
+                        hide(WindowInsetsCompat.Type.systemBars())
+                        systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                    }
+                }
+            }
+
+            FullscreenVideoPlayerContainer(
+                player = player,
+                thumbnailUrl = uiState.fullscreenThumbnailUrl,
+                startBounds = uiState.fullscreenStartBounds,
+                isMuted = isMuted,
+                onDismiss = { viewModel.onEvent(HomeUiEvent.DismissFullscreenVideo) },
+                onMuteToggle = { viewModel.onEvent(HomeUiEvent.ToggleVideoMute) }
+            )
+        }
+    }
+
     HomeScreen(
         uiState = uiState,
         isMediaActive = isMediaActive,
@@ -298,10 +352,10 @@ fun HomeScreen(
 ) {
     var playVideoIndex by remember { mutableStateOf(-1) }
 
-    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.audioPlaybackState.isPlaying) {
+    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.audioPlaybackState.isPlaying, uiState.fullscreenVideoUrl) {
         var pendingIndex = -1
         var lastChangedTime = 0L
-        if (!isMediaActive || uiState.audioPlaybackState.isPlaying) {
+        if (!isMediaActive || uiState.audioPlaybackState.isPlaying || uiState.fullscreenVideoUrl != null) {
             playVideoIndex = -1
             return@LaunchedEffect
         }
@@ -375,13 +429,14 @@ fun HomeScreen(
         },
         containerColor = NachoTheme.colorScheme.backgroundPrimary,
     ) { paddingValues ->
+        val isRefreshing =
+            upcomingInvitations.loadState.mediator?.refresh is LoadState.Loading || guestBooks.loadState.mediator?.refresh is LoadState.Loading
 
         PullToRefreshBox(
-            isRefreshing = uiState.isRefreshing,
+            isRefreshing = isRefreshing,
             onRefresh = {
                 upcomingInvitations.refresh()
                 guestBooks.refresh()
-                onEvent(HomeUiEvent.Refresh)
             },
             modifier = Modifier
                 .fillMaxSize()
@@ -418,6 +473,9 @@ fun HomeScreen(
                         onEvent(HomeUiEvent.ClickVideoPlayButton(url, itemId))
                     },
                     onReportClick = { targetId -> onEvent(HomeUiEvent.ShowReport(targetId)) },
+                    onFullscreenClick = { url, thumbnailUrl, bounds ->
+                        onEvent(HomeUiEvent.ShowFullscreenVideo(url, thumbnailUrl, bounds))
+                    }
                 )
             }
         }
@@ -496,85 +554,98 @@ private fun LazyListScope.homeUpcomingSection(
                 .wrapContentHeight(),
             contentAlignment = Alignment.Center
         ) {
-            when {
-                upcomingInvitations.itemCount > 0 -> {
-                    LazyRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
-                        contentPadding = PaddingValues(horizontal = NachoSpacing.large)
-                    ) {
-                        items(
-                            count = upcomingInvitations.itemCount,
-                            key = upcomingInvitations.itemKey { it.id }
-                        ) { index ->
-                            upcomingInvitations[index]?.let { invitation ->
-                                val dDayText = remember(invitation.startTime.date) {
-                                    invitation.startTime.date.toDDayText()
-                                }
-                                InvitationScheduleListItem(
-                                    modifier = Modifier.fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO),
-                                    imageUrl = invitation.thumbnailUrl,
-                                    title = invitation.title,
-                                    startTime = invitation.startTime.toDateTimeSingleLine(),
-                                    hostName = invitation.hostInfo.name,
-                                    dDayText = dDayText,
-                                    onClick = { onInvitationClick(invitation.id, invitation.isOwner) },
+            if (upcomingInvitations.itemCount > 0) {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
+                    contentPadding = PaddingValues(horizontal = NachoSpacing.large)
+                ) {
+                    items(
+                        count = upcomingInvitations.itemCount,
+                        key = upcomingInvitations.itemKey { it.id }
+                    ) { index ->
+                        upcomingInvitations[index]?.let { invitation ->
+                            val dDayText = remember(invitation.startTime.date) {
+                                invitation.startTime.date.toDDayText()
+                            }
+                            InvitationScheduleListItem(
+                                modifier = Modifier.fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO),
+                                imageUrl = invitation.thumbnailUrl,
+                                title = invitation.title,
+                                startTime = invitation.startTime.toDateTimeSingleLine(),
+                                hostName = invitation.hostInfo.name,
+                                dDayText = dDayText,
+                                onClick = { onInvitationClick(invitation.id, invitation.isOwner) },
+                            )
+                        }
+                    }
+                }
+            } else {
+                when {
+                    isRefreshing -> {
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
+                            contentPadding = PaddingValues(horizontal = NachoSpacing.large),
+                            userScrollEnabled = false
+                        ) {
+                            items(SKELETON_ITEM_COUNT) {
+                                InvitationScheduleListItemSkeleton(
+                                    modifier = Modifier
+                                        .fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO)
+                                        .alpha(0.5f),
                                 )
                             }
                         }
+                        InvitationLoadingIndicator()
                     }
-                }
 
-                isRefreshing -> {
-                    LazyRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
-                        contentPadding = PaddingValues(horizontal = NachoSpacing.large),
-                        userScrollEnabled = false
-                    ) {
-                        items(SKELETON_ITEM_COUNT) {
-                            InvitationScheduleListItemSkeleton(
-                                modifier = Modifier
-                                    .fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO)
-                                    .alpha(0.5f),
-                            )
+                    isError -> {
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
+                            contentPadding = PaddingValues(horizontal = NachoSpacing.large),
+                            userScrollEnabled = false
+                        ) {
+                            items(SKELETON_ITEM_COUNT) {
+                                InvitationScheduleListItemSkeleton(
+                                    modifier = Modifier
+                                        .fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO)
+                                        .alpha(0.5f),
+                                )
+                            }
                         }
+                        UpcomingStatusContent(
+                            title = stringResource(R.string.txt_error_upcoming_title),
+                            description = stringResource(R.string.txt_error_upcoming_desc),
+                        )
                     }
-                    InvitationLoadingIndicator()
-                }
 
-                isError -> {
-                    UpcomingStatusContent(
-                        title = stringResource(R.string.txt_error_upcoming_title),
-                        description = stringResource(R.string.txt_error_upcoming_desc),
-                    )
-                }
-
-                isEmpty -> {
-                    LazyRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
-                        contentPadding = PaddingValues(horizontal = NachoSpacing.large),
-                        userScrollEnabled = false
-                    ) {
-                        items(SKELETON_ITEM_COUNT) {
-                            InvitationScheduleListItemSkeleton(
-                                modifier = Modifier
-                                    .fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO)
-                                    .alpha(0.5f),
-                            )
+                    isEmpty -> {
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(NachoSpacing.large),
+                            contentPadding = PaddingValues(horizontal = NachoSpacing.large),
+                            userScrollEnabled = false
+                        ) {
+                            items(SKELETON_ITEM_COUNT) {
+                                InvitationScheduleListItemSkeleton(
+                                    modifier = Modifier
+                                        .fillParentMaxWidth(UPCOMING_CARD_WIDTH_RATIO)
+                                        .alpha(0.5f),
+                                )
+                            }
                         }
+                        UpcomingStatusContent(
+                            title = stringResource(R.string.txt_empty_upcoming_title),
+                            description = stringResource(R.string.txt_empty_upcoming_desc),
+                            buttonText = stringResource(R.string.txt_action_create_invitation),
+                            onButtonClick = onNavigateToCreate,
+                            buttonIconRes = designR.drawable.ic_add_24
+                        )
                     }
-                    UpcomingStatusContent(
-                        title = stringResource(R.string.txt_empty_upcoming_title),
-                        description = stringResource(R.string.txt_empty_upcoming_desc),
-                        buttonText = stringResource(R.string.txt_action_create_invitation),
-                        onButtonClick = onNavigateToCreate,
-                        buttonIconRes = designR.drawable.ic_add_24
-                    )
                 }
             }
-
         }
     }
 }
@@ -638,6 +709,7 @@ private fun LazyListScope.homeGuestBookSection(
     onAudioMediaClick: (String) -> Unit,
     onPlayVideoClick: (String, Long) -> Unit,
     onReportClick: (Long) -> Unit,
+    onFullscreenClick: (String, String?, Rect) -> Unit,
 ) {
     item {
         Text(
@@ -649,32 +721,17 @@ private fun LazyListScope.homeGuestBookSection(
         )
     }
 
+    val sourceLoadState = guestBooks.loadState.source.refresh
+    val mediatorLoadState = guestBooks.loadState.mediator?.refresh
 
-    val refreshState = guestBooks.loadState.refresh
-    val isInitialLoading = refreshState is LoadState.Loading && guestBooks.itemCount == 0
-    val isInitialError = refreshState is LoadState.Error && guestBooks.itemCount == 0
-    val isEmpty = refreshState is LoadState.NotLoading && guestBooks.itemCount == 0
+    val isRefreshing = sourceLoadState is LoadState.Loading || mediatorLoadState is LoadState.Loading
+    val isError = sourceLoadState is LoadState.Error || mediatorLoadState is LoadState.Error
+    val isEmpty = !isRefreshing && guestBooks.itemCount == 0
 
-    if (isInitialLoading || isInitialError || isEmpty) {
-        item {
-            Box(
-                modifier = Modifier.fillParentMaxHeight(0.3f),
-                contentAlignment = Alignment.Center
-            ) {
-                GuestBookStatusContent(
-                    isLoading = isInitialLoading,
-                    title = when {
-                        isInitialError -> stringResource(R.string.error_msg_failed_load_post)
-                        isEmpty -> stringResource(R.string.txt_empty_new_post_desc)
-                        else -> null
-                    },
-                )
-            }
-        }
-    } else {
+    if (guestBooks.itemCount > 0) {
         items(
             count = guestBooks.itemCount,
-            key = { index -> index + GUESTBOOK_KEY_OFFSET },
+            key = { index -> index + GUESTBOOK_KEY_OFFSET }
         ) { index ->
             guestBooks[index]?.let { guestBook ->
                 GuestBookItem(
@@ -684,6 +741,7 @@ private fun LazyListScope.homeGuestBookSection(
                     shouldPlayVideo = uiState.canPlayVideo && (index == playVideoIndex),
                     isFromInvitationDetail = false,
                     audioPlaybackState = uiState.audioPlaybackState,
+                    isFullscreen = uiState.isFullscreenVideoUrlValid(guestBook),
                     onInvitationTitleClick = {
                         onInvitationTitleClick(
                             guestBook.invitation.id,
@@ -694,7 +752,33 @@ private fun LazyListScope.homeGuestBookSection(
                     onAudioMediaClick = { onAudioMediaClick(it.url) },
                     onPlayVideoClick = { url -> onPlayVideoClick(url, guestBook.id) },
                     onReportClick = { onReportClick(guestBook.id) },
+                    onFullscreenClick = { url, thumbnailUrl, bounds -> onFullscreenClick(url, thumbnailUrl, bounds) },
                 )
+            }
+        }
+    } else {
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillParentMaxHeight(0.3f),
+                contentAlignment = Alignment.Center
+            ) {
+                when {
+                    isRefreshing -> {
+                        GuestBookStatusContent(isLoading = true)
+                    }
+                    isError -> {
+                        GuestBookStatusContent(
+                            title = stringResource(R.string.error_msg_failed_load_post)
+                        )
+                    }
+                    isEmpty -> {
+                        GuestBookStatusContent(
+                            title = stringResource(R.string.txt_empty_new_post_desc)
+                        )
+                    }
+                }
             }
         }
     }

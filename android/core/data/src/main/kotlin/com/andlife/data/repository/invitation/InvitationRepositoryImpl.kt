@@ -11,7 +11,8 @@ import com.andlife.data.datasource.remote.invitation.InvitationRemoteMediator
 import com.andlife.data.datasource.remote.invitation.UpcomingInvitationRemoteMediator
 import com.andlife.data.repository.invitation.mapper.toDomain
 import com.andlife.data.repository.invitation.mapper.toRequest
-import com.andlife.database.InvitationDatabase
+import com.andlife.database.dao.InvitationSummaryDao
+import com.andlife.database.dao.UpcomingInvitationDao
 import com.andlife.datastore.UserStorage
 import com.andlife.domain.error.DataError
 import com.andlife.domain.model.card.NachoCard
@@ -33,7 +34,10 @@ import javax.inject.Inject
 
 internal class InvitationRepositoryImpl @Inject constructor(
     private val invitationRemoteDataSource: InvitationRemoteDataSource,
-    private val database: InvitationDatabase,
+    private val invitationSummaryDao: InvitationSummaryDao,
+    private val upcomingInvitationDao: UpcomingInvitationDao,
+    private val invitationRemoteMediatorFactory: InvitationRemoteMediator.Factory,
+    private val upcomingInvitationRemoteMediator: UpcomingInvitationRemoteMediator,
     private val userStorage: UserStorage,
     private val json: Json
 ) : InvitationRepository {
@@ -45,12 +49,6 @@ internal class InvitationRepositoryImpl @Inject constructor(
                     Log.d("InvitationRepositoryImpl", "참여 성공: ${domainModel.invitationId}")
                 }
             }
-        }
-    }
-
-    override suspend fun leaveInvitation(invitationId: Long): Result<Unit, DataError> {
-        return invitationRemoteDataSource.leaveInvitation(invitationId).onSuccess {
-            userStorage.deleteInvitationId(invitationId)
         }
     }
 
@@ -71,8 +69,18 @@ internal class InvitationRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun leaveInvitation(invitationId: Long): Result<Unit, DataError> =
+        invitationRemoteDataSource.leaveInvitation(invitationId).onSuccess {
+            userStorage.deleteInvitationId(invitationId)
+            invitationSummaryDao.deleteById(invitationId)
+            upcomingInvitationDao.deleteById(invitationId)
+        }
+
     override suspend fun deleteInvitation(invitationId: Long): Result<Unit, DataError> =
-        invitationRemoteDataSource.deleteInvitation(invitationId)
+        invitationRemoteDataSource.deleteInvitation(invitationId).onSuccess {
+            invitationSummaryDao.deleteById(invitationId)
+            upcomingInvitationDao.deleteById(invitationId)
+        }
 
     override suspend fun getInvitation(invitationId: Long): Result<Invitation, DataError> =
         invitationRemoteDataSource.getInvitation(invitationId).map { response ->
@@ -86,13 +94,9 @@ internal class InvitationRepositoryImpl @Inject constructor(
         isMyInvitation: Boolean,
         onTotalCountLoaded: (Int) -> Unit
     ): Flow<PagingData<InvitationSummary>> {
-        val dao = database.invitationSummaryDao()
-
         return Pager(
             config = createPagingConfig(),
-            remoteMediator = InvitationRemoteMediator(
-                remoteDataSource = invitationRemoteDataSource,
-                database = database,
+            remoteMediator = invitationRemoteMediatorFactory.create(
                 status = status,
                 sortType = sortType,
                 isMyInvitation = isMyInvitation,
@@ -100,9 +104,9 @@ internal class InvitationRepositoryImpl @Inject constructor(
             ),
             pagingSourceFactory = {
                 if (sortType == SortDirection.ASC) {
-                    dao.pagingSourceAsc(status.name, isMyInvitation)
+                    invitationSummaryDao.pagingSourceAsc(status.name, isMyInvitation)
                 } else {
-                    dao.pagingSourceDesc(status.name, isMyInvitation)
+                    invitationSummaryDao.pagingSourceDesc(status.name, isMyInvitation)
                 }
             }
         ).flow.map { pagingData ->
@@ -117,13 +121,9 @@ internal class InvitationRepositoryImpl @Inject constructor(
         isMyInvitation: Boolean,
         onTotalCountLoaded: (Int) -> Unit
     ): Flow<PagingData<InvitationSummary>> {
-        val dao = database.invitationSummaryDao()
-
         return Pager(
             config = createPagingConfig(),
-            remoteMediator = InvitationRemoteMediator(
-                remoteDataSource = invitationRemoteDataSource,
-                database = database,
+            remoteMediator = invitationRemoteMediatorFactory.create(
                 status = status,
                 sortType = sortType,
                 isMyInvitation = isMyInvitation,
@@ -131,9 +131,9 @@ internal class InvitationRepositoryImpl @Inject constructor(
             ),
             pagingSourceFactory = {
                 if (sortType == SortDirection.ASC) {
-                    dao.pagingSourceAsc(status.name, isMyInvitation)
+                    invitationSummaryDao.pagingSourceAsc(status.name, isMyInvitation)
                 } else {
-                    dao.pagingSourceDesc(status.name, isMyInvitation)
+                    invitationSummaryDao.pagingSourceDesc(status.name, isMyInvitation)
                 }
             }
         ).flow.map { pagingData ->
@@ -145,14 +145,8 @@ internal class InvitationRepositoryImpl @Inject constructor(
     override fun getUpcomingInvitations(): Flow<PagingData<UpcomingInvitation>> =
         Pager(
             config = createPagingConfig(),
-            remoteMediator = UpcomingInvitationRemoteMediator(
-                remoteDataSource = invitationRemoteDataSource,
-                database = database,
-                days = UPCOMING_DAYS_THRESHOLD,
-            ),
-            pagingSourceFactory = {
-                database.upcomingInvitationDao().pagingSource()
-            }
+            remoteMediator = upcomingInvitationRemoteMediator,
+            pagingSourceFactory = { upcomingInvitationDao.pagingSource() },
         ).flow.map { pagingData ->
             pagingData.map { it.toDomain() }
         }
@@ -181,6 +175,5 @@ internal class InvitationRepositoryImpl @Inject constructor(
 
     companion object {
         private const val PAGE_SIZE = 10
-        private const val UPCOMING_DAYS_THRESHOLD = 30L
     }
 }

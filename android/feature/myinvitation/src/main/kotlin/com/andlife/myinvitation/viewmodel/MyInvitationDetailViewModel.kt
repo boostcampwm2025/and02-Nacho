@@ -14,8 +14,6 @@ import com.andlife.domain.repository.thankscard.ThanksCardRepository
 import com.andlife.domain.util.AnalyticsEvent
 import com.andlife.domain.util.AnalyticsLogger
 import com.andlife.domain.util.Button
-import com.andlife.domain.util.RefreshEventHub
-import com.andlife.domain.util.RefreshEventHub.RefreshTarget
 import com.andlife.domain.util.Screen
 import com.andlife.domain.util.ShareMethod
 import com.andlife.domain.util.onFailure
@@ -170,8 +168,6 @@ class MyInvitationDetailViewModel @AssistedInject constructor(
             invitationRepository.deleteInvitation(myInvitationId)
                 .onSuccess {
                     sendEffect(MyInvitationDetailSideEffect.InvitationDeleted)
-                    RefreshEventHub.emit(RefreshTarget.MY_INVITATION)
-                    RefreshEventHub.emit(RefreshTarget.HOME)
                 }
                 .onFailure { error, msg ->
                     sendEffect(MyInvitationDetailSideEffect.InvitationDeleteFailed)
