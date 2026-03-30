@@ -21,7 +21,10 @@ import com.andlife.domain.util.Button
 import com.andlife.domain.util.CrashlyticsLogger
 import com.andlife.domain.util.EventType
 import com.andlife.domain.util.MediaFileCopyManager
+import com.andlife.domain.util.MediaFileProvider
+import com.andlife.domain.util.MediaUploader
 import com.andlife.domain.util.Screen
+import com.andlife.domain.util.ThumbnailGenerator
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.invitation.InvitationDetail
@@ -40,6 +43,9 @@ import com.andlife.model.guestbook.toUiModel
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
 import com.andlife.ui.util.media.validateSelectedMediasByRule
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -56,11 +62,12 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
-@HiltViewModel
-class InvitationGuestBookViewModel
-@Inject
-constructor(
+@HiltViewModel(assistedFactory = InvitationGuestBookViewModel.Factory::class)
+class InvitationGuestBookViewModel @AssistedInject constructor(
     private val backgroundMediaUploader: BackgroundMediaUploader,
+    private val mediaUploader: MediaUploader,
+    private val mediaFileProvider: MediaFileProvider,
+    private val thumbnailGenerator: ThumbnailGenerator,
     private val guestBookRepository: GuestBookRepository,
     private val reportRepository: ReportRepository,
     private val authStateManager: AuthStateManager,
@@ -69,12 +76,10 @@ constructor(
     val videoPlayerPool: AutoVideoPlayerPool,
     private val analyticsLogger: AnalyticsLogger,
     private val crashlyticsLogger: CrashlyticsLogger,
-    savedStateHandle: SavedStateHandle,
+    @Assisted val invitationId: Long,
 ) : BaseViewModel<InvitationGuestBookUiState, InvitationGuestBookUiEvent, InvitationGuestBookSideEffect>(
     InvitationGuestBookUiState(authState = authStateManager.authState.value),
 ) {
-    private val invitationId: Long = savedStateHandle.toRoute<InvitationDetail>().id
-
     override val uiState: StateFlow<InvitationGuestBookUiState> = mutableUiState.asStateFlow()
 
     private val refreshFlow = MutableStateFlow(0)
@@ -578,5 +583,12 @@ constructor(
             fullscreenThumbnailUrl = thumbnailUrl,
             fullscreenStartBounds = startBounds,
         ) }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            invitationId: Long,
+        ): InvitationGuestBookViewModel
     }
 }

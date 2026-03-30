@@ -58,6 +58,7 @@ fun InvitationListItem(
     dDayText: String?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isSelected: Boolean = false,
     menuItems: ImmutableList<MenuItem> = persistentListOf(),
 ) {
     var isMenuExpanded by remember { mutableStateOf(false) }
@@ -70,7 +71,7 @@ fun InvitationListItem(
         ),
         border = BorderStroke(
             NachoStroke.small,
-            NachoTheme.colorScheme.backgroundBorder,
+            if (isSelected) NachoTheme.colorScheme.brandPrimary else NachoTheme.colorScheme.backgroundBorder,
         ),
         modifier = modifier,
     ) {

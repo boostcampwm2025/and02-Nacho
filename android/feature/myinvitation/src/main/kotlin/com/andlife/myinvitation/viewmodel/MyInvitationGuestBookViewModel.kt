@@ -21,7 +21,10 @@ import com.andlife.domain.util.Button
 import com.andlife.domain.util.CrashlyticsLogger
 import com.andlife.domain.util.EventType
 import com.andlife.domain.util.MediaFileCopyManager
+import com.andlife.domain.util.MediaFileProvider
+import com.andlife.domain.util.MediaUploader
 import com.andlife.domain.util.Screen
+import com.andlife.domain.util.ThumbnailGenerator
 import com.andlife.domain.util.onFailure
 import com.andlife.domain.util.onSuccess
 import com.andlife.media.audio.AudioPlaybackState
@@ -40,6 +43,9 @@ import com.andlife.myinvitation.model.guestbook.MyInvitationGuestBookUiState
 import com.andlife.ui.base.BaseViewModel
 import com.andlife.ui.component.invitation.SelectedMedia
 import com.andlife.ui.util.media.validateSelectedMediasByRule
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -56,11 +62,12 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
-@HiltViewModel
-class MyInvitationGuestBookViewModel
-@Inject
-constructor(
+@HiltViewModel(assistedFactory = MyInvitationGuestBookViewModel.Factory::class)
+class MyInvitationGuestBookViewModel @AssistedInject constructor(
     private val backgroundMediaUploader: BackgroundMediaUploader,
+    private val mediaUploader: MediaUploader,
+    private val mediaFileProvider: MediaFileProvider,
+    private val thumbnailGenerator: ThumbnailGenerator,
     private val guestBookRepository: GuestBookRepository,
     private val reportRepository: ReportRepository,
     private val authStateManager: AuthStateManager,
@@ -69,12 +76,11 @@ constructor(
     val videoPlayerPool: AutoVideoPlayerPool,
     private val analyticsLogger: AnalyticsLogger,
     private val crashlyticsLogger: CrashlyticsLogger,
+    @Assisted private val invitationId: Long,
     savedStateHandle: SavedStateHandle,
 ) : BaseViewModel<MyInvitationGuestBookUiState, MyInvitationGuestBookUiEvent, MyInvitationGuestBookSideEffect>(
     MyInvitationGuestBookUiState(),
 ) {
-    private val invitationId: Long = savedStateHandle.toRoute<MyInvitationDetail>().id
-
     override val uiState: StateFlow<MyInvitationGuestBookUiState> = mutableUiState.asStateFlow()
 
     private val refreshFlow = MutableStateFlow(0)
@@ -97,9 +103,9 @@ constructor(
         authStateManager.authState
             .onEach { authState ->
                 val isStateChanged = uiState.value.isAuthStateChanged(authState)
-                updateState { copy( authState = authState ) }
+                updateState { copy(authState = authState) }
                 if (isStateChanged) {
-                    sendEffect(MyInvitationGuestBookSideEffect.AuthStateChanged(authState) )
+                    sendEffect(MyInvitationGuestBookSideEffect.AuthStateChanged(authState))
                 }
             }
             .launchIn(viewModelScope)
@@ -127,6 +133,7 @@ constructor(
                 analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL_GUEST_BOOK, Button.UPLOAD_GUEST_BOOK))
                 handleUploadAndSubmit()
             }
+
             is MyInvitationGuestBookUiEvent.ClickCamera -> handleCameraClick()
             is MyInvitationGuestBookUiEvent.ClickMicrophone -> handleMicrophoneClick()
             is MyInvitationGuestBookUiEvent.ClearError -> clearError()
@@ -137,11 +144,18 @@ constructor(
                 analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL_GUEST_BOOK, Button.UPDATE_GUEST_BOOK))
                 startEditing(event.guestBook)
             }
+
             is MyInvitationGuestBookUiEvent.CancelEdit -> cancelEdit()
             is MyInvitationGuestBookUiEvent.ClickDeleteMenu -> {
-                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL_GUEST_BOOK, Button.DELETE_GUEST_BOOK))
+                analyticsLogger.logEvent(
+                    AnalyticsEvent.ButtonClick(
+                        Screen.MY_INVITATION_DETAIL_GUEST_BOOK,
+                        Button.DELETE_GUEST_BOOK
+                    )
+                )
                 deleteGuestBook(event.guestBookId)
             }
+
             is MyInvitationGuestBookUiEvent.UpdateMediaPlayState -> updatePlayState(event.isPlaying)
             MyInvitationGuestBookUiEvent.Refresh -> refresh()
             MyInvitationGuestBookUiEvent.CheckLogin -> checkLogin()
@@ -149,7 +163,12 @@ constructor(
             is MyInvitationGuestBookUiEvent.ShowReport -> updateReportTargetId(event.guestBookId)
             MyInvitationGuestBookUiEvent.DismissReport -> updateReportTargetId(null)
             is MyInvitationGuestBookUiEvent.SubmitReport -> {
-                analyticsLogger.logEvent(AnalyticsEvent.ButtonClick(Screen.MY_INVITATION_DETAIL_GUEST_BOOK, Button.INVITATION_REPORT))
+                analyticsLogger.logEvent(
+                    AnalyticsEvent.ButtonClick(
+                        Screen.MY_INVITATION_DETAIL_GUEST_BOOK,
+                        Button.INVITATION_REPORT
+                    )
+                )
                 submitReport(event.reason, event.description)
             }
             is MyInvitationGuestBookUiEvent.ShowFullscreenVideo -> updateFullscreenVideo(event.videoUrl, event.thumbnailUrl, event.startBounds)
@@ -553,5 +572,12 @@ constructor(
             fullscreenThumbnailUrl = thumbnailUrl,
             fullscreenStartBounds = startBounds,
         ) }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            myInvitationId: Long,
+        ): MyInvitationGuestBookViewModel
     }
 }

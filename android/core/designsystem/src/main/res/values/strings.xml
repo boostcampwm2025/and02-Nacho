@@ -12,5 +12,7 @@
     </string-array>
 
     <string name="des_component_filterchip">검색결과를 정렬하는 칩 아이콘</string>
+    <string name="txt_select_invitation">초대받은 초대장을 선택해주세요.</string>
+    <string name="txt_select_my_invitation">내가 생성한 초대장을 선택해주세요.</string>
 
 </resources>

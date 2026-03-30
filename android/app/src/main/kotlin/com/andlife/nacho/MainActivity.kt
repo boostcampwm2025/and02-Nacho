@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.material3.adaptive.navigationsuite.rememberNavigationSuiteScaffoldState
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -16,6 +17,7 @@ import com.andlife.domain.util.AnalyticsLogger
 import com.andlife.login.LocalLoginManager
 import com.andlife.login.social.LoginManager
 import com.andlife.nacho.viewmodel.MainViewModel
+import com.andlife.ui.util.LocalNavigationSuiteState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -39,9 +41,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NachoTheme {
+                val suiteState = rememberNavigationSuiteScaffoldState()
                 CompositionLocalProvider(
                     LocalLoginManager provides loginManager,
-                    LocalAnalyticsLogger provides analyticsLogger
+                    LocalAnalyticsLogger provides analyticsLogger,
+                    LocalNavigationSuiteState provides suiteState
                 ) {
                     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                     if (!uiState.isSplash) {

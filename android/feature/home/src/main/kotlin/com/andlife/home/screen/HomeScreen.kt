@@ -512,7 +512,6 @@ private fun HomeTopBar(
                     )
                 }
             },
-            windowInsets = WindowInsets(),
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = NachoTheme.colorScheme.backgroundPrimary,
             ),
