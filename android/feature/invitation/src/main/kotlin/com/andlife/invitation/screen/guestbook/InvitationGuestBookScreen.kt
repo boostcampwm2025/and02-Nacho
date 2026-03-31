@@ -1,6 +1,7 @@
 package com.andlife.invitation.screen.guestbook
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -102,6 +103,8 @@ import kotlin.math.min
 import com.andlife.ui.R as uiR
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 
 private const val CAMERA_IMAGES_DIR = "camera_images"
 
@@ -412,13 +415,20 @@ fun InvitationGuestBookRoute(
 
     DisposableEffect(uiState.fullscreenVideoUrl) {
         val videoUrl = uiState.fullscreenVideoUrl ?: return@DisposableEffect onDispose {}
-        val activity = context.findActivity() ?: return@DisposableEffect onDispose {}
+
+        val activity = context as Activity
         val decorView = activity.window.decorView as ViewGroup
+
+        WindowInsetsControllerCompat(activity.window, decorView).apply {
+            hide(WindowInsetsCompat.Type.systemBars())
+            systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
 
         val composeView = ComposeView(activity).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
             setContent {
-                val player = remember(videoUrl) { viewModel.videoPlayerPool.getPlayer(videoUrl) }
+                val player = remember { viewModel.videoPlayerPool.getPlayer(videoUrl) }
                 val isMuted by viewModel.videoPlayerPool.isMuted.collectAsStateWithLifecycle()
 
                 FullscreenVideoPlayerContainer(
@@ -426,8 +436,12 @@ fun InvitationGuestBookRoute(
                     thumbnailUrl = uiState.fullscreenThumbnailUrl,
                     startBounds = uiState.fullscreenStartBounds,
                     isMuted = isMuted,
-                    onDismiss = { viewModel.onEvent(InvitationGuestBookUiEvent.DismissFullscreenVideo) },
-                    onMuteToggle = { viewModel.onEvent(InvitationGuestBookUiEvent.ToggleVideoMute) }
+                    onDismiss = {
+                        viewModel.onEvent(InvitationGuestBookUiEvent.DismissFullscreenVideo)
+                    },
+                    onMuteToggle = {
+                        viewModel.onEvent(InvitationGuestBookUiEvent.ToggleVideoMute)
+                    }
                 )
             }
         }
@@ -440,7 +454,11 @@ fun InvitationGuestBookRoute(
             )
         )
 
-        onDispose { decorView.removeView(composeView) }
+        onDispose {
+            decorView.removeView(composeView)
+            WindowInsetsControllerCompat(activity.window, decorView)
+                .show(WindowInsetsCompat.Type.systemBars())
+        }
     }
 
     InvitationGuestBookScreen(
