@@ -81,7 +81,7 @@ import com.andlife.ui.component.listitem.InvitationListItem
 import com.andlife.ui.component.listitem.MenuItem
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.component.paging.PagingStateContent
-import com.andlife.ui.util.DetailPaneViewModelScope
+import com.andlife.ui.scope.DetailPaneScopedViewModel
 import com.andlife.ui.util.LocalNavigationSuiteState
 import com.andlife.ui.util.collectWithLifecycle
 import com.andlife.ui.util.isNavigationBar
@@ -180,7 +180,7 @@ private fun MyInvitationListDetailScreen(
                 AnimatedContent(myInvitationRoute) { route ->
                     when (route) {
                         is MyInvitationDetail -> {
-                            DetailPaneViewModelScope {
+                            DetailPaneScopedViewModel {
                                 MyInvitationDetailRoute(
                                     selectedId = route.id,
                                     onNavigateBack = {
