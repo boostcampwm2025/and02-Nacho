@@ -2,9 +2,7 @@ package com.andlife.invitation.viewmodel
 
 import android.util.Log
 import androidx.compose.ui.geometry.Rect
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
@@ -60,7 +58,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import javax.inject.Inject
 
 @HiltViewModel(assistedFactory = InvitationGuestBookViewModel.Factory::class)
 class InvitationGuestBookViewModel @AssistedInject constructor(
