@@ -1,9 +1,10 @@
-package com.andlife.ui.util
+package com.andlife.ui.scope
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.HasDefaultViewModelProviderFactory
 import androidx.lifecycle.SAVED_STATE_REGISTRY_OWNER_KEY
 import androidx.lifecycle.SavedStateViewModelFactory
@@ -15,17 +16,23 @@ import androidx.lifecycle.enableSavedStateHandles
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.compose.LocalSavedStateRegistryOwner
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalUuidApi::class)
 @Composable
-fun DetailPaneViewModelScope(
+fun DetailPaneScopedViewModel(
+    scopedId: String = rememberSaveable { Uuid.random().toString() },
     content: @Composable () -> Unit
 ) {
-    val viewModelStore = remember { ViewModelStore() }
+    val registry = viewModel<ScopedStoreRegistryViewModel>()
     val savedStateRegistryOwner = LocalSavedStateRegistryOwner.current
+    val viewModelStore = remember(scopedId) { registry.getOrCreate(scopedId) }
 
-    val viewModelStoreOwner = remember(viewModelStore) {
+    val owner = remember(viewModelStore) {
         object : ViewModelStoreOwner, HasDefaultViewModelProviderFactory,
             SavedStateRegistryOwner by savedStateRegistryOwner {
             override val viewModelStore: ViewModelStore
@@ -44,13 +51,14 @@ fun DetailPaneViewModelScope(
         }
     }
 
-    DisposableEffect(viewModelStoreOwner) {
+
+    DisposableEffect(scopedId) {
         onDispose {
-            viewModelStore.clear()
+            registry.clear(scopedId)
         }
     }
 
-    CompositionLocalProvider(LocalViewModelStoreOwner provides viewModelStoreOwner) {
+    CompositionLocalProvider(LocalViewModelStoreOwner provides owner) {
         content()
     }
 }
