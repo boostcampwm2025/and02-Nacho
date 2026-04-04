@@ -38,22 +38,15 @@ class NachoFirebaseMessagingService : FirebaseMessagingService() {
         super.onMessageReceived(remoteMessage)
         Log.d(TAG, "Message data payload: ${remoteMessage.data}")
         Log.d(TAG, "Message notification payload: ${remoteMessage.notification}")
-        if (remoteMessage.data.isNotEmpty()) {
-            sendNotification(
-                remoteMessage.data["title"].toString(),
-                remoteMessage.data["body"].toString()
-            )
-        } else {
-            remoteMessage.notification?.let {
-                sendNotification(
-                    remoteMessage.notification!!.title.toString(),
-                    remoteMessage.notification!!.body.toString()
-                )
-            }
-        }
+
+        val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: ""
+        val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: ""
+
+        sendNotification(title, body, remoteMessage.data)
     }
 
-    private fun sendNotification(title: String, body: String) {
+    // TODO
+    private fun sendNotification(title: String, body: String, data: Map<String, String> = emptyMap()) {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -66,7 +59,11 @@ class NachoFirebaseMessagingService : FirebaseMessagingService() {
         }
 
         val intent = packageManager.getLaunchIntentForPackage(packageName)?.apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            data["invitation_id"]?.let { putExtra("invitation_id", it) }
+            data.forEach { (key, value) ->
+                putExtra("fcm_$key", value)
+            }
         }
 
         val pendingIntent = PendingIntent.getActivity(
