@@ -9,6 +9,8 @@ import com.andlife.domain.error.InvitationError
 import com.andlife.domain.model.auth.AuthState
 import com.andlife.domain.model.auth.User
 import com.andlife.domain.repository.auth.AuthStateManager
+import com.andlife.domain.repository.fcm.FcmTokenRepository
+import com.andlife.domain.util.FcmTokenManager
 import com.andlife.domain.repository.user.UserRepository
 import com.andlife.domain.util.MediaFileProvider
 import com.andlife.domain.util.MediaUploader
@@ -25,7 +27,9 @@ internal class UserRepositoryImpl @Inject constructor(
     private val authStateManager: AuthStateManager,
     private val invitationDatabase: InvitationDatabase,
     private val mediaUploader: MediaUploader,
-    private val mediaFileProvider: MediaFileProvider
+    private val mediaFileProvider: MediaFileProvider,
+    private val fcmTokenRepository: FcmTokenRepository,
+    private val fcmTokenManager: FcmTokenManager
 ) : UserRepository {
     override suspend fun login(accessToken: String): Result<Unit, DataError> {
         return userRemoteDataSource.login(AuthRequest(accessToken))
@@ -34,16 +38,18 @@ internal class UserRepositoryImpl @Inject constructor(
                 authStateManager.setAuthenticated(authResponse.user.toDomain())
                 saveToken(authResponse.accessToken, authResponse.refreshToken)
                 syncGuestInvitations()
+                fcmTokenManager.getToken()?.let { fcmTokenRepository.putTokenToServer(it) }
             }
     }
 
     override suspend fun loginWithTestUser(): Result<Unit, DataError> {
         return userRemoteDataSource.loginWithTestUser()
-            .map {  authResponse ->
+            .map { authResponse ->
                 clearInvitationCache()
                 authStateManager.setAuthenticated(authResponse.user.toDomain())
                 saveToken(authResponse.accessToken, authResponse.refreshToken)
                 syncGuestInvitations()
+                fcmTokenManager.getToken()?.let { fcmTokenRepository.putTokenToServer(it) }
             }
     }
 
@@ -156,6 +162,7 @@ internal class UserRepositoryImpl @Inject constructor(
                     is Result.Success -> {
                         finalProfileImageUrl = uploadResult.data.firstOrNull()
                     }
+
                     is Result.Error -> return Result.Error(uploadResult.error)
                 }
             }
