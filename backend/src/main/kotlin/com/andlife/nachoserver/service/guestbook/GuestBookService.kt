@@ -19,6 +19,8 @@ import com.andlife.nachoserver.response.guestbook.GuestBookMediaResponse
 import com.andlife.nachoserver.response.guestbook.GuestBookResponse
 import com.andlife.nachoserver.response.guestbook.toGuestBookResponse
 import com.andlife.nachoserver.service.media.MediaService
+import com.andlife.nachoserver.service.user.FcmTokenService
+import com.andlife.nachoserver.repository.participant.InvitationParticipantRepository
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -32,7 +34,9 @@ class GuestBookService(
     private val guestBookRepository: GuestBookRepository,
     private val userRepository: UserRepository,
     private val invitationRepository: InvitationRepository,
-    private val mediaService: MediaService
+    private val mediaService: MediaService,
+    private val fcmTokenService: FcmTokenService,
+    private val invitationParticipantRepository: InvitationParticipantRepository
 ) {
 
     fun getCollectionByInvitation(invitationId: Long): List<CollectionResponse> {
@@ -244,6 +248,7 @@ class GuestBookService(
         }
 
         val savedGuestBook = guestBookRepository.save(guestBook)
+        sendGuestBookNotificationToParticipants(savedGuestBook)
         return savedGuestBook.toGuestBookResponse()
     }
 
@@ -461,5 +466,26 @@ class GuestBookService(
             ),
             content = responsePage.content
         )
+    }
+
+    private fun sendGuestBookNotificationToParticipants(guestBook: GuestBook) {
+        try {
+            val participants = invitationParticipantRepository.findAllByInvitationIdWithUser(guestBook.invitation.id)
+            val data = mapOf("invitation_id" to guestBook.invitation.id.toString())
+            
+            participants.forEach { participant ->
+                // 방명록 작성자는 알림 제외
+                if (participant.user.id != guestBook.user.id) {
+                    fcmTokenService.sendNotificationToUser(
+                        participant.user,
+                        "새로운 방명록",
+                        "${guestBook.user.name}님이 ${guestBook.invitation.title}에 방명록을 남겼습니다.",
+                        data
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            println("방명록 알림 전송 실패: ${e.message}")
+        }
     }
 }
