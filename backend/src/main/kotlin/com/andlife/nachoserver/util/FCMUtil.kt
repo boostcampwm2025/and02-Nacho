@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component
 @Component
 class FCMUtil {
     // 특정 FCM 토큰으로 메시지 전송
-    fun sendToToken(fcmToken: String, title: String, body: String): FcmSendResult {
-        val message = Message.builder()
+    fun sendToToken(fcmToken: String, title: String, body: String, data: Map<String, String>? = null): FcmSendResult {
+        val messageBuilder = Message.builder()
             .setToken(fcmToken)
             .setNotification(
                 Notification.builder()
@@ -19,7 +19,9 @@ class FCMUtil {
                     .setBody(body)
                     .build()
             )
-            .build()
+        data?.let { messageBuilder.putAllData(it) }
+        
+        val message = messageBuilder.build()
 
         return try {
             val response = FirebaseMessaging.getInstance().send(message)
