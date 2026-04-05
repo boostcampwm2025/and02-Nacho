@@ -79,6 +79,10 @@ class NachoFirebaseMessagingService : FirebaseMessagingService() {
             .setSmallIcon(android.R.drawable.ic_dialog_info) // TODO: 앱 아이콘으로 변경
             .setContentTitle(title)
             .setContentText(body)
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText(body)
+            )
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
