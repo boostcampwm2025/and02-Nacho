@@ -17,6 +17,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class NachoFirebaseMessagingService : FirebaseMessagingService() {
 
+    // TODO: app 모듈로 이동
+
     @Inject
     lateinit var fcmTokenManager: FcmTokenManager
 
@@ -46,7 +48,6 @@ class NachoFirebaseMessagingService : FirebaseMessagingService() {
         sendNotification(title, body, remoteMessage.data)
     }
 
-    // TODO
     private fun sendNotification(title: String, body: String, data: Map<String, String> = emptyMap()) {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
