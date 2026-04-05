@@ -480,7 +480,7 @@ class GuestBookService(
                     fcmTokenService.sendNotificationToUser(
                         participant.user,
                         "새로운 방명록",
-                        "${guestBook.user.name}님이 ${guestBook.invitation.title}에 방명록을 남겼습니다.",
+                        "${guestBook.user.name}님이 ${guestBook.invitation.title}에 방명록을 남겼습니다: ${guestBook.textContent}",
                         data
                     )
                 }
