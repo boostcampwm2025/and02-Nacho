@@ -3,6 +3,7 @@ package com.andlife.nacho.viewmodel
 import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.viewModelScope
+import com.andlife.fcm.NachoFirebaseMessagingService.Companion.INVITATION_ID_KEY
 import com.andlife.deeplink.DeepLinkConfig
 import com.andlife.deeplink.DeepLinkManager
 import com.andlife.domain.model.auth.AuthEvent
@@ -131,7 +132,7 @@ class MainViewModel @Inject constructor(
         }
 
         // Intent extras에서 추출 (FCM)
-        intent?.getStringExtra("invitation_id")?.let { inviteId ->
+        intent?.getStringExtra(INVITATION_ID_KEY)?.let { inviteId ->
             return inviteId
         }
 

@@ -3,6 +3,7 @@ package com.andlife.nachoserver.service.guestbook
 import com.andlife.nachoserver.auth.AuthContext
 import com.andlife.nachoserver.constant.MediaType
 import com.andlife.nachoserver.entity.*
+import com.andlife.nachoserver.constant.FcmConstants.INVITATION_ID_KEY
 import com.andlife.nachoserver.error.BusinessException
 import com.andlife.nachoserver.repository.invitation.InvitationRepository
 import com.andlife.nachoserver.repository.guestbook.GuestBookRepository
@@ -471,7 +472,7 @@ class GuestBookService(
     private fun sendGuestBookNotificationToParticipants(guestBook: GuestBook) {
         try {
             val participants = invitationParticipantRepository.findAllByInvitationIdWithUser(guestBook.invitation.id)
-            val data = mapOf("invitation_id" to guestBook.invitation.id.toString())
+            val data = mapOf(INVITATION_ID_KEY to guestBook.invitation.id.toString())
             
             participants.forEach { participant ->
                 // 방명록 작성자는 알림 제외

@@ -24,6 +24,7 @@ class NachoFirebaseMessagingService : FirebaseMessagingService() {
         private const val TAG = "NachoFirebaseMessagingService"
         private const val CHANNEL_ID = "fcm_notification_channel"
         private const val CHANNEL_NAME = "FCM 알림"
+        const val INVITATION_ID_KEY = "invitation_id"
     }
 
     // 토큰이 클라우드 서버로 등록되었을 때 호출되는 콜백
@@ -60,7 +61,7 @@ class NachoFirebaseMessagingService : FirebaseMessagingService() {
 
         val intent = packageManager.getLaunchIntentForPackage(packageName)?.apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            data["invitation_id"]?.let { putExtra("invitation_id", it) }
+            data[INVITATION_ID_KEY]?.let { putExtra(INVITATION_ID_KEY, it) }
             data.forEach { (key, value) ->
                 putExtra("fcm_$key", value)
             }

@@ -1,5 +1,6 @@
 package com.andlife.nachoserver.service.thankscard
 
+import com.andlife.nachoserver.constant.FcmConstants.INVITATION_ID_KEY
 import com.andlife.nachoserver.entity.ThanksCard
 import com.andlife.nachoserver.repository.invitation.InvitationRepository
 import com.andlife.nachoserver.repository.thankscard.ThanksCardRepository
@@ -69,7 +70,7 @@ class ThanksCardService(
     private fun sendThanksCardNotificationToParticipants(thanksCard: ThanksCard) {
         try {
             val participants = invitationParticipantRepository.findAllByInvitationIdWithUser(thanksCard.invitation.id)
-            val data = mapOf("invitation_id" to thanksCard.invitation.id.toString())
+            val data = mapOf(INVITATION_ID_KEY to thanksCard.invitation.id.toString())
             
             participants.forEach { participant ->
                 fcmTokenService.sendNotificationToUser(
