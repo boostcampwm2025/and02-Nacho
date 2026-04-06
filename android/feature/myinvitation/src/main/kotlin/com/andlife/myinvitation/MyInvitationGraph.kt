@@ -33,7 +33,6 @@ data class MyInvitationDetail(
 
 internal data object MyInvitationPlaceholder
 
-
 fun NavController.navigateToMyInvitation(navOptions: NavOptions, id: Long? = null) {
     navigate(MyInvitation(id), navOptions)
 }

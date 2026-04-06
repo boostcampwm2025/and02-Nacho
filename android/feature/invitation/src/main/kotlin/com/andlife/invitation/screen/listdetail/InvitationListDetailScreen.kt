@@ -59,7 +59,6 @@ fun InvitationListDetailRoute(
     )
 }
 
-
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 private fun InvitationListDetailScreen(
