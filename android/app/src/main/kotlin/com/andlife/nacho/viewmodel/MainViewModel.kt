@@ -3,6 +3,7 @@ package com.andlife.nacho.viewmodel
 import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.viewModelScope
+import com.andlife.fcm.NachoFirebaseMessagingService.Companion.INVITATION_ID_KEY
 import com.andlife.deeplink.DeepLinkConfig
 import com.andlife.deeplink.DeepLinkManager
 import com.andlife.domain.model.auth.AuthEvent
@@ -97,6 +98,7 @@ class MainViewModel @Inject constructor(
                         AuthState.Loading -> {
                             updateState { copy(isSplash = false, startDestination = Login::class) }
                         }
+
                         else -> {
                             updateState { copy(isSplash = false, startDestination = Home::class) }
                         }
@@ -109,12 +111,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun handleDeepLink(intent: Intent?) {
-        Log.d("DeepLink Debug", "handleDeepLink: ${intent?.data}")
-        val data = intent?.data ?: return
-
-        val inviteId = data.getQueryParameter(DeepLinkConfig.KAKAO_PARAM_INVITE_ID)
-            ?: data.getQueryParameter(DeepLinkConfig.AF_DEEP_LINK_SUB1)
-
+        val inviteId = extractInviteId(intent)
         if (inviteId != null) {
             viewModelScope.launch {
                 if (inviteId != lastProcessedId) {
@@ -122,5 +119,23 @@ class MainViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun extractInviteId(intent: Intent?): String? {
+        // URI에서 추출 (카카오, AppsFlyer)
+        intent?.data?.let { data ->
+            val inviteId = data.getQueryParameter(DeepLinkConfig.KAKAO_PARAM_INVITE_ID)
+                ?: data.getQueryParameter(DeepLinkConfig.AF_DEEP_LINK_SUB1)
+            if (inviteId != null) {
+                return inviteId
+            }
+        }
+
+        // Intent extras에서 추출 (FCM)
+        intent?.getStringExtra(INVITATION_ID_KEY)?.let { inviteId ->
+            return inviteId
+        }
+
+        return null
     }
 }

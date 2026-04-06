@@ -17,6 +17,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class NachoFirebaseMessagingService : FirebaseMessagingService() {
 
+    // TODO: app 모듈로 이동
+
     @Inject
     lateinit var fcmTokenManager: FcmTokenManager
 
@@ -24,6 +26,7 @@ class NachoFirebaseMessagingService : FirebaseMessagingService() {
         private const val TAG = "NachoFirebaseMessagingService"
         private const val CHANNEL_ID = "fcm_notification_channel"
         private const val CHANNEL_NAME = "FCM 알림"
+        const val INVITATION_ID_KEY = "invitation_id"
     }
 
     // 토큰이 클라우드 서버로 등록되었을 때 호출되는 콜백
@@ -38,22 +41,14 @@ class NachoFirebaseMessagingService : FirebaseMessagingService() {
         super.onMessageReceived(remoteMessage)
         Log.d(TAG, "Message data payload: ${remoteMessage.data}")
         Log.d(TAG, "Message notification payload: ${remoteMessage.notification}")
-        if (remoteMessage.data.isNotEmpty()) {
-            sendNotification(
-                remoteMessage.data["title"].toString(),
-                remoteMessage.data["body"].toString()
-            )
-        } else {
-            remoteMessage.notification?.let {
-                sendNotification(
-                    remoteMessage.notification!!.title.toString(),
-                    remoteMessage.notification!!.body.toString()
-                )
-            }
-        }
+
+        val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: ""
+        val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: ""
+
+        sendNotification(title, body, remoteMessage.data)
     }
 
-    private fun sendNotification(title: String, body: String) {
+    private fun sendNotification(title: String, body: String, data: Map<String, String> = emptyMap()) {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -66,7 +61,11 @@ class NachoFirebaseMessagingService : FirebaseMessagingService() {
         }
 
         val intent = packageManager.getLaunchIntentForPackage(packageName)?.apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            data[INVITATION_ID_KEY]?.let { putExtra(INVITATION_ID_KEY, it) }
+            data.forEach { (key, value) ->
+                putExtra("fcm_$key", value)
+            }
         }
 
         val pendingIntent = PendingIntent.getActivity(
@@ -77,9 +76,13 @@ class NachoFirebaseMessagingService : FirebaseMessagingService() {
         )
 
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(android.R.drawable.ic_dialog_info) // TODO: 앱 아이콘으로 변경
             .setContentTitle(title)
             .setContentText(body)
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText(body)
+            )
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)

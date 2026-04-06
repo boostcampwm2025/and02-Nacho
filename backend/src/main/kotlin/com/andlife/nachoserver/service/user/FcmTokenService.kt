@@ -60,8 +60,8 @@ class FcmTokenService(
     }
 
     // 특정 FCM 토큰으로 알림 전송
-    fun sendNotificationToToken(fcmToken: String, title: String, body: String) {
-        val result = fcmUtil.sendToToken(fcmToken, title, body)
+    fun sendNotificationToToken(fcmToken: String, title: String, body: String, data: Map<String, String>? = null) {
+        val result = fcmUtil.sendToToken(fcmToken, title, body, data)
         
         when (result) {
             FcmSendResult.SUCCESS -> {
@@ -87,18 +87,18 @@ class FcmTokenService(
 
     // 여러 FCM 토큰으로 알림 전송
     @Transactional
-    fun sendNotificationToTokens(fcmTokens: List<String>, title: String, body: String) {
+    fun sendNotificationToTokens(fcmTokens: List<String>, title: String, body: String, data: Map<String, String>? = null) {
         fcmTokens.forEach { token ->
-            sendNotificationToToken(token, title, body)
+            sendNotificationToToken(token, title, body, data)
         }
     }
 
     // 특정 유저의 모든 기기에 알림 전송
     @Transactional
-    fun sendNotificationToUser(user: User, title: String, body: String) {
+    fun sendNotificationToUser(user: User, title: String, body: String, data: Map<String, String>? = null) {
         val tokens = fcmTokenRepository.findByUser(user)
         tokens.forEach { token ->
-            sendNotificationToToken(token.fcmToken, title, body)
+            sendNotificationToToken(token.fcmToken, title, body, data)
         }
     }
 }
