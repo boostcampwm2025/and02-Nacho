@@ -42,12 +42,16 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -88,7 +92,6 @@ import com.andlife.ui.component.paging.PagingStateContent
 import com.andlife.ui.component.report.ReportBottomSheet
 import com.andlife.ui.util.audio.AudioRecorder
 import com.andlife.ui.util.collectWithLifecycle
-import com.andlife.ui.util.findActivity
 import com.andlife.ui.util.imeWithoutNavBars
 import com.andlife.ui.util.media.uriToSelectedMedia
 import com.andlife.ui.util.shouldRequestNotificationPermission
@@ -101,10 +104,6 @@ import java.io.File
 import kotlin.math.max
 import kotlin.math.min
 import com.andlife.ui.R as uiR
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 
 private const val CAMERA_IMAGES_DIR = "camera_images"
 
@@ -421,8 +420,7 @@ fun InvitationGuestBookRoute(
 
         WindowInsetsControllerCompat(activity.window, decorView).apply {
             hide(WindowInsetsCompat.Type.systemBars())
-            systemBarsBehavior =
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
 
         val composeView = ComposeView(activity).apply {
@@ -436,12 +434,8 @@ fun InvitationGuestBookRoute(
                     thumbnailUrl = uiState.fullscreenThumbnailUrl,
                     startBounds = uiState.fullscreenStartBounds,
                     isMuted = isMuted,
-                    onDismiss = {
-                        viewModel.onEvent(InvitationGuestBookUiEvent.DismissFullscreenVideo)
-                    },
-                    onMuteToggle = {
-                        viewModel.onEvent(InvitationGuestBookUiEvent.ToggleVideoMute)
-                    }
+                    onDismiss = { viewModel.onEvent(InvitationGuestBookUiEvent.DismissFullscreenVideo) },
+                    onMuteToggle = { viewModel.onEvent(InvitationGuestBookUiEvent.ToggleVideoMute) }
                 )
             }
         }
@@ -456,8 +450,7 @@ fun InvitationGuestBookRoute(
 
         onDispose {
             decorView.removeView(composeView)
-            WindowInsetsControllerCompat(activity.window, decorView)
-                .show(WindowInsetsCompat.Type.systemBars())
+            WindowInsetsControllerCompat(activity.window, decorView).show(WindowInsetsCompat.Type.systemBars())
         }
     }
 
@@ -544,7 +537,13 @@ private fun InvitationGuestBookScreen(
         }
     }
 
-    LaunchedEffect(lazyListState, guestBooks.itemCount, isMediaActive, uiState.audioPlaybackState.isPlaying, uiState.fullscreenVideoUrl) {
+    LaunchedEffect(
+        lazyListState,
+        guestBooks.itemCount,
+        isMediaActive,
+        uiState.audioPlaybackState.isPlaying,
+        uiState.fullscreenVideoUrl
+    ) {
         var pendingIndex = -1
         var lastChangedTime = 0L
         if (!isMediaActive || uiState.audioPlaybackState.isPlaying || uiState.fullscreenVideoUrl != null) {
@@ -654,12 +653,31 @@ private fun InvitationGuestBookScreen(
                                         isFullscreen = uiState.isFullscreenVideoUrlValid(guestBook),
                                         onEditClick = { onEvent(InvitationGuestBookUiEvent.ClickEditMenu(guestBook)) },
                                         onDeleteClick = { onDeleteMenuClick(guestBook.id) },
-                                        onReportClick = { targetId -> onEvent(InvitationGuestBookUiEvent.ShowReport(targetId)) },
+                                        onReportClick = { targetId ->
+                                            onEvent(
+                                                InvitationGuestBookUiEvent.ShowReport(
+                                                    targetId
+                                                )
+                                            )
+                                        },
                                         onVisualMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickVisualMedia(it.url)) },
                                         onAudioMediaClick = { onEvent(InvitationGuestBookUiEvent.ClickAudioMedia(it.url)) },
-                                        onPlayVideoClick = { url -> onEvent(InvitationGuestBookUiEvent.ClickVideoPlayButton(url, guestBook.id))},
+                                        onPlayVideoClick = { url ->
+                                            onEvent(
+                                                InvitationGuestBookUiEvent.ClickVideoPlayButton(
+                                                    url,
+                                                    guestBook.id
+                                                )
+                                            )
+                                        },
                                         onFullscreenClick = { url, thumbnailUrl, bounds ->
-                                            onEvent(InvitationGuestBookUiEvent.ShowFullscreenVideo(url, thumbnailUrl, bounds))
+                                            onEvent(
+                                                InvitationGuestBookUiEvent.ShowFullscreenVideo(
+                                                    url,
+                                                    thumbnailUrl,
+                                                    bounds
+                                                )
+                                            )
                                         }
                                     )
                                 }
@@ -873,7 +891,7 @@ private fun InvitationGuestBookResultPreview() {
                     onVisualMediaClick = {},
                     onAudioMediaClick = {},
                     onPlayVideoClick = {},
-                    onFullscreenClick = {_, _, _ -> },
+                    onFullscreenClick = { _, _, _ -> },
                 )
             }
         }

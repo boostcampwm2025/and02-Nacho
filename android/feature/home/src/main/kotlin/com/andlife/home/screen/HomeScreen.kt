@@ -1,5 +1,7 @@
 package com.andlife.home.screen
 
+import android.app.Activity
+import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -42,11 +44,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -78,7 +84,7 @@ import com.andlife.ui.component.guestbook.GuestBookItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItem
 import com.andlife.ui.component.listitem.InvitationScheduleListItemSkeleton
 import com.andlife.ui.component.loading.InvitationLoadingIndicator
-import com.andlife.ui.component.media.video.FullscreenVideoActivityContract
+import com.andlife.ui.component.media.video.FullscreenVideoPlayerContainer
 import com.andlife.ui.component.report.ReportBottomSheet
 import com.andlife.ui.util.collectWithLifecycle
 import com.andlife.ui.util.toDDayText
@@ -272,15 +278,45 @@ fun HomeRoute(
         )
     }
 
-    uiState.fullscreenVideoUrl?.let { url ->
-        LaunchedEffect(url, uiState.fullscreenThumbnailUrl, uiState.fullscreenStartBounds) {
-            val fullscreenIntent = FullscreenVideoActivityContract.createIntent(
-                context = context,
-                videoUrl = url,
-                thumbnailUrl = uiState.fullscreenThumbnailUrl,
-                startBounds = uiState.fullscreenStartBounds,
+    DisposableEffect(uiState.fullscreenVideoUrl) {
+        val videoUrl = uiState.fullscreenVideoUrl ?: return@DisposableEffect onDispose {}
+
+        val activity = context as Activity
+        val decorView = activity.window.decorView as ViewGroup
+
+        WindowInsetsControllerCompat(activity.window, decorView).apply {
+            hide(WindowInsetsCompat.Type.systemBars())
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+
+        val composeView = ComposeView(activity).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+            setContent {
+                val player = remember { viewModel.videoPlayerPool.getPlayer(videoUrl) }
+                val isMuted by viewModel.videoPlayerPool.isMuted.collectAsStateWithLifecycle()
+
+                FullscreenVideoPlayerContainer(
+                    player = player,
+                    thumbnailUrl = uiState.fullscreenThumbnailUrl,
+                    startBounds = uiState.fullscreenStartBounds,
+                    isMuted = isMuted,
+                    onDismiss = { viewModel.onEvent(HomeUiEvent.DismissFullscreenVideo) },
+                    onMuteToggle = { viewModel.onEvent(HomeUiEvent.ToggleVideoMute) }
+                )
+            }
+        }
+
+        decorView.addView(
+            composeView,
+            ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
             )
-            fullscreenActivityLauncher.launch(fullscreenIntent)
+        )
+
+        onDispose {
+            decorView.removeView(composeView)
+            WindowInsetsControllerCompat(activity.window, decorView).show(WindowInsetsCompat.Type.systemBars())
         }
     }
 
