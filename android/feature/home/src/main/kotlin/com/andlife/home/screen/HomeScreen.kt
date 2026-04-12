@@ -2,14 +2,11 @@ package com.andlife.home.screen
 
 import android.app.Activity
 import android.view.ViewGroup
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -126,11 +123,6 @@ fun HomeRoute(
     val refreshFailMessage = stringResource(R.string.snack_refresh_failure)
     val reportSuccessMessage = stringResource(uiR.string.msg_report_success)
     val reportFailureMessage = stringResource(uiR.string.msg_report_failure)
-    val fullscreenActivityLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) {
-        viewModel.onEvent(HomeUiEvent.DismissFullscreenVideo)
-    }
 
     val navigateToLoginWithCleanup: () -> Unit = {
         isMediaActive = false
