@@ -1,6 +1,5 @@
 package com.andlife.home.screen
 
-import android.app.Activity
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -84,6 +83,7 @@ import com.andlife.ui.component.loading.InvitationLoadingIndicator
 import com.andlife.ui.component.media.video.FullscreenVideoPlayerContainer
 import com.andlife.ui.component.report.ReportBottomSheet
 import com.andlife.ui.util.collectWithLifecycle
+import com.andlife.ui.util.findActivity
 import com.andlife.ui.util.toDDayText
 import com.andlife.ui.util.toDateTimeSingleLine
 import kotlinx.coroutines.delay
@@ -271,7 +271,7 @@ fun HomeRoute(
     DisposableEffect(uiState.fullscreenVideoUrl) {
         val videoUrl = uiState.fullscreenVideoUrl ?: return@DisposableEffect onDispose {}
 
-        val activity = context as Activity
+        val activity = context.findActivity() ?: return@DisposableEffect onDispose {}
         val decorView = activity.window.decorView as ViewGroup
 
         WindowInsetsControllerCompat(activity.window, decorView).apply {

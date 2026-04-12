@@ -1,7 +1,6 @@
 package com.andlife.myinvitation.screen.guestbook
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -92,6 +91,7 @@ import com.andlife.ui.component.paging.PagingStateContent
 import com.andlife.ui.component.report.ReportBottomSheet
 import com.andlife.ui.util.audio.AudioRecorder
 import com.andlife.ui.util.collectWithLifecycle
+import com.andlife.ui.util.findActivity
 import com.andlife.ui.util.imeWithoutNavBars
 import com.andlife.ui.util.media.uriToSelectedMedia
 import com.andlife.ui.util.shouldRequestNotificationPermission
@@ -414,7 +414,7 @@ fun MyInvitationGuestBookRoute(
     DisposableEffect(uiState.fullscreenVideoUrl) {
         val videoUrl = uiState.fullscreenVideoUrl ?: return@DisposableEffect onDispose {}
 
-        val activity = context as Activity
+        val activity = context.findActivity() ?: return@DisposableEffect onDispose {}
         val decorView = activity.window.decorView as ViewGroup
 
         WindowInsetsControllerCompat(activity.window, decorView).apply {
