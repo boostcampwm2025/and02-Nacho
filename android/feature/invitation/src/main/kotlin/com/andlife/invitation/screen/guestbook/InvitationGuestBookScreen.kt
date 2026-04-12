@@ -1,6 +1,7 @@
 package com.andlife.invitation.screen.guestbook
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -31,7 +32,6 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -42,20 +42,16 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -106,7 +102,6 @@ import kotlinx.datetime.LocalDateTime
 import java.io.File
 import kotlin.math.max
 import kotlin.math.min
-import android.graphics.Color as AndroidColor
 import com.andlife.ui.R as uiR
 
 private const val CAMERA_IMAGES_DIR = "camera_images"
@@ -416,46 +411,45 @@ fun InvitationGuestBookRoute(
         )
     }
 
-    uiState.fullscreenVideoUrl?.let { url ->
-        val player = viewModel.videoPlayerPool.getPlayer(url)
-        val isMuted by viewModel.videoPlayerPool.isMuted.collectAsStateWithLifecycle()
+    DisposableEffect(uiState.fullscreenVideoUrl) {
+        val videoUrl = uiState.fullscreenVideoUrl ?: return@DisposableEffect onDispose {}
 
-        Dialog(
-            onDismissRequest = {},
-            properties = DialogProperties(
-                usePlatformDefaultWidth = false,
-                dismissOnBackPress = false,
-                dismissOnClickOutside = false,
-                decorFitsSystemWindows = false,
-            ),
-        ) {
-            val view = LocalView.current
-            val window = (view.parent as? DialogWindowProvider)?.window
+        val activity = context as Activity
+        val decorView = activity.window.decorView as ViewGroup
 
-            SideEffect {
-                window?.apply {
-                    setLayout(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                    )
-                    setBackgroundDrawable(
-                        AndroidColor.BLACK.toDrawable()
-                    )
-                    WindowInsetsControllerCompat(this, decorView).apply {
-                        hide(WindowInsetsCompat.Type.systemBars())
-                        systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                    }
-                }
+        WindowInsetsControllerCompat(activity.window, decorView).apply {
+            hide(WindowInsetsCompat.Type.systemBars())
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+
+        val composeView = ComposeView(activity).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+            setContent {
+                val player = remember { viewModel.videoPlayerPool.getPlayer(videoUrl) }
+                val isMuted by viewModel.videoPlayerPool.isMuted.collectAsStateWithLifecycle()
+
+                FullscreenVideoPlayerContainer(
+                    player = player,
+                    thumbnailUrl = uiState.fullscreenThumbnailUrl,
+                    startBounds = uiState.fullscreenStartBounds,
+                    isMuted = isMuted,
+                    onDismiss = { viewModel.onEvent(InvitationGuestBookUiEvent.DismissFullscreenVideo) },
+                    onMuteToggle = { viewModel.onEvent(InvitationGuestBookUiEvent.ToggleVideoMute) }
+                )
             }
+        }
 
-            FullscreenVideoPlayerContainer(
-                player = player,
-                thumbnailUrl = uiState.fullscreenThumbnailUrl,
-                startBounds = uiState.fullscreenStartBounds,
-                isMuted = isMuted,
-                onDismiss = { viewModel.onEvent(InvitationGuestBookUiEvent.DismissFullscreenVideo) },
-                onMuteToggle = { viewModel.onEvent(InvitationGuestBookUiEvent.ToggleVideoMute) }
+        decorView.addView(
+            composeView,
+            ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
             )
+        )
+
+        onDispose {
+            decorView.removeView(composeView)
+            WindowInsetsControllerCompat(activity.window, decorView).show(WindowInsetsCompat.Type.systemBars())
         }
     }
 

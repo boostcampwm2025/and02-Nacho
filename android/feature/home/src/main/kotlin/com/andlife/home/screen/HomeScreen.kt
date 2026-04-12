@@ -1,13 +1,12 @@
 package com.andlife.home.screen
 
-import android.graphics.Color as AndroidColor
+import android.app.Activity
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -30,7 +29,6 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -43,15 +41,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.window.DialogWindowProvider
-import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -114,6 +110,7 @@ fun HomeRoute(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     var isMediaActive by remember { mutableStateOf(true) }
     val upcomingInvitations = viewModel.upcomingInvitationsPagingFlow.collectAsLazyPagingItems()
     val guestBooks = viewModel.guestBooksPagingFlow.collectAsLazyPagingItems()
@@ -271,46 +268,45 @@ fun HomeRoute(
         )
     }
 
-    uiState.fullscreenVideoUrl?.let { url ->
-        val player = viewModel.videoPlayerPool.getPlayer(url)
-        val isMuted by viewModel.videoPlayerPool.isMuted.collectAsStateWithLifecycle()
+    DisposableEffect(uiState.fullscreenVideoUrl) {
+        val videoUrl = uiState.fullscreenVideoUrl ?: return@DisposableEffect onDispose {}
 
-        Dialog(
-            onDismissRequest = {},
-            properties = DialogProperties(
-                usePlatformDefaultWidth = false,
-                dismissOnBackPress = false,
-                dismissOnClickOutside = false,
-                decorFitsSystemWindows = false,
-            ),
-        ) {
-            val view = LocalView.current
-            val window = (view.parent as? DialogWindowProvider)?.window
+        val activity = context as Activity
+        val decorView = activity.window.decorView as ViewGroup
 
-            SideEffect {
-                window?.apply {
-                    setLayout(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                    )
-                    setBackgroundDrawable(
-                        AndroidColor.BLACK.toDrawable()
-                    )
-                    WindowInsetsControllerCompat(this, decorView).apply {
-                        hide(WindowInsetsCompat.Type.systemBars())
-                        systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                    }
-                }
+        WindowInsetsControllerCompat(activity.window, decorView).apply {
+            hide(WindowInsetsCompat.Type.systemBars())
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+
+        val composeView = ComposeView(activity).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+            setContent {
+                val player = remember { viewModel.videoPlayerPool.getPlayer(videoUrl) }
+                val isMuted by viewModel.videoPlayerPool.isMuted.collectAsStateWithLifecycle()
+
+                FullscreenVideoPlayerContainer(
+                    player = player,
+                    thumbnailUrl = uiState.fullscreenThumbnailUrl,
+                    startBounds = uiState.fullscreenStartBounds,
+                    isMuted = isMuted,
+                    onDismiss = { viewModel.onEvent(HomeUiEvent.DismissFullscreenVideo) },
+                    onMuteToggle = { viewModel.onEvent(HomeUiEvent.ToggleVideoMute) }
+                )
             }
+        }
 
-            FullscreenVideoPlayerContainer(
-                player = player,
-                thumbnailUrl = uiState.fullscreenThumbnailUrl,
-                startBounds = uiState.fullscreenStartBounds,
-                isMuted = isMuted,
-                onDismiss = { viewModel.onEvent(HomeUiEvent.DismissFullscreenVideo) },
-                onMuteToggle = { viewModel.onEvent(HomeUiEvent.ToggleVideoMute) }
+        decorView.addView(
+            composeView,
+            ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
             )
+        )
+
+        onDispose {
+            decorView.removeView(composeView)
+            WindowInsetsControllerCompat(activity.window, decorView).show(WindowInsetsCompat.Type.systemBars())
         }
     }
 
