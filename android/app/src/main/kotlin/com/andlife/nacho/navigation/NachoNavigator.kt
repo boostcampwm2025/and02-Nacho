@@ -1,8 +1,18 @@
 package com.andlife.nacho.navigation
 
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldState
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
+import androidx.compose.material3.adaptive.navigationsuite.rememberNavigationSuiteScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
@@ -34,7 +44,7 @@ import kotlin.reflect.KClass
 @Stable
 class NachoNavigator(
     val navController: NavHostController,
-    val startDestination: KClass<*> = Login::class
+    val startDestination: KClass<*> = Login::class,
 ) {
     val currentDestination: NavDestination?
         @Composable get() = navController.currentBackStackEntryAsState().value?.destination
@@ -46,12 +56,6 @@ class NachoNavigator(
             MainBottomTab.entries.find { tab ->
                 currentDestination?.hasRoute(tab.route) == true
             }
-
-    @Composable
-    fun shouldShowBottomBar(): Boolean =
-        MainBottomTab.entries.any { tab ->
-            currentDestination?.hasRoute(tab.route) == true
-        }
 
     fun navigate(tab: MainBottomTab) {
         val navOptions =
@@ -167,6 +171,7 @@ class NachoNavigator(
 @Composable
 internal fun rememberInvitationNavigator(
     navController: NavHostController = rememberNavController(),
+    navigationSuiteScaffoldState: NavigationSuiteScaffoldState = rememberNavigationSuiteScaffoldState(),
     startDestination: KClass<*> = Login::class
 ): NachoNavigator =
     remember(navController) {

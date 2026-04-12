@@ -25,6 +25,9 @@ import com.andlife.myinvitation.model.collection.MyInvitationCollectionUiEvent
 import com.andlife.myinvitation.model.collection.MyInvitationCollectionUiState
 import com.andlife.media.StoryMediaPlayerPool
 import com.andlife.ui.base.BaseViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.toImmutableList
@@ -35,8 +38,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@HiltViewModel
-class MyInvitationCollectionViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = MyInvitationCollectionViewModel.Factory::class)
+class MyInvitationCollectionViewModel @AssistedInject constructor(
     private val guestBookRepository: GuestBookRepository,
     private val mediaDownloader: MediaDownloader,
     private val userRepository: UserRepository,
@@ -44,12 +47,11 @@ class MyInvitationCollectionViewModel @Inject constructor(
     private val analyticsLogger: AnalyticsLogger,
     private val crashlyticsLogger: CrashlyticsLogger,
     @param:ApplicationContext private val context: Context,
+    @Assisted private val invitationId: Long,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<MyInvitationCollectionUiState, MyInvitationCollectionUiEvent, MyInvitationCollectionSideEffect>(
     initialState = MyInvitationCollectionUiState(),
 ) {
-    private val invitationId: Long = savedStateHandle.toRoute<MyInvitationDetail>().id
-
     override val uiState: StateFlow<MyInvitationCollectionUiState> =
         mutableUiState
             .onStart {
@@ -232,5 +234,13 @@ class MyInvitationCollectionViewModel @Inject constructor(
 
     companion object {
         private const val FILE_NAME_PREFIX = "nacho_"
+    }
+
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            myInvitationId: Long,
+        ): MyInvitationCollectionViewModel
     }
 }

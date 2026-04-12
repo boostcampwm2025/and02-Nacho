@@ -38,3 +38,6 @@ out/
 
 ### Kotlin ###
 .kotlin
+
+### Firebase Admin SDK ###
+serviceAccountKey.json

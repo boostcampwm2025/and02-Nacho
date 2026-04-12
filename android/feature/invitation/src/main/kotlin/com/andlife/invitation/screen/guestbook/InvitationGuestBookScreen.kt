@@ -112,7 +112,7 @@ fun InvitationGuestBookRoute(
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: InvitationGuestBookViewModel = hiltViewModel(),
+    viewModel: InvitationGuestBookViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val guestBooks = viewModel.guestBooksPagingFlow.collectAsLazyPagingItems()
@@ -588,7 +588,7 @@ private fun InvitationGuestBookScreen(
 
                 val shouldChangeTo = when {
                     playVideoIndex != -1 && currentPlayingRatio < 0.2f -> -1
-                    playVideoIndex == -1 -> if (bestVisibilityRatio >= 0.6f) bestIndex else -1
+                    playVideoIndex == -1 -> if (bestVisibilityRatio >= 0.5f) bestIndex else -1
                     bestIndex != playVideoIndex && bestVisibilityRatio > currentPlayingRatio + 0.3f -> bestIndex
                     else -> playVideoIndex
                 }

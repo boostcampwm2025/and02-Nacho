@@ -1,5 +1,6 @@
-package com.andlife.invitation.screen
+package com.andlife.invitation.screen.list
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -30,6 +31,7 @@ import androidx.paging.compose.itemKey
 import com.andlife.designsystem.theme.NachoSpacing
 import com.andlife.designsystem.theme.NachoTheme
 import com.andlife.domain.model.invitation.SortDirection
+import com.andlife.domain.util.RefreshEventHub
 import com.andlife.invitation.model.InvitationSideEffect
 import com.andlife.invitation.model.InvitationUiEvent
 import com.andlife.invitation.model.InvitationUiState
@@ -59,9 +61,13 @@ fun InvitationRoute(
     onNavigateToDetail: (Long) -> Unit,
     onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
+    selectedInvitationId: Long? = null,
+    shouldHighlightSelected: Boolean = false,
     viewModel: InvitationViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val needsRefresh by RefreshEventHub.invitationRefresh.collectAsStateWithLifecycle()
+
     val upcomingItems = viewModel.upcomingInvitationPagingFlow.collectAsLazyPagingItems()
     val pastItems = viewModel.pastInvitationPagingFlow.collectAsLazyPagingItems()
 
@@ -123,6 +129,28 @@ fun InvitationRoute(
         }
     }
 
+    LaunchedEffect(needsRefresh) {
+        Log.d("RefreshEventHub", "invitation needsRefresh: $needsRefresh")
+        if (needsRefresh) {
+            viewModel.handleRefresh()
+            RefreshEventHub.consumeInvitation()
+        }
+    }
+
+    LaunchedEffect(upcomingItems.loadState.mediator?.refresh, pastItems.loadState.mediator?.refresh) {
+        val currentTabHasError = if (uiState.selectedTab == 0) {
+            upcomingItems.loadState.mediator?.refresh is LoadState.Error
+        } else {
+            pastItems.loadState.mediator?.refresh is LoadState.Error
+        }
+        if (currentTabHasError) {
+            scope.launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar(refreshFailureMessage)
+            }
+        }
+    }
+
     invitationIdToLeave?.let { id ->
         NachoInfoDialog(
             title = stringResource(R.string.txt_leave_invitation_title),
@@ -166,7 +194,9 @@ fun InvitationRoute(
         pastItems = pastItems,
         modifier = modifier,
         onEvent = viewModel::onEvent,
-        onLeaveClick = { invitationIdToLeave = it }
+        onLeaveClick = { invitationIdToLeave = it },
+        selectedInvitationId = selectedInvitationId,
+        shouldHighlightSelected = shouldHighlightSelected
     )
 }
 
@@ -178,7 +208,9 @@ private fun InvitationScreen(
     pastItems: LazyPagingItems<InvitationSummaryUiModel>,
     onEvent: (InvitationUiEvent) -> Unit,
     onLeaveClick: (Long) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    selectedInvitationId: Long? = null,
+    shouldHighlightSelected: Boolean = false,
 ) {
     val tabs = stringArrayResource(R.array.arr_invitation_tabs).toImmutableList()
     val upcomingSortOptions = stringArrayResource(R.array.arr_invitation_sort_options).toImmutableList()
@@ -266,6 +298,7 @@ private fun InvitationScreen(
                                 key = currentItems.itemKey { it.id }
                             ) { index ->
                                 currentItems[index]?.let { invitation ->
+                                    val isSelected = shouldHighlightSelected && invitation.id == selectedInvitationId
                                     val dDayLabel = when (val count = invitation.dDayCount) {
                                         null -> null
                                         0 -> stringResource(R.string.format_invitation_d_day_today)
@@ -300,7 +333,8 @@ private fun InvitationScreen(
                                         address = invitation.address,
                                         dDayText = dDayLabel,
                                         onClick = { onEvent(InvitationUiEvent.ClickInvitation(invitation.id)) },
-                                        menuItems = menuItems
+                                        menuItems = menuItems,
+                                        isSelected = isSelected
                                     )
                                 }
                             }

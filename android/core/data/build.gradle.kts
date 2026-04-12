@@ -17,6 +17,10 @@ dependencies {
     implementation(projects.core.database)
     implementation(projects.core.datastore)
 
+    // firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
+
     // paging
     implementation(libs.androidx.paging.runtime)
     implementation(libs.room.runtime)

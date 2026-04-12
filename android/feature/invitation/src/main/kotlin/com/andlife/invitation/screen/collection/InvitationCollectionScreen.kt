@@ -29,6 +29,7 @@ fun InvitationCollectionRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     InvitationCollectionScreen(
+        viewModel = viewModel,
         uiState = uiState,
         onOpenStory = { index ->
             viewModel.onEvent(InvitationCollectionUiEvent.OpenStory(index))
@@ -48,6 +49,7 @@ fun InvitationCollectionRoute(
 
 @Composable
 fun InvitationCollectionScreen(
+    viewModel: InvitationCollectionViewModel,
     uiState: InvitationCollectionUiState,
     onOpenStory: (Int) -> Unit,
     onCloseStory: () -> Unit,
@@ -72,6 +74,7 @@ fun InvitationCollectionScreen(
                 onPageChanged = onPageChanged,
                 onToggleExpand = onToggleExpand,
                 onClose = onCloseStory,
+                viewModel = viewModel,
             )
         }
     }
@@ -121,6 +124,7 @@ private fun NachoCollectionPreview() {
 
     NachoTheme {
         InvitationCollectionScreen(
+            viewModel = hiltViewModel(),
             uiState = mockState,
             onOpenStory = {},
             onCloseStory = {},

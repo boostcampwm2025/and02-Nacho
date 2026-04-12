@@ -1,5 +1,7 @@
-package com.andlife.myinvitation.screen
+package com.andlife.myinvitation.screen.list
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +22,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.layout.AnimatedPane
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.layout.PaneAdaptedValue
+import androidx.compose.material3.adaptive.navigation.BackNavigationBehavior
+import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
+import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
+import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldPredictiveBackHandler
+import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldValue
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -72,6 +86,8 @@ fun MyInvitationRoute(
     onNavigateToCreate: () -> Unit,
     onNavigateToDetail: (Long) -> Unit,
     onNavigateToLogin: () -> Unit,
+    selectedInvitationId: Long? = null,
+    shouldHighlightSelected: Boolean = false,
     modifier: Modifier = Modifier,
     viewModel: MyInvitationViewModel = hiltViewModel(),
 ) {
@@ -182,26 +198,30 @@ fun MyInvitationRoute(
         }
     }
 
-    MyInvitationScreen(
+    MyInvitationListPaneRoute(
         uiState = uiState,
         authState = authState,
         upcomingItems = upcomingItems,
         pastItems = pastItems,
         modifier = modifier,
         onEvent = viewModel::onEvent,
-        onDeleteClick = { invitationIdToDelete = it }
+        onDeleteClick = { invitationIdToDelete = it },
+        selectedInvitationId = selectedInvitationId,
+        shouldHighlightSelected = shouldHighlightSelected,
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun MyInvitationScreen(
+private fun MyInvitationListPaneRoute(
     uiState: MyInvitationUiState,
     authState: AuthState,
     upcomingItems: LazyPagingItems<InvitationSummaryUiModel>,
     pastItems: LazyPagingItems<InvitationSummaryUiModel>,
     onEvent: (MyInvitationUiEvent) -> Unit,
     onDeleteClick: (Long) -> Unit,
+    selectedInvitationId: Long? = null,
+    shouldHighlightSelected: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val tabs = stringArrayResource(R.array.arr_invitation_tabs).toImmutableList()
@@ -307,6 +327,8 @@ private fun MyInvitationScreen(
                                         key = currentItems.itemKey { it.id }
                                     ) { index ->
                                         currentItems[index]?.let { invitation ->
+                                            val isSelected =
+                                                shouldHighlightSelected && invitation.id == selectedInvitationId
                                             val dDayLabel = when (val count = invitation.dDayCount) {
                                                 null -> null
                                                 0 -> stringResource(R.string.format_invitation_d_day_today)
@@ -326,7 +348,8 @@ private fun MyInvitationScreen(
                                                         title = stringResource(R.string.txt_delete_invitation_title),
                                                         onClick = { onDeleteClick(invitation.id) }
                                                     )
-                                                )
+                                                ),
+                                                isSelected = isSelected
                                             )
                                         }
                                     }

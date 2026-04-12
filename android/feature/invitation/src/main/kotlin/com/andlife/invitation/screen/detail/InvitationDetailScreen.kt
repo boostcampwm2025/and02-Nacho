@@ -1,6 +1,7 @@
 package com.andlife.invitation.screen.detail
 
 import android.text.Editable
+import android.util.Log
 import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -54,6 +55,7 @@ import com.andlife.invitation.model.detail.InvitationDetailUiEvent
 import com.andlife.invitation.model.detail.InvitationDetailUiState
 import com.andlife.invitation.screen.collection.InvitationCollectionRoute
 import com.andlife.invitation.screen.guestbook.InvitationGuestBookRoute
+import com.andlife.invitation.viewmodel.InvitationCollectionViewModel
 import com.andlife.invitation.viewmodel.InvitationDetailViewModel
 import com.andlife.invitation.viewmodel.InvitationGuestBookViewModel
 import com.andlife.ui.component.GenericTabRow
@@ -72,9 +74,11 @@ import com.andlife.designsystem.R as designR
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InvitationDetailRoute(
+    selectedId: Long,
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
+    showBackButton: Boolean = false,
     viewModel: InvitationDetailViewModel = hiltViewModel(),
     guestBookViewModel: InvitationGuestBookViewModel = hiltViewModel(),
 ) {
@@ -122,6 +126,8 @@ fun InvitationDetailRoute(
     Box {
         InvitationDetailScreen(
             uiState = uiState,
+            guestBookViewModel = guestBookViewModel,
+            selectedId = selectedId,
             isGuestBookUploading = isGuestBookUploading,
             snackbarHostState = snackbarHostState,
             scrollBehavior = scrollBehavior,
@@ -130,6 +136,7 @@ fun InvitationDetailRoute(
             onNavigateToLogin = onNavigateToLogin,
             onEditableSave = viewModel::saveEditable,
             modifier = modifier,
+            showBackButton = showBackButton
         )
 
         if (uiState.isOverlayLoading) {
@@ -186,6 +193,8 @@ fun InvitationDetailRoute(
 @Composable
 private fun InvitationDetailScreen(
     uiState: InvitationDetailUiState,
+    guestBookViewModel: InvitationGuestBookViewModel,
+    selectedId: Long,
     isGuestBookUploading: Boolean,
     snackbarHostState: SnackbarHostState,
     scrollBehavior: TopAppBarScrollBehavior,
@@ -194,6 +203,7 @@ private fun InvitationDetailScreen(
     onNavigateToLogin: () -> Unit,
     onEditableSave: (Editable) -> Unit,
     modifier: Modifier = Modifier,
+    showBackButton: Boolean = false,
 ) {
     val tabTitles = stringArrayResource(R.array.txt_tap_title).toImmutableList()
     val coroutineScope = rememberCoroutineScope()
@@ -227,6 +237,7 @@ private fun InvitationDetailScreen(
                 hasThanksCard = uiState.hasThanksCard,
                 showActions = !uiState.isLoading && !uiState.isError,
                 onBack = navigateBackWithCleanup,
+                showBackButton = showBackButton,
                 onClickThanksCard = { onEvent(InvitationDetailUiEvent.ClickThanksCard) },
                 onLeave = { onEvent(InvitationDetailUiEvent.ClickLeaveInvitation) },
             )
@@ -279,9 +290,17 @@ private fun InvitationDetailScreen(
 
                         1 -> InvitationGuestBookRoute(
                             onNavigateBack = onNavigateBack,
-                            onNavigateToLogin = onNavigateToLogin
+                            onNavigateToLogin = onNavigateToLogin,
+                            viewModel = guestBookViewModel
                         )
-                        2 -> InvitationCollectionRoute()
+
+                        2 -> InvitationCollectionRoute(
+                            viewModel = hiltViewModel<InvitationCollectionViewModel, InvitationCollectionViewModel.Factory>(
+                                key = "collection $selectedId"
+                            ) { factory ->
+                                factory.create(selectedId)
+                            }
+                        )
                     }
                 },
             )
@@ -314,6 +333,7 @@ private fun InvitationDetailTopBar(
     modifier: Modifier = Modifier,
     showActions: Boolean = true,
     hasThanksCard: Boolean = false,
+    showBackButton: Boolean = false,
 ) {
     val alpha = 1f - scrollBehavior.state.collapsedFraction
 
@@ -329,12 +349,14 @@ private fun InvitationDetailTopBar(
             )
         },
         navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    painter = painterResource(designR.drawable.ic_arrow_back_24),
-                    contentDescription = stringResource(R.string.desc_top_bar_back),
-                    tint = NachoTheme.colorScheme.iconSecondary,
-                )
+            if (showBackButton) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        painter = painterResource(designR.drawable.ic_arrow_back_24),
+                        contentDescription = stringResource(R.string.desc_top_bar_back),
+                        tint = NachoTheme.colorScheme.iconSecondary,
+                    )
+                }
             }
         },
         actions = {

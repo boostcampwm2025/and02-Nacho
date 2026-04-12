@@ -1,6 +1,7 @@
 plugins {
     id("invitation.android.library")
     id("invitation.android.compose")
+    id("invitation.android.hilt")
 }
 
 android {
@@ -41,9 +42,12 @@ dependencies {
     // Naver Map
     implementation(libs.naver.map.compose)
 
+    implementation(libs.androidx.material3.adaptive.navigation.suite)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    implementation(libs.androidx.lifecycle.viewmodel.savedstate)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
