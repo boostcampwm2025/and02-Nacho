@@ -40,6 +40,9 @@ dependencies {
 
     // WebClient for Kakao API calls
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+
+	// Firebase Admin SDK
+	implementation("com.google.firebase:firebase-admin:9.8.0")
 }
 
 kotlin {

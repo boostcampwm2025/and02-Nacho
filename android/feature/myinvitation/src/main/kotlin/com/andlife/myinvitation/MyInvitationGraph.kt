@@ -14,8 +14,8 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.andlife.domain.util.RefreshEventHub
-import com.andlife.myinvitation.screen.MyInvitationListDetailRoute
 import com.andlife.myinvitation.screen.detail.MyInvitationDetailRoute
+import com.andlife.myinvitation.screen.listdetail.MyInvitationListDetailRoute
 import com.andlife.myinvitation.viewmodel.MyInvitationDetailViewModel
 import com.andlife.myinvitation.viewmodel.MyInvitationGuestBookViewModel
 import com.andlife.myinvitation.viewmodel.MyInvitationViewModel
@@ -32,7 +32,6 @@ data class MyInvitationDetail(
 )
 
 internal data object MyInvitationPlaceholder
-
 
 fun NavController.navigateToMyInvitation(navOptions: NavOptions, id: Long? = null) {
     navigate(MyInvitation(id), navOptions)

@@ -107,6 +107,14 @@
             android:foregroundServiceType="dataSync"
             tools:node="merge" />
 
+        <service
+            android:name="com.andlife.fcm.NachoFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
         <receiver
             android:name="com.andlife.data.util.media.download.DownloadCancelReceiver"
             android:exported="false" />

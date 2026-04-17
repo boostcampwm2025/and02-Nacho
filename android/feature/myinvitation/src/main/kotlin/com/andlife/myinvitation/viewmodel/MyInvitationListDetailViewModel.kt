@@ -10,7 +10,7 @@ import javax.inject.Inject
 private const val MY_INVITATION_ID = "my_invitation_id"
 
 @HiltViewModel
-class MyInvitation2PaneViewModel @Inject constructor(
+class MyInvitationListDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ): ViewModel() {
     private val route = savedStateHandle.toRoute<MyInvitation>()

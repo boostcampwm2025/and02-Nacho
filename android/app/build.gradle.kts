@@ -103,6 +103,7 @@ dependencies {
     implementation(projects.core.network)
     implementation(projects.core.designsystem)
     implementation(projects.core.ui)
+    implementation(projects.core.fcm)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.immutable)
@@ -138,6 +139,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.messaging)
 
     // suite
     implementation(libs.androidx.material3.adaptive.navigation.suite)

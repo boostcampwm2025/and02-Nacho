@@ -34,7 +34,6 @@ import javax.inject.Inject
 
 @HiltViewModel(assistedFactory = InvitationDetailViewModel.Factory::class)
 class InvitationDetailViewModel @AssistedInject constructor(
-    savedStateHandle: SavedStateHandle,
     private val invitationRepository: InvitationRepository,
     private val analyticsLogger: AnalyticsLogger,
     @Assisted val invitationId: Long,
