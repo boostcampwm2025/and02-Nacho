@@ -39,11 +39,11 @@ class GuestBookRemoteMediator @AssistedInject constructor(
                 LoadType.REFRESH -> 0
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
                 LoadType.APPEND -> {
-                    val loadedItemCount = state.pages.sumOf { it.data.size }
-                    if (loadedItemCount == 0) {
-                        return MediatorResult.Success(endOfPaginationReached = true)
+                    val lastPage = state.pages.lastOrNull { it.data.isNotEmpty() }
+                    if (lastPage == null) {
+                        return MediatorResult.Success(endOfPaginationReached = false)
                     }
-                    loadedItemCount / state.config.pageSize
+                    state.pages.size
                 }
             }
 
